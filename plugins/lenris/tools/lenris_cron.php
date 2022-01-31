@@ -37,6 +37,7 @@ foreach ($lenris->clients as $client) {
 	$updated_nachweise = [];
 	$deleted_nachweise = [];
 	# Synchronisation
+	$client = $lenris->get_client_information($client['client_id'])[0];
 	if (is_sync_required($client)) {
 		$lenris->update_client($client['client_id'], 'status = 2');
 		$lenris->database->begintransaction();
