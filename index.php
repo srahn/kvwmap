@@ -40,6 +40,10 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 
 set_error_handler("CustomErrorHandler");
 
+if (!file_exists('credentials.php') OR !file_exists('config.php')) {
+	echo '<h1>kvwmap-Server</h1>Die Anwendung kvwmap ist noch nicht fertig eingerichtet.<br>Dazu kann das Script <a href="install.php">install.php</a> verwendet werden.';
+	exit;
+}
 include('credentials.php');
 include('config.php');
 
@@ -57,10 +61,6 @@ for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
 		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
 	}
-}
-
-if (!defined('EPSGCODE_ALKIS')) {
-	define('EPSGCODE_ALKIS', -1);	// EPSGCODE_ALKIS ist nur bei Verwendung des Plugin alkis definiert
 }
 
 include(CLASSPATH . 'log.php');
@@ -200,6 +200,7 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
+
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -208,7 +209,6 @@ if (!FAST_CASE) {
 		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
-
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
@@ -1375,6 +1375,11 @@ function go_switch($go, $exit = false) {
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
+			} break;
+
+			case 'Layer2Stelle_Reihenfolge_Layerdef' : {
+				$GUI->checkCaseAllowed('Stellen_Anzeigen');
+				$GUI->Layer2Stelle_Reihenfolge_Layerdef();
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge_Speichern' : {

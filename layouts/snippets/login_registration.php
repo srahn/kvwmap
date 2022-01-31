@@ -27,7 +27,7 @@
 									<p>
 									<? echo password_erstellungs_hinweis($language); ?>
 									<p>
-									<? echo $strWorkWith; ?> arbeiten.
+									<? echo $strWorkWith; ?>
 									<p>
 									<? echo $strRequests; ?> <?
 									if ($this->invitation->inviter->get('email') != '') { ?>

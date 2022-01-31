@@ -75,8 +75,12 @@
 	$this->strAsteriskRequired = "Werte mit * mussen eingetragen werden";
 	$this->strSurName = "Nachname";
 	$this->strForeName = "Vorname";
+	$this->strLoginName = "Loginname";
 	$this->strUser = "Nutzer";
 	$this->strLabel = "Bezeichnung";
 	$this->strNameSuffix = "Namenszusatz";
-	$this->strMetadata="Metadaten";
+	$this->strMetadata = "Metadaten";
+	$this->strSchema = "Schema";
+	$this->strTableName = "Tabellenname";
+	$this->strLayerGroup = "Layergruppe";
 ?>

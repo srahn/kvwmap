@@ -36,7 +36,7 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->readDefaultValues();
+		$ret = $this->readDefaultValues();
 	}
 
 	function getsubmenues($id){
@@ -136,9 +136,9 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->Bezeichnung=$rs['Bezeichnung'];
@@ -1505,18 +1505,18 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
+		else {
 			$i = 0;
-			while($rs=$this->database->result->fetch_assoc()) {
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['drawingorder'][]=$rs['drawingorder'];
-				$layer['legendorder'][]=$rs['legendorder'];
-				$layer['Gruppe'][]=$rs['Gruppe'];
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$layer['ID'][] 						= $rs['Layer_ID'];
+				$layer['Bezeichnung'][]		= $rs['Name'];
+				$layer['drawingorder'][]	= $rs['drawingorder'];
+				$layer['legendorder'][]		= $rs['legendorder'];
+				$layer['Gruppe'][]				= $rs['Gruppe'];
 				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 				$i++;
 			}
-			if($order == 'Name'){
+			if ($order == 'Name') {
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1643,9 +1643,8 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=$this->database->result->fetch_assoc()){
-				 
+		else {
+			while ($rs=$this->database->result->fetch_assoc()){
 				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
 				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
 					// $connection = explode(' ', trim($rs['connection']));
@@ -1667,9 +1666,9 @@ class stelle {
 						// continue;
 					// }
 				// }
-				
+
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
@@ -1744,7 +1743,13 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				l.Layer_ID,
+				l.Name,
+				l.Gruppe,
+				ul.use_parent_privileges,
+				ul.privileg,
+				ul.export_privileg,
+				ul.requires,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1760,7 +1765,7 @@ class stelle {
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,	parent_id
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -1770,6 +1775,61 @@ class stelle {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
+	}
+
+	/*
+	* Function return layerdef for kvportal
+	* It query mapOptions, groups as themes, base and overlay layers
+	* and compose it to a layerdef conform object structure
+	*/
+	function get_layerdef() {
+		#echo 'Stelle->get_layerdef';
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		include_once(CLASSPATH . 'Layer.php');
+		include_once(CLASSPATH . 'LayerGroup.php');
+
+		$stellendaten = $this->getstellendaten();
+		$stellenextent = $this->MaxGeorefExt;
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$stellenextent->project($projFROM, $projTO);
+
+		$layerdef = (Object) array(
+			'mapOptions' => (Object) array(
+				'center' => (Object) array(
+					'lat' => round(($stellenextent->maxy - $stellenextent->miny) / 2 + $stellenextent->miny, 5),
+					'lng' => round(($stellenextent->maxx - $stellenextent->minx) / 2 + $stellenextent->minx, 5)
+				),
+				'zoom' => $stellendaten['minzoom'],
+				'maxBounds' => array(
+					array(round($stellenextent->miny, 5), round($stellenextent->minx, 5)),
+					array(round($stellenextent->maxy, 5), round($stellenextent->maxx, 5))
+				),
+				'minZoom' => $stellendaten['minzoom']
+			),
+			'default_wms_legend_icon' => 'img/noun_Globe.svg',
+			'themes' => array_map(
+				function($parent) {
+					return $parent->get_layerdef('');
+				},
+				LayerGroup::find_top_parents($this->database->gui, $this->id)
+			),
+			'baseLayers' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_baselayers_def($this->id);
+				},
+				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
+			),
+			'overlays' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_overlays_def($this->id);
+				},
+				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			)
+		);
+		return $layerdef;
 	}
 
 	function get_attributes_privileges($layer_id) {

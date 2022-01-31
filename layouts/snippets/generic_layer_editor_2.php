@@ -52,10 +52,9 @@ if ($doit == true) {
 		if ($nullable === '0'){ ?>
 			<script type="text/javascript">
 				geom_not_null = true;
-			</script>
-<?	}
-	}
-?>
+			</script><?
+		}
+	} ?>
 	<div id="layer" onclick="remove_calendar();">
 		<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>"><?
 		if ($this->new_entry != true) { ?>
@@ -538,5 +537,5 @@ if ($doit == true) {
 	</div><?
 }
 elseif ($layer['requires'] == '' AND $layer['required'] == '') {
-	$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
 } ?>

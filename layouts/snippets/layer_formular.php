@@ -1,7 +1,7 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php'); 
-	include_once(CLASSPATH . 'FormObject.php');		?>
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
 	function gotoStelle(event, option_obj){
@@ -779,7 +779,7 @@
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="queryable">
 								<option <? if($this->formvars['queryable'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['queryable'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['queryable'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
@@ -788,7 +788,7 @@
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="use_geom">
 								<option <? if($this->formvars['use_geom'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
@@ -839,25 +839,36 @@
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="postlabelcache">
 								<option <? if($this->formvars['postlabelcache'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
+
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strrequires; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<select name="requires">
-								<option value="">--- Auswahl ---</option>
-								<?
-									for($i = 0; $i < count($this->grouplayers['ID']); $i++){
-										echo '<option value="'.$this->grouplayers['ID'][$i].'" ';
-										if($this->formvars['requires'] == $this->grouplayers['ID'][$i])echo 'selected="true"';
-										echo ' >'.$this->grouplayers['Bezeichnung'][$i].'</option>';
-									}
-								?>
-							</select>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+						$group_layer_options = array();
+						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+							$group_layer_options[] = array(
+								'value' => $grouplayer_id,
+								'output' => $this->grouplayers['Bezeichnung'][$index]
+							);
+						}
+						echo FormObject::createSelectField(
+							'requires',
+							$group_layer_options,
+							$this->formvars['requires'],
+							1,
+							'',
+							'',
+							'',
+							'',
+							'',
+							$this->strPleaseSelect
+						); ?>
 					</td>
 				</tr><?
+
 				if (is_array($this->formvars['selstellen']) AND array_key_exists('Bezeichnung', $this->formvars['selstellen']) AND count($this->formvars['selstellen']["Bezeichnung"]) > 0) { ?>
 				<tr>
 					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">

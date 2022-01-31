@@ -82,17 +82,19 @@ class rolle {
 		}
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
-			if(is_numeric($LayerName))
-				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
-			$layer_name_filter .= ")";
+			if (is_numeric($LayerName)) {
+				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+			}
+			else {
+				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+			}
 		}
 
 		$sql = "
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
@@ -123,16 +125,19 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer
+				r2ul.geom_from_layer,
+				las.privileg as privilegfk 
 			FROM
-				used_layer AS ul,
-				u_rolle2used_layer as r2ul,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
+				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
+				LEFT JOIN connections as c ON l.connection_id = c.id 
+				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
+				LEFT JOIN layer_attributes2stelle as las ON 
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
-				l.Layer_ID=ul.Layer_ID AND
-				r2ul.Stelle_ID=ul.Stelle_ID AND
-				r2ul.Layer_ID=ul.Layer_ID AND
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
 				$layer_name_filter . "
@@ -1721,7 +1726,7 @@ class rolle {
 			}
 			
 			# Test ob Untergruppen in den Gruppen vorhanden sind
-			$sql ='SELECT u_groups.id FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
+			$sql ='SELECT u_groups.id, u_groups.obergruppe FROM u_groups, u_groups2rolle as r2g WHERE u_groups.id NOT IN ('.implode(',', $gruppen_ids).') AND u_groups.obergruppe IN ('.implode(',', $gruppen_ids).') AND ';
 			$sql.='r2g.id = u_groups.id AND ';
 			$sql.='r2g.user_id = '.$user_id.' AND ';
 			$sql.='r2g.stelle_id = '.$stelle_id;
@@ -1729,9 +1734,11 @@ class rolle {
 			$this->debug->write("<p>file:rolle.php class:rolle function:updateGroups - überprüft anHand der übergebenen layer_id ob die entsprechende Gruppe in u_groups2rolle überflüssig ist:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
-			$rs_subgroups = $this->database->result->fetch_assoc();
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$rs_subgroups[$rs['obergruppe']] = $rs['obergruppe'];		# ein Array mit den GruppenIDs, die noch Untergruppen haben
+			}
 			
-			if($rs_layer[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers keine Layer hat, diese löschen
+			if($rs_layer[$gruppen_ids[0]] == '' AND $rs_subgroups[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers weder Layer noch Untergruppen hat, diese löschen
 				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);

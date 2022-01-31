@@ -28,7 +28,7 @@
 							</tr>
 							<tr>
 								<td><span class="px16">Ihre IP-Adresse:</span></td>
-								<td><?php echo   $remote_addr = getenv('REMOTE_ADDR'); ?></td>
+								<td><?php echo $remote_addr = get_remote_ip(); ?></td>
 							</tr>
 							<tr>
 								<td colspan="2" align="center"><input id="anmelden" style="margin-top: 12px;" type="button" name="anmelden" onclick="logon();" value="Anmelden"/></td>

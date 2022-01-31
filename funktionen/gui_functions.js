@@ -189,6 +189,38 @@ remove_calendar = function(){
 	if(root.document.getElementById('gui-table').calendar != undefined)root.document.getElementById('gui-table').calendar.destroy();
 }
 
+/*
+* function convert a number into a hexagesimal character with a lenght of 2 signs
+* @param c integer the number
+* @return string with a lenght of 2
+*/
+function componentToHex(c) {
+  let hex = parseInt(c).toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+/*
+* function convert RGB Values into hexagesimal String with leading # sign
+* @param r integer The red value or RGB as String separated by empty spaces or as array with r, g, b values
+* @param g integer The green value
+* @param b integer The blue value
+* @return string The hex value of the color representing the rgb color.
+*/
+function rgbToHex(r, g, b) {
+  var r_ = r, g_ = g, b_ = b;
+  if (Array.isArray(r)) {
+    r_ = r[0];
+    g_ = r[1];
+    b_ = r[2];
+  }  
+  else if (typeof r === 'string' && /\s/.test(r.trim())) { // if white spaces exists
+    r_ = r.trim().split(' ')[0];
+    g_ = r.trim().split(' ')[1];
+    b_ = r.trim().split(' ')[2];
+  }
+  return "#" + componentToHex(r_) + componentToHex(g_) + componentToHex(b_);
+}
+
 function Bestaetigung(link,text) {
 	Check = confirm(text);
 	if (Check == true) {
@@ -1347,4 +1379,56 @@ function htmlspecialchars(value) {
 		"'": '&#039;'
 	};
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+function umlaute_umwandeln(value) {
+	var map = {
+		'ä' : 'ae',
+		'Ä' : 'Ae',
+		'ö' : 'oe',
+		'Ö' : 'Oe',
+		'ü' : 'ue',
+		'Ü' : 'Ue',
+		'ß' : 'ss',
+		'<' : '',
+		'>' : '',
+		'@' : '_',
+		'€' : 'Eur',
+		',' : '_',
+		';' : '_',
+		'.' : '_',
+		':' : '_',
+		'-' : '_',
+		'!' : '_',
+		'"' : '',
+		'§' : '',
+		'$' : '',
+		'%' : '',
+		'&' : '_',
+		'/' : '_',
+		'(' : '',
+		')' : '',
+		'=' : '_',
+		'?' : '',
+		'`' : '',
+		'´' : '',
+		'*' : '_',
+		'+' : '',
+		"'" : '',
+		'#' : '_',
+		'^' : '',
+		'°' : '',
+		' ' : '_',
+		'1' : '1',
+		'2' : '2',
+		'3' : '3',
+		'4' : '4',
+		'5' : '5',
+		'6' : '6',
+		'7' : '7',
+		'8' : '8',
+		'9' : '9',
+		'0' : '0'
+	};
+	return value.replace(/[äÄöÖüÜß<>@€,;.:\-!"§$%&/()=?`´*+'#^° 1234567890]/g, function(m) { return map[m]; });
 }
