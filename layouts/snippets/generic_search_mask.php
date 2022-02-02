@@ -167,7 +167,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 								}
 								if (in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != '') {
 									echo 'selected';
-								} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+								} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>" title="<? echo $this->attributes['enum_output'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 							}
 ?>
 	            </select>
