@@ -45,7 +45,7 @@ class LayerClass extends MyObject {
 		#echo 'LayerClass->get_first_style'; exit;
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
-		$styles2class = Style2Class::find($this->gui, 'class_id');
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
 		$style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
 		return $style;
 	}

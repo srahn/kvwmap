@@ -20,11 +20,14 @@ class LayerStyle extends MyObject {
 
 	function get_layerdef() {
 		$layerdef = (Object) array(
-			'color' => $this->get('outlinecolor'),
+			'symbolname' => ($this->get('symbolname') == null ? 'circle' : $this->get('symbolname')),
+			'size' => ($this->get('size') == null ? '12' : $this->get('size')),
+			'stroke' => ($this->get('outlinecolor') != '-1 -1 -1'),
 			'weight' => ($this->get('width') == null ? 1 : $this->get('width')),
+			'color' => 'rgb(' . $this->get('outlinecolor') . ')',
 			'fill' => ($this->get('color') != '-1 -1 -1'),
-			'fillColor' => ($this->get('color') == '-1 -1 -1' ? '#0000ff' : $this->get('color')),
-			'fillOpacity' => ($this->get('opacity') == null ? 1.0 : $this->get('opacity'))
+			'fillColor' => ($this->get('color') == '-1 -1 -1' ? '#0000ff' : 'rgb(' . $this->get('color') . ')'),
+			'fillOpacity' => ($this->get('opacity') == '' ? 0.6 : $this->get('opacity') / 100)
 		);
 		return $layerdef;
 	}
