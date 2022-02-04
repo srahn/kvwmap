@@ -398,7 +398,7 @@ class GUI {
 						if ($layer[0]['metalink'] != '') {
 							$href = $layer[0]['metalink'];
 							$target = '';
-							if (substr($layer[0]['metalink'], 0, 10) != 'javascript') {
+							if (substr($layer[0]['metalink'], 0, 10) != 'javascript' AND strpos(substr($layer[0]['metalink'], -5), '.') !== false) {
 								$meta_parts = explode('#', $href);
 								$meta_parts[0] .= (strpos($meta_parts[0], '?') === false ? '?' : '&') . 'time=' . time();
 								$href = implode('#', $meta_parts);
