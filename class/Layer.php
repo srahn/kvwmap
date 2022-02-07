@@ -219,7 +219,7 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$layerdef = (Object) array(
-			'img' => 'wind_power.svg',
+			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'options' => (Object) array(
 				'attribution' => $this->get('datasource')
@@ -243,9 +243,23 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$layerdef = (Object) array(
+			'thema' => $this->get_group_name(),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
 			'actuality' => $this->get('uptodateness'),
 			'actualityCircle' => $this->get('updatecycle'),
+			'url' => URL . APPLVERSION . 'index.php',
+			'params' => (Object) array(
+				'gast' => $stelle_id,
+				'go' => 'Daten_Export_Exportieren',
+				'selected_layer_id' => $this->get('Layer_ID'),
+				'export_format' =>  'GeoJSON',
+				'browserwidth' => 800,
+				'browserheight' => 600,
+				'epsg' => 4326,
+				'all' => 1
+			),
+			'type' => 'GeoJSON',
 			'backgroundColor' => '#c1ffd8',
 			'classes' => array_map(
 				function($class) {
@@ -258,16 +272,15 @@ class Layer extends MyObject {
 			'contactPhon' => $this->get('dataowner_tel'),
 			'contactOrganisation' => $this->get('datasource'),
 			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
-			'icon' => (Object) array(
-				'iconUrl' => 'icons/Windenergie/Onshore/EA-Icons_Windenergieanlagen Onshore.svg',
-				'iconSize' => array(30, 30),
-				'iconAnchor' => array(7, 0),
-				'popupAnchor' => array(0, 0)
-			),
+#			'icon' => (Object) array(
+#				'iconUrl' => 'images/Haus.svg',
+#				'iconSize' => array(30, 30),
+#				'iconAnchor' => array(7, 0),
+#				'popupAnchor' => array(0, 0)
+#			),
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
 			'img' => 'wind_power.svg',
 			'hideEmptyLayerAttributes' => true,
-			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'layerAttributes' => $layerAttributes,
 			'options' => (Object) array(
 				'attribution' => $this->get('dataowner_name'),
@@ -277,20 +290,7 @@ class Layer extends MyObject {
 #				'layers' => '',
 #				'format' => '',
 #				'opacity' => 1
-			),
-			'params' => (Object) array(
-				'gast' => $stelle_id,
-				'go' => 'Daten_Export_Exportieren',
-				'selected_layer_id' => $this->get('Layer_ID'),
-				'export_format' =>  'GeoJSON',
-				'browserwidth' => 800,
-				'browserheight' => 600,
-				'epsg' => 4326,
-				'all' => 1
-			),
-			'thema' => $this->get_group_name() . '|' . $this->get('Name'),
-			'type' => 'GeoJSON',
-			'url' => URL . APPLVERSION . 'index.php'
+			)
 		);
 		return $layerdef;
 	}

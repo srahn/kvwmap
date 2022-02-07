@@ -4055,7 +4055,7 @@ echo '			</table>
 		$this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']); ?>
 		<table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
 			<tr>
-				<td height="25" valign="top" class="fett">Styles</td>
+				<td height="25" valign="top" class="fett">Styles <a href="tools/show_symbol_icons.php" target="_symbol_icons" title="Zeige verfügbare Symbole"><i class="fa fa-eye" aria-hidden="true"></i></a></td>
 				<td align="right"><?
 					if ($this->layer['editable']) { ?>
 						<a href="javascript:add_style();" title="neuer Style"><i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i></a><?
