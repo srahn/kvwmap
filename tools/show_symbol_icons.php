@@ -20,15 +20,24 @@
     $map->setFontSet(FONTSET);
     $numSymbols = $map->getNumSymbols();
     $symbols = array();
-    $layer = ms_newLayerObj($map);
-    $layer->set('type', MS_LAYER_POINT);
+    $layer_point = ms_newLayerObj($map);
+		$layer_polygon = ms_newLayerObj($map);
+    $layer_point->set('type', MS_LAYER_POINT);
+		$layer_polygon->set('type', MS_LAYER_POLYGON);
     for ($symbolid = 1; $symbolid < $numSymbols; $symbolid++) {
-      $class = new classObj($layer);
+			$symbol = $map->getSymbolObjectById($symbolid);
+			if ($symbol->type == 1005) {
+				$class = new classObj($layer_polygon);
+				$size = 6;
+			}
+			else {
+				$class = new classObj($layer_point);
+				$size = 25;
+			}
       $class->set('name', 'testClass' . $symbolid);
-      $symbol = $map->getSymbolObjectById($symbolid);
       $style = new styleObj($class);
       $style->set('symbol', $symbolid);
-      $style->set('size', 25);
+      $style->set('size', $size);
       $style->set('width', 1);
       $style->color->setRGB(35, 109, 191);
       $style->outlinecolor->setRGB(0, 0, 0);
