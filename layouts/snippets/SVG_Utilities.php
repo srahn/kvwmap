@@ -311,6 +311,7 @@
 	function measure(){
 	  enclosingForm.last_doing.value = "measure";
 		// Wenn im UTM-System gemessen wird, NBH-Datei laden
+		if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 		if(enclosingForm.str_pathx.value != ""){
 			measuring = true;	
 			enclosingForm.str_pathx.value = "";
