@@ -1464,7 +1464,7 @@ class stelle {
     $this->database->execSQL($sql);
     if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while ($rs=$this->database->result->fetch_assoc()) {
-      $groups[$rs['id']]=$rs;
+      $groups[$rs['id']] = array_merge($groups[$rs['id']] ?: [], $rs);
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
     return $groups;
