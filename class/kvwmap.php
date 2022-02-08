@@ -11910,14 +11910,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->output();
   }
 
-  function Filterverwaltung() {
-    $this->loadMap('DataBase');
-    $this->titel='Filterverwaltung';
-    $this->main='filterverwaltung.php';
-    $this->stellendaten=$this->Stelle->getStellen('Bezeichnung');
-    $showpolygon = true;
+	function Filterverwaltung() {
+		$this->loadMap('DataBase');
+		$this->titel = 'Filterverwaltung';
+		$this->main = 'filterverwaltung.php';
+		$this->stellendaten = $this->Stelle->getStellen('Bezeichnung');
+
+		$showpolygon = true;
 		$setKeys = array();
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
 
 		if (
 			defined('LAYERNAME_FLURSTUECKE') AND
@@ -11966,6 +11967,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           }
           $poly_id = $next_poly_id;
         }
+				if (empty($this->attributes)) {
+					$this->attributes = array();
+				}
 				for ($i = 0; $i < count($this->attributes); $i++) {
 					$this->formvars['operator_' . $this->attributes[$i]['name']] = '';
 					$this->formvars['value_' . $this->attributes[$i]['name']] = '';

@@ -225,13 +225,15 @@ class wfs{
 			}
 		}
 		$this->parse_gml('sequence');
-		for($j = 0; $j < count($this->objects[$index]); $j++){
-			# nur offene oder komplette element-Tags
-			if(strpos($this->objects[$index][$j]["tag"], 'element') !== false AND ($this->objects[$index][$j]["type"] == 'complete' OR $this->objects[$index][$j]["type"] == 'open')){
-				# und keine Geometrie-Tags
-				if($this->objects[$index][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
-	  			$attribute['name'] = $this->objects[$index][$j]["attributes"]["name"];
-					$attributes[] = $attribute;
+		if (array_key_exists($index, $this->objects)) {
+			for($j = 0; $j < count($this->objects[$index]); $j++){
+				# nur offene oder komplette element-Tags
+				if(strpos($this->objects[$index][$j]["tag"], 'element') !== false AND ($this->objects[$index][$j]["type"] == 'complete' OR $this->objects[$index][$j]["type"] == 'open')){
+					# und keine Geometrie-Tags
+					if($this->objects[$index][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[$index][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
+		  			$attribute['name'] = $this->objects[$index][$j]["attributes"]["name"];
+						$attributes[] = $attribute;
+					}
 				}
 			}
 		}
