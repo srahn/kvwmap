@@ -318,7 +318,7 @@ class data_import_export {
 		if(file_exists($filename)){
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
+			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'LATIN1', false);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
@@ -925,7 +925,7 @@ class data_import_export {
 		return $ret;
 	}
 
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = true) {
 		$command = '';
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;

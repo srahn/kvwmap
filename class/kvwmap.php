@@ -447,9 +447,11 @@ class GUI {
 							$href = $layer[0]['metalink'];
 							$target = '';
 							if (substr($layer[0]['metalink'], 0, 10) != 'javascript') {
-								$meta_parts = explode('#', $href);
-								$meta_parts[0] .= (strpos($meta_parts[0], '?') === false ? '?' : '&') . 'time=' . time();
-								$href = implode('#', $meta_parts);
+								if(strpos(substr($layer[0]['metalink'], -5), '.') !== false) {
+									$meta_parts = explode('#', $href);
+									$meta_parts[0] .= (strpos($meta_parts[0], '?') === false ? '?' : '&') . 'time=' . time();
+									$href = implode('#', $meta_parts);
+								}
 								$target = '_blank';
 							}
 							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
@@ -4053,7 +4055,7 @@ echo '			</table>
 		$this->classdaten = $mapDB->read_ClassesbyClassid($this->formvars['class_id']); ?>
 		<table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
 			<tr>
-				<td height="25" valign="top" class="fett">Styles</td>
+				<td height="25" valign="top" class="fett">Styles <a href="tools/show_symbol_icons.php" target="_symbol_icons" title="Zeige verfügbare Symbole"><i class="fa fa-eye" aria-hidden="true"></i></a></td>
 				<td align="right"><?
 					if ($this->layer['editable']) { ?>
 						<a href="javascript:add_style();" title="neuer Style"><i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i></a><?

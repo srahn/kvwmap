@@ -2,7 +2,7 @@
 
 	include("settings.php");
 
-	$dbconn = pg_connect('host=' . $host . 'dbname=' . $dbname . 'user=' . $user . 'password=' . $password)
+	$dbconn = pg_connect('host=' . $host . ' dbname=' . $dbname . ' user=' . $user . ' password=' . $password)
 						or die('Could not connect: ' . pg_last_error());
 
 	pg_set_client_encoding($dbconn, UNICODE);
@@ -16,6 +16,7 @@
 	function LENRIS_get_all_nachweise(){
 		ini_set('memory_limit', '8192M');
 		set_time_limit(1800);
+    global $select;
 		$sql = "
 			DELETE FROM 
 				n_nachweisaenderungen;
@@ -36,6 +37,7 @@
 	}
 	
 	function LENRIS_get_new_nachweise(){
+    global $select;
 		$sql = "
 			SELECT
 				" . $select . "
@@ -55,6 +57,7 @@
 	}
 	
 	function LENRIS_get_changed_nachweise(){
+    global $select;
 		$sql = "
 			SELECT DISTINCT
 				" . $select . "
@@ -138,12 +141,33 @@
 	}		
 
 	function LENRIS_get_document($document){
+		global $nachweis_dir;
 		if (strpos($document, $nachweis_dir) !== false AND strpos($document, '..') === false AND file_exists($document)) {
 			readfile($document);
 		}
 	}
 
-	$_GET['go']();
+	switch($_GET['go']){
+		case 'LENRIS_confirm_new_nachweise' : {
+			LENRIS_confirm_new_nachweise($_GET['ids']);
+	  } break;
+		
+		case 'LENRIS_confirm_changed_nachweise' : {
+			LENRIS_confirm_changed_nachweise($_GET['ids']);
+	  } break;
+		
+		case 'LENRIS_confirm_deleted_nachweise' : {
+			LENRIS_confirm_deleted_nachweise($_GET['ids']);
+	  } break;
+		
+		case 'LENRIS_get_document' : {
+			LENRIS_get_document($_GET['document']);
+	  } break;
+		
+		default : {
+			$_GET['go']();
+		}
+	}
 	
 	pg_close($dbconn);
 
