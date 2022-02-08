@@ -18,6 +18,10 @@ class LayerClass extends MyObject {
 		return $layer_class->find_where($where);
 	}
 
+	function ret($mm) {
+		return $mm;
+	}
+
 	function copy($layer_id) {
 		$this->debug->show('Copy LayerClass id: ' . $this->get($this->identifier) . ' mit neuer layer_id: ' . $layer_id, LayerClass::$write_debug);
 		$new_class = clone $this;
@@ -41,13 +45,15 @@ class LayerClass extends MyObject {
 		}
 	}
 
-	function get_first_style() {
+	function get_first_style_def() {
 		#echo 'LayerClass->get_first_style'; exit;
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
 		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
-		$style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
-		return $style;
+		if (count($styles2class) == 0) {
+			return '';
+		}
+		return LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'))->get_layerdef();
 	}
 
 	function get_layerdef() {
@@ -55,7 +61,7 @@ class LayerClass extends MyObject {
 		$layerdef = (Object) array(
 			'def' => $this->get('Expression'),
 			'name' => $this->get('Name'),
-			'style' => $this->get_first_style()->get_layerdef()
+			'style' => $this->get_first_style_def()
 		);
 		return $layerdef;
 	}

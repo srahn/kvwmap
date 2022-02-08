@@ -242,12 +242,24 @@ class Layer extends MyObject {
 			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
 			$layerAttributes->$key = $value;
 		}
+
 		$layerdef = (Object) array(
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
+			'contactOrganisation' => $this->get('datasource'),
+			'contactPersonName' => $this->get('dataowner_name'),
+			'contactEMail' => $this->get('dataowner_email'),
+			'contactPhon' => $this->get('dataowner_tel'),
 			'actuality' => $this->get('uptodateness'),
 			'actualityCircle' => $this->get('updatecycle'),
+			'type' => 'GeoJSON',
+			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
+			'minScale' => $this->minScale,
+			'maxScale' => $this->mmaxScale,
+			'backgroundColor' => '#c1ffd8',
+			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'img' => 'wind_power.svg',
 			'url' => URL . APPLVERSION . 'index.php',
 			'params' => (Object) array(
 				'gast' => $stelle_id,
@@ -259,27 +271,18 @@ class Layer extends MyObject {
 				'epsg' => 4326,
 				'all' => 1
 			),
-			'type' => 'GeoJSON',
-			'backgroundColor' => '#c1ffd8',
 			'classes' => array_map(
 				function($class) {
 					return $class->get_layerdef();
 				},
 				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'))
 			),
-			'contactEMail' => $this->get('dataowner_email'),
-			'contactPersonName' => $this->get('dataowner_name'),
-			'contactPhon' => $this->get('dataowner_tel'),
-			'contactOrganisation' => $this->get('datasource'),
-			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
 #			'icon' => (Object) array(
 #				'iconUrl' => 'images/Haus.svg',
 #				'iconSize' => array(30, 30),
 #				'iconAnchor' => array(7, 0),
 #				'popupAnchor' => array(0, 0)
 #			),
-			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
-			'img' => 'wind_power.svg',
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes,
 			'options' => (Object) array(
