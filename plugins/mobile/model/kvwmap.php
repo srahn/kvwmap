@@ -610,7 +610,7 @@
 			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 		}
 		else {
-			$vorschaubild = $GUI->get_dokument_vorschau(explode('.', $doc_path . $files['image']['name']));
+			$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
 			$success = true;
 			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 		}
