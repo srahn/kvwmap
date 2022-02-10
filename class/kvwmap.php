@@ -17863,7 +17863,15 @@ class db_mapObj{
 					'symbolscale',
 					'offsite',
 					'requires',
-					'postlabelcache'
+					'postlabelcache',
+					'kurzbeschreibung',
+					'datasource',
+					'dataowner_name',
+					'dataowner_email',
+					'dataowner_tel',
+					'uptodateness',
+					'updatecycle',
+					'metalink',
 				) AS $key
 			) {
 				$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
@@ -17965,14 +17973,6 @@ class db_mapObj{
 				'selectiontype',
 				'querymap',
 				'processing',
-				'kurzbeschreibung',
-				'datasource',
-				'dataowner_name',
-				'dataowner_email',
-				'dataowner_tel',
-				'uptodateness',
-				'updatecycle',
-				'metalink',
 				'status',
 				'trigger_function'
 			) AS $key

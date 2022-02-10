@@ -9,6 +9,7 @@ class LayerStyle extends MyObject {
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
+		#echo '<br>search for layerstyle with ' . $by . ' = ' . $id;
 		$style = new LayerStyle($gui);
 		return $style->find_by($by, $id);
 	}
@@ -19,6 +20,7 @@ class LayerStyle extends MyObject {
 	}
 
 	function get_layerdef() {
+		#echo '<br>get_layerdef color: rgb(' . $this->get('outlinecolor') . ')';
 		$layerdef = (Object) array(
 			'symbolname' => ($this->get('symbolname') == null ? 'circle' : $this->get('symbolname')),
 			'size' => ($this->get('size') == null ? '12' : $this->get('size')),
