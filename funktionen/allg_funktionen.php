@@ -143,7 +143,7 @@ function url2filepath($url, $doc_path, $doc_url) {
 */
 function get_exif_data($img_path) {
 	if ($img_path != '') {
-		$exif = exif_read_data($img_path, 'EXIF, GPS');
+		$exif = @exif_read_data($img_path, 'EXIF, GPS');
 		if ($exif === false) {
 			return array(
 				'success' => false,
