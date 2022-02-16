@@ -746,8 +746,10 @@
 						<tr>
 							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
-								$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-								$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								if ($this->formvars['shared_from']) {
+									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
+									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
 									echo $shared_name; ?>
