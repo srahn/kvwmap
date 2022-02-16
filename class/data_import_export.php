@@ -1172,6 +1172,8 @@ class data_import_export {
 			}
 		}
 		else {
+			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
+			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
