@@ -15188,7 +15188,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$raster_file = SHAPEPATH.$layer[0]['Data'];
 					if(file_exists($raster_file)){
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH.'gdalinfo "'.$raster_file.'" > '.IMAGEPATH.$output.'.info';
 						exec($command);
 						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
 						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
