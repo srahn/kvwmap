@@ -19,7 +19,39 @@ class LayerStyle extends MyObject {
 		return $style->find_where($where);
 	}
 
-	function get_layerdef() {
+	function has_icon() {
+		$map = new mapObj('');
+		$map->setSymbolSet(SYMBOLSET);
+		$map->setFontSet(FONTSET);
+		$symbol = $map->getSymbolByName($this->get('symbol'));
+		return ($symbol->type == '1006');
+	}
+
+	function get_icondef() {
+		$map = new mapObj('');
+		$map->setSymbolSet(SYMBOLSET);
+		$map->setFontSet(FONTSET);
+		$symbol = $map->getSymbolByName($this->get('symbol'));
+		$iconSize = ($this->get('size') == null ? '12' : $this->get('size'));
+		$icondef = (Object) array(
+			'iconUrl' => URL . str_replace(WWWROOT, '', SYMBOLPATH) . $symbol->imagepath,
+			'iconSize' => array(
+				$iconSize,
+				$iconSize
+			),
+			'iconAnchor' => array(
+				$iconSize / 2,
+				$iconSize / 2
+			),
+			"popupAnchor" => array(
+				$iconSize / 2,
+				$iconSize / 2
+			)
+		);
+		return $icondef;
+	}
+
+	function get_styledef() {
 		#echo '<br>get_layerdef color: rgb(' . $this->get('outlinecolor') . ')';
 		$layerdef = (Object) array(
 			'symbolname' => ($this->get('symbolname') == null ? 'circle' : $this->get('symbolname')),

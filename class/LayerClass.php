@@ -54,7 +54,8 @@ class LayerClass extends MyObject {
 			return '';
 		}
 		#echo '<br>found ' . count($styles2class) . ' styles2class';
-		return LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'))->get_layerdef();
+		$layer_style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
+		return ($layer_style->has_icon() ? $layer_style->get_icondef() : $layer_style->get_styledef());
 	}
 
 	function get_layerdef($classitem = null) {

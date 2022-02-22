@@ -8054,7 +8054,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if ($formvars['connectiontype'] == MS_WFS){
+		if ($formvars['connectiontype'] == MS_WFS) {
 			include_(CLASSPATH.'wfs.php');
 			$url = $formvars['connection'];
 			$version = $formvars['wms_server_version'];
