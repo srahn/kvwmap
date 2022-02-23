@@ -659,7 +659,7 @@
 			else {
 				if (file_exists($image)) {
 					unlink($image);
-					$msg[] = 'Bild ' + $image + ' erfolgreich gelöscht';
+					$msg[] = 'Bild ' . $image . ' erfolgreich gelöscht';
 					$fp = pathinfo($image);
 					$thumb = $fp['dirname']. '/' . $fp['filename'] . '_thumb.' . $fp['extension'];
 					if (file_exists($thumb)) {
