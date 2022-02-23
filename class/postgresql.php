@@ -1558,35 +1558,6 @@ FROM
     }
     return $ret;
   }
-  										  
-  function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else{
-			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-				$sql.= "WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
-				$sql.= $this->build_temporal_filter(array('f'));
-				$sql.= " ORDER BY vorgaenger";
-				$queryret=$this->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-      $ret[0]=0;
-      $ret[1]=$Vorgaenger;
-    }
-    return $ret;
-  }
 	
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
