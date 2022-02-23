@@ -132,7 +132,7 @@
 						rw = dms2dec(rw, coordtype) + "";
 						hw = dms2dec(hw, coordtype) + "";
 					}
-					if (rw > hw) {
+					if (parseFloat(rw) > parseFloat(hw)) {
 						var kleiner = hw;
 						hw = rw;
 						rw = kleiner;
