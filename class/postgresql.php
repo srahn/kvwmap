@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string);
+		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
