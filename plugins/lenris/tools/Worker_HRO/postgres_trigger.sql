@@ -12,6 +12,8 @@ CREATE TABLE n_nachweisaenderungen
 CREATE OR REPLACE FUNCTION lenris_log_action()
   RETURNS trigger AS
 $BODY$
+DECLARE
+	n integer;
   BEGIN
 	IF (TG_OP = 'INSERT') THEN
         INSERT INTO n_nachweisaenderungen(
@@ -34,6 +36,11 @@ $BODY$
                 'UPDATE');
         RETURN NEW;
     ELSIF (TG_OP = 'DELETE') THEN
+	EXECUTE 'SELECT id_nachweis FROM n_nachweisaenderungen WHERE db_action = ''INSERT'' AND id_nachweis = ' || OLD.id;
+	GET DIAGNOSTICS n = ROW_COUNT;
+	IF n=1 THEN
+		EXECUTE 'DELETE FROM n_nachweisaenderungen WHERE id_nachweis = ' || OLD.id;
+	ELSE
 	        INSERT INTO n_nachweisaenderungen(
                 log_time,
                 id_nachweis,
@@ -42,6 +49,7 @@ $BODY$
                 now(),
                 OLD.id,
                 'DELETE');
+        END IF;
         RETURN OLD;
     END IF;
     RETURN null;

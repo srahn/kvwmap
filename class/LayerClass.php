@@ -18,6 +18,10 @@ class LayerClass extends MyObject {
 		return $layer_class->find_where($where);
 	}
 
+	function ret($mm) {
+		return $mm;
+	}
+
 	function copy($layer_id) {
 		$this->debug->show('Copy LayerClass id: ' . $this->get($this->identifier) . ' mit neuer layer_id: ' . $layer_id, LayerClass::$write_debug);
 		$new_class = clone $this;
@@ -41,21 +45,39 @@ class LayerClass extends MyObject {
 		}
 	}
 
-	function get_first_style() {
-		#echo 'LayerClass->get_first_style'; exit;
+	function get_first_style_def() {
+		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
-		$styles2class = Style2Class::find($this->gui, 'class_id');
-		$style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
-		return $style;
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
+		if (count($styles2class) == 0) {
+			return '';
+		}
+		#echo '<br>found ' . count($styles2class) . ' styles2class';
+		return LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'))->get_layerdef();
 	}
 
-	function get_layerdef() {
+	function get_layerdef($classitem = null) {
 		#echo 'LayerClass->get_layerdef';
+
+		if ($this->get('Expression') == '') {
+			$def = '';
+		}
+		elseif (preg_match('/^\([^\[]*\[[^\]]*\][^\)]*\)$/', $this->get('Expression'))) {
+			$def = trim($this->get('Expression'));
+		}
+		elseif ($classitem == '') {
+			$def = '';
+		}
+		else {
+			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
+		}
+
+		#echo '<br>getLayerdef vor class: ' . $this->get('Class_ID');
 		$layerdef = (Object) array(
-			'def' => $this->get('Expression'),
+			'def' => $def,
 			'name' => $this->get('Name'),
-			'style' => $this->get_first_style()->get_layerdef()
+			'style' => $this->get_first_style_def()
 		);
 		return $layerdef;
 	}

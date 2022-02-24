@@ -204,7 +204,13 @@ class Layer extends MyObject {
 	function get_group_name() {
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$group = LayerGroup::find_by_id($this->gui, $this->get('Gruppe'));
-		return $group->get('Gruppenname');
+		if ($group->get('obergruppe') != '') {
+			$obergroup = LayerGroup::find_by_id($this->gui, $group->get('obergruppe'));
+			return $obergroup->get('Gruppenname') . '|' . $group->get('Gruppenname');
+		}
+		else {
+			return $group->get('Gruppenname');
+		}
 	}
 
 	function get_baselayers_def($stelle_id) {
@@ -218,15 +224,16 @@ class Layer extends MyObject {
 			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
 			$layerAttributes->$key = $value;
 		}
+		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
 		$layerdef = (Object) array(
-			'img' => 'wind_power.svg',
+			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'options' => (Object) array(
 				'attribution' => $this->get('datasource')
 			),
 			'shortLabel' => $this->get('Name'),
-			'url' => $this->get('Data'),
-			'url2' => URL . APPLVERSION . 'index.php'
+			'img' => URL . APPLVERSION . $classes[0]->get('legendgraphic'),
+			'url' => ($this->get('Data') != '' ? $this->get('Data') : $this->get('connection'))
 		);
 		return $layerdef;
 	}
@@ -242,55 +249,114 @@ class Layer extends MyObject {
 			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
 			$layerAttributes->$key = $value;
 		}
+
+		switch ($this->get('connectiontype')) {
+			case 6 : { # WFS-Layer werden exportiert wie PostGIS Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' => $stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'selected_layer_id' => $this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			} break;
+			case 7 : { # WMS-Layer
+				$type = 'WMS';
+				$url = explode('?', $this->get('connection'))[0];
+				$params = '';
+				$options = (Object) array(
+					'crs' => 'EPSG4326',
+					'version' => get_first_word_after($this->get('connection'), 'version=', ' ', '&'),
+					'layers' => get_first_word_after($this->get('connection'), 'layers=', ' ', '&'),
+					'format' => 'image/png',
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			} break;
+			case 9 : { # PostGIS-Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' => $stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'selected_layer_id' => $this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			} break;
+			default : { # currently same as PostGIS-Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' => $stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'selected_layer_id' => $this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			}
+		}
+
+		$classitem = $this->get('classitem');
+
+		#echo '<br>get_overlay_def for layer: ' . $this->get('Name');
 		$layerdef = (Object) array(
+			'thema' => $this->get_group_name(),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
+			'contactOrganisation' => $this->get('datasource'),
+			'contactPersonName' => $this->get('dataowner_name'),
+			'contactEMail' => $this->get('dataowner_email'),
+			'contactPhon' => $this->get('dataowner_tel'),
 			'actuality' => $this->get('uptodateness'),
 			'actualityCircle' => $this->get('updatecycle'),
+			'type' => $type,
+			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
+			'minScale' => $this->minScale,
+			'maxScale' => $this->mmaxScale,
 			'backgroundColor' => '#c1ffd8',
+			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'img' => 'wind_power.svg',
+			'url' => $url,
+			'params' => $params,
+			'options' => $options,
 			'classes' => array_map(
-				function($class) {
-					return $class->get_layerdef();
+				function($class) use ($classitem) {
+					return $class->get_layerdef($classitem);
 				},
 				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'))
 			),
-			'contactEMail' => $this->get('dataowner_email'),
-			'contactPersonName' => $this->get('dataowner_name'),
-			'contactPhon' => $this->get('dataowner_tel'),
-			'contactOrganisation' => $this->get('datasource'),
-			'geomType' => array('Point', 'Line', 'Polygon')[$this->get('Datentyp')],
-			'icon' => (Object) array(
-				'iconUrl' => 'icons/Windenergie/Onshore/EA-Icons_Windenergieanlagen Onshore.svg',
-				'iconSize' => array(30, 30),
-				'iconAnchor' => array(7, 0),
-				'popupAnchor' => array(0, 0)
-			),
-			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
-			'img' => 'wind_power.svg',
+#			'icon' => (Object) array(
+#				'iconUrl' => 'images/Haus.svg',
+#				'iconSize' => array(30, 30),
+#				'iconAnchor' => array(7, 0),
+#				'popupAnchor' => array(0, 0)
+#			),
 			'hideEmptyLayerAttributes' => true,
-			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
-			'layerAttributes' => $layerAttributes,
-			'options' => (Object) array(
-				'attribution' => $this->get('dataowner_name'),
-#				'transparent' => true,
-#				'crs' => '',
-#				'version' => '',
-#				'layers' => '',
-#				'format' => '',
-#				'opacity' => 1
-			),
-			'params' => (Object) array(
-				'gast' => $stelle_id,
-				'go' => 'Daten_Export_Exportieren',
-				'selected_layer_id' => $this->get('Layer_ID'),
-				'export_format' =>  'GeoJSON',
-				'browserwidth' => 800,
-				'browserheight' => 600,
-				'epsg' => 4326,
-				'all' => 1
-			),
-			'thema' => $this->get_group_name() . '|' . $this->get('Name'),
-			'type' => 'GeoJSON',
-			'url' => URL . APPLVERSION . 'index.php'
+			'layerAttributes' => $layerAttributes
 		);
 		return $layerdef;
 	}

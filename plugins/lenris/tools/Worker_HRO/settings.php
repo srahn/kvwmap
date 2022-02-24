@@ -5,20 +5,21 @@ $dbname='';
 $user='';
 $password='';
 
-$nachweis_dir = "/risse/";
+$nachweis_dir = "/mnt/gds/Risse/";
 
 $select = "
 		a.id,
 		'13' || a.gemarkung || '000' AS flurid,
 		a.blatt AS blattnummer,
 		a.datum,
-		TRUE AS gueltigkeit,
-		" . $nachweis_dir . " || a.gemarkung || '/' || a.bild as link_datei,
-		a.antragsnr AS stammnr,
-		CASE WHEN NOT ST_IsValid(a.geometrie)
-			THEN ST_Transform(ST_Envelope(a.geometrie), 25833) 
+		1 AS gueltigkeit,
+		'" . $nachweis_dir . "' || a.gemarkung || '/PDFA/' || a.pdf as link_datei,
+		a.antragsnummer AS stammnr,
+		CASE
+      WHEN NOT ST_IsValid(a.geometrie)
+			THEN ST_Envelope(a.geometrie)
 		ELSE 
-			ST_Transform(a.geometrie, 25833)
+			a.geometrie
 		END AS the_geom,
 		a.jahr as fortfuehrung,
 		a.riss AS rissnummer,

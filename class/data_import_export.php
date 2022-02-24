@@ -237,7 +237,7 @@ class data_import_export {
 		else {
 			return;
 		}
-		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding, true);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
@@ -945,7 +945,7 @@ class data_import_export {
 			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0) {
+			if ($ret != 0 OR $result->stderr != '') {
 				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
 			}
 		}
@@ -1172,6 +1172,8 @@ class data_import_export {
 			}
 		}
 		else {
+			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
+			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
