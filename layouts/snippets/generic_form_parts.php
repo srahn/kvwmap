@@ -157,7 +157,12 @@
 				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-					$datapart .= '<td valign="top"><a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
+					$datapart .= '
+						<td valign="top">
+							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;" style="vertical-align: top;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a>
+							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'up\');'.$onchange2.'return false;"><img src="'.GRAPHICSPATH.'pfeil2.gif"></a>
+							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'down\');'.$onchange2.'return false;"><img src="'.GRAPHICSPATH.'pfeil.gif"></a>
+						</td>';
 				}
 				$datapart .= '</tr></table>';
 				$datapart .= '</div>';

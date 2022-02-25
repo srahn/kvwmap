@@ -319,9 +319,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastElementChild.id;
-		parts = last_id.split('div_'+fieldname+'_');
-		new_id = parseInt(parts[1])+1;
+		new_id = outer_div.childElementCount - 1;
 		new_element.id = 'div_'+fieldname+'_'+new_id;
 		var regex = new RegExp(fieldname+'_-1', "g");
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
@@ -336,6 +334,33 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		getFileAttributesInArray(remove_element);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
+	}
+	
+	moveArrayElement = function(fieldname, element_id, direction){
+		var element = document.getElementById('div_' + element_id);
+		var moved_element, stationary_element;
+		if (direction == 'up') {
+			if (element.previousSibling.previousSibling) {	// das ist so richtig
+				moved_element = element;
+				stationary_element = element.previousSibling;
+			}
+			else {
+				moved_element = element;
+				stationary_element = null;
+			}
+		}
+		else {
+			if (element.nextSibling) {
+				moved_element = element.nextSibling;
+				stationary_element = element;
+			}
+			else {
+				moved_element = element;
+				stationary_element = element.parentNode.childNodes[1];
+			}
+		}
+		element.parentNode.insertBefore(moved_element, stationary_element);
+		buildJSONString(fieldname, true);
 	}
 
 	function getFileAttributesInArray(remove_element){
