@@ -4736,51 +4736,51 @@ echo '			</table>
 		}
 	}
 
-  function createRandomPassword() {
-    $this->titel='Zufälliges Passwort';
-    $this->main='genericTemplate.php';
-    $this->param['height']=400;
-    $this->param['str1']='<h3>10 sichere und zufällig erzeugte Passwörter</h3>';
-    while($i++ < 10) {
-      $this->param['str1'].='<br><b>'.createRandomPassword(8).'</b>';
-    }
-  }
+	function createRandomPassword() {
+		$this->titel = 'Zufälliges Passwort';
+		$this->main = 'genericTemplate.php';
+		$this->param['height'] = 400;
+		$this->param['str1'] = '<h3>10 sichere und zufällig erzeugte Passwörter</h3>';
+		while ($i++ < 10) {
+			$this->param['str1'] .= '<br><b>' . createRandomPassword(8) . '</b>';
+		}
+	}
 
-  function closelogfiles(){
-    $dump_rolle =  $this->database->create_update_dump('rolle');
-    $dump_rolle2usedlayer =  $this->database->create_update_dump('u_rolle2used_layer');
-    $dump_menue2rolle =  $this->database->create_update_dump('u_menue2rolle');
-    $dump_groups2rolle =  $this->database->create_update_dump('u_groups2rolle');
-    $this->database->logfile->write($dump_rolle);
-    $this->database->logfile->write($dump_rolle2usedlayer);
-    $this->database->logfile->write($dump_menue2rolle);
-    $this->database->logfile->write($dump_groups2rolle);
-    $this->main='showadminfunctions.php';
-    $this->titel='Administrationsfunktionen';
-  }
+	function closelogfiles(){
+		$dump_rolle =  $this->database->create_update_dump('rolle');
+		$dump_rolle2usedlayer =  $this->database->create_update_dump('u_rolle2used_layer');
+		$dump_menue2rolle = $this->database->create_update_dump('u_menue2rolle');
+		$dump_groups2rolle = $this->database->create_update_dump('u_groups2rolle');
+		$this->database->logfile->write($dump_rolle);
+		$this->database->logfile->write($dump_rolle2usedlayer);
+		$this->database->logfile->write($dump_menue2rolle);
+		$this->database->logfile->write($dump_groups2rolle);
+		$this->main = 'showadminfunctions.php';
+		$this->titel = 'Administrationsfunktionen';
+	}
 
-  function showAdminFunctions() {
-    $this->main='showadminfunctions.php';
-    $this->titel='Administrationsfunktionen';
-  }
+	function showAdminFunctions() {
+		$this->main = 'showadminfunctions.php';
+		$this->titel = 'Administrationsfunktionen';
+	}
 
-  function showConstants() {
+	function showConstants() {
 		$this->main='showadminfunctions.php';
 		$this->administration->get_constants_from_all_configs();
   }
 
-  function getMenueWithAjax() {
-    $this->loadMap('DataBase');
-    $this->drawMap();
-    $this->user->rolle->hideMenue(0);
-    include(LAYOUTPATH . "snippets/menue.php");
+	function getMenueWithAjax() {
+		$this->loadMap('DataBase');
+		$this->drawMap();
+		$this->user->rolle->hideMenue(0);
+		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
-  }
+	}
 
-  function hideMenueWithAjax() {
-    $this->user->rolle->hideMenue(1);
+	function hideMenueWithAjax() {
+		$this->user->rolle->hideMenue(1);
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
-  }
+	}
 
 	function changeLegendDisplay(){
 		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
@@ -7324,7 +7324,7 @@ echo '			</table>
 
 	function Layer2Stelle_Reihenfolge() {
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
-		$this->main='layer2stelle_order.php';
+		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
 			$this->formvars['order'] = 'legendorder, drawingorder desc';
 		}
@@ -7333,44 +7333,6 @@ echo '			</table>
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
 		$this->output();
-	}
-
-	function Layer2Stelle_Reihenfolge_Layerdef() {
-		$pfad = WWWROOT . APPLVERSION . 'tools/';
-		$file = 'layerdef.json';
-		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
-		$layerdef = $this->selected_stelle->get_layerdef();
-		$layerdef_config_file = WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/layerdef_export_config.php';
-		#echo '<br>Check if File ' . $layerdef_config_file . ' existiert';
-		if (file_exists($layerdef_config_file)) {
-			#echo '<br>Config Datei existiert.';
-			include($layerdef_config_file);
-		}
-		#echo '<br>Check if Constante LAYERDEF_EXPORT_FILE definiert ist.';
-		if (defined('LAYERDEF_EXPORT_FILE')) {
-			#echo '<br>Ja Constante LAYERDEF_EXPORT_FILE hat den Wert: ' . LAYERDEF_EXPORT_FILE;
-			if (!file_exists(LAYERDEF_EXPORT_FILE)) {
-				#echo '<br>Datei ' . LAYERDEF_EXPORT_FILE . ' existiert noch nicht und wird neu angelegt.';
-				$this->add_message('notice', 'Datei ' . LAYERDEF_EXPORT_FILE . ' wird neu angelegt!');
-			}
-			if (is_writable(LAYERDEF_EXPORT_FILE)) {
-				#echo '<br>Datei ' . LAYERDEF_EXPORT_FILE . ' ist beschreibbar und wird mit Layerdef befüllt.';
-				file_put_contents(LAYERDEF_EXPORT_FILE, json_encode($layerdef));
-				$this->add_message('notice', 'Layerdef erfolgreich in Datei: ' . LAYERDEF_EXPORT_FILE . ' geschrieben!');
-			}
-			else {
-				#echo '<br>Keine Berechtigung zum Schreiben in Datei: ' . LAYERDEF_EXPORT_FILE;
-				$this->add_message('error', 'Keine Berechtigung zum Schreiben in Datei: ' . LAYERDEF_EXPORT_FILE . '!');
-			}
-			#echo '<br>Führe Anwendungsfall Layer2Stelle_Editor aus.';
-			$this->t_visible = 5000;
-			$this->go = 'Layer2Stelle_Editor';
-			go_switch('Layer2Stelle_Reihenfolge');
-		}
-		else {
-			#echo '<br>Nein Constante ist nicht definiert.';
-			echo json_encode($layerdef);
-		}
 	}
 
   function Layer2Stelle_ReihenfolgeSpeichern(){

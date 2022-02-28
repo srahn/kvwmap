@@ -339,7 +339,7 @@ class Layer extends MyObject {
 			'actuality' => $this->get('uptodateness'),
 			'actualityCircle' => $this->get('updatecycle'),
 			'type' => $type,
-			'geomType' => array('Point', 'Linestring', 'Polygon')[$this->get('Datentyp')],
+			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('Datentyp')],
 			'backgroundColor' => '#c1ffd8',
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
 			'url' => $url,
@@ -360,6 +360,28 @@ class Layer extends MyObject {
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes
 		);
+		if ($this->get('processing') != '') {
+			$processing = explode(';', $this->get('processing'));
+			if (count($processing) > 0) {
+				$layerdef->processing = (Object) array();
+				foreach ($processing AS $process) {
+					$parts = explode('=', $process);
+					switch ($parts[0]) {
+						case ('CHART_TYPE') : {
+							$layerdef->processing->chart_type = $parts[1];
+						} break;
+						case ('CHART_SIZE') : {
+							$layerdef->processing->style = (Object) array(
+								'radius' => $parts[1],
+								'fillOpacity' => 0.6,
+								"strokeOpacity" => 0.2,
+								"strokeWeight" => 3
+							);
+						} break;
+					}
+				}
+			}
+		}
 		if ($this->minScale != '') {
 			$layerdef->minScale = (int)$this->minScale;
 		}
