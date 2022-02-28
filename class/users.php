@@ -725,6 +725,7 @@ class user {
 				shared_from = " . $user_id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->layerIsSharedFrom:<br>" . $sql, 4);
+		#echo '<br>sql zur Abfrage der Layer: ' . $sql;
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;

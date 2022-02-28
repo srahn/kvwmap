@@ -261,16 +261,26 @@ class GUI {
 		return $trigger_result;
 	}
 
-	function geo_name_query(){
-		$result = json_decode(url_get_contents(GEO_NAME_SEARCH_URL.urlencode($this->formvars['q']), NULL, NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'), true);
+	function geo_name_query() {
 		$stellen_extent = $this->Stelle->MaxGeorefExt;
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
+		$result = json_decode(
+			url_get_contents(
+				GEO_NAME_SEARCH_URL .
+				urlencode($this->formvars['q']) .
+				(strpos(GEO_NAME_SEARCH_URL, 'viewbox=') === false ? '&viewbox=' . $stellen_extent->minx . ',' . $stellen_extent->miny . ',' . $stellen_extent->maxx . ',' . $stellen_extent->maxy : ''),
+				NULL,
+				NULL,
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'
+			),
+			true
+		);
 		$show = false;
-		for($i = 0; $i < @count($result['features']); $i++){
+		for ($i = 0; $i < @count($result['features']); $i++) {
 			$coord = $result['features'][$i]['geometry']['coordinates'];
-			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
+			if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
 				$show = true;
 				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
 				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
