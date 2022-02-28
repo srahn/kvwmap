@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string);
+		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
@@ -1558,35 +1558,6 @@ FROM
     }
     return $ret;
   }
-  										  
-  function getVorgaenger($FlurstKennz) {
-    $sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
-    $queryret=$this->execSQL($sql, 4, 0);
-    if($queryret[0]) {
-      $ret[0]=1;
-      $ret[1]=$queryret[1];
-    }
-    else{
-			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-				$sql.= "WHERE ARRAY['" . $FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
-				$sql.= $this->build_temporal_filter(array('f'));
-				$sql.= " ORDER BY vorgaenger";
-				$queryret=$this->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-      $ret[0]=0;
-      $ret[1]=$Vorgaenger;
-    }
-    return $ret;
-  }
 	
 	function getVersionen($table, $gml_ids, $start){
 		$versionen = array();
@@ -2569,7 +2540,7 @@ FROM
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
     if ($this->blocktransaction == 0) {
-      $ret=$this->execSQL('BEGIN', 4, 1);
+      $ret=$this->execSQL('BEGIN', 4, 0);
     }
     return $ret;
   }
@@ -2580,7 +2551,7 @@ FROM
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
     if ($this->blocktransaction == 0) {
-      $ret=$this->execSQL('ROLLBACK',4 , 1);
+      $ret=$this->execSQL('ROLLBACK',4 , 0);
     }
     return $ret;
   }
@@ -2590,7 +2561,7 @@ FROM
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction == 0) {
-      $ret = $this->execSQL('COMMIT', 4, 1);
+      $ret = $this->execSQL('COMMIT', 4, 0);
     }
     return $ret;
   }

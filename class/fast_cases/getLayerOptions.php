@@ -25,6 +25,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	</div>";
 	return $err_msg;
 }
+
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
@@ -279,6 +280,7 @@ class GUI {
 	}
 
 	function getLayerOptions() {
+		global $admin_stellen;
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -352,23 +354,26 @@ class GUI {
 												}
 											)
 										)
-									); ?><br>
-									<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
-									<div style="float: left;padding-top: 3px;">
-										<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
-									</div>
-									<div style="float: left;padding-top: 3px;">
-										<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
-									</div>
+									); 
+									if (in_array($this->Stelle->id, $admin_stellen)) {
+										?><br>
+										<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
+										<div style="float: left;padding-top: 3px;">
+											<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
+										</div>
+										<div style="float: left;padding-top: 3px;">
+											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+										</div>
+									<? } ?>
 									<div style="clear: both">
-
-									<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
-										<option value="readable"><? echo $this->strReadable; ?></option>
-										<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
-										<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
-									</select><br>
-									<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
-									<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+										<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
+											<option value="readable"><? echo $this->strReadable; ?></option>
+											<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
+											<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
+										</select><br>
+										<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
+										<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+									</div>
 								</div><?
 							}
 						}
