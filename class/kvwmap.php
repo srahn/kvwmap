@@ -3002,7 +3002,8 @@ echo '			</table>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if (strpos($this->user->rolle->gui, 'layouts') === false) {		# Berücksichtigung des alten gui-Pfads
+		if (strpos($this->user->rolle->gui, 'layouts') === false) {
+			# Berücksichtigung des alten gui-Pfads
 			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
@@ -3032,8 +3033,8 @@ echo '			</table>
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {		
-		$html = "message(" . json_encode(GUI::$messages) . ");";
+	function output_messages($option = 'with_script_tags') {
+		$html = 'message(' . json_encode(GUI::$messages) . ((property_exists($this, 't_visible') AND $this->t_visible != '') ? ', ' . quote($this->t_visible) : '') . ');';
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
@@ -7332,11 +7333,41 @@ echo '			</table>
 	}
 
 	function Layer2Stelle_Reihenfolge_Layerdef() {
-		$pfad = WWWROOT.APPLVERSION . 'tools/';
+		$pfad = WWWROOT . APPLVERSION . 'tools/';
 		$file = 'layerdef.json';
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$layerdef = $this->selected_stelle->get_layerdef();
-		echo json_encode($layerdef);
+		$layerdef_config_file = WWWROOT . APPLVERSION . CUSTOM_PATH . 'layouts/snippets/layerdef_export_config.php';
+		#echo '<br>Check if File ' . $layerdef_config_file . ' existiert';
+		if (file_exists($layerdef_config_file)) {
+			#echo '<br>Config Datei existiert.';
+			include($layerdef_config_file);
+		}
+		#echo '<br>Check if Constante LAYERDEF_EXPORT_FILE definiert ist.';
+		if (defined('LAYERDEF_EXPORT_FILE')) {
+			#echo '<br>Ja Constante LAYERDEF_EXPORT_FILE hat den Wert: ' . LAYERDEF_EXPORT_FILE;
+			if (!file_exists(LAYERDEF_EXPORT_FILE)) {
+				#echo '<br>Datei ' . LAYERDEF_EXPORT_FILE . ' existiert noch nicht und wird neu angelegt.';
+				$this->add_message('notice', 'Datei ' . LAYERDEF_EXPORT_FILE . ' wird neu angelegt!');
+			}
+			if (is_writable(LAYERDEF_EXPORT_FILE)) {
+				#echo '<br>Datei ' . LAYERDEF_EXPORT_FILE . ' ist beschreibbar und wird mit Layerdef befüllt.';
+				file_put_contents(LAYERDEF_EXPORT_FILE, json_encode($layerdef));
+				$this->add_message('notice', 'Layerdef erfolgreich in Datei: ' . LAYERDEF_EXPORT_FILE . ' geschrieben!');
+			}
+			else {
+				#echo '<br>Keine Berechtigung zum Schreiben in Datei: ' . LAYERDEF_EXPORT_FILE;
+				$this->add_message('error', 'Keine Berechtigung zum Schreiben in Datei: ' . LAYERDEF_EXPORT_FILE . '!');
+			}
+			#echo '<br>Führe Anwendungsfall Layer2Stelle_Editor aus.';
+			$this->t_visible = 5000;
+			$this->go = 'Layer2Stelle_Editor';
+			go_switch('Layer2Stelle_Reihenfolge');
+		}
+		else {
+			#echo '<br>Nein Constante ist nicht definiert.';
+			echo json_encode($layerdef);
+		}
 	}
 
   function Layer2Stelle_ReihenfolgeSpeichern(){
