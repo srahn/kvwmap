@@ -1342,6 +1342,7 @@ class flurstueck {
     $this->ALB_Flaeche=$rs['flaeche'];
 		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
 		$this->zweifelhafterflurstuecksnachweis=$rs['zweifelhafterflurstuecksnachweis'];
+		$this->antragsnummer=$rs['antragsnummer'];
     $this->endet=$rs['endet'];
 		$this->beginnt=$rs['beginnt'];
 		$this->hist_alb=$rs['hist_alb'];
