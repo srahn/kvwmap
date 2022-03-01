@@ -21,7 +21,7 @@ class Layer2Stelle extends MyObject {
 			'select' => 'l.Layer_ID',
 			'from' => 'used_layer ul JOIN layer l ON ul.Layer_ID = l.Layer_ID',
 			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.selectiontype = 'radio'",
-			'order' => 'ul.drawingorder'
+			'order' => 'ul.legendorder'
 		));
 	}
 

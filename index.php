@@ -122,11 +122,9 @@ ob_start ();    // Ausgabepufferung starten
 $formvars = $_REQUEST;
 
 $go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
-
 if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
 	$go = $go.'_'.$formvars['go_plus'];
 }
-
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -253,7 +251,7 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
-			}break;
+			} break;
 			
 			case 'layer_check_oids' : {
 				$GUI->layer_check_oids();
@@ -1379,11 +1377,6 @@ function go_switch($go, $exit = false) {
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
-			} break;
-
-			case 'Layer2Stelle_Reihenfolge_Layerdef' : {
-				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->Layer2Stelle_Reihenfolge_Layerdef();
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge_Speichern' : {

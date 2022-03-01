@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string);
+		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
@@ -2601,7 +2601,7 @@ FROM
     # after BEGIN command will be executed in a single transaction
     # until an explicit COMMIT or ROLLBACK is given
     if ($this->blocktransaction == 0) {
-      $ret=$this->execSQL('BEGIN', 4, 1);
+      $ret=$this->execSQL('BEGIN', 4, 0);
     }
     return $ret;
   }
@@ -2612,7 +2612,7 @@ FROM
     # rolls back the current transaction and causes all the updates
     # made by the transaction to be discarded
     if ($this->blocktransaction == 0) {
-      $ret=$this->execSQL('ROLLBACK',4 , 1);
+      $ret=$this->execSQL('ROLLBACK',4 , 0);
     }
     return $ret;
   }
@@ -2622,7 +2622,7 @@ FROM
     # commits the current transaction. All changes made by the transaction
     # become visible to others and are guaranteed to be durable if a crash occurs
     if ($this->blocktransaction == 0) {
-      $ret = $this->execSQL('COMMIT', 4, 1);
+      $ret = $this->execSQL('COMMIT', 4, 0);
     }
     return $ret;
   }

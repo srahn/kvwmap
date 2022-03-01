@@ -261,16 +261,26 @@ class GUI {
 		return $trigger_result;
 	}
 
-	function geo_name_query(){
-		$result = json_decode(url_get_contents(GEO_NAME_SEARCH_URL.urlencode($this->formvars['q']), NULL, NULL, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'), true);
+	function geo_name_query() {
 		$stellen_extent = $this->Stelle->MaxGeorefExt;
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
+		$result = json_decode(
+			url_get_contents(
+				GEO_NAME_SEARCH_URL .
+				urlencode($this->formvars['q']) .
+				(strpos(GEO_NAME_SEARCH_URL, 'viewbox=') === false ? '&viewbox=' . $stellen_extent->minx . ',' . $stellen_extent->miny . ',' . $stellen_extent->maxx . ',' . $stellen_extent->maxy : ''),
+				NULL,
+				NULL,
+				'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'
+			),
+			true
+		);
 		$show = false;
-		for($i = 0; $i < @count($result['features']); $i++){
+		for ($i = 0; $i < @count($result['features']); $i++) {
 			$coord = $result['features'][$i]['geometry']['coordinates'];
-			if($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy){
+			if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
 				$show = true;
 				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
 				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'\'">'.$name.'</a></li>';
@@ -3005,7 +3015,8 @@ echo '			</table>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if (strpos($this->user->rolle->gui, 'layouts') === false) {		# Berücksichtigung des alten gui-Pfads
+		if (strpos($this->user->rolle->gui, 'layouts') === false) {
+			# Berücksichtigung des alten gui-Pfads
 			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
 		}
 		else {
@@ -3035,8 +3046,8 @@ echo '			</table>
 		}
 	}
 
-	function output_messages($option = 'with_script_tags') {		
-		$html = "message(" . json_encode(GUI::$messages) . ");";
+	function output_messages($option = 'with_script_tags') {
+		$html = 'message(' . json_encode(GUI::$messages) . ((property_exists($this, 't_visible') AND $this->t_visible != '') ? ', ' . quote($this->t_visible) : '') . ');';
 		if ($option == 'with_script_tags') {
 			$html = "<script type=\"text/javascript\">" . $html . "</script>";
 		}
@@ -4735,51 +4746,51 @@ echo '			</table>
 		}
 	}
 
-  function createRandomPassword() {
-    $this->titel='Zufälliges Passwort';
-    $this->main='genericTemplate.php';
-    $this->param['height']=400;
-    $this->param['str1']='<h3>10 sichere und zufällig erzeugte Passwörter</h3>';
-    while($i++ < 10) {
-      $this->param['str1'].='<br><b>'.createRandomPassword(8).'</b>';
-    }
-  }
+	function createRandomPassword() {
+		$this->titel = 'Zufälliges Passwort';
+		$this->main = 'genericTemplate.php';
+		$this->param['height'] = 400;
+		$this->param['str1'] = '<h3>10 sichere und zufällig erzeugte Passwörter</h3>';
+		while ($i++ < 10) {
+			$this->param['str1'] .= '<br><b>' . createRandomPassword(8) . '</b>';
+		}
+	}
 
-  function closelogfiles(){
-    $dump_rolle =  $this->database->create_update_dump('rolle');
-    $dump_rolle2usedlayer =  $this->database->create_update_dump('u_rolle2used_layer');
-    $dump_menue2rolle =  $this->database->create_update_dump('u_menue2rolle');
-    $dump_groups2rolle =  $this->database->create_update_dump('u_groups2rolle');
-    $this->database->logfile->write($dump_rolle);
-    $this->database->logfile->write($dump_rolle2usedlayer);
-    $this->database->logfile->write($dump_menue2rolle);
-    $this->database->logfile->write($dump_groups2rolle);
-    $this->main='showadminfunctions.php';
-    $this->titel='Administrationsfunktionen';
-  }
+	function closelogfiles(){
+		$dump_rolle =  $this->database->create_update_dump('rolle');
+		$dump_rolle2usedlayer =  $this->database->create_update_dump('u_rolle2used_layer');
+		$dump_menue2rolle = $this->database->create_update_dump('u_menue2rolle');
+		$dump_groups2rolle = $this->database->create_update_dump('u_groups2rolle');
+		$this->database->logfile->write($dump_rolle);
+		$this->database->logfile->write($dump_rolle2usedlayer);
+		$this->database->logfile->write($dump_menue2rolle);
+		$this->database->logfile->write($dump_groups2rolle);
+		$this->main = 'showadminfunctions.php';
+		$this->titel = 'Administrationsfunktionen';
+	}
 
-  function showAdminFunctions() {
-    $this->main='showadminfunctions.php';
-    $this->titel='Administrationsfunktionen';
-  }
+	function showAdminFunctions() {
+		$this->main = 'showadminfunctions.php';
+		$this->titel = 'Administrationsfunktionen';
+	}
 
-  function showConstants() {
+	function showConstants() {
 		$this->main='showadminfunctions.php';
 		$this->administration->get_constants_from_all_configs();
   }
 
-  function getMenueWithAjax() {
-    $this->loadMap('DataBase');
-    $this->drawMap();
-    $this->user->rolle->hideMenue(0);
-    include(LAYOUTPATH . "snippets/menue.php");
+	function getMenueWithAjax() {
+		$this->loadMap('DataBase');
+		$this->drawMap();
+		$this->user->rolle->hideMenue(0);
+		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
-  }
+	}
 
-  function hideMenueWithAjax() {
-    $this->user->rolle->hideMenue(1);
+	function hideMenueWithAjax() {
+		$this->user->rolle->hideMenue(1);
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
-  }
+	}
 
 	function changeLegendDisplay(){
 		$this->user->rolle->changeLegendDisplay($this->formvars['hide']);
@@ -7323,7 +7334,7 @@ echo '			</table>
 
 	function Layer2Stelle_Reihenfolge() {
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
-		$this->main='layer2stelle_order.php';
+		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
 			$this->formvars['order'] = 'legendorder, drawingorder desc';
 		}
@@ -7332,14 +7343,6 @@ echo '			</table>
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
 		$this->output();
-	}
-
-	function Layer2Stelle_Reihenfolge_Layerdef() {
-		$pfad = WWWROOT.APPLVERSION . 'tools/';
-		$file = 'layerdef.json';
-		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
-		$layerdef = $this->selected_stelle->get_layerdef();
-		echo json_encode($layerdef);
 	}
 
   function Layer2Stelle_ReihenfolgeSpeichern(){
@@ -8057,7 +8060,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				showAlert('Keine connection angegeben.');
 			}
 		}
-		if ($formvars['connectiontype'] == MS_WFS){
+		if ($formvars['connectiontype'] == MS_WFS) {
 			include_(CLASSPATH.'wfs.php');
 			$url = $formvars['connection'];
 			$version = $formvars['wms_server_version'];
