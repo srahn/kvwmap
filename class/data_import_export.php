@@ -900,10 +900,8 @@ class data_import_export {
 	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
-		$formvars_nln = '';
-		if(!empty($this->formvars['layer_name']) and $this->formvars['layer_name'] != '') {
-			$formvars_nln = '-nln ' . $this->formvars['layer_name'];
-		}
+		$formvars_nln = ($this->formvars['layer_name'] != '' ? '-nln ' . $this->formvars['layer_name'] : '');
+		$formvars_nlt = ($this->formvars['geomtype'] != '' ? '-nlt ' . $this->formvars['geomtype'] : '');
 		$command = 'export PGDATESTYLE="ISO, MDY";'
 			. 'export '
 			. 'PGCLIENTENCODING=UTF-8;'
@@ -912,6 +910,7 @@ class data_import_export {
 			. '-lco ENCODING=UTF-8 '
 			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
+			. $formvars_nlt . ' '
 			. $exportfile . ' '
 			. 'PG:"' . $layerdb->get_connection_string(true) . ' active_schema=' . $layerdb->schema . '"';
 		$errorfile = rand(0, 1000000);
@@ -920,7 +919,8 @@ class data_import_export {
 		#echo '<br>' . $command;
 		exec($command, $output, $ret);
 		if ($ret != 0) {
-			$ret = 'Fehler beim Exportieren !<br><br>Befehl:<div class="code">'.$command.'</div><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
+			exec("sed -i -e 's/".$database->passwd."/xxxx/g' " . IMAGEPATH . $errorfile . '.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+			$ret = 'Fehler beim Exportieren !<br><a href="' . IMAGEURL . $errorfile . '.err" target="_blank">Fehlerprotokoll</a>';
 		}
 		return $ret;
 	}
@@ -1319,6 +1319,7 @@ class data_import_export {
 				$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
 				$this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
 				$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
+				$this->formvars['geomtype'] = $this->attributes['geomtype'][$this->attributes['the_geom']];
 				$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
 				$old = umask(0);
 	      mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
