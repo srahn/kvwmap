@@ -4873,7 +4873,7 @@ echo '			</table>
 				}
 			}
 			else {
-				$this->add_message('error', $ret['err_msg']);
+				$this->add_message('error', $ret['msg']);
 			}
 			$this->PointEditor();
 		}

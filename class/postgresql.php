@@ -456,7 +456,7 @@ FROM
 									$ret['type'] = $notice_obj['msg_type'];
 								}
 								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
-									$ret['msg'] = $notice_obj['msg'];
+									$ret['msg'] .= $notice_obj['msg'];
 								}
 							}
 						}

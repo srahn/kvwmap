@@ -388,8 +388,9 @@ function resizemap2window(){
 *		]);
 */
 function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
-	console.log('Show Message: %o: ', messages);
-	console.log('function message with callback: %o: ', callback);
+	//console.log('Show Message: %o: ', messages);
+  console.log('Show Message with css_top: ', css_top);
+	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
