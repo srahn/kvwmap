@@ -8095,6 +8095,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function invitation_formular() {
+		global $admin_stellen;
 		include_once(CLASSPATH . 'FormObject.php');
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitation = new Invitation($this);
@@ -8115,14 +8116,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->invitation->setKeysFromTable();
 		}
 		$myobj = new MyObject($this, 'stelle');
-		$stellen = $myobj->find_by_sql(
-			array(
-				'select' => 's.`ID`, s.`Bezeichnung`',
-				'from' => 'stelle s, rolle r',
-				'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
-				'order' => 'bezeichnung'
-			)
-		);
+		if (in_array($this->Stelle->id, $admin_stellen)) {
+			$stellen = $myobj->find_by_sql(
+				array(
+					'select' => 's.`ID`, s.`Bezeichnung`',
+					'from' => 'stelle s',
+					'order' => 'bezeichnung'
+				)
+			);
+		}
+		else {
+			$stellen = $myobj->find_by_sql(
+				array(
+					'select' => 's.`ID`, s.`Bezeichnung`',
+					'from' => 'stelle s, rolle r',
+					'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
+					'order' => 'bezeichnung'
+				)
+			);
+		}
 
 		$this->invitation->stellen = array_map(
 			function($stelle) {
