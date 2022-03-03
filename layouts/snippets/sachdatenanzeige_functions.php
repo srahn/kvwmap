@@ -534,9 +534,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	save_new_dataset = function(){
-		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
-			message('Sie haben keine Geometrie angegeben.');
-			return;
+		if (
+			(enclosingForm.newpath != undefined && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) 
+			|| 
+			(enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')
+		){
+			if (geom_not_null) {
+				message('Sie müssen noch eine Geometrie für den Datensatz erfassen!');
+				return;
+			}
+			else {
+				if (!confirm('Wollen Sie den Datensatz wirklich ohne Geometrie anlegen?')) {
+					return;
+				}
+			}
 		}
   	form_fieldstring = enclosingForm.form_field_names.value+'';
 		form_fields = form_fieldstring.split('|');
