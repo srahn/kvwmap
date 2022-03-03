@@ -5015,15 +5015,15 @@ echo '			</table>
 					break;
 					case ( # only for points
 						$this->attributes['form_element_type'][$i] == 'Winkel'
-					) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->formvars['angle'];
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['angle'] ?: 'NULL');
 					break;
 					case ( # only for lines
 						$this->attributes['form_element_type'][$i] == 'Länge'
-					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['linelength'] . "'";
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['linelength'] ?: 'NULL');
 					break;
 					case ( # only for polygons
 						$this->attributes['form_element_type'][$i] == 'Fläche'
-					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['area'] . "'";
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
 				}
 			}
