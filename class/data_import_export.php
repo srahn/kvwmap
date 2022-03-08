@@ -910,6 +910,7 @@ class data_import_export {
 			. OGR_BINPATH . 'ogr2ogr '
 			. '-f ' . $exportformat . ' '
 			. '-lco ENCODING=UTF-8 '
+			. '--config DXF_WRITE_HATCH NO '
 			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
 			. $exportfile . ' '

@@ -74,6 +74,7 @@ if($this->map->width > 430)$button_position = ($last_x+20).' 0';
 else $button_position = '0 36';
 $last_x = 0;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
+$buttons_fs = removebuttons($strDelete);
 $buttons_fs .= pointbuttons($strSetPosition);
 $buttons_fs .= coord_input_buttons();
 if($this->user->rolle->gps){
