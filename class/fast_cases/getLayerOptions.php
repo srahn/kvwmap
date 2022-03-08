@@ -1622,9 +1622,6 @@ class db_mapObj {
       $select = stristr($data,'(');
       $select = trim($select, '(');
       $select = substr($select, 0, strrpos($select, ')'));
-      if(strpos($select, 'select') != false){
-        $select = stristr($select, 'select');
-      }
     }
 		return replace_params(
 						$select,
