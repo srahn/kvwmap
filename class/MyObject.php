@@ -20,7 +20,7 @@ class MyObject {
 	/*
 	* Search for an record in the database
 	* by the given attribut and value
-	* @ return an object with this record
+	* @ return this object with the record in data or empty array if not found
 	*/
 	function find_by($attribute, $value) {
 		$sql = "
