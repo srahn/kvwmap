@@ -128,7 +128,7 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
 			WHERE
@@ -145,13 +145,6 @@ class stelle {
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -354,15 +347,6 @@ class stelle {
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
 		$sql.=', stop= "'.$stellendaten['stop'].'"';
-		if ($stellendaten['postgres_connection_id'] != '') {
-			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
-		}
-		if ($stellendaten['pgdbhost']!='') {
-			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
-		}
-		$sql.=', pgdbname= "'.$stellendaten['pgdbname'].'"';
-		$sql.=', pgdbuser= "'.$stellendaten['pgdbuser'].'"';
-		$sql.=', pgdbpasswd= "'.$stellendaten['pgdbpasswd'].'"';
 		$sql.=', ows_title= "'.$stellendaten['ows_title'].'"';
 		$sql.=', ows_abstract= "'.$stellendaten['ows_abstract'].'"';
 		$sql.=', wms_accessconstraints= "'.$stellendaten['wms_accessconstraints'].'"';
@@ -436,11 +420,6 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
-				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
-				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
-				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
-				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
-				`pgdbpasswd` = '" . $stellendaten['pgdbpasswd'] . "',
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
@@ -1593,7 +1572,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1613,8 +1592,8 @@ class stelle {
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_geom_layer){
-			$sql .=' AND layer.Datentyp < 4';
+		if($only_line_and_polygon_layer){
+			$sql .=' AND layer.Datentyp IN (2,3)';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';

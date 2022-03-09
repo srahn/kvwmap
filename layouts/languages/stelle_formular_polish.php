@@ -7,11 +7,6 @@
   $strReferenceMap="numer referencyjny karty*"; 
   $strMaxExtent="maxymalne rozszerzenie*"; 
   $strMinExtent="minimalne rozszerzenie*"; 
-  $strPostgisHost="nazwa serwera PostGIS"; 
-  $strPostGISDataBankName="nazwa bazy danych PostGIS"; 
-  $strPostGISUserName="nazwa u żytkownika danych PostGIS"; 
-  $strPostGISPassword="hasło do danych PostGIS"; 
-	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="OWS nazwa"; 
   $strOwsAbstract="OWS skrót"; 
   $strWmsAccessConstraints="ograniczenia dostępu WMS"; 

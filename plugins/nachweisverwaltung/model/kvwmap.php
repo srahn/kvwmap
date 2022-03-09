@@ -330,7 +330,7 @@
 			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
-      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
@@ -1397,7 +1397,7 @@
       $GUI->loadMap('DataBase');
     }
 		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
@@ -1684,7 +1684,7 @@
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
