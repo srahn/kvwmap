@@ -866,6 +866,7 @@
 		$columns['fortfuehrung'] = 'Fortführung';
 		$columns['vermst'] = 'Vermessungsstelle';
 		$columns['gueltigkeit'] = 'Gültigkeit';
+		$columns['geprueft'] = 'geprüft';
 		$columns['format'] = 'Format';
 		$columns['dokument_path'] = 'Dokument';
 		foreach($columns as $key=>$column){
@@ -1027,6 +1028,7 @@
 			columns['fortfuehrung'] = 'Fortführung';
 			columns['vermst'] = 'Vermessungsstelle';
 			columns['gueltigkeit'] = 'Gültigkeit';
+			columns['geprueft'] = 'geprüft';
 			columns['format'] = 'Format';
 			columns['dokument_path'] = 'Dokument';
 			
