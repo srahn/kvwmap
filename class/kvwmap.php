@@ -8518,7 +8518,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 						if (is_array($value)) {			# multible-Auswahlfelder
 							if(count($value) > 1){
-								$value = implode($value, '|');
+								$value = implode('|', $value);
 								if($operator == '=')$operator = 'IN';
 								else $operator = 'NOT IN';
 							}
@@ -8984,7 +8984,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									<select class="select quicksearch_field"
 									<?
 										if($this->attributes['req_by'][$i] != ''){
-											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'));" ';
+											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode("','", $this->attributes['name']).'\'));" ';
 										}
 										else echo 'onchange="schnellsuche();" ';
 									?>
