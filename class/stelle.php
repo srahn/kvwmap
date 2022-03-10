@@ -1623,7 +1623,7 @@ class stelle {
 			$sql .=' AND u_groups.id = '.$group_id;
 		}
 		if($layer_ids != NULL){
-			$sql .=' AND layer.Layer_ID IN ('.implode($layer_ids, ',').')';
+			$sql .=' AND layer.Layer_ID IN ('.implode(',', $layer_ids).')';
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';

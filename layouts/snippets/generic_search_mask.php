@@ -141,7 +141,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 								<select 
 <?
 								if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei WFS-Layern, abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
-									echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
+									echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode("','", $this->attributes['name']).'\'), '.$searchmask_number.');" ';
 									$array = '';
 								} else {
 									$array = '[]';

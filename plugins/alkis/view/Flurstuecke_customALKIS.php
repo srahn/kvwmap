@@ -826,7 +826,7 @@ hide_versions = function(flst){
 											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-											?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
+											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
 											</a>
 											<?
