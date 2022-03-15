@@ -1750,6 +1750,20 @@ class stelle {
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
+				ul`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1765,7 +1779,21 @@ class stelle {
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				ul`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
