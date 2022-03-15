@@ -1729,7 +1729,7 @@ class stelle {
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
-				ul`queryable`, 
+				ul.`queryable`, 
 				ul.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
@@ -1759,7 +1759,7 @@ class stelle {
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
 				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
-				ul`queryable`, 
+				ul.`queryable`, 
 				ul.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
