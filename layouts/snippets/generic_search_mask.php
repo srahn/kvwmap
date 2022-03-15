@@ -145,7 +145,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 									$array = '';
 								} else {
 									$array = '[]';
-									echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'300px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
+									echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
 								}
 ?>
 								id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
