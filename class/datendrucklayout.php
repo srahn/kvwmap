@@ -166,7 +166,8 @@ class ddl {
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
-    	if (
+			if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
+				if (
 					($type == 'fixed' AND !in_array($this->layout['lines'][$j]['type'], [2, 3]) AND ($this->layout['type'] == 0 OR $this->layout['lines'][$j]['type'] == 1)) OR 
 					($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['lines'][$j]['type'] == 0)	OR 
 					($type == 'everypage' AND (
