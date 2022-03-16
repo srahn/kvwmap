@@ -1593,7 +1593,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1603,7 +1603,7 @@ class stelle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql .='Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -1613,8 +1613,8 @@ class stelle {
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_geom_layer){
-			$sql .=' AND layer.Datentyp < 4';
+		if($only_line_and_polygon_layer){
+			$sql .=' AND layer.Datentyp IN (2,3)';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
@@ -1627,7 +1627,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1677,6 +1677,7 @@ class stelle {
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
+				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
