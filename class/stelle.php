@@ -1582,7 +1582,7 @@ class stelle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql .='Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -1606,7 +1606,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1656,6 +1656,7 @@ class stelle {
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
+				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
