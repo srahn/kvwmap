@@ -159,9 +159,11 @@
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '
 						<td valign="top">
-							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;" style="vertical-align: top;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a>
-							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'up\');'.$onchange2.'return false;"><img src="'.GRAPHICSPATH.'pfeil2.gif"></a>
-							<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'down\');'.$onchange2.'return false;"><img src="'.GRAPHICSPATH.'pfeil.gif"></a>
+							<div style="display: flex">
+								<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a>
+								<a href="javascript:void(0)" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'up\');'.$onchange2.'return false;" style="padding: 3px 3px 0 0"><img src="'.GRAPHICSPATH.'pfeil2.gif"></a>
+								<a href="javascript:void(0)" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'down\');'.$onchange2.'return false;" style="padding: 3px 3px 0 0"><img src="'.GRAPHICSPATH.'pfeil.gif"></a>
+							</div>
 						</td>';
 				}
 				$datapart .= '</tr></table>';
