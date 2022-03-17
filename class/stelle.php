@@ -1593,7 +1593,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1618,6 +1618,9 @@ class stelle {
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
+		}
+		if($export_privileg != NULL){
+			$sql .=' AND used_layer.export_privileg > 0';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
@@ -1645,28 +1648,6 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
-				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
-					// $connection = explode(' ', trim($rs['connection']));
-					// for($j = 0; $j < count($connection); $j++){
-						// if($connection[$j] != ''){
-							// $value = explode('=', $connection[$j]);
-							// if(strtolower($value[0]) == 'host'){
-								// $host = $value[1];
-							// }
-							// if(strtolower($value[0]) == 'port'){
-								// $port = $value[1];
-							// }
-						// }
-					// }
-					// if($port == '')$port = '5432';
-					// $fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
-					// if(!$fp){			# keine Verbindung --> Layer ausschalten
-						// #$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
-						// continue;
-					// }
-				// }
-
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
@@ -1679,10 +1660,6 @@ class stelle {
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
 				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}

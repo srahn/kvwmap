@@ -224,12 +224,6 @@ $j=0;
 										);
 									}
 								}
-								usort($select_options, function($a, $b) {
-									if (strtolower($a['output']) == strtolower($b['output'])) {
-										return 0;
-									}
-									return (strtolower($a['output']) < strtolower($b['output'])) ? -1 : 1;
-								});
 								echo FormObject::createSelectField(
 									'selected_layer_id',
 									$select_options,
