@@ -17,10 +17,10 @@ class LayerAttribute extends MyObject {
 		return $myObj->find_by_sql(array(
 			'select' => 'la.name, la.alias',
 			'from' => '`layer_attributes` la JOIN `layer_attributes2stelle` AS ls ON la.layer_id = ls.layer_id AND la.name = ls.attributename',
-			'where' => 'ls.stelle_id = ' . $stelle_id . ' AND la.layer_id = ' . $layer_id
+			'where' => 'la.visible = 1 AND ls.stelle_id = ' . $stelle_id . ' AND la.layer_id = ' . $layer_id,
+			'order' => 'la.`order`'
 		));
 	}
-
 
 	function copy($layer_id) {
 		$this->debug->show('Copy LayerAttribute mit layer_id: ' . $layer_id, LayerAttribute::$write_debug);
