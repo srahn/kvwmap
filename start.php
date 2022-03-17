@@ -423,14 +423,8 @@ else {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	##############################################################################
-	# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
 	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-	#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
-	#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
-	$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
-	#echo '<br>connection_id: ' . $connection_id;
-	if (!$GUI->pgdatabase->open($connection_id)) {
+	if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
 		echo $GUI->pgdatabase->err_msg;
 		exit;
 	}
