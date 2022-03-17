@@ -16828,7 +16828,7 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name']); $i++) {
@@ -16914,19 +16914,12 @@ class db_mapObj{
 								# ------<required by>------
 								# -----<requires>------
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
-									if ($only_current_enums) {
-										# Ermittlung der Spalte, die als value dient
-										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
-										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 									}
-									if ($query_result != NULL) {
-										if ($query_result === 'all') {
-											# Ermittelt das Attribut das Abhängig ist
-											$attributes['requires'][$i] = get_first_word_after($attributes['options'][$i], '<requires', '>', '<');
-											# Liefert das SQL, welches das required Attribut im Select hat und kein WHERE um alle abzufragen
-											$requires_options = get_requires_options($attributes['options'][$i], $attributes['requires'][$i]);
-										}
-										else {
+									else {
+										if ($query_result != NULL) {
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
@@ -16936,19 +16929,6 @@ class db_mapObj{
 												$options = $attributes['options'][$i];
 												foreach ($attributes['req'][$i] as $attributename) {
 													if ($query_result[$k][$attributename] != '') {
-														if ($only_current_enums) {
-															/*
-															* In diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt,
-															* sondern nur die aktuellen Werte des Datensatzes
-															* (wird z.B. beim Daten-Export verwendet,
-															* da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
-															*/
-															$options = str_ireplace(
-																'where',
-																'where ' . $attribute_value_column . '::text = \'' . $query_result[$k][$attributes['name'][$i]] . '\' AND ',
-																$options
-															);
-														}
 														$options = str_replace(
 															'<requires>' . $attributename.'</requires>',
 															"'" . $query_result[$k][$attributename] . "'",
@@ -16970,9 +16950,9 @@ class db_mapObj{
 												$attributes['dependent_options'][$i][$k] = $options;
 											}
 										}
-									}
-									else {
-										$attributes['options'][$i] = '';			# wenn kein Query-Result übergeben wurde, sind die Optionen leer
+										else {
+											$attributes['options'][$i] = '';			# wenn kein Query-Result übergeben wurde, sind die Optionen leer
+										}
 									}
 								}
 								# -----<requires>------
