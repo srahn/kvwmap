@@ -725,6 +725,7 @@ class user {
 				shared_from = " . $user_id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->layerIsSharedFrom:<br>" . $sql, 4);
+		#echo '<br>sql zur Abfrage der Layer: ' . $sql;
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;
@@ -752,7 +753,7 @@ class user {
 	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
@@ -765,7 +766,7 @@ class user {
 		#echo '<br>Sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql);
+		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];

@@ -214,6 +214,9 @@ $j=0;
 							<td><?
 								$select_options = array();
 								for ($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++) {
+									if ($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']) {
+										$selectindex = $i;
+									}
 									if (!array_key_exists($this->data_import_export->layerdaten['ID'][$i], $select_options)) {
 										$select_options[$this->data_import_export->layerdaten['ID'][$i]] = array(
 											'value' => $this->data_import_export->layerdaten['ID'][$i],
@@ -221,20 +224,6 @@ $j=0;
 										);
 									}
 								}
-								for ($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++) {
-									if (!array_key_exists($this->queryable_vector_layers['ID'][$i], $select_options)) {
-										$select_options[$this->queryable_vector_layers['ID'][$i]] = array(
-											'value' => $this->queryable_vector_layers['ID'][$i],
-											'output' => $this->queryable_vector_layers['Bezeichnung'][$i] . ' (WFS)'
-										);
-									}
-								}
-								usort($select_options, function($a, $b) {
-									if (strtolower($a['output']) == strtolower($b['output'])) {
-										return 0;
-									}
-									return (strtolower($a['output']) < strtolower($b['output'])) ? -1 : 1;
-								});
 								echo FormObject::createSelectField(
 									'selected_layer_id',
 									$select_options,

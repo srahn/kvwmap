@@ -13,7 +13,7 @@
 				&nbsp;&nbsp;\
 				<a\
 					title="Shape-Datei l&ouml;schen"\
-					href="#"\
+					href=""\
 					class="btn btn-link btn-xs xpk-func-btn"\
 					onclick="loescheShapeFile(this)"\
 				>\

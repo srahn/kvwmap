@@ -142,7 +142,7 @@ function url2filepath($url, $doc_path, $doc_url) {
 * @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
 function get_exif_data($img_path) {
-	$exif = exif_read_data($img_path, 'EXIF, GPS');
+	$exif = @exif_read_data($img_path, 'EXIF, GPS');
 	if ($exif === false) {
 		return array(
 			'success' => false,

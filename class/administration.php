@@ -314,6 +314,9 @@ class administration{
 		$name = trim($name);
 		#echo '<p>' . $name . ' prefix vor behandlung' . $this->config_params[$name]['prefix'];
 		if ($this->config_params[$name]['prefix'] != '') {
+			if ($this->config_params[$name]['value'] == '' AND !in_array($param['editable'], [1, 3])) {
+				return NULL;
+			}
 			#echo '<p>' . $name . ' prefix: ' . print_r(explode('.', $this->config_params[$name]['prefix']), true);
 			foreach (explode('.', $this->config_params[$name]['prefix']) as $prefix_constant) {
 				#echo '<br>part : ' . $prefix_constant;

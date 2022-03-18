@@ -340,10 +340,16 @@ hide_versions = function(flst){
 									<? }
 									if($privileg_['karte']){ ?>
 											<tr>
-												<td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
+												<td align="right"><span class="fett">Flurkarte/Ri&szlig;&nbsp;</span></td>
 												<td><?php echo $flst->Flurkarte; ?></td>
 											</tr>
-											<? }
+									<? }
+									if($privileg_['antragsnummer']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Antragsnummer&nbsp;</span></td>
+												<td><?php echo $flst->antragsnummer; ?></td>
+											</tr>
+									<? }
 											if($privileg_['status']){ ?>
 											<tr>
 												<td align="right"><span class="fett"> Status&nbsp;</span></td>
@@ -820,7 +826,7 @@ hide_versions = function(flst){
 											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-											?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
+											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
 											</a>
 											<?

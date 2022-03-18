@@ -83,8 +83,10 @@
 				value="<?php echo $this->strButtonBack; ?>"
 				onclick="document.location.href = 'index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->formvars['selected_stelle_id'];?>'"
 			>
-			<input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')">
-			<input type="button" name="dummy" value="Layerdef" onclick="submitWithValue('GUI','go_plus','Layerdef')">
+			<input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')"><?
+				if ($this->plugin_loaded('portal')) { ?>
+					<input type="button" name="dummy" value="Layerdef" onclick="submitWithValue('GUI','go_plus','Layerdef')"><?
+				} ?>
 		</td>
 	</tr>
 

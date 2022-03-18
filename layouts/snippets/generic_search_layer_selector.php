@@ -100,7 +100,12 @@
 <? }  ?>
 </div>
 <? if(count($this->attributes) > 0){ ?>
-	<div id="gsl_suchhinweise">
-		<span data-tooltip="<? echo $strLikeSearchHint."\n\n".$strOperatorHint; ?>"></span>
+	<div style="display: flex; justify-content: space-between;">
+		<div id="gsl_suchhinweise">
+			<span data-tooltip="<? echo $strLikeSearchHint."\n\n".$strOperatorHint; ?>"></span>
+		</div>
+		<div style="margin-right: 30px">
+			<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a>
+		</div>
 	</div>
 <? }  ?>
