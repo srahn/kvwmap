@@ -1240,10 +1240,14 @@ FROM
 			SELECT DISTINCT 
 				schluesselgesamt as GemkgID, bezeichnung || ' (hist.)' as Name, '' as gemeindename, '' as gemeinde 
 			FROM 
-				alkis.ax_gemarkung
+				alkis.ax_gemarkung g
 			WHERE 
 				endet IS NULL AND
-				'http://www.lverma-mv.de/_fdv#7040' = any(zeigtaufexternes_art)
+				NOT EXISTS (
+					SELECT 
+					FROM alkis.ax_flurstueck f
+					WHERE f.endet IS NULL AND (f.land,f.gemarkungsnummer) = (g.land,g.gemarkungsnummer)
+				)
 		";
     $sql.=" ORDER BY Name";
     #echo $sql;
