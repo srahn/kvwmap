@@ -246,6 +246,7 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 			$sql = "
 				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
@@ -969,6 +970,29 @@ class data_import_export {
 		}
 		return $ret;
 	}
+		
+	function adjustGeometryType($database, $schema, $table, $epsg){
+		$sql = "
+			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
+		";
+		$ret = $database->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+			$rs = pg_fetch_row($ret[1]);
+			if ($rs[0] == 0) {
+				$sql = "
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+				";
+				$ret = $database->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$rs = pg_fetch_row($ret[1]);
+					$sql = "
+						ALTER TABLE " . $schema . "." . $table . " ALTER the_geom TYPE geometry(" . $rs[0] . ", " . $epsg . ") USING ST_GeometryN(the_geom, 1)
+					";
+					$ret = $database->execSQL($sql,4, 0);
+				}
+			}
+		}
+	}	
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
