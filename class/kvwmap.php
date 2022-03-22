@@ -17189,12 +17189,12 @@ class db_mapObj{
 					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
 					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '".addslashes($attributes[$i]['default']) . "',
+					`default` = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
 					`order` = " . $i . "
 				ON DUPLICATE KEY UPDATE
 					real_name = '" . $attributes[$i]['real_name'] . "',
@@ -17203,12 +17203,12 @@ class db_mapObj{
 					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
 					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '" . addslashes($attributes[$i]['default']) . "',
+					`default` = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
 					`order` = `order` + ".$insert_count."
 			";
 			#echo '<br>Sql: ' . $sql;
@@ -17747,7 +17747,7 @@ class db_mapObj{
 				'" . $formvars['user_id'] . "',
 				'" . $formvars['stelle_id'] . "',
 				'" . $formvars['aktivStatus'] . "',
-				'" . addslashes($formvars['Name']) . "',
+				'" . $this->db->mysqli->real_escape_string($formvars['Name']) . "',
 				'" . $formvars['Datentyp'] . "',
 				'" . $formvars['Gruppe'] . "',
 				'" . $formvars['Typ'] . "',

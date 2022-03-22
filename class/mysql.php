@@ -90,8 +90,8 @@ class database {
 			FROM
 				user
 			WHERE
-				login_name = '" . addslashes($username) . "' AND
-				passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "') AND
+				login_name = '" . $this->mysqli->real_escape_string($username) . "' AND
+				passwort = md5('" . $this->mysqli->real_escape_string($passwort) . "') AND
 				(
 					('" . date('Y-m-d h:i:s') . "' >= start AND '" . date('Y-m-d h:i:s') . "' <= stop) OR
 					(start='0000-00-00 00:00:00' AND stop='0000-00-00 00:00:00')
@@ -547,14 +547,14 @@ INSERT INTO u_styles2classes (
 			for ($i = 0; $i < $feld_anzahl; $i++) {
 				if ($felder[$i] != $extra) {
 					if (strpos($rs[$i], '@') === 0) {
-						$insert .= addslashes($rs[$i]);
+						$insert .= $this->mysqli->real_escape_string($rs[$i]);
 					}
 					else {
 						$field = $this->result->fetch_field_direct($i);
 						if (!in_array($field->type, [252, 253, 254]) AND $rs[$i] == '') {
 							$insert .= "NULL";
 						} else{
-							$insert .= "'".addslashes($rs[$i])."'";
+							$insert .= "'".$this->mysqli->real_escape_string($rs[$i])."'";
 						}
 					}
 					if ($feld_anzahl - 1 > $i) { $insert .= ', '; }
