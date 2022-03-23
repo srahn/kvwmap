@@ -25,7 +25,7 @@
 			if (val.slice(val.length - 1) != ',') {
 				formated_val = val.replace(/\./g, '');							// Punkte raus
 				formated_val = formated_val.replace(/,/g, '.');			// Komma zu Punkt
-				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, maximumFractionDigits: decimal_length});
+				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, maximumFractionDigits: decimal_length || 10});
 				if (['NaN', '0'].indexOf(formated_val) == -1) {
 					val = formated_val;
 				}
