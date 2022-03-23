@@ -1572,7 +1572,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1582,7 +1582,7 @@ class stelle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql .='Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -1597,6 +1597,9 @@ class stelle {
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
+		}
+		if($export_privileg != NULL){
+			$sql .=' AND used_layer.export_privileg > 0';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
@@ -1606,7 +1609,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1615,7 +1618,7 @@ class stelle {
 				$sql .=' AND Gruppe = '.$group_id;
 			}
 		}
-		$sql .= ' ORDER BY Name';
+		$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);		
@@ -1624,28 +1627,6 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
-				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
-					// $connection = explode(' ', trim($rs['connection']));
-					// for($j = 0; $j < count($connection); $j++){
-						// if($connection[$j] != ''){
-							// $value = explode('=', $connection[$j]);
-							// if(strtolower($value[0]) == 'host'){
-								// $host = $value[1];
-							// }
-							// if(strtolower($value[0]) == 'port'){
-								// $port = $value[1];
-							// }
-						// }
-					// }
-					// if($port == '')$port = '5432';
-					// $fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
-					// if(!$fp){			# keine Verbindung --> Layer ausschalten
-						// #$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
-						// continue;
-					// }
-				// }
-
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
@@ -1656,11 +1637,8 @@ class stelle {
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
+				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}
@@ -1729,6 +1707,20 @@ class stelle {
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1744,7 +1736,21 @@ class stelle {
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);

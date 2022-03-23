@@ -333,7 +333,7 @@ class MyObject {
 								$v = "'" . $value . "'";
 							}
 							else {
-								$v = "'" . addslashes($value) . "'";
+								$v = "'" . $this->database->mysqli->real_escape_string($value) . "'";
 							}
 							return $v;
 						},
@@ -392,7 +392,7 @@ class MyObject {
 								$v = "'" . $value . "'";
 							}
 							else {
-								$v = "'" . addslashes($value) . "'";
+								$v = "'" . $this->database->mysqli->real_escape_string($value) . "'";
 							}
 							return $v;
 						},
