@@ -214,16 +214,16 @@ if ($doit == true) {
 										if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 										####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
-										if($layer['attributes']['arrangement'][$j] != 1){
+										if ($layer['attributes']['arrangement'][$j] != 1) {
 											$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 											$row['class'] = $attribute_class;
-										}
-										else{
-											if($nl){
-												$next_row['sidebyside'] = true;
-											}
-											else{
-												$row['sidebyside'] = true;
+											if ($layer['attributes']['arrangement'][$j+1] == 1) {	# wenn nächstes Attribut neben diesem stehen soll
+												if($nl){
+													$next_row['sidebyside'] = true;
+												}
+												else{
+													$row['sidebyside'] = true;
+												}
 											}
 										}
 										######### Attributname #########
