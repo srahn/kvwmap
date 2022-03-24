@@ -887,7 +887,7 @@ class data_import_export {
 	function export($formvars, $stelle, $user, $mapdb) {
 		#echo '<br>export formvars: ' . print_r($formvars, true);
 		$this->formvars = $formvars;
-		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, true, false, true);
+		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
 		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
