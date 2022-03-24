@@ -1162,7 +1162,7 @@ FROM
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
-		$sql.="WHERE 1=1 ";
+		$sql.="WHERE g.blattart != 5000 ";
 		if ($Bezirk!='') {
       $sql.=" AND b.schluesselgesamt='".$Bezirk."'";
 		}
