@@ -226,6 +226,7 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
+		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
 		$layerdef = (Object) array(
 			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
@@ -233,7 +234,7 @@ class Layer extends MyObject {
 				'attribution' => $this->get('datasource')
 			),
 			'shortLabel' => $this->get('Name'),
-			'img' => URL . APPLVERSION . $classes[0]->get('legendgraphic'),
+			'img' => $legendgraphic,
 			'url' => ($this->get('Data') != '' ? $this->get('Data') : $this->get('connection'))
 		);
 		return $layerdef;
