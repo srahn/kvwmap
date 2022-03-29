@@ -773,7 +773,10 @@ function get_remote_ip() {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
 	}
 	return $ip;
 }
