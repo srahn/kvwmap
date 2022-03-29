@@ -8,6 +8,7 @@ function urlencode2($str){
 	$str = urlencode($str);
 	$str = str_replace('%3F', '?', $str);
 	$str = str_replace('%26', '&', $str);
+	return $str;
 }
 
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
