@@ -4,6 +4,12 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function urlencode2($str){
+	$str = urlencode($str);
+	$str = str_replace('%3F', '?', $str);
+	$str = str_replace('%26', '&', $str);
+}
+
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
