@@ -1751,6 +1751,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	left: 0px;
 	bottom: 30px;
 	width: 220px;
+	height: fit-content;
 }
 
 .calendar table{
