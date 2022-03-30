@@ -964,6 +964,60 @@ class flurstueck {
     }
     return $Klassifizierung;
   }
+	
+	function getKlassifizierungAequivalenz() {
+    $sql = "
+			SELECT 
+				amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[ split_part(split_part(k.beschreibung, '(', 2), ')', 1), split_part(split_part(b.beschreibung, '(', 2), ')', 1), split_part(split_part(z.beschreibung, '(', 2), ')', 1), split_part(split_part(e1.beschreibung, '(', 2), ')', 1), split_part(split_part(e2.beschreibung, '(', 2), ')', 1), split_part(split_part(s.beschreibung, '(', 2), ')', 1), n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label 
+			FROM (
+				SELECT 
+					amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry)), " . $this->spatial_ref_code . ") as fl_geom, 
+					st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") as flstflaeche, ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
+					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben 
+				FROM 
+					alkis.ax_flurstueck f, alkis.ax_bodenschaetzung n, alkis.n_nutzung nu
+					left join alkis.n_nutzungsartenschluessel nas on nu.nutzungsartengruppe = nas.nutzungsartengruppe and nu.werteart1 = nas.werteart1 and nu.werteart2 = nas.werteart2
+				WHERE 
+					nas.objektart in (41008, 43001, 43002, 43003, 43004, 43005, 43006, 43007) and
+					st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
+					st_intersects(nu.wkb_geometry,f.wkb_geometry) = true AND 
+					st_area_utm(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry)), " . $this->spatial_ref_code . ") > 0.01 AND 
+					f.flurstueckskennzeichen='" . $this->FlurstKennz . "' 
+					" . $this->database->build_temporal_filter(array('f', 'nu', 'n')) . " 
+			) as n 
+			LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
+			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
+			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
+			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
+			LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+			LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
+		";
+		#echo $sql;
+    $ret=$this->database->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
+    if (pg_num_rows($ret[1])>0) {
+			$summe_amt = 0;
+			$summe_geom = 0;
+			$groesste = 0;
+			$i = 0;
+      while($rs=pg_fetch_assoc($ret[1])){
+				$summe_amt += $rs['flaeche'];
+				$summe_geom += $rs['fl_geom'];
+				if($groesste < $rs['fl_geom']){
+					$groesste = $rs['fl_geom'];
+					$index = $i;
+				}
+        $Klassifizierung[]=$rs;
+				$i++;
+      }
+			$Klassifizierung['nicht_geschaetzt'] = round(($Klassifizierung[$i-1]['flstflaeche'] - $summe_geom) * $Klassifizierung[$i-1]['amtlicheflaeche'] / $Klassifizierung[$i-1]['flstflaeche']);			
+			$summe_amt += $Klassifizierung['nicht_geschaetzt'];
+			$diff = $Klassifizierung[$i-1]['amtlicheflaeche'] - $summe_amt;
+			$Klassifizierung[$index]['flaeche'] += $diff;
+    }
+    $ret[1]=$Klassifizierung;
+    return $ret;
+  }
 
   function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
     if ($this->FlurstKennz=="") { return 0; }
@@ -1288,6 +1342,7 @@ class flurstueck {
     $this->ALB_Flaeche=$rs['flaeche'];
 		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
 		$this->zweifelhafterflurstuecksnachweis=$rs['zweifelhafterflurstuecksnachweis'];
+		$this->antragsnummer=$rs['antragsnummer'];
     $this->endet=$rs['endet'];
 		$this->beginnt=$rs['beginnt'];
 		$this->hist_alb=$rs['hist_alb'];
@@ -1297,7 +1352,12 @@ class flurstueck {
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
     $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
-    $this->Klassifizierung=$this->getKlassifizierung();
+		if (AEQUIVALENZ_BEWERTUNG) {
+			$this->Klassifizierung = $this->getKlassifizierungAequivalenz();
+		}
+		else {
+			$this->Klassifizierung = $this->getKlassifizierung();
+		}
 		$this->Forstrecht=$this->getForstrecht();
 		$this->Strassenrecht=$this->getStrassenrecht();
 		$this->Wasserrecht=$this->getWasserrecht();

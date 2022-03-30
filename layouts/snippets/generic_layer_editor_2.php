@@ -197,7 +197,7 @@ if ($doit == true) {
 								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
 												<td colspan="2" width="100%">
 													<div>
-														<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
+														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 															<tr>
 																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
 																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
@@ -214,16 +214,16 @@ if ($doit == true) {
 										if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 										####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
-										if($layer['attributes']['arrangement'][$j] != 1){
+										if ($layer['attributes']['arrangement'][$j] != 1) {
 											$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 											$row['class'] = $attribute_class;
-										}
-										else{
-											if($nl){
-												$next_row['sidebyside'] = true;
-											}
-											else{
-												$row['sidebyside'] = true;
+											if ($layer['attributes']['arrangement'][$j+1] == 1) {	# wenn nächstes Attribut neben diesem stehen soll
+												if($nl){
+													$next_row['sidebyside'] = true;
+												}
+												else{
+													$row['sidebyside'] = true;
+												}
 											}
 										}
 										######### Attributname #########

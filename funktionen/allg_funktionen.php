@@ -4,6 +4,14 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function urlencode2($str){
+	$str = urlencode($str);
+	$str = str_replace('%3F', '?', $str);
+	$str = str_replace('%26', '&', $str);
+	$str = str_replace('%3D', '=', $str);
+	return $str;
+}
+
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
@@ -142,7 +150,7 @@ function url2filepath($url, $doc_path, $doc_url) {
 * @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
 function get_exif_data($img_path) {
-	$exif = exif_read_data($img_path, 'EXIF, GPS');
+	$exif = @exif_read_data($img_path, 'EXIF, GPS');
 	if ($exif === false) {
 		return array(
 			'success' => false,
@@ -773,7 +781,10 @@ function get_remote_ip() {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
 	}
 	return $ip;
 }

@@ -144,7 +144,7 @@ else {
 		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
 		if (has_width_and_height($GUI->formvars)) {
 			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
-			$gast = $userDb->create_new_gast($_REQUEST['gast']);
+			$gast = $userDb->create_new_gast($userDb->mysqli->real_escape_string($_REQUEST['gast']));
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
@@ -423,14 +423,8 @@ else {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
 	}
 
-	##############################################################################
-	# kvwmap uses the database defined in postgres_connection_id of stelle object or if not exists from POSTGRES_CONNECTION_ID
 	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-	#echo '<br>GUI->Stelle-->postgres_connection_id: ' . $GUI->Stelle->postgres_connection_id;
-	#echo '<br>POSTGRES_CONNECTION_ID: ' . POSTGRES_CONNECTION_ID;
-	$connection_id = ($GUI->Stelle->postgres_connection_id != '' ? $GUI->Stelle->postgres_connection_id : POSTGRES_CONNECTION_ID);
-	#echo '<br>connection_id: ' . $connection_id;
-	if (!$GUI->pgdatabase->open($connection_id)) {
+	if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
 		echo $GUI->pgdatabase->err_msg;
 		exit;
 	}

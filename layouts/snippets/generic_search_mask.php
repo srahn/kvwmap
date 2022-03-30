@@ -136,85 +136,74 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 						} ?>
 					<td class="gsm_tabelle_td_third">
 						<div>
+<?          switch ($this->attributes['form_element_type'][$i]) {
+							case 'Auswahlfeld' : case 'Radiobutton' : {	?>
+								<select 
 <?
-	            	switch ($this->attributes['form_element_type'][$i]) {
-
-						case 'Auswahlfeld' : case 'Radiobutton' : {
-?>
-						<select 
-<?
-	                  	if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei WFS-Layern, abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
-							echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
-							$array = '';
-						} else {
-							$array = '[]';
-							echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'300px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
-						}
-?>
-							id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
-							<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
-<?
-							if(is_array($this->attributes['enum_value'][$i][0])){
-								$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
-								$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
-							}
-							for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){
-?>
-								<option 
-	<? 
-								if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
-									$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
+								echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode("','", $this->attributes['name']).'\'), '.$searchmask_number.');" ';
+								$array = '';
+								if($this->layerset[0]['connectiontype'] != MS_WFS AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei WFS-Layern oder Array-Typen keine multible Auswahl
+									$array = '[]';
+									echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
 								}
-								if (in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != '') {
-									echo 'selected';
-								} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>" title="<? echo $this->attributes['enum_output'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
-							}
 ?>
-	            </select>
-	            <input id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
-<?
-						}break;
-								
-						case 'Autovervollständigungsfeld' : {
-							echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
-							if(in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
-							echo '">';
-								echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40, NULL, NULL);
-							echo '</div>';
-							echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
-							if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
-							echo '">';
-								echo '<input style="width:293px" id="'.$prefix.'text_value_'.$this->attributes['name'][$i].'" name="'.$prefix.'value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]].'"';
-								if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo ' disabled="true"';
-								echo '>';
-							echo '</div>';
-						}break;
-                
-						case 'Checkbox' : {
-?>
-							<select  id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+								id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
 								<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
-								<option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 't'){ echo 'selected';} ?> value="t">ja</option><? echo "\n"; ?>
-								<option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 'f'){ echo 'selected';} ?> value="f">nein</option><? echo "\n"; ?>
-							</select>
-							<input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
 <?
-						}break;
+								if(is_array($this->attributes['enum_value'][$i][0])){
+									$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
+									$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+								}
+								for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){	?>
+									<option 
+<? 
+									if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
+										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
+									}
+									if (in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != '') {
+										echo 'selected';
+									} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>" title="<? echo $this->attributes['enum_output'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+								}
+?>
+								</select>
+								<input id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+<?
+							}break;
+								
+							case 'Autovervollständigungsfeld' : {
+								echo '<div id="'.$prefix.'_avf_'.$this->attributes['name'][$i].'" style="';
+								if(in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
+								echo '">';
+									echo Autovervollstaendigungsfeld($this->formvars['selected_layer_id'], $this->attributes['name'][$i], $i, $this->attributes['alias'][$i], $prefix.'value_'.$this->attributes['name'][$i], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]], $this->attributes['enum_output'][$i][0], 1, $prefix, NULL, NULL, NULL, NULL, false, 15, false, 40, NULL, NULL);
+								echo '</div>';
+								echo '<div id="'.$prefix.'_text_'.$this->attributes['name'][$i].'" style="';
+								if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo 'display:none';
+								echo '">';
+									echo '<input style="width:293px" id="'.$prefix.'text_value_'.$this->attributes['name'][$i].'" name="'.$prefix.'value_'.$this->attributes['name'][$i].'" type="text" value="'.$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]].'"';
+									if(!in_array($operator, array('LIKE', 'NOT LIKE')))echo ' disabled="true"';
+									echo '>';
+								echo '</div>';
+							}break;
                 
-						default : {
+							case 'Checkbox' : {	?>
+								<select  id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>"><?echo "\n"; ?>
+									<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
+									<option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 't'){ echo 'selected';} ?> value="t">ja</option><? echo "\n"; ?>
+									<option <? if($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] == 'f'){ echo 'selected';} ?> value="f">nein</option><? echo "\n"; ?>
+								</select>
+								<input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="hidden" value="<? echo $this->formvars[$prefix.'value2_'.$this->attributes['name'][$i]]; ?>">
+<?						}break;
+                
+							default : {
 ?>
-							<input style="<? if(array_key_exists($this->attributes['type'][$i], $date_types)) { ?>padding-left: 18px; <? } ?> width:<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo '120';}else{echo '293';} ?>px" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo value_of($this->formvars, $prefix.'value_'.$this->attributes['name'][$i]); ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
-							<input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]); ?>">
-
-							<?
-					if(array_key_exists($this->attributes['type'][$i], $date_types)){
-?>
-						<div class="gsm_tabelle_kalender"><a href="javascript:;" onclick="add_calendar(event, '<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>', '<? echo $this->attributes['type'][$i]; ?>');"><img title="<? echo $date_types[$this->attributes['type'][$i]]; ?>" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a></div><div id="calendar_<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" class="calendar"></div>
-<?					} ?>
-							
-							<?
-						}
-	      			}
+								<input style="<? if(array_key_exists($this->attributes['type'][$i], $date_types)) { ?>padding-left: 18px; <? } ?> width:<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo '120';}else{echo '293';} ?>px" id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="<? echo value_of($this->formvars, $prefix.'value_'.$this->attributes['name'][$i]); ?>" onkeyup="checknumbers(this, '<? echo $this->attributes['type'][$i]; ?>', '<? echo $this->attributes['length'][$i]; ?>', '<? echo $this->attributes['decimal_length'][$i]; ?>');">
+								<input style="width:145px" id="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value2_<? echo $this->attributes['name'][$i]; ?>" type="<? if(value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]) != ''){echo 'text';}else{echo 'hidden';} ?>" value="<? echo value_of($this->formvars, $prefix.'value2_'.$this->attributes['name'][$i]); ?>">
+<?
+								if(array_key_exists($this->attributes['type'][$i], $date_types)){	?>
+									<div class="gsm_tabelle_kalender"><a href="javascript:;" onclick="add_calendar(event, '<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>', '<? echo $this->attributes['type'][$i]; ?>');"><img title="<? echo $date_types[$this->attributes['type'][$i]]; ?>" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a></div><div id="calendar_<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" class="calendar"></div>
+<?							}
+							}
+	      		}
 ?>
 						<div>
 					</td>

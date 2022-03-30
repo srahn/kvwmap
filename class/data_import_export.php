@@ -237,7 +237,7 @@ class data_import_export {
 		else {
 			return;
 		}
-		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding);
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding, true);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
@@ -246,6 +246,7 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 			$sql = "
 				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
@@ -318,7 +319,7 @@ class data_import_export {
 		if(file_exists($filename)){
 			# tracks
 			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
-			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'LATIN1', false);
+			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
@@ -635,7 +636,7 @@ class data_import_export {
 			$values = explode($formvars['delimiter'], $row);
 			$x = str_replace(',', '.', $values[$index['x']]);
 			$y = str_replace(',', '.', $values[$index['y']]);
-			array_walk($values, function(&$value, $key){$value = "E'" . addslashes(utf8_encode($value)) . "'";});
+			array_walk($values, function(&$value, $key){$value = "E'" . pg_escape_string(utf8_encode($value)) . "'";});
 			$sql.= '
 				INSERT INTO ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename .
 				'("' . implode('", "', $table_columns) . '", the_geom)
@@ -886,7 +887,7 @@ class data_import_export {
 	function export($formvars, $stelle, $user, $mapdb) {
 		#echo '<br>export formvars: ' . print_r($formvars, true);
 		$this->formvars = $formvars;
-		$this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
+		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
 		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
@@ -910,6 +911,7 @@ class data_import_export {
 			. OGR_BINPATH . 'ogr2ogr '
 			. '-f ' . $exportformat . ' '
 			. '-lco ENCODING=UTF-8 '
+			. '--config DXF_WRITE_HATCH NO '
 			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
 			. $exportfile . ' '
@@ -925,7 +927,7 @@ class data_import_export {
 		return $ret;
 	}
 
-	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = true) {
+	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		$command = '';
 		if ($options != NULL) $command.= $options;
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
@@ -945,7 +947,7 @@ class data_import_export {
 			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0) {
+			if ($ret != 0 OR $result->stderr != '') {
 				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
 			}
 		}
@@ -968,6 +970,29 @@ class data_import_export {
 		}
 		return $ret;
 	}
+		
+	function adjustGeometryType($database, $schema, $table, $epsg){
+		$sql = "
+			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
+		";
+		$ret = $database->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+			$rs = pg_fetch_row($ret[1]);
+			if ($rs[0] == 0) {
+				$sql = "
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+				";
+				$ret = $database->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$rs = pg_fetch_row($ret[1]);
+					$sql = "
+						ALTER TABLE " . $schema . "." . $table . " ALTER the_geom TYPE geometry(" . $rs[0] . ", " . $epsg . ") USING ST_GeometryN(the_geom, 1)
+					";
+					$ret = $database->execSQL($sql,4, 0);
+				}
+			}
+		}
+	}	
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
@@ -1172,6 +1197,8 @@ class data_import_export {
 			}
 		}
 		else {
+			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
+			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 			# Where-Klausel aus Sachdatenabfrage-SQL

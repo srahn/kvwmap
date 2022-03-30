@@ -25,6 +25,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	</div>";
 	return $err_msg;
 }
+
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
@@ -279,6 +280,7 @@ class GUI {
 	}
 
 	function getLayerOptions() {
+		global $admin_stellen;
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -352,23 +354,26 @@ class GUI {
 												}
 											)
 										)
-									); ?><br>
-									<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
-									<div style="float: left;padding-top: 3px;">
-										<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
-									</div>
-									<div style="float: left;padding-top: 3px;">
-										<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
-									</div>
+									); 
+									if (in_array($this->Stelle->id, $admin_stellen)) {
+										?><br>
+										<? echo $this->strSchema; ?>.<? echo $this->strTableName; ?>:<br>
+										<div style="float: left;padding-top: 3px;">
+											<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
+										</div>
+										<div style="float: left;padding-top: 3px;">
+											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+										</div>
+									<? } ?>
 									<div style="clear: both">
-
-									<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
-										<option value="readable"><? echo $this->strReadable; ?></option>
-										<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
-										<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
-									</select><br>
-									<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
-									<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+										<select name="layer_options_privileg" style="margin-top: 3px; margin-bottom: 5px">
+											<option value="readable"><? echo $this->strReadable; ?></option>
+											<option value="editable_only_in_this_stelle" selected><? echo $this->strEditableOnlyInThisStelle; ?></option>
+											<option value="editable"><? echo $this->strEditableInAllStellen; ?></option>
+										</select><br>
+										<input type="button" onclick="shareRollenlayer(<? echo (-$this->formvars['layer_id']); ?>)" value="<? echo $this->strShareRollenlayer; ?>">
+										<input type="button" onclick="toggle(document.getElementById('shareRollenlayerDiv'))" value="<? echo $this->strCancel; ?>">
+									</div>
 								</div><?
 							}
 						}
@@ -1171,7 +1176,7 @@ class rolle {
 		}
 
 		$sql = "
-			SELECT " .
+				SELECT " .
 				$name_column . ",
 				l.Layer_ID,
 				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
@@ -1179,7 +1184,7 @@ class rolle {
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
 				END as connection, 
-				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
@@ -1205,18 +1210,24 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer,
-				las.privileg as privilegfk 
+				r2ul.geom_from_layer,				
+				(select 
+					max(las.privileg) 
+				from 
+					layer_attributes as la, 
+					layer_attributes2stelle as las
+				where 
+					la.layer_id = ul.Layer_ID AND 
+					form_element_type = 'SubformFK' AND
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1) 
+				) as privilegfk
 			FROM
 				layer AS l 
 				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
 				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
 				LEFT JOIN connections as c ON l.connection_id = c.id 
-				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
-				LEFT JOIN layer_attributes2stelle as las ON 
-					las.stelle_id = ul.Stelle_ID AND 
-					ul.Layer_ID = las.layer_id AND 
-					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
@@ -1617,9 +1628,6 @@ class db_mapObj {
       $select = stristr($data,'(');
       $select = trim($select, '(');
       $select = substr($select, 0, strrpos($select, ')'));
-      if(strpos($select, 'select') != false){
-        $select = stristr($select, 'select');
-      }
     }
 		return replace_params(
 						$select,
@@ -2045,20 +2053,20 @@ class pgdatabase {
 								name = '".$fields[$i]['name']."', 
 								real_name = '".$fields[$i]['real_name']."', 
 								type = '".$fields[$i]['type']."', 
-								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
 								nullable = ".$fields[$i]['nullable'].", 
 								length = ".$fields[$i]['length'].", 
 								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".addslashes($fields[$i]['default'])."', 
+								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
 								`order` = ".$i." 
 							ON DUPLICATE KEY UPDATE
 								real_name = '".$fields[$i]['real_name']."', 
 								type = '".$fields[$i]['type']."', 
-								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
 								nullable = ".$fields[$i]['nullable'].", 
 								length = ".$fields[$i]['length'].", 
 								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".addslashes($fields[$i]['default'])."', 
+								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
 								`order` = ".$i;
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
