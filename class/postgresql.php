@@ -1913,9 +1913,9 @@ FROM
     return $ret;
   }
 	
-	function getAmtsgerichtby($flurstkennz, $bezirk){
+	function getAmtsgerichtby($flurstkennz, $bezirke){
 		$sql ="
-			SELECT
+			SELECT distinct 
 				a.bezeichnung as name,
 				a.stelle as schluessel
 			FROM
@@ -1925,7 +1925,7 @@ FROM
 				b.gehoertzu_land=a.land AND
 				b.gehoertzu_stelle=a.stelle AND
 				a.stellenart=1000 AND
-				b.schluesselgesamt = '" . $bezirk['schluessel'] . "'
+				b.schluesselgesamt IN ('" . implode("', '", array_map(function($e){return $e['schluessel'];},	$bezirke)) . "')
 				" . $this->build_temporal_filter(array('b', 'a')) . "
 		";
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1935,7 +1935,9 @@ FROM
     }
     else {
       $ret[0]=0;
-      $ret[1]=pg_fetch_assoc($queryret[1]);
+			while ($rs=pg_fetch_assoc($queryret[1])) {
+				$ret[1][] = $rs;
+			}
     }
     return $ret;
 	}
@@ -2047,12 +2049,12 @@ FROM
   }
     
   function getGrundbuchbezirke($FlurstKennz, $hist_alb = false) {
-		$sql ="SELECT b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
+		$sql ="SELECT distinct b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";  
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
-		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
+		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -2065,9 +2067,11 @@ FROM
       $Bezirk['schluessel']="0";
     }
     else{
-      $Bezirk=pg_fetch_assoc($ret[1]);
+			while ($rs=pg_fetch_assoc($ret[1])) {
+				$bezirke[] = $rs;
+			}
     }
-    return $Bezirk;
+    return $bezirke;
   }
   
   function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
