@@ -129,7 +129,7 @@ if ($doit == true) {
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
-									$visibility = 'style="visibility: collapse"';
+									$visibility_geom = 'style="visibility: collapse"';
 								}
 							}
 							echo '
@@ -150,18 +150,6 @@ if ($doit == true) {
 						
 						$first_tab = true;
 						
-						if ($show_geom_editor) {
-							echo '
-							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility . '>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-							echo'
-								</td>
-							</tr>';
-							if ($this->user->rolle->geom_edit_first) {
-								$first_tab = false;
-							}
-						}
 						$visibility = '';
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
@@ -304,6 +292,18 @@ if ($doit == true) {
 							unset($table);
 							$table = '';
 						}
+						if ($show_geom_editor) {
+							echo '
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility_geom . '>
+								<td colspan="2" align="center">';
+									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+							echo'
+								</td>
+							</tr>';
+							if ($this->user->rolle->geom_edit_first) {
+								$first_tab = false;
+							}
+						}						
 						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
 							echo '</tbody></table></td></tr>';
 						}
