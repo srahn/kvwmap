@@ -1338,7 +1338,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_9_FolgenutzungAltbergbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_11_SonstigeFolgenutzung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_10_SonstigeFolgenutzung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_1_Anhydritstein')}"/>
