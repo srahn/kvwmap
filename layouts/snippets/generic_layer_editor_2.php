@@ -123,9 +123,11 @@ if ($doit == true) {
 						}
 						
 						if (!empty($layer['attributes']['tabs'])) {
+							$first_tab = true;
 							if ($show_geom_editor) {
 								if ($this->user->rolle->geom_edit_first) {
 									array_unshift($layer['attributes']['tabs'], 'Geometrie');
+									$first_tab = false;
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
@@ -136,19 +138,17 @@ if ($doit == true) {
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
-										$first_tab = true;
+										$first_tab2 = true;
 										foreach ($layer['attributes']['tabs'] as $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
-											$first_tab = false;
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab2? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											$first_tab2 = false;
 										}
 										echo '
 									</div>
 								</th>
 							</tr>';
 						}
-						
-						$first_tab = true;
 						
 						$visibility = '';
 						if ($sachdaten_tab) {
