@@ -128,7 +128,7 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
 			WHERE
@@ -145,13 +145,6 @@ class stelle {
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -354,15 +347,6 @@ class stelle {
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
 		$sql.=', stop= "'.$stellendaten['stop'].'"';
-		if ($stellendaten['postgres_connection_id'] != '') {
-			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
-		}
-		if ($stellendaten['pgdbhost']!='') {
-			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
-		}
-		$sql.=', pgdbname= "'.$stellendaten['pgdbname'].'"';
-		$sql.=', pgdbuser= "'.$stellendaten['pgdbuser'].'"';
-		$sql.=', pgdbpasswd= "'.$stellendaten['pgdbpasswd'].'"';
 		$sql.=', ows_title= "'.$stellendaten['ows_title'].'"';
 		$sql.=', ows_abstract= "'.$stellendaten['ows_abstract'].'"';
 		$sql.=', wms_accessconstraints= "'.$stellendaten['wms_accessconstraints'].'"';
@@ -436,11 +420,6 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
-				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
-				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
-				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
-				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
-				`pgdbpasswd` = '" . $stellendaten['pgdbpasswd'] . "',
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
@@ -1593,7 +1572,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1603,7 +1582,7 @@ class stelle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql .='Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -1613,21 +1592,24 @@ class stelle {
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_geom_layer){
-			$sql .=' AND layer.Datentyp < 4';
+		if($only_line_and_polygon_layer){
+			$sql .=' AND layer.Datentyp IN (2,3)';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
+		}
+		if($export_privileg != NULL){
+			$sql .=' AND used_layer.export_privileg > 0';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
 		}
 		if($layer_ids != NULL){
-			$sql .=' AND layer.Layer_ID IN ('.implode($layer_ids, ',').')';
+			$sql .=' AND layer.Layer_ID IN ('.implode(',', $layer_ids).')';
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1636,7 +1618,7 @@ class stelle {
 				$sql .=' AND Gruppe = '.$group_id;
 			}
 		}
-		$sql .= ' ORDER BY Name';
+		$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);		
@@ -1645,28 +1627,6 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
-				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
-					// $connection = explode(' ', trim($rs['connection']));
-					// for($j = 0; $j < count($connection); $j++){
-						// if($connection[$j] != ''){
-							// $value = explode('=', $connection[$j]);
-							// if(strtolower($value[0]) == 'host'){
-								// $host = $value[1];
-							// }
-							// if(strtolower($value[0]) == 'port'){
-								// $port = $value[1];
-							// }
-						// }
-					// }
-					// if($port == '')$port = '5432';
-					// $fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
-					// if(!$fp){			# keine Verbindung --> Layer ausschalten
-						// #$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
-						// continue;
-					// }
-				// }
-
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
@@ -1677,11 +1637,8 @@ class stelle {
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
+				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}
@@ -1750,6 +1707,20 @@ class stelle {
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -1765,7 +1736,21 @@ class stelle {
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
-				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);

@@ -7,11 +7,6 @@
   $strReferenceMap="Referenzkoort*";
   $strMaxExtent="Max Utmoot*";
   $strMinExtent="Min Utmoot*";
-  $strPostgisHost="PostGIS Host";
-  $strPostGISDataBankName="PostGIS Datenbanknomen";
-  $strPostGISUserName="PostGIS user Nomen";
-  $strPostGISPassword="PostGIS Passwoort";
-	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="OWS title";
   $strOwsAbstract="OWS abstract";
   $strWmsAccessConstraints="WMS access constraints";

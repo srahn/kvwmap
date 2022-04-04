@@ -116,7 +116,7 @@ function toggleGroup(group, show){
 				</tr><? 
 					global $kvwmap_plugins;
 					$last_group = '';
-					foreach ($this->administration->config_params as $param){
+					foreach ($this->administration->config_params as $param) {
 						if ($param['plugin'] == '' OR in_array($param['plugin'], $kvwmap_plugins)) {
 							if ($last_group != $param['group']) {
 								$last_group = $param['group']; ?>

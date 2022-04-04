@@ -1081,7 +1081,7 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getGrundbuchbezirk() {
+  function getGrundbuchbezirke() {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz, $this->hist_alb);
     return $ret;
@@ -1102,13 +1102,13 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getAmtsgericht() {
+  function getAmtsgerichte() {
     $blattnummer = strval($this->Buchungen[0]['blatt']);
     if ($blattnummer >= 90000 and $blattnummer <= 99999) {
       $ret[1]=array("schluessel"=>"", "name"=>"Im Grundbuch nicht gebucht");
     }
     else {
-      $ret=$this->database->getAmtsgerichtby($this->FlurstKennz, $this->Grundbuchbezirk);
+      $ret=$this->database->getAmtsgerichtby($this->FlurstKennz, $this->Grundbuchbezirke);
     }  
     return $ret[1];
   }
@@ -1342,6 +1342,7 @@ class flurstueck {
     $this->ALB_Flaeche=$rs['flaeche'];
 		$this->abweichenderrechtszustand=$rs['abweichenderrechtszustand'];
 		$this->zweifelhafterflurstuecksnachweis=$rs['zweifelhafterflurstuecksnachweis'];
+		$this->antragsnummer=$rs['antragsnummer'];
     $this->endet=$rs['endet'];
 		$this->beginnt=$rs['beginnt'];
 		$this->hist_alb=$rs['hist_alb'];
@@ -1350,7 +1351,7 @@ class flurstueck {
     #$this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
-    $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
+    $this->Grundbuchbezirke = $this->getGrundbuchbezirke();
 		if (AEQUIVALENZ_BEWERTUNG) {
 			$this->Klassifizierung = $this->getKlassifizierungAequivalenz();
 		}
@@ -1368,7 +1369,7 @@ class flurstueck {
 		$this->strittigeGrenze=$this->getStrittigeGrenze();
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
-    $this->Amtsgericht=$this->getAmtsgericht(); 
+    $this->Amtsgerichte = $this->getAmtsgerichte(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();
 		if($this->Nachfolger != '')$this->Status = 'H';

@@ -45,7 +45,7 @@ class LayerClass extends MyObject {
 		}
 	}
 
-	function get_first_style_def() {
+	function get_first_style($datentyp = 0) {
 		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
 		include_once(CLASSPATH . 'Style2Class.php');
 		include_once(CLASSPATH . 'LayerStyle.php');
@@ -54,10 +54,13 @@ class LayerClass extends MyObject {
 			return '';
 		}
 		#echo '<br>found ' . count($styles2class) . ' styles2class';
-		return LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'))->get_layerdef();
+		#echo '<br>first style_id: ' . $styles2class[0]->get('style_id');
+		$layer_style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
+		#echo '<br>Class: ' . $this->get('Class_ID') . ' first style: ' . print_r($layer_style->data, true);
+		return $layer_style;
 	}
 
-	function get_layerdef($classitem = null) {
+	function get_layerdef($classitem = null, $datentyp = 0) {
 		#echo 'LayerClass->get_layerdef';
 
 		if ($this->get('Expression') == '') {
@@ -74,11 +77,20 @@ class LayerClass extends MyObject {
 		}
 
 		#echo '<br>getLayerdef vor class: ' . $this->get('Class_ID');
+		$first_style = $this->get_first_style($datentyp);
+		#echo '<br>class: ' . $this->get('Name');
 		$layerdef = (Object) array(
 			'def' => $def,
-			'name' => $this->get('Name'),
-			'style' => $this->get_first_style_def()
+			'name' => $this->get('Name')
 		);
+		if ($first_style !== '') {
+			if ($first_style->has_icon()) {
+				$layerdef->icon = $first_style->get_icondef();
+			}
+			else {
+				$layerdef->style = $first_style->get_styledef($datentyp);
+			}
+		}
 		return $layerdef;
 	}
 } ?>

@@ -287,20 +287,38 @@ hide_versions = function(flst){
 											</tr>
 									<? }
 									$both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
-									if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
-									?>
-									<tr>
-												<td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
-												<td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
-											</tr>
-											<? }
-											$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
-									if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
-									?>
-											<tr>
-												<td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
-												<td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
-											</tr>
+									if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){	?>
+										<tr>
+											<td align="right" valign="top"><span class="fett">Amtsgericht</span>&nbsp;</td>
+											<td><? 
+												for ($a = 0; $a < count($flst->Amtsgerichte); $a++) {
+													if ($privileg_['amtsgerichtname']) { 
+														echo $flst->Amtsgerichte[$a]['name'];
+													}
+													if ($privileg_['amtsgerichtnr']) {
+														echo '&nbsp;(' . $flst->Amtsgerichte[$a]['schluessel'] . ')';
+													}
+													echo '<br>';
+												} ?>
+											</td>
+										</tr>
+									<? }
+									$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
+									if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){	?>
+										<tr>
+											<td align="right" valign="top"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
+											<td><? 
+												for ($a = 0; $a < count($flst->Grundbuchbezirke); $a++) {
+													if ($privileg_['grundbuchbezirkname']) { 
+														echo $flst->Grundbuchbezirke[$a]['name'];
+													}
+													if ($privileg_['grundbuchbezirkschl']) { 
+														echo '&nbsp;(' . $flst->Grundbuchbezirke[$a]['schluessel'] . ')';
+													}
+													echo '<br>';
+												} ?>
+											</td>
+										</tr>
 									<? }
 									if($privileg_['lagebezeichnung']){ ?>
 											<tr>
@@ -340,10 +358,16 @@ hide_versions = function(flst){
 									<? }
 									if($privileg_['karte']){ ?>
 											<tr>
-												<td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
+												<td align="right"><span class="fett">Flurkarte/Ri&szlig;&nbsp;</span></td>
 												<td><?php echo $flst->Flurkarte; ?></td>
 											</tr>
-											<? }
+									<? }
+									if($privileg_['antragsnummer']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Antragsnummer&nbsp;</span></td>
+												<td><?php echo $flst->antragsnummer; ?></td>
+											</tr>
+									<? }
 											if($privileg_['status']){ ?>
 											<tr>
 												<td align="right"><span class="fett"> Status&nbsp;</span></td>
@@ -820,7 +844,7 @@ hide_versions = function(flst){
 											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-											?>&selHausID=<? if($flst->selHausID != '')echo implode($flst->selHausID, ', '); ?>">
+											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
 											</a>
 											<?

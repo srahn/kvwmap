@@ -256,10 +256,10 @@ class ALKIS {
 	      if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-	      if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-	      if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-	      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-	      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
+	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
 	        $anzStrassen= @count($flst->Adresse);
 	        for ($s=0;$s<$anzStrassen;$s++) {
@@ -531,10 +531,10 @@ class ALKIS {
 							if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
 							if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 							if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-							if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-							if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-							if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-							if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+							if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+							if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
+							if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['lagebezeichnung']){
 								$anzStrassen= @count($flst->Adresse);
 								for ($s=0;$s<$anzStrassen;$s++) {
@@ -781,10 +781,10 @@ class ALKIS {
 	      if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-	      if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-	      if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-	      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-	      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
+	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
 	        $anzStrassen = @count($flst->Adresse);
 	        for ($s=0;$s<$anzStrassen;$s++) {
@@ -1038,10 +1038,10 @@ class ALKIS {
       if($formvars['forstname']){ $csv .= $flst->Forstamt['name'].';';}
       if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
       if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
-      if($formvars['amtsgerichtnr']){ $csv .= $flst->Amtsgericht['schluessel'].';';}
-      if($formvars['amtsgerichtname']){ $csv .= $flst->Amtsgericht['name'].';';}
-      if($formvars['grundbuchbezirkschl']){ $csv .= $flst->Grundbuchbezirk['schluessel'].';';}
-      if($formvars['grundbuchbezirkname']){ $csv .= $flst->Grundbuchbezirk['name'].';';}
+      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+			if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
+			if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
       if($formvars['lagebezeichnung']){
 			$anzStrassen = @count($flst->Adresse);
         for ($s=0;$s<$anzStrassen;$s++) {
@@ -1256,11 +1256,11 @@ class ALKIS {
 			$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 		}
 		else {
-			$row-=12;
+			#$row-=12;
 		}
 		$_col0 = $col0 + $indent;
 		$_col1 = $col1 + $indent;
-		if($eigentuemer->Nr != '')$pdf->addText($_col0,$row-=12,$fontSize,$eigentuemer->Nr);
+		if($eigentuemer->Nr != '')$pdf->addText($_col0,$row,$fontSize,$eigentuemer->Nr);
 		if($eigentuemer->zusatz_eigentuemer != ''){
 			$zusatz = $eigentuemer->zusatz_eigentuemer; if($eigentuemer->Anteil != '')$zusatz .= ' zu '.$eigentuemer->Anteil;
 			$pdf->addText($_col1,$row-=12,$fontSize,utf8_decode($zusatz));
@@ -1286,6 +1286,7 @@ class ALKIS {
 			$indent = $indent + 20;
 			foreach($eigentuemer->children as $child){
 				$this->ALBAuszug_outputEigentuemer($child, $Eigentuemerliste, $indent, $pdf,$Ueberschrift,$art,$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
+				$row = $row - 24;
 			}
 		}
 	}
@@ -1682,9 +1683,9 @@ class ALKIS {
 
 	        # Amtsgericht, Grundbuchbezirk
 	        $pdf->addText($col0,$row-=12,$fontSize,'Amtsgericht');
-	        $pdf->addText($col2,$row,$fontSize,utf8_decode($flst->Amtsgericht['name']).' ('.$flst->Amtsgericht['schluessel'].')');
+	        $pdf->addText($col2,$row,$fontSize,utf8_decode(implode(", ", array_map(function($e){return $e['name'] . ' (' . $e['schluessel'] . ')';},	$flst->Amtsgerichte))));
 	        $pdf->addText($col0,$row-=12,$fontSize,'Grundbuchbezirk');
-	        $pdf->addText($col2,$row,$fontSize,utf8_decode($flst->Grundbuchbezirk['name']).' ('.$flst->Grundbuchbezirk['schluessel'].')');
+	        $pdf->addText($col2,$row,$fontSize,utf8_decode(implode(", ", array_map(function($e){return $e['name'] . ' (' . $e['schluessel'] . ')';},	$flst->Grundbuchbezirke))));
 		    $row-=18;
 	        ################################################################################
 	        # Bestandsnachweis #
@@ -1713,6 +1714,10 @@ class ALKIS {
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
 								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 								$pdf->addText($col2,$row,$fontSize,$BestandStr);
+								
+								if($flst->Buchungen[$b]['sondereigentum'] != ''){
+									$pdf->addText($col2,$row-=24,$fontSize,'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.');
+								}
 
 								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
 								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
@@ -1745,6 +1750,7 @@ class ALKIS {
 									}
 									$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 								}
+								$row = $row - 24;
 							} # ende Schleife Bestand
 	          } # ende Ausgabe Formular 40
 	          break;
@@ -1764,13 +1770,17 @@ class ALKIS {
 								}
 
 								# Ausgabe der Zeile für die Bestandbezeichnung
-								$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
+								$pdf->addText($col0,$row-=12,$fontSize,'Bestand');
 								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
 								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 								$pdf->addText($col2,$row,$fontSize,$BestandStr);
+								
+								if($flst->Buchungen[$b]['sondereigentum'] != ''){
+									$pdf->addText($col2,$row-=24,$fontSize,'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.');
+								}
 
 								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
 								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
@@ -1803,6 +1813,7 @@ class ALKIS {
 									}
 									$pdf->addText($col1,$row-=12,$fontSize,utf8_decode($zusatzeigentuemertext));
 								}
+								$row = $row - 24;
 							} # ende Schleife Bestand
 	          } # ende Ausgabe Formular 35
 	          break;
@@ -1832,7 +1843,7 @@ class ALKIS {
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
 								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
 								$pdf->addText($col2,$row,$fontSize,$BestandStr);
-								$row-=12;
+								$row-=18;
 
 							} # ende Schleife Bestand
 	          } # ende Ausgabe Bestandsnachweis Formular 30
@@ -1950,11 +1961,11 @@ class ALKIS {
     if(POSTANSCHRIFT_PLZ != '')$pdf->addText($col42,$row-=12,$fontSize,utf8_decode(POSTANSCHRIFT_PLZ.' '.POSTANSCHRIFT_ORT));
     # Amtsgericht, Grundbuchbezirk
     $pdf->addText($col1,$row-=12,$fontSize,'Grundbuchbezirk');
-    $pdf->addText($col27,$row,$fontSize,str_pad($flst->Grundbuchbezirk['schluessel'],11," "));
-    $pdf->addText($col42,$row,$fontSize,utf8_decode($flst->Grundbuchbezirk['name']));
+    $pdf->addText($col27,$row,$fontSize,str_pad(implode(", ", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)),11," "));
+    $pdf->addText($col42,$row,$fontSize,utf8_decode(implode(", ", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke))));
     $pdf->addText($col1,$row-=12,$fontSize,'Amtsgericht');
-    $pdf->addText($col27,$row,$fontSize,str_pad($flst->Amtsgericht['schluessel'],11," "));
-    $pdf->addText($col42,$row,$fontSize,utf8_decode($flst->Amtsgericht['name']));
+    $pdf->addText($col27,$row,$fontSize,str_pad(implode(", ", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)),11," "));
+    $pdf->addText($col42,$row,$fontSize,utf8_decode(implode(", ", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte))));
 #   $pdf->addText($col00,$row-=12,$fontSize,str_repeat("-",75));
     $pdf->addText($col0,$row-=12,$fontSize,str_repeat("-",73));
 

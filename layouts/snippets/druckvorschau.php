@@ -255,7 +255,7 @@ function preventflickering(evt){
 	
 	$layerset = $this->layerset['list'];
 	$scale = $this->map_scaledenom;
-	for($i = 0; $i < count($layerset); $i++){
+	for($i = 0; $i < @count($layerset); $i++){
 		if($layerset[$i]['aktivStatus'] != 0 
 		AND ($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) 
 		AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)

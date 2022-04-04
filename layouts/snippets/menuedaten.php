@@ -1,5 +1,9 @@
 <?php
 	include(LAYOUTPATH . 'languages/menuedaten_' . $this->user->rolle->language . '.php');
+	$name_column = 'name';
+	if ($this->user->rolle->language != 'german') {
+		$name_column .= '_' . $this->user->rolle->language;
+	}
 ?>
 <script>
 	function menuedaten_delete(id) {
@@ -34,10 +38,10 @@
 				<tr>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strID; ?></a></th>
 					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strName; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Obermenü</a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene</th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Order</a></th>
-					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name">Ebene und Name</a></td>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><? echo $strTopMenue; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><? echo $strMenueLevel; ?></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><? echo $strMenueOrder; ?></a></th>
+					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $strMenueOrder; ?></a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name"><? echo $strMenueLevel . ' ' . $this->strAnd . ' ' . $this->strName; ?></a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->menuedaten); $i++) {
 					$font_size = ($this->menuedaten[$i]->get('menueebene') == '1' ? 16 : 12); ?>
@@ -46,7 +50,7 @@
 							<a name="menue_<?php echo $this->menuedaten[$i]->get('id'); ?>" style="color: black; font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('id'); ?></a>
 						</td>
 						<td>
-							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('name') ?></span>
+							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get($name_column) ?></span>
 						</td>
 						<td>
 							<span style="font-size: <?php echo $font_size; ?>"><?php echo $this->menuedaten[$i]->get('obermenue') ?></span>

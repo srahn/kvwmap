@@ -386,8 +386,13 @@ function resizemap2window(){
 *			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
 *			{ type: 'notice', msg: 'und eine Notiz'},
 *		]);
+* @param integer t_visible Time how long the message shall be visible
+* @param integer t_fade Time how long the message shall fade out
+* @param string css_top The css value for distance to the top of the page
+* @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
+* @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
 	console.log('Show Message: %o: ', messages);
 	console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -405,11 +410,8 @@ function message(messages, t_visible, t_fade, css_top, confirm_value, callback) 
   }
 	var msgDiv = $('#messages');
 	var confirm = false;
-
-	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
-	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
 	
-	if(typeof css_top  !== 'undefined') {
+	if (typeof css_top  !== 'undefined') {
 		msgBoxDiv.css('top', css_top);
 	}
 	

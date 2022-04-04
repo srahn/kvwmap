@@ -123,24 +123,26 @@ if ($doit == true) {
 						}
 						
 						if (!empty($layer['attributes']['tabs'])) {
+							$first_tab = true;
 							if ($show_geom_editor) {
 								if ($this->user->rolle->geom_edit_first) {
 									array_unshift($layer['attributes']['tabs'], 'Geometrie');
+									$first_tab = false;
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
-									$visibility = 'style="visibility: collapse"';
+									$visibility_geom = 'style="visibility: collapse"';
 								}
 							}
 							echo '
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
-										$first_tab = true;
+										$first_tab2 = true;
 										foreach ($layer['attributes']['tabs'] as $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
-											$first_tab = false;
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab2? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											$first_tab2 = false;
 										}
 										echo '
 									</div>
@@ -148,20 +150,6 @@ if ($doit == true) {
 							</tr>';
 						}
 						
-						$first_tab = true;
-						
-						if ($show_geom_editor) {
-							echo '
-							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility . '>
-								<td colspan="2" align="center">';
-									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-							echo'
-								</td>
-							</tr>';
-							if ($this->user->rolle->geom_edit_first) {
-								$first_tab = false;
-							}
-						}
 						$visibility = '';
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
@@ -197,7 +185,7 @@ if ($doit == true) {
 								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
 												<td colspan="2" width="100%">
 													<div>
-														<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
+														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 															<tr>
 																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
 																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
@@ -214,16 +202,16 @@ if ($doit == true) {
 										if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 										####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
-										if($layer['attributes']['arrangement'][$j] != 1){
+										if ($layer['attributes']['arrangement'][$j] != 1) {
 											$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 											$row['class'] = $attribute_class;
-										}
-										else{
-											if($nl){
-												$next_row['sidebyside'] = true;
-											}
-											else{
-												$row['sidebyside'] = true;
+											if ($layer['attributes']['arrangement'][$j+1] == 1) {	# wenn nächstes Attribut neben diesem stehen soll
+												if($nl){
+													$next_row['sidebyside'] = true;
+												}
+												else{
+													$row['sidebyside'] = true;
+												}
 											}
 										}
 										######### Attributname #########
@@ -304,6 +292,18 @@ if ($doit == true) {
 							unset($table);
 							$table = '';
 						}
+						if ($show_geom_editor) {
+							echo '
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility_geom . '>
+								<td colspan="2" align="center">';
+									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+							echo'
+								</td>
+							</tr>';
+							if ($this->user->rolle->geom_edit_first) {
+								$first_tab = false;
+							}
+						}						
 						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
 							echo '</tbody></table></td></tr>';
 						}
