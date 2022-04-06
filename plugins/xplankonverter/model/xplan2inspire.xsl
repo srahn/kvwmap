@@ -2793,7 +2793,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_LaendlicheSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_SonstigeFunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_SonstigeFunktion')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_Funktionszuweisung')}"/>
