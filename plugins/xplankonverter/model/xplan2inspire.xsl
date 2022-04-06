@@ -2790,7 +2790,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_LaendlicheSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_LaendlicheSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_SonstigeFunktion')}"/>
