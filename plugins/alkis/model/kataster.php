@@ -1015,8 +1015,7 @@ class flurstueck {
 			$diff = $Klassifizierung[$i-1]['amtlicheflaeche'] - $summe_amt;
 			$Klassifizierung[$index]['flaeche'] += $diff;
     }
-    $ret[1]=$Klassifizierung;
-    return $ret;
+    return $Klassifizierung;
   }
 
   function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
