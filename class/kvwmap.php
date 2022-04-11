@@ -1470,9 +1470,14 @@ echo '			</table>
 		$polygons = explode('||', $this->formvars['free_polygons']);
 		for($i = 0; $i < count($polygons)-1; $i++){
 			$parts = explode('|', $polygons[$i]);
-			$wkt = "POLYGON((" . $parts[0]."))";
-			$style = $parts[1];
-			$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+			if (substr_count($parts[0], ',') > 2) {
+				$wkt = "POLYGON((" . $parts[0]."))";
+				$style = $parts[1];
+				$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+			}
+			else {
+				$this->add_message('warning', 'Die Fläche muss aus mindestens drei Eckpunkten bestehen.');
+			}
 		}
 		$texts = explode('||', $this->formvars['free_texts']);
 		for($i = 0; $i < count($texts)-1; $i++){
