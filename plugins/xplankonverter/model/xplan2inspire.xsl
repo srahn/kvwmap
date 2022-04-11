@@ -3227,7 +3227,7 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_4_Tourism')}"/>
                       </xsl:when>
                       <xsl:otherwise>
-                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions_')}"/>
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions')}"/>
                       </xsl:otherwise>
                     </xsl:choose>
                   </xsl:when>
