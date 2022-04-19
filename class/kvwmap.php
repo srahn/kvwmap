@@ -535,7 +535,7 @@ class GUI {
 											</tr>';
 							}
 						}
-						if ($this->formvars['layer_id'] < 0) {
+						if ($this->formvars['layer_id'] < 0 AND $layer[0]['Datentyp'] != MS_LAYER_RASTER) {
 							$this->result_colors = $this->database->read_colors();
 							for ($i = 0; $i < count($this->result_colors); $i++) {
 								$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
@@ -757,7 +757,9 @@ echo '			</table>
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
-				$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+				if (!empty($classes[0]['Style'])) {
+					$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+				}
 				if($classes[0]['Label'] == NULL){
 					$empty_label = new stdClass();
 					$empty_label->font = 'arial';
