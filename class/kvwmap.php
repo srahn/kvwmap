@@ -16936,9 +16936,12 @@ class db_mapObj{
 												$options = $attributes['options'][$i];
 												foreach ($attributes['req'][$i] as $attributename) {
 													if ($query_result[$k][$attributename] != '') {
+														if (is_array($query_result[$k][$attributename])) {
+															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
+														}
 														$options = str_replace(
-															'<requires>' . $attributename.'</requires>',
-															"'" . $query_result[$k][$attributename] . "'",
+															'= <requires>' . $attributename.'</requires>',
+															" IN ('" . $query_result[$k][$attributename] . "')",
 															$options
 														);
 													}
