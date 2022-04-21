@@ -377,7 +377,7 @@ class Layer extends MyObject {
 				function($class) use ($classitem, $datentyp) {
 					return $class->get_layerdef($classitem, $datentyp);
 				},
-				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'))
+				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'), 'legendorder')
 			),
 #			'icon' => (Object) array(
 #				'iconUrl' => 'images/Haus.svg',

@@ -13,9 +13,9 @@ class LayerClass extends MyObject {
 		return $class->find_by($by, $id);
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$layer_class = new LayerClass($gui);
-		return $layer_class->find_where($where);
+		return $layer_class->find_where($where, $order);
 	}
 
 	function ret($mm) {
