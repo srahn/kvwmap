@@ -724,7 +724,7 @@ FROM
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
 					$fields[$i]['saveable'] = 0;
-					$fields[$i]['real_name'] = addslashes($select_attr[$fields[$i]['name']]['base_expr']);
+					$fields[$i]['real_name'] = $this->gui->database->mysqli->real_escape_string($select_attr[$fields[$i]['name']]['base_expr']);
 				}
 				$fields[$i]['type'] = $fieldtype;
 
@@ -920,20 +920,20 @@ FROM
 								name = '".$fields[$i]['name']."', 
 								real_name = '".$fields[$i]['real_name']."', 
 								type = '".$fields[$i]['type']."', 
-								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
 								nullable = ".$fields[$i]['nullable'].", 
 								length = ".$fields[$i]['length'].", 
 								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".addslashes($fields[$i]['default'])."', 
+								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
 								`order` = ".$i." 
 							ON DUPLICATE KEY UPDATE
 								real_name = '".$fields[$i]['real_name']."', 
 								type = '".$fields[$i]['type']."', 
-								constraints = '".addslashes($fields[$i]['constraints'])."', 
+								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
 								nullable = ".$fields[$i]['nullable'].", 
 								length = ".$fields[$i]['length'].", 
 								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".addslashes($fields[$i]['default'])."', 
+								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
 								`order` = ".$i;
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -1162,7 +1162,7 @@ FROM
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
-		$sql.="WHERE 1=1 ";
+		$sql.="WHERE g.blattart != 5000 ";
 		if ($Bezirk!='') {
       $sql.=" AND b.schluesselgesamt='".$Bezirk."'";
 		}
@@ -1240,10 +1240,14 @@ FROM
 			SELECT DISTINCT 
 				schluesselgesamt as GemkgID, bezeichnung || ' (hist.)' as Name, '' as gemeindename, '' as gemeinde 
 			FROM 
-				alkis.ax_gemarkung
+				alkis.ax_gemarkung g
 			WHERE 
 				endet IS NULL AND
-				'http://www.lverma-mv.de/_fdv#7040' = any(zeigtaufexternes_art)
+				NOT EXISTS (
+					SELECT 
+					FROM alkis.ax_flurstueck f
+					WHERE f.endet IS NULL AND (f.land,f.gemarkungsnummer) = (g.land,g.gemarkungsnummer)
+				)
 		";
     $sql.=" ORDER BY Name";
     #echo $sql;
@@ -1909,9 +1913,9 @@ FROM
     return $ret;
   }
 	
-	function getAmtsgerichtby($flurstkennz, $bezirk){
+	function getAmtsgerichtby($flurstkennz, $bezirke){
 		$sql ="
-			SELECT
+			SELECT distinct 
 				a.bezeichnung as name,
 				a.stelle as schluessel
 			FROM
@@ -1921,7 +1925,7 @@ FROM
 				b.gehoertzu_land=a.land AND
 				b.gehoertzu_stelle=a.stelle AND
 				a.stellenart=1000 AND
-				b.schluesselgesamt = '" . $bezirk['schluessel'] . "'
+				b.schluesselgesamt IN ('" . implode("', '", array_map(function($e){return $e['schluessel'];},	$bezirke)) . "')
 				" . $this->build_temporal_filter(array('b', 'a')) . "
 		";
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1931,7 +1935,9 @@ FROM
     }
     else {
       $ret[0]=0;
-      $ret[1]=pg_fetch_assoc($queryret[1]);
+			while ($rs=pg_fetch_assoc($queryret[1])) {
+				$ret[1][] = $rs;
+			}
     }
     return $ret;
 	}
@@ -2043,12 +2049,12 @@ FROM
   }
     
   function getGrundbuchbezirke($FlurstKennz, $hist_alb = false) {
-		$sql ="SELECT b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
+		$sql ="SELECT distinct b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
 		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		else $sql.="FROM alkis.ax_flurstueck f ";  
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
 		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
-		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id ";
+		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
 		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
 		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
@@ -2061,9 +2067,11 @@ FROM
       $Bezirk['schluessel']="0";
     }
     else{
-      $Bezirk=pg_fetch_assoc($ret[1]);
+			while ($rs=pg_fetch_assoc($ret[1])) {
+				$bezirke[] = $rs;
+			}
     }
-    return $Bezirk;
+    return $bezirke;
   }
   
   function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {

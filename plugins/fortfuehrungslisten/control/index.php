@@ -179,14 +179,14 @@ function fortfuehrungslisten_add_flurstuecke($GUI) {
 				SELECT
 					unnest(zeigtaufaltesflurstueck) AS flurstkennz
 				FROM
-					ff_faelle
+					fortfuehrungslisten.ff_faelle
 
 	  		UNION
 
 	  		SELECT
 					unnest(zeigtaufneuesflurstueck) AS flurstkennz
 				FROM
-					ff_faelle
+					fortfuehrungslisten.ff_faelle
 		) AS foo ORDER BY flurstkennz
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
@@ -209,14 +209,14 @@ function fortfuehrungslisten_add_fluren($GUI) {
 				SELECT
 					unnest(zeigtaufaltesflurstueck) AS flurstkennz
 				FROM
-					ff_faelle
+					fortfuehrungslisten.ff_faelle
 
 	  		UNION
 
 	  		SELECT
 					unnest(zeigtaufneuesflurstueck) AS flurstkennz
 				FROM
-					ff_faelle
+					fortfuehrungslisten.ff_faelle
 		) AS foo ORDER BY flur
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);

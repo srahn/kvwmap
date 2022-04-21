@@ -8,6 +8,8 @@
 		var cursor_pos;
 		var dot_count_before;
 		var dot_count_after;
+		var minimun_fraction_digits = 0;
+		var maximum_fraction_digits = decimal_length || 10;
 		if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].indexOf(datatype) != -1) {
 			if (type == 'Zahl') {
 				grouping = true;
@@ -23,9 +25,15 @@
 				}
 			}
 			if (val.slice(val.length - 1) != ',') {
+				if (val.indexOf(',') != -1) {
+					minimun_fraction_digits = val.length - val.indexOf(',') - 1;	// damit Nullen am Ende nicht verloren gehen
+					if (minimun_fraction_digits > maximum_fraction_digits) {
+						minimun_fraction_digits = maximum_fraction_digits;
+					}
+				}
 				formated_val = val.replace(/\./g, '');							// Punkte raus
 				formated_val = formated_val.replace(/,/g, '.');			// Komma zu Punkt
-				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, maximumFractionDigits: decimal_length});
+				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, minimumFractionDigits: minimun_fraction_digits, maximumFractionDigits: maximum_fraction_digits});
 				if (['NaN', '0'].indexOf(formated_val) == -1) {
 					val = formated_val;
 				}
