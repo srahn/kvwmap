@@ -1703,6 +1703,7 @@ class stelle {
 				l.Layer_ID,
 				l.Name,
 				l.Gruppe,
+				l.document_path,
 				ul.use_parent_privileges,
 				ul.privileg,
 				ul.export_privileg,

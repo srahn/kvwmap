@@ -3105,7 +3105,7 @@ echo '			</table>
 					header("Expires: 0");
 					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 					header("Pragma: public");
-					readfile(IMAGEPATH.$this->outputfile);
+					readfile(IMAGEPATH . $this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -14053,8 +14053,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		return $result;
 	}
 
-	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+	/**
+	* Function move or copy uploaded files to the document path of the layer and returns the value for document attribute
+	* If upload_only_file_metadata of rolle is set, than insteat belated_file.jpg will be copied to layers document path
+	* If input field value = delete, the existing document will be deleted.
+	* If a file exists with another name, it will be deleted before copy or move the new to the document path
+	* @param $input_name Name of the files form field used to upload the file
+	* @param $doc_path Document path defined for the layer
+	* @param $doc_url Document url defined for the layer
+	* @param $options Options defined for the document attributes
+	* @param $attribute_names Names of the document attributes
+	* @param $attribute_values Values of the document attributes
+	* @param $layer_db The database object with connection to layers main table
+	*/
+	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db) {
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->user->rolle->upload_only_file_metadata == 1) {
 			$file = json_decode($this->formvars[$input_name]);
 			$_files = array(
@@ -16655,43 +16668,47 @@ class db_mapObj{
 		return $path;
   }
 
-  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname){
-		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
-		// sowie die URL des Dokuments, falls eine verwendet werden soll
+	/**
+	* Diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
+	* sowie die URL des Dokuments, falls eine verwendet werden soll
+	* Wenn eine SQL-Anfrage in Option des Dokument-Attributes definiert ist, diese Ausführen und den Dokumentpfad anpassen
+	*/
+	function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname) {
 		if ($doc_path == '') {
 			$doc_path = CUSTOM_IMAGE_PATH;
 		}
-		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
+		if (strtolower(substr($dynamic_path_sql, 0, 6)) == 'select') {
+			// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $dynamic_path_sql;
-			for ($a = 0; $a < count($attributenames); $a++){
-				if($attributenames[$a] != '') {
-					$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+			for ($a = 0; $a < count($attributenames); $a++) {
+				if ($attributenames[$a] != '') {
+					$sql = str_replace('$' . $attributenames[$a], $attributevalues[$a], $sql);
 				}
 			}
 			# echo '<p>SQL zur Abfrage des Dokumentenpfades: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
-			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
+			$doc_path .= $dynamic_path[0]; // der ganze Pfad mit Dateiname ohne Endung
 			if ($doc_url) {
 				$doc_url = $doc_url . $dynamic_path[0];
 			}
 			$path_parts = explode('/', $doc_path);
 			array_pop($path_parts);
-			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
+			$new_path = implode('/', $path_parts); // der evtl. neu anzulegende Pfad ohne Datei
 			@mkdir($new_path, 0777, true);
 		}
-		else{			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-			if(!$doc_url){
-				$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);
+		else { // andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+			if (!$doc_url) {
+				$filename = date('Y-m-d_H_i_s',time()) . '-' . rand(100000, 999999);
 			}
-			else{
-				$filename = $originalname.'-'.rand(100000, 999999);
+			else {
+				$filename = $originalname . '-' . rand(100000, 999999);
 				$doc_url .= $filename;
 			}
 			$doc_path .= $filename;
 		}
-    return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
-  }
+		return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
+	}
 
 	function getlayerdatabase($layer_id, $host) {
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id; exit;
@@ -17933,6 +17950,15 @@ class db_mapObj{
 			}
 		}
 
+		# Hängt Character / an Attribute an wenn es am Ende fehlt
+		foreach(
+			array(
+				'document_path'
+			) AS $key
+		) {
+				$attribute_sets[] = "`" . $key . "` = '" . append_slash($formvars[$key]) . "'";
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17946,7 +17972,6 @@ class db_mapObj{
 				'oid',
 				'Data',
 				'schema',
-				'document_path',
 				'document_url',
 				'ddl_attribute',
 				'tileindex',
@@ -18095,7 +18120,7 @@ class db_mapObj{
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['Data']) . ",
 					" . quote_or_null($formvars['schema']) . ",
-					" . quote_or_null($formvars['document_path']) . ",
+					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
 					" . quote($formvars['tileindex']) . ",
 					" . quote($formvars['tileitem']) . ",
