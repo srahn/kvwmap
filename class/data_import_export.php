@@ -1170,7 +1170,6 @@ class data_import_export {
 		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
-
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);

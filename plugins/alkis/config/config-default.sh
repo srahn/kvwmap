@@ -2,6 +2,7 @@
 
 POSTGRES_SCHEMA="alkis"
 GFS_TEMPLATE="../config/alkis-schema.gfs"
+DATEN_ORDNER="ff"
 PGSQL_CONTAINER="kvwmap_prod_pgsql"
 GDAL_CONTAINER="kvwmap_prod_gdal_1"
 LOG_FILE="import.log"
