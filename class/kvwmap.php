@@ -3911,8 +3911,9 @@ echo '			</table>
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('= <requires>'.$attributenames[$i].'</requires>', "IN ('".$attributevalues[$i]."')", $sql);
+			$sql = str_replace('= <requires>'.$attributenames[$i].'</requires>', " IN ('".$attributevalues[$i]."')", $sql);
 		}
 		#echo $sql;
 		@$ret=$layerdb->execSQL($sql,4,0);
