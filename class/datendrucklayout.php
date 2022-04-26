@@ -1490,8 +1490,8 @@ class ddl {
 				if($formvars['font_'.$attributes['name'][$i]] == 'NULL')$formvars['font_'.$attributes['name'][$i]] = NULL;
 				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
 				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
 				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
@@ -1658,8 +1658,8 @@ class ddl {
 			for($i = 0; $i < count($attributes['name']); $i++){
 				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
 				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
 				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
