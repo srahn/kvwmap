@@ -1539,7 +1539,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_66_MikrodioritAndesit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_67_SonstigerRohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_63_SonstigerRohstoff')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_Rohstoff')}"/>

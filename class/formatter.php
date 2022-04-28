@@ -22,7 +22,7 @@ class formatter {
 	}
 	
 	function output_dump() {
-		header('Content-Type: text/html; charset=utf-8');        
+		header('Content-Type: text/html; charset=utf-8');
 		return var_dump($this->data);
 	}
    
@@ -36,7 +36,7 @@ class formatter {
     if (!isset($this->data[0]) || !is_array($this->data[0]))
       $this->data = array($this->data);
     
-		header('Content-Type: text/html; charset=utf-8');    
+		header('Content-Type: text/html; charset=utf-8');
     $html  = '<html>';
     $html .= '<head>';
     $html .= '</head>';
@@ -81,7 +81,7 @@ class formatter {
   }  
 	
 	function output_json() {
-		header('Content-Type: '.$this->content_type.'; charset=utf-8');
+		header('Content-Type: ' . $this->content_type.'; charset=utf-8');
 		empty($this->data) ? $json = '[]' : $json = json_encode($this->data);
 		return utf8_decode($json);
 	}

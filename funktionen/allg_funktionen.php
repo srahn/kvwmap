@@ -33,6 +33,10 @@ function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
 }
 
+function append_slash($var) {
+	return $var . (trim($var) != '' AND substr(trim($var), -1) != '/' ? '/' : '');
+}
+
 function pg_quote($column){
 	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"'.$column.'"';
 }
@@ -779,7 +783,7 @@ function createRandomPassword($passwordLength) {
 
 function get_remote_ip() {
 	$ip = '172.0.0.1';
-	if (strpos(getenv('REMOTE_ADDR'), '172.') === false) {
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {

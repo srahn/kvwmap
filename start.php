@@ -325,7 +325,20 @@ if (!$show_login_form) {
 					}
 					else {
 						$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-						$GUI->add_message('error', $permission['errmsg']);
+						if ($GUI->formvars['format'] == 'json') {
+							header('Content-Type: application/json; charset=utf-8');
+							$json = json_encode(
+								array(
+									'success' => false,
+									'err_msg' => $permission['errmsg']
+								)
+							);
+							echo utf8_decode($json);
+							exit;
+						}
+						else {
+							$GUI->add_message('error', $permission['errmsg']);
+						}
 						$show_login_form = true;
 						$go = 'login_new_password';
 						# login case 19
@@ -601,7 +614,7 @@ function get_permission_in_stelle($GUI) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
 			$reason = 'password expired';
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie ein neues Passwort ein und notieren Sie es sich.';
+			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
 		}
 		else {
 			$GUI->debug->write('Passwort ist nicht abgelaufen.', 4, $GUI->echo);
