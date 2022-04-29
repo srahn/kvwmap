@@ -86,9 +86,9 @@ class Flur {
     return $ret;
   }
 
-  function getFlurListe($GemkgID,$FlurID, $historical = false) {
+  function getFlurListe($GemkgID,$FlurID, $history_mode = 'aktuell') {
     # Abfragen der Fluren
-    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical);
+    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $history_mode);
     return $Liste;
   }
   
@@ -1015,8 +1015,7 @@ class flurstueck {
 			$diff = $Klassifizierung[$i-1]['amtlicheflaeche'] - $summe_amt;
 			$Klassifizierung[$index]['flaeche'] += $diff;
     }
-    $ret[1]=$Klassifizierung;
-    return $ret;
+    return $Klassifizierung;
   }
 
   function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
@@ -1104,7 +1103,7 @@ class flurstueck {
 
   function getAmtsgerichte() {
     $blattnummer = strval($this->Buchungen[0]['blatt']);
-    if ($blattnummer >= 90000 and $blattnummer <= 99999) {
+    if ($blattnummer >= 90000 and $blattnummer <= 99999 OR $this->Grundbuchbezirke == '') {
       $ret[1]=array("schluessel"=>"", "name"=>"Im Grundbuch nicht gebucht");
     }
     else {
@@ -1377,8 +1376,8 @@ class flurstueck {
     $this->Nutzung=$this->getNutzung();
   }
 
-  function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $historical = false) {
-    $Liste=$this->database->getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $historical);
+  function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode = 'aktuell') {
+    $Liste=$this->database->getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode);
     return $Liste;
   }
   

@@ -1703,6 +1703,7 @@ class stelle {
 				l.Layer_ID,
 				l.Name,
 				l.Gruppe,
+				l.document_path,
 				ul.use_parent_privileges,
 				ul.privileg,
 				ul.export_privileg,
@@ -1813,6 +1814,7 @@ class stelle {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
 					$layer->minScale = $layer2Stelle->get('minscale');
 					$layer->maxScale = $layer2Stelle->get('maxscale');
+					$layer->opacity  = 100 - $layer2Stelle->get('transparency');
 					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
 					return $layer->get_overlays_def($this->id);
 				},

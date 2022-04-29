@@ -231,16 +231,20 @@ CONFIG_PHP=$(realpath ${SCRIPT_PATH}/../../../config.php)
 if [ -e "${CONFIG_PATH}/config.sh" ] ; then
   source ${CONFIG_PATH}/config.sh
 	
+	if [ "$DATEN_ORDNER" = "" ] ; then
+		DATEN_ORDNER="ff"
+	fi
+	
 	## lokale Pfade
 	WWW_PATH=$(realpath ${SCRIPT_PATH}/../../../../../)
-	DATA_PATH="${WWW_PATH}/data/alkis/ff/eingang"
-	IMPORT_PATH="${WWW_PATH}/data/alkis/ff/import"
-	LOG_PATH="${WWW_PATH}/data/alkis/ff/logs"
-	POSTPROCESSING_PATH="${WWW_PATH}/data/alkis/ff/postprocessing"
+	DATA_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/eingang"
+	IMPORT_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/import"
+	LOG_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/logs"
+	POSTPROCESSING_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/postprocessing"
 	
 	## Pfade in den Containern
 	WWW_PATH_C="/var/www"
-	IMPORT_PATH_C="/var/www/data/alkis/ff/import"
+	IMPORT_PATH_C="/var/www/data/alkis/${DATEN_ORDNER}/import"
 	SCRIPT_PATH_C=${SCRIPT_PATH//${WWW_PATH}/${WWW_PATH_C}}
 		
 	if [ "$WWW_PATH_C" = "$WWW_PATH" ] ; then

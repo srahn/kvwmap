@@ -308,7 +308,7 @@ hide_versions = function(flst){
 										<tr>
 											<td align="right" valign="top"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
 											<td><? 
-												for ($a = 0; $a < count($flst->Grundbuchbezirke); $a++) {
+												for ($a = 0; $a < @count($flst->Grundbuchbezirke); $a++) {
 													if ($privileg_['grundbuchbezirkname']) { 
 														echo $flst->Grundbuchbezirke[$a]['name'];
 													}

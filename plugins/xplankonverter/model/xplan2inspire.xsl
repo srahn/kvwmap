@@ -1539,7 +1539,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_66_MikrodioritAndesit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_67_SonstigerRohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_63_SonstigerRohstoff')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_Rohstoff')}"/>
@@ -2790,10 +2790,10 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_LaendlicheSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_LaendlicheSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_SonstigeFunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_SonstigeFunktion')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_Funktionszuweisung')}"/>
@@ -3227,7 +3227,7 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_4_Tourism')}"/>
                       </xsl:when>
                       <xsl:otherwise>
-                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions_')}"/>
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions')}"/>
                       </xsl:otherwise>
                     </xsl:choose>
                   </xsl:when>

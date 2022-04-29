@@ -291,6 +291,9 @@ if ($doit == true) {
 							echo output_table($table);
 							unset($table);
 							$table = '';
+						}						
+						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
+							echo '</tbody></table></td></tr>';
 						}
 						if ($show_geom_editor) {
 							echo '
@@ -304,10 +307,6 @@ if ($doit == true) {
 								$first_tab = false;
 							}
 						}						
-						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
-							echo '</tbody></table></td></tr>';
-						}
-						
 							
 							if(($columnname != '' OR $layer['shape'][$k]['wfs_geom'] != '') AND $this->new_entry != true AND value_of($this->formvars, 'printversion') == ''){
 								if($layer['attributes']['group'][0] != ''){ ?>
