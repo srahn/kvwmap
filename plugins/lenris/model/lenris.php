@@ -541,7 +541,7 @@ class LENRIS {
 						link_datei = '" . $newpath . "', 
 						format = '" . $n['format'] . "',
 						stammnr = '" . $n['stammnr'] . "', 
-						the_geom = " . $geom . ", 
+						the_geom = " . ($geom != 'NULL' ? $geom : 'the_geom') . ", 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
 						bemerkungen = " . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
@@ -564,7 +564,7 @@ class LENRIS {
 				";
 				$ret = $this->database->execSQL($sql, 4, 0, true);
 				if (!$ret[0]) {
-					if ($n['document_last_modified'] != $rs['document_last_modified']) {
+					if ($n['document_last_modified'] == '' OR $n['document_last_modified'] != $rs['document_last_modified']) {
 						# neuen Dateipfad in zu_holende_dokumente schreiben
 						$sql = "
 							INSERT INTO 
@@ -577,15 +577,17 @@ class LENRIS {
 						";
 						$ret = $this->database->execSQL($sql, 4, 0);
 						if (!$ret[0]) {
-							# document_last_modified aktualisieren
-							$sql = "
-								UPDATE
-									lenris.client_nachweise
-								SET
-									document_last_modified = '" . $n['document_last_modified'] . "'
-								WHERE
-									nachweis_id = " . $rs['nachweis_id'];
-							$ret = $this->database->execSQL($sql, 4, 0);
+							if ($n['document_last_modified'] != '') {
+								# document_last_modified aktualisieren
+								$sql = "
+									UPDATE
+										lenris.client_nachweise
+									SET
+										document_last_modified = '" . $n['document_last_modified'] . "'
+									WHERE
+										nachweis_id = " . $rs['nachweis_id'];
+								$ret = $this->database->execSQL($sql, 4, 0);
+							}
 							if (!$ret[0]) {
 								# alte Datei löschen
 								if (file_exists($rs['link_datei'])){
