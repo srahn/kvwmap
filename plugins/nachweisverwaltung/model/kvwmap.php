@@ -718,6 +718,7 @@
 	};
 	
 	$GUI->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
+		$searches = array();
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
