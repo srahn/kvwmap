@@ -5,7 +5,7 @@
  */
 
 function urlencode2($str){
-	$str = urlencode($str);
+	$str = rawurlencode($str);
 	$str = str_replace('%3F', '?', $str);
 	$str = str_replace('%26', '&', $str);
 	$str = str_replace('%3D', '=', $str);
