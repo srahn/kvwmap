@@ -9,6 +9,8 @@ function urlencode2($str){
 	$str = str_replace('%3F', '?', $str);
 	$str = str_replace('%26', '&', $str);
 	$str = str_replace('%3D', '=', $str);
+	$str = str_replace('%3A', ':', $str);
+	$str = str_replace('%2F', '/', $str);	
 	return $str;
 }
 
@@ -29,6 +31,10 @@ function quote($var, $type = NULL){
 
 function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
+}
+
+function append_slash($var) {
+	return $var . (trim($var) != '' AND substr(trim($var), -1) != '/' ? '/' : '');
 }
 
 function pg_quote($column){
@@ -777,7 +783,7 @@ function createRandomPassword($passwordLength) {
 
 function get_remote_ip() {
 	$ip = '172.0.0.1';
-	if (strpos(getenv('REMOTE_ADDR'), '172.') === false) {
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {

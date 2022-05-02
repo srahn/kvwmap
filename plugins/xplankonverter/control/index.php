@@ -1032,11 +1032,9 @@ function go_switch_xplankonverter($go) {
 				$enumerationsliste = $row[0];
 			}
 			# wenn es mit _startet ist es ein array, dann das _ entfernen
-			$arrayEnum = bool;
+			$arrayEnum = false;
 			if(substr($enumerationsliste, 0, 1) === '_') {
 				$arrayEnum = true;
-			} else {
-				$arrayEnum = false;
 			}
 			$enumerationsliste = ltrim($enumerationsliste, '_');
 
@@ -1074,7 +1072,7 @@ function go_switch_xplankonverter($go) {
 				$enumerationsliste = $row[0];
 			}
 			# wenn es mit _startet ist es ein array, dann das _ entfernen
-			$arrayEnum = bool;
+			$arrayEnum = false;
 			if(substr($enumerationsliste, 0, 1) === '_') {
 				$arrayEnum = true;
 			} else {

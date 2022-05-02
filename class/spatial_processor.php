@@ -337,6 +337,11 @@ class spatial_processor {
 		
 			case 'split':{
 				$result = $this->split($polywkt1, $polywkt2);
+				$formvars['code2execute'] .= '
+					if ("' . $polywkt1 . '" != enclosingForm.pathwkt.value) {
+						top.message("Teilung erfolgreich. Zum Abspeichern Schnittlinie bearbeiten oder in neue Objekte aufteilen.");
+					}
+				';
 			}break;
 		
 			case 'add':{
@@ -397,9 +402,11 @@ class spatial_processor {
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
-			$result .= '█update_geometry();';
+			$formvars['code2execute'] = 'update_geometry();' . $formvars['code2execute'];
 		}
-		if($formvars['code2execute'] != '')$result .= '█'.$formvars['code2execute'];
+		if ($formvars['code2execute'] != '') {
+			$result .= '█'.$formvars['code2execute'];
+		}
 		echo $result;
 	}
 	
