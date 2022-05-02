@@ -9579,7 +9579,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
 			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
-			$this->formvars['geomtype'] = $geomtypes[$this->formvars['Datentyp']];
+			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 
 		if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
