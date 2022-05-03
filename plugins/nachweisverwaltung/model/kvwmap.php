@@ -95,7 +95,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
