@@ -16,7 +16,8 @@ $lenris = new LENRIS($database);
 
 /*
 	status:
-	0 - Ruhe
+ -1	- pausiert
+	0 - warte auf Synchronisation
 	1 - Sync angefordert (setzen über GUI)
 	2 - Sync läuft
 	3 - Erstimport angefordert	(setzen über GUI)

@@ -535,7 +535,7 @@ class GUI {
 											</tr>';
 							}
 						}
-						if ($this->formvars['layer_id'] < 0) {
+						if ($this->formvars['layer_id'] < 0 AND $layer[0]['Datentyp'] != MS_LAYER_RASTER) {
 							$this->result_colors = $this->database->read_colors();
 							for ($i = 0; $i < count($this->result_colors); $i++) {
 								$color_rgb = $this->result_colors[$i]['red'].' '.$this->result_colors[$i]['green'].' '.$this->result_colors[$i]['blue'];
@@ -757,7 +757,9 @@ echo '			</table>
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
-				$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+				if (!empty($classes[0]['Style'])) {
+					$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
+				}
 				if($classes[0]['Label'] == NULL){
 					$empty_label = new stdClass();
 					$empty_label->font = 'arial';
@@ -1470,9 +1472,14 @@ echo '			</table>
 		$polygons = explode('||', $this->formvars['free_polygons']);
 		for($i = 0; $i < count($polygons)-1; $i++){
 			$parts = explode('|', $polygons[$i]);
-			$wkt = "POLYGON((" . $parts[0]."))";
-			$style = $parts[1];
-			$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+			if (substr_count($parts[0], ',') > 2) {
+				$wkt = "POLYGON((" . $parts[0]."))";
+				$style = $parts[1];
+				$this->addFeatureLayer('free_polygon'.$i, MS_LAYER_POLYGON, array($wkt), NULL, $style, $this->map_factor);
+			}
+			else {
+				$this->add_message('warning', 'Die Fläche muss aus mindestens drei Eckpunkten bestehen.');
+			}
 		}
 		$texts = explode('||', $this->formvars['free_texts']);
 		for($i = 0; $i < count($texts)-1; $i++){
@@ -3100,7 +3107,7 @@ echo '			</table>
 					header("Expires: 0");
 					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 					header("Pragma: public");
-					readfile(IMAGEPATH.$this->outputfile);
+					readfile(IMAGEPATH . $this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -3904,8 +3911,10 @@ echo '			</table>
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
+		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);
+			$sql = str_replace('= <requires>'.$attributenames[$i].'</requires>', " IN ('".$attributevalues[$i]."')", $sql);
+			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret=$layerdb->execSQL($sql,4,0);
@@ -4908,7 +4917,7 @@ echo '			</table>
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
@@ -5015,15 +5024,15 @@ echo '			</table>
 					break;
 					case ( # only for points
 						$this->attributes['form_element_type'][$i] == 'Winkel'
-					) : $kvps[] = $this->attributes['name'][$i] . " = " . $this->formvars['angle'];
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['angle'] ?: 'NULL');
 					break;
 					case ( # only for lines
 						$this->attributes['form_element_type'][$i] == 'Länge'
-					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['linelength'] . "'";
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['linelength'] ?: 'NULL');
 					break;
 					case ( # only for polygons
 						$this->attributes['form_element_type'][$i] == 'Fläche'
-					) : $kvps[] = $this->attributes['name'][$i] . " = '" . $this->formvars['area'] . "'";
+					) : $kvps[] = $this->attributes['name'][$i] . " = " . ($this->formvars['area'] ?: 'NULL');
 					break;
 				}
 			}
@@ -8518,7 +8527,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 						if (is_array($value)) {			# multible-Auswahlfelder
 							if(count($value) > 1){
-								$value = implode($value, '|');
+								$value = implode('|', $value);
 								if($operator == '=')$operator = 'IN';
 								else $operator = 'NOT IN';
 							}
@@ -8984,7 +8993,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									<select class="select quicksearch_field"
 									<?
 										if($this->attributes['req_by'][$i] != ''){
-											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'));" ';
+											echo 'onchange="update_require_attribute_(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['layer_id'].', new Array(\''.implode("','", $this->attributes['name']).'\'));" ';
 										}
 										else echo 'onchange="schnellsuche();" ';
 									?>
@@ -9073,7 +9082,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (value_of($this->formvars, 'CMD') == '' AND $saved_scale != NULL) {
 					$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 				}
-				$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+				$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 				if (in_array(value_of($this->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
 					$this->navMap($this->formvars['CMD']);
 				}
@@ -9571,7 +9580,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
 			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
-			$this->formvars['geomtype'] = $geomtypes[$this->formvars['Datentyp']];
+			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 
 		if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
@@ -10083,7 +10092,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->geomtype == 'MULTILINESTRING'
 					) {
 						#-----Polygoneditor und Linieneditor---#
-						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
 						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
@@ -11137,7 +11146,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->scaleMap($saved_scale);
 		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 		$this->data_import_export = new data_import_export();
 		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -11938,7 +11947,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		$showpolygon = true;
 		$setKeys = array();
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
 		if (
 			defined('LAYERNAME_FLURSTUECKE') AND
@@ -14048,8 +14057,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		return $result;
 	}
 
-	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+	/**
+	* Function move or copy uploaded files to the document path of the layer and returns the value for document attribute
+	* If upload_only_file_metadata of rolle is set, than insteat belated_file.jpg will be copied to layers document path
+	* If input field value = delete, the existing document will be deleted.
+	* If a file exists with another name, it will be deleted before copy or move the new to the document path
+	* @param $input_name Name of the files form field used to upload the file
+	* @param $doc_path Document path defined for the layer
+	* @param $doc_url Document url defined for the layer
+	* @param $options Options defined for the document attributes
+	* @param $attribute_names Names of the document attributes
+	* @param $attribute_values Values of the document attributes
+	* @param $layer_db The database object with connection to layers main table
+	*/
+	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db) {
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->user->rolle->upload_only_file_metadata == 1) {
 			$file = json_decode($this->formvars[$input_name]);
 			$_files = array(
@@ -16650,43 +16672,47 @@ class db_mapObj{
 		return $path;
   }
 
-  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname){
-		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
-		// sowie die URL des Dokuments, falls eine verwendet werden soll
+	/**
+	* Diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
+	* sowie die URL des Dokuments, falls eine verwendet werden soll
+	* Wenn eine SQL-Anfrage in Option des Dokument-Attributes definiert ist, diese Ausführen und den Dokumentpfad anpassen
+	*/
+	function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname) {
 		if ($doc_path == '') {
 			$doc_path = CUSTOM_IMAGE_PATH;
 		}
-		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
+		if (strtolower(substr($dynamic_path_sql, 0, 6)) == 'select') {
+			// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $dynamic_path_sql;
-			for ($a = 0; $a < count($attributenames); $a++){
-				if($attributenames[$a] != '') {
-					$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+			for ($a = 0; $a < count($attributenames); $a++) {
+				if ($attributenames[$a] != '') {
+					$sql = str_replace('$' . $attributenames[$a], $attributevalues[$a], $sql);
 				}
 			}
 			# echo '<p>SQL zur Abfrage des Dokumentenpfades: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
-			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
+			$doc_path .= $dynamic_path[0]; // der ganze Pfad mit Dateiname ohne Endung
 			if ($doc_url) {
 				$doc_url = $doc_url . $dynamic_path[0];
 			}
 			$path_parts = explode('/', $doc_path);
 			array_pop($path_parts);
-			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
+			$new_path = implode('/', $path_parts); // der evtl. neu anzulegende Pfad ohne Datei
 			@mkdir($new_path, 0777, true);
 		}
-		else{			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-			if(!$doc_url){
-				$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);
+		else { // andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+			if (!$doc_url) {
+				$filename = date('Y-m-d_H_i_s',time()) . '-' . rand(100000, 999999);
 			}
-			else{
-				$filename = $originalname.'-'.rand(100000, 999999);
+			else {
+				$filename = $originalname . '-' . rand(100000, 999999);
 				$doc_url .= $filename;
 			}
 			$doc_path .= $filename;
 		}
-    return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
-  }
+		return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
+	}
 
 	function getlayerdatabase($layer_id, $host) {
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id; exit;
@@ -16759,9 +16785,6 @@ class db_mapObj{
       $select = stristr($data,'(');
       $select = trim($select, '(');
       $select = substr($select, 0, strrpos($select, ')'));
-      if(strpos($select, 'select') != false){
-        $select = stristr($select, 'select');
-      }
     }
 		return replace_params(
 						$select,
@@ -16831,7 +16854,7 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name']); $i++) {
@@ -16917,19 +16940,13 @@ class db_mapObj{
 								# ------<required by>------
 								# -----<requires>------
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
-									if ($only_current_enums) {
-										# Ermittlung der Spalte, die als value dient
-										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
-										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 									}
-									if ($query_result != NULL) {
-										if ($query_result === 'all') {
-											# Ermittelt das Attribut das Abhängig ist
-											$attributes['requires'][$i] = get_first_word_after($attributes['options'][$i], '<requires', '>', '<');
-											# Liefert das SQL, welches das required Attribut im Select hat und kein WHERE um alle abzufragen
-											$requires_options = get_requires_options($attributes['options'][$i], $attributes['requires'][$i]);
-										}
-										else {
+									else {
+										if ($query_result != NULL) {
+											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
@@ -16939,22 +16956,12 @@ class db_mapObj{
 												$options = $attributes['options'][$i];
 												foreach ($attributes['req'][$i] as $attributename) {
 													if ($query_result[$k][$attributename] != '') {
-														if ($only_current_enums) {
-															/*
-															* In diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt,
-															* sondern nur die aktuellen Werte des Datensatzes
-															* (wird z.B. beim Daten-Export verwendet,
-															* da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
-															*/
-															$options = str_ireplace(
-																'where',
-																'where ' . $attribute_value_column . '::text = \'' . $query_result[$k][$attributes['name'][$i]] . '\' AND ',
-																$options
-															);
+														if (is_array($query_result[$k][$attributename])) {
+															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
 														$options = str_replace(
-															'<requires>' . $attributename.'</requires>',
-															"'" . $query_result[$k][$attributename] . "'",
+															'= <requires>' . $attributename.'</requires>',
+															" IN ('" . $query_result[$k][$attributename] . "')",
 															$options
 														);
 													}
@@ -16973,9 +16980,9 @@ class db_mapObj{
 												$attributes['dependent_options'][$i][$k] = $options;
 											}
 										}
-									}
-									else {
-										$attributes['options'][$i] = '';			# wenn kein Query-Result übergeben wurde, sind die Optionen leer
+										else {
+											$attributes['options'][$i] = '';			# wenn kein Query-Result übergeben wurde, sind die Optionen leer
+										}
 									}
 								}
 								# -----<requires>------
@@ -17212,12 +17219,12 @@ class db_mapObj{
 					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
 					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '".addslashes($attributes[$i]['default']) . "',
+					`default` = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
 					`order` = " . $i . "
 				ON DUPLICATE KEY UPDATE
 					real_name = '" . $attributes[$i]['real_name'] . "',
@@ -17226,12 +17233,12 @@ class db_mapObj{
 					`schema` = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".addslashes($attributes[$i]['constraints']) . "',
+					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
 					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '" . addslashes($attributes[$i]['default']) . "',
+					`default` = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
 					`order` = `order` + ".$insert_count."
 			";
 			#echo '<br>Sql: ' . $sql;
@@ -17770,7 +17777,7 @@ class db_mapObj{
 				'" . $formvars['user_id'] . "',
 				'" . $formvars['stelle_id'] . "',
 				'" . $formvars['aktivStatus'] . "',
-				'" . addslashes($formvars['Name']) . "',
+				'" . $this->db->mysqli->real_escape_string($formvars['Name']) . "',
 				'" . $formvars['Datentyp'] . "',
 				'" . $formvars['Gruppe'] . "',
 				'" . $formvars['Typ'] . "',
@@ -17951,6 +17958,15 @@ class db_mapObj{
 			}
 		}
 
+		# Hängt Character / an Attribute an wenn es am Ende fehlt
+		foreach(
+			array(
+				'document_path'
+			) AS $key
+		) {
+				$attribute_sets[] = "`" . $key . "` = '" . append_slash($formvars[$key]) . "'";
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -17964,7 +17980,6 @@ class db_mapObj{
 				'oid',
 				'Data',
 				'schema',
-				'document_path',
 				'document_url',
 				'ddl_attribute',
 				'tileindex',
@@ -18113,7 +18128,7 @@ class db_mapObj{
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['Data']) . ",
 					" . quote_or_null($formvars['schema']) . ",
-					" . quote_or_null($formvars['document_path']) . ",
+					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
 					" . quote($formvars['tileindex']) . ",
 					" . quote($formvars['tileitem']) . ",

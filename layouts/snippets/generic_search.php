@@ -153,10 +153,15 @@ function update_require_attribute(attributes, layer_id, attributenamesarray, sea
 	else prefix = '';
 	var attributenames = '';
 	var attributevalues = '';
+	var values = [];
 	for(i = 0; i < attributenamesarray.length; i++){
 		if(document.getElementById(prefix+'value_'+attributenamesarray[i]) != undefined){
 			attributenames += attributenamesarray[i] + '|';
-			attributevalues += document.getElementById(prefix+'value_'+attributenamesarray[i]).value + '|';
+			options = document.getElementById(prefix+'value_'+attributenamesarray[i]).selectedOptions;
+			if (options && options.length > 0) {
+				values = Array.from(options).map(({ value }) => value);
+			}
+			attributevalues += values.join("','") + '|';
 		}
 	}
 	attribute = attributes.split(',');

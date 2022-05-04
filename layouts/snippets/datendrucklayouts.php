@@ -712,6 +712,7 @@ function scrolltop(){
 														<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
 														<? } ?>
 														<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+														<option value="3" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 3)echo ' selected '; ?>>ab der 2. Seite auf jeder Seite</option>
 													</select>
 												</td>
 												<td align="right">

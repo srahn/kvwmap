@@ -96,9 +96,13 @@ class ddl {
 				$this->layout['texts'][$j]['posy'] != ''
 			) {	# nur Freitexte mit einem y-Wert werden geschrieben
 				if (
-					($type == 'fixed' AND $this->layout['texts'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR
+					($type == 'fixed' AND !in_array($this->layout['texts'][$j]['type'], [2, 3]) AND ($this->layout['type'] == 0 OR $this->layout['texts'][$j]['type'] == 1)) OR
 					($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['texts'][$j]['type'] == 0) OR
-					($type == 'everypage' AND $this->layout['texts'][$j]['type'] == 2)
+					($type == 'everypage' AND (
+																			$this->layout['texts'][$j]['type'] == 2 OR 
+																			($this->layout['texts'][$j]['type'] == 3 AND $this->pdf->getFirstPageId() != $this->pdf->currentContents)
+																		)
+					)
 				) {
 					if ($type != 'everypage' AND $this->page_overflow){
 						$this->pdf->reopenObject($this->record_startpage);		# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
@@ -162,10 +166,16 @@ class ddl {
 				#if($this->layout['type'] == 0)$this->page_overflow = false;			# if ???		muss auskommentiert bleiben, sonst ist die Karte im MVBIO-Drucklayout auf der zweiten Seite
 			}
 			# die Linie wurde noch nicht geschrieben und ist entweder eine feste Linie oder eine fortlaufende oder eine, der auf jeder Seite erscheinen soll
-    	if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
-				if(($type == 'fixed' AND $this->layout['lines'][$j]['type'] != 2 AND ($this->layout['type'] == 0 OR $this->layout['lines'][$j]['type'] == 1)) 
-				OR ($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['lines'][$j]['type'] == 0)
-				OR ($type == 'everypage' AND $this->layout['lines'][$j]['type'] == 2)){							
+			if(in_array($this->layout['lines'][$j]['id'], $this->remaining_lines) AND $this->layout['lines'][$j]['posy'] != ''){	# nur Linien mit einem y-Wert werden geschrieben
+				if (
+					($type == 'fixed' AND !in_array($this->layout['lines'][$j]['type'], [2, 3]) AND ($this->layout['type'] == 0 OR $this->layout['lines'][$j]['type'] == 1)) OR 
+					($type == 'running' AND $this->layout['type'] != 0 AND $this->layout['lines'][$j]['type'] == 0)	OR 
+					($type == 'everypage' AND (
+																			$this->layout['lines'][$j]['type'] == 2 OR 
+																			($this->layout['lines'][$j]['type'] == 3 AND $this->pdf->getFirstPageId() != $this->pdf->currentContents)
+																		)
+					)
+				) {							
 					$x = $this->layout['lines'][$j]['posx'] + $offsetx;
 					$y_orig = $y = $this->layout['lines'][$j]['posy'];
 					$endx = $this->layout['lines'][$j]['endposx'] + $offsetx;
@@ -223,6 +233,13 @@ class ddl {
 						$this->pdf->reopenObject($page_id_start);
 						$this->pdf->line($x, $y, $endx, $this->layout['margin_bottom']);
 						$this->pdf->closeObject();
+						$in_between_page_id = $this->getNextPage($page_id_start);
+						while ($in_between_page_id != $this->pdf->currentContents) {
+							$this->pdf->reopenObject($in_between_page_id);
+							$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $this->layout['margin_bottom']);
+							$this->pdf->closeObject();
+							$in_between_page_id = $this->getNextPage($in_between_page_id);
+						}
 						$this->pdf->line($x, $this->layout['height'] - $this->layout['margin_top'] + 10, $endx, $endy);
 					}
 					else{
@@ -1473,8 +1490,8 @@ class ddl {
 				if($formvars['font_'.$attributes['name'][$i]] == 'NULL')$formvars['font_'.$attributes['name'][$i]] = NULL;
 				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
 				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
 				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
@@ -1641,8 +1658,8 @@ class ddl {
 			for($i = 0; $i < count($attributes['name']); $i++){
 				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
 				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(real)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(real)$formvars['posy_'.$attributes['name'][$i]];
+				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
+				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
 				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
 				else $sql.= " ,offset_attribute = NULL";
 				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
@@ -1972,10 +1989,9 @@ class ddl {
 				<td align="left" valign="top">
 					<select style="width: 110px" name="texttype[]">
 						<option value="0">normal</option>';
-						#if($this->ddl->selectedlayout[0]['type'] != 0){
-							echo '<option value="1" '; if($texts[$i]['type'] == 1)echo ' selected '; echo '>fixiert</option>';
-						#}
-						echo '<option value="2" '; if($texts[$i]['type'] == 2)echo ' selected '; echo '>auf jeder Seite</option>
+						echo '<option value="1" '; if($texts[$i]['type'] == 1)echo ' selected '; echo '>fixiert</option>';
+						echo '<option value="2" '; if($texts[$i]['type'] == 2)echo ' selected '; echo '>auf jeder Seite</option>';
+						echo '<option value="3" '; if($texts[$i]['type'] == 3)echo ' selected '; echo '>ab der 2. Seite auf jeder Seite</option>
 					</select>
 				</td>
 				<td align="right">

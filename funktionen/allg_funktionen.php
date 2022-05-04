@@ -4,6 +4,16 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function urlencode2($str){
+	$str = rawurlencode($str);
+	$str = str_replace('%3F', '?', $str);
+	$str = str_replace('%26', '&', $str);
+	$str = str_replace('%3D', '=', $str);
+	$str = str_replace('%3A', ':', $str);
+	$str = str_replace('%2F', '/', $str);	
+	return $str;
+}
+
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
@@ -21,6 +31,10 @@ function quote($var, $type = NULL){
 
 function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
+}
+
+function append_slash($var) {
+	return $var . (trim($var) != '' AND substr(trim($var), -1) != '/' ? '/' : '');
 }
 
 function pg_quote($column){
@@ -771,11 +785,14 @@ function createRandomPassword($passwordLength) {
 
 function get_remote_ip() {
 	$ip = '172.0.0.1';
-	if (strpos(getenv('REMOTE_ADDR'), '172.') === false) {
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
 	}
 	return $ip;
 }

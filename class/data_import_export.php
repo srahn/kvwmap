@@ -246,6 +246,7 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 			$sql = "
 				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
@@ -635,7 +636,7 @@ class data_import_export {
 			$values = explode($formvars['delimiter'], $row);
 			$x = str_replace(',', '.', $values[$index['x']]);
 			$y = str_replace(',', '.', $values[$index['y']]);
-			array_walk($values, function(&$value, $key){$value = "E'" . addslashes(utf8_encode($value)) . "'";});
+			array_walk($values, function(&$value, $key){$value = "E'" . pg_escape_string(utf8_encode($value)) . "'";});
 			$sql.= '
 				INSERT INTO ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename .
 				'("' . implode('", "', $table_columns) . '", the_geom)
@@ -886,7 +887,7 @@ class data_import_export {
 	function export($formvars, $stelle, $user, $mapdb) {
 		#echo '<br>export formvars: ' . print_r($formvars, true);
 		$this->formvars = $formvars;
-		$this->layerdaten = $stelle->getqueryablePostgisLayers(NULL, 1);
+		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
 		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
@@ -969,6 +970,29 @@ class data_import_export {
 		}
 		return $ret;
 	}
+		
+	function adjustGeometryType($database, $schema, $table, $epsg){
+		$sql = "
+			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
+		";
+		$ret = $database->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+			$rs = pg_fetch_row($ret[1]);
+			if ($rs[0] == 0) {
+				$sql = "
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+				";
+				$ret = $database->execSQL($sql,4, 0);
+				if (!$ret[0]) {
+					$rs = pg_fetch_row($ret[1]);
+					$sql = "
+						ALTER TABLE " . $schema . "." . $table . " ALTER the_geom TYPE geometry(" . $rs[0] . ", " . $epsg . ") USING ST_GeometryN(the_geom, 1)
+					";
+					$ret = $database->execSQL($sql,4, 0);
+				}
+			}
+		}
+	}	
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
@@ -1146,7 +1170,6 @@ class data_import_export {
 		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
-
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);
@@ -1388,7 +1411,7 @@ class data_import_export {
 						while ($rs=pg_fetch_assoc($ret[1])){
 							$result[] = $rs;
 						}
-						$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
+						$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 50000 ? true : false));
 						$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
 						$exportfile = $exportfile.'.csv';
 						$fp = fopen($exportfile, 'w');

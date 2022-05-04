@@ -1508,7 +1508,7 @@ function mouseup(evt){
 		dir_arrow.setAttribute("transform", "rotate("+angle+", 0 0)");
 	}
 	
-	function draw_point() {
+	function draw_point(){
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	  if(polygonfunctions == true){
 		 	if(enclosingForm.secondpoly.value == "true"){
@@ -1522,11 +1522,18 @@ function mouseup(evt){
 	}
 
 	// ------------------------texteinfuegepunkt setzen-----------------------------
-	function choose(worldx, worldy) {
+	function choose(worldx, worldy){
 	  // neuen punkt setzen
 		textx = worldx;
 		texty = worldy;
 	  sendBWlocation(worldx, worldy);
+	}
+	
+	function restart(){
+		textx = null;
+		texty = null;
+	  sendBWlocation(null, null);
+		redrawpoint();
 	}
 	';
 
@@ -2418,7 +2425,7 @@ function mouseup(evt){
 	}
 	
 	function split_geometry(){
-		applypolygons();
+		applypolygons(false);
 		remove_second_line();
 		clear_first_line();
 		enclosingForm.last_doing.value = "split_geometry";
@@ -3166,7 +3173,7 @@ function mouseup(evt){
 		redraw();
 	}
 
-	function applypolygons(){
+	function applypolygons(isvalid_check = true){
 		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
@@ -3175,7 +3182,9 @@ function mouseup(evt){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 			}
 		}
-		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		if (isvalid_check) {
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		}
 		remove_second_poly();
 	}
 	
@@ -3657,7 +3666,14 @@ $measurefunctions = '
 				
 	function deletebuttons($strUndo, $strDelete){
 		global $last_x;
-		$deletebuttons = '
+		$deletebuttons = removebuttons($strDelete);
+		$deletebuttons.= undobuttons($strUndo);
+		return $deletebuttons;
+	}
+	
+	function removebuttons($strDelete){
+		global $last_x;
+		$removebuttons = '
 	      <g id="new" onmousedown="restart();" transform="translate('.$last_x.' 0 )">
 					<rect id="new0" onmouseover="show_tooltip(\''.$strDelete.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(4 5) scale(0.8)">
@@ -3681,7 +3697,12 @@ $measurefunctions = '
 					</g>
 	      </g>';
 		$last_x += 36;
-		$deletebuttons.= '
+		return $removebuttons;
+	}
+	
+	function undobuttons($strUndo){
+		global $last_x;
+		$undobuttons = '
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate('.$last_x.' 0)">
 					<rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(5 5) scale(1)">
@@ -3696,8 +3717,8 @@ $measurefunctions = '
 	      </g>
 		';
 		$last_x += 36;
-		return $deletebuttons;
-	}
+		return $undobuttons;
+	}	
 	
 	function polygonbuttons($strDrawPolygon, $strCutByPolygon){
 		global $last_x;

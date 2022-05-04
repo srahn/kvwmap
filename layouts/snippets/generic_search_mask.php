@@ -140,12 +140,11 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							case 'Auswahlfeld' : case 'Radiobutton' : {	?>
 								<select 
 <?
-								if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['req_by'][$i] != '' OR substr($this->attributes['type'][$i], 0, 1) == '_'){		# bei WFS-Layern, abhängigen Auswahlfeldern oder Array-Typen keine multible Auswahl
-									echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode($this->attributes['name'], "','").'\'), '.$searchmask_number.');" ';
-									$array = '';
-								} else {
+								echo 'onchange="update_require_attribute(\''.$this->attributes['req_by'][$i].'\','.$this->formvars['selected_layer_id'].', new Array(\''.implode("','", $this->attributes['name']).'\'), '.$searchmask_number.');" ';
+								$array = '';
+								if($this->layerset[0]['connectiontype'] != MS_WFS AND substr($this->attributes['type'][$i], 0, 1) != '_'){		# bei WFS-Layern oder Array-Typen keine multible Auswahl
 									$array = '[]';
-									echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'300px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
+									echo ' multiple="true" size="1" style="height: 25px;z-index:'.($z_index-=1).';position: absolute; top: 0px; width: 293px" onmousedown="if(this.style.height==\'25px\'){this.style.height=\'180px\';preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height=\'25px\';scrollToSelected(this);}"';
 								}
 ?>
 								id="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i]; ?>" name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>

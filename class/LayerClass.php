@@ -13,9 +13,9 @@ class LayerClass extends MyObject {
 		return $class->find_by($by, $id);
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$layer_class = new LayerClass($gui);
-		return $layer_class->find_where($where);
+		return $layer_class->find_where($where, $order);
 	}
 
 	function ret($mm) {
@@ -56,12 +56,12 @@ class LayerClass extends MyObject {
 		#echo '<br>found ' . count($styles2class) . ' styles2class';
 		#echo '<br>first style_id: ' . $styles2class[0]->get('style_id');
 		$layer_style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
-		#echo '<br>Class: ' . $this->get('Class_ID') . ' first style: ' . print_r($layer_style->data, true);
+
 		return $layer_style;
 	}
 
 	function get_layerdef($classitem = null, $datentyp = 0) {
-		#echo 'LayerClass->get_layerdef';
+		#echo 'get_layerdef for Class: ' . $this->get('Name') . '(' . $this->get('Class_ID') . ')';
 
 		if ($this->get('Expression') == '') {
 			$def = '';
@@ -76,14 +76,14 @@ class LayerClass extends MyObject {
 			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
 		}
 
-		#echo '<br>getLayerdef vor class: ' . $this->get('Class_ID');
 		$first_style = $this->get_first_style($datentyp);
-		#echo '<br>class: ' . $this->get('Name');
+
 		$layerdef = (Object) array(
 			'def' => $def,
 			'name' => $this->get('Name')
 		);
-		if ($first_style !== '') {
+
+		if (property_exists($first_style, 'data') AND count($first_style->data) > 0) {
 			if ($first_style->has_icon()) {
 				$layerdef->icon = $first_style->get_icondef();
 			}

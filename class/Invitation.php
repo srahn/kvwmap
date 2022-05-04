@@ -62,19 +62,17 @@ class Invitation extends MyObject {
 			'&language=' . $this->gui->user->rolle->language;
 		$msg = $this->get('email') . 
 '?subject=Einladung zur Registrierung bei ' . TITLE .
-'&body=' . rawurlencode($strInvitationHeader . ' ' . $this->get('vorname') . ' ' . $this->get('name') . ',
+'&body=' . rawurlencode($strInvitationHeader . ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',
 
-' . $strInvitaiionText . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') .  '
+' . $strInvitationText . '
 
 ' .  $strInvitationLink . ':
+
 ' . $link . '
 
-' . $strInvitationLinkAlternative . ' ' . TITLE . '.
+' . $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '
 
-' . $strInvitationAfterLinkText . '
-
-' . $strInvitationQuestionsTo . '
-' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ' E-Mail: ' . $this->inviter->get('email') . '
+' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . '
 
 ' . $strInvitationAutomationText);
 		return $msg;

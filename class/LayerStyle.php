@@ -19,6 +19,10 @@ class LayerStyle extends MyObject {
 		return $style->find_where($where);
 	}
 
+	/*
+	* Function return true if the layer style has a symbolname
+	* the symbolname is in symbolset and the symbol is of type 1003 (png) or 1006 (svg)
+	*/
 	function has_icon() {
 		$map = new mapObj('');
 		#echo '<br>symbolset: ' . SYMBOLSET;
@@ -29,7 +33,7 @@ class LayerStyle extends MyObject {
 			return false;
 		}
 		$symbol = $map->getSymbolObjectById($symbol_index);
-		return ($symbol->type == '1006');
+		return in_array($symbol->type, array('1003', '1006'));
 	}
 
 	function get_icondef() {

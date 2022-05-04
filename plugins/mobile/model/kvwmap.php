@@ -574,6 +574,10 @@
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
 
+	/*
+	* ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
+	* to move the uploaded images to layers document path
+	*/
 	$GUI->mobile_upload_image = function($layer_id, $files) use ($GUI) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
@@ -589,7 +593,14 @@
 				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
-		$doc_path = $layer[0]['document_path'];
+
+		$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
+		if (substr($doc_path, -1) != '/') {
+			$doc_path .= '/';
+		}
+		if (!is_dir($doc_path)) {
+			@mkdir($doc_path, 0777, true);
+		}
 
 		if ($files['image'] == '') {
 			return array(
