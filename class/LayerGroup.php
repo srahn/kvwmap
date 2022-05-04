@@ -44,6 +44,7 @@ class LayerGroup extends MyObject {
 	}
 
 	public static function find_top_parents($gui, $stelle_id) {
+		#echo '<br>find_top_parents for stelle_id: ' . $stelle_id;
 		$group = new LayerGroup($gui);
 		return $group->find_by_sql(array(
 			'select' => 'id, Gruppenname, icon, `order`',
@@ -66,30 +67,43 @@ class LayerGroup extends MyObject {
 		));
 	}
 
-	public function find_sub_groups() {
-		return $this->find_by_sql(array(
-			'select' => "child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
-			'from' => "`u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe`",
-			'where' => "parent.`id` = " . $this->get('id'),
-			'order' => "child.`order`"
-		));
+	public function find_sub_groups($stelle_id = null) {
+		if ($stelle_id == null) {
+			return $this->find_by_sql(array(
+				'select' => "child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
+				'from' => "`u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe`",
+				'where' => "parent.`id` = " . $this->get('id'),
+				'order' => "child.`order`"
+			));
+		}
+		else {
+			// z.B. SELECT DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order` FROM `u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe` JOIN `layer` l ON child.`id` = l.`Gruppe` JOIN `used_layer` ul ON l.`Layer_ID` = ul.`Layer_ID` WHERE parent.`id` = 7 AND ul.Stelle_ID = 7 ORDER BY child.`order` 
+
+			return $this->find_by_sql(array(
+				'select' => "DISTINCT child.`id`, child.`Gruppenname`, child.`icon`, child.`order`",
+				'from' => "`u_groups` parent JOIN `u_groups` child ON parent.`id` = child.`obergruppe`" . ($stelle_id != null ? " JOIN `layer` l ON child.`id` = l.`Gruppe` JOIN `used_layer` ul ON l.`Layer_ID` = ul.`Layer_ID`" : ''),
+				'where' => "parent.`id` = " . $this->get('id') . ($stelle_id != null ? " AND ul.Stelle_ID =" . $stelle_id : ''),
+				'order' => "child.`order`"
+			));
+		}
 	}
 
-	function get_layerdef($thema) {
+	function get_layerdef($thema, $stelle_id = null) {
 		$thema = ($thema != '' ? $thema . '|' : '') . $this->get('Gruppenname');
 		#echo '<br>thema: ' . $thema;
 		$layerdef = (Object) array(
 			'thema' => $thema,
 			'icon' => $this->get('icon')
 		);
-		$sub_groups = $this->find_sub_groups();
+		$sub_groups = $this->find_sub_groups($stelle_id);
 		if (count($sub_groups) > 0) {
+			#echo '<br>loop through sub_groups with thema: ' . $thema . ' in stelle_id: ' . $stelle_id;
 			$layerdef->themes = array_map(
-				function($sub_group, $parent_thema) {
-					return $sub_group->get_layerdef($parent_thema);
+				function($sub_group) use ($thema, $stelle_id) {
+					#echo '<br>call get_layerdef of sub_group id: ' . $sub_group->get('id') . ' with thema: ' . $thema . ' in stelle_id: ' . $stelle_id;
+					return $sub_group->get_layerdef($thema, $stelle_id);
 				},
-				$sub_groups,
-				array_fill(0, count($sub_groups), $thema)
+				$sub_groups
 			);
 		}
 		return $layerdef;

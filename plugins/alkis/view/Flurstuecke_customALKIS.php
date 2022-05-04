@@ -340,10 +340,16 @@ hide_versions = function(flst){
 									<? }
 									if($privileg_['karte']){ ?>
 											<tr>
-												<td align="right"><span class="fett"> Flurkarte/Ri&szlig;&nbsp;</span></td>
+												<td align="right"><span class="fett">Flurkarte/Ri&szlig;&nbsp;</span></td>
 												<td><?php echo $flst->Flurkarte; ?></td>
 											</tr>
-											<? }
+									<? }
+									if($privileg_['antragsnummer']){ ?>
+											<tr>
+												<td align="right"><span class="fett">Antragsnummer&nbsp;</span></td>
+												<td><?php echo $flst->antragsnummer; ?></td>
+											</tr>
+									<? }
 											if($privileg_['status']){ ?>
 											<tr>
 												<td align="right"><span class="fett"> Status&nbsp;</span></td>

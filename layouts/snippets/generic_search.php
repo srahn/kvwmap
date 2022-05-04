@@ -228,6 +228,13 @@ $(document).on('click', function(e){
 		}
 	}
 });
+
+function clear(){
+	var fields = document.querySelectorAll('.gsm_tabelle_td_third select, .gsm_tabelle_td_third input');
+	[].forEach.call(fields, function (field){	// noch laufende getlegend-Requests abbrechen
+		field.value = '';
+	});
+}
   
 </script>
 <style>

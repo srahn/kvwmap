@@ -1459,12 +1459,12 @@ class stelle {
 		$sql.=' WHERE g2r.stelle_ID='.$this->id;
 		$sql.=' AND g2r.id = g.id';
 		$sql.=' ORDER BY `order`';
-		#echo $sql;
+		#echo $sql; exit;
     $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
     $this->database->execSQL($sql);
     if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while ($rs=$this->database->result->fetch_assoc()) {
-      $groups[$rs['id']]=$rs;
+      $groups[$rs['id']] = array_merge($groups[$rs['id']] ?: [], $rs);
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
     return $groups;
@@ -1788,6 +1788,7 @@ class stelle {
 		include_once(CLASSPATH . 'Layer.php');
 		include_once(CLASSPATH . 'LayerGroup.php');
 
+		$stelle_id = $this->id;
 		$stellendaten = $this->getstellendaten();
 		$stellenextent = $this->MaxGeorefExt;
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
@@ -1809,8 +1810,9 @@ class stelle {
 			),
 			'default_wms_legend_icon' => 'img/noun_Globe.svg',
 			'themes' => array_map(
-				function($parent) {
-					return $parent->get_layerdef('');
+				function($parent) use ($stelle_id) {
+					#echo '<br>call get_layerdef for group: ' . $parent->get('id') . ' in stelle_id: ' . $stelle_id;
+					return $parent->get_layerdef('', $stelle_id);
 				},
 				LayerGroup::find_top_parents($this->database->gui, $this->id)
 			),
@@ -1824,6 +1826,9 @@ class stelle {
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					$layer->minScale = $layer2Stelle->get('minscale');
+					$layer->maxScale = $layer2Stelle->get('maxscale');
+					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
 					return $layer->get_overlays_def($this->id);
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
