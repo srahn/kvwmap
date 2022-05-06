@@ -535,9 +535,8 @@
 							--RAISE notice 'schema in search_path %', search_path_schema;
 						END IF;
 
-						IF strpos(lower(part), 'delete from \"' || TG_TABLE_NAME || '\"') = 1 THEN
-						  part := replace(part, 'delete from \"' || TG_TABLE_NAME || '\"', 'delete from ' || TG_TABLE_NAME);
-						END IF;
+						part := replace(part, ' "' || TG_TABLE_NAME || '" ', ' ' || TG_TABLE_NAME || ' ');
+						--RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
 
 						IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
 							_sql := part;
@@ -548,7 +547,7 @@
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
 					--RAISE notice 'sql nach replace tablename by schema and tablename: %', _sql;
 
-					RAISE notice 'old uuid: %', OLD.uuid;
+					--RAISE notice 'old uuid: %', OLD.uuid;
 
 					_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
 					--RAISE notice 'sql nach replace where by uuid: %', _sql
