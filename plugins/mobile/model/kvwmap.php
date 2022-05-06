@@ -589,7 +589,14 @@
 				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
-		$doc_path = $layer[0]['document_path'];
+
+		$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
+		if (substr($doc_path, -1) != '/') {
+			$doc_path .= '/';
+		}
+		if (!is_dir($doc_path)) {
+			@mkdir($doc_path, 0777, true);
+		}
 
 		if ($files['image'] == '') {
 			return array(
