@@ -95,7 +95,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -127,7 +127,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -148,7 +148,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -171,7 +171,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -718,6 +718,7 @@
 	};
 	
 	$GUI->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
+		$searches = array();
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);

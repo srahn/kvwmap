@@ -3914,6 +3914,7 @@ echo '			</table>
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
 		for($i = 0; $i < count($attributenames); $i++){
 			$sql = str_replace('= <requires>'.$attributenames[$i].'</requires>', " IN ('".$attributevalues[$i]."')", $sql);
+			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);	# fallback
 		}
 		#echo $sql;
 		@$ret=$layerdb->execSQL($sql,4,0);
@@ -9579,7 +9580,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
 			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
-			$this->formvars['geomtype'] = $geomtypes[$this->formvars['Datentyp']];
+			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 
 		if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
@@ -16945,6 +16946,7 @@ class db_mapObj{
 									}
 									else {
 										if ($query_result != NULL) {
+											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
