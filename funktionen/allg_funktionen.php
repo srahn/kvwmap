@@ -180,7 +180,7 @@ function get_exif_data($img_path) {
 					+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
 				) : NULL),
 				'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
-				'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) AND substr($exif['DateTimeOriginal'], 0 , 4) != '0000' ? (
+				'Erstellungszeit' => ((array_key_exists('DateTimeOriginal', $exif) AND substr($exif['DateTimeOriginal'], 0 , 4) != '0000') ? (
 						substr($exif['DateTimeOriginal'], 0 , 4) . '-'
 					. substr($exif['DateTimeOriginal'], 5, 2) . '-'
 					. substr($exif['DateTimeOriginal'], 8, 2) . ' '
