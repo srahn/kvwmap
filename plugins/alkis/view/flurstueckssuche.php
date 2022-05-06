@@ -154,6 +154,13 @@ Eingabeformate:
 		</div>
 		<?	} ?>
 	</div>
+	<? if (!$this->formvars['ALK_Suche']) { ?>
+	<div style="text-align: left; line-height: 24px">
+		<input type="radio" onchange="document.GUI.submit();" name="history_mode" id="aktuell" value="aktuell" <? if ($this->formvars['history_mode'] == 'aktuell')echo 'checked="true"'; ?>><label for="aktuell">nur aktuelle Fluren/Flurstücke</label><br>
+		<input type="radio" onchange="document.GUI.submit();" name="history_mode" id="historisch" value="historisch" <? if ($this->formvars['history_mode'] == 'historisch')echo 'checked="true"'; ?>><label for="historisch">nur historische Fluren/Flurstücke</label><br>
+		<input type="radio" onchange="document.GUI.submit();" name="history_mode" id="beides" value="beides" <? if ($this->formvars['history_mode'] == 'beides')echo 'checked="true"'; ?>><label for="beides">aktuelle und historische</label>
+	</div>
+	<? } ?>
 </div>
 <div id="import1">
 	<a id="importlink" href="javascript:showimport();"><?php echo $strImportList; ?></a>

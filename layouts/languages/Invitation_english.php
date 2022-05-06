@@ -1,6 +1,6 @@
 <?php
-	$strInvitationHeader = 'Invitation for';
-	$strInvitaiionText = 'You have been invited to collaborate in WebGIS by';
+	$strInvitationHeader = 'Dear';
+	$strInvitationText = 'You have been invited to collaborate in the application "' . TITLE . '".';
 	$strInvitationLink = 'To accept the invitation, please click on the link below';
 	$strInvitationLinkAlternative = 'If no browser window opens, you can also manually open a browser window and copy the link into the address bar. Please make sure to copy the complete text.
 
