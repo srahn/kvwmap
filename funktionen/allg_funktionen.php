@@ -156,36 +156,38 @@ function url2filepath($url, $doc_path, $doc_url) {
 * @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
 function get_exif_data($img_path) {
-	$exif = @exif_read_data($img_path, 'EXIF, GPS');
-	if ($exif === false) {
-		return array(
-			'success' => false,
-			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
-		);
-	}
-	else {
-#		echo '<br>' . print_r($exif['GPSLatitude'], true);
-#		echo '<br>' . print_r($exif['GPSLongitude'], true);
-#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
-		return array(
-			'success' => true,
-			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
-				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
-				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
-				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
-			) . ' ' . (
-				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
-				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
-				+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
-			) : NULL),
-			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
-			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
-					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
-				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
-				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
-				. substr($exif['DateTimeOriginal'], 11)
-			) : NULL)
-		);
+	if ($img_path != '') {
+		$exif = @exif_read_data($img_path, 'EXIF, GPS');
+		if ($exif === false) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+			);
+		}
+		else {
+	#		echo '<br>' . print_r($exif['GPSLatitude'], true);
+	#		echo '<br>' . print_r($exif['GPSLongitude'], true);
+	#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+			return array(
+				'success' => true,
+				'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+					floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+					+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+					+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
+				) . ' ' . (
+					floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+					+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+					+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
+				) : NULL),
+				'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+				'Erstellungszeit' => ((array_key_exists('DateTimeOriginal', $exif) AND substr($exif['DateTimeOriginal'], 0 , 4) != '0000') ? (
+						substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+					. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+					. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+					. substr($exif['DateTimeOriginal'], 11)
+				) : NULL)
+			);
+		}
 	}
 }
 
