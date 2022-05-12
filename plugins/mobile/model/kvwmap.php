@@ -527,30 +527,32 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					-- replace horizontal tabs, new lines and carriage returns
-					part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						-- replace horizontal tabs, new lines and carriage returns
+						part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+							search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+							--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						part := replace(part, ' \"' || TG_TABLE_NAME || '\" ', ' ' || TG_TABLE_NAME || ' ');
+						--RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
+
+						IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+							_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'sql nach replace tablename by schema and tablename: %', _sql;
 
-					RAISE notice 'old uuid: %', OLD.uuid;
+					--RAISE notice 'old uuid: %', OLD.uuid;
 
 					_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
-					--RAISE notice 'sql nach replace where oid by where uuid 
+					--RAISE notice 'sql nach replace where by uuid: %', _sql
 
-					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'Write deta sql: %', _sql;
 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
@@ -574,6 +576,10 @@
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
 
+	/*
+	* ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
+	* to move the uploaded images to layers document path
+	*/
 	$GUI->mobile_upload_image = function($layer_id, $files) use ($GUI) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
@@ -589,7 +595,14 @@
 				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
-		$doc_path = $layer[0]['document_path'];
+
+		$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
+		if (substr($doc_path, -1) != '/') {
+			$doc_path .= '/';
+		}
+		if (!is_dir($doc_path)) {
+			@mkdir($doc_path, 0777, true);
+		}
 
 		if ($files['image'] == '') {
 			return array(
