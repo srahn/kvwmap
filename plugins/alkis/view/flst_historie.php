@@ -45,13 +45,14 @@
 					.data(json.links)
 					.enter().append("line")
 					//.attr("class", "fh-link")
-					.attr('class', function(d) { return "fh-link f" + d.target.fkz; });
+					.attr('class', function(d) { return "fh-link f" + d.target.fkz + " f" + d.source.fkz; });
 
 			var node = svg.selectAll(".fh-node")
 					.data(json.nodes)
 					.enter().append("g")
 					.attr('class', function(d) { return d.fkz == '<? echo $this->formvars['flurstueckskennzeichen']; ?>' ? "fh-node requested" : "fh-node"; })
 					.attr('onmouseenter', function(d) { return "highlight_link('f" + d.fkz + "');"; })
+					.attr('onmouseleave', function(d) { return "dehighlight_link('f" + d.fkz + "');"; })
 					.call(force.drag);
 
 			json.links.forEach(function(link, i) {
@@ -119,9 +120,18 @@
 	}
 	
 	function highlight_link(fkz){
-		var links = document.querySelectorAll('.fh-link .' + fkz);
+		console.log('.fh-link .' + fkz);
+		var links = document.querySelectorAll('.fh-link.' + fkz);
 		[].forEach.call(links, function (link){
-			link.style = 'stroke-width: 4px;';
+			link.classList.add('highlighted');
+		});
+	}
+	
+	function dehighlight_link(fkz){
+		console.log('.fh-link .' + fkz);
+		var links = document.querySelectorAll('.fh-link.' + fkz);
+		[].forEach.call(links, function (link){
+			link.classList.remove('highlighted');
 		});
 	}
 
@@ -138,6 +148,11 @@
 .fh-link {
 	stroke: #ddd;
 	stroke-width: 2px;
+}
+
+.fh-link.highlighted{
+	stroke: #6e80b5;
+	stroke-width: 4px;
 }
 
 .fh-node text {
