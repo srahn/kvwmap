@@ -1290,7 +1290,7 @@ function mouseup(evt){
 			}
 			else{
 				top.document.getElementById(\'epsg_code\').value = viewer_epsg;
-				top.ahah("index.php", "go=spatial_processing&operation=transformPoint&point="+coords1+"&newSRID="+viewer_epsg+"&curSRID="+epsgcode+"&coordtype="+coordtype+"&code2execute=coord_input_submit();&resulttype=svgwkt", new Array(top.document.getElementById(\'input_coords\'), ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&operation=transformPoint&point="+coords2.join(\' \')+"&newSRID="+viewer_epsg+"&curSRID="+epsgcode+"&coordtype="+coordtype+"&code2execute=coord_input_submit();&resulttype=svgwkt", new Array(top.document.getElementById(\'input_coords\'), ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
