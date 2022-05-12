@@ -1,5 +1,12 @@
 <?
 
+	$GUI->flurstueckshistorie = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
+		$flst = new flurstueck($GUI->formvars['flurstueckskennzeichen'], $GUI->pgdatabase);
+		$GUI->flst_historie = $flst->getFlstHistorie();
+    $GUI->main = PLUGINS.'alkis/view/flst_historie.php';
+  };
+
 	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
     $Flurbezeichnung = '';
