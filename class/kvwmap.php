@@ -16885,7 +16885,7 @@ class db_mapObj{
 					$attributes['options'][$i],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->Stelle->id,
+					$stelle_id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
