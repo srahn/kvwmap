@@ -109,3 +109,4 @@
 	$strSharedFrom = "Shared from user";
 	$strSharedFromHelp = "Remove the ID when the layer should not be marked as shared by another user in the layer legend any longer.";
 	$strSizeUnits="Sizeunits";
+	$strIdentifierText="Identifier text";
