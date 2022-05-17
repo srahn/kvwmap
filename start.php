@@ -198,6 +198,14 @@ else {
 
 				if (is_new_password($GUI->formvars)) {
 					$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
+					array_walk(
+						$GUI->formvars,
+						function(&$formvar, $key, $database) {
+							$formvar = $database->mysqli->real_escape_string($formvar);
+						},
+						$database
+					);
+
 					$new_registration_err = checkRegistration($GUI);
 
 					if (is_registration_valid($new_registration_err)) {
