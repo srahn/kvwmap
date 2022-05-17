@@ -505,7 +505,13 @@
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
-					</tr>			
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="identifier_text" type="text" value="<?php echo $this->formvars['identifier_text']; ?>" size="50" maxlength="50">
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">

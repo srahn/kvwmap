@@ -4,6 +4,12 @@ function go_switch_alkis($go){
 	global $GUI;
 	switch($go){
 		
+		case "Flurstueckshistorie" : {
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			$GUI->flurstueckshistorie();
+			$GUI->output();
+		} break;
+		
 		case "ZoomToFlst" : {
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->loadMap('DataBase');

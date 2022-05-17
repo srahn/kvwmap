@@ -395,8 +395,18 @@ hide_versions = function(flst){
 														}
 													}  ?></td>
 											</tr>
-											<? } ?>
-											<?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
+											<? }
+											
+											if ($privileg_['nachfolger'] AND ($flst->Nachfolger != '' OR $flst->Vorgaenger != '')) { ?>
+											<tr>
+												<td align="right" valign="top"><span class="fett">Historie</span></td>
+												<td>
+													<a target="root" href="index.php?go=Flurstueckshistorie&flurstueckskennzeichen=<? echo $flst->FlurstKennz; ?>">anzeigen</a>
+												</td>
+											</tr>
+											<?	}
+											
+											if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
 											<tr>
 											<td align="right"><span class="fett">Vorgänger</span></td>
 											<td>
@@ -414,8 +424,8 @@ hide_versions = function(flst){
 												<? } ?>
 											</td>
 										</tr>
-										<? } ?>
-										<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '' AND $flst->Nachfolger[0]['nachfolger'] != 'BOV') { ?>
+										<? } 
+										if ($privileg_['nachfolger'] AND $flst->Nachfolger != '' AND $flst->Nachfolger[0]['nachfolger'] != 'BOV') { ?>
 										<tr>
 											<td align="right" valign="top"><span class="fett">Nachfolger</span></td>
 											<td>
