@@ -3904,7 +3904,7 @@ echo '			</table>
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
 		$attributes['options'][$this->formvars['attribute']] = str_replace('$user_id', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
-		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->stelle->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
@@ -4897,7 +4897,7 @@ echo '			</table>
 				}
 			}
 			else {
-				$this->add_message('error', $ret['err_msg']);
+				$this->add_message('error', $ret['msg']);
 			}
 			$this->PointEditor();
 		}
@@ -16079,6 +16079,7 @@ class db_mapObj{
 				rl.layer_id = ul.Layer_ID AND
 				l.Layer_ID = ul.Layer_ID AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
+				l.Datentyp != 5 AND 
 				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
@@ -16884,7 +16885,7 @@ class db_mapObj{
 					$attributes['options'][$i],
 					rolle::$layer_params,
 					$this->user->id,
-					$this->Stelle->id,
+					$stelle_id,
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
@@ -16945,6 +16946,7 @@ class db_mapObj{
 									}
 									else {
 										if ($query_result != NULL) {
+											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
 												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
@@ -17976,6 +17978,7 @@ class db_mapObj{
 				'pfad',
 				'maintable',
 				'oid',
+				'identifier_text',
 				'Data',
 				'schema',
 				'document_url',
@@ -18052,6 +18055,7 @@ class db_mapObj{
 					`pfad`,
 					`maintable`,
 					`oid`,
+					`identifier_text`,
 					`Data`,
 					`schema`,
 					`document_path`,
@@ -18124,6 +18128,7 @@ class db_mapObj{
 					" . quote_or_null($formvars['pfad']) . ",
 					" . quote_or_null($formvars['maintable']) . ",
 					" . quote_or_null($formvars['oid']) . ",
+					" . quote_or_null($formvars['identifier_text']) . ",
 					" . quote_or_null($formvars['Data']) . ",
 					" . quote_or_null($formvars['schema']) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
