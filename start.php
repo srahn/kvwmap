@@ -143,6 +143,9 @@ else {
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
 		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
 		if (has_width_and_height($GUI->formvars)) {
+			if (width_or_height_empty($GUI->formvars)) {
+				$GUI->formvars = set_width_or_height_default($GUI->formvars);
+			}
 			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
 			$gast = $userDb->create_new_gast($userDb->mysqli->real_escape_string($_REQUEST['gast']));
 			$GUI->formvars['login_name'] = $gast['username'];
@@ -195,6 +198,14 @@ else {
 
 				if (is_new_password($GUI->formvars)) {
 					$GUI->debug->write('Registrierung mit neuem Passwort.', 4, $GUI->echo);
+					array_walk(
+						$GUI->formvars,
+						function(&$formvar, $key, $database) {
+							$formvar = $database->mysqli->real_escape_string($formvar);
+						},
+						$database
+					);
+
 					$new_registration_err = checkRegistration($GUI);
 
 					if (is_registration_valid($new_registration_err)) {
@@ -581,7 +592,21 @@ function is_gast_login($formvars, $gast_stellen) {
 }
 
 function has_width_and_height($var) {
-	return (intval($var['browserwidth']) > 0 AND intval($var['browserheight'] > 0));
+	return (array_key_exists('browserwidth', $var) AND array_key_exists('browserheight', $var));
+}
+
+function width_or_height_empty($var) {
+	return (intval($var['browserwidth']) == 0 OR intval($var['browserheight']) == 0);
+}
+
+function set_width_or_height_default($var) {
+	if (intval($var['browserwidth']) == 0) {
+		$var['browserwidth'] = '800';
+	}
+	if (intval($var['browserheight']) == 0) {
+		$var['browserheight'] = '600';
+	}
+	return $var;
 }
 
 function is_login($formvars) {
