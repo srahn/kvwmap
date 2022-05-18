@@ -10,7 +10,7 @@ class Nutzer extends MyObject {
 
 	public static	function find_by_login_name($gui, $login_name) {
 		$user = new Nutzer($gui);
-		return $user->find_by('login_name', $login_name);
+		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {
