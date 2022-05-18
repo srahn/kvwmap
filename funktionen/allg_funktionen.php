@@ -1904,7 +1904,7 @@ function hidden_formvars_fields($formvars, $except = array()) {
 		}
 	}
 	foreach($params AS $key => $value) {
-		$html .= '<input type="hidden" name="' . $key . '" value="' . $value .'">';
+		$html .= '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) .'">';
 	}
 	return $html;
 }
