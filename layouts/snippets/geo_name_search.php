@@ -1,5 +1,13 @@
 <script type="text/javascript">
 	var search_requests = new Array();
+	var keypressed;
+	
+	function wait(){
+		var random = Math.random();
+		keypressed = random;
+		setTimeout(function(){if (keypressed == random) {startQuery();}}, 500);
+	}
+	
 	function startQuery(){
 		query = document.GUI.geo_name_query.value;
 		if (query.length > 3) {
@@ -13,7 +21,7 @@
 	}
 </script>
 <div id="search_div">
-	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeyup="startQuery();">
+	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeyup="wait();">
 </div>
 <div id="geo_name_search_result_div">
 </div>

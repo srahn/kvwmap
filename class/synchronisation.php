@@ -451,7 +451,8 @@ class synchro {
 						schema_name = '" . $schema_name ."' AND
 						table_name = '" . $table_name . "' AND
 						pull_from_version = " . $pull_from_version . "
-				);
+				)
+			ORDER BY version;
 		";
 		$log.=$sql;
 		#echo '<br>Sql: ' . $sql;
