@@ -393,8 +393,8 @@ function resizemap2window(){
 * @param string callback The name of the function called when the user confirmd the message
 */
 function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
-	console.log('Show Message: %o: ', messages);
-	console.log('function message with callback: %o: ', callback);
+	//console.log('Show Message: %o: ', messages);
+	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');

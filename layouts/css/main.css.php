@@ -1523,10 +1523,15 @@ a:hover .preview_image{
 	border: none;
 }
 
-.datensatz_header{
+.datensatz_header {
 	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
 	#background-color:<? echo BG_GLEHEADER; ?>;
 	border-bottom: 1px solid #bbb;
+}
+
+.identifier_text {
+	font-family: SourceSansPro3;
+	font-size: 17;
 }
 
 #message_box {

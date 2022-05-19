@@ -424,6 +424,50 @@ class flurstueck {
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
   }
 	
+	function getFlstHistorie(){
+		$sql = "
+			with recursive child_tree (all_fkz, fkz, zde, nkz, vkz) as (
+			select
+				array_cat(vorgaengerflurstueckskennzeichen, nachfolgerflurstueckskennzeichen),
+				flurstueckskennzeichen as fkz,
+				zeitpunktderentstehung as zde,
+				nachfolgerflurstueckskennzeichen as nkz,
+				vorgaengerflurstueckskennzeichen as vkz
+			from
+				alkis.pp_flurstueckshistorie
+			where
+				flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+			union all
+			select
+				array_cat(all_fkz, array_cat(f.vorgaengerflurstueckskennzeichen, f.nachfolgerflurstueckskennzeichen)),
+				f.flurstueckskennzeichen,
+				f.zeitpunktderentstehung,
+				f.nachfolgerflurstueckskennzeichen,
+				f.vorgaengerflurstueckskennzeichen
+			from
+				child_tree ct
+				join alkis.pp_flurstueckshistorie f on (select count(*) from unnest(ct.all_fkz) u (all_fkz) where u.all_fkz = f.flurstueckskennzeichen) < 2 AND (f.flurstueckskennzeichen= any(ct.nkz) OR f.flurstueckskennzeichen = any(ct.vkz))
+			)
+			SELECT distinct on (fkz)
+				fkz,
+				concat_ws(
+					'/',
+					substring(fkz from 10 for 5)::int,
+					nullif(substring(fkz from 15 for 4), '____')::int
+				) as name, 
+				coalesce(CASE WHEN date_part('DOY', zde) = 1 THEN date_part('year', zde)::text ELSE zde::text END, 'n.n.') as zde, 
+				to_json(nkz) as nkz 
+			FROM
+				child_tree
+			";
+		#echo $sql;
+    $ret=$this->database->execSQL($sql, 4, 0);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$flst_historie[] = $rs;
+		}
+    return $flst_historie;
+	}
+	
 	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
 			$Eigentuemer .= $indent;
