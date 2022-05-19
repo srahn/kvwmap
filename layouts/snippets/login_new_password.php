@@ -39,7 +39,7 @@
 							<tr>
 								<td><span class="px16">Neues Passwort: </span></td>
 								<td>
-									<input style="width: 130px;" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/>
+									<input style="width: 130px;" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password" autocomplete="off"/>
 									<i title="Sicheres Passwort generieren" class="fa fa-random pointer" aria-hidden="true" style="margin-left: 5px" onclick="setRandomPassword()"></i>
 									<i title="Sichtbarkeit des Passwortes" style="margin-left: 5px" class="fa fa-eye-slash pointer" aria-hidden="true" onclick="togglePasswordVisibility(this, 'new_password', 'new_password_2')"></i>
 									<i title="Password in Zwischenablage kopieren" class="fa fa-clipboard pointer" aria-hidden="true" onclick="copyToClipboard($('#new_password').val())"></i>
@@ -47,7 +47,7 @@
 							</tr>
 							<tr>
 								<td><span class="px16">Wiederholung: </span></td>
-								<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/></td>
+								<td><input style="width: 130px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2" autocomplete="off"/></td>
 							</tr>
 							<tr>
 								<td style="height: 40px" colspan="2">Ihre IP-Adresse: <?php echo	 $remote_addr = getenv('REMOTE_ADDR'); ?></td>

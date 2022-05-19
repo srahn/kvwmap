@@ -307,9 +307,8 @@ class GUI {
 				$error_msg = 'Die Datei ' . $snippet_path . $snippet_file . ' existiert nicht. Geben Sie einen anderen Namen im Parameter snippet an!';
 			}
 		}
-
 		if (empty($error_msg)) {
-			if (strtolower($this->formvars['format']) == 'json') {
+			if (strtolower($this->formvars['format']) == 'json' OR strtolower($this->formvars['mime_type']) == 'xml') {
 				include_once($snippet_path . $snippet_file);
 			}
 		}
