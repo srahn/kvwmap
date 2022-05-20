@@ -141,13 +141,14 @@ else {
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
 	$GUI->debug->write('Nicht angemeldet.', 4, $GUI->echo);
 	if (is_gast_login($GUI->formvars, $gast_stellen)) {
+		$GUI->formvars['gast'] = intval($GUI->formvars['gast']);
 		$GUI->debug->write('Es ist eine Gastanmeldung.', 4, $GUI->echo);
 		if (has_width_and_height($GUI->formvars)) {
 			if (width_or_height_empty($GUI->formvars)) {
 				$GUI->formvars = set_width_or_height_default($GUI->formvars);
 			}
 			$GUI->debug->write('Hat width und height. (' . $GUI->formvars['browserwidth'] . 'x' . $GUI->formvars['browserheight'] . ')', 4, $GUI->echo);
-			$gast = $userDb->create_new_gast($_REQUEST['gast']);
+			$gast = $userDb->create_new_gast($GUI->formvars['gast']);
 			$GUI->formvars['login_name'] = $gast['username'];
 			$GUI->formvars['passwort'] = $gast['passwort'];
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
