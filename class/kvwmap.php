@@ -8515,8 +8515,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$value_like = '';
 					$operator_like = '';
 					for($i = 0; $i < count($attributes['name']); $i++){
-						$value = value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]);
-						$operator = value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]);
+						$value = pg_escape_string(value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]));
+						$operator = pg_escape_string(value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]));
 						if ($attributes['form_element_type'][$i] == 'Zahl') {
 							# bei Zahlen den Punkt (Tausendertrenner) entfernen
 							$value = removeTausenderTrenner($value);
