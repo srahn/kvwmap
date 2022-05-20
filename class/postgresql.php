@@ -1432,7 +1432,7 @@ FROM
 				f.gemeindezugehoerigkeit_kreis = k.kreis AND 
 				f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if (!$without_temporal_filter) {
-			$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd', 'a'));
+			$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd'));		# a nicht, da es auch beendet sein kann
 		}
 		else {
 			$sql.= " 
