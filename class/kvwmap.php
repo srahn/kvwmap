@@ -16943,11 +16943,8 @@ class db_mapObj{
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}
-														$options = str_replace(
-															'= <requires>' . $attributename.'</requires>',
-															" IN ('" . $query_result[$k][$attributename] . "')",
-															$options
-														);
+														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
 													}
 												}
 												if (strpos($options, '<requires>') !== false) {
