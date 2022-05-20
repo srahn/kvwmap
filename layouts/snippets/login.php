@@ -20,7 +20,7 @@
 							} ?>
 							<tr>
 								<td><span class="px16">Nutzername:</span></td>
-								<td><input id="login_name" style="width: 130px; height: 25px;" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name" autocomplete="off"/></td>
+								<td><input id="login_name" style="width: 130px; height: 25px;" type="text" value="<? echo htmlspecialchars($this->formvars['login_name']); ?>" name="login_name" autocomplete="off"/></td>
 							</tr>
 							<tr>
 								<td><span class="px16">Passwort:</span></td>
