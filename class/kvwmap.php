@@ -8444,6 +8444,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
+		$this->formvars['selected_layer_id'] = intval($this->formvars['selected_layer_id']);
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
@@ -9069,6 +9070,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
 		}
 		if (value_of($this->formvars, 'selected_layer_id')) {
+			$this->formvars['selected_layer_id'] = intval($this->formvars['selected_layer_id']);
 			$data = $mapdb->getData($this->formvars['selected_layer_id']);
 			$data_explosion = explode(' ', $data);
 			$this->formvars['columnname'] = $data_explosion[0];
