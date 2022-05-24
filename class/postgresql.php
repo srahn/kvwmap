@@ -1497,7 +1497,7 @@ FROM
 				f.gemeindezugehoerigkeit_kreis = k.kreis AND 
 				f.flurstueckskennzeichen='" . $FlurstKennz . "'";
 		if (!$without_temporal_filter) {
-			$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd', 'a'));
+			$sql.= $this->build_temporal_filter(array('k', 'g', 'gem', 'f', 'd'));		# a nicht, da es auch beendet sein kann
 		}
 		else {
 			$sql.= " 
@@ -2144,7 +2144,7 @@ FROM
     $order='ordernr, nrtext';
     # Abfragen der Hausnummern
     $sql ="SELECT id,nrtext, to_number(ordernr, '999999') as ordernr FROM (";
-    $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE LOWER(id) END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
+    $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE id END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
     $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
     $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
     $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_lagebezeichnungmithausnummer l";
