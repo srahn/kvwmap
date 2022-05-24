@@ -191,10 +191,11 @@ function loescheXMLDateien($data_nwm){
 			}
 		}
 	}
+	return $ret;
 }
 
 function LENRIS_confirm_new_nachweise($data_nwm, $ids){
-	loescheXMLDateien($data_nwm);
+	$ret = loescheXMLDateien($data_nwm);
 	if ($ret) {
 		echo substr_count($ids, ',') + 1;
 	}
