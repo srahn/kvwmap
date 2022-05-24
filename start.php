@@ -204,7 +204,7 @@ else {
 						function(&$formvar, $key, $database) {
 							$formvar = $database->mysqli->real_escape_string($formvar);
 						},
-						$database
+						$GUI->database
 					);
 
 					$new_registration_err = checkRegistration($GUI);
