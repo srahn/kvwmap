@@ -3257,7 +3257,7 @@ echo '			</table>
 		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
 			# return 405 http status code
 			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
-			echo "CSRF_TOKEN fehlt!";
+			echo "Diese Seite kann aus Sicherheitsgründen nicht angezeigt werden!";
 			exit;
 		}
 	}
