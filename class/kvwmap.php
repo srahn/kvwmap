@@ -3236,6 +3236,7 @@ echo '			</table>
 	* Third it test if the user have special permissions to execute this case
 	*/
 	function checkCaseAllowed($case) {
+		$this->check_csrf_token();
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
 			$this->Stelle->isFunctionAllowed($case) OR
@@ -3246,6 +3247,19 @@ echo '			</table>
 			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->goNotExecutedInPlugins = true;
 			go_switch('', true);
+		}
+	}
+
+	function check_csrf_token() {
+		#$csrf_token = filter_input(INPUT_GET, 'csrf_token', FILTER_SANITIZE_STRING);
+		$csrf_token = $this->formvars['csrf_token'];
+		#echo '<br>csrf_token: ' . $csrf_token;
+
+		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
+			# return 405 http status code
+			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+			echo "CSRF_TOKEN fehlt!";
+			exit;
 		}
 	}
 

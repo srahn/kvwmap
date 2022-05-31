@@ -633,6 +633,7 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten speichern
 			case 'Sachdaten_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
 			}break;
 
@@ -750,6 +751,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->mapCommentStore();
 			}break;
 
@@ -1134,6 +1136,7 @@ function go_switch($go, $exit = false) {
 			} break;	
 
 			case 'Dokument_Loeschen' : {
+				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
 			} break;
 
@@ -1142,6 +1145,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'neuer_Layer_Datensatz_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->neuer_Layer_Datensatz_speichern();
 			} break;
 
