@@ -249,6 +249,16 @@ function compare_legendorder($a, $b){
 	else return 0;
 }
 
+function pg_escape_string_or_array($data){
+	if (is_array($data)) {
+		array_walk($data, function(&$value, $key){$value = pg_escape_string($value);});
+	}
+	else {
+		$data = pg_escape_string($data);
+	}
+	return $data;
+}
+
 function strip_pg_escape_string($string){
 	$string = str_replace("''", "'", $string);
 	$string = str_replace('\\\\', '\\', $string);		# \\ wir durch \ ersetzt

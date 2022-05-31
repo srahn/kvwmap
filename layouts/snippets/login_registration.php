@@ -67,16 +67,16 @@
 							<tr>
 								<td><span class="px16"><? echo $strUserName; ?>: *</span></td>
 								<td>
-									<input style="width: 200px" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name" />
+									<input style="width: 200px" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name" autocomplete="off"/>
 								</td>
 							</tr>
 							<tr>
 								<td><span class="px16"><? echo $strNewPassword; ?>: *</span></td>
-								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i></td>
+								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password']; ?>" id="new_password" name="new_password" autocomplete="off"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password').attr('type') == 'text') { $('#new_password').attr('type', 'password') } else { $('#new_password').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
 								<td><span class="px16"><? echo $strNewPassword2; ?>: *</span></td>
-								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
+								<td><input style="width: 200px" type="password" value="<? echo $this->formvars['new_password_2']; ?>" id="new_password_2" name="new_password_2" autocomplete="off"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#new_password_2').attr('type') == 'text') { $('#new_password_2').attr('type', 'password') } else { $('#new_password_2').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
 								<td><span class="px16"><? echo $strPhonNumber; ?>: </span></td>

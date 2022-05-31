@@ -20,11 +20,11 @@
 							} ?>
 							<tr>
 								<td><span class="px16">Nutzername:</span></td>
-								<td><input id="login_name" style="width: 130px; height: 25px;" type="text" value="<? echo $this->formvars['login_name']; ?>" name="login_name"/></td>
+								<td><input id="login_name" style="width: 130px; height: 25px;" type="text" value="<? echo htmlspecialchars($this->formvars['login_name']); ?>" name="login_name" autocomplete="off"/></td>
 							</tr>
 							<tr>
 								<td><span class="px16">Passwort:</span></td>
-								<td><input style="width: 130px; height: 25px;" type="password" value="<? echo $this->formvars['passwort']; ?>" id="passwort" name="passwort" /><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#passwort').attr('type') == 'text') { $('#passwort').attr('type', 'password') } else { $('#passwort').attr('type', 'text'); }"></i></td>
+								<td><input style="width: 130px; height: 25px;" type="password" value="" id="passwort" name="passwort" autocomplete="off"/><i style="margin-left: -18px" class="fa fa-eye-slash" aria-hidden="true" onclick="$(this).toggleClass('fa-eye fa-eye-slash'); if ($('#passwort').attr('type') == 'text') { $('#passwort').attr('type', 'password') } else { $('#passwort').attr('type', 'text'); }"></i></td>
 							</tr>
 							<tr>
 								<td><span class="px16">Ihre IP-Adresse:</span></td>
