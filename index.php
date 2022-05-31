@@ -873,10 +873,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Druckausschnitt_loeschen' : {
+				$GUI->check_csrf_token();
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -897,7 +899,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Schnelle_Druckausgabe' : {
-				if($GUI->formvars['druckrahmen_id'] == ''){
+				if ($GUI->formvars['druckrahmen_id'] == '') {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
@@ -910,10 +912,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Notizenformular_Senden' : {
+				$GUI->checkCaseAllowed('Notizenformular');
 				$GUI->notizSpeichern();
 			} break;
 
 			case 'Notiz_Loeschen' : {
+				$GUI->checkCaseAllowed('Notizenformular');
 				$GUI->notizLoeschen($GUI->formvars['oid']);
 				$GUI->loadMap('DataBase');
 				$currenttime=date('Y-m-d H:i:s',time());
@@ -928,14 +932,17 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'NotizKategorie_hinzufuegen' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategoriehinzufügen();
 			} break;
 
 			case 'NotizKategorie_aendern' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategorieAendern();
 			} break;
 
 			case 'NotizKategorie_loeschen' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategorieLoeschen();
 			} break;
 
