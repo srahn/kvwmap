@@ -2029,6 +2029,7 @@ class stelle {
 				user JOIN
 				rolle ON user.ID = rolle.user_id
 			WHERE
+				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
 			ORDER BY Name
 		";

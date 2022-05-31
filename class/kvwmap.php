@@ -12557,13 +12557,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
   function BenutzerLöschen(){
-    $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
-    $stellen = $this->selected_user->getStellen(0);
-    $this->selected_user->Löschen($this->formvars['selected_user_id']);
-    $this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $stellen['ID']);
-    $this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
-    $this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
-    $this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
+    $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database);
+		if (NUTZER_ARCHIVIEREN) {
+			$this->selected_user->archivieren();
+		}
+		else {
+			$stellen = $this->selected_user->getStellen(0);
+			$this->selected_user->Löschen($this->formvars['selected_user_id']);
+			$this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $stellen['ID']);
+			$this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
+			$this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
+			$this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
+		}
 		if($this->formvars['nutzerstellen']){
 			$this->BenutzerNachStellenAnzeigen();
 		}
