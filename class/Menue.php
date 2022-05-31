@@ -252,6 +252,7 @@ class Menue extends MyObject {
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
+		$link .= '&csrf_token=' . $_SESSION['csrf_token'];
 		# define click events
 		if ($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";

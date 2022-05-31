@@ -2231,5 +2231,4 @@ function sql_from_parse_tree($parse_tree) {
 	}
 	return implode(' ', $sql);
 }
-
 ?>

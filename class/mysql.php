@@ -153,13 +153,13 @@ class database {
     return $color;
   }
 
-	function create_new_gast($gast_stelle){
+	function create_new_gast($gast_stelle) {
 		$loginname = "";
-		$laenge=10;
-		$string="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		mt_srand((double)microtime()*1000000);
+		$laenge = 10;
+		$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		mt_srand((double)microtime() * 1000000);
 		for ($i=1; $i <= $laenge; $i++) {
-			$loginname .= substr($string, mt_rand(0,strlen($string)-1), 1);
+			$loginname .= substr($string, mt_rand(0, strlen($string) - 1), 1);
 		}
 		# Gastnutzer anlegen
 		$sql = "
@@ -181,8 +181,7 @@ class database {
 				'd4061b1486fe2da19dd578e8d970f7eb',
 				'',
 				'gast',
-				'" . $gast_stelle .
-				"'
+				'" . $this->mysqli->real_escape_string($gast_stelle) . "'
 			);
 		";
 		#echo '<br>sql: ' . $sql;

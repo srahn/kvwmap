@@ -17,9 +17,9 @@
 			<div class="stellendaten-topdiv">
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr class="stellendaten-header">
-						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID"><?php echo $this->strID; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung"><?php echo $this->strName; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent"><?php echo $strParentStelle; ?></a></th><?
+						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strParentStelle; ?></a></th><?
 						if ($has_shared_stelle) { ?>
 							<th>&nbsp;</th><?
 						} ?>
@@ -45,17 +45,17 @@
 								</td><?
 							} ?>
 							<td>
-								<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>">
+								<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>">
 									<i class="fa fa-pencil"></i>
 								</a>
 							</td>
 							<td>
-								<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>" title="Layer">
+								<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Layer">
 									<i class="fa fa-list"></i>
 								</a>
 							</td>
 							<td>
-								<a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie die Stelle \'<? echo $this->stellendaten['Bezeichnung'][$i]; ?>\' wirklich löschen?')" title="<?php echo $this->strDelete; ?>">
+								<a href="javascript:Bestaetigung('index.php?go=Stelle_Löschen&selected_stelle_id=<? echo $this->stellendaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie die Stelle \'<? echo $this->stellendaten['Bezeichnung'][$i]; ?>\' wirklich löschen?')" title="<?php echo $this->strDelete; ?>">
 									<i class="fa fa-trash-o"></i>
 								</a>
 							</td>
