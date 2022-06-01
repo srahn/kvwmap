@@ -525,11 +525,19 @@
 				case 'SubFormEmbeddedPK' : {
 					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
 					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-						if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
-						$reloadParams .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-						$reloadParams .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						$reloadParams .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-						$reloadParams .= '&values['.$p.']='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+						if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
+							$exp = explode(':', $attributes['subform_pkeys'][$j][$p]);
+							$key = $exp[0];			# Verknüpfungsattribut in diesem Layer
+							$subkey = $exp[1];	# Verknüpfungsattribut im Sub-Layer
+						}
+						else {
+							$key = $subkey = $attributes['subform_pkeys'][$j][$p];
+						}
+						if($dataset[$key] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						$reloadParams .= '&value_'.$subkey.'='.$dataset[$key];
+						$reloadParams .= '&operator_'.$subkey.'==';
+						$reloadParams .= '&attributenames['.$p.']='.$subkey;
+						$reloadParams .= '&values['.$p.']='.$dataset[$key];
 					}
 					$reloadParams .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 					$reloadParams .= '&count='.$k;
@@ -543,7 +551,7 @@
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
 					$reloadParams .= '&reload='.$attributes['reload'][$j];
-					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
@@ -552,9 +560,7 @@
 					if($gui->new_entry != true){
 						$subform_request = true;
 						$datapart .= '
-							<script type="text/javascript">
-								reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0);
-							</script>
+							<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 						';
 					}
 					$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
