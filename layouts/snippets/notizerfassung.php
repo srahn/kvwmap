@@ -44,13 +44,14 @@ function buildwktpolygonfromsvgpath(svgpath){
 	return wkt;
 }
 
-function edit(){
-	<? if ($this->Stelle->isFunctionAllowed('kategorienverwaltung')) { ?>
-	document.GUI.go_plus.value = 'KatVerwaltung';
-	document.GUI.submit();
-	<? }else{ ?>
-	alert('<?php echo $this->TaskChangeWarning; ?>');
-	<? } ?>
+function edit() { <?
+	if ($this->Stelle->isFunctionAllowed('kategorienverwaltung')) { ?>
+		document.GUI.go_plus.value = 'KatVerwaltung';
+		document.GUI.submit();<?
+	}
+	else { ?>
+		alert('<?php echo $this->TaskChangeWarning; ?>');<?
+	} ?>
 }
 
 function neu(){
@@ -62,12 +63,12 @@ function neu(){
 </script>
 
 <?php
-	if ($this->Meldung=='') {
-	  $bgcolor=BG_FORM;
+	if ($this->Meldung == '') {
+	  $bgcolor = BG_FORM;
 	}
 	else {
-	  $bgcolor=BG_FORMFAIL;
-		showAlert('Fehler bei der Eingabe:\n'.$this->Meldung);
+	  $bgcolor = BG_FORMFAIL;
+		showAlert('Fehler bei der Eingabe:\n' . $this->Meldung);
 }
 if ($this->Fehlermeldung!='') {
   include(LAYOUTPATH."snippets/Fehlermeldung.php");
@@ -102,7 +103,7 @@ if ($this->Fehlermeldung!='') {
       		echo '<option selected value = '.$this->notizen->notizKategorie[0]['id'].'>'.$this->notizen->notizKategorie[0]['kategorie'].'</option>';
       	}
       	?>
-        </select>&nbsp;<a href="JavaScript:edit()" title="<?php echo $this->TaskChangeWarning; ?>"><?php echo $this->strChange; ?></a><br>
+        </select>&nbsp;<a href="JavaScript:edit()" title="Auswahl von Kategorien ändern"><?php echo $this->strChange; ?></a><br>
       <br>
 	  </p>
       </td>

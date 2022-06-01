@@ -33,7 +33,7 @@ class notiz {
     }
     $ret[0]=0;
     if ($formvars['textposition']=='') {
-      $ret[1].='\nGeben Sie die Position für die Textanzeige an.';
+      $ret[1].='\nGeben Sie die Position fÃ¼r die Textanzeige an.';
       $ret[0]=1;
     }
     return $ret;
@@ -120,19 +120,26 @@ class notiz {
     return $sKategorien;
   }# END of function selectKategorie
   
-  function selectKat2stelle($kategorie){
-  	$this->debug->write('<br>file:metadaten.php class:notiz function selectKat2Stelle <br>Abfragen der Rechte pro Stelle für eine Kategorie<br>PostGIS',4);
-    $sql = "SELECT * FROM q_notiz_kategorie2stelle WHERE (1=1)";
-    $sql.= " AND kat_id='".$kategorie."'";
-    $ret=$this->database->execSQL($sql,4, 0);
-    while($rs=pg_fetch_array($ret[1])) {
-      $kat2stelle[]=$rs;
-    } 
-    return $kat2stelle;
-  }
-  
+	function selectKat2stelle($kategorie) {
+		$kat2stelle = array();
+		$this->debug->write('<br>file:metadaten.php class:notiz function selectKat2Stelle <br>Abfragen der Rechte pro Stelle fÃ¼r eine Kategorie<br>PostGIS', 4);
+		$sql = "
+			SELECT
+				*
+			FROM
+				q_notiz_kategorie2stelle
+			WHERE
+				kat_id = '" . $kategorie . "'
+		";
+		$ret = $this->database->execSQL($sql, 4, 0);
+		while ($rs = pg_fetch_array($ret[1])) {
+			$kat2stelle[] = $rs;
+		}
+		return $kat2stelle;
+	}
+
   function notizKategorieAenderung($formvars){
-  # Diese Funktion ändert und fügt hinzu oder entfernt Zugriffe von Stellen
+  # Diese Funktion Ã¤ndert und fÃ¼gt hinzu oder entfernt Zugriffe von Stellen
   # auf die entsprechenden Kategorien der Notizen  
   	for ($i=0; $i<$formvars['stellenanzahl'] ;$i++) {
   		if ($formvars['checkstellelesen'.$i]!='' OR $formvars['checkstelleanlegen'.$i]!='' OR $formvars['checkstelleaendern'.$i]!=''){
@@ -142,7 +149,7 @@ class notiz {
   			$ret=$this->database->execSQL($a_sql,4, 0);
   			$rs=pg_fetch_array($ret[1]);
   			if ($rs!=''){
-  				# wenn ja, dann "update" durchführen
+  				# wenn ja, dann "update" durchfÃ¼hren
   				if ($formvars['checkstellelesen'.$i]=='') {$formvars['checkstellelesen'.$i]='0'; }
   				if ($formvars['checkstelleanlegen'.$i]=='') {$formvars['checkstelleanlegen'.$i]='0'; }
   				if ($formvars['checkstelleaendern'.$i]=='') {$formvars['checkstelleaendern'.$i]='0'; }  				
@@ -151,7 +158,7 @@ class notiz {
   			  $ret=$this->database->execSQL($u_sql,4, 0);
     		} 	
     		if ($rs==''){
-    			# wenn nicht dann "insert" ausführen
+    			# wenn nicht dann "insert" ausfÃ¼hren
     			if ($formvars['checkstellelesen'.$i]=='') {$formvars['checkstellelesen'.$i]='0'; }
   				if ($formvars['checkstelleanlegen'.$i]=='') {$formvars['checkstelleanlegen'.$i]='0'; }
   				if ($formvars['checkstelleaendern'.$i]=='') {$formvars['checkstelleaendern'.$i]='0'; } 
@@ -167,7 +174,7 @@ class notiz {
   			$ret=$this->database->execSQL($sql,4, 0);
   			$rs=pg_fetch_array($ret[1]);
   			if ($rs!=''){
-  				# wenn ja, dann wird dieser Eintrag komplett gelöscht
+  				# wenn ja, dann wird dieser Eintrag komplett gelÃ¶scht
   				$d_sql =" DELETE FROM q_notiz_kategorie2stelle WHERE (1=1)";
   				$d_sql.=" AND stelle='".$formvars['checkstelle'.$i]."' AND kat_id='".$formvars['kategorie_id']."'";
   				$ret=$this->database->execSQL($d_sql,4, 0);
@@ -178,13 +185,13 @@ class notiz {
   } # END of function notizKategorieAenderung
   
   function notizKategorieLoeschen($kategorie,$plus_notiz){
-  	# Funktion zum löschen der Kategorie
+  	# Funktion zum lÃ¶schen der Kategorie
   	$sql="DELETE FROM q_notiz_kategorien WHERE q_notiz_kategorien.id='".$kategorie."'";
   	$ret=$this->database->execSQL($sql,4, 0);
   	$sql="DELETE FROM q_notiz_kategorie2stelle WHERE kat_id='".$kategorie."'";
   	$ret=$this->database->execSQL($sql,4, 0);
   	if ($plus_notiz=='1'){
-  		# wenn zuvor gewählt, dann werden hier alle Notizen zur Kategorie mitgelöscht
+  		# wenn zuvor gewÃ¤hlt, dann werden hier alle Notizen zur Kategorie mitgelÃ¶scht
   		$sql="DELETE FROM q_notizen WHERE kategorie_id='".$kategorie."'";
   	  $ret=$this->database->execSQL($sql,4, 0);
   	}
@@ -218,40 +225,48 @@ class notiz {
     return $ret; 
   }
   
-  function eintragenNeueNotiz($formvars) {
-  	# in formvars wird übergeben:
-  	# die notiz selbst
-  	# die kategorie die der Notiz zugeordnet werden soll
-  	# die Person, die die Notiz erstellt hat,
-  	# die Position wo sich die Notiz befinden soll
-  	# und zusätzlich seit 2006-06-21:
-  	# epsg_von: enthält den epsgcode in dem die Position der Notiz erfasst wurde
-  	# das entspricht dem epsg code der rolle
-  	# epsg_nach: enthält den epsgcode die der Tabelle q_notizen zugeordnet wurde
-  	# das entspricht dem epsg code des Layers Notizen
-    $this->debug->write('<br>file:metadaten.php class:notiz function eintragenNeueNotiz<br>Einfügen der Daten zu einer Notiz in<br>PostGIS',4);
-    $sql ="INSERT INTO q_notizen (notiz,kategorie_id,person,datum,the_geom)";
-    $sql.=" VALUES ('".$formvars['notiz']."','".$formvars['kategorie_id']."','".$formvars['person']."','".date("Y-m-d",time())."'";
-    #$sql.=",st_geometryfromtext('".$formvars['textposition']."',".EPSGCODE."))";
-    # seit 2006-06-21 wird von dem epsg-code des Viewers in den epsg code der Datenlayer transformiert
-    # der epsg-code des Views ist an die Rolle gebunden und wird aus Datenbank abgefragt
-    # als epsg-code der Tabelle Notiz wird die Konstante EPSGCODE aus config.php genommen.
-    $formvars['epsg_nach']=EPSGCODE;
-    $sql.=",st_transform(st_geometryfromtext('".$formvars['textposition']."',".$formvars['epsg_von']."),".$formvars['epsg_nach']."))";
-    #echo $sql;
-    $ret=$this->database->execSQL($sql,4, 1);
-    if ($ret[0]) {
-      # Fehler beim Eintragen in Datenbank
-      $ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Notiz nicht eingetragen werden!\n'.$ret[1];
-    }
-    return $ret; 
-  }
+	function eintragenNeueNotiz($formvars) {
+		# in formvars wird Ã¼bergeben:
+		# die notiz selbst
+		# die kategorie die der Notiz zugeordnet werden soll
+		# die Person, die die Notiz erstellt hat,
+		# die Position wo sich die Notiz befinden soll
+		# und zusÃ¤tzlich seit 2006-06-21:
+		# epsg_von: enthÃ¤lt den epsgcode in dem die Position der Notiz erfasst wurde
+		# das entspricht dem epsg code der rolle
+		# epsg_nach: enthÃ¤lt den epsgcode die der Tabelle q_notizen zugeordnet wurde
+		# das entspricht dem epsg code des Layers Notizen
+		$this->debug->write('<br>file:metadaten.php class:notiz function eintragenNeueNotiz<br>EinfÃ¼gen der Daten zu einer Notiz in<br>PostGIS', 4);
+		$formvars['epsg_nach'] = 2398;
+		$sql = "
+			INSERT INTO q_notizen (
+				notiz,kategorie_id,person,datum,the_geom
+			) VALUES (
+				'" . $formvars['notiz'] . "',
+				'" . $formvars['kategorie_id'] . "',
+				'" . $formvars['person'] . "',
+				'" . date("Y-m-d",time()) . "',
+				st_transform(st_geometryfromtext('" . $formvars['textposition'] . "', " . $formvars['epsg_von'] . "), " . $formvars['epsg_nach'] . ")
+			)
+		";
+		#$sql.=",st_geometryfromtext('".$formvars['textposition']."',".EPSGCODE."))";
+		# seit 2006-06-21 wird von dem epsg-code des Viewers in den epsg code der Datenlayer transformiert
+		# der epsg-code des Views ist an die Rolle gebunden und wird aus Datenbank abgefragt
+		# als epsg-code der Tabelle Notiz wird 2398 genommen.
+		#echo '<br>SQL zum Eintragen der neuen Notiz: ' . $sql; exit;
+		$ret = $this->database->execSQL($sql, 4, 1);
+		if ($ret[0]) {
+			# Fehler beim Eintragen in Datenbank
+			$ret[1]='\nAuf Grund eines Datenbankfehlers konnte die Notiz nicht eingetragen werden!\n'.$ret[1];
+		}
+		return $ret; 
+	}
 
-  function aktualisierenNotiz($oid,$formvars) {
+  function aktualisierenNotiz($oid, $formvars) {
     $this->debug->write('<br>file:metadaten.php class:notiz function aktualisierenNotiz<br>Aktualisieren der Daten zu einer Notiz in<br>PostGIS',4);
     $sql ="UPDATE q_notizen SET notiz='".$formvars['notiz']."',kategorie_id='".$formvars['kategorie_id']."'";
     $sql.=",person='".$formvars['person']."',datum='".date("Y-m-d",time())."'";
-    $sql.=",the_geom=st_transform(st_geometryfromtext('".$formvars['textposition']."', ".$this->client_epsg."),".EPSGCODE.")";
+    $sql.=",the_geom=st_transform(st_geometryfromtext('".$formvars['textposition']."', ".$this->client_epsg."), 2398)";
     $sql.=" WHERE oid=".(int)$oid;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -260,9 +275,9 @@ class notiz {
     }
     return $ret;
   }
-  
+
   function NotizLoeschen($oid) {
-    $this->debug->write('<br>file:metadaten.php class:notiz function NotizLoeschen<br>Löschen einer Notiz in<br>PostGIS',4);
+    $this->debug->write('<br>file:metadaten.php class:notiz function NotizLoeschen<br>LÃ¶schen einer Notiz in<br>PostGIS',4);
     $sql ="DELETE FROM q_notizen";
     $sql.=" WHERE oid=".(int)$oid;
     $ret=$this->database->execSQL($sql,4, 1);
@@ -274,7 +289,7 @@ class notiz {
   }
   
   function NotizKat___($kategorie){
-    $this->debug->write('<br>file:metadaten.php class:notiz function NotizKatbearbeiten<br>Abfragen der Rechte pro Stelle für eine Kategorie<br>PostGIS',4);
+    $this->debug->write('<br>file:metadaten.php class:notiz function NotizKatbearbeiten<br>Abfragen der Rechte pro Stelle fÃ¼r eine Kategorie<br>PostGIS',4);
     $sql ="SELECT * FROM q_notiz_kategorie2stelle";
     $sql.=" WHERE kat_id=".(int)$kategorie;
     #echo $sql;

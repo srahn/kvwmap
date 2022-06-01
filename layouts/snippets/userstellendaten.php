@@ -1,6 +1,9 @@
 <?php
  # 2008-01-12 pkvvm
   include(LAYOUTPATH.'languages/userdaten_'.$this->user->rolle->language.'.php');
+	
+	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
+	
  ?>
 <script type="text/javascript">
 function Bestaetigung(link,text) {
@@ -58,7 +61,7 @@ function Bestaetigung(link,text) {
 			echo $this->stellen['user'][$s]['Bezeichnung'][$i];
 		}
 	 if($this->formvars['go'] != 'BenutzerderStelleAnzeigen'){ ?>
-		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?> wirklich <? echo $loeschen; ?>?')" title="<?php echo $this->strDelete?>">
 			<i class="fa fa-trash" style="padding: 3px"></i>
 		</a>
 	<? } ?>
@@ -79,7 +82,7 @@ function Bestaetigung(link,text) {
 			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>">
 				 <? echo $this->unassigned_users['Bezeichnung'][$i]; ?>      
 			</a>
-			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->unassigned_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->unassigned_users['Bezeichnung'][$i]; ?> wirklich <? echo $loeschen; ?>?')" title="<?php echo $this->strDelete?>">
 				<i class="fa fa-trash" style="padding: 3px"></i>
 			</a>
 		</div>
@@ -98,7 +101,7 @@ function Bestaetigung(link,text) {
 			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>">
 	     <? echo $this->expired_users['Bezeichnung'][$i]; ?>
 			</a>
-			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->expired_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->expired_users['Bezeichnung'][$i]; ?> wirklich <? echo $loeschen; ?>?')" title="<?php echo $this->strDelete?>">
 				<i class="fa fa-trash" style="padding: 3px"></i>
 			</a>
 		</div>

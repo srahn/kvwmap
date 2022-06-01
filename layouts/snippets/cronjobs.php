@@ -4,7 +4,7 @@
 <script language="javascript" type="text/javascript">
 	function update_aktiv(id) {
 		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
-		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv;
+		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv + '&csrf_token=' + <? echo $_SESSION['csrf_token']; ?>;
 	}
 </script>
 <table width="700px" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
@@ -45,11 +45,11 @@
 			<td><?php echo $cronjob->get('user_id'); ?></td>
 			<td><?php echo $cronjob->get('stelle_id'); ?></td//-->
 			<td width="70px">
-				<a href="index.php?go=cronjob_editieren&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
-				<a href="index.php?go=cronjob_löschen&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
+				<a href="index.php?go=cronjob_editieren&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
+				<a href="index.php?go=cronjob_löschen&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
 			</td>
 		<tr><?php
 	} ?>
 </table>
 <p>
-<a class="btn btn-new" href="index.php?go=crontab_schreiben"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> <? echo $strSaveCrontab; ?></a>
+<a class="btn btn-new" href="index.php?go=crontab_schreiben&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> <? echo $strSaveCrontab; ?></a>

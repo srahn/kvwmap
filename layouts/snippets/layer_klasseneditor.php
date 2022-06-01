@@ -80,15 +80,15 @@
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strCommonData; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strCommonData; ?></div></a></th>
+					<th class="navigation-selected"><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -196,7 +196,7 @@
 				</td>				
 				<td align="center" style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->layerdata['editable']){ ?>
-					<a href="javascript:Bestaetigung('index.php?go=Klasseneditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>',	'<?php echo $this->strDeleteWarningMessage; ?>');" title="<? echo $this->strDelete; ?>">
+					<a href="javascript:Bestaetigung('index.php?go=Klasseneditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>',	'<?php echo $this->strDeleteWarningMessage; ?>');" title="<? echo $this->strDelete; ?>">
 						<i style="padding: 6px" class="fa fa-trash" aria-hidden="true"></i>
 					</a>
 					<? } ?>
@@ -207,7 +207,7 @@
 			?>
 			<tr>
 				<td style="border-bottom:1px solid #C3C7C3" colspan="10">					
-					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>" title="<? echo $strAddClass; ?>">
+					<a style="float: left;" href="index.php?go=Klasseneditor_Klasse_Hinzufügen&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<? echo $strAddClass; ?>">
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
 					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>

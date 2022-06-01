@@ -1,6 +1,9 @@
 <?php
 	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php');
 	include(LAYOUTPATH.'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	
+	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
+	
 	$has_shared_user = array_reduce(
 		$this->userdaten,
 		function($has_shared_user, $user_data) {
@@ -115,7 +118,7 @@
 									} ?>
 								</td><?
 							} ?>
-							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
+							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich <? echo $loeschen; ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
 						</tr><?php  
 					} ?>
 				</table>

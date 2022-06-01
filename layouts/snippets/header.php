@@ -32,7 +32,7 @@
 					class="user-option"
 					style="margin-left: 0px" <?
 					if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
-						onclick="window.location.href='index.php?browserwidth=' + $('input[name=browserwidth]').val() + '&browserheight=' + $('input[name=browserheight]').val() + '&Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>'" <?
+						onclick="window.location.href='index.php?browserwidth=' + $('input[name=browserwidth]').val() + '&browserheight=' + $('input[name=browserheight]').val() + '&Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" <?
 					} ?>
 				><? echo $this->user->Stellen['Bezeichnung'][$id];
 				if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
@@ -43,22 +43,22 @@
 			<div class="options-devider"></div>
 			<div
 				class="user-option"
-				onclick="window.location.href='index.php?go=Stelle_waehlen&show_layer_parameter=1&hide_stellenwahl=1'"
+				onclick="window.location.href='index.php?go=Stelle_waehlen&show_layer_parameter=1&hide_stellenwahl=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"
 			><i class="fa fa-ellipsis-v options-button"></i><? echo $this->strSettings; ?></div>
 		<div class="options-devider"></div>
 		<div
 			class="user-option"
-			onclick="window.location.href='index.php?go=logout'"
+			onclick="window.location.href='index.php?go=logout&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"
 		><i class="fa fa-sign-out options-button"></i>Logout</div>
 		</div>
 	</div>
 
 	<div title="<? echo $this->strPrintMapArea; ?>">
-		<a href="index.php?go=Druckausschnittswahl"><i class="fa fa-print header-button" style="font-size: 160%" aria-hidden="true"></i></a>
+		<a href="index.php?go=Druckausschnittswahl&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-print header-button" style="font-size: 160%" aria-hidden="true"></i></a>
 	</div>
 
 	<div title="<? echo $this->strShowMap; ?>">
-		<a href="index.php?go=neu%20Laden"><i class="fa fa-map header-button" aria-hidden="true"></i></a>
+		<a href="index.php?go=neu%20Laden&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map header-button" aria-hidden="true"></i></a>
 	</div>
 
 	<div title="<? echo $this->strPlaceSearch; ?>">

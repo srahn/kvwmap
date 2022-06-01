@@ -11,10 +11,12 @@ $ahah = '
 		}
 		var req = new XMLHttpRequest();
 		if(req != undefined){
-			req.onreadystatechange = function(){ahahDone(url, target, req, action);};
-			if(typeof progress !== \'undefined\')req.upload.addEventListener("progress", progress);
-			req.open("POST", url, true);
-			if(typeof data == "string") {
+			req.onreadystatechange = function() { ahahDone(url + \'&csrf_token=' . $_SESSION['csrf_token'] . '\', target, req, action); };
+			if (typeof progress !== \'undefined\') {
+				req.upload.addEventListener("progress", progress);
+			}
+			req.open("POST", url + \'&csrf_token=' . $_SESSION['csrf_token'] . '\', true);
+			if (typeof data == "string") {
 				req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 			}
 			req.send(data);

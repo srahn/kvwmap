@@ -5,8 +5,8 @@
   <tr>
     <td><table width="100%" border="0" cellspacing="0" cellpadding="2">
       <tr>
-        <th><a href="index.php?go=Funktionen_Anzeigen&order=id">ID</a></th>
-        <th><a href="index.php?go=Funktionen_Anzeigen&order=bezeichnung">Bezeichnung</a></th>
+        <th><a href="index.php?go=Funktionen_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>">ID</a></th>
+        <th><a href="index.php?go=Funktionen_Anzeigen&order=bezeichnung&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Bezeichnung</a></th>
         <td>&nbsp;</td>
         <td>&nbsp;</td>
       </tr>
@@ -15,8 +15,8 @@
       <tr>
         <td><?php echo $this->funktionen[$i]['id']; ?></td>
         <td><?php echo $this->funktionen[$i]['bezeichnung']; ?></td>
-        <td><a href="index.php?go=Funktionen_Formular&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>">Bearbeiten</a></td>
-        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Funktion_Löschen&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie diese Funktion wirklich löschen?')">Löschen</a></td>
+        <td><a href="index.php?go=Funktionen_Formular&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Bearbeiten</a></td>
+        <td>&nbsp;&nbsp;<a href="javascript:Bestaetigung('index.php?go=Funktion_Löschen&selected_function_id=<?php echo $this->funktionen[$i]['id']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie diese Funktion wirklich löschen?')">Löschen</a></td>
       </tr>
       <?php  
       }
