@@ -705,7 +705,7 @@ FROM
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
 						for($j = 0; $j < @count($constraints[$table_oid]); $j++){
-							if(strpos($constraints[$table_oid][$j], $fieldname) AND strpos($constraints[$table_oid][$j], '=')){
+							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
 									if($k%2 == 1){
