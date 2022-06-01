@@ -280,7 +280,6 @@ class GUI {
 	}
 
 	function getLayerOptions() {
-		global $admin_stellen;
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -385,16 +384,16 @@ class GUI {
 								<div id="layer_properties" style="display: none">
 									<ul>' . (!(!$this->Stelle->isMenueAllowed('Layer_Anzeigen') AND $layer[0]['shared_from'] == $this->user->id) ? '
 										<li>
-											<a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a>
+											<a href="index.php?go=Layereditor&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->layerDefinition . '</a>
 										</li>' : '') . '
 										<li>
-											<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a>
+											<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->attributeditor.'</a>
 										</li>
 										<li>
-											<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'].'">' . $this->strPrivileges . '</a>
+											<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strPrivileges . '</a>
 										</li>
 										<li>
-											<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '">' . $this->strStyles . '</a>
+											<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strStyles . '</a>
 										</li>
 									</ul>
 								</div>';
@@ -417,10 +416,10 @@ class GUI {
 							echo '<li><a href="javascript:void();" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
-							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">' . $this->strSearch . '</a></li>';
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 						}
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '">' . $this->newDataset . '</a></li>';
+							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {

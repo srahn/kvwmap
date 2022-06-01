@@ -17,7 +17,7 @@ $GUI->echo = false;
 # Setzen der Konstante, ob in die Datenbank geschrieben werden soll oder nicht.
 # Kann z.B. zu Testzwecken ausgeschaltet werden.
 if (array_key_exists('disableDbWrite', $GUI->formvars) and $GUI->formvars['disableDbWrite'] == '1') {
-	define('DBWRITE',false);
+	define('DBWRITE', false);
 }
 else {
 	define('DBWRITE', DEFAULTDBWRITE);
@@ -819,5 +819,6 @@ function set_session_vars($formvars) {
 	$_SESSION['angemeldet'] = true;
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
+	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
 }
 ?>

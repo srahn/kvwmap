@@ -10,7 +10,7 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Menues_Anzeigen#menue_<?php echo $this->menue->get('id'); ?>'">&nbsp;<?php
+						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Menues_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#menue_<?php echo $this->menue->get('id'); ?>'">&nbsp;<?php
 						if ($this->menue->get('id') != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1">&nbsp;
@@ -19,7 +19,7 @@
 						}
 						else { ?>
 							<input value="Speichern" title="Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Speichern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menue->get('id'); ?>'"><?
+							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menue->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"><?
 						} ?>
 						<!--input type="button" name="dummy" value="Als neues Menü eintragen" onclick="submitWithValue('GUI','go_plus','Als neues Menü eintragen')"-->
 				  </td>
@@ -36,7 +36,7 @@
 			return '?' + elm.value.match(/'([^']+)'/)[1];
 		}
 		else {
-			return elm.value;
+			return elm.value . '&csrf_token=' . $_SESSION['csrf_token'];
 		}
 	}
 	function createMenueLink(elm) {

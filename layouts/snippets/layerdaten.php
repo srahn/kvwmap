@@ -73,31 +73,31 @@
 							<tr>
 								<th>&nbsp;</th>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=Layer_ID"><?php echo $this->strID; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=Layer_ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a>
 								</th><?
 								if ($this->formvars['order'] == "Name") { ?>
 									<th align="left">
-										<a href="index.php?go=Layer_Anzeigen&order=Alias"><?php echo $this->strName; ?>&nbsp;[<?php echo $this->strAlias; ?>]</a>
+										<a href="index.php?go=Layer_Anzeigen&order=Alias&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?>&nbsp;[<?php echo $this->strAlias; ?>]</a>
 									</th><?
 								}
 								if ($this->formvars['order'] != "Alias" AND $this->formvars['order'] != "Name") { ?>
-									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name">
+									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 										<?php echo $this->strName; ?>&nbsp;[<?php echo $this->strAlias; ?>]</a>
 									</th><?
 								}
 								if ($this->formvars['order'] == "Alias") { ?>
-									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name">
+									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 										<?php echo $this->strAlias; ?>&nbsp;[<?php echo $this->strName; ?>]</a>
 									</th><?
 								} ?>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=connectiontype"><?php echo $strConnectionType; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=connectiontype&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strConnectionType; ?></a>
 								</th>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=Datentyp"><?php echo $strDataType; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=Datentyp&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strDataType; ?></a>
 								</th>
 								<th align="left">
-									<a href="index.php?go=Layer_Anzeigen&order=Gruppenname"><?php echo $this->strGroup; ?></a>
+									<a href="index.php?go=Layer_Anzeigen&order=Gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strGroup; ?></a>
 								</th><?
 								if ($has_sync_layer) { ?>
 									<th align="left">
@@ -174,7 +174,7 @@
 										<td>&nbsp;</td>
 										<td><?php echo $this->layerdaten['ID'][$i]; ?>&nbsp;&nbsp;</td>
 										<td>
-											<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>" title="<?php echo $this->strChange; ?>">
+											<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>">
 												<?php
 													if ($this->formvars['order']!="Alias") {
 														echo $this->layerdaten['Bezeichnung'][$i];
@@ -196,7 +196,7 @@
 										if ($has_shared_layer) { ?>
 											<td><?php echo $this->layerdaten['shared_from'][$i]; ?></td><?
 										} ?>
-										<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
+										<td><a href="javascript:Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie den Layer <?php echo $this->layerdaten['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete; ?>"><i class="fa fa-trash-o"></i></a></td>
 									</tr><?
 								}
 							} // End for ?>

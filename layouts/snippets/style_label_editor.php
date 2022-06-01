@@ -18,7 +18,7 @@ function change_layer(){
 		document.getElementById('selected_label_div').innerHTML = '';
 		document.GUI.selected_style_id.value = '';
 		document.GUI.selected_label_id.value = '';
-		ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+		ahah('index.php', 'go=getclasses&layer_id=' + layer_id, new Array(document.getElementById('classes_div')), "");
 		document.getElementById('toLayerLink').style='display:inline';
 	}
 }
@@ -73,7 +73,7 @@ function delete_label(label_id){
 	selected_label_id = document.GUI.selected_label_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.selected_layer_id.value;
-	ahah('index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
+	ahah('index.php', 'go=delete_label&selected_label_id=' + selected_label_id + '&label_id=' + label_id + '&class_id=' + class_id + '&layer_id=' + layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function add_style(){
@@ -156,8 +156,8 @@ function browser_check(){
 	}
 }
 
-function navigate(params){	
-	location.href='index.php?'+params+'&selected_layer_id='+document.GUI.selected_layer_id.value;
+function navigate(params) {
+	location.href = 'index.php?' + params + '&selected_layer_id=' + document.GUI.selected_layer_id.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 }
 
 function setScale(select){
@@ -231,7 +231,7 @@ function setScale(select){
 				<tr>
 					<th><a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a></th>
 					<th><a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th><a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>

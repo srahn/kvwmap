@@ -62,6 +62,7 @@ foreach ($lenris->clients as $client) {
 			$lenris->update_client($client['client_id'], "status = 5, last_sync = '" . date("Y-m-d H:i:s") . "'");
 		}
 		else {
+			$lenris->delete_files();
 			$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
 			$lenris->database->committransaction();
 			$lenris->confirm_new_nachweise($client, $inserted_nachweise);
@@ -92,7 +93,7 @@ foreach ($lenris->clients as $client) {
 	
 	# Dokumente holen
 	$client = $lenris->get_client_information($client['client_id'])[0];
-	if ($client['doc_download'] < 10){
+	if ($client['status'] == 0 AND $client['doc_download'] < 10){
 		$downloadable_documents = $lenris->get_downloadable_documents($client);
 		if (!empty($downloadable_documents)) {
 			$lenris->update_client($client['client_id'], 'doc_download = doc_download + 1');

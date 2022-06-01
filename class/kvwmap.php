@@ -440,16 +440,16 @@ class GUI {
 								<div id="layer_properties" style="display: none">
 									<ul>' . (!(!$this->Stelle->isMenueAllowed('Layer_Anzeigen') AND $layer[0]['shared_from'] == $this->user->id) ? '
 										<li>
-											<a href="index.php?go=Layereditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->layerDefinition.'</a>
+											<a href="index.php?go=Layereditor&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->layerDefinition . '</a>
 										</li>' : '') . '
 										<li>
-											<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'].'">'.$this->attributeditor.'</a>
+											<a href="index.php?go=Attributeditor&selected_layer_id='.$this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->attributeditor.'</a>
 										</li>
 										<li>
-											<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'].'">' . $this->strPrivileges . '</a>
+											<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strPrivileges . '</a>
 										</li>
 										<li>
-											<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '">' . $this->strStyles . '</a>
+											<a href="index.php?go=Style_Label_Editor&selected_layer_id='.$this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strStyles . '</a>
 										</li>
 									</ul>
 								</div>';
@@ -472,10 +472,10 @@ class GUI {
 							echo '<li><a href="javascript:void();" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
-							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id='.$this->formvars['layer_id'].'">' . $this->strSearch . '</a></li>';
+							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 						}
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '">' . $this->newDataset . '</a></li>';
+							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
@@ -3235,6 +3235,7 @@ echo '			</table>
 	* Third it test if the user have special permissions to execute this case
 	*/
 	function checkCaseAllowed($case) {
+		$this->check_csrf_token();
 		if (!(
 			$this->Stelle->isMenueAllowed($case) OR
 			$this->Stelle->isFunctionAllowed($case) OR
@@ -3245,6 +3246,19 @@ echo '			</table>
 			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->goNotExecutedInPlugins = true;
 			go_switch('', true);
+		}
+	}
+
+	function check_csrf_token() {
+		#$csrf_token = filter_input(INPUT_GET, 'csrf_token', FILTER_SANITIZE_STRING);
+		$csrf_token = $this->formvars['csrf_token'];
+		#echo '<br>csrf_token: ' . $csrf_token;
+
+		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
+			# return 405 http status code
+			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
+			echo "Diese Seite kann aus Sicherheitsgründen nicht angezeigt werden!";
+			exit;
 		}
 	}
 
@@ -3320,7 +3334,7 @@ echo '			</table>
 				user u ON r.user_id = u.ID
 			WHERE
 				r.stelle_id IN (" . implode(', ', $admin_stellen) . ") AND
-				u.id = '" . $user_id . "'
+				u.id = '" . $this->database->mysqli->real_escape_string($user_id) . "'
 		";
 		#echo '<br>sql: ' . $sql;
 
@@ -6164,27 +6178,27 @@ echo '			</table>
     return $newname;
   }
 
-  function notizErfassung() {
-		include_once (CLASSPATH.'notiz.php');
-    # Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
-    if ($this->formvars['oid']=='') {
-      $this->titel='Neue Notiz';
-    }
-    else {
-      $this->titel='Notiz Bearbeiten';
-    }
-    $this->main="notizerfassung.php";
-    # aktuellen Kartenausschnitt laden + zeichnen!
-    $this->loadMap('DataBase');
-    $this->notizen=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
-    $this->notizen->anlegenKategorien = $this->notizen->getKategorie(NULL, $this->Stelle->id, NULL, 'true', NULL);
-    if ($this->formvars['CMD']!='') {
-      $this->navMap($this->formvars['CMD']);
-      $this->saveMap('');
-      $currenttime=date('Y-m-d H:i:s',time());
-      $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-      $this->drawMap();
-    }
+	function notizErfassung() {
+		include_once (CLASSPATH . 'notiz.php');
+		# Wenn eine oid in formvars übergeben wurde ist es eine Änderung, sonst Neueingabe
+		if ($this->formvars['oid']=='') {
+			$this->titel = 'Neue Notiz';
+		}
+		else {
+			$this->titel = 'Notiz Bearbeiten';
+		}
+		$this->main = "notizerfassung.php";
+		# aktuellen Kartenausschnitt laden + zeichnen!
+		$this->loadMap('DataBase');
+		$this->notizen = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		$this->notizen->anlegenKategorien = $this->notizen->getKategorie(NULL, $this->Stelle->id, NULL, 'true', NULL);
+		if ($this->formvars['CMD'] != '') {
+			$this->navMap($this->formvars['CMD']);
+			$this->saveMap('');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+			$this->drawMap();
+		}
     else {
       # Wenn nicht navigiert wurde, also kein cmd knopf gedrückt wurde,
       # und eine oid angegeben wurde, werden die Daten der notiz aus der Datenbank gelesen.
@@ -6219,71 +6233,75 @@ echo '			</table>
     $this->output();
   }
 
-  function notizSpeichern() {
+	function notizSpeichern() {
 		include_(CLASSPATH.'notiz.php');
-    # Zusammensetzen der übergebenen Parameter für die Textposition
-    #echo 'formvars[loc_x, loc_y]: '.$this->formvars['loc_x'].', '.$this->formvars['loc_x'];
-    if ($this->formvars['loc_x'] > 0 AND $this->formvars['loc_y'] > 0) {
-      $location_x = $this->formvars['loc_x'];
-      $location_y = $this->formvars['loc_y'];
-      $this->formvars['textposition']="POINT(" . $location_x." " . $location_y.")";
-      #echo '<br/>formvars[textposition]: '.$this->formvars['textposition'];
-    }
-    elseif($this->formvars['newpathwkt'] != ''){
-      $this->formvars['textposition'] = $this->formvars['newpathwkt'];
-      #echo '<br/>formvars[textposition]: '.$this->formvars['textposition'];
-    }
-    else {
-      $this->formvars['textposition']="";
-    }
-    # 2006-06-21 pk
-    # aktuellen EPSG Code der Stelle in Variable formvar übergeben
-    $this->formvars['epsg_von']=$this->user->rolle->epsg_code;
+		# Zusammensetzen der übergebenen Parameter für die Textposition
+		#echo 'formvars[loc_x, loc_y]: '.$this->formvars['loc_x'].', '.$this->formvars['loc_x'];
+		if ($this->formvars['loc_x'] > 0 AND $this->formvars['loc_y'] > 0) {
+			$location_x = $this->formvars['loc_x'];
+			$location_y = $this->formvars['loc_y'];
+			$this->formvars['textposition'] = "POINT(" . $location_x . " " . $location_y . ")";
+			#echo '<br/>formvars[textposition]: '.$this->formvars['textposition'];
+		}
+		elseif ($this->formvars['newpathwkt'] != '') {
+			$this->formvars['textposition'] = $this->formvars['newpathwkt'];
+			#echo '<br/>formvars[textposition]: '.$this->formvars['textposition'];
+		}
+		else {
+			$this->formvars['textposition'] = "";
+		}
+		# 2006-06-21 pk
+		# aktuellen EPSG Code der Stelle in Variable formvar übergeben
+		$this->formvars['epsg_von'] = $this->user->rolle->epsg_code;
 
-    # Notizobjekt erzeugen
-    $notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		# Notizobjekt erzeugen
+		$notiz = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
 
-    # 1. Prüfen der Eingabewerte
-    #echo '<br>Prüfen der Eingabewerte.';
-    $this->formvars['stelle_id'] = $this->Stelle->id;
-    $ret=$notiz->pruefeEingabedaten($this->formvars);
-    if ($ret[0]) {
-      # Es wurde ein oder mehrere Fehler bei den Eingabewerten gefunden
-      $this->Meldung=$ret[1];
-    }
-    else {
-      # Eingabewerte fehlerfrei
-      #echo 'Eingabe fehlerfrei:';
-      if ($this->formvars['oid']=='') {
-        # 2. eintragenNeueZone
-        $ret=$notiz->eintragenNeueNotiz($this->formvars);
-        if ($ret[0]) {
-          # 2.1 Eintragung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          #  2.2 Eintragung erfolgreich
-          $alertmsg='\nNotiz erfolgreich in die Datenbank eingetragen.'.
-          $this->formvars['pathx']='';    $this->formvars['loc_x']='';
-          $this->formvars['pathy']='';    $this->formvars['loc_y']='';
-          $this->formvars['umring']='';   $this->formvars['textposition']='';
-        }
-      }
-      else {
-        # 3. Notiz Aktualisieren
-        $ret=$notiz->aktualisierenNotiz($this->formvars['oid'],$this->formvars);
-        if ($ret[0]) {
-          # 3.1 Eintragung fehlerhaft
-          $this->Meldung=$ret[1];
-        }
-        else {
-          # 3.2 Aktualisierung erfolgreich
-          $alertmsg='\nNotiz erfolgreich in die Datenbank aktualisiert.';
-        }
-      }
-    }
-    $this->notizErfassung();
-  }
+		# 1. Prüfen der Eingabewerte
+		$this->formvars['stelle_id'] = $this->Stelle->id;
+		$ret = $notiz->pruefeEingabedaten($this->formvars);
+		if ($ret[0]) {
+			# Es wurde ein oder mehrere Fehler bei den Eingabewerten gefunden
+			$this->Meldung = $ret[1];
+		}
+		else {
+			# Eingabewerte fehlerfrei
+			if ($this->formvars['oid'] == '') {
+				# 2. Eintragen Neue Notiz
+				$ret = $notiz->eintragenNeueNotiz($this->formvars);
+				if ($ret[0]) {
+					# 2.1 Eintragung fehlerhaft
+					$this->Meldung = $ret[1];
+				}
+				else {
+					#  2.2 Eintragung erfolgreich
+					$alertmsg = 'Notiz erfolgreich in die Datenbank eingetragen!';
+					$this->formvars['pathx'] = '';
+					$this->formvars['loc_x'] = '';
+					$this->formvars['pathy'] = '';
+					$this->formvars['loc_y'] = '';
+					$this->formvars['umring'] = '';
+					$this->formvars['textposition'] = '';
+				}
+			}
+			else {
+				# 3. Notiz Aktualisieren
+				$ret = $notiz->aktualisierenNotiz($this->formvars['oid'],$this->formvars);
+				if ($ret[0]) {
+					# 3.1 Eintragung fehlerhaft
+					$this->Meldung = $ret[1];
+				}
+				else {
+					# 3.2 Aktualisierung erfolgreich
+					$alertmsg = 'Notiz erfolgreich in die Datenbank aktualisiert!';
+				}
+			}
+		}
+		if ($alertmsg != '') {
+			$this->add_message('notice', $alertmsg);
+		}
+		$this->notizErfassung();
+	}
 
   function notizLoeschen($oid){
 		include_(CLASSPATH.'notiz.php');
@@ -6291,47 +6309,47 @@ echo '			</table>
     $notiz->NotizLoeschen($oid);
   }
 
-  function notizKatVerwaltung() {
-		include_once (CLASSPATH.'notiz.php');
-    $this->Stelle=new stelle('',$this->database);
-    $this->Stellen=$this->Stelle->getStellen('Bezeichnung');
-    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
-    $this->AllKat=$this->notiz->selectKategorie('','','');
-    if($this->formvars['kategorie_id'] != ''){
-      $this->Kat=$this->notiz->getKategorie($this->formvars['kategorie_id'],'','','','');
-      $this->Kat2Stelle=$this->notiz->selectKat2stelle($this->formvars['kategorie_id']);
-    }
-    $this->titel='Notizkategorienverwaltung';
-    $this->main='Kat_bearbeiten.php';
-    $this->output();
-  } # END of funtion notizKatVerwaltung
+	function notizKatVerwaltung() {
+		$this->Kat2Stelle = array();
+		include_once (CLASSPATH . 'notiz.php');
+		$this->Stellen = $this->Stelle->getStellen('Bezeichnung');
+		$this->notiz = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		$this->AllKat = $this->notiz->selectKategorie('', '', '');
+		if ($this->formvars['kategorie_id'] != '') {
+			$this->Kat = $this->notiz->getKategorie($this->formvars['kategorie_id'], '', '', '', '');
+			$this->Kat2Stelle = $this->notiz->selectKat2stelle($this->formvars['kategorie_id']);
+		}
+		$this->titel = 'Notizkategorienverwaltung';
+		$this->main = 'Kat_bearbeiten.php';
+		$this->output();
+	} # END of funtion notizKatVerwaltung
 
-  function notizKategoriehinzufügen(){
-		include_(CLASSPATH.'notiz.php');
-    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
-    $this->notiz->insertKategorie($this->formvars['newKategorie']);
-    $kat=$this->notiz->selectKategorie('',$this->formvars['newKategorie'],'');
-    $this->formvars['kategorie_id']=$kat[0]['id'];
-    $this->notizKatVerwaltung();
-  } # END of function notizKathinzufügen
+	function notizKategoriehinzufügen() {
+		include_(CLASSPATH . 'notiz.php');
+		$this->notiz = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		$this->notiz->insertKategorie($this->formvars['newKategorie']);
+		$kat = $this->notiz->selectKategorie('', $this->formvars['newKategorie'], '');
+		$this->formvars['kategorie_id'] = $kat[0]['id'];
+		$this->notizKatVerwaltung();
+	} # END of function notizKathinzufügen
 
-  function notizKategorieAendern(){
-		include_(CLASSPATH.'notiz.php');
-    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
-    if($this->formvars['kategorie_id'] != ''){
-      $this->notiz->notizKategorieAenderung($this->formvars);
-    }
-    $this->notizKatVerwaltung();
-  } # END of function notizKategorieAendern
+	function notizKategorieAendern() {
+		include_(CLASSPATH . 'notiz.php');
+		$this->notiz = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		if ($this->formvars['kategorie_id'] != '') {
+			$this->notiz->notizKategorieAenderung($this->formvars);
+		}
+		$this->notizKatVerwaltung();
+	} # END of function notizKategorieAendern
 
-  function notizKategorieLoeschen() {
-		include_(CLASSPATH.'notiz.php');
-    $this->notiz=new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
-    $this->notiz->notizKategorieLoeschen($this->formvars['kategorie_id'],$this->formvars['plus_notiz']);
-    $max_id=$this->notiz->selectKategorie('','','');
-    $this->formvars['kategorie_id']=$max_id[0]['id'];
-    $this->notizKatVerwaltung();
-  } # END of function notizKategorieLoeschen
+	function notizKategorieLoeschen() {
+		include_(CLASSPATH . 'notiz.php');
+		$this->notiz = new notiz($this->pgdatabase, $this->user->rolle->epsg_code);
+		$this->notiz->notizKategorieLoeschen($this->formvars['kategorie_id'], $this->formvars['plus_notiz']);
+		$max_id = $this->notiz->selectKategorie('', '', '');
+		$this->formvars['kategorie_id'] = $max_id[0]['id'];
+		$this->notizKatVerwaltung();
+	} # END of function notizKategorieLoeschen
 
   function metadatenblattanzeige() {
 		include_(CLASSPATH.'metadaten_csw.php');

@@ -20,6 +20,7 @@ class LENRIS {
 		$this->dokumentarten = $this->nachweis->getDokumentarten(false);
 		$this->hauptarten = $this->nachweis->getHauptDokumentarten();
 		$this->errors = array();
+		$this->delete_files = array();
   }
 	
 	function log_error($client_id, $error){
@@ -101,6 +102,7 @@ class LENRIS {
 	
 	function get_nachweis_info($client_id, $client_nachweis_id){
 		$sql = "
+			SET datestyle TO ISO, DMY;
 			SELECT 
 				cn.*,
 				n.link_datei
@@ -475,7 +477,7 @@ class LENRIS {
 						if (!$ret[0]) {
 							# Datei löschen
 							if (file_exists($rs['link_datei'])){
-								unlink($rs['link_datei']);
+								$this->delete_files[] = $rs['link_datei'];
 							}
 							$deleted_nachweise[] = $n['id_nachweis'];
 							$sql = "
@@ -591,7 +593,7 @@ class LENRIS {
 							if (!$ret[0]) {
 								# alte Datei löschen
 								if (file_exists($rs['link_datei'])){
-									unlink($rs['link_datei']);
+									$this->delete_files[] = $rs['link_datei'];
 								}
 							}
 							else {
@@ -613,6 +615,15 @@ class LENRIS {
 			}
 		}
 		return $updated_nachweise;
+	}
+	
+	function delete_files(){
+		foreach ($this->delete_files as $delete_file) {
+			$pathinfo = pathinfo($delete_file);
+			@unlink($delete_file);
+			@unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
+		$this->delete_files = array();
 	}
 	
 	function confirm_new_nachweise($client, $inserted_nachweise){
