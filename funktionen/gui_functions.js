@@ -33,19 +33,31 @@ window.onbeforeunload = function(){
 * @param action array ['sethtml'. ...]
 */
 function ahah(url, data, target, action, progress) {
+	if (csrf_token && csrf_token !== '') {
+		if (typeof data == 'string') {
+			data = data + '&csrf_token=' + csrf_token;
+		}
+		else {
+			data.append('csrf_token', csrf_token);
+		}
+	}
 	for (k = 0; k < target.length; ++k) {
-		if (target[k] != null && target[k].tagName == "DIV"){
+		if (target[k] != null && target[k].tagName == "DIV") {
 			waiting_img = document.createElement("img");
 			waiting_img.src = "graphics/ajax-loader.gif";
 			target[k].appendChild(waiting_img);
 		}
 	}
 	var req = new XMLHttpRequest();
-	if(req != undefined){
-		req.onreadystatechange = function(){ahahDone(url, target, req, action);};
-		if(typeof progress !== 'undefined')req.upload.addEventListener("progress", progress);
+	if (req != undefined) {
+		req.onreadystatechange = function() {
+			ahahDone(url, target, req, action);
+		};
+		if (typeof progress !== 'undefined') {
+			req.upload.addEventListener("progress", progress);
+		}
 		req.open("POST", url, true);
-		if(typeof data == "string") {
+		if (typeof data == "string") {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 		}
 		req.send(data);
