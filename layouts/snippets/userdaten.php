@@ -33,12 +33,12 @@
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
 						<th>&nbsp;</th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID"><?php echo $this->strID . '&csrf_token=' . $_SESSION['csrf_token']; ?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name"><?php echo $this->strName . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop"><?php echo $strIntervall . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp"><?php echo $strLastActivity . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation"><?php echo $strOrganisation . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position"><?php echo $strPosition . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $this->strName;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $strIntervall;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $strLastActivity;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $strOrganisation;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position<? echo '&csrf_token=' . $_SESSION['csrf_token']; ?>"><?php echo $strPosition;?></a></th>
 						<th align="left"><?php echo $this->strTel;?></th>
 						<th align="left"><?php echo $this->strEMail;?></th><?
 						if ($has_shared_user) { ?>
