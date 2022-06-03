@@ -95,7 +95,7 @@
 							<td>&nbsp;</td>
 							<td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
 							<td>
-								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>" title="<?php echo $this->strChange; ?>">
+								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID'] . '&csrf_token=' . $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>">
 									<?php echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
 								</a>
 							</td>
