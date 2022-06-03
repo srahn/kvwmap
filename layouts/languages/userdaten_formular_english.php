@@ -17,9 +17,6 @@
 	$strAuthorizeTask="Authorize task";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
-	$strShareRollenlayerAllowedLabel = "Share Layer";
-	$strShareRollenlayerAllowedCheckboxText = "Permission to share rollenlayer with other users.";
-	$strShareRollenlayerAllowedDescription = "User with this permission are allowed, to assign it own imported rollenlayer to itself and other users as regular layers! The assignment will happen to all user of such stellen, that have the permission to accept shared layers, compare with Stelle settings. Only the user itself and the admin are allowed to  delete this so called shared layer.";
 	$strSendEmail="send e-mail";
 	$strButtonSaveAs="Save as new user";
 	$strAllowedIps="allowed IP / Domain";
@@ -30,4 +27,13 @@
 	$strActiveSite="Active site";
 	$strChangeUser="Change user";
 	$strLoginAsUser="login as this user";
+	$strShareRollenlayerAllowedLabel = "Share Layer";
+	$strShareRollenlayerAllowedCheckboxText = "Permission to share rollenlayer with other users.";
+	$strShareRollenlayerAllowedDescription = "User with this permission are allowed, to assign it own imported rollenlayer to itself and other users as regular layers! The assignment will happen to all user of such stellen, that have the permission to accept shared layers, compare with Stelle settings. Only the user itself and the admin are allowed to  delete this so called shared layer.";
+	$strUserFormNewPasswdSubject = 'New password for WebGIS kvwmap';
+	$strUserFormNewPasswdBody = "'Invitation%20for%20WebGIS%20user%20' + loginName + '%0A%0AThe application at ' + host + ' ask you to enter a new password for user ' + loginName + '.%0A%0ATo do this, go to the following link:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AThere you assign a new password.%0A%0AWith best regards%0AYour GIS administrator%0A'";
+	$strUserFormNewPasswdAssigned = 'New passwort assigned';
+	$strUserFormNewPasswdWait = 'Please wait until the e-mail window opens with a ready-made message. Then send the invitation with the automatically generated password to the user';
+	$strUserFormNewPasswdSave = 'Be sure to save the user record with the new information after closing this window, otherwise the new password will not take effect and the user will not be able to set a new password';
+	$struserFormNewPasswdAccepted = 'Accepted';
 ?>
