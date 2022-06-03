@@ -4,7 +4,7 @@
 <script language="javascript" type="text/javascript">
 	function update_aktiv(id) {
 		var aktiv = ($('#aktiv_' + id).is(':checked') ? 1 : 0);
-		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv + '&csrf_token=' + <? echo $_SESSION['csrf_token']; ?>;
+		window.location = 'index.php?go=cronjob_speichern_Speichern&id=' + id + '&aktiv=' + aktiv + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 </script>
 <table width="700px" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
