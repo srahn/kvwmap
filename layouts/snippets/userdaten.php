@@ -33,12 +33,12 @@
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
 						<th>&nbsp;</th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID"><?php echo $this->strID;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name"><?php echo $this->strName;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop"><?php echo $strIntervall;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp"><?php echo $strLastActivity;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation"><?php echo $strOrganisation;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position"><?php echo $strPosition;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID"><?php echo $this->strID . '&csrf_token=' . $_SESSION['csrf_token']; ?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name"><?php echo $this->strName . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop"><?php echo $strIntervall . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp"><?php echo $strLastActivity . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation"><?php echo $strOrganisation . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=position"><?php echo $strPosition . '&csrf_token=' . $_SESSION['csrf_token'];?></a></th>
 						<th align="left"><?php echo $this->strTel;?></th>
 						<th align="left"><?php echo $this->strEMail;?></th><?
 						if ($has_shared_user) { ?>
@@ -115,7 +115,7 @@
 									} ?>
 								</td><?
 							} ?>
-							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
+							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order'] . '&csrf_token=' . $_SESSION['csrf_token']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
 						</tr><?php  
 					} ?>
 				</table>
