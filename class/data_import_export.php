@@ -1312,6 +1312,7 @@ class data_import_export {
 			$ret = $layerdb->execSQL($sql,4, 0);
 
 			for ($s = 0; $s < count($selected_attributes); $s++){
+				$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
 				# Transformieren der Geometrie
 				if ($this->attributes['the_geom'] == $selected_attributes[$s]) {
 					$selected_attributes[$s] = 'st_transform(' . $selected_attributes[$s] . ', ' . $this->formvars['epsg'] . ') ';
@@ -1322,7 +1323,9 @@ class data_import_export {
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
-					if (in_array($selected_attr_types[$s], array('text', 'varchar'))) $selected_attributes[$s] = pg_quote($selected_attributes[$s]).'::varchar(254)';
+					if (in_array($selected_attr_types[$s], array('text', 'varchar'))) {
+						$selected_attributes[$s] = $selected_attributes[$s] . '::varchar(254)';
+					}
 				}
 			}
 
