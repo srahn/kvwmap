@@ -7,32 +7,32 @@
 <script language="JavaScript">
 <!--
 
-function gotoStelle(event, option_obj){
-	if(event.layerX > 300){
-		location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+function gotoStelle(event, option_obj) {
+	if (event.layerX > 300){
+		location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 }
 
-function gotoLayer(event, option_obj){
+function gotoLayer(event, option_obj) {
 	if(event.layerX > 300){
-		location.href = 'index.php?go=Layereditor&selected_layer_id='+option_obj.value;
+		location.href = 'index.php?go=Layereditor&selected_layer_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 }
 
-function gotoUser(event, option_obj){
+function gotoUser(event, option_obj) {
 	if(event.layerX > 300){
-		location.href = 'index.php?go=Benutzerdaten_Formular&selected_user_id='+option_obj.value;
+		location.href = 'index.php?go=Benutzerdaten_Formular&selected_user_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 }
 
-function getsubmenues(){
+function getsubmenues() {
 	menue_id = document.GUI.allmenues.options[document.GUI.allmenues.selectedIndex].value;
-	ahah('index.php', 'go=getsubmenues&menue_id='+menue_id, new Array(document.getElementById('submenue_div')), "");
+	ahah('index.php', 'go=getsubmenues&menue_id=' + menue_id, new Array(document.getElementById('submenue_div')), '');
 }
 
-function getlayer(){
+function getlayer() {
 	group_id = document.GUI.allgroups.options[document.GUI.allgroups.selectedIndex].value;
-	ahah('index.php', 'go=getlayerfromgroup&group_id='+group_id, new Array(document.getElementById('alllayer_div')), "");
+	ahah('index.php', 'go=getlayerfromgroup&group_id=' + group_id, new Array(document.getElementById('alllayer_div')), '');
 }
 
 function select_layer(){
@@ -167,11 +167,11 @@ else {
 							$this->formvars['Referenzkarte_ID'],
 							1,
 							'',
-							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value)'
+							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value + \'&csrf_token=' . $_SESSION['csrf_token'] . '\')'
 						);
 						if($this->formvars['Referenzkarte_ID']){
 							$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
-							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>" style="vertical-align: middle" onchange="this.src=">
+							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="vertical-align: middle" onchange="this.src=">
 						<? } ?>
           </td>
         </tr>
@@ -243,7 +243,7 @@ else {
 									),
 									$this->formvars['postgres_connection_id']
 								); ?>
-								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
 							</div>
 						</td>
 					</tr><?
@@ -531,7 +531,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
               <tr>
                   <th class="fetter" align="right">
                   <? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
-                    <a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                   <?}?>
                   <?php echo $strLayer; ?></th>
                 </tr>
@@ -804,7 +804,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
   <tr>
     <td align="center">
     	<input type="hidden" name="go_plus" id="go_plus" value="">
-    	<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
+    	<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
      if ($this->formvars['selected_stelle_id']>0) {
      	?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
      	 	# 2007-12-30 pk

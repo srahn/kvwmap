@@ -29,9 +29,9 @@
 			document.GUI.changepasswd.value = 0;
 		}
 	}
-	
-	function deactivate_layer(user_id, stelle_id, layer_id){
-		ahah('index.php?go=Benutzerdaten_Layer_Deaktivieren', 'user_id='+user_id+'&stelle_id='+stelle_id+'&layer_id='+layer_id, new Array(), new Array());
+
+	function deactivate_layer(user_id, stelle_id, layer_id) {
+		ahah('index.php?go=Benutzerdaten_Layer_Deaktivieren', 'user_id=' + user_id + '&stelle_id=' + stelle_id + '&layer_id=' + layer_id, new Array(), new Array());
 		layer = document.getElementById('layer_'+layer_id);
 		layer.parentNode.removeChild(layer);
 	}
@@ -140,7 +140,7 @@
 <?
 	if ($this->formvars['nutzerstellen']) {
 ?>
-	<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a>
+	<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a>
 
 <?
 	}
@@ -356,7 +356,7 @@
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strActiveSite;?></div>
 			<div>
-				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
+				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
 			</div>
 		</div>
 
@@ -382,7 +382,7 @@
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strChangeUser;?></div>
 			<div>
-				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>"><? echo $strLoginAsUser; ?></a>
+				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
 			</div>
 		</div>
 <?

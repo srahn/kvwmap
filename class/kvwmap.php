@@ -3258,7 +3258,7 @@ echo '			</table>
 		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
 			# return 405 http status code
 			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
-			echo "Diese Seite kann aus Sicherheitsgründen nicht angezeigt werden!";
+			echo $this->strSecurityReason . ' => <a href="' . URL . APPLVERSION . 'index.php?go=logout">Login</a>';
 			exit;
 		}
 	}
