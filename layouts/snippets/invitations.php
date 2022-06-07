@@ -1,4 +1,4 @@
-<?php
+<?
 	include(LAYOUTPATH . 'languages/invitations_' . $this->user->rolle->language . '.php');
 ?>
 <script>
@@ -8,8 +8,9 @@
 			$.ajax({
 				url: 'index.php',
 				data: {
-					'go': 'Einladung_Löschen',
-					'selected_invitation_id': id
+					go : 'Einladung_Löschen',
+					selected_invitation_id : id,
+					csrf_token : '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				error: function(response) {
 					message(response.msg);
@@ -29,11 +30,11 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=token"><? echo $strToken; ?></a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=email">E-Mail</a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id"><? echo $strTask; ?></a></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=name"><? echo $this->strUser; ?></th>
-					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed"><? echo $strRegistered; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=token&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strToken; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=email&csrf_token=<? echo $_SESSION['csrf_token']; ?>">E-Mail</a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=stelle_id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strTask; ?></a></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $this->strUser; ?></th>
+					<th><a href="index.php?go=Einladungen_Anzeigen&order=completed&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strRegistered; ?></a></th>
 					<th>&nbsp;</th>
 					<th>&nbsp;</th>
 				</tr><?php
@@ -57,7 +58,7 @@
 						<td>&nbsp;
 							<a
 								title="<?php echo $this->strChange; ?>"
-								href="index.php?go=Einladung_Editor&selected_invitation_id=<?php echo $this->invitations[$i]->get('token'); ?>"
+								href="index.php?go=Einladung_Editor&selected_invitation_id=<?php echo $this->invitations[$i]->get('token'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
 							><i class="fa fa-pencil" style="color: firebrick"></i></a>
 						</td>
 						<td>&nbsp;

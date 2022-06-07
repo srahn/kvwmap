@@ -196,7 +196,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				<tr>
 					<td align="center">
 						<? if($this->new_entry != true){ ?>
-						<a href="javascript:void(0);" onclick="overlay_link('go=Layer-Suche&go_plus=Suchen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>', true);">Sachdatenanzeige</a>
+						<a href="javascript:void(0);" onclick="overlay_link('go=Layer-Suche&go_plus=Suchen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', true);">Sachdatenanzeige</a>
 						<? } ?>&nbsp;
 					</td>
 				</tr>

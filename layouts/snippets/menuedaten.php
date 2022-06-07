@@ -12,9 +12,9 @@
 			$.ajax({
 				url: 'index.php',
 				data: {
-					'go': 'Menue_Löschen',
-					'selected_menue_id': id,
-					'csrf_token': '<? echo $_SESSION['csrf_token']; ?>'
+					go: 'Menue_Löschen',
+					selected_menue_id: id,
+					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				error: function(response) {
 					message(response.msg);
