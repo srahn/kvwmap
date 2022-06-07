@@ -55,7 +55,8 @@
 			url: 'index.php?go=xplankonverter_konvertierung_status',
 			data: {
 				konvertierung_id: konvertierung_id,
-				status: "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>"
+				status: "<?php echo Konvertierung::$STATUS['IN_KONVERTIERUNG']; ?>",
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			success: function(response) {
 				if (!response.success){
@@ -67,7 +68,8 @@
 				$.ajax({
 					url: 'index.php?go=xplankonverter_regeln_anwenden',
 					data: {
-						konvertierung_id: konvertierung_id
+						konvertierung_id: konvertierung_id,
+						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
 						document.getElementById('sperrspinner').style.display = 'none';
@@ -82,7 +84,8 @@
 						$.ajax({
 							url: 'index.php?go=xplankonverter_konvertierung_validate',
 							data: {
-								konvertierung_id: konvertierung_id
+								konvertierung_id: konvertierung_id,
+								csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 							},
 							complete: function () {
 								document.getElementById('sperrspinner').style.display = 'none';
@@ -117,7 +120,8 @@
 			url: 'index.php?go=xplankonverter_konvertierung_status',
 			data: {
 				konvertierung_id: konvertierung_id,
-				status: "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>"
+				status: "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>",
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			complete: function () {
 				// document.getElementById('sperrspinner').style.display = 'none';
@@ -132,7 +136,8 @@
 				$.ajax({
 					url: 'index.php?go=xplankonverter_gml_generieren',
 					data: {
-						konvertierung_id: konvertierung_id
+						konvertierung_id: konvertierung_id,
+						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
 						//document.getElementById('sperrspinner').style.display = 'none';
@@ -168,7 +173,8 @@
 			url: 'index.php?go=xplankonverter_konvertierung_status',
 			data: {
 				konvertierung_id: konvertierung_id,
-				status: "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>"
+				status: "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>",
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			complete: function () {
 				// document.getElementById('sperrspinner').style.display = 'none';
@@ -183,7 +189,8 @@
 				$.ajax({
 					url: 'index.php?go=xplankonverter_inspire_gml_generieren',
 					data: {
-						konvertierung_id: konvertierung_id
+						konvertierung_id: konvertierung_id,
+						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
 						// document.getElementById('sperrspinner').style.display = 'none';
@@ -222,7 +229,8 @@
 				data: {
 					go: 'xplankonverter_konvertierung_loeschen',
 					planart: '<?php echo $this->formvars['planart']; ?>',
-					plan_oid: plan_oid
+					plan_oid: plan_oid,
+					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				success: function(response) {
 					message([response]);
@@ -241,7 +249,8 @@
 			data: {
 				go: 'xplankonverter_konvertierung_veroffentlichen',
 				veroeffentlicht: veroeffentlicht,
-				konvertierung_id: konvertierung_id
+				konvertierung_id: konvertierung_id,
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			success: function(result) {
 				if (result.success) {

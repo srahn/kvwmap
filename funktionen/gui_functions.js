@@ -771,23 +771,26 @@ function overlay_submit(gui, start, target){
 
 function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	if(checkForUnsavedChanges()){
-		if(target == 'root'){
-			root.location.href = 'index.php?'+data;
+	data = data + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+	if (checkForUnsavedChanges()) {
+		if (target == 'root') {
+			root.location.href = 'index.php?' + data;
 		}
-		else{
-			if(querymode == 1 && (start || currentform.name == 'GUI2')){
-				if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+		else {
+			if (querymode == 1 && (start || currentform.name == 'GUI2')) {
+				if (query_tab != undefined && query_tab.closed) {
+					// wenn Fenster geschlossen wurde, resized zuruecksetzen
 					root.resized = 0;
 				}
-				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				else if (start && browser == 'firefox' && query_tab != undefined && root.resized < 2) {
+					// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?window_type=overlay&"+data, "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?window_type=overlay&" + data, "Sachdaten", "left=" + root.document.GUI.overlayx.value + ",top=" + root.document.GUI.overlayy.value + ",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
-			else{
-				window.location.href = 'index.php?'+data;
+			else {
+				window.location.href = 'index.php?' + data;
 			}
 		}
 	}

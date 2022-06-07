@@ -5,7 +5,7 @@
 			<span class="btn-group" role="group" shapefiles_oid="' + row.shapefiles_oid + '" shapefile_id="' + value + '">\
     		<a\
 					title="Shape-Datei bearbeiten"\
-					href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '"\
+					href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&operator_shapefile_id==&value_shapefile_id=' + value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>"\
 					class="btn btn-link btn-xs xpk-func-btn"\
 				>\
 					<i class="btn-link fa fa-lg fa-pencil"></i>\
@@ -35,7 +35,8 @@
 				url: 'index.php',
 				data: {
 					go: 'xplankonverter_shapefile_loeschen',
-					shapefile_oid: shapefile_oid
+					shapefile_oid: shapefile_oid,
+					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				success: function(response) {
 					$(e).closest('tr').remove();

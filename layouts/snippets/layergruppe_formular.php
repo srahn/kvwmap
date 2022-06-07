@@ -13,7 +13,7 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Layergruppen_Anzeigen#group_<?php echo $this->layergruppe->get('id'); ?>'">&nbsp;<?php
+						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Layergruppen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#group_<?php echo $this->layergruppe->get('id'); ?>'">&nbsp;<?php
 						if ($this->layergruppe->get('id') != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1">&nbsp;
