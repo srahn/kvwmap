@@ -34,7 +34,7 @@ function quote_or_null($var) {
 }
 
 function append_slash($var) {
-	return $var . (trim($var) != '' AND substr(trim($var), -1) != '/' ? '/' : '');
+	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
 }
 
 function pg_quote($column) {
