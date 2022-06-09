@@ -24,12 +24,12 @@ else { ?>
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
 						<!--th><a href="index.php?go=belated_file_upload&order=user">Nutzer</th/-->
-						<th><a href="index.php?go=belated_file_upload&order=layer">Layer</a></th>
-						<th><a href="index.php?go=belated_file_upload&order=dataset">Datensatz</a></th>
-						<th><a href="index.php?go=belated_file_upload&order=attribut_name">Attribut</a></th>
-						<th><a href="index.php?go=belated_file_upload&order=name">Dateiname</a></th>
-						<th><a href="index.php?go=belated_file_upload&order=lastmodified">Änderungsdatum</a></th>
-						<th><a href="index.php?go=belated_file_upload&order=size">Dateigröße</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=layer&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Layer</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=dataset&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Datensatz</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=attribut_name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Attribut</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Dateiname</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=lastmodified&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Änderungsdatum</a></th>
+						<th><a href="index.php?go=belated_file_upload&order=size&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Dateigröße</a></th>
 					</tr><?php
 					foreach ($this->belated_files AS $belated_file) { ?>
 						<tr id="$belated_file_<?php echo $belated_file->get('id'); ?>">

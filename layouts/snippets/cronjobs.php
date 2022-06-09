@@ -12,7 +12,7 @@
     <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
 	<tr>
-		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></td>
+		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></td>
   </tr>
 	<tr>
 		<th><i title="<? echo $strTitle_checkbox; ?>" class="fa fa-check-square-o" aria-hidden="true"></i></th>
