@@ -50,7 +50,7 @@ function Bestaetigung(link,text) {
   <? for($i=0;$i<count($this->stellen['user'][$s]['ID']);$i++) { ?>
 	<div id="stelle<? echo $this->stellen['ID'][$s]; ?>user<? echo $this->stellen['user'][$s]['ID'][$i]; ?>" class="usd-nutzer">
 	<? if($this->formvars['go'] != 'BenutzerderStelleAnzeigen'){ ?>
-		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=stelle<? echo $this->stellen['ID'][$s]; ?>&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>">
+		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=stelle<? echo $this->stellen['ID'][$s]; ?>&selected_user_id=<? echo $this->stellen['user'][$s]['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 			<? echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?>
 		</a>
 	<? }
@@ -58,7 +58,7 @@ function Bestaetigung(link,text) {
 			echo $this->stellen['user'][$s]['Bezeichnung'][$i];
 		}
 	 if($this->formvars['go'] != 'BenutzerderStelleAnzeigen'){ ?>
-		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie den Benutzer <?php echo $this->stellen['user'][$s]['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
 			<i class="fa fa-trash" style="padding: 3px"></i>
 		</a>
 	<? } ?>

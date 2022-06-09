@@ -5,7 +5,7 @@ include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr> 
 		<td align="left"><h2><?php echo $strTitle; ?></h2></td>
-		<td align="right"><a class="btn btn-new" href="index.php?go=cronjobs_anzeigen"><i class="fa fa-list" style="color: white;"></i> Alle Jobs</a></td></td>
+		<td align="right"><a class="btn btn-new" href="index.php?go=cronjobs_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list" style="color: white;"></i> Alle Jobs</a></td></td>
 	</tr>
 	<tr>
 		<td colspan="2" align="center"><?php
@@ -83,7 +83,7 @@ include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
 <tr>
 	<td colspan="2" align="center">
 		<input type="hidden" name="go" value="cronjob_speichern">
-		<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=cronjobs_anzeigen'">
+		<input type="button" name="cancle" value="<? echo $this->strCancel; ?>" onclick="document.location.href = 'index.php?go=cronjobs_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
 		<input type="submit" name="go_plus" value="<?php echo ($this->cronjob->get('id') > 0 ? $this->strSave : $this->strCreate); ?>">
 	</td>
 </tr>
