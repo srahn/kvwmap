@@ -3,7 +3,7 @@
 	<HEAD>
 		<TITLE>Regeleditor</TITLE>
 		<META charset="UTF-8">
-		<script src="<?php echo JQUERY_PATH; ?>jquery-1.12.0.min.js"></script>
+		<script src="<?php echo JQUERY_PATH; ?>jquery.min.js"></script>
 		<?php include('config.php'); ?>
 		<?php include(PLUGINS . 'xplankonverter/view/header.php'); ?>
 
