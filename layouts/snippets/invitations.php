@@ -75,7 +75,7 @@
 	</tr>
 	<tr>
 		<td align="center" style="padding-top: 20px">
-			<a class="btn btn-new" href="index.php?go=Einladung_Editor" titel="Legt eine neue Einladung an."><i class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo $strInviteNewUser; ?></a>
+			<a class="btn btn-new" href="index.php?go=Einladung_Editor&csrf_token=<? echo $_SESSION['csrf_token']; ?>" titel="Legt eine neue Einladung an."><i class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo $strInviteNewUser; ?></a>
 		</td>
 	</tr>
 </table>

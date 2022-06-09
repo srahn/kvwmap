@@ -108,7 +108,7 @@
 	} ?>
 	<tr>
 		<td>&nbsp;</td>
-		<td><input type="button" value="zurück zum Formular" onclick="document.location.href='index.php?go=WMS_Export&mapfile_name=<?php echo $this->formvars['mapfile_name']; ?>'"></td>
+		<td><input type="button" value="zurück zum Formular" onclick="document.location.href='index.php?go=WMS_Export&mapfile_name=<?php echo $this->formvars['mapfile_name']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"></td>
 	</tr>
 	<tr>
 		<td>&nbsp;</td>
@@ -118,8 +118,8 @@
 				echo implode('', array_map(
 					function($mapfile) {
 						return '<li>' . $mapfile . '
-							<a title="Map-Datei ' . $mapfile . ' ändern" href="index.php?go=WMS_Export&mapfile_name=' . $mapfile . '"><i class="fa fa-pencil" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
-							<a title="Map-Datei ' . $mapfile . ' löschen" href="index.php?go=ows_export_loeschen&mapfile_name=' . $mapfile . '"><i class="fa fa-trash" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
+							<a title="Map-Datei ' . $mapfile . ' ändern" href="index.php?go=WMS_Export&mapfile_name=' . $mapfile . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
+							<a title="Map-Datei ' . $mapfile . ' löschen" href="index.php?go=ows_export_loeschen&mapfile_name=' . $mapfile . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-trash" aria-hidden="true" style="margin-left: 10px; color: firebrick"></i></a>
 						</li>';
 					},
 					$this->mapfiles_der_stelle
