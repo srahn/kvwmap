@@ -2031,7 +2031,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
-		$msg . "
+		htmlspecialchars($msg) . "
 		<div style=\"text-align: center\">
 			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
 		</div>
