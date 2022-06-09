@@ -10,7 +10,8 @@ function urlencode2($str){
 	$str = str_replace('%26', '&', $str);
 	$str = str_replace('%3D', '=', $str);
 	$str = str_replace('%3A', ':', $str);
-	$str = str_replace('%2F', '/', $str);	
+	$str = str_replace('%2F', '/', $str);
+	$str = str_replace('%23', '#', $str);
 	return $str;
 }
 

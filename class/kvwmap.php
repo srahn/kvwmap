@@ -8462,7 +8462,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
 		$this->formvars['selected_layer_id'] = intval($this->formvars['selected_layer_id']);
-		if($this->last_query != '') {
+		if ($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
 		if ($this->formvars['selected_layer_id'] > 0) {
@@ -8722,7 +8722,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				# order by
 				$sql_order = '';
-				if (value_of($this->formvars, 'orderby'.$layerset[0]['Layer_ID']) != '') {
+				if (value_of($this->formvars, 'orderby' . $layerset[0]['Layer_ID']) != '') {
 					# Fall 1: im GLE soll nach einem Attribut sortiert werden
 					$sql_order = ' ORDER BY '. replace_semicolon($this->formvars['orderby'.$layerset[0]['Layer_ID']]);
 				}
@@ -8740,22 +8740,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$j++;
 				}
 
-				if ($this->last_query != ''){
+				if ($this->last_query != '') {
 					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
-					if(value_of($this->formvars, 'orderby'.$layerset[0]['Layer_ID']) == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-					if(value_of($this->formvars, 'anzahl') == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
-					if(value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+					if (value_of($this->formvars, 'orderby' . $layerset[0]['Layer_ID']) == '') {
+						$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
+					}
+					if (value_of($this->formvars, 'anzahl') == '') {
+						$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					}
+					if (value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']) == '') {
+						$this->formvars['offset_' . $layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+					}
 				}
 				$sql_limit = '';
-        if(value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
-        	if($this->formvars['anzahl'] == ''){
-	          $this->formvars['anzahl'] = $layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
-	        }
-        	$sql_limit.=' LIMIT ' . intval($this->formvars['anzahl']);
-        	if(value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) != ''){
-          	$sql_limit.=' OFFSET ' . intval($this->formvars['offset_'.$layerset[0]['Layer_ID']]);
-        	}
-        }
+				if (value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == '') {
+					if ($this->formvars['anzahl'] == '') {
+						$this->formvars['anzahl'] = $layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
+					}
+					$sql_limit .= ' LIMIT ' . intval($this->formvars['anzahl']);
+					if (value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']) != '') {
+						$sql_limit .= ' OFFSET ' . intval($this->formvars['offset_' . $layerset[0]['Layer_ID']]);
+					}
+				}
 
 				$layerset[0]['sql'] = $sql;
 

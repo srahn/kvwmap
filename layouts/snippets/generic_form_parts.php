@@ -301,7 +301,7 @@
 				$datapart .= '</select>';
 			}
 		}
-		else{
+		else {
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
 					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
@@ -647,10 +647,10 @@
 
 				case 'Link': {
 					if ($attribute_privileg != '0' OR $lock[$k]) {
-						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="' . $field_class . '" tabindex="1" onchange="' . $onchange . '" id="' . $layer_id . '_' . $name . '_' . $k . '" style="font-size: ' . $fontsize . 'px" size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					}
 					else {
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="' . $field_class . '" onchange="' . $onchange . '" type="hidden" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					}
 					if ($value!='') {
 						if (substr($value, 0, 4) == 'http') {
@@ -659,7 +659,7 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<div class="formelement-link"><a class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
+						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" style="font-size: ' . $fontsize . 'px" href="' . htmlspecialchars($value) . '">';
 						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
@@ -687,21 +687,21 @@
 					}
 					$explosion = explode(';', $options);		# url;alias;embedded
 					$href = $explosion[0];
-					if($explosion[1] != ''){
+					if ($explosion[1] != '') {
 						$alias = $explosion[1];
 					}
-					else{
+					else {
 						$alias = $href;
 					}
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-					if ($explosion[3] == 'all_null'){
+					if ($explosion[3] == 'all_null') {
 						$show_link = true;
 					}
-					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					$datapart .= '<input class="' . $field_class . '" onchange="' . $onchange . '" type="hidden" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					if ($show_link) {
-						if ($explosion[2] == 'embedded'){
+						if ($explosion[2] == 'embedded') {
 							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.urlencode2($href).'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
@@ -736,16 +736,15 @@
 									}
 									$params[] = $url_parts[1];
 									$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
-								} break;								
+								} break;
 							}
-							
 							$datapart .= '<a
 								tabindex="1"
 								target="' . $link_target . '"
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
 								onclick="' . $onclick . '"
-								href="' . urlencode2($href) . '"
+								href="' . urlencode2(strpos($href, '#') === false ? $href . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $href)) . '"
 							>' . $alias . '</a><br>';
 						}
 					}
