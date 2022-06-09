@@ -4,6 +4,13 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function add_csrf($url){
+	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
+		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
+	}
+	return $url;
+}
+
 function urlencode2($str){
 	$str = rawurlencode($str);
 	$str = str_replace('%3F', '?', $str);
