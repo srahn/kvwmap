@@ -3244,7 +3244,7 @@ echo '			</table>
 		)) {
 			$this->add_message('error', $this->TaskChangeWarning . '<br>(' . $case . ')' . '<br>Weder Menü noch Funktion erlaubt.');
 			global $log_loginfail;
-			$log_loginfail->write(date("Y:m:d H:i:s",time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
+			$log_loginfail->write(date("Y:m:d H:i:s", time()) . ' case: ' . $case . ' not allowed in Stelle: ' . $this->Stelle->id . ' for User: ' . $this->user->Name);
 			$this->goNotExecutedInPlugins = true;
 			go_switch('', true);
 		}
@@ -3258,7 +3258,7 @@ echo '			</table>
 		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
 			# return 405 http status code
 			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
-			echo $this->strSecurityReason . ' => <a href="' . URL . APPLVERSION . 'index.php?go=logout">Login</a>';
+			echo $this->strSecurityReason . ' => <a href="' . URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION . 'index.php?go=logout">Login</a>';
 			exit;
 		}
 	}
