@@ -11896,6 +11896,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
+			$this->formvars['version'] = $this->stellendaten['version'];
+			$this->formvars['comment'] = $this->stellendaten['comment'];
 			$where = 'ID != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
@@ -17899,6 +17901,8 @@ class db_mapObj{
 		$attribute_sets = array();
 
 		if (!$duplicate) {
+			# Diese Attribute nicht auf Dublikate übertragen
+			# Schreibt alle String-Attribute, die NULL sein sollen wenn sie einen Leerstring enthalten.
 			foreach(
 				array(
 					'alias',
@@ -17925,9 +17929,10 @@ class db_mapObj{
 					'uptodateness',
 					'updatecycle',
 					'metalink',
+					'comment'
 				) AS $key
 			) {
-				$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+				$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 			}
 
 			# Scheibt alle unterstützten Language Attribute, außer german dafür heißt das Attribut nur Name
@@ -17938,6 +17943,7 @@ class db_mapObj{
 			}
 		}
 
+		# Die nächsten Attribute auch schreiben wenn Daten auf Dublikate übertragen werden.
 		# Schreibt alle Attribute, die nur geschrieben werden sollen wenn Wert != '' ist
 		foreach(
 			array(
@@ -17961,7 +17967,7 @@ class db_mapObj{
 				'shared_from'
 			) AS $key
 		) {
-			$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+			$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 		}
 
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
@@ -17972,7 +17978,7 @@ class db_mapObj{
 				'listed'
 			) AS $key
 		) {
-			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
+			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
 		# Schreibt alle Attribute, die getrimmt werden sollen
@@ -17993,6 +17999,15 @@ class db_mapObj{
 			) AS $key
 		) {
 				$attribute_sets[] = "`" . $key . "` = '" . append_slash($formvars[$key]) . "'";
+		}
+
+		# Setzt Wert auf default wenn leer
+		foreach(
+			array(
+				'version'
+			) AS $key
+		) {
+				$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '1.0.0' : $formvars[$key]) . "'";
 		}
 
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
@@ -18059,11 +18074,19 @@ class db_mapObj{
 		}
 	}
 
+	/**
+	* function create a new layer based on layerdata.
+	* layerdata can be an array of parameters from a formular or
+	* a layer object where the values for the new layer will be taken from the object variables
+	* params $layerdata [Array|Object]
+	* return Integer The ID of new created layer or in case of error the number 0
+	*/
 	function newLayer($layerdata) {
 		global $supportedLanguages;
 		# Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
 		if (is_array($layerdata)) {
-			$formvars = $layerdata; # formvars wurden übergeben
+			# formvars wurden übergeben
+			$formvars = $layerdata;
 			$name_columns = '';
 			$names = '';
 			foreach ($supportedLanguages as $language) {
@@ -18145,7 +18168,9 @@ class db_mapObj{
 					`listed`,
 					`duplicate_from_layer_id`,
 					`duplicate_criterion`,
-					`shared_from`
+					`shared_from`,
+					`version`,
+					`comment`
 				) VALUES (
 					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
 					" . quote_or_null($formvars['Name']) . ",
@@ -18218,12 +18243,15 @@ class db_mapObj{
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
 					" . quote($formvars['duplicate_criterion']) . ",
-					" . quote_or_null($formvars['shared_from']) . "
+					" . quote_or_null($formvars['shared_from']) . ",
+					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
+					" . quote_or_null($formvars['comment']) . "
 				)
 			";
     }
 		else {
-			$layer = $layerdata;      # ein Layerobject wurde übergeben
+			# ein Layerobject wurde übergeben
+			$layer = $layerdata;
 			$projection = explode('epsg:', $layer->getProjection());
 			$sql = "
 				INSERT INTO layer (
@@ -18251,7 +18279,9 @@ class db_mapObj{
 					`wms_format`,
 					`wms_connectiontimeout`,
 					`trigger_function`,
-					`sync`
+					`sync`,
+					`version`,
+					`comment`
 				) VALUES (
 					'" . $layer->name . "',
 					" . quote($layer->type) . ",
@@ -18277,7 +18307,9 @@ class db_mapObj{
 					'',
 					60,
 					'" . $layer->trigger_function . "',
-					" . quote($layer->sync) . "
+					" . quote($layer->sync) . ",
+					'" . $layer->version . "',
+					'" . $layer->comment . "'
 				)
 			";
 		}

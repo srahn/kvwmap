@@ -23,7 +23,7 @@ function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
-		}break;
+		} break;
 		default : {
 			return is_numeric($var) ? $var : "'" . $var . "'";
 		}

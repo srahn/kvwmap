@@ -1,7 +1,6 @@
 <?php
   # 2007-12-30 pk
   include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
-
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
 <script language="JavaScript">
@@ -106,6 +105,60 @@ function addMenues(){
 
 //-->
 </script>
+<style>
+	.navigation{
+		border-collapse: collapse; 
+		width: 940px;
+		background:rgb(248, 248, 249);
+	}
+	.navigation th{
+		border: 1px solid #bbb;
+		border-collapse: collapse;
+		width: 17%;
+	}
+	.navigation th div{
+		padding: 3px;
+		padding: 9px 0 9px 0;
+		width: 100%;
+	}	
+	.navigation th:not(.navigation-selected) a{
+		color: #888;
+	}	
+	.navigation th:not(.navigation-selected):hover{
+		background-color: rgb(238, 238, 239);
+	}
+	.navigation-selected{
+		background-color: #c7d9e6;
+	}
+	.navigation-selected div{
+		color: #111;
+	}
+	
+	#form input[type="text"], #form select, #form textarea {
+		width: 100%;
+	}
+
+	#form textarea {
+		height: 40px;
+	}
+
+	#form input[type="float"] {
+		width: 100px;
+	}
+
+	#form input[type="number"] {
+		width: 41px;
+	}
+
+	#stellenzuweisung{
+		display: none;
+		width: 100%;
+	}
+	
+	.layerform_header{
+		background: rgb(199, 217, 230);
+	}
+</style>
 <br>
 <table border="0" cellpadding="5" cellspacing="0">
   <tr align="center">
@@ -122,14 +175,14 @@ else {
   $bgcolor=BG_FORMFAIL;
 }
  ?>
-    <table border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
+    <table id="form" border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
         <tr align="center">
           <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
         </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-          	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11">
+          	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11" style="width: 75px">
           </td>
         </tr><?php } ?>
 				<tr>
@@ -166,7 +219,7 @@ else {
 							$referenzkarten,
 							$this->formvars['Referenzkarte_ID'],
 							1,
-							'',
+							'width: auto',
 							'$(\'#ref_map_img_prev\').attr(\'src\', \'index.php?go=showRefMapImage&ID=\' + this.value + \'&csrf_token=' . $_SESSION['csrf_token'] . '\')'
 						);
 						if($this->formvars['Referenzkarte_ID']){
@@ -178,21 +231,21 @@ else {
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinExtent; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              x&nbsp;<input name="minxmax" type="text" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
-              y&nbsp;<input name="minymax" type="text" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
+              x&nbsp;<input name="minxmax" type="float" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
+              y&nbsp;<input name="minymax" type="float" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxExtent;  ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              x&nbsp;<input name="maxxmax" type="text" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
-              y&nbsp;<input name="maxymax" type="text" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
+              x&nbsp;<input name="maxxmax" type="float" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
+              y&nbsp;<input name="maxymax" type="float" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
           </td>
         </tr>
         <tr>
         	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<select name="epsg_code">
+						<select name="epsg_code" style="width: auto">
 							<option value=""><?php echo $this->strPleaseSelect; ?></option><? 
 							foreach ($this->epsg_codes as $epsg_code) {
 								echo '
@@ -207,13 +260,13 @@ else {
 				<tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="start" type="text" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
+              <input name="start" type="date" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="stop" type="text" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
+              <input name="stop" type="date" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
           </td>
         </tr>
         <tr>
@@ -222,12 +275,14 @@ else {
               <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="50" maxlength="100">
           </td>
         </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_abstract" type="text" value="<?php echo $this->formvars['ows_abstract']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
+
+				<tr>
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<textarea name="ows_abstract" rows="2"><?php echo $this->formvars['ows_abstract']; ?></textarea>
+					</td>
+				</tr>
+
         <tr>
           <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
           <td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -682,7 +737,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<?php echo $strDefaultUserID; ?>
 					</td>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php
-						echo FormObject::createSelectField('default_user_id', $seluseroptions, $this->formvars['default_user_id'], 1); ?>
+						echo FormObject::createSelectField('default_user_id', $seluseroptions, $this->formvars['default_user_id'], 1, 'width: auto'); ?>
 					</td>
 				</tr>
 
@@ -700,36 +755,60 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<span data-tooltip="<?php echo $strShowSharedLayersDescription; ?>"></span>
 					</td>
 				</tr>
-        <tr>
-          <td align="right" style="border-bottom:1px solid #C3C7C3">
-            <input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
-          </td>
-          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
-        </tr>
-        <tr>
-          <td align="right" style="border-bottom:1px solid #C3C7C3">
-            <input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
-          </td>
-          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
-        </tr>
-        <tr>
-          <td align="right" style="border-bottom:1px solid #C3C7C3">
-            <input name="allowedPasswordAge" type="text" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
-          </td>
-          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedPasswordAge; ?></td>
-        </tr>
-        <tr>
-          <td align="right" style="border-bottom:1px solid #C3C7C3">
-            <input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
-          </td>
-          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
-        </tr>
-        <tr>
-          <td align="right" style="border-bottom:1px solid #C3C7C3">
-            <input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
-          </td>
-          <td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
-        </tr>
+
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
+				</tr>
+
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
+				</tr>
+
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="allowedPasswordAge" type="number" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedPasswordAge; ?></td>
+				</tr>
+
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
+				</tr>
+
+				<tr>
+					<td align="right" style="border-bottom:1px solid #C3C7C3">
+						<input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
+				</tr>
+
+				<tr>
+					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $this->strVersion; ?>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3;">
+						<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10" style="width: 50px">
+					</td>
+				</tr>
+
+				<tr>
+					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $this->strComment; ?>
+					</td>
+					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
+						<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
+					</td>
+				</tr>
+
     </table>
   </td>
   </tr>

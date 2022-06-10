@@ -9,7 +9,7 @@
 	<tr>
 		<td align="center">
 			<?php echo $strTime.$timestamp->format('d.m.Y H:i:s'); ?><br><br>
-			<textarea name="comment" autofocus cols="35" rows="4" wrap="VIRTUAL" placeholder="<? echo $strComment; ?>"><?php echo $this->formvars['comment']; ?></textarea><br><br>
+			<textarea name="comment" autofocus cols="35" rows="4" wrap="VIRTUAL" placeholder="<? echo $this->strComment; ?>"><?php echo $this->formvars['comment']; ?></textarea><br><br>
 			<input type="checkbox" value="1" name="public"> <? echo $strPublic; ?><br><br>
 			<input type="hidden" name="go" value="Kartenkommentar">
 			<input type="hidden" name="consumetime" value="<?php echo $this->user->rolle->newtime; ?>">

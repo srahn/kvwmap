@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "và";
+	$this->strComment = 'Comment';
 	$this->strHelp = 'Giúp';
 	$this->strID = "Số ID";
 	$this->strName = "Tên";
@@ -40,4 +41,5 @@
 	$this->strSchema = "Schema";
 	$this->strTableName = "Tablename";
 	$this->strSecurityReason = "This page can not be displayed for security reasons! Make a note of the full URL and try to relogin if you have an account to the system. If this does not help to make the page accessable, please contact your adminstrator stating the full URL.";
+	$this->strVersion = 'Version';
 ?>

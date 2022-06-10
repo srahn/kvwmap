@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "and";
+	$this->strComment = 'Comment';
 	$this->strHelp = "Help";
 	$this->strID = "ID";
 	$this->strName = "Name";
@@ -85,4 +86,5 @@
 	$this->strTableName = "Tablename";
 	$this->strLayerGroup = "Layer group";
 	$this->strSecurityReason = "This page can not be displayed for security reasons! Make a note of the full URL and try to relogin if you have an account to the system. If this does not help to make the page accessable, please contact your adminstrator stating the full URL.";
+	$this->strVersion = 'Version';
 ?>

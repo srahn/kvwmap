@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "i";
+	$this->strComment = 'komenatrz';
 	$this->strHelp = 'Pomoc';
 	$this->strID = "ID";
 	$this->strChoose = "proszę wybrać";
@@ -40,4 +41,5 @@
 	$this->strSchema = "Schemat";
 	$this->strTableName = "Tablename";
 	$this->strSecurityReason = "This page can not be displayed for security reasons! Make a note of the full URL and try to relogin if you have an account to the system. If this does not help to make the page accessable, please contact your adminstrator stating the full URL.";
+	$this->strVersion = 'Version';
 ?>
