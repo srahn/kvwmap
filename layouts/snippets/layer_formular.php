@@ -90,7 +90,7 @@
 	}
 	
 	#form input[type="text"], #form select, #form textarea {
-		width: 97%;
+		width: 95%;
 	}
 
 	#form textarea {
