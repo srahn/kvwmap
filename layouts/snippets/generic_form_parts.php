@@ -744,7 +744,7 @@
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
 								onclick="' . $onclick . '"
-								href="' . urlencode2(strpos($href, '#') === false ? $href . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $href)) . '"
+								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
 						}
 					}

@@ -12568,7 +12568,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database);
-			$this->formvars['selstellen'] = $this->selected_user->getStellen(0);
+			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
 			# Abfragen der aktiven Layer des Nutzers
 			if ($this->userdaten[0]['stelle_id'] != '') {
 				$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
