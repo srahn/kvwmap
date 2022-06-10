@@ -49,7 +49,7 @@
 		//todo testen mit ajax context in success und error func hinzufügen
 		$.ajax({
 			url: 'index.php?go=connection_' + (id == 0 ? 'create' : 'update'),
-			data: $('form td .editable input').serialize() + '&id=' + id,
+			data: $('form td .editable input').serialize() + '&id=' + id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>',
 			success: function(response) {
 				var result = JSON.parse(response)[0],
 						new_id = result.id;
@@ -94,7 +94,10 @@
 				// todo testen mit ajax und error func hinzufügen
 				$.ajax({
 					url: 'index.php?go=connection_delete',
-					data: { id: id },
+					data: {
+						id: id,
+						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+					},
 					success: function(response) {
 						var result = JSON.parse(response)[0];
 						if (result.success) {

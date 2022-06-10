@@ -36,7 +36,8 @@
 				layerParamsBar.fadeOut();
 			}
 		</script><?
-		if (!empty($params)) { ?>
+		if (!empty($params)) {
+			include_once(CLASSPATH . 'FormObject.php'); ?>
 			<table>
 				<tr width="100%" align="center">
 					<td>
@@ -52,11 +53,10 @@
 									<tr height="22px">
 										<td class="layerOptionsHeader" colspan="2" width="350"><span class="fett">Themenparameter</span></td>
 									</tr><?php
-									foreach($params AS $param) { ?>
+									foreach ($params AS $param) { ?>
 										<tr>
 											<td class="layerOptionHeader"><?php echo $param['alias']; ?></td>
 											<td><?php
-												include_once(CLASSPATH.'FormObject.php');
 												echo FormObject::createSelectField(
 													'layer_parameter_' . $param['key'],		# name
 													$param['options'],										# options

@@ -6,7 +6,7 @@
 									+ ((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0)
 									+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0)
 									- $this->reference_map->reference->height
-									- 20;
+									- 22;
 ?>
 
 <script type="text/javascript">

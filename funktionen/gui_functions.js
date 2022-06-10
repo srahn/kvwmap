@@ -33,19 +33,31 @@ window.onbeforeunload = function(){
 * @param action array ['sethtml'. ...]
 */
 function ahah(url, data, target, action, progress) {
+	if (csrf_token && csrf_token !== '') {
+		if (typeof data == 'string') {
+			data = data + '&csrf_token=' + csrf_token;
+		}
+		else {
+			data.append('csrf_token', csrf_token);
+		}
+	}
 	for (k = 0; k < target.length; ++k) {
-		if (target[k] != null && target[k].tagName == "DIV"){
+		if (target[k] != null && target[k].tagName == "DIV") {
 			waiting_img = document.createElement("img");
 			waiting_img.src = "graphics/ajax-loader.gif";
 			target[k].appendChild(waiting_img);
 		}
 	}
 	var req = new XMLHttpRequest();
-	if(req != undefined){
-		req.onreadystatechange = function(){ahahDone(url, target, req, action);};
-		if(typeof progress !== 'undefined')req.upload.addEventListener("progress", progress);
+	if (req != undefined) {
+		req.onreadystatechange = function() {
+			ahahDone(url, target, req, action);
+		};
+		if (typeof progress !== 'undefined') {
+			req.upload.addEventListener("progress", progress);
+		}
 		req.open("POST", url, true);
-		if(typeof data == "string") {
+		if (typeof data == "string") {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 		}
 		req.send(data);
@@ -386,10 +398,15 @@ function resizemap2window(){
 *			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
 *			{ type: 'notice', msg: 'und eine Notiz'},
 *		]);
+* @param integer t_visible Time how long the message shall be visible
+* @param integer t_fade Time how long the message shall fade out
+* @param string css_top The css value for distance to the top of the page
+* @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
+* @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
-	console.log('Show Message: %o: ', messages);
-	console.log('function message with callback: %o: ', callback);
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
+	//console.log('Show Message: %o: ', messages);
+	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
@@ -405,11 +422,8 @@ function message(messages, t_visible, t_fade, css_top, confirm_value, callback) 
   }
 	var msgDiv = $('#messages');
 	var confirm = false;
-
-	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
-	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
 	
-	if(typeof css_top  !== 'undefined') {
+	if (typeof css_top  !== 'undefined') {
 		msgBoxDiv.css('top', css_top);
 	}
 	
@@ -757,23 +771,26 @@ function overlay_submit(gui, start, target){
 
 function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	if(checkForUnsavedChanges()){
-		if(target == 'root'){
-			root.location.href = 'index.php?'+data;
+	data = data + '&csrf_token=' + csrf_token;
+	if (checkForUnsavedChanges()) {
+		if (target == 'root') {
+			root.location.href = 'index.php?' + data;
 		}
-		else{
-			if(querymode == 1 && (start || currentform.name == 'GUI2')){
-				if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+		else {
+			if (querymode == 1 && (start || currentform.name == 'GUI2')) {
+				if (query_tab != undefined && query_tab.closed) {
+					// wenn Fenster geschlossen wurde, resized zuruecksetzen
 					root.resized = 0;
 				}
-				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				else if (start && browser == 'firefox' && query_tab != undefined && root.resized < 2) {
+					// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?window_type=overlay&"+data, "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?window_type=overlay&" + data, "Sachdaten", "left=" + root.document.GUI.overlayx.value + ",top=" + root.document.GUI.overlayy.value + ",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
-			else{
-				window.location.href = 'index.php?'+data;
+			else {
+				window.location.href = 'index.php?' + data;
 			}
 		}
 	}
@@ -1418,16 +1435,17 @@ function umlaute_umwandeln(value) {
 		'#' : '_',
 		'^' : '',
 		'°' : '',
-		'1': '1',
-		'2': '2',
-		'3': '3',
-		'4': '4',
-		'5': '5',
-		'6': '6',
-		'7': '7',
-		'8': '8',
-		'9': '9',
-		'0': '0'
+		' ' : '_',
+		'1' : '1',
+		'2' : '2',
+		'3' : '3',
+		'4' : '4',
+		'5' : '5',
+		'6' : '6',
+		'7' : '7',
+		'8' : '8',
+		'9' : '9',
+		'0' : '0'
 	};
-	return value.replace(/[äÄöÖüÜß<>@€,;.:\-!"§$%&/()=?`´*+'#^°1234567890]/g, function(m) { return map[m]; });
+	return value.replace(/[äÄöÖüÜß<>@€,;.:\-!"§$%&/()=?`´*+'#^° 1234567890]/g, function(m) { return map[m]; });
 }

@@ -29,9 +29,9 @@
 			document.GUI.changepasswd.value = 0;
 		}
 	}
-	
-	function deactivate_layer(user_id, stelle_id, layer_id){
-		ahah('index.php?go=Benutzerdaten_Layer_Deaktivieren', 'user_id='+user_id+'&stelle_id='+stelle_id+'&layer_id='+layer_id, new Array(), new Array());
+
+	function deactivate_layer(user_id, stelle_id, layer_id) {
+		ahah('index.php?go=Benutzerdaten_Layer_Deaktivieren', 'user_id=' + user_id + '&stelle_id=' + stelle_id + '&layer_id=' + layer_id, new Array(), new Array());
 		layer = document.getElementById('layer_'+layer_id);
 		layer.parentNode.removeChild(layer);
 	}
@@ -42,9 +42,9 @@
 		host = window.location.href.split('?')[0];
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=Neues Passwort für kvwmap&body=Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf ' + host + ' aufgefordert, ein neues Passwort für kvwmap einzugeben.%0A%0AKlicken Sie dazu bitte auf folgenden Link:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0AMelden Sie sich mit dem Passwort: ' + newPassword + ' an und vergeben ein neues.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strUserFormNewPasswdSubject; ?>&body=' + <? echo $strUserFormNewPasswdBody; ?>
 		);
-		message('<span style="font-size: larger;">Neues Passwort vergeben</span><br><br>Warten Sie bitte, bis sich das E-Mail-Fenster mit einer vorgefertigten Meldung öffnet. Verschicken Sie dann die Einladung mit dem automatisch generierten Passwort an den Nutzer.<br><span style="color: red">Speichern Sie unbedingt den Datensatz des Benutzers mit den neuen Angaben, nachdem Sie dieses Fenster geschlossen haben, sonst wird das neue Passwort nicht wirksam und der Nutzer kann kein neues Passwort vergeben!</span>',1000,2000,'', 'Verstanden');
+		message('<span style="font-size: larger;"><? echo $strUserFormNewPasswdAssigned; ?></span><br><br><? echo $strUserFormNewPasswdWait; ?>.<br><span style="color: red"><? echo $strUserFormNewPasswdSave; ?>!</span>',1000,2000,'', '<? echo 	$struserFormNewPasswdAccepted; ?>');
 		$('<input>').attr({
 			type: 'hidden',
 			name: 'password_setting_time',
@@ -140,7 +140,7 @@
 <?
 	if ($this->formvars['nutzerstellen']) {
 ?>
-	<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a>
+	<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a>
 
 <?
 	}
@@ -356,7 +356,7 @@
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strActiveSite;?></div>
 			<div>
-				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
+				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
 			</div>
 		</div>
 
@@ -382,7 +382,7 @@
 		<div class="form_formular-input form_formular-aic">
 			<div><? echo $strChangeUser;?></div>
 			<div>
-				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>"><? echo $strLoginAsUser; ?></a>
+				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
 			</div>
 		</div>
 <?

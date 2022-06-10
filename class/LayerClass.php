@@ -13,9 +13,13 @@ class LayerClass extends MyObject {
 		return $class->find_by($by, $id);
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$layer_class = new LayerClass($gui);
-		return $layer_class->find_where($where);
+		return $layer_class->find_where($where, $order);
+	}
+
+	function ret($mm) {
+		return $mm;
 	}
 
 	function copy($layer_id) {
@@ -40,5 +44,53 @@ class LayerClass extends MyObject {
 			$label2class->copy($this->get('id'));
 		}
 	}
-}
-?>
+
+	function get_first_style($datentyp = 0) {
+		#echo '<br>LayerClass->get_first_style for Class id: ' . $this->get($this->identifier);
+		include_once(CLASSPATH . 'Style2Class.php');
+		include_once(CLASSPATH . 'LayerStyle.php');
+		$styles2class = Style2Class::find($this->gui, 'class_id = ' . $this->get($this->identifier));
+		if (count($styles2class) == 0) {
+			return '';
+		}
+		#echo '<br>found ' . count($styles2class) . ' styles2class';
+		#echo '<br>first style_id: ' . $styles2class[0]->get('style_id');
+		$layer_style = LayerStyle::find_by_id($this->gui, 'Style_ID', $styles2class[0]->get('style_id'));
+
+		return $layer_style;
+	}
+
+	function get_layerdef($classitem = null, $datentyp = 0) {
+		#echo 'get_layerdef for Class: ' . $this->get('Name') . '(' . $this->get('Class_ID') . ')';
+
+		if ($this->get('Expression') == '') {
+			$def = '';
+		}
+		elseif (preg_match('/^\([^\[]*\[[^\]]*\][^\)]*\)$/', $this->get('Expression'))) {
+			$def = trim($this->get('Expression'));
+		}
+		elseif ($classitem == '') {
+			$def = '';
+		}
+		else {
+			$def = '([' . $classitem . '] = ' . $this->get('Expression') . ')';
+		}
+
+		$first_style = $this->get_first_style($datentyp);
+
+		$layerdef = (Object) array(
+			'def' => $def,
+			'name' => $this->get('Name')
+		);
+
+		if (property_exists($first_style, 'data') AND count($first_style->data) > 0) {
+			if ($first_style->has_icon()) {
+				$layerdef->icon = $first_style->get_icondef();
+			}
+			else {
+				$layerdef->style = $first_style->get_styledef($datentyp);
+			}
+		}
+		return $layerdef;
+	}
+} ?>

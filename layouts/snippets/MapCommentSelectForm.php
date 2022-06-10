@@ -8,7 +8,7 @@
 <tr bgcolor="<?php echo BG_DEFAULT ?>">
   <th><a href="index.php?go=Kartenkommentar_Waehlen&order=time_id DESC"><?php echo $strTime; ?></a></th>
 	<th><a href="index.php?go=Kartenkommentar_Waehlen&order=Name, Vorname"><?php echo $strUser; ?></a></th>
-  <th><a href="index.php?go=Kartenkommentar_Waehlen&order=comment"><?php echo $strComment; ?></a></th>
+  <th><a href="index.php?go=Kartenkommentar_Waehlen&order=comment"><?php echo $this->strComment; ?></a></th>
   <th>&nbsp;</th>
 </tr>
 <?php

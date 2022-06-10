@@ -17,4 +17,6 @@
 	$strPlaceholder_function = "Wirkt sich nur aus, wenn kein SQL angegeben ist.";
 	$strLabel_user = "ausführen als";
 	$strTip_user = "Legt fest ob der Job in den Crontab von gisadmin oder root geschrieben wird.";
+	$strNewCronJob = "Neuer Cron Job";
+	$strSaveCrontab = 'Crontab Schreiben';
 ?>

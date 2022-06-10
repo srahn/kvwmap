@@ -1448,7 +1448,6 @@ class pgdatabase {
 		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
 		# Dazu Fehlerausschriften bearchten.
 		$this->blocktransaction=0;
-		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
 	}
 
 	/**

@@ -1523,10 +1523,15 @@ a:hover .preview_image{
 	border: none;
 }
 
-.datensatz_header{
+.datensatz_header {
 	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
 	#background-color:<? echo BG_GLEHEADER; ?>;
 	border-bottom: 1px solid #bbb;
+}
+
+.identifier_text {
+	font-family: SourceSansPro3;
+	font-size: 17;
 }
 
 #message_box {
@@ -1622,6 +1627,7 @@ thead.gle th {
 	border-left: none;
 	background-color: #fff;
 	color: #aaa;
+	white-space: nowrap;
 }
 
 .gle_tabs > div.active_tab{
@@ -1750,6 +1756,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	left: 0px;
 	bottom: 30px;
 	width: 220px;
+	height: fit-content;
 }
 
 .calendar table{

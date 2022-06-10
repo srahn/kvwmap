@@ -1,7 +1,7 @@
 <?php
 	$strRegistration = "Registrierung";
 	$strWelcomeRegistration = "Welcome to register in";
-	$strInvitationToTask = " invided you to the following working group";
+	$strInvitationToTask = " invited you to the following working group";
 	$strNameAndContact = "Please assign a username and password and adjust your contact details if necessary.";
 	$strWorkWith = 'After successful registration you can work directly in the web application.';
 	$strRequests = 'If you have any questions, please contact';

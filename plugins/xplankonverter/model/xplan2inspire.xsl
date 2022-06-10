@@ -451,7 +451,7 @@
           <!-- Association SpatialPlan zu OfficialDocumentation-->
           <!-- Setzt Verknüpfung für jedes existierende RP_TextAbschnitt-Element, für welches auf RP_Plan eine Relation über +texte besteht. Setzt nilReason falls keine Relation vorhanden ist-->
           <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte">
-            <plu:officialDocument xlink:href="{concat('#', 'OfficlaDocumentation_' , generate-id(.))}"/>
+            <plu:officialDocument xlink:href="{concat('#', 'OfficialDocumentation_' , generate-id(.))}"/>
           </xsl:for-each>
           <xsl:if test="not(xplan:XPlanAuszug/gml:featureMember/xplan:RP_Plan/xplan:texte)">
             <plu:officialDocument nilReason="unknown" xsi:nil="true" />
@@ -460,13 +460,13 @@
           <!-- muss doppelt stattfinden, um Ordnung für XSLT zu behalten-->
           <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
             <xsl:if test="child::xplan:flaechenschluss='true'">
-              <plu:member xlink:href="{concat('#', 'OfficialDocumentation_' , generate-id(.))}"/>
+              <plu:member xlink:href="{concat('#', 'ZoningElement_' , generate-id(.))}"/>
             </xsl:if>
           </xsl:for-each>
           <!-- Association SpatialPlan zu SupplementaryRegulation (assoziiert mit allen existierenden SRs)-->
           <xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:RP_Freiraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Bodenschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GruenzugGruenzaesur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Hochwasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturLandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_NaturschutzrechtlichesSchutzgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Klimaschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Erholung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ErneuerbareEnergie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Forstwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kulturlandschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_RadwegWanderweg|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerFreiraumschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Rohstoff|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Energieversorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Entsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Kommunikation|xplan:XPlanAuszug/gml:featureMember/xplan:RP_LaermschutzBauschutz|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SozialeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigeInfrastruktur|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Verkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Schienenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Luftverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Wasserverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstVerkehr|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Raumkategorie|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Sperrgebiet|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Achse|xplan:XPlanAuszug/gml:featureMember/xplan:RP_ZentralerOrt|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Funktionszuweisung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Siedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_WohnenSiedlung|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Einzelhandel|xplan:XPlanAuszug/gml:featureMember/xplan:RP_IndustrieGewerbe|xplan:XPlanAuszug/gml:featureMember/xplan:RP_SonstigerSiedlungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:RP_Planungsraum|xplan:XPlanAuszug/gml:featureMember/xplan:RP_GenerischesObjekt">
             <xsl:if test="not(child::xplan:flaechenschluss='true')">
-              <plu:restriction xlink:href="{concat('#', 'ZoningElement_' , generate-id(.))}"/>
+              <plu:restriction xlink:href="{concat('#', 'SupplementaryRegulation_' , generate-id(.))}"/>
             </xsl:if>
           </xsl:for-each>
         </plu:SpatialPlan>
@@ -1287,7 +1287,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_3_Gewinnung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1300">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_4_Abbau')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_4_Abbaubereich')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:bergbauplanungTyp=1400">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_3_5_Sicherheitszone')}"/>
@@ -1338,7 +1338,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_9_FolgenutzungAltbergbau')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:folgenutzung=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_11_SonstigeFolgenutzung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_4_10_SonstigeFolgenutzung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=1000">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_1_Anhydritstein')}"/>
@@ -1539,7 +1539,7 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_66_MikrodioritAndesit')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:rohstoffTyp=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_67_SonstigerRohstoff')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_5_63_SonstigerRohstoff')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:rohstoffTyp or child::xplan:tiefe or child::xplan:zeitstufe or child::xplan:folgenutzung or child::xplan:bergbauplanungTyp)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_1_16_Rohstoff')}"/>
@@ -2790,10 +2790,10 @@
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_8_UeberoertlicheVersorgungsfunktionLaendlicherRaum')}"/>
                     </xsl:if>
 										<xsl:if test="child::xplan:typ=9000">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_LaendlicheSiedlung')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_LaendlicheSiedlung')}"/>
                     </xsl:if>
                     <xsl:if test="child::xplan:typ=9999">
-                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_10_SonstigeFunktion')}"/>
+                      <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_9_SonstigeFunktion')}"/>
                     </xsl:if>
                     <xsl:if test="not(child::xplan:typ)">
                       <plu:specificSupplementaryRegulation xlink:href="{concat($gsrv,'1_3_5_Funktionszuweisung')}"/>
@@ -3227,7 +3227,7 @@
                         <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_4_Tourism')}"/>
                       </xsl:when>
                       <xsl:otherwise>
-                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions_')}"/>
+                        <plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_AssignmentOfFunctions')}"/>
                       </xsl:otherwise>
                     </xsl:choose>
                   </xsl:when>

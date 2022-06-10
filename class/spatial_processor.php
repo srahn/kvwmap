@@ -41,8 +41,8 @@ class spatial_processor {
 		$this->rolle = $rolle;
   }
   
-  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
-  	$sql = "select st_multi(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
+  	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
 		$sql.= "generate_series(1, ST_NumGeometries(st_geomfromtext('".$wktgeom."', ".$client_epsg.")))))";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
@@ -337,6 +337,11 @@ class spatial_processor {
 		
 			case 'split':{
 				$result = $this->split($polywkt1, $polywkt2);
+				$formvars['code2execute'] .= '
+					if ("' . $polywkt1 . '" != enclosingForm.pathwkt.value) {
+						top.message("Teilung erfolgreich. Zum Abspeichern Schnittlinie bearbeiten oder in neue Objekte aufteilen.");
+					}
+				';
 			}break;
 		
 			case 'add':{
@@ -397,9 +402,11 @@ class spatial_processor {
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
-			$result .= '█update_geometry();';
+			$formvars['code2execute'] = 'update_geometry();' . $formvars['code2execute'];
 		}
-		if($formvars['code2execute'] != '')$result .= '█'.$formvars['code2execute'];
+		if ($formvars['code2execute'] != '') {
+			$result .= '█'.$formvars['code2execute'];
+		}
 		echo $result;
 	}
 	

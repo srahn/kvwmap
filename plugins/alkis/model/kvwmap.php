@@ -1,5 +1,12 @@
 <?
 
+	$GUI->flurstueckshistorie = function() use ($GUI){
+		include_once(PLUGINS.'alkis/model/kataster.php');
+		$flst = new flurstueck($GUI->formvars['flurstueckskennzeichen'], $GUI->pgdatabase);
+		$GUI->flst_historie = $flst->getFlstHistorie();
+    $GUI->main = PLUGINS.'alkis/view/flst_historie.php';
+  };
+
 	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
     $Flurbezeichnung = '';
@@ -189,7 +196,6 @@
       $legendentext.=",<br>" . $FlurstListe[$i];
     }
    	$datastring.=") ";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
 		# Filter
 		if($layerset[0]['Layer_ID'] != ''){
 			$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
@@ -518,17 +524,6 @@
 	$GUI->flurstwahl = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
-    if($GUI->formvars['historical'] == 1){
-      $GUI->titel='historische Flurstückssuche';
-			$GUI->formvars['without_temporal_filter'] = 1;
-    }
-    elseif($GUI->formvars['ALK_Suche'] == 1){
-      $GUI->titel='Flurstückssuche (zur Karte)';
-    }
-    else{
-    	$GUI->titel='Flurstückssuche';
-    }
-		if($GUI->formvars['titel'] != '')$GUI->titel = $GUI->formvars['titel'];
 		$GUI->main = PLUGINS.'alkis/view/flurstueckssuche.php';
     ####### Import ###########
 		$_files = $_FILES;
@@ -554,22 +549,21 @@
 		$selFlstID = explode(', ',$GUI->formvars['selFlstID']);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		$Gemarkung=new gemarkung('',$GUI->pgdatabase);
-		if ($GUI->formvars['historical'] != 1) {
-			if($GemeindenStelle == NULL){
-				$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
-			}
-			else{
-				$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-			}
+		if($GemeindenStelle == NULL){
+			$GemkgListe = $Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
-		else {
-			if($GemeindenStelle == NULL){
-				$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
-			}
-			else{
-				$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
-			}
+		else{
+			$GemkgListe = $Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
+		if ($GemkgListe['hist'][$GemkgID]) {
+			$GUI->formvars['history_mode'] = 'historisch';
+		}
+		if ($GUI->formvars['history_mode'] == '') {
+			$GUI->formvars['history_mode'] = 'aktuell';
+		}
+    if ($GUI->formvars['history_mode'] != 'aktuell') {
+			$GUI->formvars['without_temporal_filter'] = 1;
+    }
 		$GUI->land_schluessel = substr($GemkgListe['GemkgID'][0], 0, 2);
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
@@ -590,7 +584,7 @@
       # Abragen der Fluren zur Gemarkung
       if ($GemkgID==0) { $GemkgID=$GemkgListe['GemkgID'][0]; }
       $Flur=new Flur('','','',$GUI->pgdatabase);
-    	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['historical']);
+    	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['history_mode']);
       # Erzeugen des Formobjektes für die Flurauswahl
       if (@count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
@@ -601,7 +595,7 @@
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$GUI->pgdatabase);
         if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
-				$FlstNrListe=$FlstNr->getFlstListe($GemID, $GemkgID, $FlurID, $GemeindenStelle['eingeschr_flur'][$GemkgID][(int)$FlurID], $GUI->formvars['historical']);
+				$FlstNrListe=$FlstNr->getFlstListe($GemID, $GemkgID, $FlurID, $GemeindenStelle['eingeschr_flur'][$GemkgID][(int)$FlurID], $GUI->formvars['history_mode']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
           $FLstID=$FlstNrListe['FlstID'][0];

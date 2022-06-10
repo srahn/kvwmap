@@ -91,7 +91,7 @@
 	$strHeight="Height";
 	$strImagefile="Imagefile";
 	$strSync="Sync - Mode";
-	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialized version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
 	$strListed="show in Layer-List";
 	$strDocument_url="Document URL";
 	$strAssignDefaultValues="Apply Default-Values to User-Groups";
@@ -107,5 +107,6 @@
 	$strTriggerFunctionHelp="The name of a PHP-trigger function can be entered here, which is to be executed in this layer during insert, update or delete. The trigger function must be defined within a plugin or in custom/class/kvwmap.php.";
 	$strNotDublicate = "not duplicate";
 	$strSharedFrom = "Shared from user";
-	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
+	$strSharedFromHelp = "Remove the ID when the layer should not be marked as shared by another user in the layer legend any longer.";
 	$strSizeUnits="Sizeunits";
+	$strIdentifierText="Identifier text";

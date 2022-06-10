@@ -59,7 +59,7 @@ class Nachweis {
 				nachweisverwaltung.n_nachweise
 			ORDER BY id
 			";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);  
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -80,7 +80,7 @@ class Nachweis {
 			WHERE
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -101,7 +101,7 @@ class Nachweis {
 			WHERE
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -121,7 +121,7 @@ class Nachweis {
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE
 				db_action = 'DELETE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				$json = json_encode($nachweise);
@@ -136,7 +136,7 @@ class Nachweis {
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
 			$rows = pg_affected_rows($ret[1]);
 			echo $rows;
@@ -158,6 +158,7 @@ class Nachweis {
 					nachweisverwaltung.n_nachweisaenderungen 
 				WHERE 
 					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			$ret = $this->database->execSQL($sql,4, 1);
 			if (!$ret[0]) {
 				$rest = pg_fetch_row($ret[1]);
 				echo (substr_count($ids, ',') + 1 - $rest[0]);
@@ -171,7 +172,7 @@ class Nachweis {
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
 			$sql = "
 				SELECT 
@@ -180,6 +181,7 @@ class Nachweis {
 					nachweisverwaltung.n_nachweisaenderungen 
 				WHERE 
 					id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+			$ret = $this->database->execSQL($sql,4, 1);
 			if (!$ret[0]) {
 				$rest = pg_fetch_row($ret[1]);
 				echo (substr_count($ids, ',') + 1 - $rest[0]);
@@ -188,7 +190,7 @@ class Nachweis {
 	}		
 
 	function LENRIS_get_document($document){
-		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+		if (strpos($document, NACHWEISDOCPATH) !== false AND strpos($document, '..') === false AND file_exists($document)) {
 			readfile($document);
 		}
 	}

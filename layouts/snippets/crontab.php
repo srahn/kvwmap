@@ -31,4 +31,4 @@
 "><?
 	echo implode("<br>", $this->crontab_lines['root']); ?>
 </div>
-<a class="btn btn-new" href="index.php?go=cronjobs_anzeigen"><i class="fa fa-clock-o" style="color: white;"></i> Cronjobs Anzeigen</a>
+<a class="btn btn-new" href="index.php?go=cronjobs_anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-clock-o" style="color: white;"></i> Cronjobs Anzeigen</a>

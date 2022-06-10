@@ -319,9 +319,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		outer_div = document.getElementById(fieldname+'_elements');
 		first_element = document.getElementById('div_'+fieldname+'_-1');
 		new_element = first_element.cloneNode(true);
-		last_id = outer_div.lastElementChild.id;
-		parts = last_id.split('div_'+fieldname+'_');
-		new_id = parseInt(parts[1])+1;
+		new_id = outer_div.childElementCount - 1;
 		new_element.id = 'div_'+fieldname+'_'+new_id;
 		var regex = new RegExp(fieldname+'_-1', "g");
 		new_element.innerHTML = new_element.innerHTML.replace(regex, fieldname+'_'+new_id);
@@ -336,6 +334,33 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		getFileAttributesInArray(remove_element);
 		outer_div.removeChild(remove_element);
 		buildJSONString(fieldname, false);
+	}
+	
+	moveArrayElement = function(fieldname, element_id, direction){
+		var element = document.getElementById('div_' + element_id);
+		var moved_element, stationary_element;
+		if (direction == 'up') {
+			if (element.previousSibling.previousSibling) {	// das ist so richtig
+				moved_element = element;
+				stationary_element = element.previousSibling;
+			}
+			else {
+				moved_element = element;
+				stationary_element = null;
+			}
+		}
+		else {
+			if (element.nextSibling) {
+				moved_element = element.nextSibling;
+				stationary_element = element;
+			}
+			else {
+				moved_element = element;
+				stationary_element = element.parentNode.childNodes[1];
+			}
+		}
+		element.parentNode.insertBefore(moved_element, stationary_element);
+		buildJSONString(fieldname, true);
 	}
 
 	function getFileAttributesInArray(remove_element){
@@ -441,7 +466,12 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	
 	reload_subform_list = function(list_div_id, list_edit, weiter_erfassen, weiter_erfassen_params, further_params){
 		root.open_subform_requests++;
-		list_div = document.getElementById(list_div_id);
+		if (typeof list_div_id == 'string') {
+			list_div = document.getElementById(list_div_id);
+		}
+		else {
+			list_div = list_div_id;
+		}
 		var params = list_div.dataset.reload_params;
 		if(enclosingForm.name == 'GUI2')params += '&window_type=overlay';
 		if(list_edit)params += '&list_edit='+list_edit;
@@ -509,9 +539,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	save_new_dataset = function(){
-		if((geom_not_null && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) || (geom_not_null && enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')){ 
-			message('Sie haben keine Geometrie angegeben.');
-			return;
+		if (
+			(enclosingForm.newpath != undefined && enclosingForm.newpath.value == '' && enclosingForm.loc_x == undefined) 
+			|| 
+			(enclosingForm.loc_x != undefined && enclosingForm.loc_x.value == '')
+		){
+			if (geom_not_null) {
+				message('Sie müssen noch eine Geometrie für den Datensatz erfassen!');
+				return;
+			}
+			else {
+				if (!confirm('Wollen Sie den Datensatz wirklich ohne Geometrie anlegen?')) {
+					return;
+				}
+			}
 		}
   	form_fieldstring = enclosingForm.form_field_names.value+'';
 		form_fields = form_fieldstring.split('|');

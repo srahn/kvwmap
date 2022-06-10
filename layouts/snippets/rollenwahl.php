@@ -110,10 +110,10 @@ if ($this->Fehlermeldung!='') {
 
 		<nav>
 			<table width="100%" cellpadding="0" cellspacing="0">
-				<tr>
-					<? if ($show_layer_parameter) { ?>
-					<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th>
-					<? } ?>
+				<tr><?
+					if ($show_layer_parameter) { ?>
+						<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th><?
+					} ?>
 					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
 					<th width="20%" align="center"><label for="tab3"><? echo $strButtons; ?></label></th>
 					<th width="20%" align="center"><label for="tab4">&nbsp;<? echo $strMapOptions; ?>&nbsp;</label></th>

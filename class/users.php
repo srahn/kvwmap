@@ -725,6 +725,7 @@ class user {
 				shared_from = " . $user_id . "
 		";
 		$this->debug->write("<p>file:users.php class:user->layerIsSharedFrom:<br>" . $sql, 4);
+		#echo '<br>sql zur Abfrage der Layer: ' . $sql;
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0;
@@ -752,7 +753,7 @@ class user {
 	function readUserDaten($id, $login_name, $passwort = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
 		$sql = "
 			SELECT
@@ -765,7 +766,7 @@ class user {
 		#echo '<br>Sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql);
+		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
@@ -826,7 +827,7 @@ class user {
 	function getall_Users($order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$more_from = '';
-		$where = '';
+		$where = 'archived IS NULL ';
 
 		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
@@ -834,7 +835,7 @@ class user {
 					JOIN rolle rall ON u.ID = rall.user_id
 					JOIN rolle radm ON rall.stelle_id = radm.stelle_id
 			";
-			$where = " WHERE radm.user_id = " . $admin_id;
+			$where .= " AND radm.user_id = " . $admin_id;
 		}
 
 		if ($order != '') {
@@ -846,8 +847,9 @@ class user {
 				u.*
 			FROM
 				user u " .
-				$more_from .
-			$where .
+				$more_from . "
+			WHERE " .
+				$where .
 			$order . "
 		";
 		#echo '<br>getall_Users sql: ' . $sql;
@@ -868,7 +870,23 @@ class user {
 
 	function get_Unassigned_Users(){
 		# Lesen der User, die keiner Stelle zugeordnet sind
-		$sql ='SELECT * FROM user WHERE ID NOT IN (SELECT DISTINCT user.ID FROM user, rolle WHERE rolle.user_id = user.ID) ORDER BY Name';
+		$sql = '
+			SELECT 
+				* 
+			FROM 
+				user 
+			WHERE 
+				archived IS NULL AND 
+				ID NOT IN (
+					SELECT DISTINCT 
+						user.ID 
+					FROM 
+						user, 
+						rolle 
+					WHERE 
+						rolle.user_id = user.ID
+				) 
+			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -893,7 +911,16 @@ class user {
 
 	function get_Expired_Users(){
 		# Lesen der User, die abgelaufen sind
-		$sql ='SELECT * FROM user WHERE stop != "0000-00-00 00:00:00" AND "'.date('Y-m-d h:i:s').'" > stop ORDER BY Name';
+		$sql ='
+			SELECT 
+				* 
+			FROM 
+				user 
+			WHERE 
+				archived IS NULL AND 
+				stop != "0000-00-00 00:00:00" AND 
+				"'.date('Y-m-d h:i:s').'" > stop 
+			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -919,6 +946,8 @@ class user {
 	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$where = array();
+
+		$where[] = 'u.archived IS NULL';
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -977,7 +1006,7 @@ class user {
 		}
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($stelle_ID, $with_expired = false) {
 		global $language;
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
@@ -999,12 +1028,13 @@ class user {
 			WHERE
 				s.ID = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
+				(!$with_expired ? "
 				AND (
 					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
+				)" : "") . "
 			ORDER BY
 				Bezeichnung;
 		";
@@ -1112,23 +1142,14 @@ class user {
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
-			";
-
-			if(value_of($formvars, 'singlequery') != '') $sql.=',singlequery="1"';
-			else $sql.=',singlequery="0"';
-			if(value_of($formvars, 'instant_reload') != '') $sql.=',instant_reload="1"';
-			else $sql.=',instant_reload="0"';
-			if(value_of($formvars, 'menu_auto_close') != '') $sql.=',menu_auto_close="1"';
-			else $sql.=',menu_auto_close="0"';
-			$sql .= ', visually_impaired=' . ((value_of($formvars, 'visually_impaired') != '') ? '"1"' : '"0"');
-			if (value_of($formvars, 'querymode') != '') {
-				$sql .= ', querymode="1"';
-			}
-			else $sql.=',querymode="0", overlayx=400, overlayy=150';
-			$sql .= ',geom_edit_first="' . $formvars['geom_edit_first'] . '"';
-			$sql .= "
-				,immer_weiter_erfassen = '" . $formvars['immer_weiter_erfassen'] . "'
-				,upload_only_file_metadata = '" . $formvars['upload_only_file_metadata'] . "'
+					, singlequery = '" . (value_of($formvars, 'singlequery') == '' ? '0' : '1') . "'
+					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
+					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
+					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
+					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
+					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
+					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
+					, upload_only_file_metadata = " . quote_or_null($formvars['upload_only_file_metadata']) . "
 			";
 			$sql.=',print_scale = CASE WHEN print_scale = "auto" OR "'.$formvars['print_scale'].'" = "auto" THEN "'.$formvars['print_scale'].'" ELSE print_scale END';
 			if($formvars['hist_timestamp'] != '') $sql.=',hist_timestamp="'.DateTime::createFromFormat('d.m.Y H:i:s', $formvars['hist_timestamp'])->format('Y-m-d H:i:s').'"';
@@ -1396,6 +1417,23 @@ class user {
 		}
 		return $ret;
 	}
+	
+	function archivieren() {
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`archived` = CURRENT_TIMESTAMP
+			WHERE
+				`ID`= " . $this->id . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1].='<br>Der Benutzer konnte nicht archiviert werden.<br>'.$ret[1];
+		}
+		return $ret;
+	}	
 
 	/**
 	 * Aktualisiert das Passwort und setzt ein neuen Zeitstempel

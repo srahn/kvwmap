@@ -6,7 +6,7 @@
 <script type="text/javascript">
 	function gotoStelle(event, option_obj){
 		if(event.layerX > 300){
-			location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
 	}
 
@@ -89,8 +89,12 @@
 		color: #111;
 	}
 	
-	#form input[type="text"], #form select, #form textarea{
-		width: 340px;
+	#form input[type="text"], #form select, #form textarea {
+		width: 95%;
+	}
+
+	#form textarea {
+		height: 350px;
 	}
 
 	#form input[type="numeric"] {
@@ -137,14 +141,14 @@
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
 					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th><a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -341,7 +345,7 @@
 									),
 									$this->formvars['connection_id']
 								); ?>
-								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
 							</div>
 						</td>
 					</tr>
@@ -505,7 +509,13 @@
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
-					</tr>			
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="identifier_text" type="text" value="<?php echo $this->formvars['identifier_text']; ?>" size="50" maxlength="50">
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -709,6 +719,21 @@
 								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strVersion; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strComment; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
+						</td>
+					</tr>
+
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
@@ -746,8 +771,10 @@
 						<tr>
 							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
-								$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-								$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								if ($this->formvars['shared_from']) {
+									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
+									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
 									echo $shared_name; ?>
@@ -1047,7 +1074,7 @@
 				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->formvars['editable']) { ?>
-					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 					<? } ?>
 				</td>
 			</tr><?php
