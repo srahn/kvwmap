@@ -733,23 +733,23 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</tr>
 
 				<tr>
-					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $strDefaultUserID; ?>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php
 						echo FormObject::createSelectField('default_user_id', $seluseroptions, $this->formvars['default_user_id'], 1, 'width: auto'); ?>
 					</td>
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input
 							name="show_shared_layers"
 							type="checkbox"
 							value="1"
 							<?php echo ($this->formvars['show_shared_layers'] ? ' checked' : ''); ?>
 						>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $strShowSharedLayersText; ?>
 						<span data-tooltip="<?php echo $strShowSharedLayersDescription; ?>"></span>
@@ -757,53 +757,53 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="allowedPasswordAge" type="number" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedPasswordAge; ?></td>
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
 				</tr>
 
 				<tr>
-					<td align="right" style="border-bottom:1px solid #C3C7C3">
+					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
 				</tr>
 
 				<tr>
-					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $this->strVersion; ?>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3;">
 						<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10" style="width: 50px">
 					</td>
 				</tr>
 
 				<tr>
-					<td class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $this->strComment; ?>
-					</td>
+					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
 						<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
 					</td>
