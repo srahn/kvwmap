@@ -10,6 +10,7 @@
 		<script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
 		<!-- Setzt PHP Variable als (Global) Javascript Variable -->
 		<script>konvertierung_id = '<?php echo $konvertierung_id; ?>';</script>
+		<script>regel_layer_id = '<?php echo XPLANKONVERTER_REGELN_LAYER_ID; ?>';</script>
 		<link rel="stylesheet" href="plugins/xplankonverter/view/regeleditor/styles.css" type="text/css"/>
 		<link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" />
 	</HEAD>
