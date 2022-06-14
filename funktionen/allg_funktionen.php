@@ -19,6 +19,7 @@ function urlencode2($str){
 	$str = str_replace('%3A', ':', $str);
 	$str = str_replace('%2F', '/', $str);
 	$str = str_replace('%23', '#', $str);
+	$str = str_replace('%25', '%', $str);
 	return $str;
 }
 
