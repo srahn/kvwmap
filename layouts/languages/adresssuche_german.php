@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Adressensuche";
  $strGem="Gemeinde";
  $strGemkg="Gemarkung/Ortsteil";

@@ -11,13 +11,13 @@ include(PLUGINS.'lenris/model/lenris.php');
 $debug = new Debugger(DEBUGFILE);
 $database = new pgdatabase();
 $database->open();
-$client_id = $argv[1];
 
 $lenris = new LENRIS($database);
 
 /*
 	status:
-	0 - Ruhe
+ -1	- pausiert
+	0 - warte auf Synchronisation
 	1 - Sync angefordert (setzen über GUI)
 	2 - Sync läuft
 	3 - Erstimport angefordert	(setzen über GUI)
@@ -34,41 +34,41 @@ function is_sync_required($client){
 }
 
 foreach ($lenris->clients as $client) {
+	$inserted_nachweise = [];
+	$updated_nachweise = [];
+	$deleted_nachweise = [];
 	# Synchronisation
+	$client = $lenris->get_client_information($client['client_id'])[0];
 	if (is_sync_required($client)) {
 		$lenris->update_client($client['client_id'], 'status = 2');
 		$lenris->database->begintransaction();
 		# neue Nachweise abfragen
 		if ($new_nachweise = $lenris->get_new_nachweise($client)){
 			# neue Nachweise eintragen
-			LENRIS::log(count($new_nachweise) . ' neue Nachweise von Client ' . $client['client_id']);
-			$lenris->insert_new_nachweise($client, $new_nachweise);
+			$inserted_nachweise = $lenris->insert_new_nachweise($client, $new_nachweise);
 		}
-		else{
-			LENRIS::log('Keine neuen Nachweise von Client ' . $client['client_id']);
-		}
-
 		# veränderte Nachweise abfragen
 		if ($changed_nachweise = $lenris->get_changed_nachweise($client)) {
 			# veränderte Nachweise aktualisieren
-			LENRIS::log(count($changed_nachweise) . ' veränderte Nachweise von Client ' . $client['client_id']);
-			$lenris->update_changed_nachweise($client, $changed_nachweise);
+			$updated_nachweise = $lenris->update_changed_nachweise($client, $changed_nachweise);
 		}
-		else {
-			LENRIS::log('Keine veränderten Nachweise von Client ' . $client['client_id']);
-		}
-
 		# gelöschte Nachweise abfragen
 		if ($deleted_nachweise = $lenris->get_deleted_nachweise($client)) {
 			# gelöschte Nachweise löschen
-			LENRIS::log(count($deleted_nachweise) . ' gelöschte Nachweise von Client ' . $client['client_id']);
-			$lenris->delete_deleted_nachweise($client, $deleted_nachweise);
+			$deleted_nachweise = $lenris->delete_deleted_nachweise($client, $deleted_nachweise);
+		}
+		if (!empty($lenris->errors[$client['client_id']])) {
+			$lenris->database->rollbacktransaction();
+			$lenris->update_client($client['client_id'], "status = 5, last_sync = '" . date("Y-m-d H:i:s") . "'");
 		}
 		else {
-			LENRIS::log('Keine gelöschten Nachweise von Client ' . $client['client_id']);
+			$lenris->delete_files();
+			$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
+			$lenris->database->committransaction();
+			$lenris->confirm_new_nachweise($client, $inserted_nachweise);
+			$lenris->confirm_changed_nachweise($client, $updated_nachweise);
+			$lenris->confirm_deleted_nachweise($client, $deleted_nachweise);
 		}
-		$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
-		$lenris->database->committransaction();
 	}
 	
 	# Erstimport
@@ -77,17 +77,23 @@ foreach ($lenris->clients as $client) {
 		$lenris->database->begintransaction();
 		if ($lenris->delete_nachweise($client['client_id'])) {
 			if ($all_nachweise = $lenris->get_all_nachweise($client)) {
-				LENRIS::log('Erstimport: ' . count($all_nachweise) . ' Nachweise von Client ' . $client['client_id']);
+				$lenris->log($client['client_id'], 'Erstimport: ' . count($all_nachweise) . ' Nachweise von Client ' . $client['client_id']);
 				$lenris->insert_new_nachweise($client, $all_nachweise, false);
 			}
 		}
-		$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
-		$lenris->database->committransaction();
+		if (!empty($lenris->errors[$client['client_id']])) {
+			$lenris->database->rollbacktransaction();
+			$lenris->update_client($client['client_id'], "status = 5");
+		}
+		else {
+			$lenris->update_client($client['client_id'], "status = 0, last_sync = '" . date("Y-m-d H:i:s") . "'");
+			$lenris->database->committransaction();
+		}
 	}
 	
 	# Dokumente holen
 	$client = $lenris->get_client_information($client['client_id'])[0];
-	if ($client['doc_download'] < 6){
+	if ($client['status'] == 0 AND $client['doc_download'] < 10){
 		$downloadable_documents = $lenris->get_downloadable_documents($client);
 		if (!empty($downloadable_documents)) {
 			$lenris->update_client($client['client_id'], 'doc_download = doc_download + 1');

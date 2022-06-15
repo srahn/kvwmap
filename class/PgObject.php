@@ -253,12 +253,17 @@ class PgObject {
 			VALUES (" .
 				"'" . implode("', '", $values) . "'
 			)
+			RETURNING
+				" . $this->identifier . ";
 		";
 		$this->debug->show('Create new dataset with sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
+			$ret_id = pg_fetch_assoc($query)[$this->identifier];
+			$this->debug->show('Query created identifier ' . $this->identifier . ' with values ' . $ret_id, false);
 			$this->lastquery = $query;
+			$this->set($this->identifier, $ret_id);
 		}
 		else {
 			$sql = "

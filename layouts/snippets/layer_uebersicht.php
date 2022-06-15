@@ -1,6 +1,6 @@
 <?php
 	$GUI = $this;
-
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php'); 
 	$this->outputGroup = function($group, $indent = 0) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
 		$anzahl_layer = @count($group_layer_ids);
@@ -8,7 +8,7 @@
 			$output = '
 				<tr>
 					<td bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett id-column" style="height: 30px; border:1px solid #C3C7C3;" class="id-column">
-						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '">' . $group['id'] . '</a></div>
+						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $group['id'] . '</a></div>
 					</td>
 					<td colspan="4" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett" style="height: 30px; border:1px solid #C3C7C3;">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
@@ -35,7 +35,7 @@
 		$output = '
 				<tr>
 					<td style="padding-left: ' . $indent . 'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="id-column">
-						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '">' . $GUI->layers['ID'][$i] . '</a>
+						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
 					<td style="padding-left: ' . $indent . 'px;border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" valign="top" class="layer-column">
 						' . ($GUI->layers['alias'][$i] != '' ? $GUI->layers['alias'][$i] : $GUI->layers['Bezeichnung'][$i]) . '
@@ -48,9 +48,9 @@
 							' . htmlentities($GUI->layers['Kurzbeschreibung'][$i]) . '
 						</div>
 					</td>
-					<td style="border-bottom:1px solid #C3C7C3" class="datenherr-column">
+					<td style="border-bottom:1px solid #C3C7C3" class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
-							' . $GUI->layers['Datenherr'][$i] . '
+							' . $GUI->layers['dataowner_name'][$i] . '
 						</div>
 					</td>
 				</tr>';
@@ -101,7 +101,7 @@
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
-				<input type="checkbox" onclick="$('.datenherr-column').toggle(); $('#column_options_div').toggle();" checked> Datenherr
+				<input type="checkbox" onclick="$('.dataowner_name-column').toggle(); $('#column_options_div').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
 	</tr>
@@ -113,7 +113,7 @@
 					<th style="border-right:1px solid #C3C7C3" class="layer-column">Layer</th>
 					<th style="border-right:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
-					<th class="datenherr-column">Datenherr</th>
+					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
 				foreach ($this->groups as $group) {
 					if($group['obergruppe'] == '') {

@@ -25,6 +25,7 @@
 			}
 			record.className = 'raster_record_open';
 		}
+		setTimeout(auto_resize_overlay, 250);
 	}
 	
 	close_record = function(record){

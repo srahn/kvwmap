@@ -40,9 +40,11 @@
     </tr>
   </table>
 █
-var button_bottom = document.getElementById('sub_savebutton').getBoundingClientRect().bottom;
-if(button_bottom > window.innerHeight){
-	window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+if (button = document.getElementById('sub_savebutton')) {
+	var button_bottom = button.getBoundingClientRect().bottom;
+	if(button_bottom > window.innerHeight){
+		window.scrollBy({top: button_bottom - window.innerHeight + 70, behavior: 'smooth'});		// wegen Overlayfooter geht kein scrollintoview
+	}
 }
 auto_resize_overlay();
   

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Google Maps Viewer";
  
 ?>  

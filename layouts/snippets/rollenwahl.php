@@ -110,10 +110,10 @@ if ($this->Fehlermeldung!='') {
 
 		<nav>
 			<table width="100%" cellpadding="0" cellspacing="0">
-				<tr>
-					<? if ($show_layer_parameter) { ?>
-					<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th>
-					<? } ?>
+				<tr><?
+					if ($show_layer_parameter) { ?>
+						<th width="20%" align="center"><label for="tab1">&nbsp;<? echo $this->strLayerParameters; ?>&nbsp;</label></th><?
+					} ?>
 					<th width="20%" align="center"><label for="tab2"><? echo $strGeneralOptions; ?></label></th>
 					<th width="20%" align="center"><label for="tab3"><? echo $strButtons; ?></label></th>
 					<th width="20%" align="center"><label for="tab4">&nbsp;<? echo $strMapOptions; ?>&nbsp;</label></th>
@@ -280,11 +280,52 @@ if ($this->Fehlermeldung!='') {
 											<br>
 											<div title="<? echo $strRuler; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo dist($strRuler); ?></svg></div><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreePolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freepolygon($strFreePolygon); ?></svg></div><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>&nbsp;
-											<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?>>&nbsp;
+											<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?> onchange="$('#freeTextOptionsDiv').toggle();">&nbsp;
 											<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strGPS; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo gps_follow($strGPS, 'on'); ?></svg></div><input type="checkbox" name="gps" value="1" <? if($this->user->rolle->gps){echo 'checked="true"';} ?>>&nbsp;
-											<div style="padding: 20px; width: 30px; text-align: right">
+											<div style="margin: 10px;">
 												<span data-tooltip="<? echo $strHintButtons; ?>"></span>
+											</div>
+											<div id="freeTextOptionsDiv" style="display: <? echo ($this->user->rolle->freetext ? 'block' : 'none'); ?>">
+												<? echo $strRedlineTextOptions; ?>:<br>
+												<div style="width: 500px">
+													<div style="width: 200px; float: left;">
+														<? echo $strRedlineTextColor; ?>: <input type="color" name="redline_text_color" value="<?php echo $this->user->rolle->redline_text_color; ?>" style="width: 76px"/>
+													</div>
+													<div style="width: 200px; float: left;"><?
+														echo $strRedlineFontFamily; ?>: <? echo FormObject::createSelectField(
+															'redline_font_family',
+															array('Arial', 'Courier', 'Helvetica', 'Verdana'),
+															$this->user->rolle->redline_font_family,
+															1, 	# size
+															'', # no style
+															'', # no onchange
+															'', # no id
+															'', # not multiple
+															'', # no class
+															''  # no first_option
+														); ?>
+													</div>
+												</div>
+												<div style="width: 500px; clear: both;">
+													<div style="width: 200px; float: left;"><?
+														echo $strRedlineFontSize; ?>: <input type="number" name="redline_font_size" min="10" max="40" step="1" value="<?php echo $this->user->rolle->redline_font_size; ?>" style="width: 43px"/>
+													</div>
+													<div style="width: 200px; float: left"><?
+														echo $strRedlineFontWeight; ?>: <? echo FormObject::createSelectField(
+															'redline_font_weight',
+															array('normal', 'bold', 'bolder', 'lighter', 'initial', 'inherit', '100', '200', '300', '400', '500', '600', '700', '800', '900'),
+															$this->user->rolle->redline_font_weight,
+															1, 	# size
+															'', # no style
+															'', # no onchange
+															'', # no id
+															'', # not multiple
+															'', # no class
+															''  # no first_option
+														); ?>
+													</div>
+												</div>
 											</div>
 										</div>
 									</td>

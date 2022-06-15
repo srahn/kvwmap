@@ -188,7 +188,7 @@ class bodenrichtwertzone {
 			if($formvars['verfahrensgrund_zusatz']){$sql.= ",verfahrensgrund_zusatz";} 
 			if($formvars['bemerkungen']){$sql.= ",bemerkungen";} 
 			$sql.=", the_geom, textposition) VALUES (";
-			if($formvars['stichtag']){$sql.= "'31.12.".$formvars['stichtag']."' ";}
+			if($formvars['stichtag']){$sql.= "'".$formvars['stichtag']."' ";}
 			if($formvars['gemeinde']){$sql.= ",".$formvars['gemeinde'];}
 			if($formvars['gemarkung']){$sql.= ",".$formvars['gemarkung'];}
 			if($formvars['ortsteilname']){$sql.= ",'".$formvars['ortsteilname']."' ";}
@@ -273,7 +273,7 @@ class bodenrichtwertzone {
 			if($formvars['brwb'] == '')$sql.= "brwb = NULL, ";
 			else $sql.= "brwb = ".(float)$formvars['brwb'].", ";
 			if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(float)$formvars['bedarfswert'].", ";}
-			if($formvars['stichtag']){$sql.= "stichtag = '31.12.".$formvars['stichtag']."', ";}
+			if($formvars['stichtag']){$sql.= "stichtag = '".$formvars['stichtag']."', ";}
 			if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
 			if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
 			if($formvars['beitragszustand']){$sql.= "beitragszustand = '".$formvars['beitragszustand']."', ";}

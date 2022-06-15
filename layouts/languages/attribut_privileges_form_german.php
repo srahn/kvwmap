@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle = "Layer-Rechteverwaltung";
 	$strDefaultPrivileges="Default-Rechte";
 	$strLayerAccessPrivileges="Layerzugriffsrechte";

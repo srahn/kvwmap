@@ -362,7 +362,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		  ?>
 	  </td>
 				<tr>
-					<td><a target="root" href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
+					<td><a target="root" href="index.php?go=Nachweisrechercheformular&zurueck=1&VermStelle=<? echo $this->formvars['VermStelle']; ?>&geom_from_layer=<? echo $this->formvars['geom_from_layer']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><span style="font-size: 140%">&laquo;</span> Nachweisrecherche</a></td>
 				</tr>
         </tr>
         <tr> 
@@ -579,7 +579,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
           <td style="width: 30">
           	<? if($this->Stelle->isFunctionAllowed('Nachweise_bearbeiten')){
 									if($this->nachweis->Dokumente[$i]['geprueft'] == 0 OR $this->Stelle->isFunctionAllowed('gepruefte_Nachweise_bearbeiten')){	?>
-										<a target="root" href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit'] ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft'] ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
+										<a target="root" href="index.php?go=Nachweisformular&id=<? echo $this->nachweis->Dokumente[$i]['id'];?>&suchgueltigkeit=<? echo $this->formvars['suchgueltigkeit'] ?>&suchgeprueft=<? echo $this->formvars['suchgeprueft'] ?>&order=<? echo $this->formvars['order'] ?>&richtung=<? echo $this->formvars['richtung'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a>
 							<? 	} 
 							 } ?>
 					</td>

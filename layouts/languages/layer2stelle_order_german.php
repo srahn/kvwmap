@@ -1,4 +1,4 @@
-﻿ <?php
+ <?php
   $strTitle="Layer der Stelle";
   $strDrawingOrder="Zeichen-<br>reihenfolge ";
 	$strLegendOrder="Legenden-<br>reihenfolge ";

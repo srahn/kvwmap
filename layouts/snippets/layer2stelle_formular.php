@@ -1,6 +1,6 @@
 <?php
-  # 2007-01-26 pkvvm
-  include(LAYOUTPATH.'languages/layer2stelle_formular_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH . 'languages/layer2stelle_formular_' . $this->user->rolle->language . '.php');
+	include_once(CLASSPATH . 'FormObject.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
@@ -70,7 +70,7 @@ else {
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 		      	<select name="postlabelcache">
 	      			<option <? if($this->formvars['postlabelcache'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-	      			<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>		      			
+	      			<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 	      		</select>
 		  		</td>
 		  	</tr>
@@ -104,22 +104,33 @@ else {
 		      		<input name="symbolscale" type="text" value="<?php echo $this->formvars['symbolscale']; ?>" size="25" maxlength="100">
 		  		</td>
 		  	</tr>
-		  	<tr>
-		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stRequires; ?></th>
-		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<!--input name="requires" type="text" value="<?php echo $this->formvars['requires']; ?>" size="25" maxlength="100"-->
-							<select name="requires">
-								<option value="">--- Auswahl ---</option>
-								<?
-									for($i = 0; $i < count($this->grouplayers['ID']); $i++){
-										echo '<option value="'.$this->grouplayers['ID'][$i].'" ';
-										if($this->formvars['requires'] == $this->grouplayers['ID'][$i])echo 'selected="true"';
-										echo ' >'.$this->grouplayers['Bezeichnung'][$i].'</option>';
-									}
-								?>
-							</select>
-		  		</td>
-		  	</tr>		
+
+				<tr>
+					<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stRequires; ?></th>
+					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<!--input name="requires" type="text" value="<?php echo $this->formvars['requires']; ?>" size="25" maxlength="100"--><?
+						$group_layer_options = array();
+						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+							$group_layer_options[] = array(
+								'value' => $grouplayer_id,
+								'output' => $this->grouplayers['Bezeichnung'][$index]
+							);
+						}
+						echo FormObject::createSelectField(
+							'requires',
+							$group_layer_options,
+							$this->formvars['requires'],
+							1,
+							'',
+							'',
+							'',
+							'',
+							'',
+							$this->strPleaseSelect
+						); ?>
+					</td>
+				</tr>
+
 		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stStartAktiv; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -146,7 +157,7 @@ else {
   </tr>
   <tr> 
     <td align="center">
-    	<input type="button" value="<?php echo $this->strButtonBack; ?>" onclick="document.location.href='index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>'">
+    	<input type="button" value="<?php echo $this->strButtonBack; ?>" onclick="document.location.href='index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
     	<input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
     	<input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>">
     	<input type="hidden" name="stellen_name" value="<?php echo $this->formvars['stellen_name']; ?>">

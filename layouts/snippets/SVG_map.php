@@ -1,4 +1,5 @@
 <?php
+  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -673,7 +674,7 @@ function pquery(){
 
 // in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
 function pquery_prompt(){     
-  top.document.GUI.searchradius.value=prompt("Geben Sie den Suchradius in Meter ein.",top.document.GUI.searchradius.value);
+  top.document.GUI.searchradius.value=prompt("' . $strRequestForSearchRadius . '.",top.document.GUI.searchradius.value);
   set_suchkreis();
 }
 
@@ -959,7 +960,7 @@ function mousemove(evt){
 	      add_current_point(evt);
 	    }
 	    else {
-	    show_tooltip(\'Startpunkt setzen\',evt.clientX,evt.clientY)
+	    show_tooltip(\'' . $strSetStartPoint . '\',evt.clientX,evt.clientY)
 	    }
 	 break;
 	 		
@@ -1020,7 +1021,7 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:rgb(255,0,0);font-size:16px;font-family:Arial;font-weight:bold;");
+  newtext.setAttributeNS(null, "style", "fill:' . $this->user->rolle->redline_text_color . '; font-size:' . $this->user->rolle->redline_font_size . 'px; font-family:' . $this->user->rolle->redline_font_family . '; font-weight:' . $this->user->rolle->redline_font_weight . ';");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
@@ -1529,7 +1530,7 @@ function showMeasurement(evt){
 	j = pathx_world.length-1;
   new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
   track = top.format_number(new_distance, false, freehand_measuring, true);
-  output = "gesamt: "+track+" m";
+  output = "' . $strDistanceTotal . ': " + track + " m";
   show_tooltip(output, evt.clientX, evt.clientY);
 }
 

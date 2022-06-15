@@ -81,4 +81,9 @@
 	$strHintPrintScale="Wenn Sie die erste Option auswählen, wird ein geeigneter Druckmaßstab automatisch berechnet. Bei der zweiten Option wird der letzte verwendete Druckmaßstab benutzt.";
 	$strShowRollenFilter="Zeige Themen-Filter";
 	$strHintShowRollenFilter="Wenn Sie diese Option auswählen, gibt es in den Optionen eines Themas die Möglichkeit, das Thema zu filtern.";
+	$strRedlineTextOptions = "Freitextoptionen";
+	$strRedlineTextColor = "Textfarbe";
+	$strRedlineFontFamily = "Fontfamilie";
+	$strRedlineFontSize = "Textgröße";
+	$strRedlineFontWeight = "Schriftschnitt";
 ?>

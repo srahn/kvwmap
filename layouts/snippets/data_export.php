@@ -1,6 +1,7 @@
 <?php
  # 2008-01-22 pkvvm
   include(LAYOUTPATH.'languages/data_export_'.$this->user->rolle->language.'.php');
+	include_once(CLASSPATH . 'FormObject.php');
 	$simple = ($this->formvars['simple'] == 1);
 	$available_formats = array(
 		"Shape" => array(
@@ -210,7 +211,31 @@ $j=0;
 							<td><? echo $strLayer; ?>:</td>
 						</tr>
 						<tr>
-							<td>
+							<td><?
+								$select_options = array();
+								for ($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++) {
+									if ($this->data_import_export->layerdaten['ID'][$i] == $this->data_import_export->formvars['selected_layer_id']) {
+										$selectindex = $i;
+									}
+									if (!array_key_exists($this->data_import_export->layerdaten['ID'][$i], $select_options)) {
+										$select_options[$this->data_import_export->layerdaten['ID'][$i]] = array(
+											'value' => $this->data_import_export->layerdaten['ID'][$i],
+											'output' => $this->data_import_export->layerdaten['Bezeichnung'][$i]
+										);
+									}
+								}
+								echo FormObject::createSelectField(
+									'selected_layer_id',
+									$select_options,
+									$this->data_import_export->formvars['selected_layer_id'],
+									1,
+									'width: 250px',
+									"if (document.GUI.epsg != undefined) { document.GUI.epsg.value=''; } document.GUI.submit();",
+									'',
+									'',
+									'',
+									$this->strPleaseSelect
+								); /*?>
 								<select style="width:250px" size="1"  name="selected_layer_id" onchange="if(document.GUI.epsg != undefined) document.GUI.epsg.value=''; document.GUI.submit();" <?php if(count($this->data_import_export->layerdaten['ID']) == 0){ echo 'disabled';}?>>
 									<option value=""><?php echo $this->strPleaseSelect; ?></option><?
 									for ($i = 0; $i < count($this->data_import_export->layerdaten['ID']); $i++){
@@ -221,12 +246,13 @@ $j=0;
 										}
 										echo ' value="'.$this->data_import_export->layerdaten['ID'][$i].'">'.$this->data_import_export->layerdaten['Bezeichnung'][$i].'</option>';
 									} ?>
-								</select>
+								</select><?
+								*/ ?>
 							</td>
 						</tr>
 					</table>
 				</div><?
-				if ($this->data_import_export->formvars['selected_layer_id'] != ''){ ?>
+				if ($this->data_import_export->formvars['selected_layer_id'] != '') { ?>
 					<div style="padding-top:1px; padding-bottom:5px; margin-left: 15px;">
 						<table>
 							<tr>
@@ -239,7 +265,8 @@ $j=0;
 											if (
 												$this->data_import_export->layerdaten['export_privileg'][$selectindex] <= $required['export_privileg'] AND
 												$this->data_import_export->attributes[$required['geom_attribute']] != '' OR
-												$format == 'CSV'
+												($this->data_import_export->layerset[0]['connectiontype'] == 9 AND $format == 'GeoJSON') OR
+												($this->data_import_export->layerset[0]['connectiontype'] == 6 AND $format == 'CSV')
 											) {
 												echo '<option' . ($this->formvars['export_format'] == $format ? ' selected' : '') . ' value="' . $format . '">' . $format . '</option>';
 												if ($this->formvars['export_format'] == '') {

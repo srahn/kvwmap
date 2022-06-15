@@ -4,23 +4,54 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function add_csrf($url){
+	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
+		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
+	}
+	return $url;
+}
+
+function urlencode2($str){
+	$str = rawurlencode($str);
+	$str = str_replace('%3F', '?', $str);
+	$str = str_replace('%26', '&', $str);
+	$str = str_replace('%3D', '=', $str);
+	$str = str_replace('%3A', ':', $str);
+	$str = str_replace('%2F', '/', $str);
+	$str = str_replace('%23', '#', $str);
+	$str = str_replace('%25', '%', $str);
+	return $str;
+}
+
 function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
-	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_URL]";
+	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
 function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
-			return "'".$var."'";
-		}break;
+			return "'" . $var . "'";
+		} break;
 		default : {
-			return is_numeric($var) ? $var : "'".$var."'";
+			return is_numeric($var) ? $var : "'" . $var . "'";
 		}
 	}
 }
 
-function pg_quote($column){
-	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"'.$column.'"';
+function quote_or_null($var) {
+	return ($var == '' ? 'NULL' : quote($var));
+}
+
+function append_slash($var) {
+	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
+}
+
+function pg_quote($column) {
+	return (is_valid_pg_name($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
+}
+
+function is_valid_pg_name($name) {
+	return preg_match('/^[a-z_][a-z0-9_]*$/', $name);
 }
 
 function get_din_formats() {
@@ -138,36 +169,38 @@ function url2filepath($url, $doc_path, $doc_url) {
 * @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
 function get_exif_data($img_path) {
-	$exif = exif_read_data($img_path, 'EXIF, GPS');
-	if ($exif === false) {
-		return array(
-			'success' => false,
-			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
-		);
-	}
-	else {
-#		echo '<br>' . print_r($exif['GPSLatitude'], true);
-#		echo '<br>' . print_r($exif['GPSLongitude'], true);
-#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
-		return array(
-			'success' => true,
-			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
-				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
-				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
-				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
-			) . ' ' . (
-				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
-				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
-				+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
-			) : NULL),
-			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
-			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
-					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
-				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
-				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
-				. substr($exif['DateTimeOriginal'], 11)
-			) : NULL)
-		);
+	if ($img_path != '') {
+		$exif = @exif_read_data($img_path, 'EXIF, GPS');
+		if ($exif === false) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+			);
+		}
+		else {
+	#		echo '<br>' . print_r($exif['GPSLatitude'], true);
+	#		echo '<br>' . print_r($exif['GPSLongitude'], true);
+	#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
+			return array(
+				'success' => true,
+				'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+					floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+					+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+					+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
+				) . ' ' . (
+					floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+					+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+					+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
+				) : NULL),
+				'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+				'Erstellungszeit' => ((array_key_exists('DateTimeOriginal', $exif) AND substr($exif['DateTimeOriginal'], 0 , 4) != '0000') ? (
+						substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+					. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+					. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+					. substr($exif['DateTimeOriginal'], 11)
+				) : NULL)
+			);
+		}
 	}
 }
 
@@ -233,6 +266,16 @@ function compare_groups($a, $b){
 function compare_legendorder($a, $b){
 	if($a['legendorder'] > $b['legendorder'])return 1;
 	else return 0;
+}
+
+function pg_escape_string_or_array($data){
+	if (is_array($data)) {
+		array_walk($data, function(&$value, $key){$value = pg_escape_string($value);});
+	}
+	else {
+		$data = pg_escape_string($data);
+	}
+	return $data;
 }
 
 function strip_pg_escape_string($string){
@@ -763,6 +806,20 @@ function createRandomPassword($passwordLength) {
   return $password;
 }
 
+function get_remote_ip() {
+	$ip = '172.0.0.1';
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
+		$ip = getenv('REMOTE_ADDR');
+	}
+	else {
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
+	}
+	return $ip;
+}
+
 function in_subnet($ip,$net) {
 	$ipparts=explode('.',$ip);
 	$netparts=explode('.',$net);
@@ -1000,7 +1057,7 @@ function umlaute_sortieren($array, $second_array) {
 	}
 }
 
-function umlaute_umwandeln($name){
+function umlaute_umwandeln($name) {
 	$name = str_replace('ä', 'ae', $name);
 	$name = str_replace('ü', 'ue', $name);
 	$name = str_replace('ö', 'oe', $name);
@@ -1879,7 +1936,7 @@ function hidden_formvars_fields($formvars, $except = array()) {
 		}
 	}
 	foreach($params AS $key => $value) {
-		$html .= '<input type="hidden" name="' . $key . '" value="' . $value .'">';
+		$html .= '<input type="hidden" name="' . htmlspecialchars($key) . '" value="' . htmlspecialchars($value) .'">';
 	}
 	return $html;
 }
@@ -1975,7 +2032,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
-		$msg . "
+		htmlspecialchars($msg) . "
 		<div style=\"text-align: center\">
 			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
 		</div>
@@ -2015,7 +2072,9 @@ function send_image_not_found($img) {
 }
 
 function value_of($array, $key) {
-	if(!is_array($array))$array = array();
+	if (!is_array($array)) {
+		$array = array();
+	}
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
 }
 
@@ -2181,5 +2240,4 @@ function sql_from_parse_tree($parse_tree) {
 	}
 	return implode(' ', $sql);
 }
-
 ?>

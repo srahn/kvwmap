@@ -22,8 +22,26 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 								</span>
 	<?					} ?>
 						</td><?
-					} ?>
-					<td align="right">
+					}
+					if ($layer['identifier_text'] != '') {	?>
+						<td>
+							<span class="identifier_text">
+							<?
+								$identifier_attributes = explode(' ', $layer['identifier_text']);
+								for ($p = 0; $p < count($identifier_attributes); $p++) {
+									$output[$p] = $identifier_attributes[$p];
+									for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
+										if ($identifier_attributes[$p] == $layer['attributes']['name'][$j]) {
+											$output[$p] = $layer['shape'][$k][$identifier_attributes[$p]];
+										}
+									}
+								}
+								echo implode(' ', $output);
+							?>
+							</span>
+						</td>
+<?				}
+?>				<td align="right">
 						<table cellspacing="0" cellpadding="0" class="button_background" style="border-left: 1px solid #bbb">
 							<tr><?
 								if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>

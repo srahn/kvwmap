@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strTitle="Chức năng xuất dữ liệu bản đồ";
 $strWMSExportWarning="Chức năng này lưu bản đồ hiện tại cùng với thông tin metadata của dự án vào một file bản đồ, nội dung trong OGC có thể được đưa lên dịch vụ bản đồ mạng Web map service (WMS) độc lập với dữ liệu kvwmap đã có. File được lưu theo thông số WMS_MAPFILE_PATH.";
 $strAllOrActiveLayer="Xuất tất cả các lớp thông tin của tác vụ đang thực hiện hay chỉ xuất riêng lớp thông tin đang được kích hoạt?";

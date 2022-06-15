@@ -41,7 +41,7 @@ function toggleGroup(group, show){
 					<td colspan="2" align="center">
 						<input
 							type="button"
-							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code'"<?
+							onclick="location.href='index.php?go=Administratorfunktionen&func=update_code_and_databases&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"<?
 							if ($num_commits_behind == '' AND !$diverged) { ?>
 								disabled<?
 							} ?>
@@ -103,7 +103,7 @@ function toggleGroup(group, show){
 					}
 				} ?>
 				<tr>
-					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases'" <? if(!$update_necessary)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
+					<td colspan="2" align="center"><input type="button" onclick="location.href='index.php?go=Administratorfunktionen&func=update_databases&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" <? if(!$update_necessary)echo 'disabled'; ?> value="<? echo $strUpdate; ?>"></td>
 				</tr>
 			</table> 
 		</td>
@@ -116,7 +116,7 @@ function toggleGroup(group, show){
 				</tr><? 
 					global $kvwmap_plugins;
 					$last_group = '';
-					foreach ($this->administration->config_params as $param){
+					foreach ($this->administration->config_params as $param) {
 						if ($param['plugin'] == '' OR in_array($param['plugin'], $kvwmap_plugins)) {
 							if ($last_group != $param['group']) {
 								$last_group = $param['group']; ?>
@@ -195,10 +195,10 @@ function toggleGroup(group, show){
 					<td style="background-color:<? echo BG_GLEATTRIBUTE; ?>;"><span class="fetter px17"><? echo $strFurtherOptions; ?></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword"><? echo $strCreateRandomPassword; ?></a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=createRandomPassword&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strCreateRandomPassword; ?></a></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
-					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes"><? echo $strSaveAllLayerAttributes; ?></a></span></td>
+					<td align="center"><span class="fett"><a href="index.php?go=Administratorfunktionen&func=save_all_layer_attributes&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strSaveAllLayerAttributes; ?></a></span></td>
 				</tr>
 				<tr style="border:1px solid #C3C7C3;">
 					<td align="center">
@@ -262,7 +262,7 @@ function toggleGroup(group, show){
 								<div class="constant-box"><?php
 								foreach ($constants AS $constant => $value) { ?>
 									<label class="constant-name"><?php echo $constant; ?></label>
-									<div class="constant-value"><?php echo (($category == 'user' AND in_array($constant, array('MYSQL_PASSWORD', 'POSTGRES_PASSWORD'))) ? '*****' : $value); ?></div>
+									<div class="constant-value"><?php echo (($category == 'user' AND in_array($constant, array('MYSQL_PASSWORD', 'POSTGRES_PASSWORD', 'MAILSMTPPASSWORD'))) ? '*****' : $value); ?></div>
 									<div style="clear: both"></div><?
 								} ?>
 								</div><?php

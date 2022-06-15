@@ -1,9 +1,7 @@
-﻿<?php
-  
-  $strTel="Telefoon";
-  $strEMail="E-Mail";
-  $strTitle="Brukerdaten";
-	$strOrganisation="Organisation";
-	$strPosition="Position";	
+<?php
+	$strTitle = "Brukerdaten";
+	$strOrganisation = "Organisation";
+	$strPosition = "Position";	
 	$strShareRollenlayerAllowedLabel = "Layer Teilen";
+	$strConfirmDelete = 'Wollen Sie wirklich Nutzer %s %s';
 ?>

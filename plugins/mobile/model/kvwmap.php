@@ -1,11 +1,10 @@
 <?php
 	/*
 	* Cases:
-	* mobile_add_select_options
 	* mobile_create_layer_sync
 	* mobile_delete_images
 	* mobile_drop_layer_sync
-	* mobile_get_layers
+	* mobile_get_layers 
 	* mobile_get_stellen
 	* mobile_prepare_layer_sync
 	* mobile_reformat_attributes
@@ -68,11 +67,11 @@
 		$layers = $GUI->Stelle->getLayers('');
 		$mobile_layers = array();
 
-		foreach($layers['ID'] AS $layer_id) {
+		foreach ($layers['ID'] AS $layer_id) {
 			if ($layer_id != '') {
 				# Abfragen der Layerdefinition
 				$layerset = $GUI->user->rolle->getLayer($layer_id);
-				if ($layerset and $layerset[0]['sync'] and $layerset[0]['connectiontype'] == '6') {
+				if ($layerset and $layerset[0]['connectiontype'] == '6') {
 					# Abfragen der Privilegien der Attribute
 					$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
@@ -97,7 +96,7 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, 'all', true, $GUI->Stelle->ID);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
@@ -130,17 +129,23 @@
 		# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
 		# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
 		# $client_time muss eigentlich auch nicht, wen interessiert das?
-		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exeption
+		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
 		# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
 		# sql muss vorhanden sein.
 		#		if ($GUI->formvars['selected_layer_id'] != '')
 
+		if (!array_key_exists('client_deltas', $_FILES)) {
+			return array(
+				'success' => false,
+				'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
+			);
+		}
+
 		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-		//move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+		move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 
 		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 		if ($result['success']) {
-
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -149,7 +154,7 @@
 			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
 		}
 		else {
-			$result['err_msg'] = ' Syncronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
+			$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
 		}
 		return $result;
 	};
@@ -168,7 +173,7 @@
 		$result['msg'] .= ' client_time';
 
 		if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
-			$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+			$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
 		}
 		$result['msg'] .= ' last_client_version';
 
@@ -248,7 +253,8 @@
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
 			"document_path" => $layerset['document_path'],
-			"privileg" => $layerset['privileg']
+			"privileg" => $layerset['privileg'],
+			"sync" => $layerset['sync']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 		return $layer;
@@ -256,22 +262,18 @@
 
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
-		foreach ($attr['name'] AS $key => $value) {
+		foreach($attr['name'] AS $key => $value) {
 			if ($attr['enum_value'][$key]) {
 				$attr['options'][$key] = array();
-				foreach ($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-					 $option = array(
+				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					$attr['options'][$key][] = array(
 						'value' => $attr['enum_value'][$key][$enum_key],
 						'output' => $attr['enum_output'][$key][$enum_key]
 					);
-					if ($attr['requires'][$key] != '') {
-						$option['requires'] = $attr['enum_requires_value'][$key][$enum_key];
-					}
-					$attr['options'][$key][] = $option;
 				}
 			}
 
-			$attribute = array(
+			$attributes[] = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
@@ -286,19 +288,8 @@
 				"privilege" => $attr['privileg'][$key],
 				"default" => $attr['default'][$key]
 			);
-			if ($attr['req_by'][$key] != '') {
-				$attribute['req_by'] = $attr['req_by'][$key];
-			}
-			if ($attr['requires'][$key] != '') {
-				$attribute['requires'] = $attr['requires'][$key];
-			}
-			$attributes[] = $attribute;
 		}
 		return $attributes;
-	};
-
-	$GUI->mobile_add_all_select_options = function($attributes) use ($GUI) {
-		#
 	};
 
 	$GUI->mobile_reformat_classes = function($classes) use ($GUI) {
@@ -313,6 +304,7 @@
 						'symbol' => $class['Style'][0]['symbol'],
 						'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
 						'fillColor' => $class['Style'][0]['color'],
+						'fill' => ($class['Style'][0]['color'] == '-1 -1 -1' || $class['Style'][0]['color'] == '' ? false : true),
 						'opacity' => $class['Style'][0]['opacity'],
 						'color' => $class['Style'][0]['outlinecolor'],
 						'weight' => $class['Style'][0]['width'],
@@ -326,8 +318,8 @@
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
-		$msg = '';
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
+
 		$sql = "
 			SELECT EXISTS (
 				SELECT 1
@@ -340,35 +332,16 @@
 		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+
+		# ToDo create Table syncs if not exists
+
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' and $sync == 0) {
-			# switch off sync mode
 			$GUI->mobile_drop_layer_sync($layerdb, $layer);
-			$pending_layers = array_filter(
-				$layer->get_parentform_layers(),
-				function($parentform_layer) {
-					return $parentform_layer->get('sync') == '1';
-				}
-			);
-			if (count($pending_layers) > 0) {
-				$msg = 'Bei den folgenden übergeordneten Layern ist der Sync-Modus noch eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern gegebenenfalls auch aus. Wenn diese eingeschaltet bleiben kann man die Daten offline in kvmobile anzeigen und bearbeiten aber sieht die Daten in den Unterformularen nicht!';
-			}
 		}
+
 		if ($rs['table_exists'] == 'f' and $sync == 1) {
-			# switch on sync mode
 			$GUI->mobile_create_layer_sync($layerdb, $layer);
-			$pending_layers = array_filter(
-				$layer->get_subform_layers(),
-				function($subform_layer) {
-					return $subform_layer->get('sync') == '0';
-				}
-			);
-			if (count($pending_layers) > 0) {
-				$msg = 'Bei den folgenden verknüpften Layern ist der Sync-Modus noch nicht eingeschaltet:<br>' . $layer->get_edit_link_list($pending_layers, 'sync') . 'Schalten Sie den Sync-Modus bei diesen Layern auch ein, um die Daten in kvmobile offline anzeigen und bearbeiten zu können!';
-			}
-		}
-		if ($msg != '') {
-			$GUI->add_message('warning', $msg);
 		}
 	};
 
@@ -394,9 +367,6 @@
 		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
 	};
 
-	/**
-	* Create Tables for sync Function of $layer in $layerdb
-	*/
 	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
 		# create table for deltas
 		$sql = "
@@ -435,7 +405,17 @@
 						--RAISE notice 'schema in search_path %', search_path_schema;
 						END IF;
 
-						IF strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+						IF
+							strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR
+							strpos(lower(part), 'insert into ' || TG_TABLE_SCHEMA || '.\"' || TG_TABLE_NAME || '\"') = 1 OR
+							(
+								(
+									strpos(lower(part), 'insert into ' || TG_TABLE_NAME) = 1 OR
+									strpos(lower(part), 'insert into \"' || TG_TABLE_NAME || '\"') = 1
+								) AND
+								TG_TABLE_SCHEMA = search_path_schema
+							)
+						THEN
 						_sql := part;
 						END IF;
 					end loop;
@@ -506,17 +486,19 @@
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
-					_sql := kvw_replace_line_feeds(_sql);
-					--RAISE notice 'sql nach remove line feeds %', _sql;
+					IF _sql IS NOT NULL THEN
+						_sql := kvw_replace_line_feeds(_sql);
+						--RAISE notice 'sql nach remove line feeds %', _sql;
 
-					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+						_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
+						--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
 
-					_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
-					--RAISE NOTICE 'sql nach insert version value %', _sql;
+						_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
+						--RAISE NOTICE 'sql nach insert version value %', _sql;
 
-					RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
-					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+						RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
+						INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+					END IF;
 
 					RETURN NEW;
 				END;
@@ -545,30 +527,32 @@
 					--raise notice '_query: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
-					-- replace horizontal tabs, new lines and carriage returns
-					part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
+						-- replace horizontal tabs, new lines and carriage returns
+						part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
 
-					IF strpos(lower(part), 'set search_path') = 1 THEN
-					search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-					--RAISE notice 'schema in search_path %', search_path_schema;
-					END IF;
+						IF strpos(lower(part), 'set search_path') = 1 THEN
+							search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+							--RAISE notice 'schema in search_path %', search_path_schema;
+						END IF;
 
-					IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-					_sql := part;
-					END IF;
+						part := replace(part, ' \"' || TG_TABLE_NAME || '\" ', ' ' || TG_TABLE_NAME || ' ');
+						--RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
+
+						IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
+							_sql := part;
+						END IF;
 					end loop;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'sql nach replace tablename by schema and tablename: %', _sql;
 
-					RAISE notice 'old uuid: %', OLD.uuid;
+					--RAISE notice 'old uuid: %', OLD.uuid;
 
 					_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
-					--RAISE notice 'sql nach replace where oid by where uuid 
+					--RAISE notice 'sql nach replace where by uuid: %', _sql
 
-					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-					--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
+					--RAISE notice 'Write deta sql: %', _sql;
 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 
@@ -592,6 +576,10 @@
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
 	};
 
+	/*
+	* ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
+	* to move the uploaded images to layers document path
+	*/
 	$GUI->mobile_upload_image = function($layer_id, $files) use ($GUI) {
 		# Bestimme den Uploadpfad des Layers
 		if (intval($layer_id) == 0) {
@@ -607,7 +595,14 @@
 				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 			);
 		}
-		$doc_path = $layer[0]['document_path'];
+
+		$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
+		if (substr($doc_path, -1) != '/') {
+			$doc_path .= '/';
+		}
+		if (!is_dir($doc_path)) {
+			@mkdir($doc_path, 0777, true);
+		}
 
 		if ($files['image'] == '') {
 			return array(
@@ -629,6 +624,7 @@
 			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 		}
 		else {
+			$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
 			$success = true;
 			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 		}
@@ -677,7 +673,7 @@
 			else {
 				if (file_exists($image)) {
 					unlink($image);
-					$msg[] = 'Bild ' + $image + ' erfolgreich gelöscht';
+					$msg[] = 'Bild ' . $image . ' erfolgreich gelöscht';
 					$fp = pathinfo($image);
 					$thumb = $fp['dirname']. '/' . $fp['filename'] . '_thumb.' . $fp['extension'];
 					if (file_exists($thumb)) {

@@ -515,7 +515,7 @@ class GUI {
 		}
 
 		if ($layerset['connectiontype'] == 6) {
-			$layerset['processing'] = 'CLOSE_CONNECTION=DEFER;' . $layerset['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
+			$layerset['processing'] = 'CLOSE_CONNECTION=ALWAYS;' . $layerset['processing'];		# DB-Connection erst am Ende schliessen und nicht für jeden Layer neu aufmachen
 		}
 
 		if ($layerset['processing'] != "") {
@@ -631,6 +631,9 @@ class GUI {
 			if ($layerset['toleranceunits']!='pixels') {
 				$layer->set('toleranceunits',$layerset['toleranceunits']);
 			}
+			if (value_of($layerset, 'sizeunits') != '') {
+				$layer->set('sizeunits', $layerset['sizeunits']);
+			}			
 			if ($layerset['transparency']!=''){
 				if ($layerset['transparency']==-1) {
 						$layer->set('opacity',MS_GD_ALPHA);
@@ -1181,8 +1184,8 @@ class GUI {
       }
       $klasse -> set('template', $layerset['template']);
       $klasse -> setexpression($classset[$j]['Expression']);
-      if ($classset[$j]['text']!='') {
-        $klasse -> settext($classset[$j]['text']);
+      if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
+        $klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
@@ -1205,12 +1208,17 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
@@ -2565,34 +2573,37 @@ class rolle {
 		$layer_name_filter = '';
 		
 		# Abfragen der Layer in der Rolle
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
 		}
-		else
+		else {
 			$name_column = "l.Name";
+		}
 
 		if ($LayerName != '') {
-			$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "'";
-			if(is_numeric($LayerName))
-				$layer_name_filter .= " OR l.Layer_ID = " . $LayerName;
-			$layer_name_filter .= ")";
+			if (is_numeric($LayerName)) {
+				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+			}
+			else {
+				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+			}
 		}
 
 		$sql = "
 			SELECT " .
 				$name_column . ",
 				l.Layer_ID,
-				alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, `schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
 				END as connection, 
-				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, kurzbeschreibung, datenherr, metalink, status, trigger_function,
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -2600,8 +2611,9 @@ class rolle {
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.duplicate_from_layer_id,
-				l.duplicate_criterion,
+				l.`duplicate_from_layer_id`,
+				l.`duplicate_criterion`,
+				l.`shared_from`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -2616,16 +2628,19 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer
+				r2ul.geom_from_layer,
+				las.privileg as privilegfk 
 			FROM
-				used_layer AS ul,
-				u_rolle2used_layer as r2ul,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l 
+				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
+				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
+				LEFT JOIN connections as c ON l.connection_id = c.id 
+				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
+				LEFT JOIN layer_attributes2stelle as las ON 
+					las.stelle_id = ul.Stelle_ID AND 
+					ul.Layer_ID = las.layer_id AND 
+					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 			WHERE
-				l.Layer_ID=ul.Layer_ID AND
-				r2ul.Stelle_ID=ul.Stelle_ID AND
-				r2ul.Layer_ID=ul.Layer_ID AND
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
 				$layer_name_filter . "
@@ -3045,7 +3060,6 @@ class pgdatabase {
 		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
 		# Dazu Fehlerausschriften bearchten.
 		$this->blocktransaction=0;
-		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
 	}
 
 	/**
@@ -3565,9 +3579,9 @@ class db_mapObj{
 				ELSE l.`Name`
 			END AS Name";
 			$group_column = '
-			CASE 
-				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` 
-				ELSE `Gruppenname` 
+			CASE
+				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'`
+				ELSE `Gruppenname`
 			END AS Gruppenname';
 		}
 		else{
@@ -3582,7 +3596,7 @@ class db_mapObj{
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
+				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -3591,11 +3605,12 @@ class db_mapObj{
 				END as connection,
 				l.printconnection,
 				l.connectiontype,
-				l.classitem, l.styleitem, l.classification, 
-				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
+				l.classitem, l.styleitem, l.classification,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
+				l.shared_from,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
@@ -3621,7 +3636,7 @@ class db_mapObj{
 				drawingorder
 		";
 		#echo '<br>SQL zur Abfrage der Layer: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>",4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$layer = array();
@@ -3637,7 +3652,7 @@ class db_mapObj{
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			if($rs['alias'] == '' OR !$useLayerAliases){
+			if ($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
@@ -3655,13 +3670,21 @@ class db_mapObj{
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
+				$rs['Class'] = $this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
-			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
-			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-			$layer['list'][$i]=$rs;
-			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
-			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
+			if ($rs['maxscale'] > 0) {
+				$rs['maxscale'] = $rs['maxscale'] + 0.3;
+			}
+			if ($rs['minscale'] > 0) {
+				$rs['minscale'] = $rs['minscale'] - 0.3;
+			}
+			$layer['list'][$i] = $rs;
+			# Pointer auf requires-Array
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
+			if ($rs['requires'] != '') {
+				# requires-Array füllen
+				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+			}
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
@@ -3746,7 +3769,7 @@ class db_mapObj{
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < count($rs['Style']); $i++) {
+					for($i = 0; $i < @count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';

@@ -56,26 +56,53 @@ function validierungsergebnisseRowAttribs(row, index){
 <h2>Validierungsergebnisse</h2>
 <br>
 <h4><?php echo $this->konvertierung->plan->planart . ': ' . htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
-<button class="table-export-button-csv" onclick="event.stopPropagation(); $('#validierungsergebnis_table').tableExport({type:'csv'});">CSV-Export</button>
-<table
-  id="validierungsergebnis_table"
+
+<link href="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/tableExport.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF/jspdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tableexport.jquery.plugin@1.10.21/libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.18.3/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.18.3/dist/extensions/export/bootstrap-table-export.min.js"></script>
+
+<style>
+#toolbar {
+  margin: 0;
+}
+.btn-group > .btn:first-child {
+	margin-left: 0px;
+	height: 32px;
+}
+</style>
+
+<div id="toolbar" class="select">
+  <select class="form-control">
+    <option value="">Export Basic</option>
+    <option value="all">Export All</option>
+    <option value="selected">Export Selected</option>
+  </select>
+</div>
+
+<table id="validierungsergebnis_table"
   data-toggle="table"
   data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_VALIDIERUNGSERGEBNISSE_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
   data-height="100%"
-  data-click-to-select="false"
+  data-click-to-select="true"
+  data-toolbar="#toolbar"
   data-sort-name="ergebnis_order"
   data-sort-order="asc"
   data-search="false"
   data-show-refresh="false"
-  data-show-toggle="false"
+  data-show-toggle="true"
   data-show-columns="true"
   data-query-params="queryParams"
   data-pagination="true"
+  data-side-pagination="server"
   data-page-size="25"
-  data-show-export="false"
+  data-show-export="true"
   data-row-style="validierungsergebnisseRowStyle"
   data-row-attributes="validierungsergebnisseRowAttribs"
-  data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+  data-export-types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
 >
   <thead>
     <tr>
@@ -153,6 +180,37 @@ function validierungsergebnisseRowAttribs(row, index){
     </tr>
   </thead>
 </table>
+<script>
+/*
+  var $table = $('#validierungsergebnis_table')
+
+  $(function() {
+    $('#toolbar').find('select').change(function () {
+      $table.bootstrapTable('destroy').bootstrapTable({
+        exportDataType: $(this).val(),
+        exportTypes: ['json', 'xml', 'csv', 'txt', 'sql', 'excel', 'pdf'],
+        columns: [
+          {
+            field: 'state',
+            checkbox: true,
+            visible: $(this).val() === 'selected'
+          },
+          {
+            field: 'id',
+            title: 'ID'
+          }, {
+            field: 'name',
+            title: 'Item Name'
+          }, {
+            field: 'price',
+            title: 'Item Price'
+          }
+        ]
+      })
+    }).trigger('change')
+  })
+*/
+</script>
 <div style="clear:both"></div>
 <form action="index.php" method="post" enctype="multipart/form-data">
 	<input type="hidden" name="go" value="xplankonverter_plaene_index">

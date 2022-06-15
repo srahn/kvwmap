@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 	$strTitle="Administrationsfunktionen";
-	$strUpdateCode="Aktualisierung des Quellcodes";
+	$strUpdateCode="Aktualisierung des Quellcodes und der Datenbanken";
 	$strUpdateDBs="Aktualisierung der Datenbanken";
 	$strComponent="Komponente";
 	$strConfigParams="Konfigurationsparameter";

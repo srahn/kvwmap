@@ -20,10 +20,10 @@
     <td bgcolor="<?php echo BG_FORM ?>"><table border="0" cellspacing="0" cellpadding="5">
         <tr bgcolor="#FFFFFF"> 
           <td>&nbsp;</td>
-          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=antr_nr&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Antragsnummer sortieren"><span class="fett">Antragsnummer</span></a></div></td>
-          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=vermstelle&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungstelle sortieren"><span class="fett">Vermessungsstelle</span></a></div></td>
-          <td ><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=verm_art&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Vermessungsart sortieren"><span class="fett">Vermessungsart</span></a></div></td>
-          <td>&nbsp;&nbsp;<a href="index.php?go=Antraege_Anzeigen&order=datum&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>" title="nach Datum sortieren"><span class="fett">Datum</span></a>&nbsp;&nbsp;&nbsp;</td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=antr_nr&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="nach Antragsnummer sortieren"><span class="fett">Antragsnummer</span></a></div></td>
+          <td><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=vermstelle&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="nach Vermessungstelle sortieren"><span class="fett">Vermessungsstelle</span></a></div></td>
+          <td ><div align="center"><a href="index.php?go=Antraege_Anzeigen&order=verm_art&richtung=<?php	if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="nach Vermessungsart sortieren"><span class="fett">Vermessungsart</span></a></div></td>
+          <td>&nbsp;&nbsp;<a href="index.php?go=Antraege_Anzeigen&order=datum&richtung=<?php  if ($this->antrag->richtung=='ASC' OR '') { echo $this->formvars['richtung']='ASC';} else { echo $this->formvars['richtung']='DESC';} ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="nach Datum sortieren"><span class="fett">Datum</span></a>&nbsp;&nbsp;&nbsp;</td>
           <td>&nbsp;</td>
           <td colspan="2">&nbsp;</td>
         </tr>
@@ -46,8 +46,8 @@
           <td><?php echo $this->antrag->antragsliste[$i]['vermart']?> 
             <div align="left"></div></td>
           <td><div align="left"><?php echo $this->formvars['datum']=$this->antrag->antragsliste[$i]['datum']; ?></div></td>
-          <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<? echo $this->antrag->antragsliste[$i]['antr_nr'];?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id'];?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
-          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id'];?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Nachweis_antragsnr_form_aufrufen&antr_nr=<? echo $this->antrag->antragsliste[$i]['antr_nr'];?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="bearbeiten"><img src="graphics/button_edit.png" border="0"></a></div></td>
+          <td><div align="left"><a href="index.php?go=Antrag_loeschen&antr_nr=<?php echo $this->antrag->antragsliste[$i]['antr_nr']; ?>&stelle_id=<? echo $this->antrag->antragsliste[$i]['stelle_id'];?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="löschen"><img src="graphics/button_drop.png" border="0"></a></div></td>
         </tr>
         <?php
 		}
@@ -57,7 +57,7 @@
   </tr>
   <tr> 
     <td bgcolor="<?php echo BG_FORM ?>">
-    	<select name="go_plus" onChange="document.GUI.submit();"> 
+    	<select name="go_plus" onChange="if (this.value == 'Zugeordnete_Dokumente_Anzeigen') {overlay_submit(document.GUI, true);} else {document.GUI.submit();}"> 
         <option value="">---</option>
        <?php if($this->Stelle->isFunctionAllowed('Antraganzeige_Zugeordnete_Dokumente_Anzeigen')) { ?>
         <option value="Zugeordnete_Dokumente_Anzeigen"<?php if ($this->formvars['antr_verarbeitung']=='erzeugen') { ?> selected<?php } ?>>Zugeordnete Dokumente Anzeigen</option>

@@ -4,7 +4,6 @@
 	$selectable_scales = array_reverse($selectable_scales);
 
 ?>
-
 <script type="text/javascript">
 <!--
 
@@ -19,7 +18,7 @@ function change_layer(){
 		document.getElementById('selected_label_div').innerHTML = '';
 		document.GUI.selected_style_id.value = '';
 		document.GUI.selected_label_id.value = '';
-		ahah('index.php', 'go=getclasses&layer_id='+layer_id, new Array(document.getElementById('classes_div')), "");
+		ahah('index.php', 'go=getclasses&layer_id=' + layer_id, new Array(document.getElementById('classes_div')), "");
 		document.getElementById('toLayerLink').style='display:inline';
 	}
 }
@@ -74,7 +73,7 @@ function delete_label(label_id){
 	selected_label_id = document.GUI.selected_label_id.value;
 	class_id = document.GUI.class_1.options[document.GUI.class_1.selectedIndex].value;
 	layer_id = document.GUI.selected_layer_id.value;
-	ahah('index.php', 'go=delete_label&selected_label_id='+selected_label_id+'&label_id='+label_id+'&class_id='+class_id+'&layer_id='+layer_id, new Array(document.getElementById('label_div')), "");
+	ahah('index.php', 'go=delete_label&selected_label_id=' + selected_label_id + '&label_id=' + label_id + '&class_id=' + class_id + '&layer_id=' + layer_id, new Array(document.getElementById('label_div')), "");
 }
 
 function add_style(){
@@ -157,8 +156,8 @@ function browser_check(){
 	}
 }
 
-function navigate(params){	
-	location.href='index.php?'+params+'&selected_layer_id='+document.GUI.selected_layer_id.value;
+function navigate(params) {
+	location.href = 'index.php?' + params + '&selected_layer_id=' + document.GUI.selected_layer_id.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 }
 
 function setScale(select){
@@ -216,7 +215,7 @@ function setScale(select){
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>
@@ -232,7 +231,7 @@ function setScale(select){
 				<tr>
 					<th><a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a></th>
 					<th><a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th><a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
@@ -271,33 +270,46 @@ function setScale(select){
 			  	</td>
 			  </tr>
 			  <tr>
-			  	<td valign="top" colspan="2" style="border-right:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3;">
-			  		<div id="style_div">
-				    	<?
-				    	if($this->formvars['selected_class_id']){
-					    	echo'
-						  		<table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
-						  			<tr>
-											<td height="25" valign="top">Styles</td><td align="right"><a href="javascript:add_style();">neuer Style</a></td>
-										</tr>';
-								if(count($this->classdaten[0]['Style']) > 0){
-									$this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
-									for($i = 0; $i < count($this->classdaten[0]['Style']); $i++){
-										echo'
-							    		<tr>
-										  	<td ';
-										  	if($this->formvars['selected_style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'style="background-color:lightsteelblue;" ';}
-										  	echo 'id="td1_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" onclick="get_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">';
-										  		echo '<img src="'.IMAGEURL.$this->getlegendimage($this->formvars['selected_layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']).'"></td>';
-										  		echo '<td align="right" id="td2_style_'.$this->classdaten[0]['Style'][$i]['Style_ID'].'" ';
-										  		if($this->formvars['selected_style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID']){echo 'style="background-color:lightsteelblue;" ';}
-										  		echo '>';
-										  		if($i < count($this->classdaten[0]['Style'])-1){echo '<a href="javascript:movedown_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach unten verschieben"><img src="'.GRAPHICSPATH.'pfeil.gif" border="0"></a>';}
-													if($i > 0){echo '&nbsp;<a href="javascript:moveup_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');" title="in der Zeichenreihenfolge nach oben verschieben"><img src="'.GRAPHICSPATH.'pfeil2.gif" border="0"></a>';}
-										  		echo '&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style('.$this->classdaten[0]['Style'][$i]['Style_ID'].');">löschen</a>';
-										echo'
-												</td>
-											</tr>';
+					<td valign="top" colspan="2" style="border-right:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3;">
+						<div id="style_div"><?
+							if ($this->formvars['selected_class_id']) { ?>
+								<table width="100%" align="left" border="0" cellspacing="0" cellpadding="3">
+						  		<tr>
+										<td height="25" valign="top">Styles</td><td align="right"><a href="javascript:add_style();">neuer Style</a></td>
+									</tr><?
+									if (count($this->classdaten[0]['Style']) > 0) {
+										$this->classdaten[0]['Style'] = array_reverse($this->classdaten[0]['Style']);
+										for ($i = 0; $i < count($this->classdaten[0]['Style']); $i++) { ?>
+											<tr><?
+												$td_id = 'td1_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
+												$td_style = ($this->formvars['selected_style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID'] ? 'background-color:lightsteelblue;' : '');
+												$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ');';
+											?>
+												<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?>" onclick="<? echo $td_onclick; ?>">
+													<img src="<?php echo IMAGEURL . $this->getlegendimage($this->formvars['selected_layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
+												</td><?
+													$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['Style_ID'];
+												?>
+												<td id="<? echo $td_id; ?>" align="right" style="<? echo $td_style; ?>"><?
+												if ($i < count($this->classdaten[0]['Style']) - 1) { ?>
+													<a
+														href="javascript:movedown_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+														title="in der Zeichenreihenfolge nach unten verschieben"
+													>
+														<img src="<? echo GRAPHICSPATH; ?>pfeil.gif" border="0">
+													</a><?
+												}
+												if ($i > 0) { ?>
+													&nbsp;<a
+														href="javascript:moveup_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);"
+														title="in der Zeichenreihenfolge nach oben verschieben"
+													>
+														<img src="<? echo GRAPHICSPATH; ?>pfeil2.gif" border="0">
+													</a><?
+												} ?>
+												&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:delete_style(<? echo $this->classdaten[0]['Style'][$i]['Style_ID']; ?>);">löschen</a>
+											</td>
+										</tr><?
 									}
 								}
 								echo'
@@ -340,28 +352,27 @@ function setScale(select){
 				</tr>
 				<tr>
 					<td valign="top" colspan="2" style="width: 50%; border-right:1px solid #C3C7C3;">
-						<div id="selected_style_div">
-						<?
-						if(count($this->styledaten) > 0){
-					  	echo'
-					  		<table align="left" border="0" cellspacing="0" cellpadding="3">';
-							for($i = 0; $i < count($this->styledaten); $i++){
-								echo'
-					    		<tr>
-								  	<td class="px13">';
-								  		echo key($this->styledaten).'</td><td><input name="style_'.key($this->styledaten).'" size="20" type="text" value="'.$this->styledaten[key($this->styledaten)].'">';
-								echo'
-										</td>
-									</tr>';
-								next($this->styledaten);
-							}
-							echo'
+						<div id="selected_style_div"><?
+							if (count($this->styledaten) > 0) { ?>
+								<table align="left" border="0" cellspacing="0" cellpadding="3"><?
+									for ($i = 0; $i < count($this->styledaten); $i++) { ?>
+										<tr>
+											<td class="px13"><?
+												echo key($this->styledaten); ?>
+											</td>
+											<td>
+												<input name="style_<? echo key($this->styledaten); ?>" size="20" type="text" value="<? echo $this->styledaten[key($this->styledaten)]; ?>">
+											</td>
+										</tr><?
+										next($this->styledaten);
+									} ?>
 									<tr>
-										<td height="30" colspan="2" valign="bottom" align="center"><input type="button" name="style_save" value="Speichern" onclick="save_style('.$this->styledaten['Style_ID'].')"></td>
+										<td height="30" colspan="2" valign="bottom" align="center">
+											<input type="button" name="style_save" value="Speichern" onclick="save_style(<? echo $this->styledaten['Style_ID']; ?>)">
+										</td>
 									</tr>
-								</table>';
-				  	}
-						?>
+								</table><?
+							} ?>
 						</div>
 					</td>
 					<td valign="top" colspan="2">
@@ -407,7 +418,10 @@ function setScale(select){
 								<td><input name="sample2" type="text" style="width: 180px; background-color: rgb(255, 255, 255);" id="sample2"></td>
 							</tr>
 							<tr>
-								<td>RGB:&nbsp;<input style="width: 143px;" name="rgb" type="text"></td>
+								<td><div style="float: left; margin-top: 3px">RGB:</div><div style="float: right"><input style="width: 143px;" name="rgb" type="text" onkeyup="$('input[name=hex]').val(rgbToHex(this.value));"></div></td>
+							</tr>
+							<tr>
+								<td><div style="float: left; margin-top: 3px">Hex:</div><div style="float:right"><input style="width: 143px;" name="hex" type="text"></div></td>
 							</tr>
 							<tr>
 								<td>&nbsp;</td>
@@ -416,20 +430,27 @@ function setScale(select){
 								<td><span class="fett">Font:</span></td>
 							</tr>
 							<tr>
-								<td>
-								<? if(!function_exists(imagecreatetruecolor)){ ?>
-									<select size="1" name="font">
-									<? for($i = 0; $i < count($this->fonts['name']); $i++){?>
-										<option id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option>		
-									<? } ?>
-									</select>
-								<? }else{ ?>
-									<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');">
-									<? for($i = 0; $i < count($this->fonts['name']); $i++){?>
-										<option onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));" class="imagebacked" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');" id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option>		
-									<? } ?>
-									</select>
-								<? } ?>
+								<td><?
+									if (!function_exists(imagecreatetruecolor)) { ?>
+										<select size="1" name="font"><?
+											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
+												<option id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option><?
+											} ?>
+										</select><?
+									}
+									else { ?>
+										<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');"><?
+											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
+												<option
+													onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));"
+													class="imagebacked"
+													style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');"
+													id="<? echo $this->fonts['name'][$i]; ?>"
+													value="<? echo $this->fonts['name'][$i]; ?>"
+												><? echo $this->fonts['name'][$i]; ?></option><?
+											} ?>
+										</select><?
+									} ?>
 								</td>
 							</tr>
 							<tr>

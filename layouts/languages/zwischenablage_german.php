@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strBookmarks="Zwischenablage";
 $strEmptyBookmarks="Zwischenablage leeren";
 $strRecord="Datensatz";

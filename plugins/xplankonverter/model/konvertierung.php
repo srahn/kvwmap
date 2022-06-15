@@ -193,6 +193,65 @@ class Konvertierung extends PgObject {
 		return $this->get_file_path($name) . '/' . $parts[0] . '_' . $this->get($this->identifier) . '.' . $parts[1];
 	}
 
+	/*
+	* function check if files of file_type
+	* exists for download in this konvertierung
+	* return true if yes and false if not
+	*/
+	function files_exists($file_type) {
+		$result = false;
+		switch ($file_type) {
+			case 'uploaded_shape_files' : {
+				$result = $this->download_files_exists('uploaded_shapes');
+			} break;
+			case 'edited_shape_files' : {
+				$sql = "
+					SELECT
+						table_name
+					FROM
+						information_schema.tables
+					WHERE
+						table_schema = 'xplan_shapes_" . $this->get($this->identifier) . "'
+				";
+				#echo 'SQL zum Abfragen des Tabellennamen: ' . $sql; exit;
+				$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
+				$result = (pg_num_rows(pg_query($this->database->dbConn, $sql)) > 0);
+			} break;
+			case 'xplan_gml_file' : {
+				$filename = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_gml/xplan_' . $this->get($this->identifier) . '.gml';
+				$result = file_exists($filename);
+			} break;
+			case 'xplan_shape_files' : {
+				# Fragt die classen ab, die für die Konvertierung registriert sind und prüfe ob es dazu Daten gibt.
+				# Wenn ja, setze result = true und Abbruch der Schleife
+				foreach ($this->get_class_names() AS $class_name) {
+					$sql = "
+						SELECT
+							count(*) AS num_objects
+						FROM
+							xplan_gml. " . strtolower($class_name) . "
+						WHERE
+							konvertierung_id = " . $this->get($this->identifier) . "
+					";
+					#echo 'SQL zur Abfrage der Anzahl der Objekte in Tabelle: xplan_gml.' . strtolower($class_name) . ': ' . $sql;
+					$rs = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+					if ($rs['num_objects'] > 0) {
+						$result = true;
+						break;
+					}
+				}
+			} break;
+			case 'inspire_gml_file' : {
+				$filename = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/inspire_gml/inspire_' . $this->get($this->identifier) . '.gml';
+				$result = file_exists($filename);
+			} break;
+			default : {
+				
+			}
+		}
+		return $result;
+	}
+
 	function create_edited_shapes() {
 		$path = $this->get_file_path('edited_shapes');
 		$this->debug->show('Erzeuge Edited-Shape-Files in. ' . $path, Konvertierung::$write_debug);
@@ -207,6 +266,7 @@ class Konvertierung extends PgObject {
 			WHERE
 				table_schema = 'xplan_shapes_" . $this->get($this->identifier) . "'
 		";
+		#echo 'SQL zum Abfragen des Tabellennamen: ' . $sql; exit;
 
 		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
 		$result = pg_fetch_all(
@@ -230,10 +290,11 @@ class Konvertierung extends PgObject {
 		foreach ($class_names AS $class_name) {
 			$result = pg_query($this->database->dbConn, $sql);
 			//$result = pg_fetch_assoc($query);
-			if(pg_num_rows($result) == 0) {
+			if (pg_num_rows($result) == 0) {
 				continue;
-			} else {
-				while($row = pg_fetch_array($result)){
+			}
+			else {
+				while ($row = pg_fetch_array($result)) {
 					$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
 					$sql = "
 						SELECT
@@ -254,7 +315,7 @@ class Konvertierung extends PgObject {
 		// Delete existing shapes
 		$this->debug->show('Lösche xplan-konforme-shape-Dateien', Konvertierung::$write_debug);
 		$files = glob($path);
-		foreach($files as $file){
+		foreach ($files as $file){
 			if(is_file($file)) {
 				unlink($file);
 			}
@@ -297,17 +358,17 @@ class Konvertierung extends PgObject {
 			$src_srid = !empty(pg_fetch_result($result_srid, 0, 0)) ? pg_fetch_result($result_srid, 0, 0) : $this->get('output_epsg');
 
 			//$result = pg_fetch_assoc($query);
-			if(pg_num_rows($result) == 0) {
+			if (pg_num_rows($result) == 0) {
 				continue;
 			} else {
-				while($row = pg_fetch_array($result)){
+				while ($row = pg_fetch_array($result)){
 					if ($row[0] == 'ST_MultiPoint') {
 						$this->debug->show('Klasse: ' . $class_name, Konvertierung::$write_debug);
 						$sql_point = "
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
@@ -322,7 +383,7 @@ class Konvertierung extends PgObject {
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
@@ -337,7 +398,7 @@ class Konvertierung extends PgObject {
 							SELECT
 								*
 							FROM
-								xplan_gml. " . strtolower($class_name) . "
+								xplan_gml." . strtolower($class_name) . "
 							WHERE
 								konvertierung_id = " . $this->get($this->identifier) . "
 							AND
@@ -389,8 +450,10 @@ class Konvertierung extends PgObject {
 	function create_export_file($file_type) {
 		$path = $this->get_file_path($file_type);
 		// -j for removing directory structure in .zip
-		exec(ZIP_PATH . ' -j ' . $path . ' ' . $path . '/*');
-		
+		$cmd = ZIP_PATH . ' -j ' . $path . ' ' . $path . '/*';
+		#echo 'cmd: ' . $cmd;
+		exec($cmd);
+
 		$exportfile = $path . '.zip';
 		return $exportfile;
 	}
@@ -404,7 +467,7 @@ class Konvertierung extends PgObject {
 		readfile($exportfile);
 	}
 
-	function files_exists($dir) {
+	function download_files_exists($dir) {
 		$dir = $this->get_file_path($dir);
 		$this->debug->show('Prüfe ob Dateien im Verzeichnis : ' . $dir . ' vorhanden sind: ', Konvertierung::$write_debug);
 		$result = !(count(glob("$dir/*")) === 0);
@@ -505,6 +568,7 @@ class Konvertierung extends PgObject {
 				bp.konvertierung_id = " . $this->get($this->identifier) . " OR
 				rp.konvertierung_id = " . $this->get($this->identifier) . "
 		";
+		#echo 'SQL zur Abfrage der Klassen-Namen, die zur Konvertierung gehören.' . $sql;
 
 		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
 		$result = pg_fetch_all(
@@ -660,6 +724,12 @@ class Konvertierung extends PgObject {
 		$regeln = $this->get_regeln($this->plan);
 
 		// validate Plan
+		$validierung = new Validierung($this->gui);
+		$planvalidierungen = $validierung->find_where("functionsname LIKE 'plan_attribute_has_value'");
+		foreach($planvalidierungen AS $planvalidierung) {
+			$planvalidierung->konvertierung_id = $this->get($this->identifier);
+			$planvalidierung->plan_attribute_has_value();
+		}
 
 		// validate Bereiche
 		$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'detaillierte_requires_bedeutung');
@@ -669,9 +739,11 @@ class Konvertierung extends PgObject {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		if (count($bereiche) == 0) {
-			$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
-		}
+		// Set die Planvalidierung durchgeführt wird, führt diese Meldung in die Irre und kann weggelassen werden.
+		// ToDo: Ggf. wird der Hinweis als Validierungsergebnis gespeichert, dann wird er auch angezeigt.
+		#if (count($bereiche) == 0) {
+		#	$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
+		#}
 
 		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
@@ -687,7 +759,7 @@ class Konvertierung extends PgObject {
 						$result = $regel->convert($this);
 						// TODO: Fix this, currently no gids break the result
 						/*if (!empty($result)) {
-							if($regel->is_source_shape_or_gmlas($regel) != 'gmlas') {
+							if($regel->is_source_shape_or_gmlas($regel,  $this->get($this->identifier)) != 'gmlas') {
 								$regel->rewrite_gml_ids($result);
 							}
 						}*/
@@ -919,10 +991,10 @@ class Konvertierung extends PgObject {
 
 	function destroy_gmlas_and_shape_schemas() {
 		# Destroy the xplan_shapes_ + $konvertierung_id if it exists
-		# Destroy the xplan_gmlas: + $user_id schema if it exists
+		# Destroy the xplan_gmlas: + $konvertierung_id schema if it exists
 		$sql = "
 			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get($this->identifier) . " CASCADE;
-			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->gui->user->id . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->get($this->identifier) . " CASCADE;
 		";
 		pg_query($this->database->dbConn, $sql);
 	}

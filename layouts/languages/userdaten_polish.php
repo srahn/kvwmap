@@ -1,7 +1,8 @@
-﻿<?php
-	$strTel="Tel."; 
-	$strEMail="e-mail"; 
-	$strTitle="dane użytkownika"; 
-	$strOrganisation="Organisation";
-	$strPosition="Position";	
+<?php
+	$strTitle = "dane użytkownika";
+	$strIntervall = "Period";
+	$strLastActivity = "Last Activity";
+	$strOrganisation = "Organisation";
+	$strPosition = "Position";
+	$strConfirmDelete = 'Do you realy want user %s to %s'
 ?>

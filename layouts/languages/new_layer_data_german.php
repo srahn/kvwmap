@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strLayer="Thema";
 $strPleaseSelect="---------Bitte auswählen---------";
 $strSave="Speichern";

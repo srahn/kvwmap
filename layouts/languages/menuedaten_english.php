@@ -1,3 +1,6 @@
-﻿<?php
-  $strTitel="Menu data"; 
-?>  
+<?php
+	$strTitel = 'Menu data';
+	$strTopMenue = 'Top Menue';
+	$strMenueLevel = 'Level';
+	$strMenueOrder = 'Order';
+?>

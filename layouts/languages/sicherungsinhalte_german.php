@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle = "Sicherungsinhalte";
 	$strVerzeichnissicherung			=	"Verzeichnissicherung";
 	$strVerzeichnskopieren				=	"Verzeichnisinhalte kopieren";

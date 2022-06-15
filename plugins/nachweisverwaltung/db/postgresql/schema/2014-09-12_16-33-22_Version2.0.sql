@@ -30,7 +30,7 @@ CREATE TABLE n_nachweise (
     format character(2),
     stammnr character varying(15)
 );
-SELECT AddGeometryColumn('nachweisverwaltung', 'n_nachweise','the_geom',2398,'GEOMETRY', 2);
+SELECT AddGeometryColumn('nachweisverwaltung', 'n_nachweise','the_geom',25833,'GEOMETRY', 2);
 CREATE INDEX n_nachweise_the_geom_gist ON n_nachweise USING GIST (the_geom);
 ALTER TABLE n_nachweise ADD CONSTRAINT enforce_geotype_the_geom CHECK (geometrytype(the_geom) = 'POLYGON'::text OR geometrytype(the_geom) = 'MULTIPOLYGON'::text OR the_geom IS NULL);
 

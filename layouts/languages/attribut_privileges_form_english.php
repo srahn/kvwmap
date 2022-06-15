@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strTitle = "Layer-Privileges";
 	$strDefaultPrivileges="Default-Privileges";
 	$strLayerAccessPrivileges="layer access privileges";

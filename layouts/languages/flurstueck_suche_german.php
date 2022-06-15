@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Flurstückssuche";
  $strGemkgschl="Gemarkungsschlüssel";
  $strGemkgGem="Gemarkung, Gemeinde";

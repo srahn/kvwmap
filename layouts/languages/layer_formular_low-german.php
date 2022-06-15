@@ -1,11 +1,11 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
 	$strAsteriskRequired="Weerte mit een * mööst du indragen";
 	$strClassItem="Classitem";
 	$strMaintable="Main Table";
 	$strLayerID="Layer ID*";
 	$strName="Naam*";
-	$strDataType="Datentyp*";
+	$strDataType="Datentyp";
 	$strGroup="Grupp*";
 	$strPath="Padd";
 	$strData="Data";
@@ -18,7 +18,7 @@
 	$strLabelRequires="Labelrequires";
 	$strConnection="Connection*";
 	$strPrintConnection="Druck-Connection";
-	$strConnectionType="Connectiontype*";
+	$strConnectionType="Connectiontype";
 	$strClassItem="Classitem";
 	$strFilterItem="Filteritem*";
 	$strTolerance="Tolerance*";
@@ -66,7 +66,9 @@
 	$strWMSAuthUsername="wms_auth_username";
 	$strDocument_path="Dokumente Ordner";
 	$strDescribtion="Kurzbeschreibung";
-	$strDataOwner="Datenherr";
+	$strDataOwnerName = 'Datenherr';
+	$strUpToDateness = 'Aktualität';
+	$strUpdateCycle = 'Aktualisierungszyklus';
 	$strTriggerFunction="Trigger function";
 	$strSync="Sync - Mode";
 	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named (Main Table)_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile."
@@ -75,4 +77,5 @@
 	$strIdAttribute="ID-Spalte";
 	$strSharedFrom = "Geteilt von Nutzer";
 	$strSharedFromHelp = "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
+	$strSizeUnits="Sizeunits";
 ?>

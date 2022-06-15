@@ -28,7 +28,6 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
-	var $language;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -37,13 +36,14 @@ class stelle {
 		$this->log = $log_mysql;
 		$this->id = $id;
 		$this->database = $database;
-		$this->readDefaultValues();
+		$ret = $this->readDefaultValues();
 	}
 
 	function getsubmenues($id){
+		global $language;
 		$sql ='SELECT menue_id,';
-		if ($this->language != 'german') {
-			$sql.='`name_'.$this->language.'` AS ';
+		if ($language != 'german') {
+			$sql.='`name_'.$language.'` AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -93,9 +93,10 @@ class stelle {
 	}
 	
   function getName() {
+		global $language;
     $sql ='SELECT ';
-    if ($this->language != 'german' AND $this->language != ''){
-      $sql.='`Bezeichnung_'.$this->language.'` AS ';
+    if ($language != 'german' AND $language != ''){
+      $sql.='`Bezeichnung_'.$language.'` AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -110,7 +111,8 @@ class stelle {
   }
 
 	function readDefaultValues() {
-		if ($this->language != '' AND $this->language != 'german') {
+		global $language;
+		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
 				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
@@ -126,29 +128,23 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `pgdbhost`, `pgdbname`, `pgdbuser`, `pgdbpasswd`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `postgres_connection_id`, `show_shared_layers`
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->Bezeichnung=$rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
@@ -338,53 +334,40 @@ class stelle {
 	function NeueStelleAnlegen($stellendaten) {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
-		$sql ='INSERT INTO stelle SET';
-		if($stellendaten['id'] != ''){
-			$sql.=' ID='.$stellendaten['id'].', ';
-		}
-		$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
-		$sql.=', Referenzkarte_ID='.$stellendaten['Referenzkarte_ID'];
-		$sql.=', minxmax= "'.$stellendaten['minxmax'].'"';
-		$sql.=', minymax= "'.$stellendaten['minymax'].'"';
-		$sql.=', maxxmax= "'.$stellendaten['maxxmax'].'"';
-		$sql.=', maxymax= "'.$stellendaten['maxymax'].'"';
-		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
-		$sql.=', start= "'.$stellendaten['start'].'"';
-		$sql.=', stop= "'.$stellendaten['stop'].'"';
-		if ($stellendaten['postgres_connection_id'] != '') {
-			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
-		}
-		if ($stellendaten['pgdbhost']!='') {
-			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
-		}
-		$sql.=', pgdbname= "'.$stellendaten['pgdbname'].'"';
-		$sql.=', pgdbuser= "'.$stellendaten['pgdbuser'].'"';
-		$sql.=', pgdbpasswd= "'.$stellendaten['pgdbpasswd'].'"';
-		$sql.=', ows_title= "'.$stellendaten['ows_title'].'"';
-		$sql.=', ows_abstract= "'.$stellendaten['ows_abstract'].'"';
-		$sql.=', wms_accessconstraints= "'.$stellendaten['wms_accessconstraints'].'"';
-		$sql.=', ows_contactperson= "'.$stellendaten['ows_contactperson'].'"';
-		$sql.=', ows_contactorganization= "'.$stellendaten['ows_contactorganization'].'"';
-		$sql.=', ows_contactemailaddress= "'.$stellendaten['ows_contactemailaddress'].'"';
-		$sql.=', ows_contactposition= "'.$stellendaten['ows_contactposition'].'"';
-		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
-		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
-		$sql.=', wappen_link= "'.$stellendaten['wappen_link'].'"';
-		if($stellendaten['wappen']){
-			$sql.=', wappen="'.$_files['wappen']['name'].'"';
-		}
-		elseif($stellendaten['wappen_save']){
-			$sql.=', wappen="'.$stellendaten['wappen_save'].'"';
-		}
-		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
-		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='",';
-		$sql .= "
-			`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? "1" : "0") . ",
-			`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+		$sql = "
+			INSERT INTO stelle
+			SET
+				`" . ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "") . "
+				`Bezeichnung = '" . $stellendaten['bezeichnung'] . "',
+				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . "
+				`minxmax` = " . $stellendaten['minxmax'] . ",
+				`minymax` = " . $stellendaten['minymax'] . ",
+				`maxxmax` = " . $stellendaten['maxxmax'] . ",
+				`maxymax` = " . $stellendaten['maxymax'] . ",
+				`epsg_code` = " . $stellendaten['epsg_code'] . ",
+				`start` = '" . $stellendaten['start'] . "',
+				`stop` = '" . $stellendaten['stop'] . "',
+				`ows_title` = '" . $stellendaten['ows_title'] . "',
+				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
+				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
+				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
+				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
+				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
+				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
+				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "'
+				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
+				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
+				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
+				`use_layer_aliases` = " . ($stellendaten['use_layer_aliases'] == '1' ? 1 : 0) . ",
+				`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? 1 : 0) . ",
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				`comment` = '" . $stellendaten['comment'] . "'
 		";
-		# Abfrage starten
+		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
@@ -433,11 +416,6 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
-				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
-				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
-				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
-				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
-				`pgdbpasswd` = '" . $stellendaten['pgdbpasswd'] . "',
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
@@ -454,7 +432,9 @@ class stelle {
 				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				`comment` = '" . $stellendaten['comment'] . "'
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -514,6 +494,7 @@ class stelle {
 	}
 	
 	function getStellenhierarchie() {
+		$this->links = Array();
 		$sql = "
 			SELECT
 				*
@@ -676,8 +657,20 @@ class stelle {
 	function getFunktionen($return = '') {
 		$funktionen = array();
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
-		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
-		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
+		$sql = "
+			SELECT
+				f.id,
+				f.bezeichnung,
+				1 as erlaubt
+			FROM
+				u_funktionen AS f,
+				u_funktion2stelle AS f2s
+			WHERE
+				f.id=f2s.funktion_id AND
+				f2s.stelle_id = " . $this->id . "
+			ORDER BY bezeichnung
+		";
+		#echo '</script>SQL zur Abfrage der Funktionen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -1455,12 +1448,12 @@ class stelle {
 		$sql.=' WHERE g2r.stelle_ID='.$this->id;
 		$sql.=' AND g2r.id = g.id';
 		$sql.=' ORDER BY `order`';
-		#echo $sql;
+		#echo $sql; exit;
     $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
     $this->database->execSQL($sql);
     if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
     while ($rs=$this->database->result->fetch_assoc()) {
-      $groups[$rs['id']]=$rs;
+      $groups[$rs['id']] = array_merge($groups[$rs['id']] ?: [], $rs);
 			if($rs['obergruppe'])$groups[$rs['obergruppe']]['untergruppen'][] = $rs['id'];
     }
     return $groups;
@@ -1501,18 +1494,18 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
+		else {
 			$i = 0;
-			while($rs=$this->database->result->fetch_assoc()) {
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['drawingorder'][]=$rs['drawingorder'];
-				$layer['legendorder'][]=$rs['legendorder'];
-				$layer['Gruppe'][]=$rs['Gruppe'];
+			while ($rs = $this->database->result->fetch_assoc()) {
+				$layer['ID'][] 						= $rs['Layer_ID'];
+				$layer['Bezeichnung'][]		= $rs['Name'];
+				$layer['drawingorder'][]	= $rs['drawingorder'];
+				$layer['legendorder'][]		= $rs['legendorder'];
+				$layer['Gruppe'][]				= $rs['Gruppe'];
 				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 				$i++;
 			}
-			if($order == 'Name'){
+			if ($order == 'Name') {
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1589,7 +1582,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_geom_layer = false){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1599,7 +1592,7 @@ class stelle {
 		if($language != 'german') {
 			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
 		}
-		$sql .='Gruppenname, `connection` FROM used_layer, layer, u_groups';
+		$sql .='Gruppenname, `connection`, used_layer.export_privileg FROM used_layer, layer, u_groups';
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
@@ -1609,21 +1602,24 @@ class stelle {
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_geom_layer){
-			$sql .=' AND layer.Datentyp < 4';
+		if($only_line_and_polygon_layer){
+			$sql .=' AND layer.Datentyp IN (2,3)';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
+		}
+		if($export_privileg != NULL){
+			$sql .=' AND used_layer.export_privileg > 0';
 		}		
 		if($group_id != NULL){
 			$sql .=' AND u_groups.id = '.$group_id;
 		}
 		if($layer_ids != NULL){
-			$sql .=' AND layer.Layer_ID IN ('.implode($layer_ids, ',').')';
+			$sql .=' AND layer.Layer_ID IN ('.implode(',', $layer_ids).')';
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection` FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -1632,40 +1628,17 @@ class stelle {
 				$sql .=' AND Gruppe = '.$group_id;
 			}
 		}
-		$sql .= ' ORDER BY Name';
+		$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);		
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while($rs=$this->database->result->fetch_assoc()){
-				 
-				# fremde Layer werden auf Verbindung getestet (erstmal rausgenommen, dauert relativ lange)
-				// if(strpos($rs['connection'], 'host') !== false AND strpos($rs['connection'], 'host=localhost') === false){
-					// $connection = explode(' ', trim($rs['connection']));
-					// for($j = 0; $j < count($connection); $j++){
-						// if($connection[$j] != ''){
-							// $value = explode('=', $connection[$j]);
-							// if(strtolower($value[0]) == 'host'){
-								// $host = $value[1];
-							// }
-							// if(strtolower($value[0]) == 'port'){
-								// $port = $value[1];
-							// }
-						// }
-					// }
-					// if($port == '')$port = '5432';
-					// $fp = @fsockopen($host, $port, $errno, $errstr, 0.1);
-					// if(!$fp){			# keine Verbindung --> Layer ausschalten
-						// #$this->Fehlermeldung = $errstr.' für Layer: '.$rs['Name'].'<br>';
-						// continue;
-					// }
-				// }
-				
+		else {
+			while ($rs=$this->database->result->fetch_assoc()){
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
-				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);				
+				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				
 				if($rs['alias'] != '' AND $this->useLayerAliases){
 					$rs['Name'] = $rs['alias'];
@@ -1674,11 +1647,8 @@ class stelle {
 				$layer['Bezeichnung'][]=$rs['Name'];
 				$layer['Gruppe'][]=$rs['Gruppe'];
 				$layer['Gruppenname'][]=$rs['Gruppenname'];
+				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
-			// Sortieren der User unter Berücksichtigung von Umlauten
-			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
-			$layer['Bezeichnung'] = $sorted_arrays['array'];
-			$layer['ID'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}
@@ -1740,10 +1710,31 @@ class stelle {
 		$layer = array();
 		$sql = "
 			SELECT
-				l.*,
-				ul.*,
+				l.Layer_ID,
+				l.Name,
+				l.Gruppe,
+				l.document_path,
+				ul.use_parent_privileges,
+				ul.privileg,
+				ul.export_privileg,
+				ul.requires,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 				parent_id,
-				ul2.Stelle_ID as used_layer_parent_id
+				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
+				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
 			FROM
 				layer AS l 
 				JOIN used_layer AS ul ON l.Layer_ID = ul.Layer_ID
@@ -1751,9 +1742,26 @@ class stelle {
 				LEFT JOIN used_layer AS ul2 ON 
 					l.Layer_ID = ul2.Layer_ID AND	
 					ul2.Stelle_ID = parent_id
+				LEFT JOIN stelle AS s ON s.ID = ul2.Stelle_ID
 			WHERE
 				ul.Stelle_ID = " . $this->id .
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
+			GROUP BY 
+				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
+				ul.`queryable`, 
+				ul.`drawingorder`, 
+				ul.`legendorder`, 
+				ul.`minscale`, 
+				ul.`maxscale`, 
+				ul.`offsite`, 
+				ul.`transparency`, 
+				ul.`postlabelcache`, 
+				ul.`Filter`, 
+				ul.`template`, 
+				ul.`symbolscale`, 
+				ul.`logconsume`, 
+				ul.`start_aktiv`, 
+				ul.`use_geom`
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -1763,6 +1771,67 @@ class stelle {
 			$layer[] = ($result == 'only_ids' ? $rs['Layer_ID'] : $rs);
 		}
 		return $layer;
+	}
+
+	/*
+	* Function return layerdef for kvportal
+	* It query mapOptions, groups as themes, base and overlay layers
+	* and compose it to a layerdef conform object structure
+	*/
+	function get_layerdef() {
+		#echo 'Stelle->get_layerdef';
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		include_once(CLASSPATH . 'Layer.php');
+		include_once(CLASSPATH . 'LayerGroup.php');
+
+		$stelle_id = $this->id;
+		$stellendaten = $this->getstellendaten();
+		$stellenextent = $this->MaxGeorefExt;
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
+		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$stellenextent->project($projFROM, $projTO);
+
+		$layerdef = (Object) array(
+			'mapOptions' => (Object) array(
+				'center' => (Object) array(
+					'lat' => round(($stellenextent->maxy - $stellenextent->miny) / 2 + $stellenextent->miny, 5),
+					'lng' => round(($stellenextent->maxx - $stellenextent->minx) / 2 + $stellenextent->minx, 5)
+				),
+				'zoom' => $stellendaten['minzoom'],
+				'maxBounds' => array(
+					array(round($stellenextent->miny, 5), round($stellenextent->minx, 5)),
+					array(round($stellenextent->maxy, 5), round($stellenextent->maxx, 5))
+				),
+				'minZoom' => $stellendaten['minzoom']
+			),
+			'default_wms_legend_icon' => 'img/noun_Globe.svg',
+			'themes' => array_map(
+				function($parent) use ($stelle_id) {
+					#echo '<br>call get_layerdef for group: ' . $parent->get('id') . ' in stelle_id: ' . $stelle_id;
+					return $parent->get_layerdef('', $stelle_id);
+				},
+				LayerGroup::find_top_parents($this->database->gui, $this->id)
+			),
+			'baseLayers' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					return $layer->get_baselayers_def($this->id);
+				},
+				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
+			),
+			'overlays' => array_map(
+				function($layer2Stelle) {
+					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
+					$layer->minScale = $layer2Stelle->get('minscale');
+					$layer->maxScale = $layer2Stelle->get('maxscale');
+					$layer->opacity  = 100 - $layer2Stelle->get('transparency');
+					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+					return $layer->get_overlays_def($this->id);
+				},
+				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
+			)
+		);
+		return $layerdef;
 	}
 
 	function get_attributes_privileges($layer_id) {
@@ -1897,6 +1966,7 @@ class stelle {
 	}
 
 	function getGemeindeIDs() {
+		$liste = [];
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
@@ -1969,6 +2039,7 @@ class stelle {
 				user JOIN
 				rolle ON user.ID = rolle.user_id
 			WHERE
+				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
 			ORDER BY Name
 		";
@@ -2004,7 +2075,7 @@ class stelle {
 	function getWappen() {
 		$sql = "
 			SELECT
-				wappen
+				wappen, wappen_link
 			FROM
 				stelle
 			WHERE
@@ -2013,23 +2084,8 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen'];
-	}
-
-	function getWappenLink() {
-		$sql = "
-			SELECT
-				wappen_link
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-		$this->debug->write("<p>file:stelle.php class:stelle->getWappen - Abfragen des Wappens der Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
-		return $rs['wappen_link'];
+		$rs = $this->database->result->fetch_assoc();
+		return $rs;
 	}
 
 	/**

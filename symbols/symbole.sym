@@ -199,6 +199,7 @@ SYMBOLSET
 			.5 .75
 			.125 1
 			.25 .625
+			0 .375
 		END
 	END 
 
@@ -282,6 +283,7 @@ SYMBOLSET
 	END 
 
 	SYMBOL #28
+		NAME "v_line_right"
 		TYPE VECTOR
 		TRANSPARENT 0
 		POINTS 
@@ -291,6 +293,16 @@ SYMBOLSET
 	END 
 
 	SYMBOL #29
+		NAME "v_line_left"
+		Type VECTOR
+		POINTS 
+			0 0
+			0 1
+		END
+	END 
+
+	SYMBOL #30
+		NAME "diagonale_back"
 		TYPE VECTOR
 		TRANSPARENT 0
 	 	POINTS 
@@ -299,7 +311,8 @@ SYMBOLSET
 		END
 	END 
 
-	SYMBOL #30
+	SYMBOL #31
+		NAME "diagonale"
 		Type VECTOR
 		TRANSPARENT 0
 	 	POINTS 
@@ -308,41 +321,35 @@ SYMBOLSET
 		END
 	END 
 
-	SYMBOL #31
-		Type VECTOR
-		POINTS 
-			0 1
-			1 0
-			-99 -99
-			0 0
-			1 1
-		END
-	END 
-
 	SYMBOL #32
-		Type ELLIPSE
-		FILLED TRUE
-		POINTS 
+		NAME "filledcircle"
+		TYPE ELLIPSE
+		POINTS
 			1 1
 		END
+		FILLED TRUE
 	END 
 
 	SYMBOL #33
-		NAME "filledcircle"
+		NAME "nonefilledcircle"
 		TYPE ELLIPSE
-		POINTS 
+		POINTS
 			1 1
 		END
-		FILLED TRUE
+		FILLED FALSE
 	END
 
 	SYMBOL #34
-		Type ELLIPSE
-		POINTS 
-			1 1
+		NAME "Kruzifix"
+		TYPE VECTOR
+		POINTS
+			0.3 0
+			0.3 1
+			-99 -99
+			0 0.3
+			0.6 0.3
 		END
 		FILLED TRUE
-#		STYLE	10 0 10 END
 	END
 
 	SYMBOL #35
@@ -380,7 +387,8 @@ SYMBOLSET
 			2.5 1
 			3.5 1
 			2.5 0
-			0	 0
+			0 0
+			0 4
 		END
 		FILLED TRUE
 	END
@@ -488,7 +496,6 @@ SYMBOLSET
 		FILLED TRUE
 	END 
 
-
 	SYMBOL #46
 		NAME 'hatch'
 		TYPE HATCH
@@ -587,5 +594,15 @@ SYMBOLSET
 		TYPE PIXMAP
 		IMAGE "hecke.png"
 		TRANSPARENT 1
+	END
+
+	SYMBOL #58
+		NAME "h_line"
+		TYPE VECTOR
+		TRANSPARENT 0
+	 	POINTS
+			0 0
+			1 0
+		END
 	END
 END

@@ -41,8 +41,8 @@ class spatial_processor {
 		$this->rolle = $rolle;
   }
   
-  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg){
-  	$sql = "select st_multi(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
+  function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
+  	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
 		$sql.= "generate_series(1, ST_NumGeometries(st_geomfromtext('".$wktgeom."', ".$client_epsg.")))))";
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		if (!$ret[0]) {
@@ -310,10 +310,7 @@ class spatial_processor {
 			}break;
 			
 			case 'buffer':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->buffer($polywkt1, $formvars['width']);				
+				$result = $this->buffer($polywkt1, $formvars['width'], $formvars['segment_count']);
 			}break;
 			
 			case 'buffer_ring':{
@@ -340,6 +337,11 @@ class spatial_processor {
 		
 			case 'split':{
 				$result = $this->split($polywkt1, $polywkt2);
+				$formvars['code2execute'] .= '
+					if ("' . $polywkt1 . '" != enclosingForm.pathwkt.value) {
+						top.message("Teilung erfolgreich. Zum Abspeichern Schnittlinie bearbeiten oder in neue Objekte aufteilen.");
+					}
+				';
 			}break;
 		
 			case 'add':{
@@ -400,9 +402,11 @@ class spatial_processor {
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
-			$result .= '█update_geometry();';
+			$formvars['code2execute'] = 'update_geometry();' . $formvars['code2execute'];
 		}
-		if($formvars['code2execute'] != '')$result .= '█'.$formvars['code2execute'];
+		if ($formvars['code2execute'] != '') {
+			$result .= '█'.$formvars['code2execute'];
+		}
 		echo $result;
 	}
 	
@@ -428,14 +432,14 @@ class spatial_processor {
 		return $geom;
 	}
  
-  function buffer($geom_1, $width){
+  function buffer($geom_1, $width = 50, $segment_count = 8){
   	if(substr_count($geom_1, ',') == 1){			# wenn Polygon nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
   		$geom_1 = $this->pointfrompolygon($geom_1);
   	}
-  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_buffer(st_geomfromtext('".$geom_1."'), ".$width.") as geom) as foo";
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom,0, 15) as svg FROM (select st_buffer(st_geomfromtext('" . $geom_1 . "'), " . $width . ", " . $segment_count . ") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -710,7 +714,7 @@ class spatial_processor {
 	      $searchbox_miny=strval($rect->miny-$rand);
 	      $searchbox_maxx=strval($rect->maxx+$rand);
 	      $searchbox_maxy=strval($rect->maxy+$rand);
-				$request = $layerset[0]['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layerset[0]['epsg_code'].'&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
+				$request = $layerset[0]['connection'].'&service=WFS&version=1.1.0&request=getfeature&srsName=EPSG:'.$layerset[0]['epsg_code'].'&typename='.$layerset[0]['wms_name'].'&bbox='.$searchbox_minx.','.$searchbox_miny.','.$searchbox_maxx.','.$searchbox_maxy;
 				$request .= ',EPSG:'.$layerset[0]['epsg_code'];
         $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);

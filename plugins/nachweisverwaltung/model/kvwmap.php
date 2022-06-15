@@ -95,7 +95,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -127,7 +127,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -148,7 +148,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -171,7 +171,7 @@
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=DEFER');
+			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
 			$style=ms_newStyleObj($klasse);
@@ -330,7 +330,7 @@
 			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
       # zoomToMaxLayerExtent
 			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
-      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
@@ -407,7 +407,7 @@
       # Abfragen der Gemarkungen
       # 2006-01-26 pk
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
-      $GemkgListe=$Gemarkung->getGemarkungListe('','','gmk.GemkgName');
+      $GemkgListe=$Gemarkung->getGemarkungListeAll('','');
       # Erzeugen des Formobjektes für die Gemarkungsauswahl
       $GUI->GemkgFormObj=new FormObject("Gemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['Gemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
 
@@ -578,7 +578,7 @@
 		$sql ='UPDATE rolle_nachweise SET ';
 		$sql.='suchhauptart="'.implode(',', $suchhauptart).'",';
 		$sql.='suchunterart="'.implode(',', $suchunterart).'",';
-		if ($abfrageart!='') { $sql.='abfrageart="'.$abfrageart.'",'; }
+		if ($abfrageart != '') { $sql.='abfrageart="'.$abfrageart.'",'; }
 		$sql.='suchgemarkung="'.$suchgemarkung.'",';
 		$sql.='suchflur="'.$suchflur.'",';
 		$sql.='suchstammnr="'.$stammnr.'",';
@@ -597,7 +597,9 @@
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
 		$sql.='alle_der_messung="'.$alle_der_messung.'",';
-		$sql.='`order`="'.$order.'",';
+		if ($order != '') {
+			$sql.='`order`="'.$order.'",';
+		}
 		$sql .= 'user_id = '.$user_id;
 		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
 		#echo $sql;
@@ -716,6 +718,7 @@
 	};
 	
 	$GUI->Suchparameter_abfragen = function($antrag_nr, $stelle_id) use ($GUI){		
+		$searches = array();
 		$sql = "SELECT * FROM u_consumeNachweise ";
 		$sql.= "WHERE antrag_nr='".$antrag_nr."' AND stelle_id=".$stelle_id;
 		$GUI->debug->write("<p>file:users.php class:user->Suchparameter_anhaengen_PDF <br>".$sql,4);
@@ -789,17 +792,26 @@
       if ($GUI->nachweis->erg_dokumente==0) {
         # Keine Dokumente zur Auswahl gefunden.
 				$GUI->add_message('error', 'Es konnten keine Dokumente zu der Auswahl gefunden werden. Wählen Sie neue Suchparameter.');
-        $GUI->rechercheFormAnzeigen();				
+				if ($GUI->user->rolle->querymode == 1) {
+					$GUI->nachweisAnzeige();
+				}
+				else {
+					$GUI->rechercheFormAnzeigen();
+				}
       }
       else {
-        # Zoom auf Nachweise
-				for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
-					$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+				if ($GUI->user->rolle->querymode == 1) {
+					if (in_array($GUI->formvars['abfrageart'], ['indiv_nr', 'antr_nr'])) {
+						# Zoom auf Nachweise
+						for ($i=0; $i < $GUI->nachweis->erg_dokumente; $i++) {
+							$ids[] = $GUI->nachweis->Dokumente[$i]['id'];
+						}
+						$GUI->loadMap('DataBase');
+						$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
+						$GUI->user->rolle->saveSettings($GUI->map->extent);
+					}
+					$GUI->zoomed = true;
 				}
-				$GUI->loadMap('DataBase');
-				$GUI->zoomToNachweise($GUI->nachweis, $ids, 10);
-				$GUI->user->rolle->saveSettings($GUI->map->extent);
-				$GUI->zoomed = true;
 				# Anzeige des Rechercheergebnisses
         $GUI->nachweisAnzeige();
       }
@@ -855,6 +867,7 @@
 		$columns['fortfuehrung'] = 'Fortführung';
 		$columns['vermst'] = 'Vermessungsstelle';
 		$columns['gueltigkeit'] = 'Gültigkeit';
+		$columns['geprueft'] = 'geprüft';
 		$columns['format'] = 'Format';
 		$columns['dokument_path'] = 'Dokument';
 		foreach($columns as $key=>$column){
@@ -1016,6 +1029,7 @@
 			columns['fortfuehrung'] = 'Fortführung';
 			columns['vermst'] = 'Vermessungsstelle';
 			columns['gueltigkeit'] = 'Gültigkeit';
+			columns['geprueft'] = 'geprüft';
 			columns['format'] = 'Format';
 			columns['dokument_path'] = 'Dokument';
 			
@@ -1384,7 +1398,7 @@
       $GUI->loadMap('DataBase');
     }
 		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
@@ -1433,10 +1447,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
         
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
@@ -1648,10 +1662,10 @@
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
     $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 		if($GemeindenStelle == NULL){
-			$GemkgListe=$Gemarkung->getGemarkungListe(NULL, NULL);
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		else{
-			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			$GemkgListe=$Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}
     # Erzeugen des Formobjektes für die Gemarkungsauswahl
     $GUI->GemkgFormObj=new FormObject("suchgemarkung","select",$GemkgListe['GemkgID'],$GUI->formvars['suchgemarkung'],$GemkgListe['Bezeichnung'],"1","","",NULL);
@@ -1671,7 +1685,7 @@
       $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
-    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true);
+    $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     # Spaltenname und from-where abfragen
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);

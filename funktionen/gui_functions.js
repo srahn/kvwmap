@@ -26,20 +26,38 @@ window.onbeforeunload = function(){
 	}
 }
 
-function ahah(url, data, target, action, progress){
-	for(k = 0; k < target.length; ++k){
-		if(target[k] != null && target[k].tagName == "DIV"){
+/*
+* @param url string
+* @param data siehe Doku von XMLHttpRequest (z.B. kvp's String)
+* @param target array ['divname', ...]
+* @param action array ['sethtml'. ...]
+*/
+function ahah(url, data, target, action, progress) {
+	if (csrf_token && csrf_token !== '') {
+		if (typeof data == 'string') {
+			data = data + '&csrf_token=' + csrf_token;
+		}
+		else {
+			data.append('csrf_token', csrf_token);
+		}
+	}
+	for (k = 0; k < target.length; ++k) {
+		if (target[k] != null && target[k].tagName == "DIV") {
 			waiting_img = document.createElement("img");
 			waiting_img.src = "graphics/ajax-loader.gif";
 			target[k].appendChild(waiting_img);
 		}
 	}
 	var req = new XMLHttpRequest();
-	if(req != undefined){
-		req.onreadystatechange = function(){ahahDone(url, target, req, action);};
-		if(typeof progress !== 'undefined')req.upload.addEventListener("progress", progress);
+	if (req != undefined) {
+		req.onreadystatechange = function() {
+			ahahDone(url, target, req, action);
+		};
+		if (typeof progress !== 'undefined') {
+			req.upload.addEventListener("progress", progress);
+		}
 		req.open("POST", url, true);
-		if(typeof data == "string") {
+		if (typeof data == "string") {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 		}
 		req.send(data);
@@ -181,6 +199,38 @@ add_calendar = function(event, elementid, type, setnow){
  
 remove_calendar = function(){
 	if(root.document.getElementById('gui-table').calendar != undefined)root.document.getElementById('gui-table').calendar.destroy();
+}
+
+/*
+* function convert a number into a hexagesimal character with a lenght of 2 signs
+* @param c integer the number
+* @return string with a lenght of 2
+*/
+function componentToHex(c) {
+  let hex = parseInt(c).toString(16);
+  return hex.length == 1 ? "0" + hex : hex;
+}
+
+/*
+* function convert RGB Values into hexagesimal String with leading # sign
+* @param r integer The red value or RGB as String separated by empty spaces or as array with r, g, b values
+* @param g integer The green value
+* @param b integer The blue value
+* @return string The hex value of the color representing the rgb color.
+*/
+function rgbToHex(r, g, b) {
+  var r_ = r, g_ = g, b_ = b;
+  if (Array.isArray(r)) {
+    r_ = r[0];
+    g_ = r[1];
+    b_ = r[2];
+  }  
+  else if (typeof r === 'string' && /\s/.test(r.trim())) { // if white spaces exists
+    r_ = r.trim().split(' ')[0];
+    g_ = r.trim().split(' ')[1];
+    b_ = r.trim().split(' ')[2];
+  }
+  return "#" + componentToHex(r_) + componentToHex(g_) + componentToHex(b_);
 }
 
 function Bestaetigung(link,text) {
@@ -348,10 +398,15 @@ function resizemap2window(){
 *			{ type: 'waring', msg: 'Dies ist nur eine Warung.'},
 *			{ type: 'notice', msg: 'und eine Notiz'},
 *		]);
+* @param integer t_visible Time how long the message shall be visible
+* @param integer t_fade Time how long the message shall fade out
+* @param string css_top The css value for distance to the top of the page
+* @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
+* @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible, t_fade, css_top, confirm_value, callback) {
-	console.log('Show Message: %o: ', messages);
-	console.log('function message with callback: %o: ', callback);
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
+	//console.log('Show Message: %o: ', messages);
+	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
 	var messageTimeoutID;
 	var msgBoxDiv = $('#message_box');
@@ -367,11 +422,8 @@ function message(messages, t_visible, t_fade, css_top, confirm_value, callback) 
   }
 	var msgDiv = $('#messages');
 	var confirm = false;
-
-	t_visible   = (typeof t_visible   !== 'undefined') ? t_visible   : 1000;		// Zeit, die die Message-Box komplett zu sehen ist
-	t_fade   = (typeof t_fade   !== 'undefined') ? t_fade   : 2000;							// Dauer des Fadings
 	
-	if(typeof css_top  !== 'undefined') {
+	if (typeof css_top  !== 'undefined') {
 		msgBoxDiv.css('top', css_top);
 	}
 	
@@ -719,23 +771,26 @@ function overlay_submit(gui, start, target){
 
 function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	if(checkForUnsavedChanges()){
-		if(target == 'root'){
-			root.location.href = 'index.php?'+data;
+	data = data + '&csrf_token=' + csrf_token;
+	if (checkForUnsavedChanges()) {
+		if (target == 'root') {
+			root.location.href = 'index.php?' + data;
 		}
-		else{
-			if(querymode == 1 && (start || currentform.name == 'GUI2')){
-				if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+		else {
+			if (querymode == 1 && (start || currentform.name == 'GUI2')) {
+				if (query_tab != undefined && query_tab.closed) {
+					// wenn Fenster geschlossen wurde, resized zuruecksetzen
 					root.resized = 0;
 				}
-				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				else if (start && browser == 'firefox' && query_tab != undefined && root.resized < 2) {
+					// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?"+data+"&window_type=overlay", "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?window_type=overlay&" + data, "Sachdaten", "left=" + root.document.GUI.overlayx.value + ",top=" + root.document.GUI.overlayy.value + ",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
-			else{
-				window.location.href = 'index.php?'+data;
+			else {
+				window.location.href = 'index.php?' + data;
 			}
 		}
 	}
@@ -962,7 +1017,7 @@ function selectgroupthema(group, instantreload){
 		group = group.filter(function( x ) {
 			return x !== undefined;
 		});
-		value = group.map(x => x.value+"").join(",");
+		value = group.map(function(x){return x.value+""}).join(",");
 	} else {
 		value = group.value+"";
 	}
@@ -1216,18 +1271,24 @@ function deactivateAllClasses(class_ids){
 }
 
 /*Anne*/
-function changeClassStatus(classid,imgsrc,instantreload,width,height){
+function changeClassStatus(classid, imgsrc, instantreload, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;
-	if(selClass.value=='0'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0') {
 		selClass.value='1';
 		selImg.src=imgsrc;
-	}else if(selClass.value=='1'){
+	}
+	else if (type > 1 && selClass.value == '1') {
 		selClass.value='2';
 		selImg.src="graphics/outline"+height+".jpg";
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2' || type < 2) {
 		selClass.value='0';
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
@@ -1235,46 +1296,58 @@ function changeClassStatus(classid,imgsrc,instantreload,width,height){
 }
 
 /*Anne*/
-function mouseOverClassStatus(classid,imgsrc,width,height){
+function mouseOverClassStatus(classid, imgsrc, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;
-	if(selClass.value=='0'){
-		selImg.src=imgsrc;	
-	}else if(selClass.value=='1'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0'){
+		selImg.src=imgsrc;
+	}
+	else if (type > 1 && selClass.value == '1'){
 		selImg.src="graphics/outline"+height+".jpg";
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2' || type < 2){
 		selImg.src="graphics/inactive"+height+".jpg";
 	}
 }
 
 /*Anne*/
-function mouseOutClassStatus(classid,imgsrc,width,height){
+function mouseOutClassStatus(classid, imgsrc, width, height, type){
 	selClass = document.getElementsByName("class"+classid)[0];
 	selImg   = document.getElementsByName("imgclass"+classid)[0];
-	if(height < width)height = 12;
-	else height = 18;	
-	if(selClass.value=='0'){
+	if (height < width) {
+		height = 12;
+	}
+	else {
+		height = 18;
+	}
+	if (selClass.value == '0') {
 		selImg.src="graphics/inactive"+height+".jpg";	
-	}else if(selClass.value=='1'){
+	}
+	else if (selClass.value == '1'){
 		selImg.src=imgsrc;
-	}else if(selClass.value=='2'){
+	}
+	else if (selClass.value == '2'){
 		selImg.src="graphics/outline"+height+".jpg";
 	}
 }
 
-function showMapParameter(epsg_code, width, height) {
+function showMapParameter(epsg_code, width, height, l) {
 	var gui = document.GUI,
 			msg = " \
 				<div style=\"text-align: left\"> \
-					<h2>Daten des aktuellen Kartenausschnitts</h2><br> \
-					Koordinatenreferenzsystem: EPSG: " + epsg_code + "<br> \
-					linke untere Ecke: (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
-					rechte obere Ecke: (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
-					Ausdehnung: " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
-					Bildgröße: " + width + " x " + height + " Pixel<br> \
-					Pixelgröße: " + toFixed(gui.pixelsize.value, 3) + " m\
+					<h2>" + l.strShowMapParameterHeader + "</h2><br> \
+					" + l.strCoordinateReferenceSystem + ": EPSG: " + epsg_code + "<br> \
+					" + l.strLowerLeftCorner + ": (" + toFixed(gui.minx.value, 3) + ", " + toFixed(gui.miny.value, 3) + ")<br> \
+					" + l.strUpperRightCorner + ": (" + toFixed(gui.maxx.value, 3) + ", " + toFixed(gui.maxy.value, 3) + ")<br> \
+					" + l.strMapExtent + ": " + toFixed(gui.maxx.value - gui.minx.value, 3) + " x " + toFixed(gui.maxy.value-gui.miny.value,3) + " m<br> \
+					" + l.strMapSize + ": " + width + " x " + height + " Pixel<br> \
+					" + l.strPixelSize + ": " + toFixed(gui.pixelsize.value, 3) + " m\
 				</div> \
 			";
 	message([{
@@ -1325,10 +1398,54 @@ function htmlspecialchars(value) {
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
-function toggleSyncLayer() {
-	$('.no-sync').toggle();
-}
-
-function toggleSharedLayer() {
-	$('.no-shared').toggle();
+function umlaute_umwandeln(value) {
+	var map = {
+		'ä' : 'ae',
+		'Ä' : 'Ae',
+		'ö' : 'oe',
+		'Ö' : 'Oe',
+		'ü' : 'ue',
+		'Ü' : 'Ue',
+		'ß' : 'ss',
+		'<' : '',
+		'>' : '',
+		'@' : '_',
+		'€' : 'Eur',
+		',' : '_',
+		';' : '_',
+		'.' : '_',
+		':' : '_',
+		'-' : '_',
+		'!' : '_',
+		'"' : '',
+		'§' : '',
+		'$' : '',
+		'%' : '',
+		'&' : '_',
+		'/' : '_',
+		'(' : '',
+		')' : '',
+		'=' : '_',
+		'?' : '',
+		'`' : '',
+		'´' : '',
+		'*' : '_',
+		'+' : '',
+		"'" : '',
+		'#' : '_',
+		'^' : '',
+		'°' : '',
+		' ' : '_',
+		'1' : '1',
+		'2' : '2',
+		'3' : '3',
+		'4' : '4',
+		'5' : '5',
+		'6' : '6',
+		'7' : '7',
+		'8' : '8',
+		'9' : '9',
+		'0' : '0'
+	};
+	return value.replace(/[äÄöÖüÜß<>@€,;.:\-!"§$%&/()=?`´*+'#^° 1234567890]/g, function(m) { return map[m]; });
 }

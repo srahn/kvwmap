@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strDataPrint="Sachdatenanzeige drucken";
 $strSave="Speichern";
 $strReset="Zurücksetzen";

@@ -1,6 +1,6 @@
 <hr><h2><?php echo $this->qlayerset[$i]['alias']; ?></h2><br>
 <?php
-  $anzObj=count($this->qlayerset[$i]['shape']);
+  $anzObj = @count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
 		$this->found = 'true';
     ?><table border="1" cellspacing="0" cellpadding="2">

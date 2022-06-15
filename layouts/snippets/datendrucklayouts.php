@@ -712,6 +712,7 @@ function scrolltop(){
 														<option value="1" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 1)echo ' selected '; ?>>fixiert</option>
 														<? } ?>
 														<option value="2" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 2)echo ' selected '; ?>>auf jeder Seite</option>
+														<option value="3" <? if($this->ddl->selectedlayout[0]['lines'][$i]['type'] == 3)echo ' selected '; ?>>ab der 2. Seite auf jeder Seite</option>
 													</select>
 												</td>
 												<td align="right">
@@ -821,9 +822,11 @@ function scrolltop(){
 		</div>
 <? } ?>
 	</div>
-</div>
-<input type="hidden" name="textcount" value="<? echo count($this->ddl->selectedlayout[0]['texts']); ?>">
-<input type="hidden" name="linecount" value="<? echo count($this->ddl->selectedlayout[0]['lines']); ?>">
-<input type="hidden" name="rectcount" value="<? echo count($this->ddl->selectedlayout[0]['rectangles']); ?>">
-<input type="hidden" name="bgsrc_save" value="<? echo $this->ddl->selectedlayout[0]['bgsrc'] ?>">
+</div><?php
+	$layout_selected = $this->ddl->selectedlayout != NULL AND count($this->ddl->selectedlayout) > 0;
+?>
+<input type="hidden" name="textcount" value="<? echo ($layout_selected ? count($this->ddl->selectedlayout[0]['texts']) : 0); ?>">
+<input type="hidden" name="linecount" value="<? echo ($layout_selected ? count($this->ddl->selectedlayout[0]['lines']) : 0); ?>">
+<input type="hidden" name="rectcount" value="<? echo ($layout_selected ? count($this->ddl->selectedlayout[0]['rectangles']) : 0); ?>">
+<input type="hidden" name="bgsrc_save" value="<? echo ($layout_selected ? $this->ddl->selectedlayout[0]['bgsrc'] : ''); ?>">
 

@@ -549,6 +549,7 @@ a.green {
 
 a.metalink {
 	color: black; 
+	cursor: context-menu;
 }
 
 a.visiblelayerlink {
@@ -571,6 +572,17 @@ a.invisiblelayerlink:hover{
 
 .sachdatenanzeige_paging{
 	margin-top: 10px;
+}
+
+select[name="geom_from_layer"] {
+	width: 250px;
+}
+
+.suggests {
+	width: 450px;
+	height: auto;
+	padding:4px; 
+	margin:-2px -17px -4px -4px;
 }
 
 #params_table{
@@ -774,6 +786,7 @@ a.invisiblelayerlink:hover{
 	border-color: #CCC; 
 	border-top: none;
 	border-bottom: none;
+	position: relative;
 }
 
 #menue_switch{
@@ -792,6 +805,17 @@ a.invisiblelayerlink:hover{
 
 #menueTable a {
 	color: firebrick;
+}
+
+#menueScrollTable{
+	width: <? echo ($size['menue']['width'] - 2); ?>px;
+	overflow-y: auto;
+	-ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+#menueScrollTable::-webkit-scrollbar {
+  display: none; /* Chrome, Safari und Opera */
 }
 
 .menu {
@@ -1403,8 +1427,11 @@ span.black {
 
 #layer {
 	margin:0px 8px 8px 8px;
-/*	overflow:hidden; */
 	clear: both;
+}
+
+#nds_edit #layer {
+	margin: 0;
 }
 
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
@@ -1492,10 +1519,19 @@ a:hover .preview_image{
 	padding:0px 0px 0px 0px;
 }
 
-.datensatz_header{
+#nds_edit .datensatz {
+	border: none;
+}
+
+.datensatz_header {
 	background: linear-gradient(#DAE4EC 0%, lightsteelblue 100%);
 	#background-color:<? echo BG_GLEHEADER; ?>;
 	border-bottom: 1px solid #bbb;
+}
+
+.identifier_text {
+	font-family: SourceSansPro3;
+	font-size: 17;
 }
 
 #message_box {
@@ -1503,8 +1539,8 @@ a:hover .preview_image{
 	opacity: 1;
 	position: fixed;
 	display: none;
-	top:20%;
-	left:45%;
+	top: 48%;
+	left: 45%;
 	min-width:250px;
 	max-width: 550px;
 /*	height:90px; */
@@ -1512,7 +1548,7 @@ a:hover .preview_image{
 	overflow: auto;
 	font-size: 17px;
 	font-family: SourceSansPro2;
-	margin:-45px 0 0 -100px;
+	margin: -300px 0 0 -100px;
 	padding: 10px;
 	text-align: center;
 	line-height: 20px;
@@ -1555,6 +1591,7 @@ a:hover .preview_image{
 }
 
 table.tgle {
+	width: 100%;
 	border: 0px solid gray;
 	border-collapse:collapse;
 	margin-left:auto;
@@ -1590,6 +1627,7 @@ thead.gle th {
 	border-left: none;
 	background-color: #fff;
 	color: #aaa;
+	white-space: nowrap;
 }
 
 .gle_tabs > div.active_tab{
@@ -1616,7 +1654,7 @@ thead.gle th {
 	position: relative;
 	padding: 0px 5px;
 	min-width: 30px;
-	height: 32px;
+	height: 32px;	
 }
 
 .gle_attribute_value input[type="checkbox"] {
@@ -1646,7 +1684,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]), table.t
 	border: 1px solid #777;
 }
 
-table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
+table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=radio]):not([type=checkbox]) {
 	height: 25px;
 }
 
@@ -1718,6 +1756,7 @@ table.tgle .gledata select, table.tgle .gledata input:not([type=radio]):not([typ
 	left: 0px;
 	bottom: 30px;
 	width: 220px;
+	height: fit-content;
 }
 
 .calendar table{

@@ -36,26 +36,21 @@ function hinzufuegen(){
   <tr align="center">
     <td align="center"><table width="100%" align="center" border="1" cellpadding="5" cellspacing="0" rules="groups">
 	<tr>
-		<td>
-			<div>
-				<img src="<?php echo GRAPHICSPATH;?>/icon_i.png" align="right" onMouseOver="stm(Text[3],Style[0], document.getElementById('TipLayer'))" onmouseout="htm()">
-				<DIV id="TipLayer" style="visibility:hidden;position:absolute;z-index:1000;"></DIV>
-			</div>
+		<td align="right">
+			<span data-tooltip="Mit der Kategorienverwaltung lassen sich Kategorien hinzufügen, löschen oder die Zugriffe der Stellen pro Kategorie festlegen. Wenn Sie ein Kategorie löschen, wird auch die Zuordnung der Stellen gelöscht. Um die entsprechenden Notizen mit zu löschen müssen sie das Häckchen neben dem 'Kategorie löschen'-Link setzen" style="--left: -400px"></span>
 		</td>
 	</tr>
 	<tr><td><br>
 	<table align="center" border="0" cellspacing="0" cellpadding="0">
 	<tr>
-    <td align="center" colspan="6"><h2><?php echo $strCategory; ?></font></strong></td></tr>
-  <tr>
-	<td align="center" colspan="2"><h2>
+    <td align="center" colspan="8"><b><?php echo $strCategory; ?></b>&nbsp;
       <select name="kategorie_id" onChange="change()">
       	<option value=""><?php echo $this->strPleaseSelect; ?></option>
         <?php for ($k=0 ; $k<count($this->AllKat) ; $k++) { ?>
         <option value="<?php echo $this->AllKat[$k]['id'];?>"<?php if ($this->AllKat[$k]['id']==$this->Kat[0]['id']) {echo ' selected';} ?>><?php echo $this->AllKat[$k]['kategorie'];?></option>
         <?php } ?>
       </select>
-      </font></strong></td>
+    </td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -80,14 +75,14 @@ function hinzufuegen(){
 		  <td colspan="5"><hr></td>
 		</tr>
 	<?php 
-	  for ($i=0 ; $i<count($this->stellen['ID']) ; $i++) {
+	  for ($i = 0 ; $i < count($this->Stellen['ID']) ; $i++) {
 		$stelleID[$i]='0';
-		for ($j=0 ; $j<count($this->Kat2Stelle) ; $j++){
-	      if ($this->stellen['ID'][$i]==$this->Kat2Stelle[$j]['stelle']) {
+		for ($j = 0 ; $j < count($this->Kat2Stelle) ; $j++) {
+	      if ($this->Stellen['ID'][$i]==$this->Kat2Stelle[$j]['stelle']) {
      ?>
 			<tr	<?php if ($i%2!=0) { echo 'bgcolor="#FFFFFF"';} ?>> 
-			  <input type="hidden" name="<?php echo 'checkstelle'.$i;?>" value="<?php echo $this->stellen['ID'][$i]?>">
-			  <td align="center"><font><?php echo $this->stellen['Bezeichnung'][$i]; ?></font></td>
+			  <input type="hidden" name="<?php echo 'checkstelle'.$i;?>" value="<?php echo $this->Stellen['ID'][$i]?>">
+			  <td align="center"><font><?php echo $this->Stellen['Bezeichnung'][$i]; ?></font></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstellelesen'.$i;?>" value="1" <?php  if ($this->Kat2Stelle[$j]['lesen']=='t') { ?> checked<?php }?>></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstelleanlegen'.$i;?>" value="1" <?php  if ($this->Kat2Stelle[$j]['anlegen']=='t') { ?> checked<?php }?>></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstelleaendern'.$i;?>" value="1" <?php  if ($this->Kat2Stelle[$j]['aendern']=='t') { ?> checked<?php }?>></td>
@@ -99,8 +94,8 @@ function hinzufuegen(){
 		if ($stelleID[$i]!='1') {
 		 ?>
 			<tr <?php if ($i%2!=0) { echo 'bgcolor="#FFFFFF"';} ?>> 
-			  <input type="hidden" name="<?php echo 'checkstelle'.$i;?>" value="<?php echo $this->stellen['ID'][$i]?>">
-			  <td align="center"><font><?php echo $this->stellen['Bezeichnung'][$i]; ?></font></td>
+			  <input type="hidden" name="<?php echo 'checkstelle'.$i;?>" value="<?php echo $this->Stellen['ID'][$i]?>">
+			  <td align="center"><font><?php echo $this->Stellen['Bezeichnung'][$i]; ?></font></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstellelesen'.$i;?>" value="1"></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstelleanlegen'.$i;?>" value="1"></td>
 			  <td align="center"><input type="checkbox" name="<?php echo 'checkstelleaendern'.$i;?>" value="1"></td>

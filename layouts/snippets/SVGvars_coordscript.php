@@ -1,14 +1,16 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVGvars_coordscript_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH . 'languages/SVGvars_coordscript_' . $this->user->rolle->language . '.php');
 
-	foreach($this->epsg_codes as $epsg_code){
+	foreach ($this->epsg_codes as $epsg_code) {
 		$epsg_codes .= '<option';
-		if($this->user->rolle->epsg_code == $epsg_code['srid'])$epsg_codes .= ' selected';
-		$epsg_codes .= ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
+		if ($this->user->rolle->epsg_code == $epsg_code['srid']) {
+			$epsg_codes .= ' selected';
+		}
+		$epsg_codes .= ' value="'.$epsg_code['srid'] . '">' . $epsg_code['srid'] . ': ' . $epsg_code['srtext'] . '</option>';
 	}
  
-  $javascript ='
-  	<script type="text/javascript">
+	$javascript = '
+		<script type="text/javascript">
 	<!--
 	
 		form = '.$this->currentform.';		// das Formular in dem das Kartenfenster eingebettet ist
@@ -87,8 +89,8 @@
 			if(stellen == 0){sep = "";}
 			else{sep = ".";	}
 			return str_split[0]+sep+str_split[1];
-		}					
-			
+		}
+
 		function coords_input(){
 			var mittex  = '.$this->map->width.'/2*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value);
 			var mittey  = parseFloat(form.maxy.value) - '.$this->map->height.'/2*parseFloat(form.pixelsize.value);
@@ -98,9 +100,9 @@
 			Msg.show();
 			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="#" onclick="$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
 			content+= \'<div style="height: 30px">' . $strCoordZoom . '</div>\';
-			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">Koordinate (Rechtswert Hochwert):</td></tr>\';
+			content+= \'<table style="padding: 5px"><tr><td align="left" style="width: 300px" class="px15">' . $this->strCoordinate . ' (' . $strEastValue . ' ' . $strNorthValue .'):</td></tr>\';
 			content+= \'<tr><td><input style="width: 310px" type="text" id="input_coords" name="input_coords" value="\'+mittex+\' \'+mittey+\'"></td></tr>\';
-			content+= \'<tr><td>Koordinatenreferenzsystem:</td></tr>\';
+			content+= \'<tr><td>' . $this->strCoordinateReferenceSystem . ':</td></tr>\';
 			content+= \'<tr><td><select name="epsg_code" id="epsg_code" style="width: 310px">'.$epsg_codes.'</select></td></tr></table>\';
 			content+= \'<br><input type="button" value="OK" onclick="coords_input_submit()">\';
 			Msg.html(content);
@@ -132,7 +134,7 @@
 						rw = dms2dec(rw, coordtype) + "";
 						hw = dms2dec(hw, coordtype) + "";
 					}
-					if (rw > hw) {
+					if (parseFloat(rw) > parseFloat(hw)) {
 						var kleiner = hw;
 						hw = rw;
 						rw = kleiner;

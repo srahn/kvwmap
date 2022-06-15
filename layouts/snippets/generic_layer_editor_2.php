@@ -7,6 +7,7 @@ $geom_tablename = '';
 $geomtype = '';
 $dimension = '';
 $privileg = '';
+$visibility = '';
 # Variablensubstitution
 $layer = $this->qlayerset[$i];
 if($this->currentform == 'document.GUI2')$size = 40;
@@ -36,7 +37,24 @@ if ($this->new_entry == true){
 	$doit = true;
 }
 
-if ($doit == true) { ?>
+if ($doit == true) {
+	if ($layer['attributes']['the_geom'] != '') {
+		$index = $layer['attributes']['indizes'][$layer['attributes']['the_geom']];
+		$columnname = $layer['attributes']['real_name'][$layer['attributes']['the_geom']];
+		$geom_tablename = $layer['attributes']['table_name'][$layer['attributes']['the_geom']];
+		$column_geomtype = $layer['attributes']['geomtype'][$layer['attributes']['the_geom']];
+		$geomtype = getGeomType($column_geomtype, $layer['Datentyp']);
+		$privileg = $layer['attributes']['privileg'][$index];
+		$nullable = $layer['attributes']['nullable'][$index];
+		if ($this->new_entry == true AND $privileg == 1) {
+			$show_geom_editor = true;
+		}
+		if ($nullable === '0'){ ?>
+			<script type="text/javascript">
+				geom_not_null = true;
+			</script><?
+		}
+	} ?>
 	<div id="layer" onclick="remove_calendar();">
 		<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>"><?
 		if ($this->new_entry != true) { ?>
@@ -75,7 +93,6 @@ if ($doit == true) { ?>
 			for ($k; $k<$anzObj; $k++) {
 				$table = array();
 				$nl = false;
-				$datapart = '';
 				$next_row = array();
 				$checkbox_names .= 'check;'.$layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID'].'|'; ?>
 				<tr>
@@ -91,29 +108,59 @@ if ($doit == true) { ?>
 						if (is_array($layer['attributes']['privileg'])) {
 							if (value_of($layer['shape'][$k], value_of($layer['attributes'], 'Editiersperre')) == 't') {
 								$layer['attributes']['privileg'] = array_map(function($attribut_privileg) { return 0; }, $layer['attributes']['privileg']);
+								$privileg = 0;
 							}
 						}
 						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-						<table class="tgle dstable" <? if($layer['attributes']['group'][0] != ''){echo 'border="0" cellpadding="'.(($this->new_entry == true AND $this->user->rolle->geom_edit_first) ? '0' : '5').'" cellspacing="0"';}else{echo 'border="0"';} ?>>
+						<table class="tgle dstable" border="0" cellpadding="5" cellspacing="0">
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
-			        <tbody <? if($layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
-			<?							
+			        <tbody <? if(!$show_geom_editor AND $layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
+			<?		
+						$visibility = '';
+						if (empty($layer['attributes']['tabs']) AND $show_geom_editor) {
+							$layer['attributes']['tabs'] = ['Sachdaten'];
+							$sachdaten_tab = true;
+						}
+						
 						if (!empty($layer['attributes']['tabs'])) {
-							$datapart .= '
+							$first_tab = true;
+							if ($show_geom_editor) {
+								if ($this->user->rolle->geom_edit_first) {
+									array_unshift($layer['attributes']['tabs'], 'Geometrie');
+									$first_tab = false;
+								}
+								else {
+									array_push($layer['attributes']['tabs'], 'Geometrie');
+									$visibility_geom = 'style="visibility: collapse"';
+								}
+							}
+							echo '
 							<tr>
 								<th>
-									<div class="gle_tabs">';
-										$first_tab = true;
+									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
+										$first_tab2 = true;
 										foreach ($layer['attributes']['tabs'] as $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											$datapart .= '<div ' . ($first_tab? 'class="active_tab"' : '') . ' onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
-											$first_tab = false;
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab2? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											$first_tab2 = false;
 										}
-										$datapart .= '
+										echo '
 									</div>
 								</th>
 							</tr>';
 						}
+						
+						$visibility = '';
+						if ($sachdaten_tab) {
+							$tabname = 'Sachdaten';
+							if (!$first_tab) {	# nur den ersten Tab öffnen
+								$visibility = 'style="visibility: collapse"';
+							}
+							if ($layer['attributes']['group'][0] == '') {
+								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. '" ' . $visibility . '><td><table class="tgle"><tbody class="gle gledata">';
+							}
+						}
+						
 						for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
 							$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 							// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
@@ -131,22 +178,21 @@ if ($doit == true) { ?>
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != ''){
 									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
-									$display = '';
-									if ($layer['attributes']['tab'][$j] != $layer['attributes']['tab'][0]) {	# nur den ersten Tab öffnen
-										$display = 'style="display: none"';
+									if (!$first_tab OR $layer['attributes']['tab'][$j] != $layer['attributes']['tab'][0]) {	# nur den ersten Tab öffnen
+										$visibility = 'style="visibility: collapse"';
 									}
 								}
-								$datapart .= '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $display . '>
+								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
 												<td colspan="2" width="100%">
 													<div>
-														<table width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
+														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 															<tr>
 																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
-																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)$datapart .= 'plus.gif'; else $datapart .= 'minus.gif'; $datapart .= '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
+																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
 																</td>
 															</tr>
 														</table>
-														<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)$datapart .= 'style="display:none"'; $datapart .= 'border="0"><tbody class="gle gledata">';
+														<table width="100%" class="tgle" id="group'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" '; if($collapsed)echo 'style="display:none"'; echo 'border="0"><tbody class="gle gledata">';
 							}
 
 							if($layer['attributes']['visible'][$j]){
@@ -156,16 +202,16 @@ if ($doit == true) { ?>
 										if($layer['attributes']['alias'][$j] == '')$layer['attributes']['alias'][$j] = $layer['attributes']['name'][$j];
 						
 										####### wenn Attribut nicht daneben -> neue Zeile beginnen ########
-										if($layer['attributes']['arrangement'][$j] != 1){
+										if ($layer['attributes']['arrangement'][$j] != 1) {
 											$row['id'] = 'tr_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 											$row['class'] = $attribute_class;
-										}
-										else{
-											if($nl){
-												$next_row['sidebyside'] = true;
-											}
-											else{
-												$row['sidebyside'] = true;
+											if ($layer['attributes']['arrangement'][$j+1] == 1) {	# wenn nächstes Attribut neben diesem stehen soll
+												if($nl){
+													$next_row['sidebyside'] = true;
+												}
+												else{
+													$row['sidebyside'] = true;
+												}
 											}
 										}
 										######### Attributname #########
@@ -227,18 +273,6 @@ if ($doit == true) { ?>
 									}
 								}
 								else {
-									$columnname = $layer['attributes']['real_name'][$layer['attributes']['name'][$j]];
-									$geom_tablename = $layer['attributes']['table_name'][$layer['attributes']['name'][$j]];
-									$geomtype = $layer['attributes']['geomtype'][$layer['attributes']['name'][$j]];
-									# Frage den Geometrietyp aus der Layerdefinition, wenn in geometry_columns nur als Geometry definiert.
-									if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
-										$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
-										$geomtype = $geomtypes[$layer['Datentyp']];
-										?><input type="hidden" name="Datentyp" value="<?php echo $layer['Datentyp']; ?>"><?php
-									}
-									if(value_of($layer['attributes'], 'dimension') != '')$dimension = $layer['attributes']['dimension'][$j];
-									$privileg = $layer['attributes']['privileg'][$j];
-									$nullable = $layer['attributes']['nullable'][$j];
 									$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';Geometrie;'.$layer['attributes']['nullable'][$j].'|';
 								}
 							}
@@ -247,23 +281,33 @@ if ($doit == true) { ?>
 								$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
 							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1)){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
-								$datapart .= output_table($table);
+								echo output_table($table);
 								unset($table);
 								$table = array();
-								$datapart .= '</table></div></td></tr>';
+								echo '</table></div></td></tr>';
 							}
 						}
 						if($table){
-							$datapart .= output_table($table);
+							echo output_table($table);
 							unset($table);
 							$table = '';
+						}						
+						if ($sachdaten_tab AND $layer['attributes']['group'][0] == '') {
+							echo '</tbody></table></td></tr>';
 						}
-						if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY')$geomtype = 'Polygon';
-						elseif($geomtype == 'POINT')$geomtype = 'Point';
-						elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING')$geomtype = 'Line';
-			
-						if($this->new_entry != true)echo $datapart;
-				
+						if ($show_geom_editor) {
+							echo '
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility_geom . '>
+								<td colspan="2" align="center">';
+									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
+							echo'
+								</td>
+							</tr>';
+							if ($this->user->rolle->geom_edit_first) {
+								$first_tab = false;
+							}
+						}						
+							
 							if(($columnname != '' OR $layer['shape'][$k]['wfs_geom'] != '') AND $this->new_entry != true AND value_of($this->formvars, 'printversion') == ''){
 								if($layer['attributes']['group'][0] != ''){ ?>
 									<tr><td colspan="2"><table width="100%" class="tgle" border="0" cellpadding="0" cellspacing="0"><tbody class="gle glegeom">
@@ -283,7 +327,7 @@ if ($doit == true) { ?>
 											<table cellspacing="0" cellpadding="0">
 												<tr>
 			<?								if($privileg == 1) { ?>
-													<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+													<td><a onclick="checkForUnsavedChanges(event);" title="<? echo $strEditGeom; ?>" target="root" href="index.php?go=<? echo $geomtype; ?>Editor&oid=<?php echo $layer['shape'][$k][$geom_tablename.'_oid']; ?>&selected_layer_id=<? echo $layer['Layer_ID'];?>&dimension=<? echo $dimension; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div class="button edit_geom"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 			<?								} 
 											if($layer['shape'][$k][$layer['attributes']['the_geom']]){ ?>
 													<td><a title="<? echo $strMapZoom; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
@@ -298,7 +342,7 @@ if ($doit == true) { ?>
 									else{		# bei WFS-Layern
 			?>						<table cellspacing="0" cellpadding="0">
 											<tr>
-												<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+												<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 											</tr>
 										</table>
 			<?															
@@ -313,24 +357,7 @@ if ($doit == true) { ?>
 				}
 
 							if($this->new_entry == true){
-								if($privileg == 1){
-									if(!$this->user->rolle->geom_edit_first)echo $datapart.'</table><br><table style="width: 100%" class="tgle" border="0" cellspacing="0" cellpadding="0">';
-									if($nullable === '0'){ ?>
-										<script type="text/javascript">
-			    						geom_not_null = true;
-			    					</script>
-			<?					}
-									$this->titel=$strTitleGeometryEditor;
-									echo '
-									<tr>
-										<td colspan="2" align="center">';
-											include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-									echo'
-										</td>
-									</tr>';						
-									if($this->user->rolle->geom_edit_first)echo '</table><table class="tgle dstable" style="margin-top: 10px" border="0" cellspacing="0" cellpadding="5"><tbody class="gle">'.$datapart;
-								}
-								else echo $datapart;
+								echo $datapart;
 							}
 			 ?>
 						</tbody>
@@ -342,6 +369,7 @@ if ($doit == true) { ?>
 				</tr>
 			<?
 					$layer['attributes']['privileg'] = $definierte_attribute_privileges;
+					$privileg = $layer['attributes']['privileg'][$index];
 				}
 				if(value_of($this->formvars, 'printversion') == ''){
 			?>
@@ -508,5 +536,5 @@ if ($doit == true) { ?>
 	</div><?
 }
 elseif ($layer['requires'] == '' AND $layer['required'] == '') {
-	$this->noMatchLayers[$layer['Layer_ID']] = $layer['Name'];
+	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
 } ?>

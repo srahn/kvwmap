@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Biên tập tác vụ";
   $strAsteriskRequired="Cần đi�?n đủ thông tin cho những trư�?ng có dấu *";  
   $strDataBankID="Số ID của CSDL";
@@ -7,11 +7,6 @@
   $strReferenceMapID="Số bản đồ tham chiếu*";
   $strMaxExtent="Phạm vi tối đa*";
   $strMinExtent="Phạm vi tối thiểu*";  
-  $strPostgisHost="Máy chủ lưu số liệu PostGIS";
-  $strPostGISDataBankName="Tên CSDL PostGIS";
-  $strPostGISUserName="Tên ngư�?i dùng PostGIS";
-  $strPostGISPassword="Mã khóa PostGIS";
-	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="Tiêu đ�? OWS";
   $strOwsAbstract="Tóm lược OWS";
   $strWmsAccessConstraints="Rào cản truy cập WMS";

@@ -4,51 +4,47 @@
 		var val;
 		var properties = input.name.split(';');
 		var datatype = properties[6];
-		if(type == 'Zahl'){
-			val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
-			if(datatype == 'int2' || datatype == 'int4' || datatype == 'int8'){
-				if(input.value.search(/,/g) != -1){
+		var grouping = false;
+		var cursor_pos;
+		var dot_count_before;
+		var dot_count_after;
+		var minimun_fraction_digits = 0;
+		var maximum_fraction_digits = decimal_length || 10;
+		if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].indexOf(datatype) != -1) {
+			if (type == 'Zahl') {
+				grouping = true;
+			}
+			input.value = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');		// Buchstaben raus
+			input.value = input.value.replace(/\.$/, ',');									// Punkt hinten durch Komma ersetzen
+			val = input.value;
+			
+			if (['int2', 'int4', 'int8'].indexOf(datatype) != -1) {
+				if (val.search(/,/g) != -1) {
 					alert('Es sind nur ganzzahlige Angaben erlaubt!');
 					val = val.replace(/,/g, '');
 				}
 			}
-		}
-		else{
-			if(datatype == 'numeric' || datatype == 'float4' || datatype == 'float8'){
-				val = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
-				val = val.replace(/,/g, '.');
-				if(parseInt(decimal_length) == 0 && val.search(/\./) > 0){
-					alert(unescape('F%FCr dieses Feld sind keine Nachkommastellen erlaubt.'));
-					val = val.replace(/\./g, '');
-				}
-				parts = val.split('.');
-				ohne_leerz = parts[0].replace(/ /g, '').length;
-				mit_leerz = parts[0].length;
-				length = parseInt(length) - parseInt(decimal_length);
-				if(length != '' &&  ohne_leerz > length){
-					alert('Für dieses Feld sind maximal '+length+' Vorkommastellen erlaubt.');
-					parts[0] = parts[0].substring(0, length - ohne_leerz + mit_leerz);
-				}
-				val = parts[0];
-				if(parts[1] != undefined){
-					if(decimal_length != '' && parts[1].length > parseInt(decimal_length)){
-						alert(unescape('F%FCr dieses Feld sind maximal '+decimal_length+' Nachkommastellen erlaubt.'));
-						parts[1] = parts[1].substring(0, decimal_length);
+			if (val.slice(val.length - 1) != ',') {
+				if (val.indexOf(',') != -1) {
+					minimun_fraction_digits = val.length - val.indexOf(',') - 1;	// damit Nullen am Ende nicht verloren gehen
+					if (minimun_fraction_digits > maximum_fraction_digits) {
+						minimun_fraction_digits = maximum_fraction_digits;
 					}
-					val = val+'.'+parts[1];
+				}
+				formated_val = val.replace(/\./g, '');							// Punkte raus
+				formated_val = formated_val.replace(/,/g, '.');			// Komma zu Punkt
+				formated_val = Number(formated_val).toLocaleString('de-DE', {useGrouping: grouping, minimumFractionDigits: minimun_fraction_digits, maximumFractionDigits: maximum_fraction_digits});
+				if (['NaN', '0'].indexOf(formated_val) == -1) {
+					val = formated_val;
 				}
 			}
-			if(datatype == 'int2' || datatype == 'int4' || datatype == 'int8'){
-				val = input.value.replace(/[^(0-9|\-)]/g, '');
-				if(input.value.search(/,/g) != -1 || input.value.search(/\./g) != -1){
-					alert('Es sind nur ganzzahlige Angaben erlaubt!');
-					val = val.replace(/,/g, '');
-					val = val.replace(/\./g, '');
-				}
+			if(input.value != val && val != undefined){
+				dot_count_before = input.value.split('.').length - 1;
+				dot_count_after = val.split('.').length - 1;
+				cursor_pos = input.selectionStart + (dot_count_after - dot_count_before);
+				input.value = val;
+				input.setSelectionRange(cursor_pos, cursor_pos);
 			}
-		}
-		if(input.value != val && val != undefined){
-			input.value = val;
 		}
 	}
 
@@ -73,7 +69,7 @@
 		var split = string.split(":");
 		var hours = parseInt(split[0], 10);
 		var minutes = parseInt(split[1], 10);
-		var seconds = parseInt(split[2] ?? 0, 10);
+		var seconds = parseInt(split[2] || 0, 10);
 		var check = new Date(2021, 4, 25, hours, minutes, seconds);
 		var hours2 = check.getHours();
 		var minutes2 = check.getMinutes();

@@ -72,7 +72,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 	}
 ?>
 
-<table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="5" bgcolor="<?php echo $bgcolor; ?>">
+<table style="border-bottom: 1px solid grey; border-collapse: separate; width: 100%" border="0" cellpadding="0" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
   <tr> 
     <td>
 			<table cellspacing="0" cellpadding="0">
@@ -136,17 +136,20 @@ function buildwktpolygonfromsvgpath(svgpath){
 					} ?>
 				</tr>
 				<tr>
-					<td><? echo $strGeomFrom; ?>:<br>
-						<select name="geom_from_layer" style="width: 250px" onchange="geom_from_layer_change(<? echo $this->formvars['selected_layer_id']; ?>);">
-							<option value="0"> - alle - </option>
-							<?
-							for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
-									echo '<option';
-									if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
-									echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
-								}
-							?>
-						</select> 
+					<td>
+						<div style="padding: 0 3px 0 3px">
+							<? echo $strGeomFrom; ?>:<br>
+							<select name="geom_from_layer" style="width: 244px" onchange="geom_from_layer_change(<? echo $this->formvars['selected_layer_id']; ?>);">
+								<option value="0"> - alle - </option>
+								<?
+								for($i = 0; $i < count($this->queryable_vector_layers['ID']); $i++){
+										echo '<option';
+										if($this->formvars['geom_from_layer'] == $this->queryable_vector_layers['ID'][$i]){echo ' selected';}
+										echo ' value="'.$this->queryable_vector_layers['ID'][$i].'">'.$this->queryable_vector_layers['Bezeichnung'][$i].'</option>';
+									}
+								?>
+							</select>
+						</div>
 					</td>
 				</tr>
 				<tr>
@@ -170,7 +173,11 @@ function buildwktpolygonfromsvgpath(svgpath){
 					<td colspan="2" style="border-top:1px solid #999999"></td>
 				</tr>
 				<tr>  
-					<td width="160" style="height: 44px"><? echo $strArea; ?>:&nbsp;<input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP></td>
+					<td width="160" style="height: 44px">
+						<div style="padding: 0 3px 0 3px">
+						<? echo $strArea; ?>:&nbsp;<input size="12" type="text" name="area" value="<?echo $this->formvars['area']?>">&nbsp;m<SUP>2</SUP>
+						</div>
+					</td>
 				</tr>
 				<tr> 
 					<td colspan="2" style="border-top:1px solid #999999"><img width="240px" height="1px" src="<? echo GRAPHICSPATH; ?>leer.gif"></td>
@@ -189,7 +196,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 				<tr>
 					<td align="center">
 						<? if($this->new_entry != true){ ?>
-						<a href="javascript:void(0);" onclick="overlay_link('go=Layer-Suche&go_plus=Suchen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>', true);">Sachdatenanzeige</a>
+						<a href="javascript:void(0);" onclick="overlay_link('go=Layer-Suche&go_plus=Suchen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&value_<?php echo $this->formvars['layer_tablename']; ?>_oid=<?php echo $this->formvars['oid']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', true);">Sachdatenanzeige</a>
 						<? } ?>&nbsp;
 					</td>
 				</tr>

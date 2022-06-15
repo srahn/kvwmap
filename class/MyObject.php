@@ -20,7 +20,7 @@ class MyObject {
 	/*
 	* Search for an record in the database
 	* by the given attribut and value
-	* @ return an object with this record
+	* @ return this object with the record in data or empty array if not found
 	*/
 	function find_by($attribute, $value) {
 		$sql = "
@@ -296,7 +296,7 @@ class MyObject {
 				if ($options['escaped']) {
 					$value = str_replace("'", "''", $value);
 				}
-				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
+				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
@@ -333,7 +333,7 @@ class MyObject {
 								$v = "'" . $value . "'";
 							}
 							else {
-								$v = "'" . addslashes($value) . "'";
+								$v = "'" . $this->database->mysqli->real_escape_string($value) . "'";
 							}
 							return $v;
 						},
@@ -392,7 +392,7 @@ class MyObject {
 								$v = "'" . $value . "'";
 							}
 							else {
-								$v = "'" . addslashes($value) . "'";
+								$v = "'" . $this->database->mysqli->real_escape_string($value) . "'";
 							}
 							return $v;
 						},

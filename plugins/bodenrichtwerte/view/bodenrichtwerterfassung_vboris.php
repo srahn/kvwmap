@@ -103,7 +103,7 @@ function update_verfahren(){
 function update_nutzungsart() {
 	document.GUI.nutzungsart.length = 0;
 	if (document.GUI.entwicklungszustand.value in {'B ':'', 'R ':'','E ':''}) {
-		add_options(document.GUI.nutzungsart, new Array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB'), '-- Bitte wählen --');
+		add_options(document.GUI.nutzungsart, new Array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MDW', 'MI', 'MK', 'MU', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB'), '-- Bitte wählen --');
 	}
 	if (document.GUI.entwicklungszustand.value == 'LF') {
 		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
@@ -248,8 +248,8 @@ update_require_attribute = function(attributes, layer_id, value){
 												    <td colspan="2"> 
 												      <?php
 											      	 	if(in_array($this->formvars['entwicklungszustand'], array('B ', 'R ', 'E '))){
-																	$FormatWerte = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '');
-																	$FormatBez = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MI', 'MK', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '-- Bitte wählen --'); 
+																	$FormatWerte = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MDW', 'MI', 'MK', 'MU', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '');
+																	$FormatBez = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MDW', 'MI', 'MK', 'MU', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '-- Bitte wählen --'); 
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'LF'){
 																	$FormatWerte = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '');
@@ -517,7 +517,7 @@ update_require_attribute = function(attributes, layer_id, value){
 						    	Bodenrichtwert [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
-						      <input name="bodenrichtwert" type="text" id="bodenrichtwert" value="<?php echo $this->formvars['bodenrichtwert']; ?>" size="5" maxlength="5">
+						      <input name="bodenrichtwert" type="text" id="bodenrichtwert" value="<?php echo $this->formvars['bodenrichtwert']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>
 							<tr id="U" <? if($this->formvars['verfahrensgrund'] != 'San' AND $this->formvars['verfahrensgrund'] != 'Entw')echo 'style="display: none"'; ?>> 
@@ -528,7 +528,7 @@ update_require_attribute = function(attributes, layer_id, value){
 						    	SanU [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
-						      <input name="brwu" type="text" id="brwu" value="<?php echo $this->formvars['brwu']; ?>" size="5" maxlength="5">
+						      <input name="brwu" type="text" id="brwu" value="<?php echo $this->formvars['brwu']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>
 							<tr id="SanS" <? if($this->formvars['verfahrensgrund'] != 'San')echo 'style="display: none"'; ?>> 
@@ -536,7 +536,7 @@ update_require_attribute = function(attributes, layer_id, value){
 						    	SanS [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
-						      <input name="brws" type="text" id="brws" value="<?php echo $this->formvars['brws']; ?>" size="5" maxlength="5">
+						      <input name="brws" type="text" id="brws" value="<?php echo $this->formvars['brws']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>
 							<tr id="B" <? if($this->formvars['verfahrensgrund'] != 'San' AND $this->formvars['verfahrensgrund'] != 'Entw')echo 'style="display: none"'; ?>> 
@@ -547,19 +547,16 @@ update_require_attribute = function(attributes, layer_id, value){
 						    	SanB [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
-						      <input name="brwb" type="text" id="brwb" value="<?php echo $this->formvars['brwb']; ?>" size="5" maxlength="5">
+						      <input name="brwb" type="text" id="brwb" value="<?php echo $this->formvars['brwb']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>					
 							
 						  <tr> 
-						    <td>
+						    <td colspan="2">
 						    	Stichtag:
 						    </td>
-						    <td align="right">
-						    	31.12.
-						    </td>
 						    <td>
-						    	<input name="stichtag" type="text" value="<?php echo array_pop(explode('.', $this->formvars['stichtag'])); ?>" size="5" maxlength="5">
+						    	<input name="stichtag" type="text" value="<? echo $this->formvars['stichtag']; ?>" size="9" maxlength="10">
 						    </td>
 						  </tr>
 						  <tr> 
@@ -567,7 +564,7 @@ update_require_attribute = function(attributes, layer_id, value){
 						    	Bedarfswert [&euro;/m&sup2;]:
 						    </td>
 						    <td> 
-						      <input name="bedarfswert" type="text" id="bedarfswert" value="<?php echo $this->formvars['bedarfswert']; ?>" size="5" maxlength="5">
+						      <input name="bedarfswert" type="text" id="bedarfswert" value="<?php echo $this->formvars['bedarfswert']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>
 						  <tr> 
@@ -619,6 +616,7 @@ update_require_attribute = function(attributes, layer_id, value){
 										'forstwirtschaftliche Flächen',
 										'gemischte Bauflächen',
 										'gewerbliche Bauflächen',
+										'bebaute Flächen im Außenbereich',
 										'Grünland',
 										'Wohnbauflächen',
 										'Sanierungsgebiet',
@@ -633,6 +631,7 @@ update_require_attribute = function(attributes, layer_id, value){
 										'forstwirtschaftliche Flächen',
 										'gemischte Bauflächen',
 										'gewerbliche Bauflächen',
+										'bebaute Flächen im Außenbereich',
 										'Grünland',
 										'Wohnbauflächen',
 										'Sanierungsgebiet',

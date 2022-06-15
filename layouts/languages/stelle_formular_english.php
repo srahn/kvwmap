@@ -1,4 +1,4 @@
-﻿<?php
+<?php
   $strTitle="Task Editor";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
   $strDataBankID="Database ID";
@@ -7,11 +7,6 @@
   $strReferenceMap="Reference map*";
   $strMaxExtent="Max Extent*";
   $strMinExtent="Min Extent*";
-  $strPostgisHost="PostGIS Host";
-  $strPostGISDataBankName="PostGIS data bank name";
-  $strPostGISUserName="PostGIS user name";
-  $strPostGISPassword="PostGIS password";
-	$strPostgisConnection = "Postgres Connection";
   $strOwsTitle="OWS title";
   $strOwsAbstract="OWS abstract";
   $strWmsAccessConstraints="WMS access constraints";
@@ -47,5 +42,5 @@
 	$strcheckClientIP="Check IP-Adresses";
 	$strhist_timestamp="historical timestamps";
 	$strShowSharedLayersText = "Show shared layer in this Stelle.";
-	$strShowSharedLayersDescription = "When this permission is granted, all layer from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and in the options form is shown who has shared the layer for other.";
+	$strShowSharedLayersDescription = "When this permission is granted, all layers from users with the permission to share Rollenlayer will be assigned to this Stelle and shown to all Users of this Stelle. These Layers will be marked as Shared layers in the legend and it is shown who has shared the layer for other in the options form.";
 ?>  

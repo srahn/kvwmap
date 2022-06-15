@@ -67,7 +67,8 @@ function save_edit_field(e) {
 			layout_id: document.GUI.aktivesLayout.value,
 			line_id: $(e).attr('data-id'),
 			line_attribute_name: $(e).attr('data-name'),
-			line_attribute_value: value
+			line_attribute_value: value,
+			csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 		},
 		url: 'index.php',
 		success: function(result) {

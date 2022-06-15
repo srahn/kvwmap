@@ -870,12 +870,17 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if ($dbStyle['symbolname']!='') {
-          $style->set('symbolname',$dbStyle['symbolname']);
-        }
-        if ($dbStyle['symbol']>0) {
-          $style->set('symbol',$dbStyle['symbol']);
-        }
+				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+				}
+				else {
+					if ($dbStyle['symbolname']!='') {
+						$style->set('symbolname',$dbStyle['symbolname']);
+					}
+					if ($dbStyle['symbol']>0) {
+						$style->set('symbol',$dbStyle['symbol']);
+					}
+				}
         if (MAPSERVERVERSION >= 620) {
 					if($dbStyle['geomtransform'] != '') {
 						$style->setGeomTransform($dbStyle['geomtransform']);
@@ -1475,7 +1480,7 @@ class GUI {
 				}
 				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 			}
-			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0]) AND $layer['Class'][0]['Name'] != ''){
+			if($layer['aktivStatus'] == 1 AND isset($layer['Class'][0])){
 				if(value_of($layer, 'requires') == '' AND $layer['Layer_ID'] > 0){
 					$legend .= '<input id="classes_'.$layer['Layer_ID'].'" name="classes_'.$layer['Layer_ID'].'" type="hidden" value="'.$layer['showclasses'].'">';
 				}
@@ -1504,86 +1509,88 @@ class GUI {
 						}
 						for($k = 0; $k < $maplayer->numclasses; $k++){
 							$class = $maplayer->getClass($layer['Class'][$k]['index']);
-							for($s = 0; $s < $class->numstyles; $s++){
-								$style = $class->getStyle($s);
-								if($maplayer->type > 0){
-									$symbol = $this->map->getSymbolObjectById($style->symbol);
-									if($symbol->type == 1006){ 	# 1006 == hatch
-										$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-										$style->set('maxsize', 2*$style->width);
+							if ($class->name != '') {
+								for($s = 0; $s < $class->numstyles; $s++){
+									$style = $class->getStyle($s);
+									if($maplayer->type > 0){
+										$symbol = $this->map->getSymbolObjectById($style->symbol);
+										if($symbol->type == 1006){ 	# 1006 == hatch
+											$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+											$style->set('maxsize', 2*$style->width);
+										}
+										elseif($style->symbolname == ''){
+											$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+											$style->set('maxsize', 2);
+											$style->set('width', 2);
+											$style->set('maxwidth', 2);
+										}
+										if ($maplayer->type == MS_LAYER_CHART) {
+											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+										}
 									}
-									elseif($style->symbolname == ''){
-										$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-										$style->set('maxsize', 2);
-										$style->set('width', 2);
-										$style->set('maxwidth', 2);
-									}
-									if ($maplayer->type == MS_LAYER_CHART) {
-										$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+									else{		# Punktlayer
+										if($style->size > 14)$style->set('size', 14);
+										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
+											$style->set('offsety', 0);
+											$style->set('offsetx', 0);
+										}
 									}
 								}
-								else{		# Punktlayer
-									if($style->size > 14)$style->set('size', 14);
-									$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-									$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-									if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-										$style->set('offsety', 0);
-										$style->set('offsetx', 0);
+								$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
+								if($s > 0 OR $class->status == MS_OFF){
+									$width = $height = '';
+									if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
+									if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
+									$padding = 1;
+									###### eigenes Klassenbild ######
+									if ($layer['Class'][$k]['legendgraphic'] != '') {
+										$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+										if ($width == '') {
+											$size = getimagesize($imagename);
+											$width = $size[0];
+											$height = $size[1];
+										}
 									}
+									###### generiertes Klassenbild ######
+									else{
+										if($width == '')$width = $legendicon_size['width'][$maplayer->type];
+										if($height == '')$height = $legendicon_size['height'][$maplayer->type];
+										if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
+											$padding = 0;
+											$newname = rand(0, 1000000).'.jpg';
+											$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
+											$imagename = TEMPPATH_REL.$newname;
+										}
+										else{																												# vom Mapserver generiertes Klassenbild
+											$image = $class->createLegendIcon($width, $height);
+											ob_start();
+											$image->saveImage();
+											$image = ob_get_clean();
+											$imagename = 'data:image/jpg;base64,'.base64_encode($image);
+										}
+										$original_class_image = $imagename;
+									}
+									####################################
+									$classid = $layer['Class'][$k]['Class_ID'];
+									if($this->mapDB->disabled_classes['status'][$classid] == '0'){
+										if($height < $width)$height1 = 12;
+										else $height1 = 18;
+										$imagename = 'graphics/inactive'.$height1.'.jpg';
+										$status = 0;
+									}
+									elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
+										$status = 2;
+									}
+									else{
+										$status = 1;
+									}
+									# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
+									$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.', ' . $maplayer->type . ')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.', ' . $maplayer->type . ')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
 								}
+								$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 							}
-							$legend .= '<tr style="line-height: 15px"><td style="line-height: 14px">';
-							if($s > 0 OR $class->status == MS_OFF){
-								$width = $height = '';
-								if($layer['Class'][$k]['legendimagewidth'] != '')$width = $layer['Class'][$k]['legendimagewidth'];
-								if($layer['Class'][$k]['legendimageheight'] != '')$height = $layer['Class'][$k]['legendimageheight'];
-								$padding = 1;
-								###### eigenes Klassenbild ######
-								if ($layer['Class'][$k]['legendgraphic'] != '') {
-									$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
-									if ($width == '') {
-										$size = getimagesize($imagename);
-										$width = $size[0];
-										$height = $size[1];
-									}
-								}
-								###### generiertes Klassenbild ######
-								else{
-									if($width == '')$width = $legendicon_size['width'][$maplayer->type];
-									if($height == '')$height = $legendicon_size['height'][$maplayer->type];
-									if($layer['Class'][$k]['Style'][0]['colorrange'] != ''){		# generierte Color-Ramp
-										$padding = 0;
-										$newname = rand(0, 1000000).'.jpg';
-										$this->colorramp(IMAGEPATH.$newname, $width, $height, $layer['Class'][$k]['Style'][0]['colorrange']);
-										$imagename = TEMPPATH_REL.$newname;
-									}
-									else{																												# vom Mapserver generiertes Klassenbild
-										$image = $class->createLegendIcon($width, $height);
-										ob_start();
-										$image->saveImage();
-										$image = ob_get_clean();
-										$imagename = 'data:image/jpg;base64,'.base64_encode($image);
-									}
-									$original_class_image = $imagename;
-								}
-								####################################
-								$classid = $layer['Class'][$k]['Class_ID'];
-								if($this->mapDB->disabled_classes['status'][$classid] == '0'){
-									if($height < $width)$height1 = 12;
-									else $height1 = 18;
-									$imagename = 'graphics/inactive'.$height1.'.jpg';
-									$status = 0;
-								}
-								elseif($this->mapDB->disabled_classes['status'][$classid] == 2){
-									$status = 2;
-								}
-								else{
-									$status = 1;
-								}
-								# $original_class_image ist das eigentliche Klassenbild bei Status 1, $imagename das Bild, welches entsprechend des Status gerade gesetzt ist
-								$legend .= '<input type="hidden" size="2" name="class'.$classid.'" value="'.$status.'"><a href="#" onmouseover="mouseOverClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onmouseout="mouseOutClassStatus('.$classid.',\''.$original_class_image.'\', '.$width.', '.$height.')" onclick="changeClassStatus('.$classid.',\''.$original_class_image.'\', '.$this->user->rolle->instant_reload.', '.$width.', '.$height.')"><img style="vertical-align:middle;padding-bottom: '.$padding.'" border="0" name="imgclass'.$classid.'" width="'.$width.'" height="'.$height.'" src="'.$imagename.'"></a>';
-							}
-							$legend .= '&nbsp;<span class="px13">'.html_umlaute($class->name).'</span></td></tr>';
 						}
 						$legend .= '</table>';
 					}
@@ -2230,7 +2237,6 @@ class pgdatabase {
 		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
 		# Dazu Fehlerausschriften bearchten.
 		$this->blocktransaction=0;
-		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
 	}
 
 	/**
@@ -2571,7 +2577,7 @@ class db_mapObj {
     return $groups;
   }
 
-  function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
 		if($language != 'german') {
@@ -2581,9 +2587,9 @@ class db_mapObj {
 				ELSE l.`Name`
 			END AS Name";
 			$group_column = '
-			CASE 
-				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` 
-				ELSE `Gruppenname` 
+			CASE
+				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'`
+				ELSE `Gruppenname`
 			END AS Gruppenname';
 		}
 		else{
@@ -2598,9 +2604,17 @@ class db_mapObj {
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem,
-				l.labelmaxscale, l.labelminscale, l.labelrequires, l.connection_id, CASE WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) ELSE l.connection END as connection, l.printconnection, l.connectiontype, l.classitem, l.styleitem, l.classification, 
-				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
+				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.labelmaxscale, l.labelminscale, l.labelrequires,
+				l.connection_id,
+				CASE
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', gr.user_id)
+					ELSE l.connection
+				END as connection,
+				l.printconnection,
+				l.connectiontype,
+				l.classitem, l.styleitem, l.classification,
+				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
 				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
@@ -2609,44 +2623,36 @@ class db_mapObj {
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
-				u_groups AS g,
-				u_groups2rolle as gr,
-				layer AS l
-				LEFT JOIN connections as c ON l.connection_id = c.id
+				layer AS l LEFT JOIN
+				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
+				connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
 				l.Layer_ID = ul.Layer_ID AND
-				(ul.minscale != -1 OR ul.minscale IS NULL) AND l.Gruppe = g.id AND rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
-				gr.id = g.id AND
+				(ul.minscale != -1 OR ul.minscale IS NULL) AND
+				l.Datentyp != 5 AND 
+				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
-				gr.user_id = " . $this->User_ID;
-
-		if($groups != NULL){
-			$sql.=' AND g.id IN ('.$groups.')';
-		}
-    if($this->nurAufgeklappteLayer){
-      $sql.=' AND (rl.aktivStatus != "0" OR gr.status != "0" OR ul.requires != "")';
-    }
-    if($this->nurAktiveLayer){
-      $sql.=' AND (rl.aktivStatus != "0")';
-    }
-		if($this->OhneRequires){
-      $sql.=' AND (ul.requires IS NULL)';
-    }
-    if($this->nurFremdeLayer){			# entweder fremde (mit host=...) Postgis-Layer oder aktive nicht-Postgis-Layer
-    	$sql.=' AND (l.connection like "%host=%" AND l.connection NOT like "%host=localhost%" OR l.connectiontype != 6 AND rl.aktivStatus != "0")';
-    }
-    $sql.=' ORDER BY drawingorder';
-    #echo '<br>SQL zur Abfrage der Layer: ' . $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
+				gr.user_id = " . $this->User_ID .
+				($groups != NULL ? " AND g.id IN (" . $groups . ")" : '') .
+				($this->nurAufgeklappteLayer ? " AND (rl.aktivStatus != '0' OR gr.status != '0' OR ul.requires != '')" : '') .
+				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
+				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
+				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') . "
+			ORDER BY
+				drawingorder
+		";
+		#echo '<br>SQL zur Abfrage der Layer: ' . $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>",4);
+		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-    $layer = array();
+		$layer = array();
 		$layer['list'] = array();
-    $this->disabled_classes = $this->read_disabled_classes();
+		$this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-    while ($rs = $ret['result']->fetch_assoc()) {
+		while ($rs = $ret['result']->fetch_assoc()) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['Filter'] == ''){
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
@@ -2655,7 +2661,7 @@ class db_mapObj {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			if($rs['alias'] == '' OR !$useLayerAliases){
+			if ($rs['alias'] == '' OR !$useLayerAliases){
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
@@ -2673,18 +2679,26 @@ class db_mapObj {
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class']=$this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
+				$rs['Class'] = $this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
 			}
-			if($rs['maxscale'] > 0)$rs['maxscale'] = $rs['maxscale']+0.3;
-			if($rs['minscale'] > 0)$rs['minscale'] = $rs['minscale']-0.3;
-			$layer['list'][$i]=$rs;
-			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];		# Pointer auf requires-Array
-			if($rs['requires'] != '')$requires_layer[$rs['requires']][] = $rs['Layer_ID'];		# requires-Array füllen
+			if ($rs['maxscale'] > 0) {
+				$rs['maxscale'] = $rs['maxscale'] + 0.3;
+			}
+			if ($rs['minscale'] > 0) {
+				$rs['minscale'] = $rs['minscale'] - 0.3;
+			}
+			$layer['list'][$i] = $rs;
+			# Pointer auf requires-Array
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
+			if ($rs['requires'] != '') {
+				# requires-Array füllen
+				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+			}
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
-    }
-    return $layer;
-  }
+		}
+		return $layer;
+	}
 
   function read_disabled_classes() {
 		$sql = "

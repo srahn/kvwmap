@@ -5,6 +5,7 @@
 	global $strShowAll;
 	global $strNewEmbeddedPK;
 	global $hover_preview;
+	
 	function output_table($table) {
 		$output = '';
 		if (is_array($table['rows'])) {
@@ -146,6 +147,7 @@
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
+			$dataset2 = $dataset;
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count_or_0($elements); $e++){
@@ -155,7 +157,14 @@
 				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
-					$datapart .= '<td valign="top"><a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a></td>';
+					$datapart .= '
+						<td valign="top">
+							<div style="display: flex">
+								<a href="javascript:void(0)" title="'.$gui->strDelete.'" onclick="removeArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\');'.$onchange2.'return false;"><img style="width: 18px" src="'.GRAPHICSPATH.'datensatz_loeschen.png"></a>
+								<a href="javascript:void(0)" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'up\');'.$onchange2.'return false;" style="padding: 3px 3px 0 0"><img src="'.GRAPHICSPATH.'pfeil2.gif"></a>
+								<a href="javascript:void(0)" onclick="moveArrayElement(\''.$id.'\', \''.$id.'_'.$e.'\', \'down\');'.$onchange2.'return false;" style="padding: 3px 3px 0 0"><img src="'.GRAPHICSPATH.'pfeil.gif"></a>
+							</div>
+						</td>';
 				}
 				$datapart .= '</tr></table>';
 				$datapart .= '</div>';
@@ -292,7 +301,7 @@
 				$datapart .= '</select>';
 			}
 		}
-		else{
+		else {
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
 					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
@@ -308,10 +317,10 @@
 					$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select'){
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
@@ -410,7 +419,7 @@
 					$datapart .= '</td>';
 					if($gui->new_entry != true){
 						$datapart .= '<td width="100%" align="right">';
-						if ($value != ''){
+						if ($value != '') {
 							$params = 'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j].'&subform_link=true';
 							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 								$params .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
@@ -424,14 +433,14 @@
 							}
 							$datapart .= 	' class="buttonlink"><span>'.$strShowPK.'</span></a>&nbsp;';
 						}
-						if($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
-							$datapart .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=neuer_Layer_Datensatz&subform=true&selected_layer_id='.$attributes['subform_layer_id'][$j];
-							for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-								$datapart .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-								$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value)';
+						if ($attributes['subform_layer_privileg'][$j] > 0 AND $attribute_privileg > 0){
+							$datapart .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=neuer_Layer_Datensatz&subform=true&selected_layer_id=' . $attributes['subform_layer_id'][$j] . '&csrf_token=' . $_SESSION['csrf_token'];
+							for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {
+								$datapart .= '&attributenames[' . $p . ']='.$attributes['subform_pkeys'][$j][$p];
+								$datapart .= '&values[' . $p . ']=\' + document.getElementById(\'' . $layer_id . '_' . $attributes['subform_pkeys'][$j][$p] . '_' . $k . '\').value)';
 							}
 							$datapart .= 	'"';
-							if($attributes['no_new_window'][$j] != true){
+							if ($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
 							$datapart .= 	' class="buttonlink"><span>' . $strNewPK . '</span></a>&nbsp;';
@@ -498,7 +507,7 @@
 					$datapart .= '</td><td align="right" valign="top">';
 					if($gui->new_entry != true){
 						if($value != ''){
-							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
+							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' . $attributes['subform_layer_id'][$j] . '&csrf_token=' . $_SESSION['csrf_token'];
 							for($f = 0; $f < count($attribute_foreign_keys); $f++){
 								$datapart .= '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
 								$datapart .= '&operator_'.$attribute_foreign_keys[$f].'==';
@@ -516,11 +525,19 @@
 				case 'SubFormEmbeddedPK' : {
 					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
 					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
-						if($dataset[$attributes['subform_pkeys'][$j][$p]] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
-						$reloadParams .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$dataset[$attributes['subform_pkeys'][$j][$p]];
-						$reloadParams .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-						$reloadParams .= '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-						$reloadParams .= '&values['.$p.']='.$dataset[$attributes['subform_pkeys'][$j][$p]];
+						if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
+							$exp = explode(':', $attributes['subform_pkeys'][$j][$p]);
+							$key = $exp[0];			# Verknüpfungsattribut in diesem Layer
+							$subkey = $exp[1];	# Verknüpfungsattribut im Sub-Layer
+						}
+						else {
+							$key = $subkey = $attributes['subform_pkeys'][$j][$p];
+						}
+						if($dataset[$key] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						$reloadParams .= '&value_'.$subkey.'='.$dataset[$key];
+						$reloadParams .= '&operator_'.$subkey.'==';
+						$reloadParams .= '&attributenames['.$p.']='.$subkey;
+						$reloadParams .= '&values['.$p.']='.$dataset[$key];
 					}
 					$reloadParams .= '&preview_attribute='.$attributes['preview_attribute'][$j];
 					$reloadParams .= '&count='.$k;
@@ -534,7 +551,7 @@
 					$reloadParams .= '&targetlayer_id='.$layer_id;
 					$reloadParams .= '&targetattribute='.$name;
 					$reloadParams .= '&reload='.$attributes['reload'][$j];
-					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$attributes['subform_pkeys'][$j][0]].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
+					$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 					$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 					$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
@@ -543,9 +560,7 @@
 					if($gui->new_entry != true){
 						$subform_request = true;
 						$datapart .= '
-							<script type="text/javascript">
-								reload_subform_list(\''.$layer_id.'_'.$name.'_'.$k.'\', 0, 0);
-							</script>
+							<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 						';
 					}
 					$datapart .= '</div><table width="98%" cellspacing="0" cellpadding="2"><tr style="border: none"><td width="100%" align="right">';
@@ -563,7 +578,7 @@
 						if ($preview['doc_src'] != '') {
 							$datapart .= '<table border="0"><tr><td>';
 							if ($hover_preview) {
-								$onmouseover = 'onmouseenter="document.getElementById(\'vorschau\').style.border=\'1px solid grey\';document.getElementById(\'preview_img\').src=this.src" onmouseleave="document.getElementById(\'vorschau\').style.border=\'none\';document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
+								$onmouseover = 'onmouseenter="root.document.getElementById(\'vorschau\').style.border=\'1px solid grey\';root.document.getElementById(\'preview_img\').src=this.src" onmouseleave="root.document.getElementById(\'vorschau\').style.border=\'none\';root.document.getElementById(\'preview_img\').src=\''.GRAPHICSPATH.'leer.gif\'"';
 							}
 							switch ($preview['doc_type']) {
 								case 'local_img' : { # Bilder mit Vorschaubild
@@ -632,10 +647,10 @@
 
 				case 'Link': {
 					if ($attribute_privileg != '0' OR $lock[$k]) {
-						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="' . $field_class . '" tabindex="1" onchange="' . $onchange . '" id="' . $layer_id . '_' . $name . '_' . $k . '" style="font-size: ' . $fontsize . 'px" size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					}
 					else {
-						$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="' . $field_class . '" onchange="' . $onchange . '" type="hidden" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					}
 					if ($value!='') {
 						if (substr($value, 0, 4) == 'http') {
@@ -644,7 +659,7 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<div class="formelement-link"><a class="link" target="'.$target.'" style="font-size: '.$fontsize.'px" href="' . htmlspecialchars($value) .'">';
+						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" style="font-size: ' . $fontsize . 'px" href="' . htmlspecialchars($value) . '">';
 						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
@@ -672,22 +687,22 @@
 					}
 					$explosion = explode(';', $options);		# url;alias;embedded
 					$href = $explosion[0];
-					if($explosion[1] != ''){
+					if ($explosion[1] != '') {
 						$alias = $explosion[1];
 					}
-					else{
+					else {
 						$alias = $href;
 					}
 					if ($explosion[3] == 'all_not_null' and $one_param_is_null) {
 						$show_link = false;
 					}
-					if ($explosion[3] == 'all_null'){
+					if ($explosion[3] == 'all_null') {
 						$show_link = true;
 					}
-					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+					$datapart .= '<input class="' . $field_class . '" onchange="' . $onchange . '" type="hidden" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					if ($show_link) {
-						if ($explosion[2] == 'embedded'){
-							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.$href.'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
+						if ($explosion[2] == 'embedded') {
+							$datapart .= '<a class="dynamicLink" href="javascript:void(0);" onclick="if(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\').innerHTML != \'\'){clearsubform(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\');} else {ahah(\''.urlencode2($href).'&embedded=true\', \'\', new Array(document.getElementById(\'dynamicLink'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'))}">';
 							$datapart .= $alias;
 							$datapart .= '</a><br>';
 							$datapart .= '<div style="display:inline" id="dynamicLink'.$layer_id.'_'.$k.'_'.$j.'"></div>';
@@ -721,16 +736,15 @@
 									}
 									$params[] = $url_parts[1];
 									$href = $link_type . ':' . $mail_addresses[0] . '?' . implode('&', $params);
-								} break;								
+								} break;
 							}
-							
 							$datapart .= '<a
 								tabindex="1"
 								target="' . $link_target . '"
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
 								onclick="' . $onclick . '"
-								href="' . $href . '"
+								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
 						}
 					}
@@ -861,9 +875,12 @@
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
 					}
-					if($attributes['length'][$j] AND !in_array($attributes['type'][$j], array('numeric', 'float4', 'float8', 'int2', 'int4', 'int8'))){
-						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
+						$value = str_replace('.', ',', $value);
 					}
+					elseif ($attributes['length'][$j]) {
+						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
+					}				
 					if($size)$datapart .= ' size="'.$size.'"';
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0'){ // nur lesbares Attribut
@@ -872,10 +889,10 @@
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != '' AND strpos($attributes['options'][$j], 'require') === false){		# bei <requires> oder <required by> nicht
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select') {
-							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode($attributes['name'], "','").'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="automatisch generieren" href="javascript:auto_generate(new Array(\''.implode("','", $attributes['name']).'\'), \''.$attributes['the_geom'].'\', \''.$name.'\', '.$k.', '.$layer_id.');'.$onchange.'"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 						else{
-							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode($attributes['name'], "','").'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
+							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
 				}
@@ -902,14 +919,14 @@
 			if ($embedded == true) {
 				$href = 'javascript:void(0);" onclick="ahah(
 					\'index.php\',
-					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id.'&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id.'&targetattribute='.$name.'\',
-					new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')),
+					\'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&embedded=true&fromobject=subform' . $layer_id . '_' . $k . '_' . $j . '&targetobject=' . $element_id . '&targetlayer_id=' . $layer_id . '&targetattribute=' . $name . '\',
+					new Array(document.getElementById(\'subform' . $layer_id . '_' . $k . '_' . $j . '\')),
 					new Array(\'sethtml\')
 				)';
 				$subform_div = '<td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
 			}
 			else {
-				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
+				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'];
 			}
 			$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
 		}
@@ -1011,7 +1028,7 @@
 				$subform_div = '<td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
 			}
 			else {
-				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
+				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'];
 			}
 			$new_button = '<td>&nbsp;&nbsp;<a class="buttonlink" href="' . $href . '">&nbsp;neu&nbsp;</a></td>';
 		}
@@ -1112,7 +1129,7 @@
 			}
 			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
-				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode($attributenames, "','").'\'));'.$onchange;
+				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));'.$onchange;
 			}
 			$datapart .= ' onchange="'.$onchange.'" ';
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
@@ -1129,7 +1146,7 @@
 			if($subform_layer_id != ''){
 				if($subform_layer_privileg > 0){
 					if($embedded == true){
-						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:void(0);" onclick="ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id;
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:void(0);" onclick="ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
 						for($p = 0; $p < count($req); $p++){
 							$datapart .= '&attributenames['.$p.']='.$req[$p];
 							$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$req[$p].'_'.$k.'\').value+\'';
@@ -1138,7 +1155,7 @@
 						$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
 					}
 					else{
-						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$subform_layer_id.'">&nbsp;neu&nbsp;</a>';
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'] . '">&nbsp;neu&nbsp;</a>';
 					}
 				}
 			}
@@ -1213,8 +1230,27 @@
 				else $style[] = $elem;
 			}
 		}
-		if(!empty($class))$output = ' class="'.implode($class, ' ').'"';
-		if(!empty($style))$output.= ' style="'.implode($style, ';').'"';
+		if(!empty($class))$output = ' class="'.implode(' ', $class).'"';
+		if(!empty($style))$output.= ' style="'.implode(';', $style).'"';
 		return $output;
+	}
+	
+	function getGeomType($column_geomtype, $layer_datatype){
+		$geomtype = $column_geomtype;
+		# Frage den Geometrietyp aus der Layerdefinition ab, wenn in geometry_columns nur als Geometry definiert.
+		if ($geomtype == 'GEOMETRY' OR empty($geomtype)) {
+			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtype = $geomtypes[$layer_datatype];
+		}
+		if ($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY') {
+			$geomtype = 'Polygon';
+		}
+		elseif ($geomtype == 'POINT') {
+			$geomtype = 'Point';
+		}
+		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
+			$geomtype = 'Line';
+		}
+		return $geomtype;
 	}
 ?>

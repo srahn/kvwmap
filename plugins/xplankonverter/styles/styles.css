@@ -1,3 +1,9 @@
+.xplankonverter-back-button {
+	margin-top: 10px;
+	margin-bottom: 10px;
+	float: right;
+}
+
 .xplankonverter {
   margin: auto;
   width: 97%

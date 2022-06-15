@@ -90,8 +90,8 @@ class database {
 			FROM
 				user
 			WHERE
-				login_name = '" . addslashes($username) . "' AND
-				passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "') AND
+				login_name = '" . $this->mysqli->real_escape_string($username) . "' AND
+				passwort = md5('" . $this->mysqli->real_escape_string($passwort) . "') AND
 				(
 					('" . date('Y-m-d h:i:s') . "' >= start AND '" . date('Y-m-d h:i:s') . "' <= stop) OR
 					(start='0000-00-00 00:00:00' AND stop='0000-00-00 00:00:00')
@@ -153,13 +153,13 @@ class database {
     return $color;
   }
 
-	function create_new_gast($gast_stelle){
+	function create_new_gast($gast_stelle) {
 		$loginname = "";
-		$laenge=10;
-		$string="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-		mt_srand((double)microtime()*1000000);
+		$laenge = 10;
+		$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+		mt_srand((double)microtime() * 1000000);
 		for ($i=1; $i <= $laenge; $i++) {
-			$loginname .= substr($string, mt_rand(0,strlen($string)-1), 1);
+			$loginname .= substr($string, mt_rand(0, strlen($string) - 1), 1);
 		}
 		# Gastnutzer anlegen
 		$sql = "
@@ -181,8 +181,7 @@ class database {
 				'd4061b1486fe2da19dd578e8d970f7eb',
 				'',
 				'gast',
-				'" . $gast_stelle .
-				"'
+				'" . $this->mysqli->real_escape_string($gast_stelle) . "'
 			);
 		";
 		#echo '<br>sql: ' . $sql;
@@ -508,7 +507,10 @@ INSERT INTO u_styles2classes (
 		#echo '<br>extra: ' . $extra;
 		$this->debug->write("<p>file:kvwmap class:database->create_insert_dump :<br>".$sql,4);
 		$this->execSQL($sql, 4, 0);
-
+		$dump = array(
+			'insert' => array(),
+			'extra'  => array()
+		);
 		$feld_anzahl = $this->result->field_count;
 		#echo '<br>Anzahl Felder: ' . $feld_anzahl;
 		for ($i = 0; $i < $feld_anzahl; $i++) {
@@ -544,14 +546,14 @@ INSERT INTO u_styles2classes (
 			for ($i = 0; $i < $feld_anzahl; $i++) {
 				if ($felder[$i] != $extra) {
 					if (strpos($rs[$i], '@') === 0) {
-						$insert .= addslashes($rs[$i]);
+						$insert .= $this->mysqli->real_escape_string($rs[$i]);
 					}
 					else {
 						$field = $this->result->fetch_field_direct($i);
 						if (!in_array($field->type, [252, 253, 254]) AND $rs[$i] == '') {
 							$insert .= "NULL";
 						} else{
-							$insert .= "'".addslashes($rs[$i])."'";
+							$insert .= "'".$this->mysqli->real_escape_string($rs[$i])."'";
 						}
 					}
 					if ($feld_anzahl - 1 > $i) { $insert .= ', '; }

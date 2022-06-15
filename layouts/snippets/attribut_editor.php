@@ -7,12 +7,12 @@
 	$form_element_options = array(
 		array(
 			'value' => 'Text',
-			'output' => 'Text',
-			'title' => 'Einfaches Textfeld'
+			'output' => 'Eingabefeld',
+			'title' => 'Einfaches einzeiliges Eingabefeld'
 		),
 		array(
 			'value' => 'Zahl',
-			'output' => 'Zahl',
+			'output' => 'Zahl mit Tausendertrennzeichen',
 			'title' => 'Zahlenfeld'
 		),
 		array(
@@ -173,7 +173,7 @@ function submitDatatypeSelector() {
 }  
 
 function toLayerEditor(){	
-	location.href='index.php?go=Layereditor&selected_layer_id='+document.GUI.selected_layer_id.value;
+	location.href = 'index.php?go=Layereditor&selected_layer_id=' + document.GUI.selected_layer_id.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 }
 
 function create_aliasnames(){
@@ -230,7 +230,7 @@ function alias_replace(name){
 	}
 </style>
 
-<table style="width: 700px; margin: 0 40px 0 40px">
+<table style="width: 700px; margin: 15px 40px 0 40px">
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
@@ -243,7 +243,7 @@ function alias_replace(name){
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
+    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>
@@ -275,12 +275,12 @@ function alias_replace(name){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
 				</tr>
 			</table>
 		</td>
@@ -300,7 +300,7 @@ function alias_replace(name){
 			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 120); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
-					for ($i = 0; $i < count($this->attributes['type']); $i++){ ?>
+					for ($i = 0; $i < @count($this->attributes['type']); $i++){ ?>
 						<tr>
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
@@ -310,20 +310,22 @@ function alias_replace(name){
 									style="width: 27px"
 								>
 						  </td>
-						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Attribut</div>'; ?>
-						  	<input type="text"
-								  name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
+							<td align="left" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strAttributes .'</div>';
+								} ?>
+								<input type="text"
+									name="attribute_<?php echo $this->attributes['name'][$i]; ?>"
 									value="<?php echo $this->attributes['name'][$i]; ?>"
 									readonly
 								>
 						  </td>
 
 							<td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Formularelement</div>';
+								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strFormularElement . '</div>';
 								$type = ltrim($this->attributes['type'][$i], '_');
 								if(is_numeric($type)){ ?>
-									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
+									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
 								}
 								else {
 									echo '<select style="width:130px" name="form_element_' . $this->attributes['name'][$i] . '">';
@@ -343,37 +345,48 @@ function alias_replace(name){
 								} ?>
 							</td>
 
-						  <td align="left" valign="top">
-							<? if($i == 0)echo '<div class="fett scrolltable_header">Optionen</div>';
-								if($this->attributes['options'][$i] == '' AND $this->attributes['constraints'][$i] != '' AND !in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){
-									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+							<td align="left" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-						  ?>
+								if (
+									$this->attributes['options'][$i] == '' AND
+									$this->attributes['constraints'][$i] != '' AND
+									!in_array($this->attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+								) {
+									$this->attributes['options'][$i] = $this->attributes['constraints'][$i];
+								} ?>
 								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
 						  </td>
 
 						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a></div>'; ?>
+								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strAlias . '&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a></div>'; ?>
 						  	<input name="alias_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias'][$i]); ?>">
 						  </td>
 							
 							<?php
 							foreach ($supportedLanguages as $language){
 								if($language != 'german') { ?>
-									<td align="left" valign="top">
-										<? if($i == 0)echo '<div class="fett scrolltable_header">Aliasname '.$language.'</div>'; ?>
+									<td align="left" valign="top"><?
+										if ($i == 0) {
+											echo '<div class="fett scrolltable_header">' . $strAlias . ' ' . $language . '</div>';
+										} ?>
 										<input name="alias_<?php echo $language; ?>_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['alias_' . $language][$i]); ?>">
 									</td><?php
 								}
 							} ?>
 
-						  <td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Erläuterungen</div>'; ?>
+							<td align="left" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strAttributExplanations . '</div>';
+								} ?>
 								<textarea name="tooltip_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:120px"><?php echo htmlspecialchars($this->attributes['tooltip'][$i]); ?></textarea>
 							</td>
 
-							<td align="left" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Gruppe</div>'; ?>
+							<td align="left" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $this->strGroup . '</div>';
+								} ?>
 								<input name="group_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['group'][$i]); ?>">
 							</td>
 							
@@ -385,108 +398,118 @@ function alias_replace(name){
 							<?php
 							if ($this->attributes['arrangement'][$i] == 0) { $bgcolor = 'white'; }
 							if ($this->attributes['arrangement'][$i] == 1) { $bgcolor = '#faef1e'; } ?>
-							<td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Anordnung</div>';
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strArrangement . '</div>';
+								}
 								echo FormObject::createSelectField(
-											'arrangement_' . $this->attributes['name'][$i],
-											array(
-												array('value' => 0, 'output' => 'unter dem vorigen'),
-												array('value' => 1, 'output' => 'neben dem vorigen', 'style' => 'background-color: #faef1e')
-											),
-											$this->attributes['arrangement'][$i],
-											1,
-											"outline: 1px solid lightgrey; border: none; width: 78px; height: 18px; background-color: " . $bgcolor,
-											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
-										); ?>
+									'arrangement_' . $this->attributes['name'][$i],
+									array(
+										array('value' => 0, 'output' => $strUnderPrevious),
+										array('value' => 1, 'output' => $strBesidePrevious, 'style' => 'background-color: #faef1e')
+									),
+									$this->attributes['arrangement'][$i],
+									1,
+									"outline: 1px solid lightgrey; border: none; width: 85px; height: 18px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+								); ?>
 						  </td>
 
 							<?php
 							if($this->attributes['labeling'][$i] == 0) $bgcolor = 'white';
 							if($this->attributes['labeling'][$i] == 1) $bgcolor = '#faef1e';
 							if($this->attributes['labeling'][$i] == 2) $bgcolor = '#ff6600'; ?>
-						  <td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">Beschriftung</div>';
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strAttributeLabeling . '</div>';
+								}
 								echo FormObject::createSelectField(
-											'labeling_' . $this->attributes['name'][$i],
-											array(
-												array('value' => 0, 'output' => 'links neben dem Attribut', 'style' => 'background-color: white'),
-												array('value' => 1, 'output' => 'über dem Attribut', 'style' => 'background-color: #faef1e'),
-												array('value' => 2, 'output' => 'ohne', 'style' => 'background-color: #ff6600')
-											),
-											$this->attributes['labeling'][$i],
-											1,
-											"outline: 1px solid lightgrey; border: none; width: 88px; height: 18px; background-color: " . $bgcolor,
-											"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
-										); ?>
+									'labeling_' . $this->attributes['name'][$i],
+									array(
+										array('value' => 0, 'output' => $strLeftBesideAttribute, 'style' => 'background-color: white'),
+										array('value' => 1, 'output' => $strAboveAttribute, 'style' => 'background-color: #faef1e'),
+										array('value' => 2, 'output' => $strWithoutLabel, 'style' => 'background-color: #ff6600')
+									),
+									$this->attributes['labeling'][$i],
+									1,
+									"outline: 1px solid lightgrey; border: none; width: 88px; height: 18px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+								); ?>
 							</td>
 							
-						  <td align="center" valign="top">
-								<? if($i == 0)echo '<div style="margin-top: -9px;" class="fett scrolltable_header">Bei der<br>Suche</div>';
+							<td align="center" valign="top"><?
+								if($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
+								}
 								echo FormObject::createSelectField(
-											'mandatory_' . $this->attributes['name'][$i],
-											array(
-												array('value' => -1, 'output' => 'nicht sichtbar'),
-												array('value' => 0, 'output' => 'anzeigen'),
-												array('value' => 1, 'output' => 'Pflichtangabe')
-											),
-											$this->attributes['mandatory'][$i],
-											1,
-											'width: 75px'
-										); ?>
+									'mandatory_' . $this->attributes['name'][$i],
+									array(
+										array('value' => -1, 'output' => $strAttributeNotVisible),
+										array('value' => 0, 'output' => $strShowAttribute),
+										array('value' => 1, 'output' => $strMandatoryAtSearch)
+									),
+									$this->attributes['mandatory'][$i],
+									1,
+									'width: 75px'
+								); ?>
 							</td>
 
-							<td align="center" valign="top">
-								<? if($i == 0)echo '<div style="margin-top: -9px;" class="fett scrolltable_header">Für neuen<br>Datensatz</div>';
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strForNewDataset . '</div>';
+								}
 								echo FormObject::createSelectField(
-											'dont_use_for_new_' . $this->attributes['name'][$i],
-											array(
-												array('value' => -1, 'output' => 'nicht sichtbar'),
-												array('value' => 0, 'output' => 'anzeigen'),
-												array('value' => 1, 'output' => 'Werte nicht übernehmen')
-											),
-											$this->attributes['dont_use_for_new'][$i],
-											1,
-											'width: 75'
-										); ?>
+									'dont_use_for_new_' . $this->attributes['name'][$i],
+									array(
+										array('value' => -1, 'output' => $strAttributeNotVisible),
+										array('value' => 0, 'output' => $strShowAttribute),
+										array('value' => 1, 'output' => $strOmitAttributeValues)
+									),
+									$this->attributes['dont_use_for_new'][$i],
+									1,
+									'width: 75'
+								); ?>
 							</td>
 							
-							<td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header">sichtbar</div>'; ?>
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header">' . $strAttributeVisible . '</div>';
+								} ?>
 								<table style="width: 100%" cellspacing="0" cellpadding="0">
 									<tr>
 										<td align="left"><?
-								echo FormObject::createSelectField(
-											'visible_' . $this->attributes['name'][$i],
-											array(
-												array('value' => 0, 'output' => 'nein'),
-												array('value' => 1, 'output' => 'ja'),
-												array('value' => 2, 'output' => 'ja, wenn')
-											),
-											$this->attributes['visible'][$i],
-											1,
-											'width: 75px',
-											'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
-										); ?>
+											echo FormObject::createSelectField(
+												'visible_' . $this->attributes['name'][$i],
+												array(
+													array('value' => 0, 'output' => $this->strNo),
+													array('value' => 1, 'output' => $this->strYes),
+													array('value' => 2, 'output' => $strYesWhen)
+												),
+												$this->attributes['visible'][$i],
+												1,
+												'width: 75px',
+												'update_visibility_form(this.value, \''.$this->attributes['name'][$i].'\')'
+											); ?>
 										</td>
 										<td id="visibility_form_<? echo $this->attributes['name'][$i]; ?>" style="<? echo ($this->attributes['visible'][$i] == 2 ? '' : 'display:none') ?>">
 											<table style="width: 100%" cellspacing="0" cellpadding="0">
 												<tr>
 													<td><?
 														echo FormObject::createSelectField(
-																'vcheck_attribute_' . $this->attributes['name'][$i],
-																$this->attributes['name'],
-																$this->attributes['vcheck_attribute'][$i],
-																1
-															); ?>
+															'vcheck_attribute_' . $this->attributes['name'][$i],
+															$this->attributes['name'],
+															$this->attributes['vcheck_attribute'][$i],
+															1
+														); ?>
 													</td>
 													<td><?
 														echo FormObject::createSelectField(
-																	'vcheck_operator_' . $this->attributes['name'][$i],
-																	array('=', '!=', '<', '>', 'IN'),
-																	$this->attributes['vcheck_operator'][$i],
-																	1,
-																	'width: 35px'
-																); ?>
+															'vcheck_operator_' . $this->attributes['name'][$i],
+															array('=', '!=', '<', '>', 'IN'),
+															$this->attributes['vcheck_operator'][$i],
+															1,
+															'width: 35px'
+														); ?>
 													</td>
 													<td>
 														<input type="text" style="width: 60px" name="vcheck_value_<? echo $this->attributes['name'][$i]; ?>" value="<? echo htmlentities($this->attributes['vcheck_value'][$i]); ?>">
@@ -500,15 +523,19 @@ function alias_replace(name){
 
 							<?php
 							if (in_array($this->formvars['selected_layer_id'], $quicksearch_layer_ids)) { ?>
-								<td align="center" valign="top">
-									<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-search" style="font-size:20px" title="Für die Schnellsuche verwenden"></i></div>'; ?>
+								<td align="center" valign="top"><?
+									if ($i == 0) {
+										echo '<div class="fett scrolltable_header"><i class="fa fa-search" style="font-size:20px" title="' . $strUseForQuickSearchTitle .'"></i></div>';
+									} ?>
 						  		<input name="quicksearch_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['quicksearch'][$i] ? ' checked="true"' : ''); ?>>
 						  	</td><?php
-							} ?>							
+							} ?>
 							
-							<td align="center" valign="top">
-								<? if($i == 0)echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="Im Rastertemplate als Vorschau-Attribut verwenden"></i></div>'; ?>
-						  	<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
+							<td align="center" valign="top"><?
+								if ($i == 0) {
+									echo '<div class="fett scrolltable_header"><i class="fa fa-th" style="font-size:23px" title="' . $strUseInRasterTemplate . '"></i></div>';
+								} ?>
+								<input name="raster_visibility_<?php echo $this->attributes['name'][$i]; ?>" type="checkbox" value="1"<?php echo ($this->attributes['raster_visibility'][$i] ? ' checked="true"' : ''); ?>>
 						  </td>
 							<td>
 								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

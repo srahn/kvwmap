@@ -1,3 +1,14 @@
+<?
+	global $sizes;
+	$size =	$sizes[$this->user->rolle->gui];
+	$menue_height = $this->user->rolle->nImageHeight
+									+ $size['scale_bar']['height'] +
+									+ ((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0)
+									+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0)
+									- $this->reference_map->reference->height
+									- 22;
+?>
+
 <script type="text/javascript">
 function changemenue(id, auto_close){
 	if(auto_close == 1){
@@ -53,10 +64,14 @@ function showMenue() {
 <?	
   if (!$this->user->rolle->hideMenue) {
 		include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
-		$wappen_html = '<img src="' . WAPPENPATH . $this->Stelle->getWappen() . '" alt="Wappen" align="middle" border="0">';
-		$wappen_link = $this->Stelle->getWappenLink();
-		if ($wappen_link != '') {
-			$wappen_html = '<a href="' . $wappen_link . '" target="_blank">' . $wappen_html . '</a>';
+		if (MENU_WAPPEN != 'kein') {
+			$wappen = $this->Stelle->getWappen();
+			$wappen_size = getimagesize(WAPPENPATH . $wappen['wappen']);
+			$menue_height = $menue_height - $wappen_size[1];
+			$wappen_html = '<img src="' . WAPPENPATH . $wappen['wappen'] . '" alt="Wappen" align="middle" border="0">';
+			if ($wappen['wappen_link'] != '') {
+				$wappen_html = '<a href="' . $wappen['wappen_link'] . '" target="_blank">' . $wappen_html . '</a>';
+			}
 		}
 		$refmap_html = '
 			<input
@@ -86,20 +101,27 @@ function showMenue() {
 					echo $menue->html();
 				}
 				$this->menues = Menue::loadMenue($this, 'all-buttons');		# dann alle Menüpunkte, wobei Obermenüpunkte, die Buttons sind, weggelassen werden
+				$menue_height = $menue_height - 38;
 			}
-			else $this->menues = Menue::loadMenue($this, 'all-no_buttons');		# ansonsten alle Menüpunkte, keine Buttons
+			else {
+				$this->menues = Menue::loadMenue($this, 'all-no_buttons');		# ansonsten alle Menüpunkte, keine Buttons
+			}
+			?><div id="menueScrollTable" style="max-height: <? echo $menue_height; ?>"><?
 			foreach($this->menues as $menue){
 				if($menue->get('menueebene') == 1) echo $menue->html();
 			} ?>
+			</div>
 		</div>
 
-		<?
-		if($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben")echo $refmap_html;
-		
-		if(MENU_WAPPEN=="unten"){ ?>
-		<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-			echo $wappen_html; ?>
+		<div id="menuefooter">
+			<?
+			if($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben")echo $refmap_html;
+			
+			if(MENU_WAPPEN=="unten"){ ?>
+			<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
+				echo $wappen_html; ?>
+			</div>
+			<? } ?>
 		</div>
-		<? }
-  } ?>
+<? } ?>
 </div>

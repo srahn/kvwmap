@@ -40,6 +40,10 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 
 set_error_handler("CustomErrorHandler");
 
+if (!file_exists('credentials.php') OR !file_exists('config.php')) {
+	echo '<h1>kvwmap-Server</h1>Die Anwendung kvwmap ist noch nicht fertig eingerichtet.<br>Dazu kann das Script <a href="install.php">install.php</a> verwendet werden.';
+	exit;
+}
 include('credentials.php');
 include('config.php');
 
@@ -118,11 +122,9 @@ ob_start ();    // Ausgabepufferung starten
 $formvars = $_REQUEST;
 
 $go = (array_key_exists('go', $formvars) ? $formvars['go'] : '');
-
 if (array_key_exists('go_plus', $formvars) and $formvars['go_plus'] != '') {
 	$go = $go.'_'.$formvars['go_plus'];
 }
-
 ###########################################################################################################
 define('CASE_COMPRESS', false);
 #																																																					#
@@ -200,6 +202,7 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
+
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -208,7 +211,6 @@ if (!FAST_CASE) {
 		include(PLUGINS . $kvwmap_plugins[$i] . '/control/index.php');
 	}
 }
-
 # Übergeben des Anwendungsfalles
 $debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
 function go_switch($go, $exit = false) {
@@ -242,12 +244,14 @@ function go_switch($go, $exit = false) {
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
 				$GUI->saveMap('');
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
+					$currenttime=date('Y-m-d H:i:s',time());
+					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				}
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
-			}break;
+			} break;
 			
 			case 'layer_check_oids' : {
 				$GUI->layer_check_oids();
@@ -629,6 +633,7 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten speichern
 			case 'Sachdaten_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
 			}break;
 
@@ -746,6 +751,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->mapCommentStore();
 			}break;
 
@@ -867,10 +873,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Druckausschnitt_loeschen' : {
+				$GUI->check_csrf_token();
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -891,7 +899,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Schnelle_Druckausgabe' : {
-				if($GUI->formvars['druckrahmen_id'] == ''){
+				if ($GUI->formvars['druckrahmen_id'] == '') {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
@@ -904,10 +912,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Notizenformular_Senden' : {
+				$GUI->checkCaseAllowed('Notizenformular');
 				$GUI->notizSpeichern();
 			} break;
 
 			case 'Notiz_Loeschen' : {
+				$GUI->checkCaseAllowed('Notizenformular');
 				$GUI->notizLoeschen($GUI->formvars['oid']);
 				$GUI->loadMap('DataBase');
 				$currenttime=date('Y-m-d H:i:s',time());
@@ -922,14 +932,17 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'NotizKategorie_hinzufuegen' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategoriehinzufügen();
 			} break;
 
 			case 'NotizKategorie_aendern' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategorieAendern();
 			} break;
 
 			case 'NotizKategorie_loeschen' : {
+				$GUI->checkCaseAllowed('Notizenformular_KatVerwaltung');
 				$GUI->notizKategorieLoeschen();
 			} break;
 
@@ -1084,10 +1097,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
+				$GUI->check_csrf_token();
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1130,6 +1145,7 @@ function go_switch($go, $exit = false) {
 			} break;	
 
 			case 'Dokument_Loeschen' : {
+				$GUI->check_csrf_token();
 				$GUI->sachdaten_speichern();
 			} break;
 
@@ -1138,6 +1154,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'neuer_Layer_Datensatz_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->neuer_Layer_Datensatz_speichern();
 			} break;
 

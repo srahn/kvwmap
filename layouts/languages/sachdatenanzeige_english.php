@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 $strPrint="Print";
 $strSave="Save";
 $strReset="Reset";

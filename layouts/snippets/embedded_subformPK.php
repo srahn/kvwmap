@@ -77,10 +77,12 @@
 								if ($layer['attributes']['visible'][$j]) {
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if ($explosion[1] != 'collapsed') { ?>
-										<td class="gle-attribute-name">
+										<td class="gle-attribute-name" style="height: auto">
+										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
 												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
 											</a>
+										<? } ?>
 										</td><?
 									}
 								}
@@ -123,7 +125,7 @@
 							} 
 							if ($layer['privileg'] == 2 and $layer['shape'][$k][$layer['attributes']['Editiersperre']] != 't'){	?>
 							<td style="text-align: center">
-								<a href="javascript:void(0)" onclick="subdelete_data(<? echo $layer['Layer_ID']; ?>, '<? echo $element_id; ?>', <? echo $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>, '');"><img style="width: 18px" src="graphics/datensatz_loeschen.png"></a>
+								<a href="javascript:void(0)" onclick="subdelete_data(<? echo $layer['Layer_ID']; ?>, '<? echo $element_id; ?>', '<? echo $layer['shape'][$k][$layer['maintable'] . '_oid']; ?>', '');"><img style="width: 18px" src="graphics/datensatz_loeschen.png"></a>
 							</td>
 							<? } ?>
 						</tr><?
@@ -138,7 +140,7 @@
 		} ?>
 		<div style="width: 100%;text-align: center;margin-top: 4px">
 	<? if ($anzObj > 0){
-			if ($this->formvars['list_edit']) { ?>
+			if ($editable AND $this->formvars['list_edit']) { ?>
 				<a tabindex="1" class="buttonlink" href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 0)"><span><? echo $this->strCancel; ?></span></a>
 			<? }
 			if($editable OR $layer['template'] == 'generic_layer_editor_doc_raster.php'){ ?>

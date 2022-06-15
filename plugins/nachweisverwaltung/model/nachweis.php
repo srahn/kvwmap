@@ -57,11 +57,9 @@ class Nachweis {
 				*
       FROM 
 				nachweisverwaltung.n_nachweise
-			WHERE
-				gueltigkeit = 1
 			ORDER BY id
 			";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);  
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -80,10 +78,9 @@ class Nachweis {
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND
 				b.db_action = 'INSERT'
 			ORDER BY a.id";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -97,15 +94,14 @@ class Nachweis {
 	
 	function LENRIS_get_changed_nachweise(){
 		$sql = "
-			SELECT 
+			SELECT DISTINCT
 				a.*
       FROM 
 				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
 			WHERE
-				gueltigkeit = 1 AND 
 				b.db_action = 'UPDATE'
 			ORDER BY a.id";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				foreach ($nachweise as $index => $nachweis) {
@@ -122,11 +118,10 @@ class Nachweis {
 			SELECT 
 				id_nachweis
       FROM 
-				nachweisverwaltung.n_nachweise as a JOIN nachweisverwaltung.n_nachweisaenderungen as b on a.id = b.id_nachweis
+				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE
-				gueltigkeit = 1 AND 
-				b.db_action = 'DELETE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
+				db_action = 'DELETE'";
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
       if ($nachweise = pg_fetch_all($ret[1])) {
 				$json = json_encode($nachweise);
@@ -141,41 +136,61 @@ class Nachweis {
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'INSERT'";
-		$ret = $this->database->execSQL($sql,4, 1);    
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
 			$rows = pg_affected_rows($ret[1]);
 			echo $rows;
 		}
 	}
-	
+		
 	function LENRIS_confirm_changed_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
-    if (!$ret[0]) {
-			$rows = pg_affected_rows($ret[1]);
-			echo $rows;
+		$ret = $this->database->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'UPDATE'";
+			$ret = $this->database->execSQL($sql,4, 1);
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
 		}
 	}
-	
+
 	function LENRIS_confirm_deleted_nachweise($ids){
 		$sql = "
 			DELETE FROM 
 				nachweisverwaltung.n_nachweisaenderungen 
 			WHERE 
-				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
-		$ret = $this->database->execSQL($sql,4, 1);    
+				id_nachweis IN (" . $ids . ")";		# alle Einträge löschen, da es noch UPDATE-Einträge geben kann
+		$ret = $this->database->execSQL($sql,4, 1);
     if (!$ret[0]) {
-			$rows = pg_affected_rows($ret[1]);
-			echo $rows;
+			$sql = "
+				SELECT 
+					count(*)
+				FROM
+					nachweisverwaltung.n_nachweisaenderungen 
+				WHERE 
+					id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
+			$ret = $this->database->execSQL($sql,4, 1);
+			if (!$ret[0]) {
+				$rest = pg_fetch_row($ret[1]);
+				echo (substr_count($ids, ',') + 1 - $rest[0]);
+			}
 		}
 	}		
 
 	function LENRIS_get_document($document){
-		if (strpos($document, NACHWEISDOCPATH) !== false AND file_exists($document)) {
+		if (strpos($document, NACHWEISDOCPATH) !== false AND strpos($document, '..') === false AND file_exists($document)) {
 			readfile($document);
 		}
 	}
@@ -646,28 +661,28 @@ class Nachweis {
   
 	function CreateNachweisDokumentVorschau($dateiname){		
 		$dir = dirname($dateiname);
-		$dateinamensteil=explode('.',$dateiname);
-		if(mb_strtolower($dateinamensteil[1]) == 'pdf'){
-			$pagecount = getNumPagesPdf($dateiname);
-			if($pagecount > 1)$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
-																											 stroke none fill white text 98,102 \''.$pagecount.'\'
-																																							text 60,150 \'Seiten\'"';
+		$dateinamensteil = explode('.',$dateiname);
+		$type = mb_strtolower($dateinamensteil[1]);
+		if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+			if ($type == 'pdf'){
+				$pagecount = getNumPagesPdf($dateiname);
+				if ($pagecount > 1) {
+					$label = '-pointsize 11 -draw "stroke #0009 fill #0007 stroke-width 2 circle 120,120 200,120 
+																												 stroke none fill white text 98,102 \''.$pagecount.'\'
+																																								text 60,150 \'Seiten\'"';
+				}
+			}
+			$command = IMAGEMAGICKPATH.'convert -density 200x200 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
+			exec($command, $ausgabe, $ret);
 		}
-		$command = IMAGEMAGICKPATH.'convert -density 300x300 '.$dateiname.'[0] -quality 75 -background white '.$label.' -flatten -resize 1800x1800\> '.$dateinamensteil[0].'_thumb.jpg';
-		exec($command, $ausgabe, $ret);
-		if($ret == 1){
-			$type = $dateinamensteil[1];
-  		switch ($type) {  			
-  			default : {
-  				$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
-          $textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
-          $textwidth = $textbox[2] - $textbox[0] + 13;
-          $blue = ImageColorAllocate ($image, 26, 87, 150);
-          imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
-          $thumbname = $dateinamensteil[0].'_thumb.jpg';
-          imagejpeg($image, $thumbname);
-  			}
-  		}
+  	else {
+			$image = imagecreatefromgif(GRAPHICSPATH.'document.gif');
+			$textbox = imagettfbbox(13, 0, WWWROOT.APPLVERSION.'fonts/arial.ttf', '.'.$type);
+			$textwidth = $textbox[2] - $textbox[0] + 13;
+			$blue = ImageColorAllocate ($image, 26, 87, 150);
+			imagettftext($image, 13, 0, 22, 34, $blue, WWWROOT.APPLVERSION.'fonts/arial_bold.ttf', $type);
+			$thumbname = $dateinamensteil[0].'_thumb.jpg';
+			imagejpeg($image, $thumbname);
 		}
   }
 	

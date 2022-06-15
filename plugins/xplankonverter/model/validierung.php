@@ -80,6 +80,32 @@ class Validierung extends PgObject {
 		return $regeln_existieren;
 	}
 
+	function plan_attribute_has_value() {
+		$has_value = true;
+		$sql = "
+			SELECT
+				count(*) = 1 AS has_value
+			FROM
+				xplan_gml.xp_plan
+			WHERE
+				konvertierung_id = " . $this->konvertierung_id . " AND
+				" . implode(' AND ', json_decode(str_replace('}', ']', str_replace('{', '[', $this->get('functionsargumente'))))) . "
+		";
+		$this->debug->show('plan_attribute_has_value sql: ' . $sql, false);
+		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
+		$has_value = $result['has_value'] == 't';
+		$validierungsergebnis = new Validierungsergebnis($this->gui);
+		$validierungsergebnis->create(
+			array(
+				'konvertierung_id' => $this->konvertierung_id,
+				'validierung_id' => $this->get('id'),
+				'status' => ($has_value ? 'Erfolg' : 'Fehler'),
+				'msg' => $this->get('msg_' . ($has_value ? 'success' : 'error'))
+			)
+		);
+		return $has_value;
+	}
+
 	function sql_ausfuehrbar($regel) {
 		$this->debug->show('<br>Validiere ob sql_ausfuehrbar: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
@@ -193,11 +219,11 @@ class Validierung extends PgObject {
 		else {
 			$sql = $this->str_ilreplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND ",
-				#"WHERE " . $geometry_col . " IS NULL AND (",
+				//"WHERE " . $geometry_col . " IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
-			#$sql .= ')';
+			$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
@@ -207,7 +233,7 @@ class Validierung extends PgObject {
 
 		$result = pg_query($this->database->dbConn, $sql);
 		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
-
+		
 		while ($row = pg_fetch_assoc($result)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -239,7 +265,7 @@ class Validierung extends PgObject {
 	function geometrie_isvalid($regel, $konvertierung) {
 		$this->debug->show('<br>Validate geom_isvalid:', Validierung::$write_debug);
 		$all_geom_isvalid = true;
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		# shape or gmlas?
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
@@ -371,7 +397,7 @@ class Validierung extends PgObject {
 		$all_within_plan = true;
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 		# Default Shape (the_geom), gmlas (position)
 
@@ -400,7 +426,7 @@ class Validierung extends PgObject {
 				$sql,
 				" SELECT
 					gid,
-					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(ST_Transform(" . $plantype . ".raeumlichergeltungsbereich," . $konvertierung->get('input_epsg') . ")," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				 ",
 				stripos($sql, 'select'),
@@ -413,7 +439,7 @@ class Validierung extends PgObject {
 			$sql = substr_replace(
 				$sql,
 				" SELECT
-					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(ST_Transform(" . $plantype . ".raeumlichergeltungsbereich," . $konvertierung->get('input_epsg') . ")," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				 ",
 				stripos($sql, 'select'),
@@ -530,7 +556,7 @@ class Validierung extends PgObject {
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
 
 		# Spaltenname der Geometrie ermitteln
-		$sourcetype = $regel->is_source_shape_or_gmlas($regel);
+		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		$geometry_col = ($sourcetype == 'gmlas') ? 'position' : 'the_geom';
 
 		# Plantyp abfragen

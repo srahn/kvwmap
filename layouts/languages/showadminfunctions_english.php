@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 	$strTitle="Administration";
-	$strUpdateCode="Update Code";
+	$strUpdateCode="Update Code and Databases";
 	$strUpdateDBs="Update Databases";
 	$strComponent="Component";
 	$strConfigParams="Config Parameters";

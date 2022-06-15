@@ -2,9 +2,8 @@
 	global $selectable_limits;
 	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
-	include(SNIPPETS.'sachdatenanzeige_functions.php'); 
+	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
-
 	<style>
 		table.tgle td{
 			font-size: <? echo $this->user->rolle->fontsize_gle; ?>px;

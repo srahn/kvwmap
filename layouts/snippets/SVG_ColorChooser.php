@@ -25,6 +25,7 @@ var color = "#ffffff";
 function mousedown(evt){
 	top.document.getElementById("sample2").style.backgroundColor = color;
 	top.document.GUI.rgb.value = rgb1[0]+" "+rgb1[1]+" "+rgb1[2];
+	top.document.GUI.hex.value = color;
 	setSquare(adeg);
 }
 

@@ -42,6 +42,10 @@
 		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
 	
+	function add_buffer_submit(){
+		document.getElementById("svghelp").SVGadd_buffer_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}	
+	
 	function add_parallel_polygon_submit(){
 		document.getElementById("svghelp").SVGadd_parallel_polygon_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
@@ -157,8 +161,8 @@
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
 		var ortho_point_vertices = new Array();
-		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x']).'];
-		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y']).'];
+		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x'] ?: []).'];
+		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y'] ?: []).'];
 	}
 	var helmert;
 	var textx = '.$text_x.';
@@ -1286,7 +1290,7 @@ function mouseup(evt){
 			}
 			else{
 				top.document.getElementById(\'epsg_code\').value = viewer_epsg;
-				top.ahah("index.php", "go=spatial_processing&operation=transformPoint&point="+coords1+"&newSRID="+viewer_epsg+"&curSRID="+epsgcode+"&coordtype="+coordtype+"&code2execute=coord_input_submit();&resulttype=svgwkt", new Array(top.document.getElementById(\'input_coords\'), ""), new Array("setvalue", "execute_function"));
+				top.ahah("index.php", "go=spatial_processing&operation=transformPoint&point="+coords2.join(\' \')+"&newSRID="+viewer_epsg+"&curSRID="+epsgcode+"&coordtype="+coordtype+"&code2execute=coord_input_submit();&resulttype=svgwkt", new Array(top.document.getElementById(\'input_coords\'), ""), new Array("setvalue", "execute_function"));
 			}
 		}
 	}
@@ -1504,7 +1508,7 @@ function mouseup(evt){
 		dir_arrow.setAttribute("transform", "rotate("+angle+", 0 0)");
 	}
 	
-	function draw_point() {
+	function draw_point(){
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	  if(polygonfunctions == true){
 		 	if(enclosingForm.secondpoly.value == "true"){
@@ -1518,11 +1522,18 @@ function mouseup(evt){
 	}
 
 	// ------------------------texteinfuegepunkt setzen-----------------------------
-	function choose(worldx, worldy) {
+	function choose(worldx, worldy){
 	  // neuen punkt setzen
 		textx = worldx;
 		texty = worldy;
 	  sendBWlocation(worldx, worldy);
+	}
+	
+	function restart(){
+		textx = null;
+		texty = null;
+	  sendBWlocation(null, null);
+		redrawpoint();
 	}
 	';
 
@@ -2252,21 +2263,33 @@ function mouseup(evt){
 		bufferfunctions = true;
 		
 		top.document.getElementById("svghelp").SVGadd_parallel_polygon_submit = add_parallel_polygon_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		top.document.getElementById("svghelp").SVGadd_buffer_submit = add_buffer_submit;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
-		function add_buffer(){
-			buffer = prompt("Breite des Puffers in Metern:", enclosingForm.bufferwidth.value);
-			if(buffer){
+		function add_buffer(){		
+			var Msg = top.$("#message_box");
+			Msg.show();
+			content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+			content+= \'<div style="width:320px;height: 30px">Puffer hinzufügen</div>\';
+			content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="buffer_width" name="buffer_width" value="\'+enclosingForm.bufferwidth.value+\'">&nbsp;m</td></tr>\';
+			content+= \'<tr><td align="right">Segmente im Viertelkreis:&nbsp;</td><td><input style="width: 110px" type="text" id="segment_count" name="segment_count" value="8"></td></tr></table>\';
+			content+= \'<br><input type="button" value="OK" onclick="add_buffer_submit()">\';
+			Msg.html(content);
+		}
+			
+		function add_buffer_submit(){
+			top.$(\'#message_box\').hide();
+			if (enclosingForm.buffer_width.value) {
 				enclosingForm.secondpoly.value = true;
 				enclosingForm.firstpoly.value = true;
-				if(enclosingForm.newpathwkt.value != ""){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.newpathwkt.value+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if (enclosingForm.newpathwkt.value != "") {
+					newpathwkt = enclosingForm.newpathwkt.value;
 				}
-				else{
-					if(enclosingForm.newpath.value != ""){
-						newpath = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
-						top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+buffer+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				else {
+					if (enclosingForm.newpath.value != "") {
+						newpathwkt = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
+				top.ahah("index.php", "go=spatial_processing&path1="+newpathwkt+"&width="+enclosingForm.buffer_width.value+"&segment_count="+enclosingForm.segment_count.value+"&operation=buffer&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			}
 		}
 		
@@ -2402,7 +2425,7 @@ function mouseup(evt){
 	}
 	
 	function split_geometry(){
-		applypolygons();
+		applypolygons(false);
 		remove_second_line();
 		clear_first_line();
 		enclosingForm.last_doing.value = "split_geometry";
@@ -2657,17 +2680,23 @@ function mouseup(evt){
 		if(selected_vertex == vertex){
 			vertex_id_string = vertex.getAttribute("id");
 			vertex_id = vertex_id_string.split("_");
-			svg_path = enclosingForm.newpath.value+"";
-			components = svg_path.split(" ");
-			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig
-				components.splice(parseInt(vertex_id[1]), 2);
+			svg_path = String(enclosingForm.newpath.value);
+			var components = svg_path.split(" ");
+			if(components.length > 10){			// nur loeschen, wenn mindestens 4 Eckpunkte uebrig			
+				components.splice(parseInt(vertex_id[1]), 2);				
+				if(components[parseInt(vertex_id[1])-1] == "M" && ( components[parseInt(vertex_id[1])+2] == "M" || components[parseInt(vertex_id[1])+2] == undefined)){
+					components.splice(parseInt(vertex_id[1]-1), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+				}
+				if(components[parseInt(vertex_id[1])-3] == "M" && ( components[parseInt(vertex_id[1])] == "M" || components[parseInt(vertex_id[1])] == undefined)){
+					components.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+				}
 				if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 					components[parseInt(vertex_id[2])-2] = components[parseInt(vertex_id[1])];
 		  		components[parseInt(vertex_id[2])-1] = components[parseInt(vertex_id[1])+1];
 				}
 				new_svg_path = "M";
 				for(i = 1; i < components.length; i++){
-					if(components[i] != \'\'){
+					if(components[i] != \'\' && components[i] != undefined){
 						new_svg_path = new_svg_path + " " + components[i];
 					}
 				}
@@ -2676,14 +2705,23 @@ function mouseup(evt){
 				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, hier auch den Vertex loeschen
 					wktarray = get_array_from_wktstring(enclosingForm.newpathwkt.value);
 					wktarray.splice(parseInt(vertex_id[1]), 2);
+					
+					if(isNaN(wktarray[parseInt(vertex_id[1])-1]) && ( isNaN(wktarray[parseInt(vertex_id[1])+2]) || wktarray[parseInt(vertex_id[1])+2] == undefined)){
+						wktarray.splice(parseInt(vertex_id[1]-1), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+					}
+					if(isNaN(wktarray[parseInt(vertex_id[1])-3]) && ( isNaN(wktarray[parseInt(vertex_id[1])]) || wktarray[parseInt(vertex_id[1])] == undefined)){
+						wktarray.splice(parseInt(vertex_id[1]-3), 3);			// in diesem Fall hat das Teilpolygon nur 2 Eckpunkte und wird komplett entfernt
+					}
+					
 					if(vertex_id[2] != ""){			// Anfangs und Endpunkt
 						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
 						wktarray[parseInt(vertex_id[2])-1] = wktarray[parseInt(vertex_id[1])+1];
 					}
+					console.log(wktarray);
 					wktstring = "";
 					komma = 1;
 					for(i = 0; i < wktarray.length; i++){
-						if(wktarray[i] != ""){
+						if(wktarray[i] != "" && wktarray[i] != undefined){
 							wktstring = wktstring + wktarray[i];
 							if(i > 0 && wktarray[i].lastIndexOf(")") == -1 && wktarray[i+1].lastIndexOf(")") == -1){		// Kommas einfuegen
 								if(komma == 2){
@@ -3135,7 +3173,7 @@ function mouseup(evt){
 		redraw();
 	}
 
-	function applypolygons(){
+	function applypolygons(isvalid_check = true){
 		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
@@ -3144,7 +3182,9 @@ function mouseup(evt){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 			}
 		}
-		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		if (isvalid_check) {
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		}
 		remove_second_poly();
 	}
 	
@@ -3626,7 +3666,14 @@ $measurefunctions = '
 				
 	function deletebuttons($strUndo, $strDelete){
 		global $last_x;
-		$deletebuttons = '
+		$deletebuttons = removebuttons($strDelete);
+		$deletebuttons.= undobuttons($strUndo);
+		return $deletebuttons;
+	}
+	
+	function removebuttons($strDelete){
+		global $last_x;
+		$removebuttons = '
 	      <g id="new" onmousedown="restart();" transform="translate('.$last_x.' 0 )">
 					<rect id="new0" onmouseover="show_tooltip(\''.$strDelete.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(4 5) scale(0.8)">
@@ -3650,7 +3697,12 @@ $measurefunctions = '
 					</g>
 	      </g>';
 		$last_x += 36;
-		$deletebuttons.= '
+		return $removebuttons;
+	}
+	
+	function undobuttons($strUndo){
+		global $last_x;
+		$undobuttons = '
 	      <g id="undo" onmousedown="deletelast(evt);" transform="translate('.$last_x.' 0)">
 					<rect id="undo0" onmouseover="show_tooltip(\''.$strUndo.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton" transform="translate(5 5) scale(1)">
@@ -3665,8 +3717,8 @@ $measurefunctions = '
 	      </g>
 		';
 		$last_x += 36;
-		return $deletebuttons;
-	}
+		return $undobuttons;
+	}	
 	
 	function polygonbuttons($strDrawPolygon, $strCutByPolygon){
 		global $last_x;

@@ -31,13 +31,12 @@ class wfs{
 		$this->gml = url_get_contents($request, $this->username, $this->password);
 		return $request;
 	}
-	
-	function describe_featuretype_request(){
-		$request = $this->url.'&service=WFS&request=DescribeFeatureType&version='.$this->version.'&typename='.$this->typename;
-		#echo $request;
+
+	function describe_featuretype_request() {
+		$request = $this->url . (substr(trim($this->url), -1) == '?' ? '' : '&') . 'SERVICE=WFS&REQUEST=DescribeFeatureType&VERSION=' . $this->version . '&TYPENAME=' . $this->typename;
 		$this->gml = url_get_contents($request, $this->username, $this->password);
 	}
-	
+
 	function getTargetNamespace(){
 		$exp = explode('targetNamespace="', $this->gml);
 		$this->targetnamespace = substr($exp[1], 0, strpos($exp[1], '"'));
@@ -74,6 +73,9 @@ class wfs{
 					case 'LIKE' : {									# geht noch nicht, weil man den requeststring hierfür url-encoden muss und dann ist er zu lang 
 						$operator = 'PropertyIsLike';
 						$operator_attributes = " wildCard='*' singleChar='.' escape='!'";
+						if (strpos($values[$i], '%') === false) {
+							$values[$i] = '%' . $values[$i] . '%';
+						}
 						$values[$i] = str_replace('%', '*', $values[$i]);
 					}break;
 				}
@@ -106,36 +108,39 @@ class wfs{
 					</Filter>
 			*/
 	}
-	
-	function parse_gml($parse_object){
-		# Diese Funktion parst das GML und sucht nach dem übergebenem Tagnamen '$parse_object' und erstellt ein Array von Objekten, die diesem Namen entsprechen
-		# Jedes Objekt ist wiederum ein Array, deren Elemente die im Objekt enthaltenen XML-Tags sind
-		# Jeder XML-Tag ist auch ein Array, dessen Elemente die verschiedenen Eigenschaften des Tags sind (tag,value,type,level,attributes)
-		# attributes ist ein Array, welches die Attribute des Tags enthält
-    $parser = xml_parser_create();
-    xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
-    xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
-    xml_parse_into_struct($parser, $this->gml, $values, $tags);
-    xml_parser_free($parser);
-		
-		foreach($tags as $key=>$val){
-			if(strpos($key, $parse_object) !== false){
-      	$ranges = $val;
-        for($i=0; $i < count($ranges); $i+=2){
-        	$offset = $ranges[$i] + 1;
-          $len = $ranges[$i + 1] - $offset;
-          $objects[] = array_slice($values, $offset, $len);
-        }
-    	}
-    }
-    $this->objects = $objects;
+
+	/**
+	* Diese Funktion parst das GML und sucht nach dem übergebenem Tagnamen '$parse_object' und erstellt ein Array von Objekten, die diesem Namen entsprechen
+	* Jedes Objekt ist wiederum ein Array, deren Elemente die im Objekt enthaltenen XML-Tags sind
+	* Jeder XML-Tag ist auch ein Array, dessen Elemente die verschiedenen Eigenschaften des Tags sind (tag,value,type,level,attributes)
+	* attributes ist ein Array, welches die Attribute des Tags enthält
+	*/
+	function parse_gml($parse_object) {
+		$objects = array();
+		$parser = xml_parser_create();
+		xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+		xml_parse_into_struct($parser, $this->gml, $values, $tags);
+		xml_parser_free($parser);
+		foreach ($tags as $key => $val) {
+			if (strpos($key, $parse_object) !== false) {
+				$ranges = $val;
+				for ($i = 0; $i < count($ranges); $i += 2) {
+					$offset = $ranges[$i] + 1;
+					$len = $ranges[$i + 1] - $offset;
+					$objects[] = array_slice($values, $offset, $len);
+				}
+			}
+		}
+		$this->objects = $objects;
 	}
-	
+
 	function rename_features(){
 		$this->gml = preg_replace('/\w+_feature/', 'gml:featureMember', $this->gml);
 	}
 
 	function extract_features(){
+		$features = array();
 		# liefert die Datensätze einer getfeature-Abfrage (zuvor muss get_feature_request() ausgeführt werden)
 		if (strpos($this->gml, 'gmlx:featureMember') !== false) {
 			$this->parse_gml('gmlx:featureMember');
@@ -190,26 +195,61 @@ class wfs{
 					# evtl. Namespace davor entfernen
 					$this->objects[$i][$j]["tag"] = str_replace($this->namespace . ':', '', $this->objects[$i][$j]["tag"]);
 		  		$features[$i]['value'][$this->objects[$i][$j]["tag"]] = $this->objects[$i][$j]["value"];
-				}
+				}				
+			}
+			if ($features[$i]['value']['gml:lowerCorner'] != '') {
+				$lc = explode(' ', $features[$i]['value']['gml:lowerCorner']);
+				$uc = explode(' ', $features[$i]['value']['gml:upperCorner']);
+				$features[$i]['bbox'] = 'POLYGON((' . 
+																	$features[$i]['value']['gml:lowerCorner'] . ', ' . 
+																	$uc[0] . ' ' . $lc[1] . ', ' . 
+																	$features[$i]['value']['gml:upperCorner'] . ', ' . 
+																	$lc[0] . ' ' . $uc[1] . ', ' . 
+																	$features[$i]['value']['gml:lowerCorner'] . 
+																'))';
 			}
   	}
 	  return $features;
 	}
-	
-	function get_attributes(){
-		# liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgeführt werden) 
-		$this->parse_gml('sequence');
-		for($j = 0; $j < count($this->objects[0]); $j++){
-			# nur offene oder komplette element-Tags
-			if(strpos($this->objects[0][$j]["tag"], 'element') !== false AND ($this->objects[0][$j]["type"] == 'complete' OR $this->objects[0][$j]["type"] == 'open')){
-				# und keine Geometrie-Tags
-				if($this->objects[0][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND $this->objects[0][$j]["attributes"]["type"] != 'gml:PointPropertyType'){
-	  			$attribute['name'] = $this->objects[0][$j]["attributes"]["name"];
-					$attributes[] = $attribute;
+
+	/*
+	* liefert die Sachattribute eines WFS-Layers (zuvor muss describe_featuretype_request() ausgeführt werden) 
+	* erstmal den richtigen Featuretype finden, falls mehrere geliefert wurden
+	*/
+	function get_attributes() {
+		$attributes = array();
+		$this->parse_gml('schema');
+		$index = -1;
+		if (count($this->objects) > 0) {
+			for ($j = 0; $j < count($this->objects[0]); $j++) {
+				if (in_array($this->objects[0][$j]["tag"], ['element', 'xsd:complexType']) AND in_array($this->objects[0][$j]["type"], ['open', 'complete']) AND $this->objects[0][$j]["level"] == 2) {
+					$index++;
+					if ($this->objects[0][$j]["attributes"]['name'] == str_replace($this->namespace . ':', '', $this->typename) OR
+							$this->objects[0][$j]["attributes"]['name'] == str_replace($this->namespace . ':', '', $this->typename. 'Type')) {
+						break;
+					}
+				}
+			}
+			$this->parse_gml('sequence');
+			if (array_key_exists($index, $this->objects)) {
+				for ($j = 0; $j < count($this->objects[$index]); $j++) {
+					# nur offene oder komplette element-Tags
+					if(strpos($this->objects[$index][$j]["tag"], 'element') !== false AND ($this->objects[$index][$j]["type"] == 'complete' OR $this->objects[$index][$j]["type"] == 'open')) {
+						# und keine Geometrie-Tags
+						if (
+							$this->objects[$index][$j]["attributes"]["type"] != 'gml:GeometryPropertyType' AND
+							$this->objects[$index][$j]["attributes"]["type"] != 'gml:MultiPolygonPropertyType' AND
+							$this->objects[$index][$j]["attributes"]["type"] != 'gml:PolygonPropertyType' AND
+							$this->objects[$index][$j]["attributes"]["type"] != 'gml:PointPropertyType'
+						) {
+			  			$attribute['name'] = $this->objects[$index][$j]["attributes"]["name"];
+							$attributes[] = $attribute;
+						}
+					}
 				}
 			}
 		}
-	  return $attributes;
+		return $attributes;
 	}
 }
 ?>

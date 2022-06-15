@@ -8,7 +8,7 @@
 		$parent_privileges_checkbox = '
 			<div class="apt-use_parent_privileges">
 				<input id="parent' . $this->stelle->id . '" value="1" type="checkbox" onclick="toggle_privileges(this);" name="use_parent_privileges' . $this->stelle->id . '" '. ($this->layer[0]['use_parent_privileges'] ? 'checked="true"' : '') .'>
-				<label for="parent' . $this->stelle->id . '" class="fett">' . $strUseParentPrivileges . '</label>
+				<label for="parent' . $this->stelle->id . '" class="fett">' . $strUseParentPrivileges . '&nbsp;('.$this->layer[0]['used_layer_parent_bezeichnung'].')</label>
 			</div>';
 	}
 ?>
@@ -57,7 +57,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 	}
 	if (array_key_exists('name', $this->attributes)) {
 		$attributenames = implode('|', $this->attributes['name']);
-		for ($i = 0; $i < count($this->attributes['type']); $i++){
+		for ($i = 0; $i < @count($this->attributes['type']); $i++){
 			if ($this->stelle->id == ''){
 				$this->attributes_privileges[$this->attributes['name'][$i]] = $this->attributes['privileg'][$i]; 	# die default-Rechte kommen aus layer_attributes
 				$this->attributes_privileges['tooltip_'.$this->attributes['name'][$i]] = $this->attributes['query_tooltip'][$i]; 	# die default-Rechte kommen aus layer_attributes

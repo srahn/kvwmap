@@ -5,6 +5,7 @@ class Layer extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'layer');
+		$this->stelle_id = $gui->stelle->id;
 		$this->identifier = 'Layer_ID';
 	}
 
@@ -199,6 +200,224 @@ class Layer extends MyObject {
 				$layers
 			)
 		) . '</li></ul>';
+	}
+
+	function get_group_name() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		$group = LayerGroup::find_by_id($this->gui, $this->get('Gruppe'));
+		if ($group->get('obergruppe') != '') {
+			$obergroup = LayerGroup::find_by_id($this->gui, $group->get('obergruppe'));
+			return $obergroup->get('Gruppenname') . '|' . $group->get('Gruppenname');
+		}
+		else {
+			return $group->get('Gruppenname');
+		}
+	}
+
+	function get_baselayers_def($stelle_id) {
+		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		#echo '<p>get_baselayer_def for Layer: ' . $this->get('Name');
+
+		include_once(CLASSPATH . 'LayerClass.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$layerAttributes = new stdClass();
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+			$key = $attr->get('name');
+			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
+			$layerAttributes->$key = $value;
+		}
+		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
+		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
+		$layerdef = (Object) array(
+			'img' => $this->get('icon'),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'options' => $this->get_baselayer_options(),
+			'shortLabel' => $this->get('Name'),
+			'img' => $legendgraphic,
+			'url' => $this->get_baselayer_url()
+		);
+		return $layerdef;
+	}
+
+	function get_baselayer_options() {
+		if (strpos($this->get('Data'), '{') === 0) {
+			$data = json_decode($this->get('Data'));
+			$data->options->attribution = $this->get('datasource');
+			return $data->options;
+		}
+		else {
+			return (Object) array(
+				'attribution' => $this->get('datasource')
+			);
+		}
+	}
+
+	function get_baselayer_url() {
+		if ($this->get('Data') == '') {
+			return $this->get('connection');
+		}
+		if (strpos($this->get('Data'), '{') === 0) {
+			$data = json_decode($this->get('Data'));
+			return $data->url;
+		}
+		else {
+			return $this->get('Data');
+		}
+	}
+
+	function get_overlays_def($stelle_id) {
+		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
+		include_once(CLASSPATH . 'LayerClass.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$layerAttributes = new stdClass();
+		foreach (LayerAttribute::find_visible($this->gui, $stelle_id, $this->get('Layer_ID')) AS $attr) {
+			$key = $attr->get('name');
+			$value = ($attr->get('alias') == '' ? $attr->get('name') : $attr->get('alias'));
+			$layerAttributes->$key = $value;
+		}
+
+		switch ($this->get('connectiontype')) {
+			case 6 : { # WFS-Layer werden exportiert wie PostGIS Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' =>(int)$stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'Stelle_ID' => (int)$stelle_id,
+					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			} break;
+			case 7 : { # WMS-Layer
+				$type = 'WMS';
+				$url = explode('?', $this->get('connection'))[0];
+				$params = '';
+				$options = (Object) array(
+					'crs' => 'EPSG4326',
+					'version' => get_first_word_after($this->get('connection'), 'version=', ' ', '&'),
+					'layers' => get_first_word_after($this->get('connection'), 'layers=', ' ', '&'),
+					'format' => 'image/png',
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name'),
+					'opacity' => $this->opacity / 100
+				);
+			} break;
+			case 9 : { # PostGIS-Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' => (int)$stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'Stelle_ID' => (int)$stelle_id,
+					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			} break;
+			default : { # currently same as PostGIS-Layer
+				$type = 'GeoJSON';
+				$url = URL . APPLVERSION . 'index.php';
+				$params = (Object) array(
+					'gast' => (int)$stelle_id,
+					'go' => 'Daten_Export_Exportieren',
+					'Stelle_ID' => (int)$stelle_id,
+					'selected_layer_id' => (int)$this->get('Layer_ID'),
+					'export_format' =>  'GeoJSON',
+					'browserwidth' => 800,
+					'browserheight' => 600,
+					'epsg' => 4326,
+					'all' => 1
+				);
+				$options = (Object) array(
+					'transparent' => true,
+					'attribution' => $this->get('dataowner_name')
+				);
+			}
+		}
+
+		$classitem = $this->get('classitem');
+		$datentyp = $this->get('Datentyp');
+
+		$layerdef = (Object) array(
+			'thema' => $this->get_group_name(),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'abstract' => $this->get('kurzbeschreibung'),
+			'contactOrganisation' => $this->get('datasource'),
+			'contactPersonName' => $this->get('dataowner_name'),
+			'contactEMail' => $this->get('dataowner_email'),
+			'contactPhon' => $this->get('dataowner_tel'),
+			'actuality' => $this->get('uptodateness'),
+			'actualityCircle' => $this->get('updatecycle'),
+			'type' => $type,
+			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('Datentyp')],
+			'backgroundColor' => '#c1ffd8',
+			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
+			'url' => $url,
+			'params' => $params,
+			'options' => $options,
+			'classes' => array_map(
+				function($class) use ($classitem, $datentyp) {
+					return $class->get_layerdef($classitem, $datentyp);
+				},
+				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'), 'legendorder')
+			),
+#			'icon' => (Object) array(
+#				'iconUrl' => 'images/Haus.svg',
+#				'iconSize' => array(30, 30),
+#				'iconAnchor' => array(7, 0),
+#				'popupAnchor' => array(0, 0)
+#			),
+			'hideEmptyLayerAttributes' => true,
+			'layerAttributes' => $layerAttributes
+		);
+
+		if ($this->get('processing') != '') {
+			$processing = explode(';', $this->get('processing'));
+			if (count($processing) > 0) {
+				$layerdef->processing = (Object) array();
+				foreach ($processing AS $process) {
+					$parts = explode('=', $process);
+					switch ($parts[0]) {
+						case ('CHART_TYPE') : {
+							$layerdef->processing->chart_type = $parts[1];
+						} break;
+						case ('CHART_SIZE') : {
+							$layerdef->processing->style = (Object) array(
+								'radius' => $parts[1],
+								'fillOpacity' => 0.6,
+								"strokeOpacity" => 0.2,
+								"strokeWeight" => 3
+							);
+						} break;
+					}
+				}
+			}
+		}
+		if ($this->minScale != '') {
+			$layerdef->minScale = (int)$this->minScale;
+		}
+		if ($this->maxScale != '') {
+			$layerdef->maxScale = (int)$this->maxScale;
+		}
+		return $layerdef;
 	}
 }
 ?>

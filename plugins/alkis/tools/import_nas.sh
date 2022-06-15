@@ -60,13 +60,20 @@ convert_nas_files() {
 				mv $NAS_FILE $NAS_FILE_
 				$NAS_FILE=$NAS_FILE_
 			fi
+			NAS_FILE_C=${NAS_FILE//${WWW_PATH}/${WWW_PATH_C}}
 			NAS_DIR=$(dirname "${NAS_FILE}")
 			NAS_FILENAME=${NAS_FILE##*/}
 			NAS_BASENAME=${NAS_FILENAME%.*}
 			SQL_FILE="${NAS_DIR}/${NAS_BASENAME}.sql"
+			SQL_FILE_C=${SQL_FILE//${WWW_PATH}/${WWW_PATH_C}}
 			GFS_FILE="${NAS_DIR}/${NAS_BASENAME}.gfs"
 			
-			check_dublicate=`PGPASSWORD=$POSTGRES_PASSWORD psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2>> ${LOG_PATH}/${ERROR_FILE}`
+			if [ "${CONTAINER_RUN}" = "true" ] ; then
+				check_dublicate=`PGPASSWORD=$POSTGRES_PASSWORD psql -q -t -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2>> ${LOG_PATH}/${ERROR_FILE}`
+			else
+				check_dublicate=`docker exec -e PGPASSWORD=$POSTGRES_PASSWORD $PGSQL_CONTAINER psql -q -t -U $POSTGRES_USER -c "SELECT count(*) FROM ${POSTGRES_SCHEMA}.import WHERE datei = '${NAS_FILENAME}' AND status='eingelesen';" $POSTGRES_DBNAME 2>> ${LOG_PATH}/${ERROR_FILE}`
+			fi
+
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Abfragen der import-Tabelle."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -80,7 +87,11 @@ convert_nas_files() {
 				fi
 			fi
 
-			${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco DIM=2 -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			if [ "${CONTAINER_RUN}" = "true" ] ; then
+				${OGR_BINPATH}/ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco DIM=2 -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE} ${NAS_FILE} >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			else
+				docker exec $GDAL_CONTAINER ogr2ogr -f PGDump -append -a_srs EPSG:${EPSG_CODE} -nlt CONVERT_TO_LINEAR -lco DIM=2 -lco SCHEMA=${POSTGRES_SCHEMA} -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "$SCRIPT_PATH_C/$GFS_TEMPLATE" --config NAS_NO_RELATION_LAYER YES ${SQL_FILE_C} ${NAS_FILE_C} >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			fi
 		
 			#/usr/local/gdal/bin/ogr2ogr -f PGDump -append -a_srs EPSG:25833 -nlt CONVERT_TO_LINEAR -lco SCHEMA=alkis -lco CREATE_SCHEMA=OFF -lco CREATE_TABLE=OFF --config PG_USE_COPY YES --config NAS_GFS_TEMPLATE "../config/alkis-schema.gfs" --config NAS_NO_RELATION_LAYER YES /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.sql /var/www/data/alkis/ff/import/NAS/nba_landmv_lro_160112_1207von2024_288000_5986000.xml
 
@@ -123,7 +134,13 @@ execute_sql_transaction() {
 		if [ -f "${IMPORT_PATH}/import_transaction.sql" ] ; then
 			# execute transaction sql file
 			log "Lese Transaktionsdatei ein"
-			PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			
+			if [ "${CONTAINER_RUN}" = "true" ] ; then
+				PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${IMPORT_PATH}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			else
+				docker exec -e PGPASSWORD=$POSTGRES_PASSWORD $PGSQL_CONTAINER psql -U $POSTGRES_USER -f ${IMPORT_PATH_C}/import_transaction.sql $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+			fi
+			
 			if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 				err "Fehler beim Einlesen der Transaktions-Datei: ${IMPORT_PATH}/import_transaction.sql."
 				head -n 30 ${LOG_PATH}/${ERROR_FILE}
@@ -131,14 +148,27 @@ execute_sql_transaction() {
 				log "Einlesevorgang erfolgreich"
 				clear_import_folder
 				log "Post-Processing wird ausgeführt"
-				PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+				
+				if [ "${CONTAINER_RUN}" = "true" ] ; then
+					PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+				else
+					docker exec -e PGPASSWORD=$POSTGRES_PASSWORD $PGSQL_CONTAINER psql -U $POSTGRES_USER -c "SELECT ${POSTGRES_SCHEMA}.postprocessing();" $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+				fi
+				
 				if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 					err "Fehler beim Ausführen der Post-Processing-Funktion : ${POSTGRES_SCHEMA}.postprocessing()"
 					head -n 30 ${LOG_PATH}/${ERROR_FILE}
 				else
 					find ${POSTPROCESSING_PATH} -iname '*.sql' | sort |  while read PP_FILE ; do
 						log "${PP_FILE} wird ausgeführt"
-						PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+						PP_FILE_C=${PP_FILE//${WWW_PATH}/${WWW_PATH_C}}
+						
+						if [ "${CONTAINER_RUN}" = "true" ] ; then
+							PGPASSWORD=$POSTGRES_PASSWORD psql -h $POSTGRES_HOST -U $POSTGRES_USER -f ${PP_FILE} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+						else
+							docker exec -e PGPASSWORD=$POSTGRES_PASSWORD $PGSQL_CONTAINER psql -U $POSTGRES_USER -f ${PP_FILE_C} $POSTGRES_DBNAME >> ${LOG_PATH}/${LOG_FILE} 2>> ${LOG_PATH}/${ERROR_FILE}
+						fi
+						
 						if [ -n "$(grep -i 'Error\|Fehler\|FATAL' ${LOG_PATH}/${ERROR_FILE})" ] ; then
 							err "Fehler beim Ausführen der Post-Processing-Datei : ${PP_FILE}"
 						else
@@ -200,6 +230,27 @@ CONFIG_PHP=$(realpath ${SCRIPT_PATH}/../../../config.php)
 
 if [ -e "${CONFIG_PATH}/config.sh" ] ; then
   source ${CONFIG_PATH}/config.sh
+	
+	if [ "$DATEN_ORDNER" = "" ] ; then
+		DATEN_ORDNER="ff"
+	fi
+	
+	## lokale Pfade
+	WWW_PATH=$(realpath ${SCRIPT_PATH}/../../../../../)
+	DATA_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/eingang"
+	IMPORT_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/import"
+	LOG_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/logs"
+	POSTPROCESSING_PATH="${WWW_PATH}/data/alkis/${DATEN_ORDNER}/postprocessing"
+	
+	## Pfade in den Containern
+	WWW_PATH_C="/var/www"
+	IMPORT_PATH_C="/var/www/data/alkis/${DATEN_ORDNER}/import"
+	SCRIPT_PATH_C=${SCRIPT_PATH//${WWW_PATH}/${WWW_PATH_C}}
+		
+	if [ "$WWW_PATH_C" = "$WWW_PATH" ] ; then
+		CONTAINER_RUN="true"
+	fi	
+	
 	POSTGRES_HOST=$(grep "'POSTGRES_HOST'" $CONFIG_PHP | cut -d"'" -f4)
 	POSTGRES_USER=$(grep "'POSTGRES_USER'" $CONFIG_PHP | cut -d"'" -f4)
 	POSTGRES_PASSWORD=$(grep "'POSTGRES_PASSWORD'" $CONFIG_PHP | cut -d"'" -f4)

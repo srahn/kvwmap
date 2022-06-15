@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Flagstücks dörchschnöckern";
  $strGemkgschl="Slötel von de Gemarkung";
  $strGemkgGem="Gemarkung, Gemeen";

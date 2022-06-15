@@ -1,4 +1,4 @@
-﻿<?php
+<?php
  $strTitle="Layer properties task related";
  $strTask=" of the Task";
  $strQueryable="Queryable";

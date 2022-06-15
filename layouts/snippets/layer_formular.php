@@ -1,12 +1,12 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php'); 
-	include_once(CLASSPATH . 'FormObject.php');		?>
+	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
 	function gotoStelle(event, option_obj){
 		if(event.layerX > 300){
-			location.href = 'index.php?go=Stelleneditor&selected_stelle_id='+option_obj.value;
+			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
 	}
 
@@ -24,7 +24,7 @@
 	function testConnection() {
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
-			getMapURL = document.getElementById('connection').value+'&service=WMS&request=GetMap&srs=epsg:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&width=<?php echo $this->user->rolle->nImageWidth; ?>&height=<?php echo $this->user->rolle->nImageHeight; ?>';
+			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
 			document.getElementById('test_img').src = getMapURL;
 			document.getElementById('test_img').style.display='block';
 			document.getElementById('test_link').href=getCapabilitiesURL;
@@ -89,8 +89,12 @@
 		color: #111;
 	}
 	
-	#form input[type="text"], #form select, #form textarea{
-		width: 340px;
+	#form input[type="text"], #form select, #form textarea {
+		width: 95%;
+	}
+
+	#form textarea {
+		height: 350px;
 	}
 
 	#form input[type="numeric"] {
@@ -137,14 +141,14 @@
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
 					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
+					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strAttributes; ?></div></a></th>
+					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
 					<th><a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>"><div><? echo $strPrivileges; ?></div></a></th>
+					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
 					<? } ?>
 				</tr>
 			</table>
@@ -194,7 +198,7 @@
 										'',
 										'',
 										'',
-										'nicht duplizieren'
+										$strNotDublicate
 									); ?>&nbsp;
 									<span data-tooltip="<? echo $strDuplicateFromLayerIdHelp; ?>"></span>
 								</div>
@@ -275,7 +279,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataType; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="Datentyp">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -292,7 +296,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnectionType; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select id="connectiontype" name="connectiontype" onchange="updateConnection();">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -341,7 +345,7 @@
 									),
 									$this->formvars['connection_id']
 								); ?>
-								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								<a href="index.php?go=connections_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
 							</div>
 						</td>
 					</tr>
@@ -470,6 +474,16 @@
 						</td>
 					</tr>
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSizeUnits; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<select name="sizeunits">
+									<option value=""><?php echo $this->strPleaseSelect; ?></option>
+									<option <? if($this->formvars['sizeunits'] == MS_PIXELS){echo 'selected';} ?> value="<? echo MS_PIXELS; ?>">Pixel</option>
+									<option <? if($this->formvars['sizeunits'] == MS_METERS){echo 'selected';} ?> value="<? echo MS_METERS; ?>">Meter</option>								
+								</select>
+						</td>
+					</tr>					
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strClassification; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="layer_classification" type="text" value="<?php echo $this->formvars['classification']; ?>" size="50" maxlength="50">&nbsp;
@@ -495,7 +509,13 @@
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
-					</tr>			
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="identifier_text" type="text" value="<?php echo $this->formvars['identifier_text']; ?>" size="50" maxlength="50">
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -555,7 +575,7 @@
 								<select name="toleranceunits">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['toleranceunits'] == 'pixels'){echo 'selected';} ?> value="pixels">pixels</option>
-									<option <? if($this->formvars['toleranceunits'] == 'meters'){echo 'selected';} ?> value="meters">meters</option>								
+									<option <? if($this->formvars['toleranceunits'] == 'meters'){echo 'selected';} ?> value="meters">meters</option>
 								</select>
 						</td>
 					</tr>
@@ -564,7 +584,7 @@
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="querymap">
 									<option <? if($this->formvars['querymap'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-									<option <? if($this->formvars['querymap'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+									<option <? if($this->formvars['querymap'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 								</select>
 						</td>
 					</tr>
@@ -599,8 +619,8 @@
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['wms_server_version'] == '1.0.0'){echo 'selected';} ?> value="1.0.0">1.0.0</option>
 									<option <? if($this->formvars['wms_server_version'] == '1.1.0'){echo 'selected';} ?> value="1.1.0">1.1.0</option>
-									<option <? if($this->formvars['wms_server_version'] == '1.1.1'){echo 'selected';} ?> value="1.1.1">1.1.1</option>		 			
-									<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.0">1.3.0</option>		 			
+									<option <? if($this->formvars['wms_server_version'] == '1.1.1'){echo 'selected';} ?> value="1.1.1">1.1.1</option>
+									<option <? if($this->formvars['wms_server_version'] == '1.3.0'){echo 'selected';} ?> value="1.3.0">1.3.0</option>
 								</select>
 						</td>
 					</tr>
@@ -611,7 +631,7 @@
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
 									<option <? if($this->formvars['wms_format'] == 'image/png'){echo 'selected';} ?> value="image/png">image/png</option>
 									<option <? if($this->formvars['wms_format'] == 'image/jpeg'){echo 'selected';} ?> value="image/jpeg">image/jpeg</option>
-									<option <? if($this->formvars['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>								
+									<option <? if($this->formvars['wms_format'] == 'image/gif'){echo 'selected';} ?> value="image/gif">image/gif</option>
 								</select>
 						</td>
 					</tr>
@@ -652,17 +672,68 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwner; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="datenherr" type="text" value="<?php echo $this->formvars['datenherr']; ?>" size="50" maxlength="100">
+						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
+						<td style="border-bottom:1px solid #C3C7C3">
+							<textarea name="datasource" cols="33" rows="2"><? echo $this->formvars['datasource'] ?></textarea>
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDataOwnerName; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="dataowner_name" type="text" value="<?php echo $this->formvars['dataowner_name']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strEmail; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="dataowner_email" type="text" value="<?php echo $this->formvars['dataowner_email']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strTelephone; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="dataowner_tel" type="text" value="<?php echo $this->formvars['dataowner_tel']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strUpToDateness; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="uptodateness" type="text" value="<?php echo $this->formvars['uptodateness']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strUpdateCycle; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="updatecycle" type="text" value="<?php echo $this->formvars['updatecycle']; ?>" size="50" maxlength="100">
+						</td>
+					</tr>
+
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMetaLink; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strVersion; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strComment; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
+						</td>
+					</tr>
+
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
@@ -700,8 +771,10 @@
 						<tr>
 							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSharedFrom; ?></th>
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
-								$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-								$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								if ($this->formvars['shared_from']) {
+									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
+									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
 									echo $shared_name; ?>
@@ -733,7 +806,7 @@
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="queryable">
 								<option <? if($this->formvars['queryable'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['queryable'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['queryable'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
@@ -742,7 +815,7 @@
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="use_geom">
 								<option <? if($this->formvars['use_geom'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['use_geom'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
@@ -793,25 +866,36 @@
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<select name="postlabelcache">
 								<option <? if($this->formvars['postlabelcache'] == '0'){echo 'selected ';} ?>value="0"><?php echo $this->strNo; ?></option>
-								<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>								
+								<option <? if($this->formvars['postlabelcache'] == 1){echo 'selected ';} ?>value="1"><?php echo $this->strYes; ?></option>
 							</select>
 					</td>
 				</tr>
+
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strrequires; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<select name="requires">
-								<option value="">--- Auswahl ---</option>
-								<?
-									for($i = 0; $i < count($this->grouplayers['ID']); $i++){
-										echo '<option value="'.$this->grouplayers['ID'][$i].'" ';
-										if($this->formvars['requires'] == $this->grouplayers['ID'][$i])echo 'selected="true"';
-										echo ' >'.$this->grouplayers['Bezeichnung'][$i].'</option>';
-									}
-								?>
-							</select>
+					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+						$group_layer_options = array();
+						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+							$group_layer_options[] = array(
+								'value' => $grouplayer_id,
+								'output' => $this->grouplayers['Bezeichnung'][$index]
+							);
+						}
+						echo FormObject::createSelectField(
+							'requires',
+							$group_layer_options,
+							$this->formvars['requires'],
+							1,
+							'',
+							'',
+							'',
+							'',
+							'',
+							$this->strPleaseSelect
+						); ?>
 					</td>
 				</tr><?
+
 				if (is_array($this->formvars['selstellen']) AND array_key_exists('Bezeichnung', $this->formvars['selstellen']) AND count($this->formvars['selstellen']["Bezeichnung"]) > 0) { ?>
 				<tr>
 					<td align="center" colspan=3 style="height: 30px;border-bottom:1px solid #C3C7C3">
@@ -990,7 +1074,7 @@
 				</td>				
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<? if($this->formvars['editable']) { ?>
-					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
+					<a href="javascript:Bestaetigung('index.php?go=Layereditor_Klasse_Löschen&class_id=<?php echo $this->classes[$i]['Class_ID']; ?>&selected_layer_id=<?php echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>#Klassen',	'<?php echo $this->strDeleteWarningMessage; ?>');"><?php echo $this->strDelete; ?></a>
 					<? } ?>
 				</td>
 			</tr><?php

@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 	$strLayer="Layer";
   $strAsteriskRequired="Fields marked with an asterisk * are required";
 	$strBaseParameters="Base-Parameter";
@@ -8,7 +8,7 @@
 	$strAdministrative="Administration";
   $strLayerID="Layer ID*";
   $strName="Name";
-  $strDataType="Datatype*";
+  $strDataType="Datatype";
   $strGroup="Group";
   $strPath="Query";
   $strData="Data";
@@ -21,7 +21,7 @@
   $strLabelRequires="Labelrequires";
   $strConnection="Connection*";
   $strPrintConnection="Print-Connection";
-  $strConnectionType="Connectiontype*";
+  $strConnectionType="Connectiontype";
   $strClassItem="Classitem";
   $strFilterItem="Filteritem*";
   $strTolerance="Tolerance*";
@@ -50,7 +50,7 @@
   $strButtonSave="Save";
   $strButtonSaveAsNewLayer="Save as new layer";
   $strCommonData="General information";
-  $strtransparency="transparency";
+  $strtransparency="opacity";
   $strDrawingOrder="drawingorder";
 	$strLegendOrder="legend order";	
 	$strLegend="legend";
@@ -62,8 +62,8 @@
 	$strsymbolscale="symbolscale";
 	$stroffsite="offsite";
 	$strOWSParameter="OWS-Parameters";
-	$strStellenAsignment="Usergroup-Asignment";
-	$strDefaultValues="Default-Values for Usergroup-Asignment";
+	$strStellenAsignment="Usergroup-Assignment";
+	$strDefaultValues="Default-Values for Usergroup-Assignment";
 	$strWFS_geom="WFS-Geometry-Attribute";
 	$strQueryMap="QueryMap";
 	$strProcessing="Processing";
@@ -73,7 +73,10 @@
 	$strWMSAuthPassword="wms_auth_password";
 	$strDocument_path="Document Path";
 	$strDescribtion="Short Description";
-	$strDataOwner="Data-Owner";
+	$strDataSource = 'Data source';
+	$strDataOwnerName = 'Data owner';
+	$strUpToDateness = 'Up-to-dateness';
+	$strUpdateCycle = 'Update cylce';
 	$strMetaLink="Metadata-Link";
 	$strMaintable="Main Table";
 	$strPrivileges="Privileges";
@@ -88,7 +91,7 @@
 	$strHeight="Height";
 	$strImagefile="Imagefile";
 	$strSync="Sync - Mode";
-	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialised version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
+	$strSyncHelp="In Sync - Mode all changes on the layer will be stored in a table named 'Main Table'_deltas with a serialized version number. The mode must be switched on, to enable the layer in the mobile App kvmobile.";
 	$strListed="show in Layer-List";
 	$strDocument_url="Document URL";
 	$strAssignDefaultValues="Apply Default-Values to User-Groups";
@@ -102,6 +105,8 @@
 	$strClassificationHelp="The name of the classification to be used can be entered here. A classification is a collection of related classes.&#xa;The classification name entered here can also contain a layer-parameter and thus be dynamic.";
 	$strStatusHelp="This field can be filled with an error status. This deactivates the layer and has a hint symbol in the legend.&#xa;The 'wms_checker.php' tool fills this field automatically.";
 	$strTriggerFunctionHelp="The name of a PHP-trigger function can be entered here, which is to be executed in this layer during insert, update or delete. The trigger function must be defined within a plugin or in custom/class/kvwmap.php.";
+	$strNotDublicate = "not duplicate";
 	$strSharedFrom = "Shared from user";
-	$strSharedFromHelp = "Remove the ID when the layer not any longer should be marked as shared by another user in layer legend.";
-?>
+	$strSharedFromHelp = "Remove the ID when the layer should not be marked as shared by another user in the layer legend any longer.";
+	$strSizeUnits="Sizeunits";
+	$strIdentifierText="Identifier text";

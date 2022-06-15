@@ -1,10 +1,7 @@
-﻿<?php
-$strTitleExtent="Gespeicherte Kartenausschnitte wählen";
-$strTitleLayers="Gespeicherte Themenauswahl laden";
-$strTime="Zeitstempel";
-$strComment="Kommentar";
-$strName="Name";
-$strUser="Nutzer";
-
- 
+<?
+	$strTitleExtent = 'Gespeicherte Kartenausschnitte wählen';
+	$strTitleLayers = 'Gespeicherte Themenauswahl laden';
+	$strTime = 'Zeitstempel';
+	$strName = 'Name';
+	$strUser = 'Nutzer';
 ?>  
