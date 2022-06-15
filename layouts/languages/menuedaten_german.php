@@ -1,3 +1,6 @@
 <?php
-  $strTitel="Menüdaten";
+	$strTitel = "Menüdaten";
+	$strTopMenue = 'Obermenü';
+	$strMenueLevel = 'Ebene';
+	$strMenueOrder = 'Reihenfolge';
 ?>

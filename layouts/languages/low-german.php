@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "un";
+	$this->strAsteriskRequired = 'Weerte mit een * mööst du indragen';
 	$this->strComment = 'Kommentor';
 	$this->strHelp = 'Help';
 	$this->strID = "ID";
