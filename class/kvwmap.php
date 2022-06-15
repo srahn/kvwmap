@@ -3921,7 +3921,7 @@ echo '			</table>
 		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
+    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
@@ -3933,17 +3933,27 @@ echo '			</table>
 		@$ret=$layerdb->execSQL($sql,4,0);
 		if (!$ret[0]) {
 			switch($this->formvars['type']) {
-				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
 					$html .= '<option value="">-- Bitte Auswählen --</option>';
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
 				}break;
-
+				
 				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
 					$rs = pg_fetch_array($ret[1]);
 					$html = $rs['output'];
+				}break;
+				
+				case 'hidden' : {					# ein Bild-Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '						
+						<li class="item" data-value="' . $rs['value'] . '" onclick="image_select(this);">
+							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($rs['image'])) . '">
+							<span>' . $rs['output'] . '</span>
+						</li>';
+					}
 				}break;
 			}
 		}
@@ -16925,7 +16935,7 @@ class db_mapObj{
 
 				switch ($attributes['form_element_type'][$i]) {
 					# Auswahlfelder
-					case 'Auswahlfeld' : {
+					case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : {
 						if ($attributes['options'][$i] != '') {
 							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {
@@ -17035,6 +17045,7 @@ class db_mapObj{
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
 												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
+												$attributes['enum_image'][$i][$k][] = value_of($rs, 'image');
 											}
 										}
 									}
@@ -17054,6 +17065,7 @@ class db_mapObj{
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
 										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
+										$attributes['enum_image'][$i][] = value_of($rs, 'image');
 										if ($requires_options != '') {
 											$attributes['enum_requires_value'][$i][] = $rs['requires'];
 										}

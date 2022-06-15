@@ -82,6 +82,27 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 	
+	function toggle_image_select(id) {
+		var image_select = document.getElementById('image_select_' + id);
+    if (image_select.classList.contains('active')) {
+        image_select.classList.remove('active');
+     } else {
+			 image_select.classList.add('active');
+     }
+	}
+	
+	function image_select(option) {
+		var image_select = option.closest('.image-select');
+		var field = image_select.querySelector('input');
+		field.value = option.dataset.value;
+		image_select.querySelector('.placeholder img').src = option.querySelector('img').src;
+		image_select.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+		if (field.onchange) {
+			field.onchange();
+		}
+		toggle_image_select(field.id);
+	}
+	
 	toggle_group = function(id){
 		var group = document.getElementById('group'+id);
 		var group_img = document.getElementById('group_img'+id);
@@ -1057,13 +1078,18 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				scope = document; // ansonsten global
 			}
 			var elements = [].slice.call(scope.querySelectorAll('#\\3'+id1+' '+id2+'_'+attribute[i]+'_'+k));
-			console.log(elements);
 			elements.forEach(function(element){
-				type = element.type;
-				if(['text', 'select-one'].indexOf(type) !== -1){
-					if(type == 'text'){action = 'setvalue'};
-					if(type == 'select-one'){action = 'sethtml'};
-					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(element), new Array(action));
+				var target = element;
+				var type = element.type;
+				var action = 'sethtml';
+				if(['text', 'select-one', 'hidden'].indexOf(type) !== -1){
+					if (type == 'text'){
+						action = 'setvalue';
+					}
+					if (type == 'hidden') {	// image-select
+						target = scope.querySelector('#image_select_' + element.id + ' .dropdown');
+					}
+					ahah("index.php", "go=get_select_list&layer_id="+layer_id+datatype+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type="+type, new Array(target), new Array(action));
 				}
 			})
 		}
