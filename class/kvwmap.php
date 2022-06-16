@@ -187,7 +187,7 @@ class GUI {
 		}
 		$this->log_loginfail->write(
 			date("Y:m:d H:i:s", time()) .
-			' IP: ' . $_SERVER['REMOTE_ADDR'] .
+			' IP: ' . get_remote_ip() .
 			' Port: ' . $_SERVER['REMOTE_PORT'] .
 			' User: ' . $login_name .
 			' User agent: ' .
