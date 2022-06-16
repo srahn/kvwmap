@@ -345,7 +345,18 @@
 						><?php echo $strShareRollenlayerAllowedCheckboxText; ?>
 						<span data-tooltip="<?php echo $strShareRollenlayerAllowedDescription; ?>"></span>
 			</div>
-		</div>	
+		</div>
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strLayerDataImportAllowedLabel; ?></div>
+			<div><input
+							name="layer_data_import_allowed"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['layer_data_import_allowed'] ? 'checked' : ''); ?>
+						><?php echo $strLayerDataImportAllowedCheckboxText; ?>
+			</div>
+		</div>
 		
 		<?
 	if ($this->formvars['selected_user_id'] > 0) {

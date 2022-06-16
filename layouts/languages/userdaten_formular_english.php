@@ -36,4 +36,6 @@
 	$strUserFormNewPasswdWait = 'Please wait until the e-mail window opens with a ready-made message. Then send the invitation with the automatically generated password to the user';
 	$strUserFormNewPasswdSave = 'Be sure to save the user record with the new information after closing this window, otherwise the new password will not take effect and the user will not be able to set a new password';
 	$struserFormNewPasswdAccepted = 'Accepted';
+	$strLayerDataImportAllowedLabel = 'Data-Import in layers';
+	$strLayerDataImportAllowedCheckboxText = 'Permission to create new Records by data-import.';
 ?>

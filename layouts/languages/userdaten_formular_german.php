@@ -36,4 +36,7 @@
 	$strUserFormNewPasswdWait = 'Warten Sie bitte, bis sich das E-Mail-Fenster mit einer vorgefertigten Meldung öffnet. Verschicken Sie dann die Einladung mit dem automatisch generierten Passwort an den Nutzer';
 	$strUserFormNewPasswdSave = 'Speichern Sie unbedingt den Datensatz des Benutzers mit den neuen Angaben, nachdem Sie dieses Fenster geschlossen haben, sonst wird das neue Passwort nicht wirksam und der Nutzer kann kein neues Passwort vergeben';
 	$struserFormNewPasswdAccepted = 'Verstanden';
+	$strLayerDataImportAllowedLabel = 'Daten-Import in Themen';
+	$strLayerDataImportAllowedCheckboxText = 'Darf neue Datensätze über den Daten-Import erzeugen.';
+
 ?>

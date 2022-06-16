@@ -476,6 +476,9 @@ class GUI {
 						}
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+							if ($this->user->layer_data_import_allowed) {
+								echo '<li><a href="index.php?go=Daten_Import&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+							}							
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
@@ -11132,7 +11135,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action']);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
 								$file_number++;
 							}
 						}
@@ -11146,11 +11149,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id) {
 		include_once (CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
