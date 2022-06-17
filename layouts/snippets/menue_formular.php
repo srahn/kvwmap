@@ -1,8 +1,11 @@
+<?
+	include(LAYOUTPATH . 'languages/menue_formular_' . $this->user->rolle->language . '.php');
+?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">
 	<div class="input-form">
 		<h2><?php echo $this->titel; ?></h2>
-		<em><span class="px13">Werte mit * mussen eingetragen werden</span></em><br><?php
+		<em><span class="px13"><? echo $this->strAsteriskRequired; ?></span></em><br><?php
 		echo $this->menue->as_form_html(); ?>
 		<div class="clear"></div>
 		<div style="text-align: -webkit-center">
@@ -10,16 +13,16 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Menues_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#menue_<?php echo $this->menue->get('id'); ?>'">&nbsp;<?php
+						<input value="<? echo $this->strButtonBack; ?>" title="<? echo $strShowMenueList; ?>" type="button" name="go" onclick="document.location.href='index.php?go=Menues_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#menue_<?php echo $this->menue->get('id'); ?>'">&nbsp;<?php
 						if ($this->menue->get('id') != '') { ?>
-							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1">&nbsp;
-							<input value="Als neuen Menüpunkt Eintragen" title="Als neuen Menüpunkt eintragen" type="button" onclick="submitWithValue('GUI','go_plus','Als neuen Menüpunkt Eintragen')">
+							<input value="<? echo $this->strChange; ?>" title="<? echo $this->strChangeTitle; ?>" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
+							<input value="<? echo $this->strReset; ?>" title="<? echo $this->strResetTitle; ?>." type="reset" name="reset1">&nbsp;
+							<input value="<? echo $strCreateAsNewMenue; ?>" title="Als neuen Menüpunkt eintragen" type="button" onclick="submitWithValue('GUI','go_plus','Als neuen Menüpunkt Eintragen')">
 							<input type="hidden" name="selected_menue_id" value="<?php echo  $this->menue->get('id'); ?>"><?php
 						}
 						else { ?>
-							<input value="Speichern" title="Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Speichern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menue->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"><?
+							<input value="<? echo $this->strSave; ?>" title="<? echo $this->strSave; ?>" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Speichern')">&nbsp;
+							<input value="<? echo $this->strReset; ?>" title="<? echo $this->strResetTitle; ?>" type="button" onclick="document.location.href='index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menue->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"><?
 						} ?>
 						<!--input type="button" name="dummy" value="Als neues Menü eintragen" onclick="submitWithValue('GUI','go_plus','Als neues Menü eintragen')"-->
 				  </td>

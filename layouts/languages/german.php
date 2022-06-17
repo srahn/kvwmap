@@ -1,10 +1,12 @@
 <?php
 	$this->strAnd = "und";
+	$this->strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
 	$this->strHelp = "Hilfe";
 	$this->strID = "ID";
 	$this->strName = "Name";
 	$this->strChoose = "Auswahl";
-	$this->strChange = "Ändern";
+	$this->strChange = 'Ändern';
+	$this->strChangeTitle = 'Änderungen Speichern';
 	$this->strDelete = "Löschen";
 	$this->strLoad = "Laden";
 	$this->strArchive = "Archivieren";
@@ -26,7 +28,8 @@
 	$this->strSearch = "Suchen";
 	$this->strEnter = "Übernehmen";
 	$this->strConnect = "Verbinden";
-	$this->strReset = "Zurücksetzen";
+	$this->strReset = 'Zurücksetzen';
+	$this->strResetTitle = 'Setzt alle Werte zurück auf die vorhigen';
 	$this->strSaveMapViewCommittMassage = "Kartenausschnitt wurde gespeichert";
 	$this->strCoordinates  =  'Koordinaten';
 	$this->strCoordinate  =  'Koordinate';

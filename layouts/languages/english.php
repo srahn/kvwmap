@@ -1,11 +1,13 @@
 <?php
 	$this->strAnd = "and";
+	$this->strAsteriskRequired = 'Fields with * are mandatory';
 	$this->strComment = 'Comment';
 	$this->strHelp = "Help";
 	$this->strID = "ID";
 	$this->strName = "Name";
 	$this->strChoose = "Choose";
 	$this->strChange = "Change";
+	$this->strChangeTitle = 'Saves changes';
 	$this->strDelete = "Delete";
 	$this->strLoad = "Load";
 	$this->strArchive = "Archive";
@@ -28,6 +30,7 @@
 	$this->strEnter = "Apply";
 	$this->strConnect = "Connect";
 	$this->strReset = "Reset";
+	$this->strResetTitle = 'Reset all values back to the previous setting';
 	$this->strSaveMapViewCommittMassage = "Mapview is saved";
 	$this->strCoordinates = 'Coordinates';
 	$this->strCoordinate = 'Coordinate';

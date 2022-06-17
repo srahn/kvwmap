@@ -1,5 +1,6 @@
 <?php
 	$this->strAnd = "i";
+	$this->strAsteriskRequired = 'Fields with * are mandatory';
 	$this->strComment = 'komenatrz';
 	$this->strHelp = 'Pomoc';
 	$this->strID = "ID";

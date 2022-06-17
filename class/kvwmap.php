@@ -1594,7 +1594,7 @@ echo '			</table>
         #$map->legend->set('transparent', MS_OFF);
         $map->legend->set('keysizex', '16');
         $map->legend->set('keysizey', '16');
-        $map->legend->set('template', LAYOUTPATH.'legend_layer.htm');
+        $map->legend->set('template', LAYOUTPATH . 'legend_layer.htm');
         $map->legend->imagecolor -> setRGB(255,255,255);
         $map->legend->outlinecolor -> setRGB(-1,-1,-1);
         $map->legend->label->set('type', MS_TRUETYPE);
@@ -1956,20 +1956,24 @@ echo '			</table>
 		$layer = ms_newLayerObj($map);
 		$layer->setMetaData('wfs_request_method', 'GET');
 		$layer->setMetaData('wms_name', $layerset['wms_name']);
-		if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		if ($layerset['wms_keywordlist']) {
+			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		}
 		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-		$layer->setMetaData('ows_title', $layerset['Name']); # required
+		$layer->setMetaData('ows_title', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name'])); # required
 		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
 		$layer->setMetaData('wms_queryable',$layerset['queryable']);
 		$layer->setMetaData('wms_format',$layerset['wms_format']);
 		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
 		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
-		if($layerset['metalink']){
+		if ($layerset['metalink']) {
 			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
 			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
 			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
 		}
-		if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		if ($layerset['ows_srs'] == '') {
+			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
@@ -1980,12 +1984,12 @@ echo '			</table>
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->setMetaData("gml_featureid", "ogc_fid");
 		$layer->setMetaData("gml_include_items", "all");
-
+		$layer->setMetaData('wms_abstract', $layerset['kurzbeschreibung']);
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
 
-		$layer->set('name', $layerset['alias']);
+		$layer->set('name', $layerset['Name']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -2198,8 +2202,9 @@ echo '			</table>
 				$layer->set('tolerance',$layerset['tolerance']);
 			}
 			if (value_of($layerset, 'toleranceunits') != '') {
-				$layer->set('toleranceunits',$layerset['toleranceunits']);
+				$layer->set('toleranceunits', constant('MS_' . strtoupper($layerset['toleranceunits'])));
 			}
+			
 			if (value_of($layerset, 'sizeunits') != '') {
 				$layer->set('sizeunits', $layerset['sizeunits']);
 			}
@@ -13860,9 +13865,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
-        if ($this->user->id == 1) {
-          echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
-        }
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -16099,6 +16101,13 @@ class db_mapObj{
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
+				l.kurzbeschreibung,
+				l.datasource,
+				l.dataowner_name,
+				l.dataowner_email,
+				l.dataowner_tel,
+				l.uptodateness,
+				l.updatecycle,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
