@@ -363,6 +363,7 @@ span[data-tooltip]:hover::after {
 
 
 .image-select {
+	background-color: #e9e9ed;
   position: relative;
   width: 250px;
   border: 1px solid #888;
@@ -443,11 +444,11 @@ span[data-tooltip]:hover::after {
 }
 
 .image-select .dropdown li:not(:last-child) {
-  border-bottom: 1px solid #bbb;
+  border-bottom: 1px solid #cdcdcd;
 }
 
 .image-select .dropdown li:hover {
-  box-shadow: 0px 0px 11px 1px rgba(182, 182, 182, 0.75) inset;
+  background-color: #e0e0e6;
 }
 
 
