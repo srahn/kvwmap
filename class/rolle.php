@@ -818,7 +818,20 @@ class rolle {
 						$formvars[$prefix.'value_'.$attributes['name'][$i]] = json_encode($formvars[$prefix.'value_'.$attributes['name'][$i]], JSON_UNESCAPED_UNICODE);
 					}
 					$search_params_set = true;
-					$sql = "INSERT INTO search_attributes2rolle VALUES ('".$formvars['search_name']."', ".$this->user_id.", ".$this->stelle_id.", ".$formvars['selected_layer_id'].", '".$attributes['name'][$i]."', '".value_of($formvars, $prefix.'operator_'.$attributes['name'][$i])."', '" . $this->database->mysqli->real_escape_string($formvars[$prefix.'value_'.$attributes['name'][$i]]) . "', '".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', ".$m.", '".value_of($formvars, 'boolean_operator_'.$m)."');";
+					$sql = "
+						INSERT INTO 
+							search_attributes2rolle 
+						VALUES (
+							'".$formvars['search_name']."', 
+							".$this->user_id.", 
+							".$this->stelle_id.", 
+							".$formvars['selected_layer_id'].", 
+							'".$attributes['name'][$i]."', 
+							'".value_of($formvars, $prefix.'operator_'.$attributes['name'][$i])."', 
+							'" . $this->database->mysqli->real_escape_string($formvars[$prefix.'value_'.$attributes['name'][$i]]) . "', 
+							'".$formvars[$prefix.'value2_'.$attributes['name'][$i]]."', 
+							".$m.", 
+							" . (value_of($formvars, 'boolean_operator_'.$m) != '' ? "'" . value_of($formvars, 'boolean_operator_' . $m) . "'" : "NULL") . ");";
 					$this->debug->write("<p>file:rolle.php class:rolle->save_search - Speichern einer Suchabfrage:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}

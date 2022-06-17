@@ -12,7 +12,7 @@
     <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
 	<tr>
-		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
+		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
   </tr>
 	<tr>
 		<th><i title="<? echo $strTitle_checkbox; ?>" class="fa fa-check-square-o" aria-hidden="true"></i></th>
@@ -45,11 +45,11 @@
 			<td><?php echo $cronjob->get('user_id'); ?></td>
 			<td><?php echo $cronjob->get('stelle_id'); ?></td//-->
 			<td width="70px">
-				<a href="index.php?go=cronjob_editieren&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
-				<a href="index.php?go=cronjob_löschen&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
+				<a href="index.php?go=cronjob_editieren&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
+				<a href="index.php?go=cronjob_löschen&selected_cronjob_id=<?php echo $cronjob->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="margin-left: 10px;"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
 			</td>
 		<tr><?php
 	} ?>
 </table>
 <p>
-<a class="btn btn-new" href="index.php?go=crontab_schreiben"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> Crontab Schreiben</a>
+<a class="btn btn-new" href="index.php?go=crontab_schreiben&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> Crontab Schreiben</a>

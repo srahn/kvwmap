@@ -745,7 +745,7 @@
 								class="dynamicLink"
 								style="font-size: ' . $fontsize . 'px"
 								onclick="' . $onclick . '"
-								href="' . urlencode2($href) . '"
+								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
 						}
 					}

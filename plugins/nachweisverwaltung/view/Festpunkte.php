@@ -90,7 +90,7 @@
         }
         ?>  
         </td>
-        <td align="right"><?php if ($rs['pkn']=='') { ?>&nbsp;<?php } else { ?><a href="index.php?go=Festpunkte%20Anzeigen&pkn=<?php echo $rs['pkn']; ?>">in Karte</a> <?php } ?></td>
+        <td align="right"><?php if ($rs['pkn']=='') { ?>&nbsp;<?php } else { ?><a href="index.php?go=Festpunkte%20Anzeigen&pkn=<?php echo $rs['pkn']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">in Karte</a> <?php } ?></td>
         <td align="center"><?php if ($rs['fgp']=='true') { ?>ja<?php } else { ?>nein<?php } ?></td>
         <td align="center"><?php if ($rs['abm']=='') { ?>nein<?php } elseif ($rs['abm'] < 9000) { ?>ja<?php } else { ?>nein<?php } ?></td>
         <td align="right">&nbsp;<?php echo $rs['kst']; ?></td>
@@ -235,7 +235,7 @@
     <br>
   <table width="100%" border="0" cellpadding="2" cellspacing="0">
   <tr align="center" valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
-    <td><a href="index.php">zur&uuml;ck zur Karte</a> | <a href="index.php?go=Festpunkte_Auswaehlen&kiloquad=<?php echo $this->formvars['kiloquad']; ?>&pkz=<?php echo $this->formvars['pkn']; ?>">zur Festpunktsuche</a></td>
+    <td><a href="index.php">zur&uuml;ck zur Karte</a> | <a href="index.php?go=Festpunkte_Auswaehlen&kiloquad=<?php echo $this->formvars['kiloquad']; ?>&pkz=<?php echo $this->formvars['pkn']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">zur Festpunktsuche</a></td>
   </tr>
 </table><?php
 }
