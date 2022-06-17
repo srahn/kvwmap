@@ -483,6 +483,7 @@ else { ?>
 				data-formatter="konvertierungHtmlSpecialchars"
 				class="col-md-7"
 				data-filter-control="input"
+				data-filter-control-placeholder="Suchen"
 			>Name</th>
 			<th
 				data-field="nummer"
@@ -509,6 +510,7 @@ else { ?>
 					data-formatter="konvertierungGemeindeFormatter"
 					class="col-md-2"
 					data-filter-control="select"
+					data-filter-control-placeholder="Filtern nach"
 				>Gemeinden</th><?php
 			}
 			if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
@@ -519,6 +521,7 @@ else { ?>
 					data-formatter="konvertierungStatusFormatter"
 					class="col-md-2"
 					data-filter-control="select"
+					data-filter-control-placeholder="Filtern nach"
 				>Status</th><?php
 			}
 			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>

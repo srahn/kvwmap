@@ -5,7 +5,7 @@
 	<div id="upload_message" style="margin-top: 50px; margin-bottom: 20px;"></div>
 </form>
 
-<form action="index.php?go=xplankonverter_extract_gml_to_form&planart=<?php echo $this->formvars['planart']?>" method="post">
+<form action="index.php?go=xplankonverter_extract_gml_to_form&planart=<?php echo $this->formvars['planart']?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" method="post">
 	<button id="extract_to_form" style="display:none" name="gml_file" value="">Daten in Formular laden</button>
 </form>
 <script>
