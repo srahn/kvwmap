@@ -1053,7 +1053,9 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				$GUI->checkCaseAllowed('Daten_Export');
+				if (!$GUI->user->is_gast()) {
+					$GUI->checkCaseAllowed('Daten_Export');
+				};
 				$GUI->daten_export_exportieren();
 			} break;
 			

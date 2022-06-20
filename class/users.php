@@ -1487,6 +1487,10 @@ class user {
 		}
 		return $ret;
 	}
+
+	function is_gast() {
+		return ($this->Name == 'gast' && $this->Vorname =='gast' && $this->funktion == 'gast');
+	}
 }
 
 ?>
