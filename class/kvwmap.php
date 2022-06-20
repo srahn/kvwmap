@@ -18812,7 +18812,7 @@ class db_mapObj{
 		else {
 			$attributes['all_table_names'] = array();
 		}
-		$attributes['tabs'] = array_filter(array_unique($attributes['tab']), 'strlen');
+		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
 	}
 
