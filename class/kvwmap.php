@@ -8651,18 +8651,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						# räumliche Einschränkung
 						if($m == 0 AND $attributes['name'][$i] == $attributes['the_geom']){		// nur einmal machen, also nur bei $m == 0
 							if(value_of($this->formvars, 'newpathwkt') != ''){
-								if(strpos(strtolower($this->formvars['newpathwkt']), 'polygon') !== false){
-									# Suche im Suchpolygon
-									if($this->formvars['within'] == 1){
-										$spatial_sql_where =' AND st_within('.$attributes['the_geom'].', st_buffer(st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].'), 0.0001))';
-									}
-									else {
-										$spatial_sql_where =' AND st_intersects('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';
-									}
+								# Suche im Suchpolygon
+								if($this->formvars['within'] == 1){
+									$spatial_sql_where =' AND st_within('.$attributes['the_geom'].', st_buffer(st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].'), 0.0001))';
 								}
-								if(strpos(strtolower($this->formvars['newpathwkt']), 'point') !== false){
-									# Suche an Punktkoordinaten mit übergebener SRID
-									$spatial_sql_where.=" AND st_within(st_transform(st_geomfromtext('" . $this->formvars['newpathwkt']."', " . $this->formvars['epsg_code']."), " . $layerset[0]['epsg_code']."), " . $attributes['the_geom'].")";
+								else {
+									$spatial_sql_where =' AND st_intersects('.$attributes['the_geom'].', (st_transform(st_geomfromtext(\''.$this->formvars['newpathwkt'].'\', '.$this->user->rolle->epsg_code.'), '.$layerset[0]['epsg_code'].')))';
 								}
 							}
 							# Suche nur im Stellen-Extent

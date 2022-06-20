@@ -240,9 +240,6 @@ class Menue extends MyObject {
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
-		if (strpos($onclick, 'overlay_link') !== false) {
-			$onclick = str_replace('go=', 'csrf_token=' . $_SESSION['csrf_token'] . '&go=', $onclick);
-		}
 		return $onclick;
 	}
 
