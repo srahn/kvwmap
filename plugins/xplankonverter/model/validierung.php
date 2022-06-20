@@ -464,7 +464,8 @@ class Validierung extends PgObject {
 			'where',
 			"WHERE
 				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
+				NOT st_within(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), 
+						ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
@@ -600,7 +601,8 @@ class Validierung extends PgObject {
 			"WHERE
 				" . $bereichtype . ".gml_id = '" . $regel->get('bereich_gml_id') . "' AND
 				" . $bereichtype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AND (
+				NOT st_within(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') . "),
+											ST_Transform(ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . "), " . $konvertierung->get('input_epsg') . ")) AND (
 			",
 			$sql
 		);
