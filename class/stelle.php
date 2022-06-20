@@ -680,8 +680,20 @@ class stelle {
 	function getFunktionen($return = '') {
 		$funktionen = array();
 		# Abfragen der Funktionen, die in der Stelle ausgeführt werden dürfen
-		$sql ='SELECT f.id,f.bezeichnung, 1 as erlaubt FROM u_funktionen AS f,u_funktion2stelle AS f2s';
-		$sql.=' WHERE f.id=f2s.funktion_id AND f2s.stelle_id='.$this->id.' ORDER BY bezeichnung';
+		$sql = "
+			SELECT
+				f.id,
+				f.bezeichnung,
+				1 as erlaubt
+			FROM
+				u_funktionen AS f,
+				u_funktion2stelle AS f2s
+			WHERE
+				f.id=f2s.funktion_id AND
+				f2s.stelle_id = " . $this->id . "
+			ORDER BY bezeichnung
+		";
+		#echo '</script>SQL zur Abfrage der Funktionen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {

@@ -76,10 +76,10 @@ function Bestaetigung(link,text) {
 <? }
    for($i = 0; $i < @count($this->unassigned_users['ID']); $i++){ ?>
 		<div id="unassigneduser<? echo $this->unassigned_users['ID'][$i]; ?>" class="usd-nutzer">
-			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>">
+			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 				 <? echo $this->unassigned_users['Bezeichnung'][$i]; ?>      
 			</a>
-			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->unassigned_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie den Benutzer <?php echo $this->unassigned_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
 				<i class="fa fa-trash" style="padding: 3px"></i>
 			</a>
 		</div>
@@ -95,10 +95,10 @@ function Bestaetigung(link,text) {
 <? }
    for($i = 0; $i < @count($this->expired_users['ID']); $i++){ ?>
     <div id="expireduser<? echo $this->expired_users['ID'][$i]; ?>" class="usd-nutzer">
-			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>">
+			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 	     <? echo $this->expired_users['Bezeichnung'][$i]; ?>
 			</a>
-			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>','Wollen Sie den Benutzer <?php echo $this->expired_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
+			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie den Benutzer <?php echo $this->expired_users['Bezeichnung'][$i]; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>">
 				<i class="fa fa-trash" style="padding: 3px"></i>
 			</a>
 		</div>

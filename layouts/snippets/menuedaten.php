@@ -8,8 +8,9 @@
 			$.ajax({
 				url: 'index.php',
 				data: {
-					'go': 'Menue_Löschen',
-					'selected_menue_id': id
+					go: 'Menue_Löschen',
+					selected_menue_id: id,
+					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				error: function(response) {
 					message(response.msg);
@@ -22,7 +23,7 @@
 	}
 </script>
 <div id="neuer_datensatz_button">
-	<a class="btn btn-new" href="index.php?go=Menueeditor"><i titel="Lege einen neuen Menüpunkt an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neues&nbsp;Menue</a>
+	<a class="btn btn-new" href="index.php?go=Menueeditor&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="Lege einen neuen Menüpunkt an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neues&nbsp;Menue</a>
 </div>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center">
@@ -32,12 +33,12 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strID; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>"><?php echo $this->strName; ?></a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Obermenü</a></th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene</th>
-					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Order</a></th>
-					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name">Ebene und Name</a></td>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=id&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=name&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=obermenue&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Obermenü</a></th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Ebene</th>
+					<th><a href="index.php?go=Menues_Anzeigen&view_sort=order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Order</a></th>
+					<th colspan="2"><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,order&sort_direction=<?php echo $this->formvars['sort_direction']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Ebene und Order</a><br><a href="index.php?go=Menues_Anzeigen&view_sort=menueebene,name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Ebene und Name</a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->menuedaten); $i++) {
 					$font_size = ($this->menuedaten[$i]->get('menueebene') == '1' ? 16 : 12); ?>
@@ -60,7 +61,7 @@
 						<td>&nbsp;
 							<a
 								title="<?php echo $this->strChange; ?>"
-								href="index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menuedaten[$i]->get('id'); ?>"
+								href="index.php?go=Menueeditor&selected_menue_id=<?php echo $this->menuedaten[$i]->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
 								style="font-size: <?php echo $font_size; ?>"
 							><i class="fa fa-pencil" style="color: firebrick"></i></a>
 						</td>

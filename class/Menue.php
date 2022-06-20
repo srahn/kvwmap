@@ -232,7 +232,7 @@ class Menue extends MyObject {
 	}
 
 	function get_onclick(){
-		return replace_params(
+		$onclick = replace_params(
 			$this->get('onclick'),
 			rolle::$layer_params,
 			$this->gui->user->id,
@@ -240,6 +240,10 @@ class Menue extends MyObject {
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
+		if (strpos($onclick, 'overlay_link') !== false) {
+			$onclick = str_replace('go=', 'csrf_token=' . $_SESSION['csrf_token'] . '&go=', $onclick);
+		}
+		return $onclick;
 	}
 
 	function get_href($class, $target) {

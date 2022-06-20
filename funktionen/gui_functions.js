@@ -33,19 +33,31 @@ window.onbeforeunload = function(){
 * @param action array ['sethtml'. ...]
 */
 function ahah(url, data, target, action, progress) {
+	if (csrf_token && csrf_token !== '') {
+		if (typeof data == 'string') {
+			data = data + '&csrf_token=' + csrf_token;
+		}
+		else {
+			data.append('csrf_token', csrf_token);
+		}
+	}
 	for (k = 0; k < target.length; ++k) {
-		if (target[k] != null && target[k].tagName == "DIV"){
+		if (target[k] != null && target[k].tagName == "DIV") {
 			waiting_img = document.createElement("img");
 			waiting_img.src = "graphics/ajax-loader.gif";
 			target[k].appendChild(waiting_img);
 		}
 	}
 	var req = new XMLHttpRequest();
-	if(req != undefined){
-		req.onreadystatechange = function(){ahahDone(url, target, req, action);};
-		if(typeof progress !== 'undefined')req.upload.addEventListener("progress", progress);
+	if (req != undefined) {
+		req.onreadystatechange = function() {
+			ahahDone(url, target, req, action);
+		};
+		if (typeof progress !== 'undefined') {
+			req.upload.addEventListener("progress", progress);
+		}
 		req.open("POST", url, true);
-		if(typeof data == "string") {
+		if (typeof data == "string") {
 			req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=iso-8859-15"); // data kann entweder ein String oder ein FormData-Objekt sein
 		}
 		req.send(data);
@@ -759,23 +771,26 @@ function overlay_submit(gui, start, target){
 
 function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	if(checkForUnsavedChanges()){
-		if(target == 'root'){
-			root.location.href = 'index.php?'+data;
+	data = data + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+	if (checkForUnsavedChanges()) {
+		if (target == 'root') {
+			root.location.href = 'index.php?' + data;
 		}
-		else{
-			if(querymode == 1 && (start || currentform.name == 'GUI2')){
-				if(query_tab != undefined && query_tab.closed){		// wenn Fenster geschlossen wurde, resized zuruecksetzen
+		else {
+			if (querymode == 1 && (start || currentform.name == 'GUI2')) {
+				if (query_tab != undefined && query_tab.closed) {
+					// wenn Fenster geschlossen wurde, resized zuruecksetzen
 					root.resized = 0;
 				}
-				else if(start && browser == 'firefox' && query_tab != undefined && root.resized < 2){	// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
+				else if (start && browser == 'firefox' && query_tab != undefined && root.resized < 2) {
+					// bei Abfrage aus Hauptfenster und Firefox und keiner Groessenanpassung des Fensters, Fenster neu laden
 					query_tab.close();
 				}
-				query_tab = root.window.open("index.php?window_type=overlay&"+data, "Sachdaten", "left="+root.document.GUI.overlayx.value+",top="+root.document.GUI.overlayy.value+",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
+				query_tab = root.window.open("index.php?window_type=overlay&" + data, "Sachdaten", "left=" + root.document.GUI.overlayx.value + ",top=" + root.document.GUI.overlayy.value + ",location=0,status=0,height=800,width=700,scrollbars=1,resizable=1");
 				if(root.document.GUI.CMD != undefined)root.document.GUI.CMD.value = "";
 			}
-			else{
-				window.location.href = 'index.php?'+data;
+			else {
+				window.location.href = 'index.php?' + data;
 			}
 		}
 	}

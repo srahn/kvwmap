@@ -1,4 +1,4 @@
-<?php
+<?
 	include(LAYOUTPATH . 'languages/invitations_' . $this->user->rolle->language . '.php');
 ?>
 <script>
@@ -8,8 +8,9 @@
 			$.ajax({
 				url: 'index.php',
 				data: {
-					'go': 'Einladung_Löschen',
-					'selected_invitation_id': id
+					go : 'Einladung_Löschen',
+					selected_invitation_id : id,
+					csrf_token : '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				error: function(response) {
 					message(response.msg);
