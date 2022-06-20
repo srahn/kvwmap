@@ -587,6 +587,20 @@ class MyObject {
 		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
 	}
 
+	function validate_date($key, $format) {
+		$invalid_msg = array();
+		DateTime::createFromFormat($format, $this->get($key));
+		$last_errors = DateTime::getLastErrors();
+		if ($last_errors === false) {
+			return '';
+		}
+		else {
+			if ($last_errors['warning_count'] > 0) $invalide_msg[] = '<b>Warung:</b><br>' . implode('<br>', $last_errors['warnings']);
+			if ($last_errors['error_count']   > 0) $invalide_msg[] = '<b>Fehler:</b><br>' . implode('<br>', $last_errors['errors']);
+			return implode('<p>', $invalid_msg);
+		}
+	}
+
 	function as_form_html() {
 		$html = implode(
 			"<div class=\"clear\"></div>",

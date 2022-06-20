@@ -259,11 +259,56 @@
 
 					row.veroeffentlicht = result.veroeffentlicht;
 					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
-          console.log(result);
 
 					message([{
 						"type": "notice",
 						"msg" : 'Plan' + (result.veroeffentlicht == 'Ja' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
+					}]);
+				}
+				else {
+					message([{
+						"type": "error",
+						"msg": result.msg
+					}]);
+				}
+			}
+		});
+	};
+
+	editVeroeffentlichungsdatum = function(konvertierung_id, veroeffentlichungsdatum) {
+		document.getElementById('input_konvertierung_id').value = konvertierung_id;
+		document.getElementById('input_veroeffentlichungsdatum').value = veroeffentlichungsdatum;
+		$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').show();
+	};
+
+	toggleVeroeffentlichungsdatum = function(konvertierung_id, veroeffentlichungsdatum) {
+		var today = new Date();
+		$('#veroeffentlichungsdatum_button_' + konvertierung_id).hide();
+		$('#veroeffentlichungsdatum_spinner_' + konvertierung_id).show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go: 'xplankonverter_konvertierung_veroffentlichungsdatum',
+				veroeffentlichungsdatum: veroeffentlichungsdatum,
+				konvertierung_id: konvertierung_id,
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+			},
+			success: function(result) {
+				if (result.success) {
+					var konvertierung_id = result.konvertierung_id,
+							row = $('#konvertierungen_table').bootstrapTable('getRowByUniqueId', konvertierung_id);
+
+					row.veroeffentlichungsdatum = result.veroeffentlichungsdatum.split('-').reverse().join('.');
+
+					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
+
+					$('#veroeffentlichungsdatum_spinner_' + konvertierung_id).hide();
+					$('#veroeffentlichungsdatum_button_' + konvertierung_id).show();
+					$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide();
+
+					message([{
+						"type": "notice",
+						"msg" : 'Neues Veröffentlichungsdatum erfolgreich eingetragen!'
 					}]);
 				}
 				else {
@@ -385,6 +430,55 @@
 		return output;
 	}
 
+	function konvertierungVeroeffentlichungsdatumFormatter(value, row) {
+		var symbol = {};
+		var today = new Date();
+		var veroeffentlichungsdatum = row.veroeffentlichungsdatum === null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
+
+		console.log('today: ', today);
+		console.log('veroeff: ', new Date(veroeffentlichungsdatum));
+		console.log('vergleich: ', new Date(veroeffentlichungsdatum) == today);
+
+		if (veroeffentlichungsdatum === '') {
+			symbol.title = 'Plan ist nicht veröffentlicht. Kein Datum angegeben!';
+			symbol.color = '#d82c2c'; // Rot
+			symbol.class = 'fa-eye-slash'; // ist nicht veröffentlicht
+		}
+		else if (new Date(veroeffentlichungsdatum) > today) {
+			symbol.title = 'Plan wird am ' + value + ' veröffentlicht.';
+			symbol.color = '#b0952c' // Gelb
+			symbol.class = 'fa-clock-o'; // wird noch veröffentlicht
+		}
+		else if ((new Date(veroeffentlichungsdatum)).toDateString() == today.toDateString()) {
+			symbol.title = 'Plan wurde heute veröffentlicht.';
+			symbol.color = '#2cb03c'; // Grün
+			symbol.class = 'fa-eye'; // ist veröffentlicht
+		}
+		else {
+			symbol.title = 'Plan wurde am ' + value + ' veröffentlicht.';
+			symbol.color = '#2cb03c'; // Grün
+			symbol.class = 'fa-eye'; // ist veröffentlicht
+		}
+
+		var output = '<a\
+			title="' + symbol['title'] + '"\
+			class="btn btn-link btn-xs xpk-func-btn"\
+			href="#"\
+			onclick="editVeroeffentlichungsdatum(' + row.konvertierung_id + ', \'' + veroeffentlichungsdatum + '\')");\
+		><i\
+			id="veroeffentlichungsdatum_button_' + row.konvertierung_id + '"\
+			class="btn-link fa fa-lg ' + symbol['class'] + '"\
+			style="color: ' + symbol['color'] + '"\
+		></i></a>\
+		<i\
+			id="veroeffentlichungsdatum_spinner_' + row.konvertierung_id + '"\
+			class="color: fa fa-spinner fa-spin"\
+			style="display: none"\
+		></i>';
+
+		return output;
+	}
+
 	function konvertierungDownloadsFormatter(value, row) {
 		var funcIsAllowed, funcIsInProgress,
 			disableFrag = ' xpk-func-btn-disabled disabled" onclick="return false';
@@ -449,6 +543,14 @@ else { ?>
 </div//-->
 <div id="downloadMessage"></div>
 <div id="downloadMessageSperrDiv" class="sperr-div"></div>
+<div id="editVeroeffentlichungsdatumDiv" class="edit-veroeffentlichungsdatum-div">
+	<h2>Veröffentlichungsdatum</h2>
+Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht. Damit erscheint er in den Diensten des Bauleitplanservers und im Bau- und Planungsportal des Geoportals MV.<p></p>
+	<input id="input_konvertierung_id" type="hidden">
+	<input id="input_veroeffentlichungsdatum" type="date" style="margin: 20px"><p></p>
+	<input type="button" value="<? echo $this->strCancel; ?>" onclick="$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide()"/>
+	<input type="button" name="Sende Veröffentlichungsdatum" value="Übernehmen" onclick="toggleVeroeffentlichungsdatum(document.getElementById('input_konvertierung_id').value, document.getElementById('input_veroeffentlichungsdatum').value)"/>
+</div>
 <div class="table-wrapper">
 <table
 	id="konvertierungen_table"
@@ -524,6 +626,7 @@ else { ?>
 					data-filter-control-placeholder="Filtern nach"
 				>Status</th><?php
 			}
+			/*
 			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 				<th
 					data-field="veroeffentlicht"
@@ -533,6 +636,17 @@ else { ?>
 					data-searchable="false"
 					data-switchable="true"
 				><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+			}
+			*/
+			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+				<th
+					data-field="veroeffentlichungsdatum"
+					data-visible="true"
+					data-sortable="true"
+					data-formatter="konvertierungVeroeffentlichungsdatumFormatter"
+					data-searchable="false"
+					data-switchable="false"
+				><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 			} ?>
 			<th
 				data-field="konvertierung_id"
