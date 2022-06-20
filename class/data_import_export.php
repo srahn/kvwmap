@@ -332,7 +332,7 @@ class data_import_export {
 			else {
 				$db = $pgdatabase;
 				$schema = CUSTOM_SHAPE_SCHEMA;
-				$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000);
+				$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))) . date("_Y_m_d_H_i_s", time());
 				$adjustments = true;
 			}
 			
