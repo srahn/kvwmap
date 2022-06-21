@@ -1006,7 +1006,7 @@ class user {
 		}
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($stelle_ID, $with_expired = false) {
 		global $language;
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
@@ -1028,12 +1028,13 @@ class user {
 			WHERE
 				s.ID = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
+				(!$with_expired ? "
 				AND (
 					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
+				)" : "") . "
 			ORDER BY
 				Bezeichnung;
 		";
@@ -1485,6 +1486,10 @@ class user {
 			}
 		}
 		return $ret;
+	}
+
+	function is_gast() {
+		return ($this->Name == 'gast' && $this->Vorname =='gast' && $this->funktion == 'gast');
 	}
 }
 

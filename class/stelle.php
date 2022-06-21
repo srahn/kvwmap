@@ -334,44 +334,40 @@ class stelle {
 	function NeueStelleAnlegen($stellendaten) {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
-		$sql ='INSERT INTO stelle SET';
-		if($stellendaten['id'] != ''){
-			$sql.=' ID='.$stellendaten['id'].', ';
-		}
-		$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
-		$sql.=', Referenzkarte_ID='.$stellendaten['Referenzkarte_ID'];
-		$sql.=', minxmax= "'.$stellendaten['minxmax'].'"';
-		$sql.=', minymax= "'.$stellendaten['minymax'].'"';
-		$sql.=', maxxmax= "'.$stellendaten['maxxmax'].'"';
-		$sql.=', maxymax= "'.$stellendaten['maxymax'].'"';
-		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
-		$sql.=', start= "'.$stellendaten['start'].'"';
-		$sql.=', stop= "'.$stellendaten['stop'].'"';
-		$sql.=', ows_title= "'.$stellendaten['ows_title'].'"';
-		$sql.=', ows_abstract= "'.$stellendaten['ows_abstract'].'"';
-		$sql.=', wms_accessconstraints= "'.$stellendaten['wms_accessconstraints'].'"';
-		$sql.=', ows_contactperson= "'.$stellendaten['ows_contactperson'].'"';
-		$sql.=', ows_contactorganization= "'.$stellendaten['ows_contactorganization'].'"';
-		$sql.=', ows_contactemailaddress= "'.$stellendaten['ows_contactemailaddress'].'"';
-		$sql.=', ows_contactposition= "'.$stellendaten['ows_contactposition'].'"';
-		$sql.=', ows_fees= "'.$stellendaten['ows_fees'].'"';
-		$sql.=', ows_srs= "'.$stellendaten['ows_srs'].'"';
-		$sql.=', wappen_link= "'.$stellendaten['wappen_link'].'"';
-		if($stellendaten['wappen']){
-			$sql.=', wappen="'.$_files['wappen']['name'].'"';
-		}
-		elseif($stellendaten['wappen_save']){
-			$sql.=', wappen="'.$stellendaten['wappen_save'].'"';
-		}
-		$sql.=', check_client_ip="';if($stellendaten['checkClientIP']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', check_password_age="';if($stellendaten['checkPasswordAge']=='1')$sql.='1';else $sql.='0';$sql.='"';
-		$sql.=', allowed_password_age=';if($stellendaten['allowedPasswordAge']!='')$sql.=$stellendaten['allowedPasswordAge'];else $sql.='6';
-		$sql.=', use_layer_aliases="';if($stellendaten['use_layer_aliases']=='1')$sql.='1';else $sql.='0';$sql.='",';
-		$sql .= "
-			`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? "1" : "0") . ",
-			`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+		$sql = "
+			INSERT INTO stelle
+			SET
+				`" . ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "") . "
+				`Bezeichnung = '" . $stellendaten['bezeichnung'] . "',
+				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . "
+				`minxmax` = " . $stellendaten['minxmax'] . ",
+				`minymax` = " . $stellendaten['minymax'] . ",
+				`maxxmax` = " . $stellendaten['maxxmax'] . ",
+				`maxymax` = " . $stellendaten['maxymax'] . ",
+				`epsg_code` = " . $stellendaten['epsg_code'] . ",
+				`start` = '" . $stellendaten['start'] . "',
+				`stop` = '" . $stellendaten['stop'] . "',
+				`ows_title` = '" . $stellendaten['ows_title'] . "',
+				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
+				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
+				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
+				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
+				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
+				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
+				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "'
+				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
+				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
+				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
+				`use_layer_aliases` = " . ($stellendaten['use_layer_aliases'] == '1' ? 1 : 0) . ",
+				`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? 1 : 0) . ",
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				`comment` = '" . $stellendaten['comment'] . "'
 		";
-		# Abfrage starten
+		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
@@ -436,7 +432,9 @@ class stelle {
 				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
 				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . "
+				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				`comment` = '" . $stellendaten['comment'] . "'
 			WHERE
 				ID = " . $this->id . "
 		";

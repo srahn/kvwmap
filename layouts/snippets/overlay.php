@@ -61,6 +61,7 @@
 				</table>
 			</div>
 			<input type="hidden" name="window_type" value="">
+			<input type="hidden" name="csrf_token" value="<? echo $_SESSION['csrf_token']; ?>">
 		</form>
 	</body>
 </html>

@@ -764,3 +764,16 @@ nav > ul > li > ul > li:hover > ul {
 .fixed-table-body {
   height: auto;
 }
+
+.edit-veroeffentlichungsdatum-div {
+	display: none;
+	width: 50%;
+	height: 30%;
+	padding: 20px;
+	background-color: #cfdde8;
+	position: absolute;
+	top: 25%;
+	left: 25%;
+	z-index: 1000;
+	border: solid 2px lightgray;
+}

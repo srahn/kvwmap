@@ -240,9 +240,6 @@ class Menue extends MyObject {
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
-		if (strpos($onclick, 'overlay_link') !== false) {
-			$onclick = str_replace('go=', 'csrf_token=' . $_SESSION['csrf_token'] . '&go=', $onclick);
-		}
 		return $onclick;
 	}
 
@@ -256,9 +253,7 @@ class Menue extends MyObject {
 			rolle::$hist_timestamp,
 			$this->gui->user->rolle->language
 		);
-		if (strpos($link, 'javascript:') === false) {
-			$link .= '&csrf_token=' . $_SESSION['csrf_token'];
-		}
+		$link = add_csrf($link);
 		# define click events
 		if ($this->obermenue){
 			$href .= "javascript:changemenue(".$this->get('id').", ".$this->gui->user->rolle->menu_auto_close.");";

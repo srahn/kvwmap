@@ -4,13 +4,22 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function add_csrf($url){
+	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
+		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
+	}
+	return $url;
+}
+
 function urlencode2($str){
 	$str = rawurlencode($str);
 	$str = str_replace('%3F', '?', $str);
 	$str = str_replace('%26', '&', $str);
 	$str = str_replace('%3D', '=', $str);
 	$str = str_replace('%3A', ':', $str);
-	$str = str_replace('%2F', '/', $str);	
+	$str = str_replace('%2F', '/', $str);
+	$str = str_replace('%23', '#', $str);
+	$str = str_replace('%25', '%', $str);
 	return $str;
 }
 
@@ -22,7 +31,7 @@ function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
-		}break;
+		} break;
 		default : {
 			return is_numeric($var) ? $var : "'" . $var . "'";
 		}
@@ -34,7 +43,7 @@ function quote_or_null($var) {
 }
 
 function append_slash($var) {
-	return $var . (trim($var) != '' AND substr(trim($var), -1) != '/' ? '/' : '');
+	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
 }
 
 function pg_quote($column) {
@@ -2023,7 +2032,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
-		$msg . "
+		htmlspecialchars($msg) . "
 		<div style=\"text-align: center\">
 			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
 		</div>

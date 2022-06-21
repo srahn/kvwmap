@@ -1,7 +1,7 @@
-<?php
-$strTitleExtent="Gespiekerte Koortutsnitte utsöken";
-$strTime="Tiedstempel";
-$strComment="Kommentor";
-
- 
+<?
+	$strTitleExtent = 'Gespiekerte Koortutsnitte utsöken';
+	$strTitleLayers = 'Gespeicherte Themenauswahl laden';
+	$strTime = 'Tiedstempel';
+	$strName = 'Name';
+	$strUser = 'Nutzer';
 ?>  

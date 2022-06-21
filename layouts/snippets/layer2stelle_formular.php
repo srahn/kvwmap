@@ -157,7 +157,7 @@ else {
   </tr>
   <tr> 
     <td align="center">
-    	<input type="button" value="<?php echo $this->strButtonBack; ?>" onclick="document.location.href='index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>'">
+    	<input type="button" value="<?php echo $this->strButtonBack; ?>" onclick="document.location.href='index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">
     	<input type="hidden" name="selected_layer_id" value="<?php echo $this->formvars['selected_layer_id']; ?>">
     	<input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>">
     	<input type="hidden" name="stellen_name" value="<?php echo $this->formvars['stellen_name']; ?>">

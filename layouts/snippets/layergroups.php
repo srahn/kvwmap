@@ -15,8 +15,9 @@
 			$.ajax({
 				url: 'index.php',
 				data: {
-					'go': 'Layergruppe_Löschen',
-					'selected_group_id': id
+					go: 'Layergruppe_Löschen',
+					selected_group_id: id,
+					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				error: function(response) {
 					message(response.msg);
@@ -36,15 +37,15 @@
 		<td>
 			<table width="100%" border="0" cellspacing="0" cellpadding="2">
 				<tr>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=id"><?php echo $this->strID; ?></a></th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=Gruppenname"><?php echo $this->strName; ?></a></th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=obergruppe">Obergruppe</th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order">Order</a></th><?
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=Gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=obergruppe&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Obergruppe</th>
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Order</a></th><?
 					$colspan = 2;
 					if ($has_shared_group) {
 						$colspan += 1;
 					} ?>
-					<td colspan="<? echo $colspan; ?>" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo  $strCreateLayerGroup; ?></a></td>
+					<td colspan="<? echo $colspan; ?>" align="right"><a class="btn btn-new" href="index.php?go=Layergruppe_Editor&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="Legt eine neue Layergruppe an." class="fa fa-plus" style="color: white; margin-bottom: 10px"></i> <?php echo  $strCreateLayerGroup; ?></a></td>
 				</tr><?php
 				for ($i = 0; $i < count($this->layergruppen); $i++) { ?>
 					<tr id="group_<?php echo $this->layergruppen[$i]->get('id'); ?>" onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
@@ -72,7 +73,7 @@
 						<td align="right">
 							<a
 								title="<?php echo $this->strChange; ?>"
-								href="index.php?go=Layergruppe_Editor&selected_group_id=<?php echo $this->layergruppen[$i]->get('id'); ?>"
+								href="index.php?go=Layergruppe_Editor&selected_group_id=<?php echo $this->layergruppen[$i]->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
 							><i class="fa fa-pencil" style="padding: 3px"></i></a>
 						</td>
 						<td>

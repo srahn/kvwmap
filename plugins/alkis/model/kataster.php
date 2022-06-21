@@ -499,7 +499,7 @@ class flurstueck {
 	
 	function outputEigentuemerShort($eigentuemer, $adressAenderungen = NULL, $indent = NULL, $database = NULL){
 		$Eigentuemer .= '<tr><td colspan="2"><table cellpadding="0" cellspacing="0"><tr><td valign="top" style="padding-right: 4">'.$eigentuemer->Nr.'</td><td valign="top" style="padding-right: 4">';
-		$Eigentuemer .= '<a target="root" href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;
+		$Eigentuemer .= '<a target="root" href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$eigentuemer->vorname.' '.$eigentuemer->nachnameoderfirma;
 		if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;
 		if($eigentuemer->akademischergrad != '')$Eigentuemer .= ', '.$eigentuemer->akademischergrad;
 		$Eigentuemer .= ' ';
@@ -525,7 +525,7 @@ class flurstueck {
 																<table border="0" cellspacing="0" cellpadding="0">
 																	<tr>
 																		<td>
-																			<a target="root" href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'">';
+																			<a target="root" href="index.php?go=Namen_Auswaehlen_Suchen&gml_id='.$eigentuemer->gml_id.'&withflurst=on&anzahl='.MAXQUERYROWS.'&csrf_token=' . $_SESSION['csrf_token'] . '">';
 			if($eigentuemer->vorname != '')$Eigentuemer .= $eigentuemer->vorname.' ';
 			$Eigentuemer .= $eigentuemer->nachnameoderfirma;
 			if($eigentuemer->namensbestandteil != '')$Eigentuemer .= ', '.$eigentuemer->namensbestandteil;

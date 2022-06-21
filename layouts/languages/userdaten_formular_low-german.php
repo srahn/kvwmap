@@ -17,8 +17,6 @@
 	$strAuthorizeTask="Berechtigte Stäen";
 	$strOrganisation="Organisation";
 	$strPosition="Position";
-	$strShareRollenlayerAllowedCheckboxText = "Darf Rollenlayer mit anderen Nutzern teilen.";
-	$strShareRollenlayerAllowedDescription = "Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin kann diese sogenannten freigegebenen Layer wieder löschen.";
 	$strSendEmail="Mail versennen";
 	$strButtonSaveAs="As niegen Bruker indragen";
 	$strAllowedIps="verlööft IP / Domain";
@@ -29,4 +27,12 @@
 	$strActiveSite="Aktive Stäe";
 	$strChangeUser="Bruker wesseln";
 	$strLoginAsUser="As düsse Bruker ranlaten";
+	$strShareRollenlayerAllowedCheckboxText = "Darf Rollenlayer mit anderen Nutzern teilen.";
+	$strShareRollenlayerAllowedDescription = "Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin kann diese sogenannten freigegebenen Layer wieder löschen.";
+	$strUserFormNewPasswdSubject = 'Neues Passwort für kvwmap';
+	$strUserFormNewPasswdBody = "'Einladung%20f%C3%BCr%20kvwmap%20Nutzer%20' + loginName + '%0A%0ASie werden von der Anwendung auf ' + host + ' aufgefordert, ein neues Passwort für kvwmap einzugeben.%0A%0ARufen Sie dazu folgenden Link auf:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0ADort vergeben Sie ein neues Passwort.%0A%0AMit freundlichen Grüßen%0AIhr GIS-Administrator%0A'";
+	$strUserFormNewPasswdAssigned = 'Neues Passwort vergeben';
+	$strUserFormNewPasswdWait = 'Warten Sie bitte, bis sich das E-Mail-Fenster mit einer vorgefertigten Meldung öffnet. Verschicken Sie dann die Einladung mit dem automatisch generierten Passwort an den Nutzer';
+	$strUserFormNewPasswdSave = 'Speichern Sie unbedingt den Datensatz des Benutzers mit den neuen Angaben, nachdem Sie dieses Fenster geschlossen haben, sonst wird das neue Passwort nicht wirksam und der Nutzer kann kein neues Passwort vergeben';
+	$struserFormNewPasswdAccepted = 'Verstanden';
 ?>

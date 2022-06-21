@@ -1,7 +1,7 @@
-<?php
-$strTitleExtent="wybierz zapisane fragmenty map"; 
-$strTime="znacznik czasu"; 
-$strComment="komenatrz"; 
-
- 
+<?
+	$strTitleExtent = 'wybierz zapisane fragmenty map';
+	$strTitleLayers = 'Gespeicherte Themenauswahl laden';
+	$strTime = 'znacznik czasu';
+	$strName = 'Name';
+	$strUser = 'Nutzer';
 ?>  

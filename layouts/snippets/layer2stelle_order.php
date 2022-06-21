@@ -24,16 +24,24 @@
 		}
 	};
 	
-	$this->outputLayer = function($i, $indent = 0) use ($GUI){
-		echo '
-      	<tr>
-      		<td style="padding-left: '.$indent.'px;border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3">&nbsp;'.$GUI->layers['Bezeichnung'][$i].'</td>
-      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="drawingorder_layer'.$GUI->layers['ID'][$i].'" value="'.$GUI->layers['drawingorder'][$i].'"></td>
-					<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><input size="7" type="text" name="legendorder_layer'.$GUI->layers['ID'][$i].'" value="'.$GUI->layers['legendorder'][$i].'"></td>
-      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center"><a href="index.php?go=Layer2Stelle_Editor&selected_layer_id='.$GUI->layers['ID'][$i].'&selected_stelle_id='.$GUI->formvars['selected_stelle_id'].'&stellen_name='.$GUI->selected_stelle->Bezeichnung.'">'.$GUI->strChange.'</a></td>
-      		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3;border-right:1px solid #C3C7C3" align="center"><a href="index.php?go=Layereditor&selected_layer_id='.$GUI->layers['ID'][$i].'">'.$GUI->strChange.'</a></td>
-      	</tr>
-      	';
+	$this->outputLayer = function($i, $indent = 0) use ($GUI) { ?>
+		<tr>
+			<td style="padding-left: <? echo $indent; ?>px; border-bottom: 1px solid #C3C7C3; border-left: 1px solid #C3C7C3">
+				&nbsp;<? echo $GUI->layers['Bezeichnung'][$i]; ?>
+			</td>
+			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
+				<input size="7" type="text" name="drawingorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['drawingorder'][$i]; ?>">
+			</td>
+			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
+				<input size="7" type="text" name="legendorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['legendorder'][$i]; ?>">
+			</td>
+			<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
+				<a href="index.php?go=Layer2Stelle_Editor&selected_layer_id=<? echo $GUI->layers['ID'][$i]; ?>&selected_stelle_id=<? echo $GUI->formvars['selected_stelle_id']; ?>&stellen_name=<? echo $GUI->selected_stelle->Bezeichnung; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $GUI->strChange; ?></a>
+			</td>
+			<td style="border-bottom: 1px solid #C3C7C3; border-left: 1px solid #C3C7C3; border-right: 1px solid #C3C7C3" align="center">
+				<a href="index.php?go=Layereditor&selected_layer_id=<? echo $GUI->layers['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $GUI->strChange; ?></a>
+			</td>
+		</tr><?
 	};
 
   # 2007-12-30 pk
@@ -47,10 +55,17 @@
     <td>
     <table width="100%" border="0" cellspacing="0" cellpadding="2">
     	<tr>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name"><?php echo $this->strLayer; ?></a></td>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder"><?php echo $strDrawingOrder; ?></a></td>
-				<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=legendorder, drawingorder desc"><?php echo $strLegendOrder; ?></a></td>
-    		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="fett"><?php echo $strProperties; ?></td>
+    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
+					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strLayer; ?></a>
+				</td>
+    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
+					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strDrawingOrder; ?></a>
+				</td>
+				<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
+					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=legendorder, drawingorder desc&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLegendOrder; ?></a>
+				</td>
+    		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="fett">
+					<?php echo $strProperties; ?></td>
     	</tr>
     	<tr>
     		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" class="fett"><?php echo $strTask; ?></td>
@@ -81,7 +96,7 @@
 				type="button"
 				name="zurueck"
 				value="<?php echo $this->strButtonBack; ?>"
-				onclick="document.location.href = 'index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->formvars['selected_stelle_id'];?>'"
+				onclick="document.location.href = 'index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'"
 			>
 			<input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="submitWithValue('GUI','go_plus','Speichern')"><?
 				if ($this->plugin_loaded('portal')) { ?>
