@@ -759,7 +759,7 @@ function overlay_submit(gui, start, target){
 
 function overlay_link(data, start, target){
 	// diese Funktion öffnet bei Aufruf aus dem Overlay-Fenster ein Browser-Fenster (bzw. benutzt es falls schon vorhanden) mit den übergebenen Daten, ansonsten wird das Ganze wie ein normaler Link aufgerufen
-	data = data + '&csrf_token=' + csrf_token;
+	data = 'csrf_token=' + csrf_token + '&' + data;
 	if(checkForUnsavedChanges()){
 		if(target == 'root'){
 			root.location.href = 'index.php?'+data;
