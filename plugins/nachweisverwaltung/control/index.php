@@ -15,6 +15,7 @@ function go_switch_nachweisverwaltung($go){
 		case 'LENRIS_get_new_nachweise' : {
 			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
 				$GUI->LENRIS_get_new_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_get_changed_nachweise' : {
