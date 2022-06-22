@@ -848,13 +848,15 @@ hide_versions = function(flst){
 											<a target="root" href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-											?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
+											?>&FlstID=<?php echo $flst->FlurstKennz; 
+											?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Flurstückssuche&nbsp;&nbsp;</div>
 											</a>
 											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); ?>">
+											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); 
+											?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
 											</a>
 											<?

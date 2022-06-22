@@ -43,7 +43,7 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?go=Einladungen_Anzeigen#invitation_<?php echo $this->invitation->get(Invitation::$identifier); ?>'">&nbsp;<?php
+						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?csrf_token=<? echo $_SESSION['csrf_token']; ?>&go=Einladungen_Anzeigen#invitation_<?php echo $this->invitation->get(Invitation::$identifier); ?>'">&nbsp;<?php
 						if ($this->invitation->get(Invitation::$identifier) != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorigen." type="reset" name="reset1">&nbsp;
