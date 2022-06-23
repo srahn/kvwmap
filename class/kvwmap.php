@@ -8402,7 +8402,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function invitation_update() {
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
-			#//ToDo prüfen ob und warum hier die completet timestamp auf 0000-00 etc. gesetzt wird.
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->update(
