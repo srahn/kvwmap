@@ -2069,7 +2069,7 @@ echo '			</table>
 			}
 			if ($layerset['connectiontype'] == 6) {
 				# z.B. für Klassen mit Umlauten
-				$layerset['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
+				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
 			$layer->set('connection',
 				replace_params(
