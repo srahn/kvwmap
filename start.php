@@ -88,8 +88,8 @@ else {
   $GUI->debug->write("Verbindung zur MySQL Kartendatenbank erfolgreich hergestellt.",4);
 }
 
-# Angeben, dass die Texte in latin1 zurückgegeben werden sollen
 $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
+$GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
 
 /*
 *	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
