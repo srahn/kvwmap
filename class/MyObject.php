@@ -296,7 +296,7 @@ class MyObject {
 				if ($options['escaped']) {
 					$value = str_replace("'", "''", $value);
 				}
-				$kvp[] = "`" . $key . "` = " . ((stripos($types[$key], 'int') !== false AND $value == '') ? 'NULL' : "'" . $value . "'");
+				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
