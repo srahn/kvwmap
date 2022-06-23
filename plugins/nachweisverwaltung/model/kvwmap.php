@@ -596,7 +596,7 @@
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
 		$sql.='flur_thematisch="'.$flur_thematisch.'",';
-		$sql.='alle_der_messung="'.$alle_der_messung.'",';
+		$sql.='alle_der_messung = ' . (int)$alle_der_messung . ',';
 		if ($order != '') {
 			$sql.='`order`="'.$order.'",';
 		}
