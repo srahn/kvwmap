@@ -154,7 +154,7 @@ class Bauauskunft {
   function countbaudaten($searchvars){
   	$searchvars['withlimit'] = false;
   	$this->getbaudaten($searchvars);
-  	return count($this->baudata);
+  	return @count($this->baudata);
   }
   
   function formatFlurstKennz($FlurstKennz){
