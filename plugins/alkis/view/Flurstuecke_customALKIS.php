@@ -460,7 +460,7 @@ hide_versions = function(flst){
 												?>
 											<tr>
 												<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
-												<td><a target="root" href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
+												<td><a target="root" href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>">anzeigen</a></td>
 											</tr>
 												<?
 												}
