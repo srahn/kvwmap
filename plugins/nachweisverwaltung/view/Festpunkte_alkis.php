@@ -65,19 +65,19 @@
           if (file_exists(PUNKTDATEIPATH.$skizzenDatei)) {
             $blatt++;
             # Setzen eines Links auf das Vorschaubilder.
-            $link="index.php?go=sendeFestpunktskizze&name=".$skizzenDatei;
+            $link="index.php?go=sendeFestpunktskizze&name=" . $skizzenDatei . "&csrf_token=" . $_SESSION['csrf_token'];
             ?><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei; ?></a><?php
           }
           $skizzenDatei_1=substr($rs['datei'],0,-4)."-1.png";
           if (file_exists(PUNKTDATEIPATH.$skizzenDatei_1)) {
             $blatt++;
-            $link="index.php?go=sendeFestpunktskizze&name&name=".  $skizzenDatei_1;
+            $link="index.php?go=sendeFestpunktskizze&name&name=".  $skizzenDatei_1 . "&csrf_token=" . $_SESSION['csrf_token'];
             ?><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_1; ?></a><?php
           }
           $skizzenDatei_2=substr($rs['datei'],0,-4)."-2.png";
           if (file_exists(PUNKTDATEIPATH.$skizzenDatei_2)) {
             $blatt++;
-            $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_2;
+            $link="index.php?go=sendeFestpunktskizze&name&name=".$skizzenDatei_2 . "&csrf_token=" . $_SESSION['csrf_token'];
             ?><br><a href="<?php echo $link; ?>" target="_blank"><?php echo $skizzenDatei_2; ?></a><?php
           }
           if ($blatt==0) {
