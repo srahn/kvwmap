@@ -7,7 +7,7 @@ BEGIN;
 	RETURNS boolean
 	LANGUAGE 'sql'
 	COST 100
-	VOLATILE PARALLEL UNSAFE
+	STABLE
 	AS $BODY$
 		SELECT
 			COALESCE(true = ANY(array_agg(results)), true)
