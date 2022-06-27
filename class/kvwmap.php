@@ -17072,14 +17072,26 @@ class db_mapObj{
 								$attributes['options'][$i] = $optionen[0];
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
-										$sql = $attributes['options'][$i];
+										$options_sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
 										if ($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))) {			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
-											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
-											$ret = $database->execSQL($sql, 4, 0);
-											if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-											$rs = pg_fetch_array($ret[1]);
-											$attributes['enum_output'][$i][$k] = $rs['output'];
+											$values = json_decode($value);
+											if (is_array($values)) {		# Array-Typ
+												foreach ($values as $value) {
+													$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+													$ret = $database->execSQL($sql, 4, 0);
+													if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+													$rs = pg_fetch_array($ret[1]);
+													$attributes['enum_output'][$i][$k][] = $rs['output'];
+												}
+											}
+											else {
+												$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+												$ret = $database->execSQL($sql, 4, 0);
+												if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+												$rs = pg_fetch_array($ret[1]);
+												$attributes['enum_output'][$i][$k] = $rs['output'];
+											}
 										}
 									}
 								}
