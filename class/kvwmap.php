@@ -1198,8 +1198,8 @@ echo '			</table>
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
-						if($layer['Class'][$k]['legendgraphic'] != ''){
-							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+						if($layer['Class'][0]['legendgraphic'] != ''){
+							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][0]['legendgraphic'];
 							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
