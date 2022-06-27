@@ -903,6 +903,9 @@
 
 	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){
 		$element_id = $layer_id . '_' . $name . '_' . $k;
+		if (strpos($fieldname, $element_id) !== false) {		# bei Array-Typen der Fall
+			$element_id = $fieldname;
+		}
 		$dataparts = array();
 
 		if ($change_all) {
