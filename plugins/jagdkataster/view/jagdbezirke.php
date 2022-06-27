@@ -227,7 +227,7 @@ function save(){
             <a target="root" href="index.php?go=jagdkatastereditor_Eigentuemer_Listen&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&name=<? echo $this->qlayerset[$i]['shape'][$j]['name'] ?>&search_nummer=<? echo $this->formvars['search_nummer']; ?>&search_name=<? echo $this->formvars['search_name']; ?>&search_art=<? echo $this->formvars['search_art']; ?>">Eigentümer auflisten</a>&nbsp;|&nbsp;
 						<? }
 							 if($editable){ ?>
-            <a target="root" href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>">bearbeiten</a>&nbsp;|&nbsp;
+            <a target="root" href="index.php?go=jagdkatastereditor&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">bearbeiten</a>&nbsp;|&nbsp;
             <a target="root" href="javascript:Bestaetigung('index.php?go=jagdkatastereditor_Loeschen&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>', 'Wollen Sie diesen Jagdbezirk wirklich löschen?');">löschen</a>&nbsp;|&nbsp;
             <a target="root" href="index.php?go=jagdkatastereditor_kopieren&oid=<?php echo $this->qlayerset[$i]['shape'][$j][$this->qlayerset[$i]['maintable'] . '_oid']; ?>">kopieren</a>
 						<? } ?>
