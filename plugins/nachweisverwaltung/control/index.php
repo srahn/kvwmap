@@ -7,43 +7,51 @@ function go_switch_nachweisverwaltung($go){
 	global $GUI;	
 	switch($go){
 		case 'LENRIS_get_all_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_get_all_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_get_all_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_get_new_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_get_new_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_get_new_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_get_changed_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_get_changed_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_get_changed_nachweise();
+			}
 	  } break;		
 		
 		case 'LENRIS_get_deleted_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_get_deleted_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_get_deleted_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_confirm_new_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_confirm_new_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_confirm_new_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_confirm_changed_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_confirm_changed_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_confirm_changed_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_confirm_deleted_nachweise' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_confirm_deleted_nachweise();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_confirm_deleted_nachweise();
+			}
 	  } break;
 		
 		case 'LENRIS_get_document' : {
-			$GUI->checkCaseAllowed('LENRIS');
-			$GUI->LENRIS_get_document();
+			if ($GUI->Stelle->isFunctionAllowed('LENRIS')) {
+				$GUI->LENRIS_get_document();
+			}
 	  } break;		
 		
 		case 'Antraege_Anzeigen' : {

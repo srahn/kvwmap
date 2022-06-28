@@ -72,7 +72,7 @@
       $GUI->formvars['flur'] = $searchvars['flur'];
       $GUI->formvars['flurstueck'] = $searchvars['flurstueck'];
 
-      for($i = 0; $i < count($GUI->bau->baudata); $i++){
+      for($i = 0; $i < @count($GUI->bau->baudata); $i++){
         $gemarkungs_searchvars['jahr'] = $GUI->bau->baudata[$i]['feld1'];
         $gemarkungs_searchvars['obergruppe'] = $GUI->bau->baudata[$i]['feld2'];
         $gemarkungs_searchvars['nummer'] = $GUI->bau->baudata[$i]['feld3'];

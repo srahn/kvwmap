@@ -1198,8 +1198,8 @@ echo '			</table>
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
-						if($layer['Class'][$k]['legendgraphic'] != ''){
-							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+						if($layer['Class'][0]['legendgraphic'] != ''){
+							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][0]['legendgraphic'];
 							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
@@ -1979,7 +1979,7 @@ echo '			</table>
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->setMetaData('ows_auth_type', 'basic');
-		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+		$layer->setMetaData('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->setMetaData("gml_featureid", "ogc_fid");
@@ -2069,7 +2069,7 @@ echo '			</table>
 			}
 			if ($layerset['connectiontype'] == 6) {
 				# z.B. für Klassen mit Umlauten
-				$layerset['connection'] .= " options='-c client_encoding=".MYSQL_CHARSET."'";
+				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
 			$layer->set('connection',
 				replace_params(
@@ -8406,7 +8406,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function invitation_update() {
 		include_once(CLASSPATH . 'Invitation.php');
 		$this->invitation = Invitation::find_by_id($this, $this->formvars['selected_invitation_id']);
-			#//ToDo prüfen ob und warum hier die completet timestamp auf 0000-00 etc. gesetzt wird.
 		$results = $this->invitation->validate();
 		if (empty($results)) {
 			$results = $this->invitation->update(
@@ -17073,14 +17072,26 @@ class db_mapObj{
 								$attributes['options'][$i] = $optionen[0];
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
-										$sql = $attributes['options'][$i];
+										$options_sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
 										if ($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))) {			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
-											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
-											$ret = $database->execSQL($sql, 4, 0);
-											if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-											$rs = pg_fetch_array($ret[1]);
-											$attributes['enum_output'][$i][$k] = $rs['output'];
+											$values = json_decode($value);
+											if (is_array($values)) {		# Array-Typ
+												foreach ($values as $value) {
+													$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+													$ret = $database->execSQL($sql, 4, 0);
+													if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+													$rs = pg_fetch_array($ret[1]);
+													$attributes['enum_output'][$i][$k][] = $rs['output'];
+												}
+											}
+											else {
+												$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+												$ret = $database->execSQL($sql, 4, 0);
+												if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+												$rs = pg_fetch_array($ret[1]);
+												$attributes['enum_output'][$i][$k] = $rs['output'];
+											}
 										}
 									}
 								}

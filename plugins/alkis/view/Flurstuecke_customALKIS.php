@@ -460,7 +460,7 @@ hide_versions = function(flst){
 												?>
 											<tr>
 												<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
-												<td><a target="root" href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1">anzeigen</a></td>
+												<td><a target="root" href="index.php?go=Bauauskunft_Suche_Suchen&flurstkennz=<? echo $flst->Flurstkennz_alt; ?>&distinct=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>">anzeigen</a></td>
 											</tr>
 												<?
 												}
@@ -778,7 +778,7 @@ hide_versions = function(flst){
 										<? 
 										for ($b=0; $b < @count($flst->Buchungen);$b++) {
 											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
-											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
+											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 											if($flst->Buchungen[$b]['sondereigentum'] != ''){
@@ -848,13 +848,15 @@ hide_versions = function(flst){
 											<a target="root" href="index.php?go=Flurstueck_<? if($flst->endet!="" OR $flst->hist_alb == 1)echo 'hist_';?>Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<?php echo $flst->GemeindeID;
 											?>&GemkgID=<?php echo $flst->GemkgSchl; ?>&FlurID=<?php echo $flst->FlurID;
-											?>&FlstID=<?php echo $flst->FlurstKennz; ?>">
+											?>&FlstID=<?php echo $flst->FlurstKennz; 
+											?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Flurstückssuche&nbsp;&nbsp;</div>
 											</a>
 											<a target="root" href="index.php?go=Adresse_Auswaehlen&searchInExtent=<?php echo $this->searchInExtent;
 											?>&GemID=<? echo $flst->GemeindeID;
 											?>&StrID=<? echo $flst->Adresse[0]["strasse"];
-											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); ?>">
+											?>&selHausID=<? if($flst->selHausID != '')echo implode(', ', $flst->selHausID); 
+											?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 												<div class="fstanzeigehover">&nbsp;&nbsp;zur Adresssuche&nbsp;&nbsp;</div>
 											</a>
 											<?

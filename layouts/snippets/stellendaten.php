@@ -17,9 +17,9 @@
 			<div class="stellendaten-topdiv">
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr class="stellendaten-header">
-						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent&=csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strParentStelle; ?></a></th><?
+						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strParentStelle; ?></a></th><?
 						if ($has_shared_stelle) { ?>
 							<th>&nbsp;</th><?
 						} ?>
