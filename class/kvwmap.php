@@ -1979,7 +1979,7 @@ echo '			</table>
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->setMetaData('ows_auth_type', 'basic');
-		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+		$layer->setMetaData('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->setMetaData("gml_featureid", "ogc_fid");
