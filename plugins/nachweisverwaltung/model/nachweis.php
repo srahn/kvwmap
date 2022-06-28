@@ -954,13 +954,13 @@ class Nachweis {
 		if($order==''){
 			$order="n.flurid, n.stammnr, n.datum";
 		}
-		$order_rissnummer = "
-			(regexp_matches(coalesce(n.rissnummer, ''), '^\D*'))[1],
-			NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint,
-			(regexp_matches(coalesce(n.rissnummer, ''), '\D*$'))[1]
-		";
+		$order_rissnummer1 = "(regexp_matches(coalesce(n.rissnummer, ''), '^\D*'))[1]";
+		$order_rissnummer2 = "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint";
+		$order_rissnummer3 = "(regexp_matches(coalesce(n.rissnummer, ''), '\D*$'))[1]";
+		$order_rissnummer = $order_rissnummer1 . ', ' . $order_rissnummer2 . ', ' . $order_rissnummer3;
+		$order_rissnummer_richtung = $order_rissnummer1 . ' ' . $richtung . ', ' . $order_rissnummer2 . ' ' . $richtung. ', ' . $order_rissnummer3;
 		$order = str_replace('blattnummer', "NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint", $order);		// nach Blattnummer nummerisch sortieren
-		$order = str_replace('rissnummer', $order_rissnummer, $order);		// nach Rissnummer 3-stufig alphanumerisch und nummerisch sortieren
+		$order = str_replace('rissnummer', $order_rissnummer_richtung, $order);		// nach Rissnummer 3-stufig alphanumerisch und nummerisch sortieren
     # Die Funktion liefert die Nachweise nach verschiedenen Suchverfahren.
     # Vor dem Suchen nach Nachweisen werden jeweils die Suchparameter überprüft    
     if (is_array($id)) { $idListe=$id; } else { $idListe=array($id); }
