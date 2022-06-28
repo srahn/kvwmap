@@ -11609,9 +11609,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
+	function dienstmetadaten_aendern() {
+    $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);		# das "alte" Stellenobjekt
+    $Stelle->language = $this->Stelle->language;
+    $Stelle->metadaten_aendern($this->formvars);
+		if (
+			count(
+				array_map(
+					function($message) {
+						if ($message['type'] == 'error') return $message;
+					},
+					GUI::$messages
+				)
+			) == 0
+		) {
+			$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+		}
+		$this->Stelleneditor();
+	}
+
   function StelleAendern() {
   	$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->database, $this);
 		$this->document = new Document($this->database);
 		$results = array();
@@ -11624,8 +11643,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     else {
       if ($_files['wappen']['name']){
         $this->formvars['wappen'] = $_files['wappen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
-        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+        $nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'], $nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
@@ -11738,8 +11757,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						GUI::$messages
 					)
 				) == 0
-			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-
+			) {
+				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+			}
     }
     $this->Stelleneditor();
   }
