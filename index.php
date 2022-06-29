@@ -1451,6 +1451,18 @@ function go_switch($go, $exit = false) {
 				$GUI->Stelleneditor();
 			} break;
 
+			case 'Dienstmetadaten' : {
+				$GUI->checkCaseAllowed('Dienstmetadaten');
+				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
+				$GUI->Stelleneditor();
+			} break;
+
+			case 'Dienstmetadaten_Ändern' : {
+				$GUI->checkCaseAllowed('Dienstmetadaten');
+				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
+				$GUI->dienstmetadaten_aendern();
+			} break;
+
 			case 'Stelle_Löschen' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
