@@ -136,15 +136,6 @@ class stelle {
 				`ows_contactemailaddress`,
 				`ows_contactperson`,
 				`ows_contactposition`,
-				`ows_contentorganization`,
-				`ows_contentemailaddress`,
-				`ows_contentperson`,
-				`ows_contentposition`,
-				`ows_geographicdescription`,
-				`ows_distributionorganization`,
-				`ows_distributionemailaddress`,
-				`ows_distributionperson`,
-				`ows_distributionposition`,
 				`ows_fees`,
 				`ows_srs`,
 				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
@@ -173,15 +164,6 @@ class stelle {
 		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
 		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactposition = $rs['ows_contactposition'];
-		$this->ows_contentorganization = $rs['ows_contentorganization'];
-		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
-		$this->ows_contentperson = $rs['ows_contentperson'];
-		$this->ows_contentposition = $rs['ows_contentposition'];
-		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
-		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
-		$this->ows_distributionelectronicmailaddress = $rs['ows_distributionemailaddress'];
-		$this->ows_distributionperson = $rs['ows_distributionperson'];
-		$this->ows_distributionposition = $rs['ows_distributionposition'];
 		$this->ows_fees = $rs['ows_fees'];
 		$this->ows_srs = $rs['ows_srs'];
 		$this->check_client_ip = $rs['check_client_ip'];
