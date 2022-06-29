@@ -482,7 +482,7 @@ class rolle {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$user_id', $this->user_id, $sql);
 					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
-					#echo '<br>sql: ' . $sql;
+					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
 						$param['options'] = array();
