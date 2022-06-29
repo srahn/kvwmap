@@ -128,7 +128,26 @@ class stelle {
 				`ID`," .
 				$name_column . ",
 				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`ows_title`,
+				`wms_accessconstraints`,
+				`ows_abstract`,
+				`ows_contactorganization`,
+				`ows_contactemailaddress`,
+				`ows_contactperson`,
+				`ows_contactposition`,
+				`ows_contentorganization`,
+				`ows_contentemailaddress`,
+				`ows_contentperson`,
+				`ows_contentposition`,
+				`ows_geographicdescription`,
+				`ows_distributionorganization`,
+				`ows_distributionemailaddress`,
+				`ows_distributionperson`,
+				`ows_distributionposition`,
+				`ows_fees`,
+				`ows_srs`,
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
 			WHERE
@@ -150,10 +169,19 @@ class stelle {
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
 		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
 		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionelectronicmailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
 		$this->ows_fees = $rs['ows_fees'];
 		$this->ows_srs = $rs['ows_srs'];
 		$this->check_client_ip = $rs['check_client_ip'];
@@ -350,10 +378,19 @@ class stelle {
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
-				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
+				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
+				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
+				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
+				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
+				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
+				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
+				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
@@ -407,7 +444,7 @@ class stelle {
 				$wappen . "
 				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "'," .
 				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
-					`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
+				`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
 				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
 				`minxmax` = '" . $stellendaten['minxmax'] . "',
 				`minymax` = '" . $stellendaten['minymax'] . "',
@@ -419,10 +456,19 @@ class stelle {
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
-				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
 				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
+				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
 				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
+				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
+				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
+				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
+				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
+				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
+				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
@@ -445,6 +491,43 @@ class stelle {
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
+		}
+		return $ret[1];
+	}
+
+	function metadaten_aendern($stellendaten) {
+		$sql = "
+			UPDATE
+				stelle
+			SET
+				`ows_title` = '" . $stellendaten['ows_title'] . "',
+				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
+				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
+				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
+				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
+				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
+				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
+				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
+				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
+				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
+				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
+				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
+				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
+				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
+				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
+				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
+				`ows_srs` = '" . $stellendaten['ows_srs'] . "'
+			WHERE
+				ID = " . $this->id . "
+		";
+
+		#echo '<br>SQL zum Updaten der Stellenmetadaten' . $sql;
+		# Abfrage starten
+		$ret = $this->database->execSQL($sql,4, 0);
+		if ($ret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>' . $ret[1];
 		}
 		return $ret[1];
 	}

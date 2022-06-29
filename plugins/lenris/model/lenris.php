@@ -302,14 +302,15 @@ class LENRIS {
 	}
 	
 	function get_new_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' neue Nachweise von Client ' . $client['client_id']);
 				return $json;
 			}
 			else {
-				$this->log_error($client['client_id'], 'Fehler beim Abfragen der neuen Nachweise von Client ' . $client['client_id']);
+				$this->log_error($client['client_id'], 'Fehler beim Abfragen der neuen Nachweise von Client ' . $client['client_id'].' '.$result);
 			}
 		}
 		else {
@@ -319,8 +320,9 @@ class LENRIS {
 	}
 	
 	function get_changed_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' veränderte Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -336,8 +338,9 @@ class LENRIS {
 	}
 	
 	function get_deleted_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' gelöschte Nachweise von Client ' . $client['client_id']);
 				return $json;

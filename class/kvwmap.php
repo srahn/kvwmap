@@ -1198,8 +1198,8 @@ echo '			</table>
 				}
 				if ($layer['showclasses'] != 0) {
 					if($layer['connectiontype'] == 7){      # WMS
-						if($layer['Class'][$k]['legendgraphic'] != ''){
-							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][$k]['legendgraphic'];
+						if($layer['Class'][0]['legendgraphic'] != ''){
+							$imagename = $original_class_image = CUSTOM_PATH . 'graphics/' . $layer['Class'][0]['legendgraphic'];
 							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
@@ -1979,7 +1979,7 @@ echo '			</table>
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->setMetaData('ows_auth_type', 'basic');
-		$layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_xml');
+		$layer->setMetaData('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->setMetaData("gml_featureid", "ogc_fid");
@@ -11609,9 +11609,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
+	function dienstmetadaten_aendern() {
+    $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);		# das "alte" Stellenobjekt
+    $Stelle->language = $this->Stelle->language;
+    $Stelle->metadaten_aendern($this->formvars);
+		if (
+			count(
+				array_map(
+					function($message) {
+						if ($message['type'] == 'error') return $message;
+					},
+					GUI::$messages
+				)
+			) == 0
+		) {
+			$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+		}
+		$this->Stelleneditor();
+	}
+
   function StelleAendern() {
   	$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->database, $this);
 		$this->document = new Document($this->database);
 		$results = array();
@@ -11624,8 +11643,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     else {
       if ($_files['wappen']['name']){
         $this->formvars['wappen'] = $_files['wappen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
-        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+        $nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'], $nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
@@ -11738,8 +11757,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						GUI::$messages
 					)
 				) == 0
-			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-
+			) {
+				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+			}
     }
     $this->Stelleneditor();
   }
@@ -13732,7 +13752,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
-				if ($layer_id != $old_layer_id AND $tablename != '') {
+				if ($layer_id != $old_layer_id) {
 					$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 					$layerdb[$layer_id]->setClientEncoding();
 					$privileges = $this->Stelle->get_attributes_privileges($layer_id);		# Rechte
