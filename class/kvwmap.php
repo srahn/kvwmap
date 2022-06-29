@@ -13717,10 +13717,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
 				if ($layer_id != $old_layer_id) {
-					if ($tablename != '') {
-						$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-						$layerdb[$layer_id]->setClientEncoding();
-					}
+					$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+					$layerdb[$layer_id]->setClientEncoding();
 					$privileges = $this->Stelle->get_attributes_privileges($layer_id);		# Rechte
 					$attributes = $mapdb->read_layer_attributes($layer_id, $layerdb[$layer_id], $privileges['attributenames']);
 					#$filter = $mapdb->getFilter ($layer_id, $this->Stelle->id);		# siehe unten
