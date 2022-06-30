@@ -605,7 +605,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		form_fieldstring = '';
 		var formData = new FormData();
 		for (i = 0; i < form_fields.length; i++) {
-			if (form_fields[i].name != form_fields[i].id && form_fields[i].name.slice(-4) != '_alt') {
+			if (form_fields[i].name.indexOf(';') != -1 && form_fields[i].name.slice(-4) != '_alt') {
 				form_fieldstring += form_fields[i].name + '|';
 			}
 			field = form_fields[i].name.split(';');
