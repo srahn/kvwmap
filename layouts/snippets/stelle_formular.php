@@ -206,18 +206,18 @@ else {
 			<tr align="center">
 				<td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
 			</tr><?
-			if ($this->formvars['go'] != 'Dienstmetadaten') {
-				if ($this->formvars['selected_stelle_id'] > 0) { ?>
+			if ($this->formvars['go'] != 'Dienstmetadaten') {?>
 				<tr>
 					<th class="group" colspan="3" align="left"><a href="javascript:toggleGroup('stammdaten', false);"><img id="stammdaten" src="<? echo GRAPHICSPATH . 'minus.gif'; ?>"></a>&nbsp;Stammdaten</td>
-				</tr>
-
-				<tr class="group-stammdaten">
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
-					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-						<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11" style="width: 75px">
-					</td>
-				</tr><?php } ?>
+				</tr><?
+				if ($this->formvars['selected_stelle_id'] > 0) { ?>
+					<tr class="group-stammdaten">
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
+						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11" style="width: 75px">
+						</td>
+					</tr><?
+				} ?>
 
 				<tr class="group-stammdaten">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?></th>
@@ -826,10 +826,69 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</td>
 			</tr>
 
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactvoicephone" type="text" value="<?php echo $this->formvars['ows_contactvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactfacsimile" type="text" value="<?php echo $this->formvars['ows_contactfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactaddress" type="text" value="<?php echo $this->formvars['ows_contactaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactpostalcode" type="text" value="<?php echo $this->formvars['ows_contactpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactcity" type="text" value="<?php echo $this->formvars['ows_contactcity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactadministrativearea" type="text" value="<?php echo $this->formvars['ows_contactadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
 			<tr>
 				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactContent; ?></th>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactOrganization; ?>*
@@ -839,7 +898,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentorganization" type="text" value="<?php echo $this->formvars['ows_contentorganization']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactEmailAddress; ?>*
@@ -849,7 +907,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentemailaddress" type="text" value="<?php echo $this->formvars['ows_contentemailaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsGeographicDescription; ?>&nbsp;<span data-tooltip="<?php echo $strOwsGeographicDescriptionHint; ?>"></span>
@@ -858,7 +915,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_geographicdescription" type="text" value="<?php echo $this->formvars['ows_geographicdescription']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPerson; ?>
@@ -868,7 +924,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentperson" type="text" value="<?php echo $this->formvars['ows_contentperson']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPosition; ?>
@@ -878,11 +933,64 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_contentposition" type="text" value="<?php echo $this->formvars['ows_contentposition']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentvoicephone" type="text" value="<?php echo $this->formvars['ows_contentvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentfacsimile" type="text" value="<?php echo $this->formvars['ows_contentfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentaddress" type="text" value="<?php echo $this->formvars['ows_contentaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentpostalcode" type="text" value="<?php echo $this->formvars['ows_contentpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentcity" type="text" value="<?php echo $this->formvars['ows_contentcity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentadministrativearea" type="text" value="<?php echo $this->formvars['ows_contentadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
 
 			<tr>
 				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactDistribution; ?></th>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactOrganization; ?>
@@ -892,7 +1000,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionorganization" type="text" value="<?php echo $this->formvars['ows_distributionorganization']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactEmailAddress; ?>
@@ -902,7 +1009,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionemailaddress" type="text" value="<?php echo $this->formvars['ows_distributionemailaddress']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPerson; ?>
@@ -912,7 +1018,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<input name="ows_distributionperson" type="text" value="<?php echo $this->formvars['ows_distributionperson']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
-
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strOwsContactPosition; ?>
@@ -920,6 +1025,60 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<input name="ows_distributionposition" type="text" value="<?php echo $this->formvars['ows_distributionposition']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionvoicephone" type="text" value="<?php echo $this->formvars['ows_distributionvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionfacsimile" type="text" value="<?php echo $this->formvars['ows_distributionfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionaddress" type="text" value="<?php echo $this->formvars['ows_distributionaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionpostalcode" type="text" value="<?php echo $this->formvars['ows_distributionpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributioncity" type="text" value="<?php echo $this->formvars['ows_distributioncity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionadministrativearea" type="text" value="<?php echo $this->formvars['ows_distributionadministrativearea']; ?>" size="50" maxlength="100">
 				</td>
 			</tr><?
 			if ($this->formvars['go'] != 'Dienstmetadaten') {?>

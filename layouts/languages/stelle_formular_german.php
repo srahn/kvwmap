@@ -30,9 +30,20 @@
   $strOwsContactPersonHint = 'Bezeichnung der zuständigen Person. Das kann aus Datenschutzgründen z.B. auch der Name der Tätigkeitsbezeichnung sein, z.B. Sachbearbeiter Geodaten.';
   $strOwsContactPosition = 'Position der Person';
   $strOwsContactPositionHint = 'Position der zuständigen Person. Das kann eine Abteilung oder Funktion sein, z.B. Sachgebietsleiter';
+	$strOwsContactVoicephone = 'Telefonnummer';
+	$strOwsContactVoicephoneHint = 'Telefonnummer der zuständigen Person oder Organisation.';
+	$strOwsContactFacsimile = 'Fax-Nummer';
+	$strOwsContactFacsimileHint = 'Fax-Nummer der zuständigen Person oder Organisation';
+	$strOwsContactAddress = 'Strasse HausNr';
+	$strOwsContactAddressHint = 'Strasse und Hausnummer der Adresse der zuständigen Person oder Organisation, ggf. mit Zusatz.';
+	$strOwsContactPostalcode = 'Postleitzahl';
+	$strOwsContactPostalcodeHint = 'Postleitzahl der Adresse der zuständigen Person oder Organisation.';
+	$strOwsContactCity = 'Ort';
+	$strOwsContactCityHint = 'Ortsname der Adresse der zuständigen Person oder Organisation.';
+	$strOwsContactAdministrativeArea = 'Bundesland';
+	$strOwsContactAdministrativeAreaHint = 'Bundesland oder andere administrative Einheit der Adresse der zuständigen Person oder Organisation.';
 	$strOwsGeographicDescription = 'Regionalschlüssel';
 	$strOwsGeographicDescriptionHint = 'Amtlicher Regionalschlüssel (ARS) als 12-stelliger Schlüssel zur eindeutigen Identifizierung der Gebietseinheit mit den Bestandteilen: Bundesland (2 Stellen), Regierungsbezirk (1 Stelle, wenn nicht vorhanden: 0), Kreis (2 Stellen), Gemeindeverband (4 Stellen) und Gemeinde (3 Stellen). Gibt es keinen eindeutigen AGS, kann auch der Name der Verwaltungseiheit zu dem der Datensatz gehört angegeben werden.';
-
   $strLogo = 'Wappen';
   $strNoLogoSelected = 'kein Wappen ausgewählt';
   $strMenuPoint = 'Menüpunkte';
