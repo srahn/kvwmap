@@ -100,7 +100,7 @@ function go_switch_baumfaellantrag($go){
 		} break;
 
 		case 'upload_temp_file' : {
-			$GUI->checkCaseAllowed($go);
+			$GUI->Stelle->isFunctionAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			header('Content-Type: text/plain; charset=utf-8');
 			echo utf8_decode(json_encode($GUI->uploadTempFile()));
