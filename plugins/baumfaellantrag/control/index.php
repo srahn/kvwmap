@@ -107,7 +107,7 @@ function go_switch_baumfaellantrag($go){
 		} break;
 
 		case 'pack_and_mail' : {
-			$GUI->checkCaseAllowed($go);
+			$GUI->Stelle->isFunctionAllowed($go);
 			include(PLUGINS.'baumfaellantrag/model/kvwmap.php');
 			$strip_list = "go, go_plus, username, passwort, Stelle_ID, format, version, callback, _dc, file";
 			$application_data = formvars_strip($GUI->formvars, $strip_list);
