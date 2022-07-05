@@ -2,23 +2,23 @@
 	$url_parts = explode('/', JQUERY_PATH);
 	$dir_parts = explode('-' , $url_parts[count($url_parts) - 2]);
 ?>
-<link rel="stylesheet" href="<?php echo BOOTSTRAP_PATH; ?>css/bootstrap.min.css" type="text/css">
-<link rel="stylesheet" href="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.css" type="text/css">
-<link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css" type="text/css">
 
-<script type="text/javascript" src="<?php echo JQUERY_PATH; ?>jquery<?php echo ($dir_parts[1] != '3.6.0' ? '-' . $dir_parts[1] : '') ; ?>.min.js"></script>
-<script type="text/javascript" src="<?php echo JQUERY_PATH; ?>jquery.base64.js"></script>
+<script src="<? echo JQUERY_PATH; ?>jquery.min.js"></script>
 
-<script type="text/javascript" src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap.min.js"></script>
-<script type="text/javascript" src="<?php echo BOOTSTRAP_PATH; ?>js/bootstrap-table-flatJSON.js"></script>
-<script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.js"></script>
-<script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/export/bootstrap-table-export.min.js"></script><?
-if (BOOTSTRAPTABLE_PATH == '../3rdparty/bootstrap-table-1.18.2/') { ?>
-  <script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>extensions/filter-control/bootstrap-table-filter-control.min.js"></script><?
-} ?>
+<link rel="stylesheet" href="<? echo BOOTSTRAP_PATH; ?>css/bootstrap.min.css">
+<script src="<? echo BOOTSTRAP_PATH; ?>lib/popper-1.16.1.min.js"></script>
+<script src="<? echo BOOTSTRAP_PATH; ?>js/bootstrap.min.js"></script>
+
+<link rel="stylesheet" href="<? echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.css">
+<script src="<? echo BOOTSTRAPTABLE_PATH; ?>bootstrap-table.min.js"></script>
+<script src="<? echo BOOTSTRAPTABLE_PATH; ?>locale/bootstrap-table-de-DE.min.js"></script>
+<script type="text/javascript" src="<? echo BOOTSTRAPTABLE_PATH; ?>/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+<link rel="stylesheet" href="<? echo BOOTSTRAPTABLE_PATH; ?>/extensions/filter-control/bootstrap-table-filter-control.min.css">
 <script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/FileSaver/FileSaver.min.js"></script>
 <script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>libs/js-xlsx/xlsx.core.min.js"></script>
-<script type="text/javascript" src="<?php echo BOOTSTRAPTABLE_PATH; ?>locale/bootstrap-table-de-DE.min.js"></script>
+
+
+<link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css" type="text/css">
 
 <style>
 	body {

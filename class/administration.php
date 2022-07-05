@@ -237,18 +237,18 @@ class administration{
 								}
 							}
 						}
-					}break;
+					} break;
 
 					case 'php' : {
 						include $filepath . $file;
-					}break;
+					} break;
 				}
 				if ($result[0]) {
 					$err_msgs[] = getTimestamp('H:i:s', 4) . ': Fehler beim Ausführen von migration-Datei:<br>' . $file . '<br>in Pfad: ' . str_replace(WWWROOT.APPLVERSION, '../', $filepath) . '<br>' . $result[1];
 					$result = $this->pgdatabase->execSQL('ROLLBACK;', 0, 0, false);
 					break;
 				}
-				else{
+				else {
 					$sql = "
 						INSERT INTO `migrations` (
 							`component`,
