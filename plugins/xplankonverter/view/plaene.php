@@ -435,9 +435,9 @@
 		var today = new Date();
 		var veroeffentlichungsdatum = row.veroeffentlichungsdatum === null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
 
-		console.log('today: ', today);
-		console.log('veroeff: ', new Date(veroeffentlichungsdatum));
-		console.log('vergleich: ', new Date(veroeffentlichungsdatum) == today);
+		//console.log('today: ', today);
+		//console.log('veroeff: ', new Date(veroeffentlichungsdatum));
+		//console.log('vergleich: ', new Date(veroeffentlichungsdatum) == today);
 
 		if (veroeffentlichungsdatum === '') {
 			symbol.title = 'Plan ist nicht veröffentlicht. Kein Datum angegeben!';
