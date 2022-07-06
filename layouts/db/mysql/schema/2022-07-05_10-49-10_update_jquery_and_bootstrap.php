@@ -22,7 +22,12 @@
 					) {
 						exec('mv ' . $src_dir . $lib['content'] . ' ' . $dest_dir . $lib['content']);
 						$this->database->gui->add_message('warning', 'Source ' . $src_dir . $lib['content'] . ' erfolgreich nach ' . $dest_dir . $lib['content'] . ' geschrieben.');
+					}
+					else {
+						$this->database->gui->add_message('warning', 'Source ' . $src_dir . $lib['content'] . ' existiert nicht oder ' . $dest_dir . $lib['content'] . ' ist schon vorhanden.');
+					}
 
+					if (is_dir($dest_dir . $lib['value'])) {
 						exec('sed -i "/' . $lib['const'] . '/c\define(\'' . $lib['const'] . '\', \'../3rdparty/' . $lib['value'] . '/\');" ' . WWWROOT . APPLVERSION . 'config.php');
 						$this->database->gui->add_message('notice', 'Konstante ' . $lib['constant'] . ' in config.php auf ../3rdparty/' . $lib['value'] . '/ gesetzt.');
 						$sql = "
@@ -42,9 +47,6 @@
 						else {
 							$this->database->gui->add_message('warning', 'Konstante ' . $lib['const'] . ' in Datenbank Tabelle config auf ' . $lib['value'] . '/ geändert.');
 						}
-					}
-					else {
-						$this->database->gui->add_message('warning', 'Source ' . $src_dir . $lib['content'] . ' existiert nicht oder ' . $dest_dir . $lib['content'] . ' ist schon vorhanden.');
 					}
 				}
 				exec('rm -R /tmp/kvwmap-server-develop');
