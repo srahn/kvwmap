@@ -351,7 +351,7 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group col-edit" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
 		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
@@ -552,146 +552,146 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 	<input type="button" name="Sende Veröffentlichungsdatum" value="Übernehmen" onclick="toggleVeroeffentlichungsdatum(document.getElementById('input_konvertierung_id').value, document.getElementById('input_veroeffentlichungsdatum').value)"/>
 </div>
 <div class="table-wrapper">
-<table
-	id="konvertierungen_table"
-	data-unique-id="konvertierung_id"
-	data-toggle="table"
-	data-url="index.php"
-	data-click-to-select="false"
-	data-filter-control="true"
-	data-sort-name="Name"
-	data-sort-order="asc"
-	data-search="true"
-	data-visible-search="true"
-	data-show-export="false"
-	data-show-refresh="false"
-	data-show-toggle="false"
-	data-show-columns="true"
-	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
-	data-pagination="true"
-	data-page-list=[10,25,50,100,250,500,1000,all]
-	data-page-size="25"
-	data-show-export="false"
-	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
-	data-toggle="table"
-	data-toolbar="#toolbar"
->
-	<thead>
-		<tr>
-			<th
-				data-field="anzeigename"
-				data-sortable="true"
-				data-visible="true"
-				data-formatter="konvertierungHtmlSpecialchars"
-				class="col-md-7"
-				data-filter-control="input"
-				data-filter-control-placeholder="Suchen"
-			>Name</th>
-			<th
-				data-field="nummer"
-				data-sortable="true"
-				data-visible="false"
-				class="col-md-2"
-				data-filter-control="input"
-			>Nr</th><?php
-			if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+	<table
+		id="konvertierungen_table"
+		data-unique-id="konvertierung_id"
+		data-toggle="table"
+		data-url="index.php"
+		data-click-to-select="false"
+		data-filter-control="true"
+		data-sort-name="Name"
+		data-sort-order="asc"
+		data-search="true"
+		data-visible-search="true"
+		data-show-export="false"
+		data-show-refresh="false"
+		data-show-toggle="false"
+		data-show-columns="true"
+		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
+		data-pagination="true"
+		data-page-list=[10,15,25,50,100,250,500,1000,all]
+		data-page-size="15"
+		data-show-export="false"
+		data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+		data-toggle="table"
+		data-toolbar="#toolbar"
+	>
+		<thead>
+			<tr>
 				<th
-					data-field="bundesland"
+					data-field="anzeigename"
+					data-sortable="true"
+					data-visible="true"
+					data-formatter="konvertierungHtmlSpecialchars"
+					class="col-md-7"
+					data-filter-control="input"
+					data-filter-control-placeholder="Suchen"
+				>Name</th>
+				<th
+					data-field="nummer"
+					data-sortable="true"
 					data-visible="false"
-					data-sortable="true"
-					data-formatter="konvertierungBundeslandFormatter"
 					class="col-md-2"
-					data-filter-control="select"
-				>Bundesland</th><?php
-			}
-			else { ?>
+					data-filter-control="input"
+				>Nr</th><?php
+				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="bundesland"
+						data-visible="false"
+						data-sortable="true"
+						data-formatter="konvertierungBundeslandFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+					>Bundesland</th><?php
+				}
+				else { ?>
+					<th
+						data-field="gemeinde"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungGemeindeFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Gemeinden</th><?php
+				}
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="konvertierung_status"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungStatusFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Status</th><?php
+				}
+				/*
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlicht"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichtFormatter"
+						data-searchable="false"
+						data-switchable="true"
+					><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+				}
+				*/
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlichungsdatum"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichungsdatumFormatter"
+						data-searchable="false"
+						data-switchable="false"
+						class="text-center"
+					><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+				} ?>
 				<th
-					data-field="gemeinde"
+					data-field="konvertierung_id"
 					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungGemeindeFormatter"
-					class="col-md-2"
-					data-filter-control="select"
-					data-filter-control-placeholder="Filtern nach"
-				>Gemeinden</th><?php
-			}
-			if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
-				<th
-					data-field="konvertierung_status"
-					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungStatusFormatter"
-					class="col-md-2"
-					data-filter-control="select"
-					data-filter-control-placeholder="Filtern nach"
-				>Status</th><?php
-			}
-			/*
-			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
-				<th
-					data-field="veroeffentlicht"
-					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungVeroeffentlichtFormatter"
-					data-searchable="false"
-					data-switchable="true"
-				><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
-			}
-			*/
-			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
-				<th
-					data-field="veroeffentlichungsdatum"
-					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungVeroeffentlichungsdatumFormatter"
-					data-searchable="false"
+					data-formatter="konvertierungFunctionsFormatter"
 					data-switchable="false"
-					class="text-center"
-				><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
-			} ?>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungFunctionsFormatter"
-				data-switchable="false"
-				class="col-md-2 text-center"
-			>Funktionen</th>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungDownloadsFormatter"
-				data-switchable="false"
-				class="col-md-2 align-top text-center"
-			>Downloads</th>
-			<th
-				data-field="plan_gml_id"
-				data-visible="true"
-				data-formatter="konvertierungEditFunctionsFormatter"
-				data-switchable="false"
-				class="text-center"
-			>Edit</th>
-			<th
-				data-field="konvertierung_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-				data-searchable="false"
-			>Konvertierung Id</th>
-			<th
-				data-field="plan_gml_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Plan-Id</th>
-			<th
-				data-field="stelle_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Stelle Id</th>
-		</tr>
-	</thead>
-</table>
+					class="col-md-2 text-center"
+				>Funktionen</th>
+				<th
+					data-field="konvertierung_id"
+					data-visible="true"
+					data-formatter="konvertierungDownloadsFormatter"
+					data-switchable="false"
+					class="col-md-2 align-top text-center"
+				>Downloads</th>
+				<th
+					data-field="plan_gml_id"
+					data-visible="true"
+					data-formatter="konvertierungEditFunctionsFormatter"
+					data-switchable="false"
+					class="col-md-2 text-center"
+				>Edit</th>
+				<th
+					data-field="konvertierung_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+					data-searchable="false"
+				>Konvertierung Id</th>
+				<th
+					data-field="plan_gml_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Plan-Id</th>
+				<th
+					data-field="stelle_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Stelle Id</th>
+			</tr>
+		</thead>
+	</table>
 </div><br>
 <button type="button" id="backButton" class="xplankonverter-back-button" title="Nach oben" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Zurück nach oben</button><?
 if ($this->Stelle->id > 200) { ?>
