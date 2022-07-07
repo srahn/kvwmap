@@ -482,7 +482,7 @@
 	function konvertierungDownloadsFormatter(value, row) {
 		var funcIsAllowed, funcIsInProgress,
 			disableFrag = ' xpk-func-btn-disabled disabled" onclick="return false';
-		output = '<span class="btn-group" style="width: 125px;" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
+		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
 
 		// hochgeladene Shapes
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
@@ -646,6 +646,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungVeroeffentlichungsdatumFormatter"
 					data-searchable="false"
 					data-switchable="false"
+					class="text-center"
 				><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
 			} ?>
 			<th
@@ -653,21 +654,22 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 				data-visible="true"
 				data-formatter="konvertierungFunctionsFormatter"
 				data-switchable="false"
-				class="col-md-2"
-			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				class="col-md-2 text-center"
+			>Funktionen</th>
 			<th
 				data-field="konvertierung_id"
 				data-visible="true"
 				data-formatter="konvertierungDownloadsFormatter"
 				data-switchable="false"
-				class="col-md-2"
-			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				class="col-md-2 align-top text-center"
+			>Downloads</th>
 			<th
 				data-field="plan_gml_id"
 				data-visible="true"
 				data-formatter="konvertierungEditFunctionsFormatter"
 				data-switchable="false"
-			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+				class="text-center"
+			>Edit</th>
 			<th
 				data-field="konvertierung_id"
 				data-sortable="true"

@@ -669,12 +669,13 @@
 
 	.xpk-func-btn:hover {
 		color: red;
-		padding: 5 2 5 2;
+		/* padding: 5 2 5 2;
 		border-radius: 0px;
 		background-color: #d2d2d2;
 		border: 2px solid gray;
 		width: 25px;
-		height: 25px;
+		height: 25px; */
+		border: 1px solid gray;
 	}
 
 	.xpk-func-btn-disabled {
