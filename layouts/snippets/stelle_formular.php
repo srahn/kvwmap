@@ -1,10 +1,22 @@
 <?php
-  # 2007-12-30 pk
-  include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
+	# 2007-12-30 pk
+	include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
 <script language="JavaScript">
 <!--
+
+function toggleGroup(group, show) {
+	var img = document.getElementById(group);
+	if (show || img.src.split(/[\\/]/).pop() == 'plus.gif') {
+		img.src = '<? echo GRAPHICSPATH.'minus.gif'; ?>';
+		$('.group-' + group).show();
+	}
+	else {
+		img.src = '<? echo GRAPHICSPATH.'plus.gif'; ?>';		
+		$('.group-' + group).hide();
+	}
+}
 
 function gotoStelle(event, option_obj) {
 	if (event.layerX > 300){
@@ -158,51 +170,77 @@ function addMenues(){
 	.layerform_header{
 		background: rgb(199, 217, 230);
 	}
+
+	.group {
+		background-color: <? echo BG_GLEATTRIBUTE; ?>;
+		border-bottom: 2px solid lightgray;
+	}
+
+	.group-metadata {<?
+		echo ($this->formvars['go'] == 'Dienstmetadaten' ? '' : 'display: none;'); ?>
+	}
+
+	span[data-tooltip] {
+		position: relative;
+		--left: -200px;
+		--width: 400px;
+	}
+
 </style>
 <br>
-<table border="0" cellpadding="5" cellspacing="0">
-  <tr align="center">
-    <td><h2><?php echo $strTitle; ?></h2></td>
-  </tr>
-  <tr>
-    <td align="center"><?php
+<table border="0" cellpadding="5" cellspacing="0" style="width: 100%">
+	<tr align="center">
+		<td><h2><? echo ($this->formvars['go'] == 'Dienstmetadaten' ? $this->strTask . ' ' . $this->Stelle->Bezeichnung : $strTitle); ?></h2></td>
+	</tr>
+	<tr>
+		<td align="center"><?php
 if ($this->Meldung=='Daten der Stelle erfolgreich eingetragen!' OR $this->Meldung=='') {
-  $bgcolor=BG_FORM;
+	$bgcolor=BG_FORM;
 }
 else {
-  $this->Fehlermeldung=$this->Meldung;
-  include('Fehlermeldung.php');
-  $bgcolor=BG_FORMFAIL;
-}
- ?>
-    <table id="form" border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3">
-        <tr align="center">
-          <td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
-        </tr><?php if ($this->formvars['selected_stelle_id']>0) {?>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-          	<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11" style="width: 75px">
-          </td>
-        </tr><?php } ?>
+	$this->Fehlermeldung=$this->Meldung;
+	include('Fehlermeldung.php');
+	$bgcolor=BG_FORMFAIL;
+} ?>
+		<table id="form" border="0" cellspacing="0" cellpadding="5" style="border:1px solid #C3C7C3; width: 100%">
+			<tr align="center">
+				<td colspan="3" style="border-bottom:1px solid #C3C7C3"><em><span class="px13"><?php echo $strAsteriskRequired; ?> </span></em></td>
+			</tr><?
+			if ($this->formvars['go'] != 'Dienstmetadaten') {?>
 				<tr>
+					<th class="group" colspan="3" align="left"><a href="javascript:toggleGroup('stammdaten', false);"><img id="stammdaten" src="<? echo GRAPHICSPATH . 'minus.gif'; ?>"></a>&nbsp;Stammdaten</td>
+				</tr><?
+				if ($this->formvars['selected_stelle_id'] > 0) { ?>
+					<tr class="group-stammdaten">
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><div style="width: 220px;"><?php echo $strDataBankID; ?></div></th>
+						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<input name="id" type="text" value="<?php echo $this->formvars['selected_stelle_id']; ?>" size="25" maxlength="11" style="width: 75px">
+						</td>
+					</tr><?
+				} ?>
+
+				<tr class="group-stammdaten">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<input name="bezeichnung" type="text" value="<?php echo $this->formvars['bezeichnung']; ?>" size="25" maxlength="100">
 					</td>
 				</tr>
-				<tr><?
+
+				<tr class="group-stammdaten"><?
 				if ($this->user->rolle->language != 'german') { ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst($this->user->rolle->language); ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<input name="Bezeichnung_<? echo $this->user->rolle->language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . $this->user->rolle->language]; ?>" size="25" maxlength="100">
 						</td>
 					</tr><?
 				} ?>
-				<tr>
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strReferenceMap; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?
+
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strReferenceMap; ?>*
+					</th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3"><?
 						include_once(CLASSPATH . 'Referenzkarte.php');
 						include_once(CLASSPATH . 'FormObject.php');
 						$referenzkarten = array_map(
@@ -226,25 +264,32 @@ else {
 							$referenzkarte = Referenzkarte::find_by_id($this, $this->formvars['Referenzkarte_ID']); ?>
 							<img id="ref_map_img_prev" src="index.php?go=showRefMapImage&ID=<? echo $referenzkarte->get('ID'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" style="vertical-align: middle" onchange="this.src=">
 						<? } ?>
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMinExtent; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              x&nbsp;<input name="minxmax" type="float" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
-              y&nbsp;<input name="minymax" type="float" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaxExtent;  ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              x&nbsp;<input name="maxxmax" type="float" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
-              y&nbsp;<input name="maxymax" type="float" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-        	<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+					</td>
+				</tr>
+
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strMinExtent; ?>*
+					</th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							x&nbsp;<input name="minxmax" type="float" value="<?php echo $this->formvars['minxmax']; ?>" size="15" maxlength="100">
+							y&nbsp;<input name="minymax" type="float" value="<?php echo $this->formvars['minymax']; ?>" size="15" maxlength="100">
+					</td>
+				</tr>
+
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strMaxExtent;	?>*
+					</th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							x&nbsp;<input name="maxxmax" type="float" value="<?php echo $this->formvars['maxxmax']; ?>" size="15" maxlength="100">
+							y&nbsp;<input name="maxymax" type="float" value="<?php echo $this->formvars['maxymax']; ?>" size="15" maxlength="100">
+					</td>
+				</tr>
+
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strEpsgCode; ?></th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 						<select name="epsg_code" style="width: auto">
 							<option value=""><?php echo $this->strPleaseSelect; ?></option><? 
 							foreach ($this->epsg_codes as $epsg_code) {
@@ -257,79 +302,29 @@ else {
 						</select>
 					</td>
 				</tr>
-				<tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="start" type="date" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="stop" type="date" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsTitle; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
 
-				<tr>
-					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsAbstract; ?></th>
-					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<textarea name="ows_abstract" rows="2"><?php echo $this->formvars['ows_abstract']; ?></textarea>
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStart; ?></th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<input name="start" type="date" value="<?php echo $this->formvars['start']; ?>" size="25" maxlength="100">
 					</td>
 				</tr>
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWmsAccessConstraints; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPerson; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactOrganization; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactEmailAddress; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsContactPosition; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsFees; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="50" maxlength="100"></td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLogo; ?></th>
-          <td style="border-bottom:1px solid #C3C7C3">
-            &nbsp;<input type="file" name="wappen" size="15"><br>
-            &nbsp;<? echo $this->formvars['wappen'] ?>
-          </td>
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strStop; ?></th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<input name="stop" type="date" value="<?php echo $this->formvars['stop']; ?>" size="25" maxlength="100">
+					</td>
+				</tr>
+
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strLogo; ?>*
+					</th>
+					<td style="border-bottom:1px solid #C3C7C3">
+						&nbsp;<input type="file" name="wappen" size="15"><br>
+						&nbsp;<? echo $this->formvars['wappen'] ?>
+					</td>
 
 					<td style="border-bottom:1px solid #C3C7C3"><?
 						if ($this->formvars['wappen'] != '') { ?>
@@ -340,232 +335,237 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
-				<tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWappenLink; ?></th>
-          <td colspan=2 style="border-bottom:1px solid #C3C7C3">
-              <input name="wappen_link" type="text" value="<?php echo $this->formvars['wappen_link']; ?>" size="50" maxlength="100">
-          </td>
-        </tr>
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right"><?php echo $strMenuPoint; ?></th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td><?php echo $strAssigned; ?><br>
-
-                      <select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width: 340px">
-                      <?
-                      for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
-                        echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
-                      }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&laquo;" onClick="addMenues()">
-                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedmenues,document.GUI.selmenues,'value')>
-                    </td>
-                    <td>
-                      <?php echo $strAvailable; ?><br>
-                      <select name="allmenues" size="6" onchange="getsubmenues();" style="width: 340px">
-                      <? for($i=0; $i < count($this->formvars['menues']); $i++){
-                          echo '<option id="'.$this->formvars['menues'][$i]->data['order'].'_all_'.$this->formvars['menues'][$i]->data['menueebene'].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues'][$i]->data['name']).'" value="'.$this->formvars['menues'][$i]->data['id'].'">'.$this->formvars['menues'][$i]->data['name'].'</option>';
-                           }
-                      ?>
-                      </select>
-                      <div id="submenue_div">
-                      	<select name="submenues" size="6" multiple style="width: 340px">
-                      	</select>
-                      </div>
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
+				<tr class="group-stammdaten">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWappenLink; ?></th>
+					<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<input name="wappen_link" type="text" value="<?php echo $this->formvars['wappen_link']; ?>" size="50" maxlength="100">
+					</td>
+				</tr>
 
 				<tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right">Funktionen</th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td>
-                      <select name="selectedfunctions" size="6" multiple style="width: 340px">
-                      <?
-                      for($i=0; $i < count($this->formvars['selfunctions']); $i++){
-                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
-                         }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allfunctions,document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
-                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
-                    </td>
-                    <td>
-                      <select name="allfunctions" size="6" multiple style="width: 340px">
-                      <? for($i=0; $i < count($this->formvars['functions']); $i++){
-                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['functions'][$i]["bezeichnung"]).'" value="'.$this->formvars['functions'][$i]["id"].'">'.$this->formvars['functions'][$i]["bezeichnung"].'</option>';
-                           }
-                      ?>
-                      </select>
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
+					<th colspan="3" class="group" align="left"><a href="javascript:toggleGroup('zuordnungen', false);"><img id="zuordnungen" src="<? echo GRAPHICSPATH . 'minus.gif'; ?>"></a>&nbsp;Zuordnungen</td>
+				</tr>
 
-				<tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right">Kartendruck-Layouts</th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td>
-                      <select name="selectedframes" size="6" multiple style="width: 340px">
-                      <?
-                      for($i=0; $i < count($this->formvars['selframes']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
-                         }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allframes,document.GUI.selectedframes,document.GUI.selframes,'value')>
-                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
-                    </td>
-                    <td>
-                      <select name="allframes" size="6" multiple style="width: 340px">
-                      <? for($i=0; $i < count($this->formvars['frames']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'  value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
-                           }
-                      ?>
-                      </select>
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
-				
-				<tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right">Datendruck-Layouts</th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td>
-                      <select name="selectedlayouts" size="6" multiple style="width: 340px">
-                      <?
-                      for($i=0; $i < count($this->formvars['sellayouts']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
-                         }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayouts,document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
-                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
-                    </td>
-                    <td>
-                      <select name="alllayouts" size="6" multiple style="width: 340px">
-                      <? for($i=0; $i < count($this->formvars['layouts']); $i++){
-                          echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'  value="'.$this->formvars['layouts'][$i]["id"].'">['.$this->formvars['layouts'][$i]["layer_id"].'] '.$this->formvars['layouts'][$i]["name"].'</option>';
-                           }
-                      ?>
-                      </select>
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
+				<tr class="group-zuordnungen">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+									<th class="fetter" align="right"><?php echo $strMenuPoint; ?></th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+						</table>
+					</th>
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+										<td><?php echo $strAssigned; ?><br>
 
-        <tr>
-          <th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-            <table border="0" cellspacing="0" cellpadding="0">
-              <tr>
-                  <th class="fetter" align="right">
-                  <? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
-                    <a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                  <?}?>
-                  <?php echo $strLayer; ?></th>
-                </tr>
-                <tr>
-                  <td align="right">&nbsp;</td>
-                </tr>
-            </table>
-          </th>
-          <td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
-              <table border="0" cellspacing="0" cellpadding="0">
-                <tr valign="top">
-                    <td>
-                      <select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
-                      <?
-                      for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
-                          echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
-                         }
-                      ?>
-                      </select>
-                    </td>
-                    <td align="center" valign="middle" width="1">
-                      <input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayer,document.GUI.selectedlayer,document.GUI.sellayer,'value')>
-                      <input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
-                    </td>
-                    <td>
+											<select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width: 340px">
+											<?
+											for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+												echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
+											}
+											?>
+											</select>
+										</td>
+										<td align="center" valign="middle" width="1">
+											<input type="button" name="addPlaces" value="&laquo;" onClick="addMenues()">
+											<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedmenues,document.GUI.selmenues,'value')>
+										</td>
+										<td>
+											<?php echo $strAvailable; ?><br>
+											<select name="allmenues" size="6" onchange="getsubmenues();" style="width: 340px">
+											<? for($i=0; $i < count($this->formvars['menues']); $i++){
+													echo '<option id="'.$this->formvars['menues'][$i]->data['order'].'_all_'.$this->formvars['menues'][$i]->data['menueebene'].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['menues'][$i]->data['name']).'" value="'.$this->formvars['menues'][$i]->data['id'].'">'.$this->formvars['menues'][$i]->data['name'].'</option>';
+													 }
+											?>
+											</select>
+											<div id="submenue_div">
+												<select name="submenues" size="6" multiple style="width: 340px">
+												</select>
+											</div>
+										</td>
+								</tr>
+							</table>
+					</td>
+				</tr>
+
+				<tr class="group-zuordnungen">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+									<th class="fetter" align="right">Funktionen</th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+						</table>
+					</th>
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+										<td>
+											<select name="selectedfunctions" size="6" multiple style="width: 340px">
+											<?
+											for($i=0; $i < count($this->formvars['selfunctions']); $i++){
+													echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
+												 }
+											?>
+											</select>
+										</td>
+										<td align="center" valign="middle" width="1">
+											<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allfunctions,document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+											<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedfunctions,document.GUI.selfunctions,'value')>
+										</td>
+										<td>
+											<select name="allfunctions" size="6" multiple style="width: 340px">
+											<? for($i=0; $i < count($this->formvars['functions']); $i++){
+													echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['functions'][$i]["bezeichnung"]).'" value="'.$this->formvars['functions'][$i]["id"].'">'.$this->formvars['functions'][$i]["bezeichnung"].'</option>';
+													 }
+											?>
+											</select>
+										</td>
+								</tr>
+							</table>
+					</td>
+				</tr>
+
+				<tr class="group-zuordnungen">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+									<th class="fetter" align="right">Kartendruck-Layouts</th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+						</table>
+					</th>
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+										<td>
+											<select name="selectedframes" size="6" multiple style="width: 340px">
+											<?
+											for($i=0; $i < count($this->formvars['selframes']); $i++){
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
+												 }
+											?>
+											</select>
+										</td>
+										<td align="center" valign="middle" width="1">
+											<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.allframes,document.GUI.selectedframes,document.GUI.selframes,'value')>
+											<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedframes,document.GUI.selframes,'value')>
+										</td>
+										<td>
+											<select name="allframes" size="6" multiple style="width: 340px">
+											<? for($i=0; $i < count($this->formvars['frames']); $i++){
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['frames'][$i]["Name"]).'	value="'.$this->formvars['frames'][$i]["id"].'">'.$this->formvars['frames'][$i]["Name"].'</option>';
+													 }
+											?>
+											</select>
+										</td>
+								</tr>
+							</table>
+					</td>
+				</tr>
+			
+				<tr class="group-zuordnungen">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+									<th class="fetter" align="right">Datendruck-Layouts</th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+						</table>
+					</th>
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+										<td>
+											<select name="selectedlayouts" size="6" multiple style="width: 340px">
+											<?
+											for($i=0; $i < count($this->formvars['sellayouts']); $i++){
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
+												 }
+											?>
+											</select>
+										</td>
+										<td align="center" valign="middle" width="1">
+											<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayouts,document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+											<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayouts,document.GUI.sellayouts,'value')>
+										</td>
+										<td>
+											<select name="alllayouts" size="6" multiple style="width: 340px">
+											<? for($i=0; $i < count($this->formvars['layouts']); $i++){
+													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['layouts'][$i]["name"]).'	value="'.$this->formvars['layouts'][$i]["id"].'">['.$this->formvars['layouts'][$i]["layer_id"].'] '.$this->formvars['layouts'][$i]["name"].'</option>';
+													 }
+											?>
+											</select>
+										</td>
+								</tr>
+							</table>
+					</td>
+				</tr>
+
+				<tr class="group-zuordnungen">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<table border="0" cellspacing="0" cellpadding="0">
+							<tr>
+									<th class="fetter" align="right">
+									<? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
+										<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+									<?}?>
+									<?php echo $strLayer; ?></th>
+								</tr>
+								<tr>
+									<td align="right">&nbsp;</td>
+								</tr>
+						</table>
+					</th>
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellspacing="0" cellpadding="0">
+								<tr valign="top">
+										<td>
+											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
+											<?
+											for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+												 }
+											?>
+											</select>
+										</td>
+										<td align="center" valign="middle" width="1">
+											<input type="button" name="addPlaces" value="&laquo;" onClick=addOptions(document.GUI.alllayer,document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+											<input type="button" name="substractPlaces" value="&raquo;" onClick=substractOptions(document.GUI.selectedlayer,document.GUI.sellayer,'value')>
+										</td>
+										<td>
 											<select name="allgroups" size="6" onchange="getlayer();select_layer();" style="width: 340px">
 												<option value=""> - alle - </option>
-                      <? for($i = 0; $i < count($this->layergruppen['ID']); $i++){
-                          echo '<option title="'.str_replace(' ', '&nbsp;', $this->layergruppen['Bezeichnung'][$i]).'" value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
-                         }
-                      ?>
-                      </select>                    
-                    	<div id="alllayer_div">
-                      <select name="alllayer" size="6" multiple style="position: relative; width: 340px">
-                      <? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
-                          echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' id="'.$this->formvars['layer']["ID"][$i].'_'.$this->formvars['layer']["GruppeID"][$i].'" value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
-                           }
-                      ?>
-                      </select>
-                      </div>                    
-                    </td>
-                </tr>
-              </table>
-          </td>
-        </tr>
+											<? for($i = 0; $i < count($this->layergruppen['ID']); $i++){
+													echo '<option title="'.str_replace(' ', '&nbsp;', $this->layergruppen['Bezeichnung'][$i]).'" value="'.$this->layergruppen['ID'][$i].'">'.$this->layergruppen['Bezeichnung'][$i].'</option>';
+												 }
+											?>
+											</select>
+											<div id="alllayer_div">
+											<select name="alllayer" size="6" multiple style="position: relative; width: 340px">
+											<? for($i=0; $i < count($this->formvars['layer']["Bezeichnung"]); $i++){
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['layer']["Bezeichnung"][$i]).' id="'.$this->formvars['layer']["ID"][$i].'_'.$this->formvars['layer']["GruppeID"][$i].'" value="'.$this->formvars['layer']["ID"][$i].'">'.$this->formvars['layer']["Bezeichnung"][$i].'</option>';
+													 }
+											?>
+											</select>
+											</div>
+										</td>
+								</tr>
+							</table>
+					</td>
+				</tr>
 
-				<tr>
+				<tr class="group-zuordnungen">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
@@ -576,7 +576,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							</tr>
 						</table>
 					</th>
-					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr valign="top">
 								<td>
@@ -584,7 +584,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										$seluseroptions[] = array('value' => '', 'output' => '-- Auswahl --');
 										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
-												'value'  => $this->formvars['selusers']["ID"][$i],
+												'value'	=> $this->formvars['selusers']["ID"][$i],
 												'output' => $this->formvars['selusers']["Bezeichnung"][$i]
 											); ?>
 											<option
@@ -614,8 +614,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						</table>
 					</td>
 				</tr>
-				
-				<tr>
+			
+				<tr class="group-zuordnungen">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
@@ -626,7 +626,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							</tr>
 						</table>
 					</th>
-					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr valign="top">
 								<td><?php
@@ -673,7 +673,8 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						</table>
 					</td>
 				</tr>
-				<tr>
+
+				<tr class="group-zuordnungen">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
@@ -684,7 +685,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							</tr>
 						</table>
 					</th>
-					<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
+					<td colspan="2" valign="top" style="border-bottom:1px solid #C3C7C3">
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr valign="top">
 								<td><?php
@@ -730,9 +731,363 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							</tr>
 						</table>
 					</td>
-				</tr>
+				</tr><?
+			} ?>
+
+			<tr>
+				<th class="group" colspan="3" align="left"><a href="javascript:toggleGroup('metadata', false);"><img id="metadata" src="<? echo GRAPHICSPATH . ($this->formvars['go'] == 'Dienstmetadaten' ? 'minus' : 'plus') . '.gif'; ?>"></a>&nbsp;<? echo $strOwsMetadata; ?></th>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsTitle; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsTitleHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_title" type="text" value="<?php echo $this->formvars['ows_title']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsAbstract; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsAbstractHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+					<textarea name="ows_abstract" rows="2"><?php echo $this->formvars['ows_abstract']; ?></textarea>
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strWmsAccessConstraints; ?>&nbsp;<span data-tooltip="<?php echo $strWmsAccessConstraintsHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="wms_accessconstraints" type="text" value="<?php echo $this->formvars['wms_accessconstraints']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsFees; ?>&nbsp;<span data-tooltip="<?php echo $strOwsFeesHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_fees" type="text" value="<?php echo $this->formvars['ows_fees']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsSrs; ?>&nbsp;<span data-tooltip="<?php echo $strOwsSrsHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="50" maxlength="100"></td>
+			</tr>
+
+			<tr>
+				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactMetadata; ?></th>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactOrganization; ?>*
+					<span data-tooltip="<?php echo $strOwsContactOrganizationHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactorganization" type="text" value="<?php echo $this->formvars['ows_contactorganization']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactEmailAddress; ?>*
+					<span data-tooltip="<?php echo $strOwsContactEmailAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactemailaddress" type="text" value="<?php echo $this->formvars['ows_contactemailaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPerson; ?>
+					<span data-tooltip="<?php echo $strOwsContactPersonHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactperson" type="text" value="<?php echo $this->formvars['ows_contactperson']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPosition; ?>
+					<span data-tooltip="<?php echo $strOwsContactPositionHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactposition" type="text" value="<?php echo $this->formvars['ows_contactposition']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactvoicephone" type="text" value="<?php echo $this->formvars['ows_contactvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactfacsimile" type="text" value="<?php echo $this->formvars['ows_contactfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactaddress" type="text" value="<?php echo $this->formvars['ows_contactaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactpostalcode" type="text" value="<?php echo $this->formvars['ows_contactpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactcity" type="text" value="<?php echo $this->formvars['ows_contactcity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contactadministrativearea" type="text" value="<?php echo $this->formvars['ows_contactadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr>
+				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactContent; ?></th>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactOrganization; ?>*
+					<span data-tooltip="<?php echo $strOwsContactOrganizationHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentorganization" type="text" value="<?php echo $this->formvars['ows_contentorganization']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactEmailAddress; ?>*
+					<span data-tooltip="<?php echo $strOwsContactEmailAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentemailaddress" type="text" value="<?php echo $this->formvars['ows_contentemailaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsGeographicDescription; ?>&nbsp;<span data-tooltip="<?php echo $strOwsGeographicDescriptionHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_geographicdescription" type="text" value="<?php echo $this->formvars['ows_geographicdescription']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPerson; ?>
+					<span data-tooltip="<?php echo $strOwsContactPersonHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentperson" type="text" value="<?php echo $this->formvars['ows_contentperson']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPosition; ?>
+					<span data-tooltip="<?php echo $strOwsContactPositionHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentposition" type="text" value="<?php echo $this->formvars['ows_contentposition']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentvoicephone" type="text" value="<?php echo $this->formvars['ows_contentvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentfacsimile" type="text" value="<?php echo $this->formvars['ows_contentfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentaddress" type="text" value="<?php echo $this->formvars['ows_contentaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentpostalcode" type="text" value="<?php echo $this->formvars['ows_contentpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentcity" type="text" value="<?php echo $this->formvars['ows_contentcity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_contentadministrativearea" type="text" value="<?php echo $this->formvars['ows_contentadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr>
+				<th class="group-metadata" colspan="3" align="center"><? echo $strOwsContactDistribution; ?></th>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactOrganization; ?>
+					<span data-tooltip="<?php echo $strOwsContactOrganizationHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionorganization" type="text" value="<?php echo $this->formvars['ows_distributionorganization']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactEmailAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactEmailAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionemailaddress" type="text" value="<?php echo $this->formvars['ows_distributionemailaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPerson; ?>
+					<span data-tooltip="<?php echo $strOwsContactPersonHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionperson" type="text" value="<?php echo $this->formvars['ows_distributionperson']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPosition; ?>
+					<span data-tooltip="<?php echo $strOwsContactPositionHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionposition" type="text" value="<?php echo $this->formvars['ows_distributionposition']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactVoicephone; ?>
+					<span data-tooltip="<?php echo $strOwsContactVoicephoneHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionvoicephone" type="text" value="<?php echo $this->formvars['ows_distributionvoicephone']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactFacsimile; ?>
+					<span data-tooltip="<?php echo $strOwsContactFacsimileHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionfacsimile" type="text" value="<?php echo $this->formvars['ows_distributionfacsimile']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAddress; ?>
+					<span data-tooltip="<?php echo $strOwsContactAddressHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionaddress" type="text" value="<?php echo $this->formvars['ows_distributionaddress']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactPostalcode; ?>
+					<span data-tooltip="<?php echo $strOwsContactPostalcodeHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionpostalcode" type="text" value="<?php echo $this->formvars['ows_distributionpostalcode']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactCity; ?>
+					<span data-tooltip="<?php echo $strOwsContactCityHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributioncity" type="text" value="<?php echo $this->formvars['ows_distributioncity']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsContactAdministrativeArea; ?>
+					<span data-tooltip="<?php echo $strOwsContactAdministrativeAreaHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+						<input name="ows_distributionadministrativearea" type="text" value="<?php echo $this->formvars['ows_distributionadministrativearea']; ?>" size="50" maxlength="100">
+				</td>
+			</tr><?
+			if ($this->formvars['go'] != 'Dienstmetadaten') {?>
 
 				<tr>
+					<th class="group" colspan="3" align="left"><a href="javascript:toggleGroup('sonstiges', false);"><img id="sonstiges" src="<? echo GRAPHICSPATH . 'minus.gif'; ?>"></a>&nbsp;Sonstiges</td>
+				</tr>
+
+				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $strDefaultUserID; ?>
 					</th>
@@ -741,7 +1096,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input
 							name="show_shared_layers"
@@ -756,42 +1111,42 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkClientIP" type="checkbox" value="1" <?php if ($this->formvars['checkClientIP']) { ?> checked<?php } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strcheckClientIP; ?></td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="checkPasswordAge" type="checkbox" value="1" <?php if ($this->formvars['checkPasswordAge']) { ?> checked<?php } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strCheckPasswordAge; ?></td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="allowedPasswordAge" type="number" size="1" value="<?php echo $this->formvars['allowedPasswordAge']; ?>">
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strAllowedPasswordAge; ?></td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="use_layer_aliases" type="checkbox" value="1" <? if ($this->formvars['use_layer_aliases']) { ?> checked<? } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strUseLayerAliases; ?></td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th align="right" style="border-bottom:1px solid #C3C7C3">
 						<input name="hist_timestamp" type="checkbox" value="1" <?php if ($this->formvars['hist_timestamp']) { ?> checked<?php } ?>>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php echo $strhist_timestamp; ?></td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $this->strVersion; ?>
 					</th>
@@ -800,78 +1155,83 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					</td>
 				</tr>
 
-				<tr>
+				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $this->strComment; ?>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
 						<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
 					</td>
-				</tr>
-
-    </table>
-  </td>
-  </tr>
-  <tr>
-    <td align="center">
-    	<input type="hidden" name="go_plus" id="go_plus" value="">
-    	<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?php
-     if ($this->formvars['selected_stelle_id']>0) {
-     	?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
-     	 	# 2007-12-30 pk
-     	 	# Wenn kein Button gewählt wurde, wird go_plus ohne Wert gesendet
-      ?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
-     } ?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonInsert; ?>" onclick="submitWithValue('GUI','go_plus','Als neue Stelle eintragen')">
-  </td>
-  </tr>
+				</tr><?
+			} ?>
+		</table>
+	</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input type="hidden" name="go_plus" id="go_plus" value=""><?
+			if ($this->formvars['go'] != 'Dienstmetadaten') { ?>
+				<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?
+			}
+			if ($this->formvars['selected_stelle_id'] > 0) {
+				?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
+				?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
+			}
+			if ($this->formvars['go'] != 'Dienstmetadaten') {
+				?>&nbsp;<input type="button" name="dummy" value="<?php echo $strButtonInsert; ?>" onclick="submitWithValue('GUI','go_plus','Als neue Stelle eintragen')"><?
+			} ?>
+		</td>
+	</tr>
 </table>
 
-<input type="hidden" name="go" value="Stelleneditor">
-<input type="hidden" name="selmenues" value="<?
-        echo $this->formvars['selmenues']["ID"][0];
-        for($i=1; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
-          echo ', '.$this->formvars['selmenues']["ID"][$i];
-        }
-      ?>">
-<input type="hidden" name="selfunctions" value="<?
-        echo $this->formvars['selfunctions'][0]["id"];
-        for($i=1; $i < @count($this->formvars['selfunctions']); $i++){
-          echo ', '.$this->formvars['selfunctions'][$i]["id"];
-        }
-      ?>">
-<input type="hidden" name="selframes" value="<?
-        echo $this->formvars['selframes'][0]["id"];
-        for($i=1; $i < @count($this->formvars['selframes']); $i++){
-          echo ', '.$this->formvars['selframes'][$i]["id"];
-        }
-      ?>">      
-<input type="hidden" name="sellayouts" value="<?
-        echo $this->formvars['sellayouts'][0]["id"];
-        for($i=1; $i < @count($this->formvars['sellayouts']); $i++){
-          echo ', '.$this->formvars['sellayouts'][$i]["id"];
-        }
-      ?>">
+<input type="hidden" name="go" value="<? echo ($this->formvars['go'] == 'Dienstmetadaten' ? 'Dienstmetadaten' : 'Stelleneditor'); ?>"><?
+if ($this->formvars['go'] != 'Dienstmetadaten') { ?>
+	<input type="hidden" name="selmenues" value="<?
+					echo $this->formvars['selmenues']["ID"][0];
+					for($i=1; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+						echo ', '.$this->formvars['selmenues']["ID"][$i];
+					}
+				?>">
+	<input type="hidden" name="selfunctions" value="<?
+					echo $this->formvars['selfunctions'][0]["id"];
+					for($i=1; $i < @count($this->formvars['selfunctions']); $i++){
+						echo ', '.$this->formvars['selfunctions'][$i]["id"];
+					}
+				?>">
+	<input type="hidden" name="selframes" value="<?
+					echo $this->formvars['selframes'][0]["id"];
+					for($i=1; $i < @count($this->formvars['selframes']); $i++){
+						echo ', '.$this->formvars['selframes'][$i]["id"];
+					}
+				?>">			
+	<input type="hidden" name="sellayouts" value="<?
+					echo $this->formvars['sellayouts'][0]["id"];
+					for($i=1; $i < @count($this->formvars['sellayouts']); $i++){
+						echo ', '.$this->formvars['sellayouts'][$i]["id"];
+					}
+				?>">
 
-<input
-	name="sellayer"
-	value="<?php echo implode(', ', $this->formvars['sellayer']['ID']); ?>"
-	type="hidden"
->
+	<input
+		name="sellayer"
+		value="<?php echo implode(', ', $this->formvars['sellayer']['ID']); ?>"
+		type="hidden"
+	>
 
-<input
-	name="selusers"
-	value="<?php if(!empty($this->formvars['selusers']['ID']))echo implode(', ', $this->formvars['selusers']['ID']); ?>"
-	type="hidden"
->
+	<input
+		name="selusers"
+		value="<?php if(!empty($this->formvars['selusers']['ID']))echo implode(', ', $this->formvars['selusers']['ID']); ?>"
+		type="hidden"
+	>
 
-<input
-	name="selparents"
-	value="<?php echo implode(', ', array_map(function($parent) { return $parent['ID']; }, $this->formvars['selparents'])); ?>"
-	type="hidden"
->
+	<input
+		name="selparents"
+		value="<?php echo implode(', ', array_map(function($parent) { return $parent['ID']; }, $this->formvars['selparents'])); ?>"
+		type="hidden"
+	>
 
-<input
-	name="selchildren"
-	value="<?php echo implode(', ', array_map(function($child) { return $child['ID']; }, $this->formvars['selchildren'])); ?>"
-	type="hidden"
->
+	<input
+		name="selchildren"
+		value="<?php echo implode(', ', array_map(function($child) { return $child['ID']; }, $this->formvars['selchildren'])); ?>"
+		type="hidden"
+	><?
+} ?>

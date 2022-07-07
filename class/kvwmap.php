@@ -4701,6 +4701,7 @@ echo '			</table>
 		switch ($this->formvars['func']) {
 			case "update_code_and_databases" : {
 				$result = $this->administration->update_code();
+				$this->administration->get_database_status();
 				$err_msgs = $this->administration->update_databases();
 				if (count($err_msgs) > 0) {
 					$this->add_message('error', implode('<br>', $err_msgs));
@@ -11609,9 +11610,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
+	function dienstmetadaten_aendern() {
+    $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);		# das "alte" Stellenobjekt
+    $Stelle->language = $this->Stelle->language;
+    $Stelle->metadaten_aendern($this->formvars);
+		if (
+			count(
+				array_map(
+					function($message) {
+						if ($message['type'] == 'error') return $message;
+					},
+					GUI::$messages
+				)
+			) == 0
+		) {
+			$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+		}
+		$this->Stelleneditor();
+	}
+
   function StelleAendern() {
   	$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->database, $this);
 		$this->document = new Document($this->database);
 		$results = array();
@@ -11624,8 +11644,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     else {
       if ($_files['wappen']['name']){
         $this->formvars['wappen'] = $_files['wappen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
-        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+        $nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'], $nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
@@ -11738,8 +11758,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						GUI::$messages
 					)
 				) == 0
-			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-
+			) {
+				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+			}
     }
     $this->Stelleneditor();
   }
@@ -13732,7 +13753,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
-				if ($layer_id != $old_layer_id AND $tablename != '') {
+				if ($layer_id != $old_layer_id) {
 					$layerdb[$layer_id] = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 					$layerdb[$layer_id]->setClientEncoding();
 					$privileges = $this->Stelle->get_attributes_privileges($layer_id);		# Rechte
