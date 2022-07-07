@@ -337,9 +337,9 @@ class stelle {
 		$sql = "
 			INSERT INTO stelle
 			SET
-				`" . ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "") . "
-				`Bezeichnung = '" . $stellendaten['bezeichnung'] . "',
-				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . "
+				" . ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "") . "
+				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
+				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
 				`minxmax` = " . $stellendaten['minxmax'] . ",
 				`minymax` = " . $stellendaten['minymax'] . ",
 				`maxxmax` = " . $stellendaten['maxxmax'] . ",
@@ -357,7 +357,7 @@ class stelle {
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
-				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "'
+				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
 				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
 				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
 				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
