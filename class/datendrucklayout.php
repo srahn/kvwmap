@@ -1631,7 +1631,7 @@ class ddl {
       $sql .= ", `font_date` = '".$formvars['font_date']."'";
       $sql .= ", `font_user` = '".$formvars['font_user']."'";
 			$sql .= ", `gap` = ".(int)$formvars['gap'];
-      if($formvars['type'])$sql .= ", `type` = ".(int)$formvars['type'];
+      if($formvars['type'] != '')$sql .= ", `type` = ".(int)$formvars['type'];
       else $sql .= ", `type` = NULL";
 			$sql .= ", `margin_top` = ".(int)$formvars['margin_top'];
 			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
