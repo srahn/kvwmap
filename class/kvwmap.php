@@ -5238,10 +5238,10 @@ echo '			</table>
 	}
 
 	function zoomto_selected_datasets(){
-    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+    $dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
     $layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-    $checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+    $checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
 		$this->formvars['selektieren'] = 'false';
     for($i = 0; $i < count($checkbox_names); $i++){
       if($this->formvars[$checkbox_names[$i]] == 'on'){
@@ -16504,7 +16504,8 @@ class db_mapObj{
 	}
 
 	function zoomToDatasets($oids, $layerset, $columnname, $border, $layerdb, $client_epsg, $stelle) {
-  	$sql ="
+		
+		$sql = "
 			SELECT 
 				st_xmin(bbox) AS minx,
 				st_ymin(bbox) AS miny,
@@ -16512,7 +16513,7 @@ class db_mapObj{
 				st_ymax(bbox) AS maxy
 			FROM (
 				SELECT 
-					st_transform(ST_SetSRID(ST_Extent(" . $columnname."), " . $layerset['epsg_code'] . "), " . $client_epsg.") as bbox
+					st_transform(ST_SetSRID(ST_Extent(" . $columnname . "), " . $layerset['epsg_code'] . "), " . $client_epsg.") as bbox
 				FROM 
 					(SELECT " . $this->getQueryWithOid($layerset, $layerdb, $stelle) . ") as fooo
 				WHERE 
