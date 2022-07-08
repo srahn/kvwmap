@@ -1120,20 +1120,14 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
-<<<<<<< HEAD
 				$GUI->check_csrf_token();
-=======
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
->>>>>>> bugfix
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
-<<<<<<< HEAD
 				$GUI->check_csrf_token();
-=======
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
->>>>>>> bugfix
 				$GUI->GenerischeSuche();
 			} break;
 
