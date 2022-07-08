@@ -5817,27 +5817,32 @@ echo '			</table>
     $this->output();
   }
 
-  function druckausschnittswahl($loadmapsource){
+	function druckausschnittswahl($loadmapsource) {
 		global $selectable_scales;
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
-    $this->main="druckausschnittswahl.php";
+		$this->main = "druckausschnittswahl.php";
 		$this->Document=new Document($this->database);
-    # aktuellen Kartenausschnitt laden + zeichnen!
+		# aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
-  	if($this->formvars['neuladen']){
-      $this->neuLaden();
-    }
-    else{
-      $this->loadMap($loadmapsource);
-    }
+		if ($this->formvars['neuladen']) {
+			$this->neuLaden();
+		}
+		else {
+			$this->loadMap($loadmapsource);
+		}
 		# Redlining Polygone
 		$this->addRedlining();
 
-		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if ($saved_scale != NULL) {
+			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			$this->scaleMap($saved_scale);
+		}
 		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-		# Kartendrucklayouts laden
+		if ($this->formvars['zoom_layer_id'] != '') {
+			# Kartendrucklayouts laden
+			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		}
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
     # aktuelles Layout laden
     if($this->formvars['angle'] == ''){
@@ -5930,12 +5935,12 @@ echo '			</table>
     $this->druckausschnittswahl($loadmapsource);
   }
 
-  function druckausschnitt_speichern($loadmapsource){
-    $this->loadMap($loadmapsource);
-    $this->Document = new Document($this->database);
-    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
-    $this->druckausschnittswahl($loadmapsource);
-  }
+	function druckausschnitt_speichern($loadmapsource) {
+		$this->loadMap($loadmapsource);
+		$this->Document = new Document($this->database);
+		$this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
+		$this->druckausschnittswahl($loadmapsource);
+	}
 
   function druckvorschau(){
     $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true);
@@ -6619,22 +6624,31 @@ echo '			</table>
     $this->output();
   }
 
-  function createMapPDF($frame_id, $preview, $fast = false) {
-    $Document=new Document($this->database);
-    $this->Docu=$Document;
-    $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
+	function createMapPDF($frame_id, $preview, $fast = false) {
+		$this->sanitize([
+			'name' => 'text',
+			'center_x' => 'float', 'center_y' => 'float',
+			'refpoint_x' => 'float', 'refpoint_x' => 'float',
+			'printscale' => 'int',
+			'angle' => 'int',
+			'aktiverRahmen' => 'int',
+			'legend_extra' => 'int'
+		]);
+		$Document = new Document($this->database);
+		$this->Docu = $Document;
+		$this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 
-		if($this->Docu->activeframe[0]['dhk_call'] != ''){
+		if ($this->Docu->activeframe[0]['dhk_call'] != ''){
 			global $GUI;
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
 		}
 		else{
 			# Abfrage der aktuellen Karte
-			if($this->formvars['post_map_factor']){
+			if ($this->formvars['post_map_factor']) {
 				$this->map_factor = $this->formvars['post_map_factor'];
 			}
-			elseif($this->formvars['map_factor'] != ''){
+			elseif($this->formvars['map_factor'] != '') {
 				$this->map_factor = $this->formvars['map_factor'];
 			}
 			else{
@@ -6652,7 +6666,8 @@ echo '			</table>
 			if($this->map->selectOutputFormat('jpeg_print') == 1){
 				$this->map->selectOutputFormat('jpeg');
 			}
-			if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
+			if ($fast == true) {
+				# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
 				$this->formvars['referencemap'] = 1;
 				$this->formvars['printscale'] = round($this->map_scaledenom);
 				$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
@@ -6660,7 +6675,7 @@ echo '			</table>
 				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
 				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
 			}
-			elseif($this->user->rolle->print_scale != 'auto'){
+			elseif($this->user->rolle->print_scale != 'auto') {
 				$this->user->rolle->savePrintScale($this->formvars['printscale']);
 			}
 			#echo $this->formvars['center_x'].'<br>';
@@ -6670,7 +6685,7 @@ echo '			</table>
 			$breite = $this->formvars['worldprintwidth']/2;
 			$höhe = $this->formvars['worldprintheight']/2;
 
-			if($this->formvars['angle'] != 0){
+			if ($this->formvars['angle'] != 0){
 				$diag = sqrt(pow($breite, 2) + pow($höhe, 2));
 				$gamma = asin($breite/$diag);
 				$alpha = deg2rad(90) - deg2rad(abs($this->formvars['angle'])) - $gamma;
@@ -10096,9 +10111,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						$this->loadMap('DataBase');
 					}
-					if ($saved_scale != NULL) $this->scaleMap($saved_scale); # nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+					if ($saved_scale != NULL) {
+						# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+						$this->scaleMap($saved_scale);
+					}
 					# zoomToMaxLayerExtent
-					if (value_of($this->formvars, 'zoom_layer_id') != '') $this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+					if (value_of($this->formvars, 'zoom_layer_id') != '') {
+						$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+					}
 					# Zoom auf Geometrie-Fehler-Position
 					if ($this->error_position != '') {
 						$rect = ms_newRectObj();
@@ -19981,19 +20001,21 @@ class Document {
     $this->database = $database;
   }
 
-  function delete_ausschnitt($stelle_id, $user_id, $id){
-    $sql = 'DELETE FROM druckausschnitte WHERE ';
-    $sql.= 'stelle_id = '.$stelle_id.' AND ';
-    $sql.= 'user_id = '.$user_id;
-    if($id != ''){
-      $sql.= ' AND id = '.$id;
-    }
-    $this->debug->write("<p>file:kvwmap class:Document->delete_ausschnitt :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
+	function delete_ausschnitt($stelle_id, $user_id, $id) {
+		$sql = "
+			DELETE FROM
+				druckausschnitte
+			WHERE
+				stelle_id = " . $stelle_id . " AND
+				user_id = " . $user_id . "
+				" . ($id != '' ? " AND id = " . $id : '') . "
+		";
+		$this->debug->write("<p>file:kvwmap class:Document->delete_ausschnitt :",4);
+		$this->database->execSQL($sql,4, 1);
+	}
 
-  function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
-    $sql = "
+	function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
+		$sql = "
 			INSERT INTO
 				druckausschnitte
 			SET
@@ -20008,25 +20030,25 @@ class Document {
 							FROM
 								druckausschnitte
 							WHERE
-								stelle_id = ".$stelle_id." AND
-								user_id = ".$user_id."
+								stelle_id = " . $stelle_id . " AND
+								user_id = " . $user_id . "
 						) as foo
 					),
 					1
 				),
-				stelle_id = ".$stelle_id.",
-				user_id = ".$user_id.",
-				name = '".$name."',
-				epsg_code = '".$epsg_code."',
-				center_x = ".$center_x.",
-				center_y = ".$center_y.",
-				print_scale = ".$print_scale.",
-				angle = ".$angle.",
-				frame_id = ".$frame_id."
+				stelle_id = " . $stelle_id . ",
+				user_id = " . $user_id . ",
+				name = '" . $name . "',
+				epsg_code = '" . $epsg_code . "',
+				center_x = " . $center_x . ",
+				center_y = " . $center_y . ",
+				print_scale = " . $print_scale . ",
+				angle = " . $angle . ",
+				frame_id = " . $frame_id . "
 		";
-    $this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
+		$this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
+		$this->database->execSQL($sql,4, 1);
+	}
 
   function load_ausschnitte($stelle_id, $user_id, $id){
     $sql = 'SELECT * FROM druckausschnitte WHERE ';

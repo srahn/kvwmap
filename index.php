@@ -594,6 +594,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'zoomto_selected_datasets' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
 				$GUI->zoomto_selected_datasets();
 			}break;
 
@@ -881,11 +882,19 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
+				$GUI-sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
 				$GUI->check_csrf_token();
+				$GUI->sanitize([
+					'name' => 'text',
+					'center_x' => 'float', 'center_y' => 'float',
+					'printscale' => 'int',
+					'angle' => 'int',
+					'aktiverRahmen' => 'int'
+				]);
 				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 

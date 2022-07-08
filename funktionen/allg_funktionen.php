@@ -2229,18 +2229,29 @@ function sql_from_parse_tree($parse_tree) {
 
 /**
 	Function sanitize $value based on its $type and returns the sanitized value.
+	If $value is an array all elements will be sanitized with $type.
 	Allowed types: 'int', 'text', $value will be not be changed if type is different or empty
 */
 function sanitize(&$value, $type) {
-	switch ($type) {
-		case 'int' : {
-			$value = (int) $value;
-		} break;
-		case 'text' : {
-			$value = pg_escape_string($value);
-		} break;
-		default : {
-			// let $value as it is
+	if (is_array($value)) {
+		foreach ($value AS &$single_value) {
+			sanitize($single_value, $type);
+		}
+	}
+	else {
+		switch ($type) {
+			case 'int' : {
+				$value = (int) $value;
+			} break;
+			case 'float' : {
+				$value = (float) $value;
+			}
+			case 'text' : {
+				$value = pg_escape_string($value);
+			} break;
+			default : {
+				// let $value as it is
+			}
 		}
 	}
 	return $value;
