@@ -546,10 +546,19 @@ class rolle {
   }
 
   function getConsume($consumetime, $user_id = NULL) {
-		if($user_id == NULL)$user_id = $this->user_id;		# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
-    $sql ='SELECT * FROM u_consume';
-    $sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$this->stelle_id;
-    $sql.=' AND time_id="'.$consumetime.'"';
+		if ($user_id == NULL) {
+			# man kann auch eine user_id übergeben um den Kartenausschnitt eines anderen Users abzufragen
+			$user_id = $this->user_id;
+		}
+    $sql = "
+			SELECT 
+				* 
+			FROM 
+				u_consume
+			WHERE 
+				user_id = " . $user_id ." AND 
+				stelle_id = " . $this->stelle_id . " AND 
+				time_id = '" . $consumetime . "'";
     #echo '<br>'.$sql;
     $queryret=$this->database->execSQL($sql,4, 0);
     if ($queryret[0]) {
@@ -1966,12 +1975,15 @@ class rolle {
 
 	function insertMapComment($consumetime,$comment,$public) {
 		if($public == '')$public = 0;
-		$sql ='REPLACE INTO u_consume2comments SET';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=', stelle_id='.$this->stelle_id;
-		$sql.=', time_id="'.$consumetime.'"';
-		$sql.=', comment="'.$comment.'"';
-		$sql.=', public = '.$public;
+		$sql = "
+			REPLACE INTO 
+				u_consume2comments 
+			SET
+				user_id = " . $this->user_id . ", 
+				stelle_id = " . $this->stelle_id . ", 
+				time_id = '" . $consumetime . "',
+				comment = '" . $comment . "',
+				public = " . $public;
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -1989,18 +2001,21 @@ class rolle {
 	function insertLayerComment($layerset,$comment) {
 		$layers = array();
 		$query = array();
-		$sql ='REPLACE INTO rolle_saved_layers SET';
-		$sql.=' user_id='.$this->user_id;
-		$sql.=', stelle_id='.$this->stelle_id;
-		$sql.=', name="'.$comment.'"';
 		for($i=0; $i < count($layerset['list']); $i++){
 			if($layerset['list'][$i]['Layer_ID'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
 				$layers[] = $layerset['list'][$i]['Layer_ID'];
 				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['Layer_ID'];
 			}
 		}
-		$sql.=', layers="'.implode(',', $layers).'"';
-		$sql.=', query="'.implode(',', $query).'"';
+		$sql = "
+			REPLACE INTO 
+				rolle_saved_layers 
+			SET
+				user_id = ".$this->user_id . ",
+				stelle_id = " . $this->stelle_id . ",
+				name = '" . $comment . "',
+				layers = '" . implode(',', $layers) . "',
+				query = '" . implode(',', $query) . "'";
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -2016,7 +2031,13 @@ class rolle {
 	}
 
 	function deleteMapComment($storetime){
-		$sql = 'DELETE FROM u_consume2comments WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id.' AND time_id = "'.$storetime.'"';
+		$sql = "
+			DELETE FROM 
+				u_consume2comments 
+			WHERE 
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . " 
+				AND time_id = '" . $storetime . "'";
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
@@ -2027,7 +2048,13 @@ class rolle {
 	}
 		
 	function deleteLayerComment($id){
-		$sql = 'DELETE FROM rolle_saved_layers WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id.' AND id = "'.$id.'"';
+		$sql = "
+			DELETE FROM 
+				rolle_saved_layers 
+			WHERE 
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . " AND 
+				id = '" . $id . "'";
 		#echo '<br>'.$sql;
 		$queryret=$this->database->execSQL($sql,4, 1);
 		if ($queryret[0]) {
