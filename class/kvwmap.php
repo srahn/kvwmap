@@ -138,6 +138,21 @@ class GUI {
 		}
 	}
 
+	/**
+		function sanitizes all values of $this->formvars array
+		with names by type given in $vars array
+		@params	$vars Array of formvars elements and types
+						eg: ['selected_layer_id' => 'int', name' => 'text']
+						allowed types: 'int', 'text'
+		@return	$this->formvars is passed by reference to sanitize function,
+						That's why it is changed at the end of this function
+	*/
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
+	}
+
 	function layer_check_oids() {
 		$this->main = 'layer_check_oids.php';
 		$this->output();
@@ -5543,11 +5558,11 @@ echo '			</table>
   }
 
   function haltestellenSuche() {
-    $this->main='haltestellensuche.php';
-    $this->titel='Haltestellensuche';
+    $this->main = 'haltestellensuche.php';
+    $this->titel = 'Haltestellensuche';
     if ($this->formvars['defaultAddress'] == '') {
 	  	echo $this->formvars['defaultAddress'];
-	  	$this->formvars['defaultAddress']='hier eine Adresse eingeben';
+	  	$this->formvars['defaultAddress'] = 'hier eine Adresse eingeben';
 		}
   }
 
@@ -8462,7 +8477,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
-		$this->formvars['selected_layer_id'] = intval($this->formvars['selected_layer_id']);
+		$this->formvars['selected_layer_id'] = $this->formvars['selected_layer_id'];
 		if($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
@@ -8967,8 +8982,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function get_quicksearch_attributes(){
-		if($this->formvars['layer_id']){
-			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+		if ($this->formvars['layer_id']) {
+			$this->layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
 			$this->formvars['anzahl'] = $this->layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
 			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
@@ -8989,8 +9004,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }break;
       }
 			?><table><tr><?
-			for($i = 0; $i < count($this->attributes['name']); $i++){
-				if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['quicksearch'][$i] == 1){
+			for ($i = 0; $i < count($this->attributes['name']); $i++){
+				if ($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['quicksearch'][$i] == 1){
 					?>
 						<td width="40%">&nbsp;&nbsp;<?
 							if($this->attributes['alias'][$i] != ''){
@@ -9018,22 +9033,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 											}
 										for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
 											?>
-											<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+											<option <?
+											if ($this->formvars['value_' . $this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]) {
+												echo 'selected';
+											} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 										} ?>
 										</select>
 										<input type="hidden" class="quicksearch_field" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 										<?
-								}break;
+								} break;
 
 								default : { ?>
-                  <input size="24" class="quicksearch_field" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
-									<? if($this->layerset[0]['connectiontype'] == MS_WFS OR
-												!in_array($this->attributes['type'][$i],	array('varchar', 'text'))){ ?>
-										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
-									<? }else{ ?>
-										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE">
-									<? }
-               }
+                  <input size="24" class="quicksearch_field" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value=""><?
+									if (
+										$this->layerset[0]['connectiontype'] == MS_WFS OR
+										!in_array($this->attributes['type'][$i],	array('varchar', 'text'))
+									) { ?>
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="="><?
+									} else { ?>
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE"><?
+									}
+								}
 							}
 					 ?></td><?
 				}
@@ -9071,7 +9091,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function GenerischeSuche() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->titel = value_of($this->formvars, 'titel');
-		$this->main='generic_search.php';
+		$this->main = 'generic_search.php';
 		$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
 		if ($this->layerdaten['Gruppe']) {
 			$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
@@ -9282,16 +9302,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function gemerkte_Datensaetze_anzeigen($layer_id){
-		$sql = "SELECT oid FROM zwischenablage WHERE user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." AND layer_id = " . $layer_id;
+		$sql = "
+			SELECT oid
+		FROM
+			zwischenablage
+		WHERE
+			user_id = " . $this->user->id . " AND
+			stelle_id = " . $this->Stelle->id . " AND
+			layer_id = " . $layer_id . "
+		";
 		#echo $sql.'<br>';
-		$ret = $this->database->execSQL($sql,4, 1);
-		while($rs = $this->database->result->fetch_assoc()){
+		$ret = $this->database->execSQL($sql, 4, 1);
+		while ($rs = $this->database->result->fetch_assoc()){
 			$oids[] = $rs['oid'];
 		}
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = "('" . implode("', '", $oids) . "')";
-		$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = 'IN';
+		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids) . "')";
+		$this->formvars['operator_'.$layerset[0]['maintable'] . '_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
 	}
@@ -11091,8 +11119,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
 	function daten_import(){
-		$this->main='data_import.php';
-		exec('rm '.UPLOADPATH.$this->user->id.'/*');
+		$this->main = 'data_import.php';
+		exec('rm ' . UPLOADPATH . $this->user->id . '/*');
 		$this->output();
 	}
 
@@ -11126,10 +11154,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action) {
-		include_once (CLASSPATH.'data_import_export.php');
+		sanitize($filename, 'text');
+		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -13000,27 +13029,38 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 
-  function neuLaden() {
+	function neuLaden() {
+		$this->sanitize([
+			'selected_rollenlayer_id' => 'int',
+			'delete_rollenlayer_type' => 'text'
+		]);
 		$this->saveLegendRoleParameters();
-		if(in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if(value_of($this->formvars, 'delete_rollenlayer') != ''){
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if (
+			in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery'))
+		) {
+			// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+			$this->user->rolle->setSelectedButton($this->formvars['last_button']);
+		}
+		if (value_of($this->formvars, 'delete_rollenlayer') != '') {
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
-    # Karteninformationen lesen
-    $this->loadMap('DataBase');
-    # zwischenspeichern des vorherigen Maßstabs
-    $oldscale=round($this->map_scaledenom);
+		# Karteninformationen lesen
+		$this->loadMap('DataBase');
+		# zwischenspeichern des vorherigen Maßstabs
+		$oldscale=round($this->map_scaledenom);
 		# zoomToMaxLayerExtent
-		if(value_of($this->formvars, 'zoom_layer_id') != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		if (value_of($this->formvars, 'zoom_layer_id') != '') {
+			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		}
 		if (value_of($this->formvars, 'nScale') != '' AND $this->formvars['nScale'] != $oldscale) {
-      # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
-      # wenn er sich von der vorherigen Maßstabszahl unterscheidet
-      # (das heißt wenn eine andere Zahl eingegeben wurde)
-      $this->scaleMap($this->formvars['nScale']);
+			# Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
+			# wenn er sich von der vorherigen Maßstabszahl unterscheidet
+			# (das heißt wenn eine andere Zahl eingegeben wurde)
+			$this->scaleMap($this->formvars['nScale']);
 			$this->user->rolle->saveSettings($this->map->extent);
 			$this->user->rolle->readSettings();
-    }
+		}
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
     if (value_of($this->formvars, 'refmap_x') > 0) {
       $this->zoomToRefExt();
@@ -15417,8 +15457,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
   }
 
-  function zoomToMaxLayerExtent($layer_id) {
-    # Abfragen der maximalen Ausdehnung aller Daten eines Layers
+	function zoomToMaxLayerExtent($layer_id) {
+		sanitize($layer_id, 'int');
+		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
 			$layer = $this->user->rolle->getLayer($layer_id);
 		}
@@ -15749,8 +15790,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function deleteRollenlayer(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+	function deleteRollenlayer() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
 		$currenttime=date('Y-m-d H:i:s',time());
@@ -17607,8 +17648,8 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql);
 	}
 
-  function deleteRollenLayer($id = NULL, $type = NULL){
-  	$rollenlayerset = $this->read_RollenLayer($id, $type);
+	function deleteRollenLayer($id = NULL, $type = NULL) {
+		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
 				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);

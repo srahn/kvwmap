@@ -2226,4 +2226,23 @@ function sql_from_parse_tree($parse_tree) {
 	}
 	return implode(' ', $sql);
 }
+
+/**
+	Function sanitize $value based on its $type and returns the sanitized value.
+	Allowed types: 'int', 'text', $value will be not be changed if type is different or empty
+*/
+function sanitize(&$value, $type) {
+	switch ($type) {
+		case 'int' : {
+			$value = (int) $value;
+		} break;
+		case 'text' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
+}
 ?>

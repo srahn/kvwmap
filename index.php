@@ -391,6 +391,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'get_quicksearch_attributes' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->get_quicksearch_attributes();
 			} break;
 
@@ -1070,18 +1071,22 @@ function go_switch($go, $exit = false) {
 			case 'get_last_search' : {
 				$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
 				$GUI->formvars['searches'] = '<last_search>';
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchmaske_generieren' : {
+				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$GUI->GenerischeSuche_Suchmaske();
 			} break;
 
 			case 'Layer-Suche_Suchen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 
 			case 'SchnellSuche_Suchen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
 				$GUI->formvars['keinzurueck'] = true;
 				$GUI->formvars['quicksearch'] = true;
@@ -1089,6 +1094,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1097,10 +1103,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1117,6 +1125,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'gemerkte_Datensaetze_anzeigen' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
