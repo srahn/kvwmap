@@ -789,6 +789,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->DeleteStoredLayers();
 			}break;
 
