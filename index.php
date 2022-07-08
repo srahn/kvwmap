@@ -1751,11 +1751,16 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_rollenlayer' : {
+				$GUI->sanitize([
+					'selected_rollenlayer_id' => 'int',
+					'delete_rollenlayer_type' => 'text'
+				]);
 				$GUI->deleteRollenlayer();
 			} break;
 
 			case 'share_rollenlayer': {
 				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->sanitize(['selected_rollenlayer_id' => 'int']);
 				$GUI->share_rollenlayer();
 				$GUI->loadMap('DataBase');
 				$currenttime = date('Y-m-d H:i:s',time());

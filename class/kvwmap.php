@@ -137,19 +137,6 @@ class GUI {
 			return call_user_func_array($this->{$method}, $arguments);
 		}
 	}
-	
-	function sanitize($formvars){
-		foreach ($formvars as $name => $type) {
-			switch ($type) {
-				case 'int' : {
-					$this->formvars[$name] = (int)$this->formvars[$name];
-				}break;
-				case 'text' : {
-					$this->formvars[$name] = pg_escape_string($this->formvars[$name]);
-				}break;
-			}
-		}
-	}	
 
 	/**
 		function sanitizes all values of $this->formvars array
