@@ -1,4 +1,19 @@
 <?
+function sanitize(&$value, $type) {
+	switch ($type) {
+		case 'int' : {
+			$value = (int) $value;
+		} break;
+		case 'text' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
+}
+
 function value_of($array, $key) {
 	if(!is_array($array))$array = array();
 	return (array_key_exists($key, $array) ? $array[$key] :	'');
@@ -97,7 +112,13 @@ class GUI {
     if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
   }
-	
+
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
+	}
+
 	function loadMultiLingualText($language) {
     #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
     $this->Stelle->language=$language;

@@ -391,6 +391,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'get_quicksearch_attributes' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->get_quicksearch_attributes();
 			} break;
 
@@ -593,6 +594,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'zoomto_selected_datasets' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
 				$GUI->zoomto_selected_datasets();
 			}break;
 
@@ -752,6 +754,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Kartenkommentar_Speichern' : {
 				$GUI->check_csrf_token();
+				$GUI->sanitize(['consumetime' => 'text', 'comment' => 'text', 'public' => 'int']);
 				$GUI->mapCommentStore();
 			}break;
 
@@ -760,10 +763,12 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Zoom' : {
+				$GUI->sanitize(['storetime' => 'text', 'user_id' => 'int']);
 				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime'], $GUI->formvars['user_id']);
 			}break;
 
 			case 'Kartenkommentar_loeschen' : {
+				$GUI->sanitize(['storetime' => 'text']);
 				$GUI->DeleteStoredMapExtent();
 			}break;
 
@@ -772,6 +777,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Speichern' : {
+				$GUI->sanitize(['comment' => 'text']);
 				$GUI->layerCommentStore();
 			}break;
 
@@ -780,10 +786,12 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Laden' : {
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->DeleteStoredLayers();
 			}break;
 
@@ -874,11 +882,19 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
+				$GUI-sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
 				$GUI->check_csrf_token();
+				$GUI->sanitize([
+					'name' => 'text',
+					'center_x' => 'float', 'center_y' => 'float',
+					'printscale' => 'int',
+					'angle' => 'int',
+					'aktiverRahmen' => 'int'
+				]);
 				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -1072,18 +1088,22 @@ function go_switch($go, $exit = false) {
 			case 'get_last_search' : {
 				$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
 				$GUI->formvars['searches'] = '<last_search>';
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchmaske_generieren' : {
+				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$GUI->GenerischeSuche_Suchmaske();
 			} break;
 
 			case 'Layer-Suche_Suchen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 
 			case 'SchnellSuche_Suchen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
 				$GUI->formvars['keinzurueck'] = true;
 				$GUI->formvars['quicksearch'] = true;
@@ -1091,6 +1111,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1099,12 +1120,20 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
+<<<<<<< HEAD
 				$GUI->check_csrf_token();
+=======
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
+>>>>>>> bugfix
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
+<<<<<<< HEAD
 				$GUI->check_csrf_token();
+=======
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
+>>>>>>> bugfix
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1121,6 +1150,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'gemerkte_Datensaetze_anzeigen' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
@@ -1752,11 +1782,16 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_rollenlayer' : {
+				$GUI->sanitize([
+					'selected_rollenlayer_id' => 'int',
+					'delete_rollenlayer_type' => 'text'
+				]);
 				$GUI->deleteRollenlayer();
 			} break;
 
 			case 'share_rollenlayer': {
 				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->sanitize(['selected_rollenlayer_id' => 'int']);
 				$GUI->share_rollenlayer();
 				$GUI->loadMap('DataBase');
 				$currenttime = date('Y-m-d H:i:s',time());

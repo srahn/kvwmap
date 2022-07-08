@@ -138,6 +138,21 @@ class GUI {
 		}
 	}
 
+	/**
+		function sanitizes all values of $this->formvars array
+		with names by type given in $vars array
+		@params	$vars Array of formvars elements and types
+						eg: ['selected_layer_id' => 'int', name' => 'text']
+						allowed types: 'int', 'text'
+		@return	$this->formvars is passed by reference to sanitize function,
+						That's why it is changed at the end of this function
+	*/
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
+	}
+
 	function layer_check_oids() {
 		$this->main = 'layer_check_oids.php';
 		$this->output();
@@ -5547,11 +5562,11 @@ echo '			</table>
   }
 
   function haltestellenSuche() {
-    $this->main='haltestellensuche.php';
-    $this->titel='Haltestellensuche';
+    $this->main = 'haltestellensuche.php';
+    $this->titel = 'Haltestellensuche';
     if ($this->formvars['defaultAddress'] == '') {
 	  	echo $this->formvars['defaultAddress'];
-	  	$this->formvars['defaultAddress']='hier eine Adresse eingeben';
+	  	$this->formvars['defaultAddress'] = 'hier eine Adresse eingeben';
 		}
   }
 
@@ -5806,27 +5821,32 @@ echo '			</table>
     $this->output();
   }
 
-  function druckausschnittswahl($loadmapsource){
+	function druckausschnittswahl($loadmapsource) {
 		global $selectable_scales;
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
-    $this->main="druckausschnittswahl.php";
+		$this->main = "druckausschnittswahl.php";
 		$this->Document=new Document($this->database);
-    # aktuellen Kartenausschnitt laden + zeichnen!
+		# aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
-  	if($this->formvars['neuladen']){
-      $this->neuLaden();
-    }
-    else{
-      $this->loadMap($loadmapsource);
-    }
+		if ($this->formvars['neuladen']) {
+			$this->neuLaden();
+		}
+		else {
+			$this->loadMap($loadmapsource);
+		}
 		# Redlining Polygone
 		$this->addRedlining();
 
-		if($saved_scale != NULL)$this->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+		if ($saved_scale != NULL) {
+			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+			$this->scaleMap($saved_scale);
+		}
 		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
-		# Kartendrucklayouts laden
+		if ($this->formvars['zoom_layer_id'] != '') {
+			# Kartendrucklayouts laden
+			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		}
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
     # aktuelles Layout laden
     if($this->formvars['angle'] == ''){
@@ -5919,12 +5939,12 @@ echo '			</table>
     $this->druckausschnittswahl($loadmapsource);
   }
 
-  function druckausschnitt_speichern($loadmapsource){
-    $this->loadMap($loadmapsource);
-    $this->Document = new Document($this->database);
-    $this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
-    $this->druckausschnittswahl($loadmapsource);
-  }
+	function druckausschnitt_speichern($loadmapsource) {
+		$this->loadMap($loadmapsource);
+		$this->Document = new Document($this->database);
+		$this->Document->save_ausschnitt($this->Stelle->id, $this->user->id, $this->formvars['name'], $this->user->rolle->epsg_code, $this->formvars['center_x'], $this->formvars['center_y'], $this->formvars['printscale'], $this->formvars['angle'], $this->formvars['aktiverRahmen']);
+		$this->druckausschnittswahl($loadmapsource);
+	}
 
   function druckvorschau(){
     $this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true);
@@ -6608,22 +6628,31 @@ echo '			</table>
     $this->output();
   }
 
-  function createMapPDF($frame_id, $preview, $fast = false) {
-    $Document=new Document($this->database);
-    $this->Docu=$Document;
-    $this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
+	function createMapPDF($frame_id, $preview, $fast = false) {
+		$this->sanitize([
+			'name' => 'text',
+			'center_x' => 'float', 'center_y' => 'float',
+			'refpoint_x' => 'float', 'refpoint_x' => 'float',
+			'printscale' => 'int',
+			'angle' => 'int',
+			'aktiverRahmen' => 'int',
+			'legend_extra' => 'int'
+		]);
+		$Document = new Document($this->database);
+		$this->Docu = $Document;
+		$this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
 
-		if($this->Docu->activeframe[0]['dhk_call'] != ''){
+		if ($this->Docu->activeframe[0]['dhk_call'] != ''){
 			global $GUI;
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
 		}
 		else{
 			# Abfrage der aktuellen Karte
-			if($this->formvars['post_map_factor']){
+			if ($this->formvars['post_map_factor']) {
 				$this->map_factor = $this->formvars['post_map_factor'];
 			}
-			elseif($this->formvars['map_factor'] != ''){
+			elseif($this->formvars['map_factor'] != '') {
 				$this->map_factor = $this->formvars['map_factor'];
 			}
 			else{
@@ -6641,7 +6670,8 @@ echo '			</table>
 			if($this->map->selectOutputFormat('jpeg_print') == 1){
 				$this->map->selectOutputFormat('jpeg');
 			}
-			if($fast == true){			# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
+			if ($fast == true) {
+				# schnelle Druckausgabe ohne Druckausschnittswahl, beim Schnelldruck und im Druckrahmeneditor
 				$this->formvars['referencemap'] = 1;
 				$this->formvars['printscale'] = round($this->map_scaledenom);
 				$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
@@ -6649,7 +6679,7 @@ echo '			</table>
 				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
 				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
 			}
-			elseif($this->user->rolle->print_scale != 'auto'){
+			elseif($this->user->rolle->print_scale != 'auto') {
 				$this->user->rolle->savePrintScale($this->formvars['printscale']);
 			}
 			#echo $this->formvars['center_x'].'<br>';
@@ -6659,7 +6689,7 @@ echo '			</table>
 			$breite = $this->formvars['worldprintwidth']/2;
 			$höhe = $this->formvars['worldprintheight']/2;
 
-			if($this->formvars['angle'] != 0){
+			if ($this->formvars['angle'] != 0){
 				$diag = sqrt(pow($breite, 2) + pow($höhe, 2));
 				$gamma = asin($breite/$diag);
 				$alpha = deg2rad(90) - deg2rad(abs($this->formvars['angle'])) - $gamma;
@@ -8466,7 +8496,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
-		$this->formvars['selected_layer_id'] = intval($this->formvars['selected_layer_id']);
+		$this->formvars['selected_layer_id'] = $this->formvars['selected_layer_id'];
 		if ($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
@@ -8977,8 +9007,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function get_quicksearch_attributes(){
-		if($this->formvars['layer_id']){
-			$this->layerset=$this->user->rolle->getLayer($this->formvars['layer_id']);
+		if ($this->formvars['layer_id']) {
+			$this->layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
 			$this->formvars['anzahl'] = $this->layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
 			$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 			switch ($this->layerset[0]['connectiontype']){
@@ -8999,8 +9029,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }break;
       }
 			?><table><tr><?
-			for($i = 0; $i < count($this->attributes['name']); $i++){
-				if($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['quicksearch'][$i] == 1){
+			for ($i = 0; $i < count($this->attributes['name']); $i++){
+				if ($this->layerset[0]['connectiontype'] == MS_WFS OR $this->attributes['quicksearch'][$i] == 1){
 					?>
 						<td width="40%">&nbsp;&nbsp;<?
 							if($this->attributes['alias'][$i] != ''){
@@ -9028,22 +9058,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 											}
 										for($o = 0; $o < count($this->attributes['enum_value'][$i]); $o++){
 											?>
-											<option <? if($this->formvars['value_'.$this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+											<option <?
+											if ($this->formvars['value_' . $this->attributes['name'][$i]] == $this->attributes['enum_value'][$i][$o]) {
+												echo 'selected';
+											} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
 										} ?>
 										</select>
 										<input type="hidden" class="quicksearch_field" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
 										<?
-								}break;
+								} break;
 
 								default : { ?>
-                  <input size="24" class="quicksearch_field" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value="">
-									<? if($this->layerset[0]['connectiontype'] == MS_WFS OR
-												!in_array($this->attributes['type'][$i],	array('varchar', 'text'))){ ?>
-										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="=">
-									<? }else{ ?>
-										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE">
-									<? }
-               }
+                  <input size="24" class="quicksearch_field" onkeydown="keydown(event)" id="attribute_<? echo $i; ?>" name="value_<? echo $this->attributes['name'][$i]; ?>" type="text" value=""><?
+									if (
+										$this->layerset[0]['connectiontype'] == MS_WFS OR
+										!in_array($this->attributes['type'][$i],	array('varchar', 'text'))
+									) { ?>
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="="><?
+									} else { ?>
+										<input type="hidden" class="quicksearch_field" id="operator_attribute_<? echo $i; ?>" name="operator_<? echo $this->attributes['name'][$i]; ?>" value="LIKE"><?
+									}
+								}
 							}
 					 ?></td><?
 				}
@@ -9081,7 +9116,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function GenerischeSuche() {
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->titel = value_of($this->formvars, 'titel');
-		$this->main='generic_search.php';
+		$this->main = 'generic_search.php';
 		$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, 'import');
 		if ($this->layerdaten['Gruppe']) {
 			$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
@@ -9292,16 +9327,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function gemerkte_Datensaetze_anzeigen($layer_id){
-		$sql = "SELECT oid FROM zwischenablage WHERE user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." AND layer_id = " . $layer_id;
+		$sql = "
+			SELECT oid
+		FROM
+			zwischenablage
+		WHERE
+			user_id = " . $this->user->id . " AND
+			stelle_id = " . $this->Stelle->id . " AND
+			layer_id = " . $layer_id . "
+		";
 		#echo $sql.'<br>';
-		$ret = $this->database->execSQL($sql,4, 1);
-		while($rs = $this->database->result->fetch_assoc()){
+		$ret = $this->database->execSQL($sql, 4, 1);
+		while ($rs = $this->database->result->fetch_assoc()){
 			$oids[] = $rs['oid'];
 		}
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'].'_oid'] = "('" . implode("', '", $oids) . "')";
-		$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = 'IN';
+		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids) . "')";
+		$this->formvars['operator_'.$layerset[0]['maintable'] . '_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
 	}
@@ -10078,9 +10121,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						$this->loadMap('DataBase');
 					}
-					if ($saved_scale != NULL) $this->scaleMap($saved_scale); # nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+					if ($saved_scale != NULL) {
+						# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
+						$this->scaleMap($saved_scale);
+					}
 					# zoomToMaxLayerExtent
-					if (value_of($this->formvars, 'zoom_layer_id') != '') $this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+					if (value_of($this->formvars, 'zoom_layer_id') != '') {
+						$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+					}
 					# Zoom auf Geometrie-Fehler-Position
 					if ($this->error_position != '') {
 						$rect = ms_newRectObj();
@@ -11101,8 +11149,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
 	function daten_import(){
-		$this->main='data_import.php';
-		exec('rm '.UPLOADPATH.$this->user->id.'/*');
+		$this->main = 'data_import.php';
+		exec('rm ' . UPLOADPATH . $this->user->id . '/*');
 		$this->output();
 	}
 
@@ -11136,10 +11184,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action) {
-		include_once (CLASSPATH.'data_import_export.php');
+		sanitize($filename, 'text');
+		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder.$filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -13037,27 +13086,38 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 
-  function neuLaden() {
+	function neuLaden() {
+		$this->sanitize([
+			'selected_rollenlayer_id' => 'int',
+			'delete_rollenlayer_type' => 'text'
+		]);
 		$this->saveLegendRoleParameters();
-		if(in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-		if(value_of($this->formvars, 'delete_rollenlayer') != ''){
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		if (
+			in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery'))
+		) {
+			// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+			$this->user->rolle->setSelectedButton($this->formvars['last_button']);
+		}
+		if (value_of($this->formvars, 'delete_rollenlayer') != '') {
+			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
-    # Karteninformationen lesen
-    $this->loadMap('DataBase');
-    # zwischenspeichern des vorherigen Maßstabs
-    $oldscale=round($this->map_scaledenom);
+		# Karteninformationen lesen
+		$this->loadMap('DataBase');
+		# zwischenspeichern des vorherigen Maßstabs
+		$oldscale=round($this->map_scaledenom);
 		# zoomToMaxLayerExtent
-		if(value_of($this->formvars, 'zoom_layer_id') != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		if (value_of($this->formvars, 'zoom_layer_id') != '') {
+			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		}
 		if (value_of($this->formvars, 'nScale') != '' AND $this->formvars['nScale'] != $oldscale) {
-      # Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
-      # wenn er sich von der vorherigen Maßstabszahl unterscheidet
-      # (das heißt wenn eine andere Zahl eingegeben wurde)
-      $this->scaleMap($this->formvars['nScale']);
+			# Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
+			# wenn er sich von der vorherigen Maßstabszahl unterscheidet
+			# (das heißt wenn eine andere Zahl eingegeben wurde)
+			$this->scaleMap($this->formvars['nScale']);
 			$this->user->rolle->saveSettings($this->map->extent);
 			$this->user->rolle->readSettings();
-    }
+		}
     # Zoom auf den in der Referenzkarte ausgewählten Ausschnitt
     if (value_of($this->formvars, 'refmap_x') > 0) {
       $this->zoomToRefExt();
@@ -15464,8 +15524,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     }
   }
 
-  function zoomToMaxLayerExtent($layer_id) {
-    # Abfragen der maximalen Ausdehnung aller Daten eines Layers
+	function zoomToMaxLayerExtent($layer_id) {
+		sanitize($layer_id, 'int');
+		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
 		if($layer_id > 0){
 			$layer = $this->user->rolle->getLayer($layer_id);
 		}
@@ -15796,8 +15857,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function deleteRollenlayer(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+	function deleteRollenlayer() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
 		$currenttime=date('Y-m-d H:i:s',time());
@@ -17677,8 +17738,8 @@ class db_mapObj{
 		$ret = $this->db->execSQL($sql);
 	}
 
-  function deleteRollenLayer($id = NULL, $type = NULL){
-  	$rollenlayerset = $this->read_RollenLayer($id, $type);
+	function deleteRollenLayer($id = NULL, $type = NULL) {
+		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
 				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
@@ -20051,19 +20112,21 @@ class Document {
     $this->database = $database;
   }
 
-  function delete_ausschnitt($stelle_id, $user_id, $id){
-    $sql = 'DELETE FROM druckausschnitte WHERE ';
-    $sql.= 'stelle_id = '.$stelle_id.' AND ';
-    $sql.= 'user_id = '.$user_id;
-    if($id != ''){
-      $sql.= ' AND id = '.$id;
-    }
-    $this->debug->write("<p>file:kvwmap class:Document->delete_ausschnitt :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
+	function delete_ausschnitt($stelle_id, $user_id, $id) {
+		$sql = "
+			DELETE FROM
+				druckausschnitte
+			WHERE
+				stelle_id = " . $stelle_id . " AND
+				user_id = " . $user_id . "
+				" . ($id != '' ? " AND id = " . $id : '') . "
+		";
+		$this->debug->write("<p>file:kvwmap class:Document->delete_ausschnitt :",4);
+		$this->database->execSQL($sql,4, 1);
+	}
 
-  function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
-    $sql = "
+	function save_ausschnitt($stelle_id, $user_id, $name, $epsg_code, $center_x, $center_y, $print_scale, $angle, $frame_id){
+		$sql = "
 			INSERT INTO
 				druckausschnitte
 			SET
@@ -20078,25 +20141,25 @@ class Document {
 							FROM
 								druckausschnitte
 							WHERE
-								stelle_id = ".$stelle_id." AND
-								user_id = ".$user_id."
+								stelle_id = " . $stelle_id . " AND
+								user_id = " . $user_id . "
 						) as foo
 					),
 					1
 				),
-				stelle_id = ".$stelle_id.",
-				user_id = ".$user_id.",
-				name = '".$name."',
-				epsg_code = '".$epsg_code."',
-				center_x = ".$center_x.",
-				center_y = ".$center_y.",
-				print_scale = ".$print_scale.",
-				angle = ".$angle.",
-				frame_id = ".$frame_id."
+				stelle_id = " . $stelle_id . ",
+				user_id = " . $user_id . ",
+				name = '" . $name . "',
+				epsg_code = '" . $epsg_code . "',
+				center_x = " . $center_x . ",
+				center_y = " . $center_y . ",
+				print_scale = " . $print_scale . ",
+				angle = " . $angle . ",
+				frame_id = " . $frame_id . "
 		";
-    $this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
-    $this->database->execSQL($sql,4, 1);
-  }
+		$this->debug->write("<p>file:kvwmap class:Document->save_ausschnitt :",4);
+		$this->database->execSQL($sql,4, 1);
+	}
 
   function load_ausschnitte($stelle_id, $user_id, $id){
     $sql = 'SELECT * FROM druckausschnitte WHERE ';
