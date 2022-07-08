@@ -753,6 +753,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Kartenkommentar_Speichern' : {
 				$GUI->check_csrf_token();
+				$GUI->sanitize(['consumetime' => 'text', 'comment' => 'text', 'public' => 'int']);
 				$GUI->mapCommentStore();
 			}break;
 
@@ -761,10 +762,12 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_Zoom' : {
+				$GUI->sanitize(['storetime' => 'text', 'user_id' => 'int']);
 				$GUI->zoomToStoredMapExtent($GUI->formvars['storetime'], $GUI->formvars['user_id']);
 			}break;
 
 			case 'Kartenkommentar_loeschen' : {
+				$GUI->sanitize(['storetime' => 'text']);
 				$GUI->DeleteStoredMapExtent();
 			}break;
 
@@ -773,6 +776,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Speichern' : {
+				$GUI->sanitize(['comment' => 'text']);
 				$GUI->layerCommentStore();
 			}break;
 
@@ -781,10 +785,12 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Laden' : {
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
 			}break;
 
 			case 'Layerauswahl_loeschen' : {
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->DeleteStoredLayers();
 			}break;
 
