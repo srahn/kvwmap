@@ -764,7 +764,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Kartenkommentar_loeschen' : {
-				$GUI->sanitize(['storetime' => 'text');
+				$GUI->sanitize(['storetime' => 'text']);
 				$GUI->DeleteStoredMapExtent();
 			}break;
 
@@ -773,7 +773,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Speichern' : {
-				$GUI->sanitize(['comment' => 'text');
+				$GUI->sanitize(['comment' => 'text']);
 				$GUI->layerCommentStore();
 			}break;
 
@@ -782,7 +782,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'Layerauswahl_Laden' : {
-				$GUI->sanitize(['id' => 'int');
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->layerCommentLoad();
 			}break;
 
