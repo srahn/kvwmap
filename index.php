@@ -254,6 +254,13 @@ function go_switch($go, $exit = false) {
 			} break;
 			
 			case 'layer_check_oids' : {
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'new_oid_*' => 'text',
+					'new_query_*' => 'text',
+					'new_data_*' => 'text',
+					'order' => 'text'
+				]);
 				$GUI->layer_check_oids();
 			} break;
 
@@ -291,10 +298,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'openCustomSubform' : {
+				$GUI->sanitize(['attribute' => 'text']);
 				$GUI->openCustomSubform();
 			} break;
 
 			case 'getLayerOptions' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->getLayerOptions();
 			} break;
 
@@ -303,14 +312,27 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'saveGeomFromLayer' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'geom_from_layer' => 'text'
+				]);
 				$GUI->saveGeomFromLayer();
 			} break;
 
 			case 'saveLayerOptions' : {
+				$GUI->sanitize([
+					'layer_options_transparency' => 'int',
+					'layer_options_open' => 'int',
+					'layer_options_rollenfilter' => 'text',
+					'layer_options_name' => 'text'
+				]);
 				$GUI->saveLayerOptions();
 			} break;
 
 			case 'resetLayerOptions' : {
+				$GUI->sanitize([
+					'layer_options_open' => 'int'
+				]);
 				$GUI->resetLayerOptions();
 			} break;
 
@@ -1098,7 +1120,11 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchen' : {
-				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'selected_group_id' => 'int',
+					'anzahl' => 'int'
+				]);
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 

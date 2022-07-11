@@ -505,7 +505,7 @@ class rolle {
 			UPDATE
 				rolle
 			SET
-				`layer_params` = '" . $layer_params . "'
+				`layer_params` = '" . sanitize($layer_params, 'text') . "'
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
@@ -516,34 +516,50 @@ class rolle {
 		return $ret;
 	}
 
-  function set_last_time_id($time){
-    # Eintragen der last_time_id
-    $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';
-    $sql.= ' WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id;
-    #echo $sql;
-    $ret=$this->database->execSQL($sql,4, 1);
-    return $ret;
-  }
+	function set_last_time_id($time) {
+		# Eintragen der last_time_id
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				last_time_id = '" . $time . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		#echo $sql;
+		$ret=$this->database->execSQL($sql, 4, 1);
+		return $ret;
+	}
 
-  # 2006-02-16 pk
-  function getLastConsumeTime() {
-    $sql ='SELECT time_id,prev FROM u_consume';
-    $sql.=' WHERE stelle_id='.$this->stelle_id.' AND user_id='.$this->user_id;
-    $sql.=' ORDER BY time_id DESC limit 1';
-    #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 0);
-    if ($queryret[0]) {
-      # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
-    }
-    else {
-      $rs = $this->database->result->fetch_assoc();
-      $ret[0]=0;
-      $ret[1]=$rs;
-    }
-    return $ret;
-  }
+	function getLastConsumeTime() {
+		$sql = "
+			SELECT
+				time_id,
+				prev
+			FROM
+				u_consume
+			WHERE
+				stelle_id = " . $this->stelle_id . " AND
+				user_id = " . $this->user_id . "
+			ORDER BY
+				time_id DESC
+			LIMIT 1
+		";
+		#echo '<br>'.$sql;
+		$queryret=$this->database->execSQL($sql, 4, 0);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0]=1;
+			$ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
+		}
+		else {
+			$rs = $this->database->result->fetch_assoc();
+			$ret[0]=0;
+			$ret[1]=$rs;
+		}
+		return $ret;
+	}
 
   function getConsume($consumetime, $user_id = NULL) {
 		if ($user_id == NULL) {
@@ -573,66 +589,78 @@ class rolle {
     }
     return $ret;
   }
-  
-# 2006-03-20 pk
-  function updateNextConsumeTime($time_id,$nexttime) {
-    $sql ='UPDATE u_consume SET next="'.$nexttime.'"';
-    $sql.=' WHERE time_id="'.$time_id.'"';
-    #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>'.$ret[1];
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]=1;
-    }
-    return $ret;
-  }
 
-  # 2006-03-20 pk
-  function updatePrevConsumeTime($time_id,$prevtime) {
-    $sql ='UPDATE u_consume SET prev="'.$prevtime.'"';
-    $sql.=' WHERE time_id="'.$time_id.'"';
-    #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 1);
-    if ($queryret[0]) {
-      # Fehler bei Datenbankanfrage
-      $ret[0]=1;
-      $ret[1]='<br>Fehler bei der Aktualisierung des Zeitstempels des Vorgängers Prev.<br>'.$ret[1];
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]=1;
-    }
-    return $ret;
-  }
+	function updateNextConsumeTime($time_id,$nexttime) {
+		$sql = "
+			UPDATE
+				u_consume
+			SET
+				next = '" . $nexttime . "'
+			WHERE
+				time_id = '" . $time_id . "'
+		";
+		#echo '<br>'.$sql;
+		$queryret = $this->database->execSQL($sql, 4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler bei der Aktualisierung des Zeitstempels des Nachfolgers Next.<br>' . $ret[1];
+		}
+		else {
+			$ret[0] = 0;
+			$ret[1] = 1;
+		}
+		return $ret;
+	}
 
+	function updatePrevConsumeTime($time_id, $prevtime) {
+		$sql = "
+			UPDATE
+				u_consume
+			SET
+				prev = '" . $prevtime . "'
+			WHERE
+				time_id = '" . $time_id . "'
+		";
+		#echo '<br>' . $sql;
+		$queryret=$this->database->execSQL($sql,4, 1);
+		if ($queryret[0]) {
+			# Fehler bei Datenbankanfrage
+			$ret[0] = 1;
+			$ret[1] = '<br>Fehler bei der Aktualisierung des Zeitstempels des Vorgängers Prev.<br>' . $ret[1];
+		}
+		else {
+			$ret[0] = 0;
+			$ret[1] = 1;
+		}
+		return $ret;
+	}
 
-  function setConsumeALK($time,$druckrahmen_id) {
-    if (LOG_CONSUME_ACTIVITY==1) {
-      # function setzt eine ALK-PDF-EXportaktivität
-      $sql ='INSERT INTO u_consumeALK SET';
-      $sql.=' user_id='.$this->user_id;
-      $sql.=', stelle_id='.$this->stelle_id;
-      $sql.=', time_id="'.$time.'"';
-      $sql .= ', druckrahmen_id = "'.$druckrahmen_id.'"';
-      #echo $sql;
-      $ret=$this->database->execSQL($sql,4, 1);
-      if ($ret[0]) {
-        # Fehler bei Datenbankanfrage
-        $errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
-      }
-    }
-    else {
-      $ret[0]=0;
-      $ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
-    }
-    return $ret;
-  }
-
+	function setConsumeALK($time,$druckrahmen_id) {
+		if (LOG_CONSUME_ACTIVITY == 1) {
+			# function setzt eine ALK-PDF-EXportaktivität
+			$sql = "
+				INSERT INTO
+					u_consumeALK
+				SET
+					user_id = " . $this->user_id . ",
+					stelle_id = " . $this->stelle_id . ",
+					time_id = '" . $time . "',
+					druckrahmen_id = '" . $druckrahmen_id . "'
+			";
+			#echo $sql;
+			$ret=$this->database->execSQL($sql,4, 1);
+			if ($ret[0]) {
+				# Fehler bei Datenbankanfrage
+				$errmsg.='<br>Die Verbraucheraktivität konnte nicht eingetragen werden.<br>'.$ret[1];
+			}
+		}
+		else {
+			$ret[0]=0;
+			$ret[1]='<br>Funktion zur Speicherung der Verbraucheraktivitäten ist ausgeschaltet (LOG_CONSUME_ACTIVITY).';
+		}
+		return $ret;
+	}
 
 # 2006-03-20 pk
   function setConsumeActivity($time,$activity,$prevtime) {
@@ -736,11 +764,29 @@ class rolle {
     return $ret;
   }
 	
-	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset){
-		if($limit == '')$limit = 'NULL';
-		if($offset == '')$offset = 'NULL';
-		$sql = "INSERT INTO rolle_last_query (user_id, stelle_id, go, layer_id, `sql`, orderby, `limit`, `offset`) VALUES (";
-		$sql.= $this->user_id.", ".$this->stelle_id.", '".$go."', ".$layer_id.", '".$this->database->mysqli->real_escape_string($query)."', '".$this->database->mysqli->real_escape_string($sql_order)."', ".$limit.", ".$offset.")";
+	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset) {
+		$sql = "
+			INSERT INTO `rolle_last_query` (
+				`user_id`,
+				`stelle_id`,
+				`go`,
+				`layer_id`,
+				`sql`,
+				`orderby`,
+				`limit`,
+				`offset`
+			)
+			VALUES (
+				" . $this->user_id . ",
+				" . $this->stelle_id . ",
+				'" . $go . "',
+				" . $layer_id . ",
+				'" . $this->database->mysqli->real_escape_string($query) . "',
+				'" . $this->database->mysqli->real_escape_string($sql_order) . "',
+				" . ($limit == '' ? 'NULL' : $limit) . ",
+				" . ($offset == '' ? 'NULL' : $offset) . "
+			)
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->save_last_query - Speichern der letzten Abfrage:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -1240,9 +1286,16 @@ class rolle {
 	}
 	
 	function setRollenLayerName($formvars){
-		$sql ='UPDATE rollenlayer set Name = \''.$formvars['layer_options_name'].'\'';
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				Name = '" . $formvars['layer_options_name'] . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				id = -1*" . $formvars['layer_options_open'] . "
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -1250,16 +1303,30 @@ class rolle {
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
 			if ($formvars['layer_options_open'] > 0) { # normaler Layer
-				$sql ='UPDATE u_rolle2used_layer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND layer_id='.$formvars['layer_options_open'];
+				$sql = "
+					UPDATE
+						u_rolle2used_layer
+					SET
+						labelitem = '" . $formvars['layer_options_labelitem'] . "'
+					WHERE
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						layer_id = " . $formvars['layer_options_open'] . "
+				";
 				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
-			elseif($formvars['layer_options_open'] < 0) { # Rollenlayer
-				$sql ='UPDATE rollenlayer set labelitem = \''.$formvars['layer_options_labelitem'].'\'';
-				$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-				$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+			elseif ($formvars['layer_options_open'] < 0) { # Rollenlayer
+				$sql = "
+					UPDATE
+						rollenlayer
+					SET
+						labelitem = '" . $formvars['layer_options_labelitem'] . "'
+					WHERE
+					 user_id = " . $this->user_id . " AND
+					 stelle_id = " . $this->stelle_id . " AND
+					 id = -1*" . $formvars['layer_options_open'] . "
+				";
 				$this->debug->write("<p>file:rolle.php class:rolle->setLabelitem:",4);
 				$this->database->execSQL($sql,4, $this->loglevel);
 			}
@@ -1267,9 +1334,16 @@ class rolle {
 	}
 
 	function removeLabelitem($formvars) {
-		$sql ='UPDATE u_rolle2used_layer set labelitem = NULL';
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$sql.=' AND layer_id='.$formvars['layer_options_open'];
+		$sql = "
+			UPDATE
+				u_rolle2used_layer
+			SET
+				labelitem = NULL
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				layer_id = " . $formvars['layer_options_open'] . "
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->removeLabelitem:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
@@ -1319,29 +1393,49 @@ class rolle {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
 			$formvars['layer_options_transparency'] = 100;
 		}
-		if($formvars['layer_options_open'] > 0){		# normaler Layer
-			$sql ='
-				UPDATE u_rolle2used_layer 
-				INNER JOIN layer ON layer.Layer_ID = u_rolle2used_layer.layer_id
-				set u_rolle2used_layer.transparency = '.$formvars['layer_options_transparency'].'
-				WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.'
-				AND (u_rolle2used_layer.layer_id='.$formvars['layer_options_open'].' OR requires = '.$formvars['layer_options_open'].')';
+		if ($formvars['layer_options_open'] > 0) { # normaler Layer
+			$sql = "
+				UPDATE
+					u_rolle2used_layer INNER JOIN layer ON layer.Layer_ID = u_rolle2used_layer.layer_id
+				SET
+					u_rolle2used_layer.transparency = " . $formvars['layer_options_transparency'] . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND (
+						u_rolle2used_layer.layer_id = " . $formvars['layer_options_open'] . " OR
+						requires = " . $formvars['layer_options_open'] . "
+					)
+			";
 			$this->debug->write("<p>file:rolle.php class:rolle->setTransparency:",4);
-			$this->database->execSQL($sql,4, $this->loglevel);
+			$this->database->execSQL($sql, 4, $this->loglevel);
 		}
-		elseif($formvars['layer_options_open'] < 0){		# Rollenlayer
-			$sql ='UPDATE rollenlayer set transparency = '.$formvars['layer_options_transparency'];
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND id= -1*'.$formvars['layer_options_open'];
+		elseif ($formvars['layer_options_open'] < 0) { # Rollenlayer
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					transparency = " . $formvars['layer_options_transparency'] . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					id = -1* " . $formvars['layer_options_open'] . "
+			";
 			$this->debug->write("<p>file:rolle.php class:rolle->setTransparency:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
 	}
-	
+
 	function removeTransparency($formvars) {
-		$sql ='UPDATE u_rolle2used_layer set transparency = NULL';
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-		$sql.=' AND layer_id='.$formvars['layer_options_open'];
+		$sql = "
+			UPDATE
+				u_rolle2used_layer
+			SET
+				transparency = NULL
+			WHERE
+				user_id= " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				layer_id = " . $formvars['layer_options_open'] . "
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->removeTransparency:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}

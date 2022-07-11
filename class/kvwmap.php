@@ -148,6 +148,23 @@ class GUI {
 						That's why it is changed at the end of this function
 	*/
 	function sanitize($vars) {
+		$vars_with_asterisk = array_filter(
+			$vars,
+			function($key) {
+				return substr($key, -1) === '*';
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+		foreach ($vars_with_asterisk as $asterisk_key => $asterisk_type) {
+			foreach ($this->formvars as $formvar_key => $value) {
+				if (strpos($formvar_key, substr($asterisk_key, 0, -1)) === 0) {
+					#echo '<br>Set sanitize key: ' . $formvar_key . ' => ' . $asterisk_type;
+					$vars[$formvar_key] = $asterisk_type;
+				}
+			}
+			#echo'<br>Remove sanitize key: ' . $asterisk_key;
+			unset($vars[$asterisk_key]);
+		}
 		foreach ($vars as $name => $type) {
 			sanitize($this->formvars[$name], $type);
 		}
@@ -351,7 +368,7 @@ class GUI {
 	}
 
 	function getLayerOptions() {
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		}
@@ -734,7 +751,7 @@ echo '			</table>
 		';
 	}
 
-	function saveGeomFromLayer(){
+	function saveGeomFromLayer() {
 		$this->user->rolle->saveGeomFromLayer($this->formvars['selected_layer_id'], $this->formvars['geom_from_layer']);
 	}
 
@@ -760,7 +777,7 @@ echo '			</table>
 		$this->output();
 	}
 
-	function saveLayerOptions(){
+	function saveLayerOptions() {
 		$this->user->rolle->setTransparency($this->formvars);
 		$this->user->rolle->setLabelitem($this->formvars);
 		$this->user->rolle->setRollenFilter($this->formvars);
@@ -834,18 +851,22 @@ echo '			</table>
 		$this->output();
 	}
 
+	/**
+		@param $prefix String dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+	*/
 	function setLayerParams($prefix = '') {
 		$layer_params = array();
 		if ($prefix == '') {
-			rolle::$layer_params = array(); 		# leeren, damit alte Layerparameter entfernt werden
+			# leeren, damit alte Layerparameter entfernt werden
+			rolle::$layer_params = array();
 		}
 		foreach ($this->formvars AS $key => $value) {
-			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);		// $prefix dient zur Unterscheidung zwischen den Layer-Parametern im Header und denen in den Optionen
+			$param_key = str_replace($prefix . 'layer_parameter_', '', $key);
 			if ($param_key != $key) {
 				rolle::$layer_params[$param_key] = $value;
 			}
 		}
-		foreach(rolle::$layer_params as $param_key => $value){
+		foreach (rolle::$layer_params as $param_key => $value) {
 			$layer_params[] = '"' . $param_key . '":"' . $value . '"';
 		}
 		if (!empty($layer_params)) {
@@ -3989,19 +4010,19 @@ echo '			</table>
 		echo $rs[0];
   }
 
-	function openCustomSubform(){
+	function openCustomSubform() {
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
-    $attributenames[0] = $this->formvars['attribute'];
-    $attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$layerdb->setClientEncoding();
+		$attributenames[0] = $this->formvars['attribute'];
+		$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$url = $attributes['options'][0];
 		for($i = 0; $i < count($attributenames); $i++){
 			$url = str_replace('$'.$attributenames[$i], $attributevalues[$i], $url);
 		}
-		echo $url.'&field_id='.$this->formvars['field_id'];
+		echo $url . '&field_id='.$this->formvars['field_id'];
 	}
 
   function showMapImage(){
@@ -7579,8 +7600,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function layer_parameter(){
-    $this->main='layer_parameter.php';
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->main = 'layer_parameter.php';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->params = $mapDB->get_all_layer_params();
 		$this->params_layer = $mapDB->get_layer_params_layer();
     $this->output();
@@ -8556,21 +8577,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$sql_where = '';
 				$spatial_sql_where = '';
-				for($m = 0; $m <= value_of($this->formvars, 'searchmask_count'); $m++){
-					if($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
-						$prefix = $m.'_';
-						$sql_where .= ' '.$this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
+				for ($m = 0; $m <= value_of($this->formvars, 'searchmask_count'); $m++){
+					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
+						$prefix = $m . '_';
+						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
 					}
-					else{
+					else {
 						$prefix = '';
 						$sql_where .= ' AND (';		// eine äußere Klammer, dadurch die ORs darin eingeschlossen sind
 					}
 					$sql_where .= ' (1=1';			// klammern
 					$value_like = '';
 					$operator_like = '';
-					for($i = 0; $i < count($attributes['name']); $i++){
-						$value = pg_escape_string_or_array(value_of($this->formvars, $prefix.'value_'.$attributes['name'][$i]));
-						$operator = pg_escape_string(value_of($this->formvars, $prefix.'operator_'.$attributes['name'][$i]));
+					for ($i = 0; $i < count($attributes['name']); $i++) {
+						$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
+						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
 						if ($attributes['form_element_type'][$i] == 'Zahl') {
 							# bei Zahlen den Punkt (Tausendertrenner) entfernen
 							$value = removeTausenderTrenner($value);
@@ -8578,22 +8599,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						elseif (in_array($attributes['type'][$i], ['numeric', 'float4', 'float8'])) {
 							$value = str_replace(',', '.', $value);
 						}
-						if (is_array($value)) {			# multible-Auswahlfelder
-							if(count($value) > 1){
+						if (is_array($value)) {
+							# multible-Auswahlfelder
+							if (count($value) > 1){
 								$value = implode('|', $value);
-								if($operator == '=')$operator = 'IN';
-								else $operator = 'NOT IN';
+								if ($operator == '=') {
+									$operator = 'IN';
+								}
+								else {
+									$operator = 'NOT IN';
+								}
 							}
-							else{
+							else {
 								$value = $value[0];
 							}
 						}
-						if($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
-							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
+						if ($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL') {
+							if (substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL') { # Array-Datentyp
 								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(query.'.$attributes['name'][$i].') a) foo where true ';
 								$attr = 'a';
 							}
-							else{
+							else {
 								$attr = 'query.'.pg_quote($attributes['name'][$i]);		# normaler Datentyp
 							}
 							if ($value != '') {
@@ -8852,7 +8878,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
-					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']));
+					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
 
 					# Querymaps erzeugen
 					if (
@@ -16865,6 +16891,7 @@ class db_mapObj{
 	* @return array with integer connection_id and string schema name, return an empty array if no connection for layer_id found
 	*/
 	function get_layer_connection($layer_id) {
+		sanitize($layer_id, 'int');
 		#echo 'Class db_map Method get_layer_connection';
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
@@ -19108,10 +19135,11 @@ class db_mapObj{
 					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
-		if($param_id != NULL){
+		if ($param_id != NULL) {
 			$sql .= " AND p.id = ".$params_id;
 		}
-		if($layer_id != NULL){	# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer dabei ignorieren
+		if ($layer_id != NULL) {
+			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer dabei ignorieren
 			$sql .= " 
 			AND l.Layer_ID NOT IN (
 					SELECT 
