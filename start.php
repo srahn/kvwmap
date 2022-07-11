@@ -177,6 +177,7 @@ else {
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 				set_session_vars($GUI->formvars);
+				$GUI->user->has_logged_in = true;
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
 			}
