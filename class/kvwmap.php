@@ -3286,12 +3286,20 @@ echo '			</table>
 		}
 	}
 
+	/**
+		Function check the csrf_token if the user has not logged in with this request
+		HTTP 405 Error is sent if csrf_token is not received or does not match the one in the session.
+	*/
 	function check_csrf_token() {
 		#$csrf_token = filter_input(INPUT_GET, 'csrf_token', FILTER_SANITIZE_STRING);
 		$csrf_token = $this->formvars['csrf_token'];
 		#echo '<br>csrf_token: ' . $csrf_token;
-
-		if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
+		if (
+			!$this->user->has_logged_in AND (
+				!$csrf_token OR
+				$csrf_token !== $_SESSION['csrf_token']
+			)
+		) {
 			# return 405 http status code
 			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
 			echo $this->strSecurityReason . ' => <a href="' . URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION . 'index.php?go=logout">Login</a>';
