@@ -1202,18 +1202,21 @@ class data_import_export {
 			$filter = $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id);
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
-			$where = substr($this->formvars['sql_'.$this->formvars['selected_layer_id']], strrpos(strtolower($this->formvars['sql_'.$this->formvars['selected_layer_id']]), 'where'));
+			$where = substr(
+				$this->formvars['sql_' . $this->formvars['selected_layer_id']],
+				strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'where')
+			);
 
 			# order by rausnehmen
 			$orderbyposition = strrpos(strtolower($sql), 'order by');
 			$lastfromposition = strrpos(strtolower($sql), 'from');
-			if ($orderbyposition !== false AND $orderbyposition > $lastfromposition){
+			if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
 				$orderby = ' '.substr($sql, $orderbyposition);
 				$sql = substr($sql, 0, $orderbyposition);
 			}
 			# group by rausnehmen
 			$groupbyposition = strpos(strtolower($sql), 'group by');
-			if($groupbyposition !== false){
+			if ($groupbyposition !== false) {
 				$groupby = ' '.substr($sql, $groupbyposition);
 				$sql = substr($sql, 0, $groupbyposition);
 	  	}

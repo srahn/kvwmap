@@ -337,6 +337,9 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'saveLegendOptions' : {
+				$GUI->sanitize([
+					'legendtype' => 'int'
+				]);
 				$GUI->saveLegendOptions();
 			} break;
 
@@ -345,6 +348,9 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'toggle_gle_view' : {
+				$GUI->sanitize([
+					'chosen_layer_id' => 'int'
+				]);
 				$GUI->switch_gle_view();
 			} break;
 
@@ -1091,6 +1097,14 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
+				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'layer_name' => 'text',
+					'epsg' => 'int',
+					'newpathwkt' => 'text',
+					'precision' => 'int'
+				]);
 				$GUI->checkCaseAllowed('Daten_Export');
 				$GUI->daten_export_exportieren();
 			} break;
