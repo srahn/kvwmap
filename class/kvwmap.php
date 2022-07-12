@@ -756,7 +756,7 @@ echo '			</table>
 	}
 
 	function saveLegendOptions(){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);     # class_load_level: 0 = keine Klassen laden
 		$this->user->rolle->saveLegendOptions($layerset, $this->formvars);
 		$this->resizeMap2Window();
@@ -8635,7 +8635,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								if (strlen(trim($value)) > 0) {
 									$value = trim($value);
 								}
-								switch($operator) {
+								switch ($operator) {
 									case 'LIKE' : case 'NOT LIKE' : {
 										################  Autovervollständigungsfeld ########################################
 										if($attributes['form_element_type'][$i] == 'Autovervollständigungsfeld' AND $attributes['options'][$i] != ''){
@@ -8661,7 +8661,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										}
 										$sql_where .= ' AND LOWER(CAST('.$attr.' AS TEXT)) '.$operator.' ';
 										$sql_where.='LOWER(\''.$value.'\')';
-									}break;
+									} break;
 
 									case 'IN' : case 'NOT IN' : {
 										$parts = explode('|', $value);
@@ -8679,36 +8679,36 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 											$value_like = '';
 											$operator_like = '';
 										}
-									}break;
+									} break;
 
 									default : {
 										if ($operator != 'IS NULL' AND $operator != 'IS NOT NULL') {
-											$sql_where .= ' AND ('.$attr.' '.$operator.' \''.$value.'\'';
-											if ($this->formvars[$prefix.'value2_'.$attributes['name'][$i]] != '') {
-												$sql_where.=' AND \''.$this->formvars[$prefix.'value2_'.$attributes['name'][$i]].'\'';
+											$sql_where .= ' AND (' . $attr . ' ' . $operator . ' \'' . $value . '\'';
+											if ($this->formvars[$prefix . 'value2_' . $attributes['name'][$i]] != '') {
+												$sql_where.= ' AND \'' . $this->formvars[$prefix . 'value2_' . $attributes['name'][$i]] . '\'';
 											}
 											if ($operator == '!=') {
-												$sql_where .= ' OR '.$attr.' IS NULL';
+												$sql_where .= ' OR ' . $attr . ' IS NULL';
 											}
 											$sql_where .= ')';
 										}
 									}
 								}
 							}
-							if($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
-								if(in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text'))){
-									if($operator == 'IS NULL'){
-										$sql_where .= ' AND ('.$attr.' '.$operator.' OR '.$attr.' = \'\') ';
+							if ($operator == 'IS NULL' OR $operator == 'IS NOT NULL'){
+								if (in_array($attributes['type'][$i], array('bpchar', 'varchar', 'text'))) {
+									if ($operator == 'IS NULL') {
+										$sql_where .= ' AND (' . $attr . ' ' . $operator . ' OR ' . $attr . ' = \'\') ';
 									}
-									else{
-										$sql_where .= ' AND '.$attr.' '.$operator.' AND '.$attr.' != \'\' ';
+									else {
+										$sql_where .= ' AND ' . $attr . ' ' . $operator . ' AND ' . $attr . ' != \'\' ';
 									}
 								}
-								else{
-									$sql_where .= ' AND '.$attr.' '.$operator.' ';
+								else {
+									$sql_where .= ' AND ' . $attr . ' ' . $operator . ' ';
 								}
 							}
-							if(substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL'){		# Array-Datentyp
+							if (substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL') { # Array-Datentyp
 								$sql_where .= ')';
 							}
 						}
@@ -8743,7 +8743,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         }
 				if ($layerset[0]['maintable'] != '' AND $layerset[0]['oid'] != '') {
 					$pfad = pg_quote($attributes['table_alias_name'][$layerset[0]['maintable']]) . '.' . $layerset[0]['oid'] . ' AS '.pg_quote($layerset[0]['maintable'] . '_oid') . ', ' . $pfad;
-					if (value_of($this->formvars, 'operator_'.$layerset[0]['maintable'].'_oid') == '') {
+					if (value_of($this->formvars, 'operator_' . $layerset[0]['maintable'] . '_oid') == '') {
 						$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = '=';
 					}
 					if (value_of($this->formvars, 'value_'.$layerset[0]['maintable'] . '_oid')) {
@@ -11241,6 +11241,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function daten_export() {
+		$this->sanitize([
+			'selected_rollenlayer_id' => 'int',
+			'setting_name' => 'text',
+			'export_format' => 'text',
+			'epsg' => 'int',
+			'with_metadata_document' => 'bool',
+			'export_groupnames' => 'bool',
+			'download_documents' => 'bool',
+			'newpathwkt' => 'text',
+			'within' => 'bool',
+			'singlegeom' => 'bool'
+		]);
 		include_once (CLASSPATH . 'data_import_export.php');
 		if ($this->formvars['chosen_layer_id'] != '') {
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];		# aus der Sachdatenanzeige des GLE
@@ -11275,7 +11287,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 			$where = substr($where, 0, -1).')';
 			if ($anzahl > 0) {
-				$this->formvars['sql_'.$this->formvars['selected_layer_id']] = $where.$orderby;
+				$this->formvars['sql_' . $this->formvars['selected_layer_id']] = $where . $orderby;
 				$this->formvars['anzahl'] = $anzahl;
 			}
 		}

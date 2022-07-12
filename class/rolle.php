@@ -263,22 +263,36 @@ class rolle {
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
 	}
-	
-	function switch_gle_view($layer_id){
-		if($layer_id > 0){
-			$sql ='UPDATE u_rolle2used_layer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND layer_id='.$layer_id;
+
+	function switch_gle_view($layer_id) {
+		if ($layer_id > 0) {
+			$sql = "
+				UPDATE
+					u_rolle2used_layer
+				SET
+					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					layer_id = " . $layer_id . "
+			";
 		}
-		else{
-			$sql ='UPDATE rollenlayer SET gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END';
-			$sql.=' WHERE id='.(-$layer_id);
+		else {
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					gle_view = CASE WHEN gle_view IS NULL THEN 0 ELSE NOT gle_view END
+				WHERE
+					id = " . (-$layer_id) . "
+			";
 		}
-    #echo $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:switch_gle_view - Speichern der Einstellungen zur Rolle:",4);
-    $this->database->execSQL($sql,4, $this->loglevel);
-    return 1;
-  }
-		
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:switch_gle_view - Speichern der Einstellungen zur Rolle:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}
+
 	function setLanguage($language) {
     $sql ='UPDATE rolle SET language="'.$language.'"';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -934,15 +948,15 @@ class rolle {
 		}
 		return $search;
 	}
-	
-	function saveExportSettings($formvars){
+
+	function saveExportSettings($formvars) {
 		$layerset = $this->getLayer($formvars['selected_layer_id']);
 		$mapdb = new db_mapObj($this->stelle_id, $this->user_id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $stelle->pgdbhost);
 		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
 		# Attribute
 		for ($i = 0; $i < count($this->attributes['name']); $i++) {
-			if ($formvars['check_'.$this->attributes['name'][$i]]) {
+			if ($formvars['check_' . $this->attributes['name'][$i]]) {
 				$selected_attributes[] = $this->attributes['name'][$i];
 			}
 		}
@@ -1239,9 +1253,15 @@ class rolle {
 	}
 	
 	function saveLegendOptions($layerset, $formvars){
-		$sql ="	UPDATE rolle SET 
-						legendtype=".$formvars['legendtype']." 
-						WHERE user_id=".$this->user_id." AND stelle_id=".$this->stelle_id;
+		$sql ="
+			UPDATE
+				rolle
+			SET 
+				legendtype = " . $formvars['legendtype'] . "
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";;
 		#echo $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
@@ -1268,23 +1288,39 @@ class rolle {
 					}
 				}
 			}
-			if($layers_changed != ''){				
-				foreach($layers_changed as $id => $value){
-					$sql = 'UPDATE u_rolle2used_layer SET drawingorder = '.$layerset['list'][$id]['drawingorder'].' WHERE layer_id='.$layerset['list'][$id]['Layer_ID'].' AND user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+			if ($layers_changed != '') {
+				foreach ($layers_changed as $id => $value) {
+					$sql = "
+						UPDATE
+							u_rolle2used_layer
+						SET
+							drawingorder = " . $layerset['list'][$id]['drawingorder'] . "
+						WHERE
+							layer_id = " . $layerset['list'][$id]['Layer_ID'] . " AND
+							user_id = " . $this->user_id . " AND
+							stelle_id = " . $this->stelle_id . "
+					";
 					$this->debug->write("<p>file:rolle.php class:rolle function:saveLegendOptions - :",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
 			}
 		}
 	}
-	
-	function removeDrawingOrders(){
-		$sql ='UPDATE u_rolle2used_layer set drawingorder = NULL';
-		$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
+
+	function removeDrawingOrders() {
+		$sql = "
+			UPDATE
+				u_rolle2used_layer
+			SET
+				drawingorder = NULL
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
 		$this->debug->write("<p>file:rolle.php class:rolle->removeDrawingOrders:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
+
 	function setRollenLayerName($formvars){
 		$sql = "
 			UPDATE

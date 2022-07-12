@@ -2244,46 +2244,54 @@ function sql_from_parse_tree($parse_tree) {
 }
 
 /**
-	Function sanitize $value based on its $type and returns the sanitized value.
+	Function sanitizes $value based on its $type and returns the sanitized value.
+	If $type or $value is empty or $type unknown, $value will not be sanitized at all.
 	If $value is an array all elements will be sanitized with $type.
-	Allowed types: 'int', 'text', $value will be not be changed if type is different or empty
 */
 function sanitize(&$value, $type) {
+	if (empty($type)) {
+		return $value;
+	}
+
 	if (is_array($value)) {
 		foreach ($value AS &$single_value) {
 			sanitize($single_value, $type);
 		}
+		return $value;
 	}
-	else {
-		switch ($type) {
 
-			case 'int' :
-			case 'int4' :
-			case '_int4' :
-			case 'oid' :
-			case 'int8' : {
-				$value = (int) $value;
-			} break;
+	if (empty($value)) {
+		return $value;
+	}
 
-			case 'numeric' :
-			case '_numeric' :
-			case 'float8' :
-			case 'float' : {
-				$value = (float) $value;
-			} break;
+	switch ($type) {
+		case 'int' :
+		case 'int4' :
+		case '_int4' :
+		case 'oid' :
+		case 'bool':
+		case 'boolean':
+		case 'int8' : {
+			$value = (int) $value;
+		} break;
 
-			case 'text' :
-			case 'bool' ;
-			case 'geometry' :
-			case 'timestamp' :
-			case 'date' :
-			case 'unknown' :
-			case 'varchar' : {
-				$value = pg_escape_string($value);
-			} break;
-			default : {
-				// let $value as it is
-			}
+		case 'numeric' :
+		case '_numeric' :
+		case 'float8' :
+		case 'float' : {
+			$value = (float) $value;
+		} break;
+
+		case 'text' :
+		case 'geometry' :
+		case 'timestamp' :
+		case 'date' :
+		case 'unknown' :
+		case 'varchar' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
 		}
 	}
 	return $value;
