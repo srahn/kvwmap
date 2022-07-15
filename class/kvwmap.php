@@ -8594,7 +8594,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$value_like = '';
 					$operator_like = '';
 					for ($i = 0; $i < count($attributes['name']); $i++) {
-						$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
+						if (value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]) == 'IN') {
+							# Sanitize all elements in list delimited with | separately and compose afterward again together to list string
+							$value = explode('|', value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]));
+							$value = sanitize(explode('|', value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i])), $attributes['type'][$i]);
+							$value = implode('|', $value);
+						}
+						else {
+							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
+						}
 						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
 						if ($attributes['form_element_type'][$i] == 'Zahl') {
 							# bei Zahlen den Punkt (Tausendertrenner) entfernen
