@@ -761,7 +761,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 					<?php echo $strOwsNameSpace; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-					<textarea name="ows_namespace" rows="2"><?php echo $this->formvars['ows_namespace']; ?></textarea>
+					<input name="ows_namespace" type="text" value="<?php echo $this->formvars['ows_namespace']; ?>" size="50" maxlength="100">
 				</td>
 			</tr>
 
