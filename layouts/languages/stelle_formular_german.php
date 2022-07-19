@@ -14,6 +14,8 @@
 	$strOwsContactDistribution = 'Kontakt Vertrieb';
   $strOwsTitle =  'Titel des Dienstes';
   $strOwsTitleHint = 'Eine kurze Überschrift unter der der Dienst in Suchergebnissen angezeigt werden soll. Der Text sollte sich von anderen unterscheiden aber nicht zu lang sein.';
+	$strOwsNameSpace = 'Namespace des Dienstes';
+	$strOwsNameSpaceHint = 'Der Namespace ist der Namensraum in dem die im Dienst verwendeten Identifikatoren eindeutig sind. Der Identifikator eines Datenobjektes in einem INSPIRE-Datensatz setzt sich z.B. immer aus einem namespace und einer ID zusammen. Dadurch wird sicher gestellt, dass der Identifikator wirklich eindeutig ist auch über den Dienst und die Dienststelle, die den Dienst bereitstellt hinweg.';
   $strOwsAbstract = 'Kurzbeschreibung';
   $strOwsAbstractHint = 'Kurze Darstellung zu den Inhalten und der räumlichen Ausdehnung der Daten, die über den Dienst verfügbar gemacht werden.';
   $strWmsAccessConstraints = 'Zugangsbeschränkungen';

@@ -14,6 +14,8 @@
 	$strOwsContactDistribution = 'Contact distribution';
   $strOwsTitle =  'OWS nazwa';
   $strOwsTitleHint = 'A short headline. It will used eg. to list the service in search results.';
+	$strOwsNameSpace = 'Namespace';
+	$strOwsNameSpaceHint = 'The Namespace is used to make identifier unique in service and beyond.';
   $strOwsAbstract = 'OWS skrót';
   $strOwsAbstractHint = 'A short description about the content and the spatial extent of the geodata delivered by the service.';
   $strWmsAccessConstraints = 'ograniczenia dostępu WMS';
