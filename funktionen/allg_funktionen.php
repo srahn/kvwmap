@@ -2269,7 +2269,6 @@ function sanitize(&$value, $type) {
 		case 'int4' :
 		case '_int4' :
 		case 'oid' :
-		case 'bool':
 		case 'boolean':
 		case 'int8' : {
 			$value = (int) $value;
@@ -2290,6 +2289,11 @@ function sanitize(&$value, $type) {
 		case 'varchar' : {
 			$value = pg_escape_string($value);
 		} break;
+
+		case 'bool': {
+			$value = (is_string($value) ? pg_escape_string($value) : (int) $value);
+		} break;
+
 		default : {
 			// let $value as it is
 		}
