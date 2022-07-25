@@ -254,14 +254,21 @@ class rolle {
     }
     return $groups;
   }
-	
+
 	function set_print_legend_separate($separate){
-		$sql ='UPDATE rolle SET print_legend_separate="'.$separate.'"';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    # echo $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:set_print_legend_separate - Speichern der Einstellungen zur Rolle:",4);
-    $this->database->execSQL($sql,4, $this->loglevel);
-    return 1;
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				print_legend_separate = " . ($separate == '' ? 0 : 1 ) . "
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		# echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:set_print_legend_separate - Speichern der Einstellungen zur Rolle:", 4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
 	}
 
 	function switch_gle_view($layer_id) {
