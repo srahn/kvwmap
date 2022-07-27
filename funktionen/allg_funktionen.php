@@ -41,8 +41,8 @@ function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
 }
 
-function pg_quote($column){
-	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"'.$column.'"';
+function pg_quote($column) {
+	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
 }
 
 function get_din_formats() {
