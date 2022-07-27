@@ -1157,7 +1157,8 @@ class data_import_export {
 		global $kvwmap_plugins;
 		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
-		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
+		$layerset = ($export_rollen_layer ? $user->rolle->getRollenLayer((int) $this->formvars['selected_layer_id'] * -1) : $user->rolle->getLayer($this->formvars['selected_layer_id']));
 		$mapdb = new db_mapObj($stelle->id,$user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 		$sql = replace_params(
@@ -1170,6 +1171,12 @@ class data_import_export {
 		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+		if ($export_rollen_layer) {
+			include_once(CLASSPATH . 'LayerAttribute.php');
+			$attribute = new LayerAttribute($GUI);
+			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
+			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
+		}
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);
@@ -1183,7 +1190,6 @@ class data_import_export {
 			else {
 				$t_epsg = '4326';
 			}
-
 			$contenttype = 'application/vnd.geo+json';
 			$command = 'ogr2ogr -f GeoJSON ' . $exportfile . ' -t_srs "epsg:' . $t_epsg . '" "WFS:' . $layerset[0]['connection'] . 'Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
 			$errorfile = rand(0, 1000000);
@@ -1239,9 +1245,9 @@ class data_import_export {
 				if ($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument') {			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
 					$selection[$this->attributes['name'][$i]] = 1;
 				}
-	    }
+			}
 
-	    $sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+			$sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
 
 			# oid auch abfragen
 			$distinctpos = strpos(strtolower($sql), 'distinct');
@@ -1313,11 +1319,10 @@ class data_import_export {
 			";
 			#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 			$ret = $layerdb->execSQL($sql,4, 0);
-
-			for ($s = 0; $s < count($selected_attributes); $s++){
+			for ($s = 0; $s < count($selected_attributes); $s++) {
 				$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
 				# Transformieren der Geometrie
-				if ($this->attributes['the_geom'] == $selected_attributes[$s]) {
+				if (trim($this->attributes['the_geom'], "'\"") == trim($selected_attributes[$s], "'\"")) {
 					$selected_attributes[$s] = 'st_transform(' . $selected_attributes[$s] . ', ' . $this->formvars['epsg'] . ') ';
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
@@ -1360,8 +1365,9 @@ class data_import_export {
 				$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 				switch($this->formvars['export_format']){
 					case 'Shape' : {
-						$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
-						if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
+						$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile . '.shp', $layerdb);
+						if (!file_exists($exportfile.'.cpg')) {
+							// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 							$fp = fopen($exportfile.'.cpg', 'w');
 							fwrite($fp, 'UTF-8');
 							fclose($fp);

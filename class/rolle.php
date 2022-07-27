@@ -125,24 +125,25 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer,				
-				(select 
-					max(las.privileg) 
-				from 
-					layer_attributes as la, 
-					layer_attributes2stelle as las
-				where 
-					la.layer_id = ul.Layer_ID AND 
-					form_element_type = 'SubformFK' AND
-					las.stelle_id = ul.Stelle_ID AND 
-					ul.Layer_ID = las.layer_id AND 
-					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1) 
+				r2ul.geom_from_layer,
+				(
+					SELECT
+						max(las.privileg)
+					FROM
+						layer_attributes AS la,
+						layer_attributes2stelle AS las
+					WHERE
+						la.layer_id = ul.Layer_ID AND
+						form_element_type = 'SubformFK' AND
+						las.stelle_id = ul.Stelle_ID AND
+						ul.Layer_ID = las.layer_id AND
+						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 				) as privilegfk
 			FROM
-				layer AS l 
-				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
-				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
-				LEFT JOIN connections as c ON l.connection_id = c.id 
+				layer AS l JOIN
+				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
+				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID LEFT JOIN
+				connections as c ON l.connection_id = c.id
 			WHERE
 				ul.Stelle_ID= " . $this->stelle_id . " AND
 				r2ul.User_ID= " . $this->user_id .
@@ -150,7 +151,7 @@ class rolle {
 			ORDER BY
 				ul.drawingorder desc
 		";
-		#echo $sql.'<br>';
+		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1096,7 +1097,7 @@ class rolle {
 		if ($typ != NULL){
 			$sql .= " AND Typ = '" . $typ . "'";
 		}
-		#echo $sql.'<br>';
+		#echo '<br>SQL zur Abfrage des Rollenlayers: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
