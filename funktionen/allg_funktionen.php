@@ -42,7 +42,11 @@ function quote_or_null($var) {
 }
 
 function pg_quote($column) {
-	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
+	return (is_valid_pg_name($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
+}
+
+function is_valid_pg_name($name) {
+	return preg_match('/^[a-z_][a-z0-9_]*$/', $name);
 }
 
 function get_din_formats() {
