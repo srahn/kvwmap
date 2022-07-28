@@ -455,6 +455,10 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'zoom2coord' : {
+				$GUI->sanitize([
+					'INPUT_COORD' => 'text',
+					'query' => 'text'
+				]);
 				$GUI->loadMap('DataBase');
 				$GUI->zoom2coord();
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
@@ -1039,6 +1043,11 @@ function go_switch($go, $exit = false) {
 
 			case 'WMS_Import_eintragen' : {
 				$GUI->checkCaseAllowed('WMS_Import');
+				$GUI->sanitize([
+					'wms_url' => 'text',
+					'layers' => 'text',
+					'query' => 'text'
+				]);
 				$GUI->wmsImportieren();
 			} break;
 
@@ -1313,6 +1322,11 @@ function go_switch($go, $exit = false) {
 
 			case 'Layer_Export_Exportieren' : {
 				$GUI->checkCaseAllowed('Layer_Export');
+				# sanitize
+				$GUI->sanitize([
+					'layer' => 'int'
+				]);
+				# $layer_ids
 				$GUI->layer_export_exportieren();
 			} break;
 

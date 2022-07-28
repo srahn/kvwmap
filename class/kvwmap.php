@@ -2722,16 +2722,16 @@ echo '			</table>
     }
   }
 
-	function zoom2coord(){
+	function zoom2coord() {
 		# Funktion zum Zoomen auf eine Punktkoordinate oder einen Kartenausschnitt; Koordinaten sind Weltkoordinaten
-		$corners=explode(';',$this->formvars['INPUT_COORD']);
-    $lo=explode(',',$corners[0]);
-    $minx=$lo[0];
-    $miny=$lo[1];
-    if(count($corners)==1){		# Zoom auf Punktkoordinate
-			$oPixelPos=ms_newPointObj();
-			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
-				$oPixelPos->setXY($minx,$miny);
+		$corners = explode(';', $this->formvars['INPUT_COORD']);
+		$lo = explode(',', $corners[0]);
+		$minx = (float) $lo[0];
+		$miny = (float) $lo[1];
+		if (count($corners) == 1) { # Zoom auf Punktkoordinate
+			$oPixelPos = ms_newPointObj();
+			if ($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code) {
+				$oPixelPos->setXY($minx, $miny);
 				$projFROM = ms_newprojectionobj("init=epsg:" . $this->formvars['epsg_code']);
 				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 				$oPixelPos->project($projFROM, $projTO);
@@ -2739,18 +2739,22 @@ echo '			</table>
 				$miny = $oPixelPos->y;
 			}
 			#---------- Punkt-Rollenlayer erzeugen --------#
-			if($this->formvars['name'] != '')$legendentext = $this->formvars['name'];
-			else $legendentext ="Koordinate: " . $minx." " . $miny;
-			if(strpos($minx, '°') !== false){
+			if ($this->formvars['name'] != '') {
+				$legendentext = $this->formvars['name'];
+			}
+			else {
+				$legendentext = "Koordinate: " . $minx . " " . $miny;
+			}
+			if (strpos($minx, '°') !== false) {
 				$minx = dms2dec($minx);
 				$miny = dms2dec($miny);
 			}
-			$datastring ="the_geom from (select st_geomfromtext('POINT(" . $minx." " . $miny.")', " . $this->user->rolle->epsg_code.") as the_geom, 1 as oid) as foo using unique oid using srid=" . $this->user->rolle->epsg_code;
+			$datastring = "the_geom from (select st_geomfromtext('POINT(" . $minx . " " . $miny . ")', " . $this->user->rolle->epsg_code . ") as the_geom, 1 as oid) as foo using unique oid using srid=" . $this->user->rolle->epsg_code;
 			$group = $this->mapDB->getGroupbyName('Suchergebnis');
-			if($group != ''){
+			if ($group != '') {
 				$groupid = $group['id'];
 			}
-			else{
+			else {
 				$groupid = $this->mapDB->newGroup('Suchergebnis', 0);
 			}
 			$this->formvars['user_id'] = $this->user->id;
@@ -2771,10 +2775,10 @@ echo '			</table>
 			$classdata['layer_id'] = -$layer_id;
 			$class_id = $this->mapDB->new_Class($classdata);
 
-			if(defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != ''){
+			if (defined('ZOOM2COORD_STYLE_ID') AND ZOOM2COORD_STYLE_ID != '') {
 				$style_id = $this->mapDB->copyStyle(ZOOM2COORD_STYLE_ID);
 			}
-			else{
+			else {
 				$style['colorred'] = 255;
 				$style['colorgreen'] = 255;
 				$style['colorblue'] = 128;
@@ -2790,25 +2794,25 @@ echo '			</table>
 				$style_id = $this->mapDB->new_Style($style);
 			}
 
-			$this->mapDB->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
-			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
+			$this->mapDB->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
+			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1); # der Rolle die Gruppe zuordnen
 			$this->loadMap('DataBase');
 
 			# Bildkoordinaten ausrechnen
-			$this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx)/$this->map->width;
-			$pixel_x = ($minx-$this->map->extent->minx)/$this->pixwidth;
-			$pixel_y = ($this->map->extent->maxy-$miny)/$this->pixwidth;
+			$this->pixwidth = ($this->map->extent->maxx - $this->map->extent->minx) / $this->map->width;
+			$pixel_x = ($minx-$this->map->extent->minx) / $this->pixwidth;
+			$pixel_y = ($this->map->extent->maxy-$miny) / $this->pixwidth;
 			$oPixelPos->setXY($pixel_x,$pixel_y);
-			if($this->map->scaledenom > COORD_ZOOM_SCALE){
-				$this->map->zoomscale(COORD_ZOOM_SCALE/4,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			if ($this->map->scaledenom > COORD_ZOOM_SCALE) {
+				$this->map->zoomscale(COORD_ZOOM_SCALE / 4, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
 			}
-			else{
-				$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			else {
+				$this->map->zoompoint(1, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
 			}
 		}
-		else{	# Zoom auf Rechteck
-			$ru=explode(',',$corners[1]);
-      $maxx=$ru[0];
+		else {	# Zoom auf Rechteck
+			$ru = explode(',',$corners[1]);
+			$maxx=$ru[0];
 			$maxy=$ru[1];
 			$rect=ms_newRectObj();
 			$rect->setextent($minx,$miny,$maxx,$maxy);
@@ -5407,16 +5411,22 @@ echo '			</table>
 		$this->formvars['Data'] = $datastring;
 		$this->formvars['Datentyp'] = $layerset[0]['Datentyp'];
 		$this->formvars['connectiontype'] = 6;
-		if($layerset[0]['labelitem'] != 'Cluster_FeatureCount')$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
+			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
+		}
 		$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connection_id'] = $layerdb->connection_id;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
-		if($layerset[0]['Datentyp'] == MS_LAYER_POLYGON)$this->formvars['transparency'] = $this->user->rolle->result_transparency;
-		else $this->formvars['transparency'] = 100;
+		if ($layerset[0]['Datentyp'] == MS_LAYER_POLYGON) {
+			$this->formvars['transparency'] = $this->user->rolle->result_transparency;
+		}
+		else {
+			$this->formvars['transparency'] = 100;
+		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
 
-		if($this->formvars['selektieren'] == 'false'){      # highlighten (mit der ausgewählten Farbe)
+		if ($this->formvars['selektieren'] == 'false') { # highlighten (mit der ausgewählten Farbe)
 			# ------------ automatische Klassifizierung -------------------
 			if($auto_class_attribute != ''){
 				$attributes = $layerset[0]['attributes'];
@@ -7345,22 +7355,21 @@ echo '			</table>
   }
 
 	function wmsImportFormular() {
-		$this->titel='WMS Import';
-		$this->main="wms_import.php";
+		$this->titel = 'WMS Import';
+		$this->main = "wms_import.php";
 		if ($this->formvars['wms_url']) {
-			include(CLASSPATH.'wms.php');
+			include(CLASSPATH . 'wms.php');
 			$wms = new wms_request_obj();
 			$this->layers = $wms->parseCapabilities($this->formvars['wms_url'], $this->formvars['wms_auth_username'], $this->formvars['wms_auth_password']);
 		}
 		$this->output();
 	}
 
-	function wmsImportieren(){
-		if(count($this->formvars['layers']) > 0){
-			$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+	function wmsImportieren() {
+		if (count($this->formvars['layers']) > 0) {
+			$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
 			$group = $dbmap->getGroupbyName('WMS-Importe');
-			if($group != '')$groupid = $group['id'];
-			else $groupid = $dbmap->newGroup('WMS-Importe', 0);
+			$groupid = ($group != '' ? $group['id'] : $dbmap->newGroup('WMS-Importe', 0));
 			$this->formvars['user_id'] = $this->user->id;
 			$this->formvars['stelle_id'] = $this->Stelle->id;
 			$this->formvars['aktivStatus'] = 1;
@@ -7370,11 +7379,9 @@ echo '			</table>
 			$this->formvars['connectiontype'] = MS_WMS;
 			$this->formvars['transparency'] = 100;
 			$wms_epsg_codes = array_flip(explode(' ', str_replace('epsg:', '', strtolower($this->formvars['srs'][0]))));
-			if($wms_epsg_codes[$this->user->rolle->epsg_code] !== NULL)$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
-			else $this->formvars['epsg_code'] = 4326;
-			if(strpos($this->formvars['wms_url'], '?') !== false)$this->formvars['wms_url'] .= '&';
-			else $this->formvars['wms_url'] .= '?';
-			for($i = 0; $i < count($this->formvars['layers']); $i++){
+			$this->formvars['epsg_code'] = ($wms_epsg_codes[$this->user->rolle->epsg_code] !== NULL ? $this->user->rolle->epsg_code : 4326);
+			$this->formvars['wms_url'] .= (strpos($this->formvars['wms_url'], '?') !== false ? '&' : '?');
+			for ($i = 0; $i < count($this->formvars['layers']); $i++) {
 				$this->formvars['Name'] = $this->formvars['layers'][$i];
 				$this->formvars['connection'] = $this->formvars['wms_url'] . 'VERSION=1.1.1&FORMAT=image/png&transparent=true&styles=&LAYERS=' . $this->formvars['layers'][$i];
 				$layer_id = $dbmap->newRollenLayer($this->formvars);
@@ -7450,7 +7457,7 @@ echo '			</table>
 
   function layer_export(){
   	# Abfragen aller Layer
-    $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+    $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
     $this->layerdaten = $mapDB->getall_Layer('Name');
     $this->titel='Layer-Export';
     $this->main='layer_export.php';
@@ -17542,7 +17549,7 @@ class db_mapObj{
 				$err_msg = $ret[1];
 			}
 			else {
-				while($rs = $database->result->fetch_assoc()) {
+				while ($rs = $database->result->fetch_assoc()) {
 					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
@@ -17572,7 +17579,7 @@ class db_mapObj{
 			}
 		}
 
-		for($i = 0; $i < count($layer_ids); $i++) {
+		for ($i = 0; $i < count($layer_ids); $i++) {
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
@@ -17935,9 +17942,11 @@ class db_mapObj{
 		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
 		# echo '<p>neuer Style style_id: ' . $style_id;
-		if(!$style_id)$style_id = $this->new_Style($style);
+		if (!$style_id) {
+			$style_id = $this->new_Style($style);
+		}
 		$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
-		if($user->rolle->result_hatching){
+		if ($user->rolle->result_hatching) {
 			$style['symbolname'] = NULL;
 			$style['width'] = 1;
 			$style['colorred'] = -1;
@@ -17946,7 +17955,7 @@ class db_mapObj{
 			$style_id = $this->new_Style($style);
 			$this->addStyle2Class($class_id, $style_id, 0); # den Style der Klasse zuordnen
 		}
-		if($labelitem != '') {
+		if ($labelitem != '') {
 			$label['font'] = 'arial';
 			$label['color'] = '0 0 0';
 			$label['outlinecolor'] = '255 255 255';
