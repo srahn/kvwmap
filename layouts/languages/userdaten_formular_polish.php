@@ -1,19 +1,31 @@
 <?php
-	$strTitle="dane użytkownika edytor";
-	$strDataBankID="baza danych ID";
-	$strName="nazwisko";
-	$strUserTitle="User title";
-	$strForeName="imię";
-	$strLogInName="nazwa login";
-	$strChangePassword="również zmienić hasło";
-	$strResetPassword="Reset passwort";
-	$strLastModPassword="Last Modification";
-	$strPasswordExpired="Expired";
-	$strPasswordValid="Valid";
-	$strPasswordExpiredDays="Days";
-	$strPassword="hasło";
-	$strNewPassword="New Password";
+	$strTitle = 'dane użytkownika edytor';
+	$strDataBankID = 'baza danych ID';
+	$strInvitationBody1 = 'Invitation%20for%20WebGIS%20user';
+	$strInvitationBody2 = 'You will be prompted by the application under ' .  URL . APPLVERSION . ' to assign a new password';
+	$strInvitationBody3 = 'To do this, please call the following link';
+	$strInvitationBody4 = 'and enter a new password there';
+	$strInvitationBody5 = 'Kind regards';
+	$strInvitationBody6 = 'Your GIS-Administrator';
+	$strInvitationConfirmation1 = 'New Passwort assigned';
+	$strInvitationConfirmation2 = 'Please wait until the e-mail window opens with a ready-made message. Then send the invitation with the automatically generated link to the user';
+	$strInvitationConfirmation3 = 'Be sure to save the user record with the new information after closing this window, otherwise the new password will not take effect and the user will not be able to set a new password';
+	$strInvitationConfirmation4 = 'Roger that';
+	$strInvitationSubject = 'New passwort for';
+	$strName = 'nazwisko';
+	$strUserTitle = 'User title';
+	$strForeName = 'imię';
+	$strLogInName = 'nazwa login';
+	$strChangePassword = 'również zmienić hasło';
+	$strResetPassword = 'Reset passwort';
+	$strLastModPassword = 'Last Modification';
+	$strPasswordExpired = 'Expired';
+	$strPasswordValid = 'Valid';
+	$strPasswordExpiredDays = 'Days';
+	$strPassword = 'hasło';
+	$strNewPassword = 'New Password';
 	$strReEnterPassword='powtórz hasło';
+<<<<<<< HEAD
 	$strAuthorizeTask="uprawnione pozycje";
 	$strOrganisation="organizacja";
 	$strPosition="pozycja";
@@ -36,4 +48,22 @@
 	$strUserFormNewPasswdWait = 'Please wait until the e-mail window opens with a ready-made message. Then send the invitation with the automatically generated password to the user';
 	$strUserFormNewPasswdSave = 'Be sure to save the user record with the new information after closing this window, otherwise the new password will not take effect and the user will not be able to set a new password';
 	$struserFormNewPasswdAccepted = 'Accepted';
+=======
+	$strAuthorizeTask = 'uprawnione pozycje';
+	$strOrganisation = 'organizacja';
+	$strPosition = 'pozycja';
+	$strShareRollenlayerAllowedLabel = 'Share Layer';
+	$strShareRollenlayerAllowedCheckboxText = 'Permission to share rollenlayer with other users.';
+	$strShareRollenlayerAllowedDescription = 'User with this permission are allowed, to assign it own imported rollenlayer to itself and other users as regular layers! The assignment will happen to all user of such stellen, that have the permission to accept shared layers, compare with Stelle settings. Only the user itself and the admin are allowed to  delete this so called shared layer.';
+	$strSendEmail = 'send e-mail';
+	$strButtonSaveAs = 'Zarejestruj się jako nowy użytkownik';
+	$strAllowedIps = 'dozwolone IP / Domain';
+	$strStart = 'Start Access';
+	$strStop = 'Stop Access';
+	$strActiveLayers = 'Active layers';
+	$strDeactiveLayer = 'deactivate';
+	$strActiveSite = 'Active site';
+	$strChangeUser = 'Change user';
+	$strLoginAsUser = 'login as this user';
+>>>>>>> bugfix
 ?>
