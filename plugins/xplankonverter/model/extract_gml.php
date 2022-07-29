@@ -214,10 +214,18 @@ class Gml_extractor {
 		} else if (preg_match('/5\/0/', $matched_ns_str[1], $matched_version_str)) {
 			$version = '5.0';
 		} else if (preg_match('/5.0/', $matched_ns_str[1], $matched_version_str)) {
-			$version = '5.0';	
+			$version = '5.0';
+		} else if (preg_match('/5\/3/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.3';
+		} else if (preg_match('/5.3/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.3';
+		} else if (preg_match('/5\/4/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.4';
+		} else if (preg_match('/5.4/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.4';
 		} else {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
-			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
+			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1, 5.2, 5.3 oder 5.4 liegt<br>';
 			$msg .= 'Es wird eine Fallback-Version 5.1 verwendet.<br>';
 			#$GUI->add_message('warning', $msg);
 			#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
