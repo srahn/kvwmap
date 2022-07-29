@@ -29,5 +29,26 @@ class LayerAttribute extends MyObject {
 		$new_attribute->set('layer_id', $layer_id);
 		$new_attribute->create();
 	}
+
+	/**
+		function return the name of the first attribut in $attributes array that has PRIMARY KEY as constraint
+		@params array $attributes An array of attributes as returned by function mapdb->read_layer_attributes
+		@return string The name of the attribute
+	*/
+	function get_oid($attributes) {
+		if (
+			array_key_exists('constraints', $attributes) AND
+			array_key_exists('name', $attributes)
+		) {
+			$key = array_search('PRIMARY KEY', $attributes['constraints']);
+			if (
+				$key !== false AND
+				array_key_exists($key, $attributes['name'])
+			) {
+				return $attributes['name'][$key];
+			}
+		}
+		return false;
+	}
 }
 ?>
