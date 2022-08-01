@@ -11220,6 +11220,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->formvars['download_documents'] = $this->selected_export_setting[0]['documents'];
 				if ($this->selected_export_setting[0]['geom'] != '') {
 					$this->formvars['newpathwkt'] = $this->selected_export_setting[0]['geom'];
+					$this->formvars['newpath'] = buildsvgpolygonfromwkt($this->formvars['newpathwkt']);
 					$this->formvars['firstpoly'] = 'true';
 				}
 				else {
