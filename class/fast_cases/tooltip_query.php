@@ -1,4 +1,18 @@
 <?
+function sanitize(&$value, $type) {
+	switch ($type) {
+		case 'int' : {
+			$value = (int) $value;
+		} break;
+		case 'text' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
+}
 
 function url2filepath($url, $doc_path, $doc_url) {
 	if ($doc_path == '') {
@@ -229,6 +243,12 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
+
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
+	}
 
 	function add_message($type, $msg) {
 		GUI::add_message_($type, $msg);

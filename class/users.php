@@ -51,11 +51,11 @@ class account {
 
 	function __construct($database) {
 		global $debug;
-		$this->debug=$debug;
-		$this->database=$database;
+		$this->debug = $debug;
+		$this->database = $database;
 	}
 
-	function getStatistik($nutzer,$nutzung,$stelle,$zeitraum,$day_d,$week_w,$month_d,$month_w,$month_m,$year_m,$year_w,$year_d,$day_e1,$day_e2,$month_e1,$month_e2,$year_e1,$year_e2){
+	function getStatistik($nutzer,$nutzung,$stelle,$zeitraum,$day_d,$week_w,$month_d,$month_w,$month_m,$year_m,$year_w,$year_d,$day_e1,$day_e2,$month_e1,$month_e2,$year_e1,$year_e2) {
 			# Ausführen der einzelnen Funktionen für
 			# die Statistik zur Anfrage
 			if($stelle != ''){
@@ -666,11 +666,13 @@ class user {
 	var $nImageHeight;
 	var $database;
 	var $remote_addr;
+	var $has_logged_in;
 
 	function __construct($login_name, $id, $database, $passwort = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
+		$this->has_logged_in = false;
 		if ($login_name) {
 			$this->login_name = $login_name;
 			$this->readUserDaten(0, $login_name, $passwort);

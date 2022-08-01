@@ -1,4 +1,19 @@
 <?
+function sanitize(&$value, $type) {
+	switch ($type) {
+		case 'int' : {
+			$value = (int) $value;
+		} break;
+		case 'text' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
+}
+
 # ohne Fehlermeldung fehlen die Funktionen
 # sql_err_msg aus funktionen/allg_funktionen.php
 # add_message in Class GUI aus kvwmap.php
@@ -180,6 +195,12 @@ class GUI {
 		if (isset ($mime_type)) $this->mime_type=$mime_type;
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
+	}
+
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
 	}
 
 	function add_message($type, $msg) {

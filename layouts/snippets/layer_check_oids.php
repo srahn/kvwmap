@@ -13,14 +13,14 @@ if(!in_array($this->Stelle->id, $admin_stellen)){
 
 $this->layer_dbs = array();
 
-function checkStatus($layer){
+function checkStatus($layer) {
 	$status['oid'] = ($layer['oid'] == 'oid' ? false : true);
 	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false OR strpos($layer['pfad'], '.oid') !== false)? false : true);
 	$status['data'] = (strpos($layer['Data'], 'oid') !== false ? false : true);
 	return $status;
 }
 
-function get_oid_alternative($layer){
+function get_oid_alternative($layer) {
 	global $GUI;
 	if (!array_key_exists($layer['connection_id'], $GUI->layer_dbs)){
 		$GUI->layer_dbs[$layer['connection_id']] = new pgdatabase();
@@ -58,7 +58,7 @@ function get_oid_alternative($layer){
 	return $result;
 }
 
-function delete_oid_in_sql($query){
+function delete_oid_in_sql($query) {
 	$query = str_replace([' as oid', ' AS oid', ' oid,', ',oid', ', oid'], ['', '', ' '], $query);
 	if (strpos($query, '.oid') !== false) {
 		$query = preg_replace('/\w+\.oid,/', '', $query);		#	tablename.oid,
@@ -66,7 +66,7 @@ function delete_oid_in_sql($query){
 	return $query;
 }
 
-function replace_oid_in_data($data, $id){
+function replace_oid_in_data($data, $id) {
 	if ($id != '') {
 		$data = delete_oid_in_sql($data);
 		if (!strpos($data, ',' . $id) AND		#	,id
@@ -86,7 +86,14 @@ switch ($this->formvars['action']) {
 	case 'set_new_oid' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
 			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_oid_' . $layer_id] != '') {
-				$sql = "UPDATE layer SET oid = '" . $this->formvars['new_oid_' . $layer_id] . "' WHERE Layer_ID = " . $layer_id;
+				$sql = "
+					UPDATE
+						layer
+					SET
+						oid = '" . $this->formvars['new_oid_' . $layer_id] . "'
+					WHERE
+						Layer_ID = " . $layer_id . "
+				";
 				$result = $this->database->execSQL($sql);
 			}
 		}
@@ -94,7 +101,14 @@ switch ($this->formvars['action']) {
 	case 'set_new_query' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
 			if ($this->formvars['check_' . $layer_id] AND $this->formvars['new_query_' . $layer_id] != '') {
-				$sql = "UPDATE layer SET pfad = '" . addcslashes($this->formvars['new_query_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
+				$sql = "
+					UPDATE
+						layer
+					SET
+						pfad = '" . $this->formvars['new_query_' . $layer_id] . "'
+					WHERE
+						Layer_ID = " . $layer_id . "
+				";
 				$result = $this->database->execSQL($sql);
 			}
 		}
@@ -112,7 +126,14 @@ switch ($this->formvars['action']) {
 						$table_part[1] = $table_part[0];
 					}
 					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
-						$sql = "UPDATE layer SET Data = '" . addcslashes($this->formvars['new_data_' . $layer_id], "'") . "' WHERE Layer_ID = " . $layer_id;
+						$sql = "
+							UPDATE
+								layer
+							SET
+								Data = '" . $this->formvars['new_data_' . $layer_id] . "'
+							WHERE
+								Layer_ID = " . $layer_id . "
+						";
 						$result = $this->database->execSQL($sql);
 					}
 				}
@@ -127,17 +148,18 @@ $color[true] = '#36908a';
 $this->formvars['order'] = $this->formvars['order'] ?: 'Name';
 
 $query = "
-	SELECT 	
+	SELECT
 		layer.*,
 		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
 		g.Gruppenname
 	FROM 
-		`layer` 
-		LEFT JOIN	u_groups g ON layer.Gruppe = g.id
-		LEFT JOIN connections c ON c.id = connection_id
-	WHERE 
-		connectiontype = 6 
-	ORDER BY " . $this->formvars['order'];
+		`layer` LEFT JOIN
+		u_groups g ON layer.Gruppe = g.id LEFT JOIN
+		connections c ON c.id = connection_id
+	WHERE
+		connectiontype = 6
+	ORDER BY " . $this->formvars['order'] . "
+";
 
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';

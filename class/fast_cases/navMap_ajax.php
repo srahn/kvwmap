@@ -1,4 +1,18 @@
 <?
+function sanitize(&$value, $type) {
+	switch ($type) {
+		case 'int' : {
+			$value = (int) $value;
+		} break;
+		case 'text' : {
+			$value = pg_escape_string($value);
+		} break;
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
+}
 
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
@@ -198,7 +212,13 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
 		$this->trigger_functions = array();
   }
-	
+
+	function sanitize($vars) {
+		foreach ($vars as $name => $type) {
+			sanitize($this->formvars[$name], $type);
+		}
+	}
+
 	function resizeMap2Window() {
 		global $sizes;
 

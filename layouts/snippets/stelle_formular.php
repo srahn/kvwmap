@@ -758,6 +758,15 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+					<?php echo $strOwsNameSpace; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
+				</th>
+				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
+					<input name="ows_namespace" type="text" value="<?php echo $this->formvars['ows_namespace']; ?>" size="50" maxlength="100">
+				</td>
+			</tr>
+
+			<tr class="group-metadata">
+				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 					<?php echo $strWmsAccessConstraints; ?>&nbsp;<span data-tooltip="<?php echo $strWmsAccessConstraintsHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
