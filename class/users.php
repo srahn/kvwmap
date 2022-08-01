@@ -1299,8 +1299,12 @@ class user {
 		if ($userdaten['position']!='') {
 			$sql.=',position="'.$userdaten['position'].'"';
 		}
-		$sql.=',start="'.$userdaten['start'].'"';
-		$sql.=',stop="'.$userdaten['stop'].'"';
+		if ($userdaten['start'] != '') {
+			$sql.=',start="'.$userdaten['start'].'"';
+		}
+		if ($userdaten['stop'] != '') {
+			$sql.=',stop="'.$userdaten['stop'].'"';
+		}
 		if ($userdaten['ips']!='') {
 			$sql.=',ips="'.$userdaten['ips'].'"';
 		}
