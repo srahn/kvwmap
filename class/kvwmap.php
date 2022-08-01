@@ -14407,6 +14407,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$sql_order = '';
 			if (
 				$layerset[$i]['queryable'] AND
+				$layerset[$i]['status']  == '' AND 
 				(
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
