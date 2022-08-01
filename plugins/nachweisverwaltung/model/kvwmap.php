@@ -595,7 +595,7 @@
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
-		$sql.='flur_thematisch="'.$flur_thematisch.'",';
+		$sql.='flur_thematisch = '.($flur_thematisch ?: 0).',';
 		$sql.='alle_der_messung = ' . (int)$alle_der_messung . ',';
 		if ($order != '') {
 			$sql.='`order`="'.$order.'",';
