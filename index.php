@@ -254,6 +254,13 @@ function go_switch($go, $exit = false) {
 			} break;
 			
 			case 'layer_check_oids' : {
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'new_oid_*' => 'text',
+					'new_query_*' => 'text',
+					'new_data_*' => 'text',
+					'order' => 'text'
+				]);
 				$GUI->layer_check_oids();
 			} break;
 
@@ -291,10 +298,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'openCustomSubform' : {
+				$GUI->sanitize(['attribute' => 'text']);
 				$GUI->openCustomSubform();
 			} break;
 
 			case 'getLayerOptions' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->getLayerOptions();
 			} break;
 
@@ -303,18 +312,34 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'saveGeomFromLayer' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'geom_from_layer' => 'text'
+				]);
 				$GUI->saveGeomFromLayer();
 			} break;
 
 			case 'saveLayerOptions' : {
+				$GUI->sanitize([
+					'layer_options_transparency' => 'int',
+					'layer_options_open' => 'int',
+					'layer_options_rollenfilter' => 'text',
+					'layer_options_name' => 'text'
+				]);
 				$GUI->saveLayerOptions();
 			} break;
 
 			case 'resetLayerOptions' : {
+				$GUI->sanitize([
+					'layer_options_open' => 'int'
+				]);
 				$GUI->resetLayerOptions();
 			} break;
 
 			case 'saveLegendOptions' : {
+				$GUI->sanitize([
+					'legendtype' => 'int'
+				]);
 				$GUI->saveLegendOptions();
 			} break;
 
@@ -323,6 +348,9 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'toggle_gle_view' : {
+				$GUI->sanitize([
+					'chosen_layer_id' => 'int'
+				]);
 				$GUI->switch_gle_view();
 			} break;
 
@@ -391,6 +419,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'get_quicksearch_attributes' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->get_quicksearch_attributes();
 			} break;
 
@@ -426,6 +455,10 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'zoom2coord' : {
+				$GUI->sanitize([
+					'INPUT_COORD' => 'text',
+					'query' => 'text'
+				]);
 				$GUI->loadMap('DataBase');
 				$GUI->zoom2coord();
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
@@ -593,6 +626,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'zoomto_selected_datasets' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
 				$GUI->zoomto_selected_datasets();
 			}break;
 
@@ -880,11 +914,19 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
+				$GUI-sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
 			case 'Druckausschnitt_speichern' : {
 				$GUI->check_csrf_token();
+				$GUI->sanitize([
+					'name' => 'text',
+					'center_x' => 'float', 'center_y' => 'float',
+					'printscale' => 'int',
+					'angle' => 'int',
+					'aktiverRahmen' => 'int'
+				]);
 				$GUI->druckausschnitt_speichern($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -1001,6 +1043,11 @@ function go_switch($go, $exit = false) {
 
 			case 'WMS_Import_eintragen' : {
 				$GUI->checkCaseAllowed('WMS_Import');
+				$GUI->sanitize([
+					'wms_url' => 'text',
+					'layers' => 'text',
+					'query' => 'text'
+				]);
 				$GUI->wmsImportieren();
 			} break;
 
@@ -1059,6 +1106,14 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
+				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'layer_name' => 'text',
+					'epsg' => 'int',
+					'newpathwkt' => 'text',
+					'precision' => 'int'
+				]);
 				$GUI->checkCaseAllowed('Daten_Export');
 				$GUI->daten_export_exportieren();
 			} break;
@@ -1076,18 +1131,26 @@ function go_switch($go, $exit = false) {
 			case 'get_last_search' : {
 				$GUI->formvars['selected_layer_id'] = $GUI->user->rolle->get_last_search_layer_id();
 				$GUI->formvars['searches'] = '<last_search>';
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchmaske_generieren' : {
+				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$GUI->GenerischeSuche_Suchmaske();
 			} break;
 
 			case 'Layer-Suche_Suchen' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'selected_group_id' => 'int',
+					'anzahl' => 'int'
+				]);
 				$GUI->GenerischeSuche_Suchen();
 			} break;
 
 			case 'SchnellSuche_Suchen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->formvars['selected_layer_id'] = $GUI->formvars['quicksearch_layer_id'];
 				$GUI->formvars['keinzurueck'] = true;
 				$GUI->formvars['quicksearch'] = true;
@@ -1095,6 +1158,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1103,10 +1167,12 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
+				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
@@ -1123,6 +1189,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'gemerkte_Datensaetze_anzeigen' : {
+				$GUI->sanitize(['layer_id' => 'int']);
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
@@ -1251,6 +1318,11 @@ function go_switch($go, $exit = false) {
 
 			case 'Layer_Export_Exportieren' : {
 				$GUI->checkCaseAllowed('Layer_Export');
+				# sanitize
+				$GUI->sanitize([
+					'layer' => 'int'
+				]);
+				# $layer_ids
 				$GUI->layer_export_exportieren();
 			} break;
 
@@ -1742,11 +1814,16 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_rollenlayer' : {
+				$GUI->sanitize([
+					'selected_rollenlayer_id' => 'int',
+					'delete_rollenlayer_type' => 'text'
+				]);
 				$GUI->deleteRollenlayer();
 			} break;
 
 			case 'share_rollenlayer': {
 				$GUI->checkCaseAllowed('share_rollenlayer');
+				$GUI->sanitize(['selected_rollenlayer_id' => 'int']);
 				$GUI->share_rollenlayer();
 				$GUI->loadMap('DataBase');
 				$currenttime = date('Y-m-d H:i:s',time());

@@ -41,8 +41,12 @@ function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
 }
 
-function pg_quote($column){
-	return (ctype_lower($column) OR strpos($column, "'") === 0) ? $column : '"'.$column.'"';
+function pg_quote($column) {
+	return (is_valid_pg_name($column) OR strpos($column, "'") === 0) ? $column : '"' . $column . '"';
+}
+
+function is_valid_pg_name($name) {
+	return preg_match('/^[a-z_][a-z0-9_]*$/', $name);
 }
 
 function get_din_formats() {
@@ -259,7 +263,9 @@ function compare_legendorder($a, $b){
 
 function pg_escape_string_or_array($data){
 	if (is_array($data)) {
-		array_walk($data, function(&$value, $key){$value = pg_escape_string($value);});
+		array_walk($data, function(&$value, $key) {
+			$value = pg_escape_string($value);
+		});
 	}
 	else {
 		$data = pg_escape_string($data);
@@ -2225,5 +2231,63 @@ function sql_from_parse_tree($parse_tree) {
 		}
 	}
 	return implode(' ', $sql);
+}
+
+/**
+	Function sanitizes $value based on its $type and returns the sanitized value.
+	If $type or $value is empty or $type unknown, $value will not be sanitized at all.
+	If $value is an array all elements will be sanitized with $type.
+*/
+function sanitize(&$value, $type) {
+	if (empty($type)) {
+		return $value;
+	}
+
+	if (is_array($value)) {
+		foreach ($value AS &$single_value) {
+			sanitize($single_value, $type);
+		}
+		return $value;
+	}
+
+	if (empty($value)) {
+		return $value;
+	}
+
+	switch ($type) {
+		case 'int' :
+		case 'int4' :
+		case '_int4' :
+		case 'oid' :
+		case 'boolean':
+		case 'int8' : {
+			$value = (int) $value;
+		} break;
+
+		case 'numeric' :
+		case '_numeric' :
+		case 'float8' :
+		case 'float' : {
+			$value = (float) $value;
+		} break;
+
+		case 'text' :
+		case 'geometry' :
+		case 'timestamp' :
+		case 'date' :
+		case 'unknown' :
+		case 'varchar' : {
+			$value = pg_escape_string($value);
+		} break;
+
+		case 'bool': {
+			$value = (is_string($value) ? pg_escape_string($value) : (int) $value);
+		} break;
+
+		default : {
+			// let $value as it is
+		}
+	}
+	return $value;
 }
 ?>
