@@ -249,12 +249,12 @@
 				}
 				chdir(WWWROOT.APPLVERSION);
       }
+	    $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
+			$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+			$tmpfilename = copy_file_to_tmp($filename, $dateiname);
+			unlink($filename);
+			return $tmpfilename;
     }
-    $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-		$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
-    $tmpfilename = copy_file_to_tmp($filename, $dateiname);
-    unlink($filename);
-    return $tmpfilename;
   };
 	
 	$GUI->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
