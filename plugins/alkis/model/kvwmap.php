@@ -212,7 +212,7 @@
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
-    $GUI->formvars['Name'] = $legendentext;
+		$GUI->formvars['Name'] = substr($legendentext, 0, 1000);
     $GUI->formvars['Gruppe'] = $groupid;
     $GUI->formvars['Typ'] = 'search';
     $GUI->formvars['Datentyp'] = 2;
