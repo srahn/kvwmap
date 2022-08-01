@@ -403,6 +403,32 @@ function removeTausenderTrenner($number){
 	}
 }
 
+function buildsvgpolygonfromwkt($wkt){
+	if ($wkt != '') {
+		$type = substr($wkt, 0, 9);
+		if ($type == 'MULTIPOLY') {
+			$start = 15;
+			$end = strlen($wkt) - 18;
+			$delim = ')),((';
+		}
+		else{			// POLYGON
+			$start = 9;
+			$end = strlen($wkt) - 11;
+			$delim = '),(';
+		}
+		$wkt = substr($wkt, $start, $end);
+		$parts = explode($delim, $wkt);
+		for ($j = 0; $j < count($parts); $j++) {
+			$parts[$j] = str_replace(',', ' ', $parts[$j]);
+		}
+		$svg = "M " . implode(' M ', $parts);
+		return $svg;
+	}
+	else{
+		return '';
+	}
+}
+
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
