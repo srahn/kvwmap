@@ -1547,15 +1547,15 @@ class data_import_export {
 		}
 	}
 
-	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url){
+	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url, $recursion_depth = 0){
 		global $GUI;
 		$zip = false;
 		foreach ($result As $key => $value) {
 			$j = $attributes['indizes'][$key];
-			if (in_array($attributes['form_element_type'][$j], ['SubFormEmbeddedPK', 'SubFormPK'])) {
+			if ($recursion_depth < 1 AND in_array($attributes['form_element_type'][$j], ['SubFormEmbeddedPK', 'SubFormPK'])) {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
 				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
-					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url, $recursion_depth + 1);
 					$zip = $zip || $zip2;
 				}
 			}
