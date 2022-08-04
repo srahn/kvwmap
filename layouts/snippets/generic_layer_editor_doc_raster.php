@@ -492,6 +492,7 @@
 
 <input type="hidden" name="checkbox_names_<? echo $layer['Layer_ID']; ?>" value="<? echo $checkbox_names; ?>">
 <input type="hidden" name="orderby<? echo $layer['Layer_ID']; ?>" id="orderby<? echo $layer['Layer_ID']; ?>" value="<? echo $this->formvars['orderby'.$layer['Layer_ID']]; ?>">
+<input type="hidden" id="geom_privileg_<? echo $layer['Layer_ID']; ?>" value="<? echo $privileg; ?>">
 <?
   }
   else {
