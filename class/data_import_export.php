@@ -1540,7 +1540,7 @@ class data_import_export {
 		$zip = false;
 		foreach ($result As $key => $value) {
 			$j = $attributes['indizes'][$key];
-			if (in_array($attributes['form_element_type'][$j], ['SubFormEmbeddedPK', 'SubFormPK']) {
+			if (in_array($attributes['form_element_type'][$j], ['SubFormEmbeddedPK', 'SubFormPK'])) {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
 				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
 					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
