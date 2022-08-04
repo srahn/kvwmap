@@ -1445,7 +1445,7 @@ class data_import_export {
 							$result[] = $rs;
 						}
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
 					for ($i = 0; $i < count($result); $i++) {
 						$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder, $layerset[0]['document_path'], $layerset[0]['document_url']);
 						$zip = $zip || $doc_zip;
