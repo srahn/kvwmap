@@ -1232,7 +1232,7 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
 	#return TEMPPATH_REL.$dateiname;
 }
 
-function read_epsg_codes($database){
+function read_epsg_codes($database) {
   $epsg_codes = $database->read_epsg_codes();
   return $epsg_codes;
 }
