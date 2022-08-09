@@ -930,7 +930,7 @@ class data_import_export {
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		$command = '';
 		if ($options != NULL) $command.= $options;
-		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
