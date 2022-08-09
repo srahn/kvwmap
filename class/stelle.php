@@ -353,16 +353,14 @@ class stelle {
 		$sql.=', maxymax= "'.$stellendaten['maxymax'].'"';
 		$sql.=', epsg_code= "'.$stellendaten['epsg_code'].'"';
 		$sql.=', start= "'.$stellendaten['start'].'"';
-		$sql.=', stop= "'.$stellendaten['stop'].'"';
-		if ($stellendaten['postgres_connection_id'] != '') {
-			$sql .= ', postgres_connection_id = ' . $stellendaten['postgres_connection_id'];
-		}
-		if ($stellendaten['pgdbhost']!='') {
-			$sql.=', pgdbhost= "'.$stellendaten['pgdbhost'].'"';
-		}
-		$sql.=', pgdbname= "'.$stellendaten['pgdbname'].'"';
-		$sql.=', pgdbuser= "'.$stellendaten['pgdbuser'].'"';
-		$sql.=', pgdbpasswd= "'.$stellendaten['pgdbpasswd'].'"';
+		$sql.=', stop= "'.$stellendaten['stop'].'",';
+		$sql .= "
+			postgres_connection_id = " . ($stellendaten['postgres_connection_id'] == '' ? "0" : $stellendaten['postgres_connection_id']) . ",
+			pgdbhost = '" . $stellendaten['pgdbhost'] . "',
+			pgdbname = '" . $stellendaten['pgdbname'] . "',
+			pgdbuser = '" . $stellendaten['pgdbuser'] . "',
+			pgdbpasswd =  '" . $stellendaten['pgdbpasswd'] . "'
+		";
 		$sql.=', ows_title= "'.$stellendaten['ows_title'].'"';
 		$sql.=', ows_abstract= "'.$stellendaten['ows_abstract'].'"';
 		$sql.=', wms_accessconstraints= "'.$stellendaten['wms_accessconstraints'].'"';
@@ -436,7 +434,7 @@ class stelle {
 				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
 				`start` = '" . $stellendaten['start'] . "',
 				`stop` = '" . $stellendaten['stop'] . "',
-				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] != '' ? $stellendaten['postgres_connection_id'] : 'NULL') . ",
+				`postgres_connection_id` = " . ($stellendaten['postgres_connection_id'] == '' ? "0" : $stellendaten['postgres_connection_id']) . ",
 				`pgdbhost` = '" . $stellendaten['pgdbhost'] . "',
 				`pgdbname` = '" . $stellendaten['pgdbname'] . "',
 				`pgdbuser` = '" . $stellendaten['pgdbuser'] . "',
