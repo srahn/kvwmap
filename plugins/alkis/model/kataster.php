@@ -579,18 +579,8 @@ class flurstueck {
 			SELECT
 				round(
 					(
-						st_area_utm(
-							st_intersection(
-								fo.wkb_geometry,
-								f.wkb_geometry
-							),
-							" . $this->spatial_ref_code . "
-						)::numeric /
-						st_area_utm(
-							f.wkb_geometry,
-							" . $this->spatial_ref_code . "
-						) *
-						f.amtlicheflaeche
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
 					)::numeric,
 					CASE
 						WHEN amtlicheflaeche > 0.5
@@ -605,17 +595,8 @@ class flurstueck {
 				alkis.ax_sonstigesrecht fo LEFT JOIN
 				alkis.ax_artderfestlegung_sonstigesrecht a ON a.wert=fo.artderfestlegung
 			WHERE
-				st_intersects(
-					fo.wkb_geometry,
-					f.wkb_geometry
-				) = true AND
-				st_area_utm(
-					st_intersection(
-						fo.wkb_geometry,
-						f.wkb_geometry
-					),
-					" . $this->spatial_ref_code . "
-				) > 0.001 AND
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND
 				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
 		";
 		$sql .= $this->database->build_temporal_filter(array('f', 'fo'));
@@ -637,20 +618,8 @@ class flurstueck {
 			SELECT
 				round(
 					(
-						sum(
-							st_area_utm(
-								st_intersection(
-									fo.wkb_geometry,
-									f.wkb_geometry
-								),
-								" . $this->spatial_ref_code . "
-							)::numeric /
-							st_area_utm(
-								f.wkb_geometry,
-								" . $this->spatial_ref_code . "
-							) *
-							f.amtlicheflaeche
-						)
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
 					)::numeric,
 					CASE
 						WHEN amtlicheflaeche > 0.5
@@ -665,17 +634,8 @@ class flurstueck {
 				alkis.ax_denkmalschutzrecht fo LEFT JOIN
 				alkis.ax_artderfestlegung_denkmalschutzrecht a ON a.wert = fo.artderfestlegung
 			WHERE
-				st_intersects(
-					fo.wkb_geometry,
-					f.wkb_geometry
-				) = true AND
-				st_area_utm(
-					st_intersection(
-						fo.wkb_geometry,
-						f.wkb_geometry
-					),
-					" . $this->spatial_ref_code . "
-				) > 0.001 AND
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND
 				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
 		";
 		$sql .= $this->database->build_temporal_filter(array('f', 'fo'));
@@ -698,18 +658,8 @@ class flurstueck {
 			SELECT distinct
 				round(
 					(
-						st_area_utm(
-							st_intersection(
-								fo.wkb_geometry,
-								f.wkb_geometry
-							),
-							" . $this->spatial_ref_code . "
-						)::numeric /
-						st_area_utm(
-							f.wkb_geometry,
-							" . $this->spatial_ref_code . "
-						) *
-						f.amtlicheflaeche
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
 					)::numeric,
 					CASE
 						WHEN amtlicheflaeche > 0.5
@@ -726,17 +676,8 @@ class flurstueck {
 				alkis.ax_artderfestlegung_bauraumoderbodenordnungsrecht a ON a.wert=fo.artderfestlegung LEFT JOIN
 				alkis.ax_dienststelle s ON s.stelle = fo.stelle
 			WHERE
-				st_intersects(
-					fo.wkb_geometry,
-					f.wkb_geometry
-				) = true AND
-				st_area_utm(
-					st_intersection(
-						fo.wkb_geometry,
-						f.wkb_geometry
-					),
-					" . $this->spatial_ref_code . "
-				) > 0.001 AND
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND
 				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
 		";
 		$sql .= $this->database->build_temporal_filter(array('f', 'fo', 's'));
@@ -756,7 +697,17 @@ class flurstueck {
     $this->debug->write("<br>kataster.php->flurstueck->getNaturUmweltrecht Abfrage des NaturUmweltrechts zum Flurstück<br>".$sql,4);
     $sql ="
 			SELECT
-				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
 				a.beschreibung as art
 		FROM
 			alkis.ax_flurstueck f,
@@ -764,7 +715,7 @@ class flurstueck {
 			alkis.ax_artderfestlegung_naturumweltoderbodenschutzrecht a ON a.wert=fo.artderfestlegung
 		WHERE
 			st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
-			st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+			st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND
 			f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
 		";
 		$sql .= $this->database->build_temporal_filter(array('f', 'fo'));
@@ -784,7 +735,17 @@ class flurstueck {
     $this->debug->write("<br>kataster.php->flurstueck->getSchutzgebiet Abfrage des Schutzgebiets zum Flurstück<br>".$sql,4);
 		$sql ="
 			SELECT
-				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
 				coalesce(a.beschreibung, b.beschreibung) as art
 			FROM
 				alkis.ax_flurstueck f, alkis.ax_schutzzone fo LEFT JOIN
@@ -794,7 +755,8 @@ class flurstueck {
 				alkis.ax_artderfestlegung_schutzgebietnachnaturumweltoderbodensc b ON b.wert = d.artderfestlegung
 			WHERE
 				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
-				st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $this->FlurstKennz . "'
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
+				f.flurstueckskennzeichen='" . $this->FlurstKennz . "'
 		";
 		$sql.= $this->database->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
@@ -813,7 +775,17 @@ class flurstueck {
     $this->debug->write("<br>kataster.php->flurstueck->getWasserrecht Abfrage des Wasserrechts zum Flurstück<br>".$sql,4);
 		$sql ="
 			SELECT
-				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
 				a.beschreibung as art,
 				'' as bezeichnung
 			FROM
@@ -822,11 +794,22 @@ class flurstueck {
 				alkis.ax_artderfestlegung_klassifizierungnachwasserrecht a ON a.wert=fo.artderfestlegung
 			WHERE
 				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
-				st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $FlurstKennz . "'
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
+				f.flurstueckskennzeichen='" . $FlurstKennz . "'
 				" . $this->database->build_temporal_filter(array('f', 'fo')) . "
 			UNION
 			SELECT
-				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
 				a.beschreibung as art,
 				s.bezeichnung
 			FROM
@@ -835,7 +818,8 @@ class flurstueck {
 				alkis.ax_artderfestlegung_anderefestlegungnachwasserrecht a ON a.wert=fo.artderfestlegung LEFT JOIN
 				alkis.ax_dienststelle s ON s.stelle = fo.stelle
 			WHERE
-				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
 				f.flurstueckskennzeichen='" . $this->FlurstKennz . "'
 		";
 		$sql.= $this->database->build_temporal_filter(array('f', 'fo', 's'));
@@ -855,7 +839,17 @@ class flurstueck {
     $this->debug->write("<br>kataster.php->flurstueck->getStrassenrecht Abfrage des Strassenrechts zum Flurstück<br>".$sql,4);
 		$sql ="
 			SELECT
-				round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche,
 				a.beschreibung as art,
 				bezeichnung
 			FROM
@@ -863,7 +857,8 @@ class flurstueck {
 				alkis.ax_klassifizierungnachstrassenrecht fo LEFT JOIN
 				alkis.ax_artderfestlegung_klassifizierungnachstrassenrecht a ON a.wert=fo.artderfestlegung
 			WHERE
-				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
 				f.flurstueckskennzeichen='" . $this->FlurstKennz . "'
 		";
 		$sql.= $this->database->build_temporal_filter(array('f', 'fo'));
@@ -881,11 +876,30 @@ class flurstueck {
 	function getForstrecht() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
-		$sql ="SELECT round((st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") * f.amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche,  a.beschreibung as art, b.beschreibung as funktion ";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_forstrecht fo ";
-		$sql.=" LEFT JOIN alkis.ax_artderfestlegung_forstrecht a ON a.wert=fo.artderfestlegung";
-		$sql.=" LEFT JOIN alkis.ax_besonderefunktion_forstrecht b ON b.wert=fo.besonderefunktion";
-    $sql.=" WHERE st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(fo.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $this->FlurstKennz . "'";
+		$sql = "
+			SELECT 
+				round(
+					(
+						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
+						st_area(f.wkb_geometry) *	f.amtlicheflaeche
+					)::numeric,
+					CASE
+						WHEN amtlicheflaeche > 0.5
+						THEN 0
+						ELSE 2
+					END
+				) AS flaeche, 
+				a.beschreibung as art, 
+				b.beschreibung as funktion 
+			FROM 
+				alkis.ax_flurstueck f, 
+				alkis.ax_forstrecht fo LEFT JOIN 
+				alkis.ax_artderfestlegung_forstrecht a ON a.wert=fo.artderfestlegung LEFT JOIN 
+				alkis.ax_besonderefunktion_forstrecht b ON b.wert=fo.besonderefunktion 
+			WHERE 
+				st_intersects(fo.wkb_geometry,f.wkb_geometry) = true AND
+				st_area(st_intersection(fo.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
+				f.flurstueckskennzeichen='" . $this->FlurstKennz . "'";
 		$sql.= $this->database->build_temporal_filter(array('f', 'fo'));
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
@@ -920,25 +934,55 @@ class flurstueck {
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Klassifizierungen zum Flurstück<br>".$sql,4);
-		$sql ="SELECT amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[
-		split_part(split_part(k.beschreibung, '(', 2), ')', 1), 
-		split_part(split_part(b.beschreibung, '(', 2), ')', 1), 
-		split_part(split_part(z.beschreibung, '(', 2), ')', 1), 
-		split_part(split_part(e1.beschreibung, '(', 2), ')', 1), 
-		split_part(split_part(e2.beschreibung, '(', 2), ')', 1), 
-		split_part(split_part(s.beschreibung, '(', 2), ')', 1), 
-		n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label ";
-		$sql.=" FROM (SELECT amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), ".$this->spatial_ref_code.") as fl_geom, st_area_utm(f.wkb_geometry, ".$this->spatial_ref_code.") as flstflaeche, ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben";
-    $sql.=" FROM alkis.ax_flurstueck f, alkis.ax_bewertung be, alkis.ax_bodenschaetzung n ";		
-    $sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND st_area_utm(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry)), " . $this->spatial_ref_code . ") > 0.001 AND f.flurstueckskennzeichen='" . $this->FlurstKennz . "'";
-		$sql.= $this->database->build_temporal_filter(array('f', 'be', 'n'));
-		$sql.=" ) as n";
-		$sql.=" LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart";
-		$sql.=" LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart";
-		$sql.=" LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1]";
-		$sql.=" LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2]";
-		$sql.=" LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe";
-		$sql.=" LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]";
+		$sql ="
+			SELECT 
+				amtlicheflaeche, 
+				round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
+				fl_geom, 
+				flstflaeche, 
+				n.wert, 
+				objart, 
+				ARRAY_TO_STRING(
+					ARRAY[
+						split_part(split_part(k.beschreibung, '(', 2), ')', 1), 
+						split_part(split_part(b.beschreibung, '(', 2), ')', 1), 
+						split_part(split_part(z.beschreibung, '(', 2), ')', 1), 
+						split_part(split_part(e1.beschreibung, '(', 2), ')', 1), 
+						split_part(split_part(e2.beschreibung, '(', 2), ')', 1), 
+						split_part(split_part(s.beschreibung, '(', 2), ')', 1), 
+						n.bodenzahlodergruenlandgrundzahl || '/' || n.wert
+					], ' '
+				) as label 
+			FROM 
+				(SELECT 
+					amtlicheflaeche, 
+					st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) as fl_geom, 
+					st_area(f.wkb_geometry) as flstflaeche, 
+					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
+					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
+					n.kulturart as objart, 
+					n.kulturart, 
+					n.bodenart, 
+					n.entstehungsartoderklimastufewasserverhaeltnisse, 
+					n.zustandsstufeoderbodenstufe, 
+					n.sonstigeangaben 
+				FROM 
+					alkis.ax_flurstueck f, 
+					alkis.ax_bewertung be, 
+					alkis.ax_bodenschaetzung n 
+				WHERE 
+					st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
+					st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND 
+					st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) > 0.001 AND 
+					f.flurstueckskennzeichen='" . $this->FlurstKennz . "'" .
+					$this->database->build_temporal_filter(array('f', 'be', 'n')) . "
+				) as n 
+				LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
+				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
+				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
+				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
+				LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+				LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]";
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -971,17 +1015,27 @@ class flurstueck {
 				amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[ split_part(split_part(k.beschreibung, '(', 2), ')', 1), split_part(split_part(b.beschreibung, '(', 2), ')', 1), split_part(split_part(z.beschreibung, '(', 2), ')', 1), split_part(split_part(e1.beschreibung, '(', 2), ')', 1), split_part(split_part(e2.beschreibung, '(', 2), ')', 1), split_part(split_part(s.beschreibung, '(', 2), ')', 1), n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label 
 			FROM (
 				SELECT 
-					amtlicheflaeche, st_area_utm(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry)), " . $this->spatial_ref_code . ") as fl_geom, 
-					st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . ") as flstflaeche, ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
-					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, n.kulturart as objart, n.kulturart, n.bodenart, n.entstehungsartoderklimastufewasserverhaeltnisse, n.zustandsstufeoderbodenstufe, n.sonstigeangaben 
+					amtlicheflaeche, 
+					st_area(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry))) as fl_geom, 
+					st_area(f.wkb_geometry) as flstflaeche, 
+					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
+					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
+					n.kulturart as objart, 
+					n.kulturart, 
+					n.bodenart, 
+					n.entstehungsartoderklimastufewasserverhaeltnisse, 
+					n.zustandsstufeoderbodenstufe, 
+					n.sonstigeangaben 
 				FROM 
-					alkis.ax_flurstueck f, alkis.ax_bodenschaetzung n, alkis.n_nutzung nu
+					alkis.ax_flurstueck f, 
+					alkis.ax_bodenschaetzung n, 
+					alkis.n_nutzung nu
 					left join alkis.n_nutzungsartenschluessel nas on nu.nutzungsartengruppe = nas.nutzungsartengruppe and nu.werteart1 = nas.werteart1 and nu.werteart2 = nas.werteart2
 				WHERE 
 					nas.objektart in (41008, 43001, 43002, 43003, 43004, 43005, 43006, 43007) and
 					st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
 					st_intersects(nu.wkb_geometry,f.wkb_geometry) = true AND 
-					st_area_utm(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry)), " . $this->spatial_ref_code . ") > 0.01 AND 
+					st_area(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry))) > 0.01 AND 
 					f.flurstueckskennzeichen='" . $this->FlurstKennz . "' 
 					" . $this->database->build_temporal_filter(array('f', 'nu', 'n')) . " 
 			) as n 
@@ -1152,18 +1206,39 @@ class flurstueck {
   
   function getNutzung() {
     if ($this->FlurstKennz=="") { return 0; }		
-		$sql ="SELECT round((st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ")::numeric * amtlicheflaeche / st_area_utm(f.wkb_geometry, " . $this->spatial_ref_code . "))::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, nag.gruppe||' '||coalesce(na.nutzungsart, '')||' '||coalesce(nu1.untergliederung1, '')||' '||coalesce(nu2.untergliederung2, '') as bezeichnung, nag.bereich, nag.gruppe, na.nutzungsart, nu1.untergliederung1, nu2.untergliederung2, n.info, n.zustand, n.name, amtlicheflaeche";
-		$sql.=" FROM alkis.ax_flurstueck f, alkis.n_nutzung n";
-		$sql.=" left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2";
-		$sql.=" left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel";
-		$sql.=" left join alkis.n_nutzungsart na on nas.nutzungsartengruppe = na.nutzungsartengruppe and nas.nutzungsart = na.schluessel";
-		$sql.=" left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel";
-		$sql.=" left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung1 = nu2.untergliederung1 and nas.untergliederung2 = nu2.schluessel";
-		$sql.=" WHERE st_intersects(n.wkb_geometry,f.wkb_geometry) = true";
-		$sql.=" AND st_area_utm(st_intersection(n.wkb_geometry,f.wkb_geometry), " . $this->spatial_ref_code . ") > 0.001";
-		$sql.=" AND f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'";
-		$sql.= $this->database->build_temporal_filter(array('f','n'));
-		$sql.=" ORDER BY nutzungskennz";
+		$sql = "
+			SELECT 
+				round(
+					(
+						st_area(st_intersection(n.wkb_geometry,f.wkb_geometry))::numeric * amtlicheflaeche / 
+						st_area(f.wkb_geometry)
+					)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END
+				) AS flaeche, 
+				nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, 
+				nag.gruppe || ' ' || coalesce(na.nutzungsart, '') || ' '||coalesce(nu1.untergliederung1, '') || ' ' || coalesce(nu2.untergliederung2, '') as bezeichnung, 
+				nag.bereich, 
+				nag.gruppe, 
+				na.nutzungsart, 
+				nu1.untergliederung1, 
+				nu2.untergliederung2, 
+				n.info, 
+				n.zustand, 
+				n.name, 
+				amtlicheflaeche
+			FROM 
+				alkis.ax_flurstueck f, 
+				alkis.n_nutzung n 
+				left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2
+				left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel 
+				left join alkis.n_nutzungsart na on nas.nutzungsartengruppe = na.nutzungsartengruppe and nas.nutzungsart = na.schluessel 
+				left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel 
+				left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung1 = nu2.untergliederung1 and nas.untergliederung2 = nu2.schluessel
+			WHERE 
+				st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
+				st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) > 0.001 AND 
+				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'" .
+				$this->database->build_temporal_filter(array('f','n')) . "
+			ORDER BY nutzungskennz";
 		#echo $sql;
     $queryret = $this->database->execSQL($sql, 4, 0);
     if ($queryret[0] OR pg_num_rows($queryret[1])==0) {
