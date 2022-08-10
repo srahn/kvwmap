@@ -1,5 +1,7 @@
 BEGIN;
 
+DROP VIEW jagdkataster.befriedete_bezirke_flurstuecke;
+
 CREATE OR REPLACE VIEW jagdkataster.befriedete_bezirke_flurstuecke AS 
  SELECT b.id,
     a.flurstueckskennzeichen,
