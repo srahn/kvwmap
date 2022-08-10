@@ -617,7 +617,7 @@ class flurstueck {
 		$sql = "
 			SELECT
 				round(
-					(
+					sum(
 						st_area(st_intersection(fo.wkb_geometry, f.wkb_geometry))::numeric /
 						st_area(f.wkb_geometry) *	f.amtlicheflaeche
 					)::numeric,
