@@ -68,6 +68,7 @@ class rolle {
 	function getLayer($LayerName) {
 		global $language;
 		$layer_name_filter = '';
+		$privilegfk = '';
 		
 		# Abfragen der Layer in der Rolle
 		if ($language != 'german') {
@@ -88,6 +89,20 @@ class rolle {
 			else {
 				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
+			$privilegfk = ",
+				(
+					SELECT
+						max(las.privileg)
+					FROM
+						layer_attributes AS la,
+						layer_attributes2stelle AS las
+					WHERE
+						la.layer_id = ul.Layer_ID AND
+						form_element_type = 'SubformFK' AND
+						las.stelle_id = ul.Stelle_ID AND
+						ul.Layer_ID = las.layer_id AND
+						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+				) as privilegfk";
 		}
 
 		$sql = "
@@ -125,20 +140,8 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer,
-				(
-					SELECT
-						max(las.privileg)
-					FROM
-						layer_attributes AS la,
-						layer_attributes2stelle AS las
-					WHERE
-						la.layer_id = ul.Layer_ID AND
-						form_element_type = 'SubformFK' AND
-						las.stelle_id = ul.Stelle_ID AND
-						ul.Layer_ID = las.layer_id AND
-						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
-				) as privilegfk
+				r2ul.geom_from_layer 
+				" . $privilegfk . "
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
