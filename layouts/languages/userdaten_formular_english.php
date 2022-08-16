@@ -45,4 +45,6 @@
 	$strTakeOverPassword = 'Take over password';
 	$strTitle = 'User Data Editor';
 	$strUserTitle = 'User title';
+	$strLayerDataImportAllowedLabel = 'Data-Import in layers';
+	$strLayerDataImportAllowedCheckboxText = 'Permission to create new Records by data-import.';	
 ?>

@@ -361,6 +361,97 @@ span[data-tooltip]:hover::after {
   display: block;
 }
 
+
+.image-select {
+	background-color: #e9e9ed;
+  position: relative;
+  width: 250px;
+  border: 1px solid #888;
+	border-radius: 2px;
+  align-items: center;
+	margin: 3px 3px 3px 0;
+}
+
+.image-select .dropdown {
+	z-index: 10000;
+	color: black;
+  list-style: none;
+  padding: 0;
+  display: none;
+	border: 1px solid #bbb;
+	border-radius: 2px;
+}
+
+.image-select img {
+  display: inline-block;
+  width: 30px;
+	margin-right: 5px;
+}
+
+.image-select .placeholder {
+	width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  position: relative;
+}
+
+.image-select .placeholder.editable{
+  cursor: pointer;
+}
+
+.image-select .placeholder.editable::before,
+.image-select .placeholder.editable::after {
+  content: "";
+  display: inline-block;
+  height: 2px;
+  width: 10px;
+  background-color: #aaa;
+  position: absolute;
+  right: 0;
+}
+
+.image-select .placeholder.editable::before {
+  transform: rotate(45deg);
+  right: 20px;
+}
+
+.image-select .placeholder.editable::after {
+  transform: rotate(-45deg);
+  right: 15px;
+}
+
+.image-select.active .dropdown {
+  display: flex;
+  flex-direction: column;
+  box-shadow: 1px 1px 6px 1px #ddd;
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
+  min-width: 200px;
+	max-height: 400px;
+	overflow-y: auto;
+	margin: 0;
+}
+
+.image-select .dropdown li {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.image-select .dropdown li:not(:last-child) {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.image-select .dropdown li:hover {
+  background-color: #e0e0e6;
+}
+
+
 .select_option_link:hover{
 	background-image: url(../../graphics/pfeil_rechts.gif);
 	background-repeat: no-repeat;

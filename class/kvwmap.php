@@ -508,6 +508,9 @@ class GUI {
 						}
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+							if ($this->user->layer_data_import_allowed) {
+								echo '<li><a href="index.php?go=Daten_Import&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+							}							
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
@@ -3975,7 +3978,7 @@ echo '			</table>
 		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options;
+    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
@@ -3987,17 +3990,27 @@ echo '			</table>
 		@$ret=$layerdb->execSQL($sql,4,0);
 		if (!$ret[0]) {
 			switch($this->formvars['type']) {
-				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden
+				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
 					$html .= '<option value="">-- Bitte Auswählen --</option>';
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
 				}break;
-
+				
 				case 'text' : {								#  ein Textfeld soll nur mit dem ersten Wert aufgefüllt werden
 					$rs = pg_fetch_array($ret[1]);
 					$html = $rs['output'];
+				}break;
+				
+				case 'hidden' : {					# ein Bild-Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '						
+						<li class="item" data-value="' . $rs['value'] . '" onclick="image_select(this);">
+							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($rs['image'])) . '">
+							<span>' . $rs['output'] . '</span>
+						</li>';
+					}
 				}break;
 			}
 		}
@@ -11241,7 +11254,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action']);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
 								$file_number++;
 							}
 						}
@@ -11255,12 +11268,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id) {
 		sanitize($filename, 'text');
-		include_once (CLASSPATH . 'data_import_export.php');
+		include_once (CLASSPATH.'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg);
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -17125,7 +17138,7 @@ class db_mapObj{
 
 				switch ($attributes['form_element_type'][$i]) {
 					# Auswahlfelder
-					case 'Auswahlfeld' : {
+					case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : {
 						if ($attributes['options'][$i] != '') {
 							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {
@@ -17235,6 +17248,7 @@ class db_mapObj{
 												$attributes['enum_value'][$i][$k][] = $rs['value'];
 												$attributes['enum_output'][$i][$k][] = $rs['output'];
 												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
+												$attributes['enum_image'][$i][$k][] = value_of($rs, 'image');
 											}
 										}
 									}
@@ -17254,6 +17268,7 @@ class db_mapObj{
 										$attributes['enum_value'][$i][] = $rs['value'];
 										$attributes['enum_output'][$i][] = $rs['output'];
 										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
+										$attributes['enum_image'][$i][] = value_of($rs, 'image');
 										if ($requires_options != '') {
 											$attributes['enum_requires_value'][$i][] = $rs['requires'];
 										}
@@ -19002,7 +19017,7 @@ class db_mapObj{
 		else {
 			$attributes['all_table_names'] = array();
 		}
-		$attributes['tabs'] = array_filter(array_unique($attributes['tab']), 'strlen');
+		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
 	}
 
