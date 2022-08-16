@@ -1952,7 +1952,7 @@ echo '			</table>
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
-				for ($i=0; $i < $layerset['anzLayer']; $i++) {
+				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
@@ -1990,6 +1990,7 @@ echo '			</table>
 	function loadlayer($map, $layerset) {
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
+		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
 		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		if ($layerset['wms_keywordlist']) {
@@ -7239,10 +7240,11 @@ echo '			</table>
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
 		$this->center->project($projFROM, $projTO);
+
 		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
-			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id);
+			mkdir(WMS_MAPFILE_PATH . $this->Stelle->id, 0770, true);
 		}
-		$this->mapfile = WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'];
+		$this->mapfile = $this->mapfile ?? WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'];
 		# setzen der WMS-Metadaten
 		$this->map->setMetaData("ows_title", $this->formvars['ows_title']);
 		$this->map->setMetaData("ows_abstract", $this->formvars['ows_abstract']);
@@ -7257,6 +7259,12 @@ echo '			</table>
 		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
 		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
 		$this->map->setMetaData("wms_enable_request", '*');
+		$this->map->setMetaData("gdi_filter_attribute_name", $this->formvars['filter_attribute_name']);
+		$this->map->setMetaData("gdi_filter_attribute_operator", $this->formvars['filter_attribute_operator']);
+		$this->map->setMetaData("gdi_filter_attribute_value", $this->formvars['filter_attribute_value']);
+		$this->map->setMetaData("gdi_nurVeroeffentlichte", $this->formvars['nurVeroeffentlichte']);
+		$this->map->setMetaData("gdi_nurAktiveLayer", $this->formvars['nurAktiveLayer']);
+		$this->map->setMetaData("gdi_totalExtent", $this->formvars['totalExtent']);
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
@@ -7270,39 +7278,48 @@ echo '			</table>
 		/*
 		* if formvars['nurVeroeffentlichte'] == 1 and connection_type add a filter to the layer definition
 		* but only if connectiontype of the layer is postgis and
-		* $filter_attribute is part of the base_expresion or the alias of an attribute in layers data sql
+		* attribute 'veroeffentlicht' is part of the base_expresion or the alias of an attribute in layers data sql
 		*/
-		if ($this->formvars['nurVeroeffentlichte'] AND $this->formvars['nurVeroeffentlichte'] == 1) {
-			$mapDb = new db_mapObj($this->Stelle->id,$this->user->id);
+		if (
+			array_key_exists('nurVeroeffentlichte', $this->formvars) AND $this->formvars['nurVeroeffentlichte'] == 1 OR
+			(
+				array_key_exists('filter_attribute_name', $this->formvars) AND $this->formvars['filter_attribute_name'] != '' AND
+				array_key_exists('filter_attribute_value', $this->formvars) AND $this->formvars['filter_attribute_value'] != ''
+			)
+		) {
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$this->gefilterte_layer = array();
-			$filter_attribute = 'veroeffentlicht';
 			for ($i = 0; $i < $this->map->numlayers; $i++) {
 				$layer = $this->map->getLayer($i);
-				if ($layer->connectiontype == 6) {
-					$sql = $mapDb->getSelectFromData($layer->data);
-					$filter = '';
-					$attributes = $this->pgdatabase->getFieldsfromSelect($sql);
-					for($i = 0; $i < count($attributes[1])-2; $i++){
-						if ($attributes[1][$i]['name'] == $filter_attribute) {
-							$filter = $attributes[1][$i]['name'];
+				if ($layer->connectiontype == 6 AND $layer->data != '') {
+					$sql = $mapDB->getSelectFromData($layer->data);
+					$filters = array();
+					$layerdb = $mapDB->getlayerdatabase($layer->getMetadata('kvwmap_layer_id'), $this->Stelle->pgdbhost);
+					$attributes = $layerdb->getFieldsfromSelect($sql);
+					for ($j = 0; $j < count($attributes[1]) - 2; $j++) {
+						if ($attributes[1][$j]['name'] == 'veroeffentlicht') {
+							$filters[] = $attributes[1][$j]['name'];
 						}
-						if ($filter != '') {
+						if ($attributes[1][$j]['name'] == $this->formvars['filter_attribute_name'] AND $this->formvars['filter_attribute_value'] != '') {
+							$filters[] = '"[' . $this->formvars['filter_attribute_name'] . ']" ' . $this->formvars['filter_attribute_operator'] . ' "' . $this->formvars['filter_attribute_value'] . '"';
+						}
+						if (count($filters) > 0) {
 							$this->gefilterte_layer[] = $layer->name;
-							$layer->setFilter($filter);
+							#echo '<p>filter: (' . implode(' AND ', $filters) . ')'; exit;
+							$layer->setFilter('(' . implode(' AND ', $filters) . ')');
 							break;
 						}
 					}
 				}
 			}
 		}
-
 		$this->saveMap($this->mapfile);
 		$this->getMapRequestExample = $this->wms_onlineresource
 			. 'SERVICE=WMS&'
 			. 'REQUEST=GetMap&'
 			. 'VERSION=' . SUPORTED_WMS_VERSION . '&'
 			. 'LAYERS='.implode(',', $this->exportierte_layer).'&'
-			. 'SRS=EPSG:' . $this->user->rolle->epsg_code . '&'
+			. 'CRS=EPSG:' . $this->user->rolle->epsg_code . '&'
 			. 'BBOX=' . implode(',', $bb) .'&'
 			. 'WIDTH=' . $this->map->width . '&'
 			. 'HEIGHT=' . $this->map->height . '&'
@@ -7313,7 +7330,7 @@ echo '			</table>
 			. 'REQUEST=GetFeature&'
 			. 'VERSION=' . SUPORTED_WFS_VERSION . '&'
 			. 'TYPENAME='.implode(',', $this->exportierte_layer).'&'
-			. 'SRS=EPSG:' . $this->user->rolle->epsg_code;
+			. 'CRS=EPSG:' . $this->user->rolle->epsg_code;
 
 		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
 
@@ -7347,6 +7364,12 @@ echo '			</table>
 			$this->formvars['wms_onlineresource'] = $map->getMetaData('wms_onlineresource');
 			$this->formvars['ows_srs'] = $map->getMetaData('ows_srs');
 			$this->formvars['wms_enable_request'] = $map->getMetaData('wms_enable_request');
+			$this->formvars['filter_attribute_name'] = $map->getMetaData('gdi_filter_attribute_name');
+			$this->formvars['filter_attribute_operator'] = $map->getMetaData('gdi_filter_attribute_operator');
+			$this->formvars['filter_attribute_value'] = $map->getMetaData('gdi_filter_attribute_value');
+			$this->formvars['nurVeroeffentlichte'] = $map->getMetaData('gdi_nurVeroeffentlichte');
+			$this->formvars['nurAktiveLayer'] = $map->getMetaData('gdi_nurAktiveLayer');
+			$this->formvars['totalExtent'] = $map->getMetaData('gdi_totalExtent');
 		}
 
 		$this->mapfiles_der_stelle = $this->Stelle->get_mapfiles();
@@ -9623,7 +9646,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function neuer_Layer_Datensatz_speichern() {
-		foreach($this->formvars as $key => $value) {
+		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
 				$this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
 			}
