@@ -788,6 +788,7 @@ class user {
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
+		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 	}
 
 	/*
@@ -1410,7 +1411,8 @@ class user {
 				`organisation` = '".$userdaten['organisation']."',
 				`position` = '".$userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) .
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
+				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .				
 				$passwort_column .
 				$passwort_setting_time_column . "
 			WHERE

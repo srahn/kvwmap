@@ -122,27 +122,24 @@ if ($doit == true) {
 							$sachdaten_tab = true;
 						}
 						
-						if (!empty($layer['attributes']['tabs'])) {
-							$first_tab = true;
+						if (!empty($layer['attributes']['tabs'])) {							
 							if ($show_geom_editor) {
 								if ($this->user->rolle->geom_edit_first) {
 									array_unshift($layer['attributes']['tabs'], 'Geometrie');
-									$first_tab = false;
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
 									$visibility_geom = 'style="visibility: collapse"';
 								}
 							}
+							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab'] ?: 0];
 							echo '
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
-										$first_tab2 = true;
 										foreach ($layer['attributes']['tabs'] as $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ($first_tab2? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
-											$first_tab2 = false;
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
 										}
 										echo '
 									</div>
@@ -153,7 +150,7 @@ if ($doit == true) {
 						$visibility = '';
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
-							if (!$first_tab) {	# nur den ersten Tab öffnen
+							if ($opentab != 'Sachdaten') {
 								$visibility = 'style="visibility: collapse"';
 							}
 							if ($layer['attributes']['group'][0] == '') {
@@ -171,6 +168,7 @@ if ($doit == true) {
 							}				
 				
 							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
+								$visibility = '';
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
@@ -178,7 +176,7 @@ if ($doit == true) {
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != ''){
 									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
-									if (!$first_tab OR $layer['attributes']['tab'][$j] != $layer['attributes']['tab'][0]) {	# nur den ersten Tab öffnen
+									if ($opentab != $layer['attributes']['tab'][$j]) {
 										$visibility = 'style="visibility: collapse"';
 									}
 								}
