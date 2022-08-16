@@ -1,5 +1,6 @@
 <?php
-$strTitle="dodaj opis do fragmentu mapy"; 
-$strTime="znacznik czasu: "; 
- 
+	$strTitleExtent = 'dodaj opis do fragmentu mapy';
+	$strTitleLayers = 'Save the layer selection';
+	$strTime = 'znacznik czasu: ';
+	$strPublic = 'public in usergroup';
 ?>  

@@ -35,13 +35,13 @@ function setValue() {
 		return;
 	}
 	// Sets the sql in the kvwmap-form
-	console.log("x");
-	if(top.document.getElementById("5_sql_-1") != null) {
-		top.document.getElementById("5_sql_-1").value = sqlString;
-		console.log("y");
+	//console.log(regel_layer_id + "_sql_0");
+	if(top.document.getElementById(regel_layer_id + "_sql_-1") != null) {
+		top.document.getElementById(regel_layer_id + "_sql_-1").value = sqlString;
+		//console.log("case: -1");
 	} else {
-		top.document.getElementById("5_sql_0").value = sqlString;
-		console.log("z");
+		top.document.getElementById(regel_layer_id + "_sql_0").value = sqlString;
+		//console.log("case: 0");
 	}
 	top.closeCustomSubform();
 }

@@ -1114,7 +1114,9 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				$GUI->checkCaseAllowed('Daten_Export');
+				if (!$GUI->user->is_gast()) {
+					$GUI->checkCaseAllowed('Daten_Export');
+				};
 				$GUI->daten_export_exportieren();
 			} break;
 			
@@ -1167,11 +1169,13 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_speichern' : {
+				$GUI->check_csrf_token();
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
 
 			case 'Layer-Suche_Suchabfrage_löschen' : {
+				$GUI->check_csrf_token();
 				$GUI->sanitize(['selected_layer_id' => 'int', 'selected_group_id' => 'int']);
 				$GUI->GenerischeSuche();
 			} break;
@@ -1523,6 +1527,18 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->stelle_bearbeiten_allowed($GUI->formvars['selected_stelle_id'], $GUI->user->id);
 				$GUI->Stelleneditor();
+			} break;
+
+			case 'Dienstmetadaten' : {
+				$GUI->checkCaseAllowed('Dienstmetadaten');
+				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
+				$GUI->Stelleneditor();
+			} break;
+
+			case 'Dienstmetadaten_Ändern' : {
+				$GUI->checkCaseAllowed('Dienstmetadaten');
+				$GUI->formvars['selected_stelle_id'] = $GUI->Stelle->id;
+				$GUI->dienstmetadaten_aendern();
 			} break;
 
 			case 'Stelle_Löschen' : {

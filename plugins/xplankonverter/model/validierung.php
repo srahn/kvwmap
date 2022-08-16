@@ -219,11 +219,11 @@ class Validierung extends PgObject {
 		else {
 			$sql = $this->str_ilreplace(
 				'where',
-				"WHERE " . $geometry_col . " IS NULL AND ",
-				#"WHERE " . $geometry_col . " IS NULL AND (",
+				//"WHERE " . $geometry_col . " IS NULL AND ",
+				"WHERE " . $geometry_col . " IS NULL AND (",
 				$sql
 			);
-			#$sql .= ')';
+			$sql .= ')';
 		}
 		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
@@ -233,7 +233,7 @@ class Validierung extends PgObject {
 
 		$result = pg_query($this->database->dbConn, $sql);
 		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
-
+		
 		while ($row = pg_fetch_assoc($result)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -426,7 +426,7 @@ class Validierung extends PgObject {
 				$sql,
 				" SELECT
 					gid,
-					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(ST_Transform(" . $plantype . ".raeumlichergeltungsbereich," . $konvertierung->get('input_epsg') . ")," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				 ",
 				stripos($sql, 'select'),
@@ -439,7 +439,7 @@ class Validierung extends PgObject {
 			$sql = substr_replace(
 				$sql,
 				" SELECT
-					NOT st_within(" . $geometry_col . ", ST_Buffer(" . $plantype . ".raeumlichergeltungsbereich," . $tolerance_meters . ")) AS ausserhalb,
+					NOT st_within(" . $geometry_col . ", ST_Buffer(ST_Transform(" . $plantype . ".raeumlichergeltungsbereich," . $konvertierung->get('input_epsg') . ")," . $tolerance_meters . ")) AS ausserhalb,
 					st_distance(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), ST_Transform(" . $plantype . ".raeumlichergeltungsbereich, " . $konvertierung->get('input_epsg') ."))/1000 AS distance,
 				 ",
 				stripos($sql, 'select'),
@@ -464,7 +464,8 @@ class Validierung extends PgObject {
 			'where',
 			"WHERE
 				" . $plantype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
+				NOT st_within(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') ."), 
+						ST_Buffer(raeumlichergeltungsbereich," . $tolerance_meters . ")) AND (
 			",
 			$sql
 		);
@@ -600,7 +601,8 @@ class Validierung extends PgObject {
 			"WHERE
 				" . $bereichtype . ".gml_id = '" . $regel->get('bereich_gml_id') . "' AND
 				" . $bereichtype . ".konvertierung_id = " . $konvertierung->get('id') . " AND 
-				NOT st_within(" . $geometry_col . ", ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . ")) AND (
+				NOT st_within(ST_Transform(" . $geometry_col . ", " . $konvertierung->get('input_epsg') . "),
+											ST_Transform(ST_Buffer(" . $bereichtype . ".geltungsbereich," . $tolerance_meters . "), " . $konvertierung->get('input_epsg') . ")) AND (
 			",
 			$sql
 		);

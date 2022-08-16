@@ -86,9 +86,9 @@ class Flur {
     return $ret;
   }
 
-  function getFlurListe($GemkgID,$FlurID, $historical = false) {
+  function getFlurListe($GemkgID,$FlurID, $history_mode = 'aktuell') {
     # Abfragen der Fluren
-    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $historical);
+    $Liste=$this->database->getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $history_mode);
     return $Liste;
   }
   
@@ -423,6 +423,50 @@ class flurstueck {
     $this->LayerName=LAYERNAME_FLURSTUECKE;
 		$this->spatial_ref_code = EPSGCODE_ALKIS . ", " . EARTH_RADIUS;
   }
+	
+	function getFlstHistorie(){
+		$sql = "
+			with recursive child_tree (all_fkz, fkz, zde, nkz, vkz) as (
+			select
+				array_cat(vorgaengerflurstueckskennzeichen, nachfolgerflurstueckskennzeichen),
+				flurstueckskennzeichen as fkz,
+				zeitpunktderentstehung as zde,
+				nachfolgerflurstueckskennzeichen as nkz,
+				vorgaengerflurstueckskennzeichen as vkz
+			from
+				alkis.pp_flurstueckshistorie
+			where
+				flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+			union all
+			select
+				array_cat(all_fkz, array_cat(f.vorgaengerflurstueckskennzeichen, f.nachfolgerflurstueckskennzeichen)),
+				f.flurstueckskennzeichen,
+				f.zeitpunktderentstehung,
+				f.nachfolgerflurstueckskennzeichen,
+				f.vorgaengerflurstueckskennzeichen
+			from
+				child_tree ct
+				join alkis.pp_flurstueckshistorie f on (select count(*) from unnest(ct.all_fkz) u (all_fkz) where u.all_fkz = f.flurstueckskennzeichen) < 2 AND (f.flurstueckskennzeichen= any(ct.nkz) OR f.flurstueckskennzeichen = any(ct.vkz))
+			)
+			SELECT distinct on (fkz)
+				fkz,
+				concat_ws(
+					'/',
+					substring(fkz from 10 for 5)::int,
+					nullif(substring(fkz from 15 for 4), '____')::int
+				) as name, 
+				coalesce(CASE WHEN date_part('DOY', zde) = 1 THEN date_part('year', zde)::text ELSE zde::text END, 'n.n.') as zde, 
+				to_json(nkz) as nkz 
+			FROM
+				child_tree
+			";
+		#echo $sql;
+    $ret=$this->database->execSQL($sql, 4, 0);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$flst_historie[] = $rs;
+		}
+    return $flst_historie;
+	}
 	
 	function outputEigentuemerText($eigentuemer, $adressAenderungen = NULL, $indent, $database = NULL){
 		if($eigentuemer->Nr != '' OR $eigentuemer->zusatz_eigentuemer != ''){
@@ -1134,7 +1178,7 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getGrundbuchbezirk() {
+  function getGrundbuchbezirke() {
     if ($this->FlurstKennz=="") { return 0; }
     $ret=$this->database->getGrundbuchbezirke($this->FlurstKennz, $this->hist_alb);
     return $ret;
@@ -1155,13 +1199,13 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getAmtsgericht() {
+  function getAmtsgerichte() {
     $blattnummer = strval($this->Buchungen[0]['blatt']);
-    if ($blattnummer >= 90000 and $blattnummer <= 99999) {
+    if ($blattnummer >= 90000 and $blattnummer <= 99999 OR $this->Grundbuchbezirke == '') {
       $ret[1]=array("schluessel"=>"", "name"=>"Im Grundbuch nicht gebucht");
     }
     else {
-      $ret=$this->database->getAmtsgerichtby($this->FlurstKennz, $this->Grundbuchbezirk);
+      $ret=$this->database->getAmtsgerichtby($this->FlurstKennz, $this->Grundbuchbezirke);
     }  
     return $ret[1];
   }
@@ -1425,7 +1469,7 @@ class flurstueck {
     #$this->AktualitaetsNr=$this->getAktualitaetsNr();			# ALKIS TODO
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
-    $this->Grundbuchbezirk=$this->getGrundbuchbezirk();
+    $this->Grundbuchbezirke = $this->getGrundbuchbezirke();
 		if (AEQUIVALENZ_BEWERTUNG) {
 			$this->Klassifizierung = $this->getKlassifizierungAequivalenz();
 		}
@@ -1443,7 +1487,7 @@ class flurstueck {
 		$this->strittigeGrenze=$this->getStrittigeGrenze();
     //$this->Grundbuecher=$this->getGrundbuecher();							# steht im Snippet
     //$this->Buchungen=$this->getBuchungen($Bezirk,$Blatt,1);		# steht im Snippet
-    $this->Amtsgericht=$this->getAmtsgericht(); 
+    $this->Amtsgerichte = $this->getAmtsgerichte(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();
 		if($this->Nachfolger != '')$this->Status = 'H';
@@ -1451,8 +1495,8 @@ class flurstueck {
     $this->Nutzung=$this->getNutzung();
   }
 
-  function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $historical = false) {
-    $Liste=$this->database->getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $historical);
+  function getFlstListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode = 'aktuell') {
+    $Liste=$this->database->getFlurstuecksListe($GemID, $GemkgID, $FlurID, $FlstID, $history_mode);
     return $Liste;
   }
   

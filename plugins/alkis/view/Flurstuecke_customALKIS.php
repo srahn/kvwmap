@@ -287,20 +287,38 @@ hide_versions = function(flst){
 											</tr>
 									<? }
 									$both = ($privileg_['amtsgerichtname'] AND $privileg_['amtsgerichtnr']);
-									if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){
-									?>
-									<tr>
-												<td align="right"><span class="fett">Amtsgericht</span>&nbsp;</td>
-												<td><?php if($privileg_['amtsgerichtname']){ echo $flst->Amtsgericht['name'];} ?>&nbsp;<? if($privileg_['amtsgerichtnr']){echo '('.$flst->Amtsgericht['schluessel'].')';} ?></td>
-											</tr>
-											<? }
-											$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
-									if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){
-									?>
-											<tr>
-												<td align="right"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
-												<td><?php if($privileg_['grundbuchbezirkname']){ echo $flst->Grundbuchbezirk['name'];} ?>&nbsp;<? if($privileg_['grundbuchbezirkschl']){ echo '('.$flst->Grundbuchbezirk['schluessel'].')';} ?></td>
-											</tr>
+									if($privileg_['amtsgerichtname'] OR $privileg_['amtsgerichtnr']){	?>
+										<tr>
+											<td align="right" valign="top"><span class="fett">Amtsgericht</span>&nbsp;</td>
+											<td><? 
+												for ($a = 0; $a < count($flst->Amtsgerichte); $a++) {
+													if ($privileg_['amtsgerichtname']) { 
+														echo $flst->Amtsgerichte[$a]['name'];
+													}
+													if ($privileg_['amtsgerichtnr']) {
+														echo '&nbsp;(' . $flst->Amtsgerichte[$a]['schluessel'] . ')';
+													}
+													echo '<br>';
+												} ?>
+											</td>
+										</tr>
+									<? }
+									$both = ($privileg_['grundbuchbezirkname'] AND $privileg_['grundbuchbezirkschl']);
+									if($privileg_['grundbuchbezirkname'] OR $privileg_['grundbuchbezirkschl']){	?>
+										<tr>
+											<td align="right" valign="top"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
+											<td><? 
+												for ($a = 0; $a < @count($flst->Grundbuchbezirke); $a++) {
+													if ($privileg_['grundbuchbezirkname']) { 
+														echo $flst->Grundbuchbezirke[$a]['name'];
+													}
+													if ($privileg_['grundbuchbezirkschl']) { 
+														echo '&nbsp;(' . $flst->Grundbuchbezirke[$a]['schluessel'] . ')';
+													}
+													echo '<br>';
+												} ?>
+											</td>
+										</tr>
 									<? }
 									if($privileg_['lagebezeichnung']){ ?>
 											<tr>
@@ -377,8 +395,18 @@ hide_versions = function(flst){
 														}
 													}  ?></td>
 											</tr>
-											<? } ?>
-											<?php if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
+											<? }
+											
+											if ($privileg_['nachfolger'] AND ($flst->Nachfolger != '' OR $flst->Vorgaenger != '')) { ?>
+											<tr>
+												<td align="right" valign="top"><span class="fett">Historie</span></td>
+												<td>
+													<a target="root" href="index.php?go=Flurstueckshistorie&flurstueckskennzeichen=<? echo $flst->FlurstKennz; ?>">anzeigen</a>
+												</td>
+											</tr>
+											<?	}
+											
+											if ($privileg_['vorgaenger'] AND $flst->Vorgaenger != '') { ?>
 											<tr>
 											<td align="right"><span class="fett">Vorgänger</span></td>
 											<td>
@@ -396,8 +424,8 @@ hide_versions = function(flst){
 												<? } ?>
 											</td>
 										</tr>
-										<? } ?>
-										<?php if ($privileg_['nachfolger'] AND $flst->Nachfolger != '' AND $flst->Nachfolger[0]['nachfolger'] != 'BOV') { ?>
+										<? } 
+										if ($privileg_['nachfolger'] AND $flst->Nachfolger != '' AND $flst->Nachfolger[0]['nachfolger'] != 'BOV') { ?>
 										<tr>
 											<td align="right" valign="top"><span class="fett">Nachfolger</span></td>
 											<td>

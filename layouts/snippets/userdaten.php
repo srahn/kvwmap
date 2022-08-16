@@ -1,6 +1,9 @@
 <?php
 	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php');
 	include(LAYOUTPATH.'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	
+	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
+	
 	$has_shared_user = array_reduce(
 		$this->userdaten,
 		function($has_shared_user, $user_data) {
@@ -95,8 +98,8 @@
 							<td>&nbsp;</td>
 							<td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
 							<td>
-								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>">
-									<?php echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
+								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>"><?
+									echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
 								</a>
 							</td>
 							<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;- '.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
@@ -115,8 +118,8 @@
 									} ?>
 								</td><?
 							} ?>
-							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','Wollen Sie den Benutzer <?php echo $this->userdaten[$i]['Vorname']." ".$this->userdaten[$i]['Name']; ?> wirklich löschen?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
-						</tr><?php  
+							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['Name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
+						</tr><?
 					} ?>
 				</table>
 			</div>

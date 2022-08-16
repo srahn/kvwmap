@@ -259,11 +259,56 @@
 
 					row.veroeffentlicht = result.veroeffentlicht;
 					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
-          console.log(result);
 
 					message([{
 						"type": "notice",
 						"msg" : 'Plan' + (result.veroeffentlicht == 'Ja' ? ' erfolgreich veröffentlicht' : 'veröffentlichung zurückgenommen') + '!'
+					}]);
+				}
+				else {
+					message([{
+						"type": "error",
+						"msg": result.msg
+					}]);
+				}
+			}
+		});
+	};
+
+	editVeroeffentlichungsdatum = function(konvertierung_id, veroeffentlichungsdatum) {
+		document.getElementById('input_konvertierung_id').value = konvertierung_id;
+		document.getElementById('input_veroeffentlichungsdatum').value = veroeffentlichungsdatum;
+		$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').show();
+	};
+
+	toggleVeroeffentlichungsdatum = function(konvertierung_id, veroeffentlichungsdatum) {
+		var today = new Date();
+		$('#veroeffentlichungsdatum_button_' + konvertierung_id).hide();
+		$('#veroeffentlichungsdatum_spinner_' + konvertierung_id).show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go: 'xplankonverter_konvertierung_veroffentlichungsdatum',
+				veroeffentlichungsdatum: veroeffentlichungsdatum,
+				konvertierung_id: konvertierung_id,
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+			},
+			success: function(result) {
+				if (result.success) {
+					var konvertierung_id = result.konvertierung_id,
+							row = $('#konvertierungen_table').bootstrapTable('getRowByUniqueId', konvertierung_id);
+
+					row.veroeffentlichungsdatum = result.veroeffentlichungsdatum.split('-').reverse().join('.');
+
+					$('#konvertierungen_table').bootstrapTable('updateByUniqueId', { id: konvertierung_id, row: row});
+
+					$('#veroeffentlichungsdatum_spinner_' + konvertierung_id).hide();
+					$('#veroeffentlichungsdatum_button_' + konvertierung_id).show();
+					$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide();
+
+					message([{
+						"type": "notice",
+						"msg" : 'Neues Veröffentlichungsdatum erfolgreich eingetragen!'
 					}]);
 				}
 				else {
@@ -306,7 +351,7 @@
 		var funcIsAllowed,
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
-				output = '<span class="btn-group col-edit" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
+				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
 		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
@@ -385,10 +430,59 @@
 		return output;
 	}
 
+	function konvertierungVeroeffentlichungsdatumFormatter(value, row) {
+		var symbol = {};
+		var today = new Date();
+		var veroeffentlichungsdatum = row.veroeffentlichungsdatum === null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
+
+		//console.log('today: ', today);
+		//console.log('veroeff: ', new Date(veroeffentlichungsdatum));
+		//console.log('vergleich: ', new Date(veroeffentlichungsdatum) == today);
+
+		if (veroeffentlichungsdatum === '') {
+			symbol.title = 'Plan ist nicht veröffentlicht. Kein Datum angegeben!';
+			symbol.color = '#d82c2c'; // Rot
+			symbol.class = 'fa-eye-slash'; // ist nicht veröffentlicht
+		}
+		else if (new Date(veroeffentlichungsdatum) > today) {
+			symbol.title = 'Plan wird am ' + value + ' veröffentlicht.';
+			symbol.color = '#b0952c' // Gelb
+			symbol.class = 'fa-clock-o'; // wird noch veröffentlicht
+		}
+		else if ((new Date(veroeffentlichungsdatum)).toDateString() == today.toDateString()) {
+			symbol.title = 'Plan wurde heute veröffentlicht.';
+			symbol.color = '#2cb03c'; // Grün
+			symbol.class = 'fa-eye'; // ist veröffentlicht
+		}
+		else {
+			symbol.title = 'Plan wurde am ' + value + ' veröffentlicht.';
+			symbol.color = '#2cb03c'; // Grün
+			symbol.class = 'fa-eye'; // ist veröffentlicht
+		}
+
+		var output = '<a\
+			title="' + symbol['title'] + '"\
+			class="btn btn-link btn-xs xpk-func-btn"\
+			href="#"\
+			onclick="editVeroeffentlichungsdatum(' + row.konvertierung_id + ', \'' + veroeffentlichungsdatum + '\')");\
+		><i\
+			id="veroeffentlichungsdatum_button_' + row.konvertierung_id + '"\
+			class="btn-link fa fa-lg ' + symbol['class'] + '"\
+			style="color: ' + symbol['color'] + '"\
+		></i></a>\
+		<i\
+			id="veroeffentlichungsdatum_spinner_' + row.konvertierung_id + '"\
+			class="color: fa fa-spinner fa-spin"\
+			style="display: none"\
+		></i>';
+
+		return output;
+	}
+
 	function konvertierungDownloadsFormatter(value, row) {
 		var funcIsAllowed, funcIsInProgress,
 			disableFrag = ' xpk-func-btn-disabled disabled" onclick="return false';
-		output = '<span class="btn-group" style="width: 125px;" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
+		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
 
 		// hochgeladene Shapes
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
@@ -449,130 +543,155 @@ else { ?>
 </div//-->
 <div id="downloadMessage"></div>
 <div id="downloadMessageSperrDiv" class="sperr-div"></div>
+<div id="editVeroeffentlichungsdatumDiv" class="edit-veroeffentlichungsdatum-div">
+	<h2>Veröffentlichungsdatum</h2>
+Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht. Damit erscheint er in den Diensten des Bauleitplanservers und im Bau- und Planungsportal des Geoportals MV.<p></p>
+	<input id="input_konvertierung_id" type="hidden">
+	<input id="input_veroeffentlichungsdatum" type="date" style="margin: 20px"><p></p>
+	<input type="button" value="<? echo $this->strCancel; ?>" onclick="$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide()"/>
+	<input type="button" name="Sende Veröffentlichungsdatum" value="Übernehmen" onclick="toggleVeroeffentlichungsdatum(document.getElementById('input_konvertierung_id').value, document.getElementById('input_veroeffentlichungsdatum').value)"/>
+</div>
 <div class="table-wrapper">
-<table
-	id="konvertierungen_table"
-	data-unique-id="konvertierung_id"
-	data-toggle="table"
-	data-url="index.php"
-	data-click-to-select="false"
-	data-filter-control="true"
-	data-sort-name="Name"
-	data-sort-order="asc"
-	data-search="true"
-	data-visible-search="true"
-	data-show-export="false"
-	data-show-refresh="false"
-	data-show-toggle="false"
-	data-show-columns="true"
-	data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
-	data-pagination="true"
-	data-page-list=[10,25,50,100,250,500,1000,all]
-	data-page-size="25"
-	data-show-export="false"
-	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
-	data-toggle="table"
-	data-toolbar="#toolbar"
->
-	<thead>
-		<tr>
-			<th
-				data-field="anzeigename"
-				data-sortable="true"
-				data-visible="true"
-				data-formatter="konvertierungHtmlSpecialchars"
-				class="col-md-7"
-				data-filter-control="input"
-			>Name</th>
-			<th
-				data-field="nummer"
-				data-sortable="true"
-				data-visible="false"
-				class="col-md-2"
-				data-filter-control="input"
-			>Nr</th><?php
-			if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+	<table
+		id="konvertierungen_table"
+		data-unique-id="konvertierung_id"
+		data-toggle="table"
+		data-url="index.php"
+		data-click-to-select="false"
+		data-filter-control="true"
+		data-sort-name="Name"
+		data-sort-order="asc"
+		data-search="true"
+		data-visible-search="true"
+		data-show-export="false"
+		data-show-refresh="false"
+		data-show-toggle="false"
+		data-show-columns="true"
+		data-query-params="go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&anzahl=10000&mime_type=formatter&format=json"
+		data-pagination="true"
+		data-page-list=[10,15,25,50,100,250,500,1000,all]
+		data-page-size="15"
+		data-show-export="false"
+		data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+		data-toggle="table"
+		data-toolbar="#toolbar"
+	>
+		<thead>
+			<tr>
 				<th
-					data-field="bundesland"
+					data-field="anzeigename"
+					data-sortable="true"
+					data-visible="true"
+					data-formatter="konvertierungHtmlSpecialchars"
+					class="col-md-7"
+					data-filter-control="input"
+					data-filter-control-placeholder="Suchen"
+				>Name</th>
+				<th
+					data-field="nummer"
+					data-sortable="true"
 					data-visible="false"
-					data-sortable="true"
-					data-formatter="konvertierungBundeslandFormatter"
 					class="col-md-2"
-					data-filter-control="select"
-				>Bundesland</th><?php
-			}
-			else { ?>
+					data-filter-control="input"
+				>Nr</th><?php
+				if ($this->plan_layer_id == XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="bundesland"
+						data-visible="false"
+						data-sortable="true"
+						data-formatter="konvertierungBundeslandFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+					>Bundesland</th><?php
+				}
+				else { ?>
+					<th
+						data-field="gemeinde"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungGemeindeFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Gemeinden</th><?php
+				}
+				if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					<th
+						data-field="konvertierung_status"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungStatusFormatter"
+						class="col-md-2"
+						data-filter-control="select"
+						data-filter-control-placeholder="Filtern nach"
+					>Status</th><?php
+				}
+				/*
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlicht"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichtFormatter"
+						data-searchable="false"
+						data-switchable="true"
+					><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+				}
+				*/
+				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					<th
+						data-field="veroeffentlichungsdatum"
+						data-visible="true"
+						data-sortable="true"
+						data-formatter="konvertierungVeroeffentlichungsdatumFormatter"
+						data-searchable="false"
+						data-switchable="false"
+						class="text-center"
+					><i title="Veröffentlichungsdatum" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
+				} ?>
 				<th
-					data-field="gemeinde"
+					data-field="konvertierung_id"
 					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungGemeindeFormatter"
-					class="col-md-2"
-					data-filter-control="select"
-				>Gemeinden</th><?php
-			}
-			if ($this->plan_layer_id != XPLANKONVERTER_RP_PLAENE_LAYER_ID) { ?>
+					data-formatter="konvertierungFunctionsFormatter"
+					data-switchable="false"
+					class="col-md-2 text-center"
+				>Funktionen</th>
 				<th
-					data-field="konvertierung_status"
+					data-field="konvertierung_id"
 					data-visible="true"
-					data-sortable="true"
-					data-formatter="konvertierungStatusFormatter"
-					class="col-md-2"
-					data-filter-control="select"
-				>Status</th><?php
-			}
-			if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
+					data-formatter="konvertierungDownloadsFormatter"
+					data-switchable="false"
+					class="col-md-2 align-top text-center"
+				>Downloads</th>
 				<th
-					data-field="veroeffentlicht"
+					data-field="plan_gml_id"
 					data-visible="true"
+					data-formatter="konvertierungEditFunctionsFormatter"
+					data-switchable="false"
+					class="col-md-2 text-center"
+				>Edit</th>
+				<th
+					data-field="konvertierung_id"
 					data-sortable="true"
-					data-formatter="konvertierungVeroeffentlichtFormatter"
-					data-searchable="false"
+					data-visible="false"
 					data-switchable="true"
-				><i title="Veröffentlichung" class="fa fa-share-alt" aria-hidden="true" style="color: black"></i></th><?
-			} ?>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungFunctionsFormatter"
-				data-switchable="false"
-				class="col-md-2"
-			>Funktionen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungDownloadsFormatter"
-				data-switchable="false"
-				class="col-md-2"
-			>Downloads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-			<th
-				data-field="plan_gml_id"
-				data-visible="true"
-				data-formatter="konvertierungEditFunctionsFormatter"
-				data-switchable="false"
-			>Edit&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-			<th
-				data-field="konvertierung_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-				data-searchable="false"
-			>Konvertierung Id</th>
-			<th
-				data-field="plan_gml_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Plan-Id</th>
-			<th
-				data-field="stelle_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Stelle Id</th>
-		</tr>
-	</thead>
-</table>
+					data-searchable="false"
+				>Konvertierung Id</th>
+				<th
+					data-field="plan_gml_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Plan-Id</th>
+				<th
+					data-field="stelle_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Stelle Id</th>
+			</tr>
+		</thead>
+	</table>
 </div><br>
 <button type="button" id="backButton" class="xplankonverter-back-button" title="Nach oben" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Zurück nach oben</button><?
 if ($this->Stelle->id > 200) { ?>

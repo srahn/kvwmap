@@ -89,8 +89,12 @@
 		color: #111;
 	}
 	
-	#form input[type="text"], #form select, #form textarea{
-		width: 340px;
+	#form input[type="text"], #form select, #form textarea {
+		width: 95%;
+	}
+
+	#form textarea {
+		height: 350px;
 	}
 
 	#form input[type="numeric"] {
@@ -505,7 +509,13 @@
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
-					</tr>			
+					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
+						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="identifier_text" type="text" value="<?php echo $this->formvars['identifier_text']; ?>" size="50" maxlength="50">
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strMaxQueryRows; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -709,6 +719,21 @@
 								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strVersion; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10">
+						</td>
+					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strComment; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
+						</td>
+					</tr>
+
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">

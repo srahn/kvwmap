@@ -20,6 +20,7 @@ class LENRIS {
 		$this->dokumentarten = $this->nachweis->getDokumentarten(false);
 		$this->hauptarten = $this->nachweis->getHauptDokumentarten();
 		$this->errors = array();
+		$this->delete_files = array();
   }
 	
 	function log_error($client_id, $error){
@@ -101,6 +102,7 @@ class LENRIS {
 	
 	function get_nachweis_info($client_id, $client_nachweis_id){
 		$sql = "
+			SET datestyle TO ISO, DMY;
 			SELECT 
 				cn.*,
 				n.link_datei
@@ -300,14 +302,15 @@ class LENRIS {
 	}
 	
 	function get_new_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' neue Nachweise von Client ' . $client['client_id']);
 				return $json;
 			}
 			else {
-				$this->log_error($client['client_id'], 'Fehler beim Abfragen der neuen Nachweise von Client ' . $client['client_id']);
+				$this->log_error($client['client_id'], 'Fehler beim Abfragen der neuen Nachweise von Client ' . $client['client_id'].' '.$result);
 			}
 		}
 		else {
@@ -317,8 +320,9 @@ class LENRIS {
 	}
 	
 	function get_changed_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' veränderte Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -334,8 +338,9 @@ class LENRIS {
 	}
 	
 	function get_deleted_nachweise($client){
-		$result = file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise');
-		if (trim($result) != '') {
+		$bom = pack('H*','EFBBBF');
+		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise')));
+		if ($result != '') {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' gelöschte Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -475,7 +480,7 @@ class LENRIS {
 						if (!$ret[0]) {
 							# Datei löschen
 							if (file_exists($rs['link_datei'])){
-								unlink($rs['link_datei']);
+								$this->delete_files[] = $rs['link_datei'];
 							}
 							$deleted_nachweise[] = $n['id_nachweis'];
 							$sql = "
@@ -541,7 +546,7 @@ class LENRIS {
 						link_datei = '" . $newpath . "', 
 						format = '" . $n['format'] . "',
 						stammnr = '" . $n['stammnr'] . "', 
-						the_geom = " . $geom . ", 
+						the_geom = " . ($geom != 'NULL' ? $geom : 'the_geom') . ", 
 						fortfuehrung = " . ($n['fortfuehrung'] ?: 'NULL') . ", 
 						rissnummer = '" . $n['rissnummer'] . "', 
 						bemerkungen = " . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
@@ -564,7 +569,7 @@ class LENRIS {
 				";
 				$ret = $this->database->execSQL($sql, 4, 0, true);
 				if (!$ret[0]) {
-					if ($n['document_last_modified'] != $rs['document_last_modified']) {
+					if ($n['document_last_modified'] == '' OR $n['document_last_modified'] != $rs['document_last_modified']) {
 						# neuen Dateipfad in zu_holende_dokumente schreiben
 						$sql = "
 							INSERT INTO 
@@ -577,19 +582,21 @@ class LENRIS {
 						";
 						$ret = $this->database->execSQL($sql, 4, 0);
 						if (!$ret[0]) {
-							# document_last_modified aktualisieren
-							$sql = "
-								UPDATE
-									lenris.client_nachweise
-								SET
-									document_last_modified = '" . $n['document_last_modified'] . "'
-								WHERE
-									nachweis_id = " . $rs['nachweis_id'];
-							$ret = $this->database->execSQL($sql, 4, 0);
+							if ($n['document_last_modified'] != '') {
+								# document_last_modified aktualisieren
+								$sql = "
+									UPDATE
+										lenris.client_nachweise
+									SET
+										document_last_modified = '" . $n['document_last_modified'] . "'
+									WHERE
+										nachweis_id = " . $rs['nachweis_id'];
+								$ret = $this->database->execSQL($sql, 4, 0);
+							}
 							if (!$ret[0]) {
 								# alte Datei löschen
 								if (file_exists($rs['link_datei'])){
-									unlink($rs['link_datei']);
+									$this->delete_files[] = $rs['link_datei'];
 								}
 							}
 							else {
@@ -611,6 +618,15 @@ class LENRIS {
 			}
 		}
 		return $updated_nachweise;
+	}
+	
+	function delete_files(){
+		foreach ($this->delete_files as $delete_file) {
+			$pathinfo = pathinfo($delete_file);
+			@unlink($delete_file);
+			@unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+		}
+		$this->delete_files = array();
 	}
 	
 	function confirm_new_nachweise($client, $inserted_nachweise){

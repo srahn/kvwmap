@@ -216,6 +216,8 @@ class Layer extends MyObject {
 
 	function get_baselayers_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		#echo '<p>get_baselayer_def for Layer: ' . $this->get('Name');
+
 		include_once(CLASSPATH . 'LayerClass.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
@@ -226,21 +228,47 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
+		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
 		$layerdef = (Object) array(
 			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
-			'options' => (Object) array(
-				'attribution' => $this->get('datasource')
-			),
+			'options' => $this->get_baselayer_options(),
 			'shortLabel' => $this->get('Name'),
-			'img' => URL . APPLVERSION . $classes[0]->get('legendgraphic'),
-			'url' => ($this->get('Data') != '' ? $this->get('Data') : $this->get('connection'))
+			'img' => $legendgraphic,
+			'url' => $this->get_baselayer_url()
 		);
 		return $layerdef;
 	}
 
+	function get_baselayer_options() {
+		if (strpos($this->get('Data'), '{') === 0) {
+			$data = json_decode($this->get('Data'));
+			$data->options->attribution = $this->get('datasource');
+			return $data->options;
+		}
+		else {
+			return (Object) array(
+				'attribution' => $this->get('datasource')
+			);
+		}
+	}
+
+	function get_baselayer_url() {
+		if ($this->get('Data') == '') {
+			return $this->get('connection');
+		}
+		if (strpos($this->get('Data'), '{') === 0) {
+			$data = json_decode($this->get('Data'));
+			return $data->url;
+		}
+		else {
+			return $this->get('Data');
+		}
+	}
+
 	function get_overlays_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
 		include_once(CLASSPATH . 'LayerClass.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
@@ -281,7 +309,8 @@ class Layer extends MyObject {
 					'layers' => get_first_word_after($this->get('connection'), 'layers=', ' ', '&'),
 					'format' => 'image/png',
 					'transparent' => true,
-					'attribution' => $this->get('dataowner_name')
+					'attribution' => $this->get('dataowner_name'),
+					'opacity' => $this->opacity / 100
 				);
 			} break;
 			case 9 : { # PostGIS-Layer
@@ -327,7 +356,6 @@ class Layer extends MyObject {
 		$classitem = $this->get('classitem');
 		$datentyp = $this->get('Datentyp');
 
-		#echo '<p>Layer: ' . $this->get('Name');
 		$layerdef = (Object) array(
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
@@ -349,7 +377,7 @@ class Layer extends MyObject {
 				function($class) use ($classitem, $datentyp) {
 					return $class->get_layerdef($classitem, $datentyp);
 				},
-				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'))
+				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'), 'legendorder')
 			),
 #			'icon' => (Object) array(
 #				'iconUrl' => 'images/Haus.svg',
@@ -360,6 +388,7 @@ class Layer extends MyObject {
 			'hideEmptyLayerAttributes' => true,
 			'layerAttributes' => $layerAttributes
 		);
+
 		if ($this->get('processing') != '') {
 			$processing = explode(';', $this->get('processing'));
 			if (count($processing) > 0) {

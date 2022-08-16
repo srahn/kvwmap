@@ -4,6 +4,12 @@ function go_switch_alkis($go){
 	global $GUI;
 	switch($go){
 		
+		case "Flurstueckshistorie" : {
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			$GUI->flurstueckshistorie();
+			$GUI->output();
+		} break;
+		
 		case "ZoomToFlst" : {
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->loadMap('DataBase');
@@ -49,7 +55,7 @@ function go_switch_alkis($go){
 		case "Flurstueck_hist_Auswaehlen" : {
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed($go);
-			$GUI->formvars['historical'] = 1;
+			$GUI->formvars['history_mode'] = 'historisch';
 			$GUI->flurstwahl();
 			$GUI->output();
 		} break;

@@ -12,7 +12,7 @@
     <td align="center" colspan="4"><h2><?php echo $strTitle; ?></h2></td>
 	</tr>
 	<tr>
-		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;Neuer&nbsp;Job</a></td>
+		<td align="right" colspan="4"><a class="btn btn-new" href="index.php?go=cronjob_editieren&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_cronjob; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></td>
   </tr>
 	<tr>
 		<th><i title="<? echo $strTitle_checkbox; ?>" class="fa fa-check-square-o" aria-hidden="true"></i></th>
@@ -52,4 +52,4 @@
 	} ?>
 </table>
 <p>
-<a class="btn btn-new" href="index.php?go=crontab_schreiben&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> Crontab Schreiben</a>
+<a class="btn btn-new" href="index.php?go=crontab_schreiben&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i title="Schreibe die aktiven Cronjobs in die Crontab, damit sie von da an ausgeführt werden." class="fa fa-clock-o" style="color: white;"></i> <? echo $strSaveCrontab; ?></a>

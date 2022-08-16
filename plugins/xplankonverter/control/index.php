@@ -41,6 +41,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_konvertierung_loeschen
 * xplankonverter_konvertierung_status
 * xplankonverter_konvertierung_veroffentlichen
+* xplankonverter_konvertierung_veroffentlichungsdatum
 * xplankonverter_plaene_index
 * xplankonverter_regeleditor
 * xplankonverter_regeleditor_getshapeattributes
@@ -631,6 +632,41 @@ function go_switch_xplankonverter($go) {
 			return;
 		} break;
 
+		case 'xplankonverter_konvertierung_veroffentlichungsdatum': {
+			header('Content-Type: application/json');
+			$response = array();
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$response['success'] = false;
+				$response['msg'] = 'Konvertierung wurde nicht angegeben';
+				return;
+			}
+			// now get konvertierung
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+
+			// check stelle
+			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
+
+			$validation_msg = $GUI->konvertierung->validate_date($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
+			if ($validation_msg != '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut Veroeffentlichungsdatum leer ist oder einen gültigen Datumswert hat.';
+				$response['success'] = false;
+				$response['msg'] = 'Attribut veroeffentlicht muss leer sein oder ein gültiges Datum haben.' . $validation_msg;
+				echo json_encode($response);
+				return;
+			}
+
+			$GUI->konvertierung->data = array(
+				"id" => $GUI->formvars['konvertierung_id'],
+				"veroeffentlichungsdatum" => $GUI->formvars['veroeffentlichungsdatum']
+			);
+			$GUI->konvertierung->update();
+			$response['success'] = true;
+			$response['veroeffentlichungsdatum'] = $GUI->formvars['veroeffentlichungsdatum'];
+			$response['konvertierung_id'] = $GUI->formvars['konvertierung_id'];
+			echo json_encode($response);
+			return;
+		} break;
+
 		case 'xplankonverter_create_konvertierung_directories' : {
 			$konvertierung = new Konvertierung($GUI);
 			$konvertierungen = $konvertierung->find_where('1=1');
@@ -1032,11 +1068,9 @@ function go_switch_xplankonverter($go) {
 				$enumerationsliste = $row[0];
 			}
 			# wenn es mit _startet ist es ein array, dann das _ entfernen
-			$arrayEnum = bool;
+			$arrayEnum = false;
 			if(substr($enumerationsliste, 0, 1) === '_') {
 				$arrayEnum = true;
-			} else {
-				$arrayEnum = false;
 			}
 			$enumerationsliste = ltrim($enumerationsliste, '_');
 
@@ -1074,7 +1108,7 @@ function go_switch_xplankonverter($go) {
 				$enumerationsliste = $row[0];
 			}
 			# wenn es mit _startet ist es ein array, dann das _ entfernen
-			$arrayEnum = bool;
+			$arrayEnum = false;
 			if(substr($enumerationsliste, 0, 1) === '_') {
 				$arrayEnum = true;
 			} else {

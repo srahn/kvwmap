@@ -219,7 +219,7 @@ class GUI {
 		}
 		$this->log_loginfail->write(
 			date("Y:m:d H:i:s", time()) .
-			' IP: ' . $_SERVER['REMOTE_ADDR'] .
+			' IP: ' . get_remote_ip() .
 			' Port: ' . $_SERVER['REMOTE_PORT'] .
 			' User: ' . $login_name .
 			' User agent: ' .
@@ -339,9 +339,8 @@ class GUI {
 				$error_msg = 'Die Datei ' . $snippet_path . $snippet_file . ' existiert nicht. Geben Sie einen anderen Namen im Parameter snippet an!';
 			}
 		}
-
 		if (empty($error_msg)) {
-			if (strtolower($this->formvars['format']) == 'json') {
+			if (strtolower($this->formvars['format']) == 'json' OR strtolower($this->formvars['mime_type']) == 'xml') {
 				include_once($snippet_path . $snippet_file);
 			}
 		}
@@ -1631,7 +1630,7 @@ echo '			</table>
         #$map->legend->set('transparent', MS_OFF);
         $map->legend->set('keysizex', '16');
         $map->legend->set('keysizey', '16');
-        $map->legend->set('template', LAYOUTPATH.'legend_layer.htm');
+        $map->legend->set('template', LAYOUTPATH . 'legend_layer.htm');
         $map->legend->imagecolor -> setRGB(255,255,255);
         $map->legend->outlinecolor -> setRGB(-1,-1,-1);
         $map->legend->label->set('type', MS_TRUETYPE);
@@ -1993,20 +1992,24 @@ echo '			</table>
 		$layer = ms_newLayerObj($map);
 		$layer->setMetaData('wfs_request_method', 'GET');
 		$layer->setMetaData('wms_name', $layerset['wms_name']);
-		if($layerset['wms_keywordlist'])$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		if ($layerset['wms_keywordlist']) {
+			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+		}
 		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-		$layer->setMetaData('ows_title', $layerset['Name']); # required
+		$layer->setMetaData('ows_title', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name'])); # required
 		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
 		$layer->setMetaData('wms_queryable',$layerset['queryable']);
 		$layer->setMetaData('wms_format',$layerset['wms_format']);
 		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
 		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
-		if($layerset['metalink']){
+		if ($layerset['metalink']) {
 			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
 			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
 			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
 		}
-		if($layerset['ows_srs'] == '') $layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		if ($layerset['ows_srs'] == '') {
+			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
+		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
@@ -2017,12 +2020,12 @@ echo '			</table>
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->setMetaData("gml_featureid", "ogc_fid");
 		$layer->setMetaData("gml_include_items", "all");
-
+		$layer->setMetaData('wms_abstract', $layerset['kurzbeschreibung']);
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
 
-		$layer->set('name', $layerset['alias']);
+		$layer->set('name', $layerset['Name']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -2235,8 +2238,9 @@ echo '			</table>
 				$layer->set('tolerance',$layerset['tolerance']);
 			}
 			if (value_of($layerset, 'toleranceunits') != '') {
-				$layer->set('toleranceunits',$layerset['toleranceunits']);
+				$layer->set('toleranceunits', constant('MS_' . strtoupper($layerset['toleranceunits'])));
 			}
+			
 			if (value_of($layerset, 'sizeunits') != '') {
 				$layer->set('sizeunits', $layerset['sizeunits']);
 			}
@@ -3147,7 +3151,7 @@ echo '			</table>
 					header("Expires: 0");
 					header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
 					header("Pragma: public");
-					readfile(IMAGEPATH.$this->outputfile);
+					readfile(IMAGEPATH . $this->outputfile);
 				}
 				else {
 					$this->pdf->ezStream();
@@ -4961,7 +4965,7 @@ echo '			</table>
 				}
 			}
 			else {
-				$this->add_message('error', $ret['err_msg']);
+				$this->add_message('error', $ret['msg']);
 			}
 			$this->PointEditor();
 		}
@@ -4980,7 +4984,7 @@ echo '			</table>
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
@@ -8529,7 +8533,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
 		$this->formvars['selected_layer_id'] = $this->formvars['selected_layer_id'];
-		if($this->last_query != '') {
+		if ($this->last_query != '') {
 			$this->formvars['selected_layer_id'] = $this->last_query['layer_ids'][0];
 		}
 		if ($this->formvars['selected_layer_id'] > 0) {
@@ -8796,7 +8800,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				# order by
 				$sql_order = '';
-				if (value_of($this->formvars, 'orderby'.$layerset[0]['Layer_ID']) != '') {
+				if (value_of($this->formvars, 'orderby' . $layerset[0]['Layer_ID']) != '') {
 					# Fall 1: im GLE soll nach einem Attribut sortiert werden
 					$sql_order = ' ORDER BY '. replace_semicolon($this->formvars['orderby'.$layerset[0]['Layer_ID']]);
 				}
@@ -8814,22 +8818,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$j++;
 				}
 
-				if ($this->last_query != ''){
+				if ($this->last_query != '') {
 					$sql = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
-					if(value_of($this->formvars, 'orderby'.$layerset[0]['Layer_ID']) == '')$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
-					if(value_of($this->formvars, 'anzahl') == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
-					if(value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) == '')$this->formvars['offset_'.$layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+					if (value_of($this->formvars, 'orderby' . $layerset[0]['Layer_ID']) == '') {
+						$sql_order = $this->last_query[$layerset[0]['Layer_ID']]['orderby'];
+					}
+					if (value_of($this->formvars, 'anzahl') == '') {
+						$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
+					}
+					if (value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']) == '') {
+						$this->formvars['offset_' . $layerset[0]['Layer_ID']] = $this->last_query[$layerset[0]['Layer_ID']]['offset'];
+					}
 				}
 				$sql_limit = '';
-        if(value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
-        	if($this->formvars['anzahl'] == ''){
-	          $this->formvars['anzahl'] = $layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
-	        }
-        	$sql_limit.=' LIMIT ' . intval($this->formvars['anzahl']);
-        	if(value_of($this->formvars, 'offset_'.$layerset[0]['Layer_ID']) != ''){
-          	$sql_limit.=' OFFSET ' . intval($this->formvars['offset_'.$layerset[0]['Layer_ID']]);
-        	}
-        }
+				if (value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == '') {
+					if ($this->formvars['anzahl'] == '') {
+						$this->formvars['anzahl'] = $layerset[0]['max_query_rows'] ?: MAXQUERYROWS;
+					}
+					$sql_limit .= ' LIMIT ' . intval($this->formvars['anzahl']);
+					if (value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']) != '') {
+						$sql_limit .= ' OFFSET ' . intval($this->formvars['offset_' . $layerset[0]['Layer_ID']]);
+					}
+				}
 
 				$layerset[0]['sql'] = $sql;
 
@@ -9180,7 +9190,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (value_of($this->formvars, 'CMD') == '' AND $saved_scale != NULL) {
 					$this->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
 				}
-				$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+				$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 				if (in_array(value_of($this->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
 					$this->navMap($this->formvars['CMD']);
 				}
@@ -10203,7 +10213,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$this->geomtype == 'MULTILINESTRING'
 					) {
 						#-----Polygoneditor und Linieneditor---#
-						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
 						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
@@ -11270,7 +11280,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->scaleMap($saved_scale);
 		}
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 		$this->data_import_export = new data_import_export();
 		if (defined('LAYERNAME_FLURSTUECKE') AND !$this->formvars['geom_from_layer']) {
 			$layerset = $this->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -11711,9 +11721,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
+	function dienstmetadaten_aendern() {
+    $Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);		# das "alte" Stellenobjekt
+    $Stelle->language = $this->Stelle->language;
+    $Stelle->metadaten_aendern($this->formvars);
+		if (
+			count(
+				array_map(
+					function($message) {
+						if ($message['type'] == 'error') return $message;
+					},
+					GUI::$messages
+				)
+			) == 0
+		) {
+			$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+		}
+		$this->Stelleneditor();
+	}
+
   function StelleAendern() {
   	$_files = $_FILES;
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->database, $this);
 		$this->document = new Document($this->database);
 		$results = array();
@@ -11726,8 +11755,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     else {
       if ($_files['wappen']['name']){
         $this->formvars['wappen'] = $_files['wappen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
-        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+        $nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
+        if (move_uploaded_file($_files['wappen']['tmp_name'], $nachDatei)) {
             #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
         }
       }
@@ -11840,8 +11869,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						GUI::$messages
 					)
 				) == 0
-			) $this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
-
+			) {
+				$this->add_message('notice', 'Daten der Stelle erfolgreich eingetragen!');
+			}
     }
     $this->Stelleneditor();
   }
@@ -11969,13 +11999,41 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->formvars['pgdbname'] = $this->stellendaten['pgdbname'];
       $this->formvars['pgdbuser'] = $this->stellendaten['pgdbuser'];
       $this->formvars['pgdbpasswd'] = $this->stellendaten['pgdbpasswd'];
+      $this->formvars['ows_namespace'] = $this->stellendaten['ows_namespace'];
       $this->formvars['ows_title'] = $this->stellendaten['ows_title'];
       $this->formvars['ows_abstract'] = $this->stellendaten['ows_abstract'];
       $this->formvars['wms_accessconstraints'] = $this->stellendaten['wms_accessconstraints'];
-      $this->formvars['ows_contactperson'] = $this->stellendaten['ows_contactperson'];
       $this->formvars['ows_contactorganization'] = $this->stellendaten['ows_contactorganization'];
       $this->formvars['ows_contactemailaddress'] = $this->stellendaten['ows_contactemailaddress'];
+      $this->formvars['ows_contactperson'] = $this->stellendaten['ows_contactperson'];
       $this->formvars['ows_contactposition'] = $this->stellendaten['ows_contactposition'];
+      $this->formvars['ows_contactvoicephone'] = $this->stellendaten['ows_contactvoicephone'];
+			$this->formvars['ows_contactfacsimile'] = $this->stellendaten['ows_contactfacsimile'];
+			$this->formvars['ows_contactaddress'] = $this->stellendaten['ows_contactaddress'];
+			$this->formvars['ows_contactpostalcode'] = $this->stellendaten['ows_contactpostalcode'];
+			$this->formvars['ows_contactcity'] = $this->stellendaten['ows_contactcity'];
+			$this->formvars['ows_contactadministrativearea'] = $this->stellendaten['ows_contactadministrativearea'];
+			$this->formvars['ows_contentorganization'] = $this->stellendaten['ows_contentorganization'];
+			$this->formvars['ows_contentemailaddress'] = $this->stellendaten['ows_contentemailaddress'];
+			$this->formvars['ows_contentperson'] = $this->stellendaten['ows_contentperson'];
+			$this->formvars['ows_contentposition'] = $this->stellendaten['ows_contentposition'];
+			$this->formvars['ows_contentvoicephone'] = $this->stellendaten['ows_contentvoicephone'];
+			$this->formvars['ows_contentfacsimile'] = $this->stellendaten['ows_contentfacsimile'];
+			$this->formvars['ows_contentaddress'] = $this->stellendaten['ows_contentaddress'];
+			$this->formvars['ows_contentpostalcode'] = $this->stellendaten['ows_contentpostalcode'];
+			$this->formvars['ows_contentcity'] = $this->stellendaten['ows_contentcity'];
+			$this->formvars['ows_contentadministrativearea'] = $this->stellendaten['ows_contentadministrativearea'];
+			$this->formvars['ows_geographicdescription'] = $this->stellendaten['ows_geographicdescription'];
+			$this->formvars['ows_distributionorganization'] = $this->stellendaten['ows_distributionorganization'];
+			$this->formvars['ows_distributionemailaddress'] = $this->stellendaten['ows_distributionemailaddress'];
+			$this->formvars['ows_distributionperson'] = $this->stellendaten['ows_distributionperson'];
+			$this->formvars['ows_distributionposition'] = $this->stellendaten['ows_distributionposition'];
+			$this->formvars['ows_distributionvoicephone'] = $this->stellendaten['ows_distributionvoicephone'];
+			$this->formvars['ows_distributionfacsimile'] = $this->stellendaten['ows_distributionfacsimile'];
+			$this->formvars['ows_distributionaddress'] = $this->stellendaten['ows_distributionaddress'];
+			$this->formvars['ows_distributionpostalcode'] = $this->stellendaten['ows_distributionpostalcode'];
+			$this->formvars['ows_distributioncity'] = $this->stellendaten['ows_distributioncity'];
+			$this->formvars['ows_distributionadministrativearea'] = $this->stellendaten['ows_distributionadministrativearea'];
       $this->formvars['ows_fees'] = $this->stellendaten['ows_fees'];
       $this->formvars['ows_srs'] = $this->stellendaten['ows_srs'];
       $this->formvars['wappen'] = $this->stellendaten['wappen'];
@@ -11996,6 +12054,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
+			$this->formvars['version'] = $this->stellendaten['version'];
+			$this->formvars['comment'] = $this->stellendaten['comment'];
 			$where = 'ID != '.$this->formvars['selected_stelle_id'];
 
 			$children_ids = array_map(function($child) {return $child['ID'];}, $this->formvars['selchildren']);
@@ -12072,7 +12132,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 		$showpolygon = true;
 		$setKeys = array();
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true);
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
 		if (
 			defined('LAYERNAME_FLURSTUECKE') AND
@@ -12666,7 +12726,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database);
-			$this->formvars['selstellen'] = $this->selected_user->getStellen(0);
+			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
 			# Abfragen der aktiven Layer des Nutzers
 			if ($this->userdaten[0]['stelle_id'] != '') {
 				$mapDB = new db_mapObj($this->userdaten[0]['stelle_id'], $this->formvars['selected_user_id']);
@@ -12681,13 +12741,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
   function BenutzerLöschen(){
-    $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
-    $stellen = $this->selected_user->getStellen(0);
-    $this->selected_user->Löschen($this->formvars['selected_user_id']);
-    $this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $stellen['ID']);
-    $this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
-    $this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
-    $this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
+    $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database);
+		if (NUTZER_ARCHIVIEREN) {
+			$this->selected_user->archivieren();
+		}
+		else {
+			$stellen = $this->selected_user->getStellen(0);
+			$this->selected_user->Löschen($this->formvars['selected_user_id']);
+			$this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $stellen['ID']);
+			$this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
+			$this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
+			$this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
+		}
 		if($this->formvars['nutzerstellen']){
 			$this->BenutzerNachStellenAnzeigen();
 		}
@@ -13964,9 +14029,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					}
 				}
 				$updates[$attr_oid['layer_id']][$attr_oid['tablename']][$attr_oid['oid']][$attr_oid['attributename']]['value'] = $document_attributes[$i]['update'] = $update;
-        if ($this->user->id == 1) {
-          echo '<br>upload_only_file_metadata: ' . print_r($this->rolle->upload_only_file_metadata, true);
-        }
 			}
 		}
 		if ($this->formvars['delete_documents'] != '') {
@@ -14193,8 +14255,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		return $result;
 	}
 
-	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db){
-		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
+	/**
+	* Function move or copy uploaded files to the document path of the layer and returns the value for document attribute
+	* If upload_only_file_metadata of rolle is set, than insteat belated_file.jpg will be copied to layers document path
+	* If input field value = delete, the existing document will be deleted.
+	* If a file exists with another name, it will be deleted before copy or move the new to the document path
+	* @param $input_name Name of the files form field used to upload the file
+	* @param $doc_path Document path defined for the layer
+	* @param $doc_url Document url defined for the layer
+	* @param $options Options defined for the document attributes
+	* @param $attribute_names Names of the document attributes
+	* @param $attribute_values Values of the document attributes
+	* @param $layer_db The database object with connection to layers main table
+	*/
+	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db) {
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->user->rolle->upload_only_file_metadata == 1) {
 			$file = json_decode($this->formvars[$input_name]);
 			$_files = array(
@@ -14332,6 +14407,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$sql_order = '';
 			if (
 				$layerset[$i]['queryable'] AND
+				$layerset[$i]['status']  == '' AND 
 				(
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
@@ -16191,6 +16267,13 @@ class db_mapObj{
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
+				l.kurzbeschreibung,
+				l.datasource,
+				l.dataowner_name,
+				l.dataowner_email,
+				l.dataowner_tel,
+				l.uptodateness,
+				l.updatecycle,
 				g.id, ".$group_column.", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
@@ -16798,43 +16881,47 @@ class db_mapObj{
 		return $path;
   }
 
-  function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname){
-		// diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
-		// sowie die URL des Dokuments, falls eine verwendet werden soll
+	/**
+	* Diese Funktion liefert den Pfad des Dokuments, welches hochgeladen werden soll (absoluter Pfad mit Dateiname ohne Dateiendung)
+	* sowie die URL des Dokuments, falls eine verwendet werden soll
+	* Wenn eine SQL-Anfrage in Option des Dokument-Attributes definiert ist, diese Ausführen und den Dokumentpfad anpassen
+	*/
+	function getDocument_Path($doc_path, $doc_url, $dynamic_path_sql, $attributenames, $attributevalues, $layerdb, $originalname) {
 		if ($doc_path == '') {
 			$doc_path = CUSTOM_IMAGE_PATH;
 		}
-		if(strtolower(substr($dynamic_path_sql, 0, 6)) == 'select'){		// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
+		if (strtolower(substr($dynamic_path_sql, 0, 6)) == 'select') {
+			// ist im Optionenfeld eine SQL-Abfrage definiert, diese ausführen und mit dem Ergebnis den Dokumentenpfad erweitern
 			$sql = $dynamic_path_sql;
-			for ($a = 0; $a < count($attributenames); $a++){
-				if($attributenames[$a] != '') {
-					$sql = str_replace('$'.$attributenames[$a], $attributevalues[$a], $sql);
+			for ($a = 0; $a < count($attributenames); $a++) {
+				if ($attributenames[$a] != '') {
+					$sql = str_replace('$' . $attributenames[$a], $attributevalues[$a], $sql);
 				}
 			}
 			# echo '<p>SQL zur Abfrage des Dokumentenpfades: ' . $sql;
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			$dynamic_path = pg_fetch_row($ret[1]);
-			$doc_path .= $dynamic_path[0];		// der ganze Pfad mit Dateiname ohne Endung
+			$doc_path .= $dynamic_path[0]; // der ganze Pfad mit Dateiname ohne Endung
 			if ($doc_url) {
 				$doc_url = $doc_url . $dynamic_path[0];
 			}
 			$path_parts = explode('/', $doc_path);
 			array_pop($path_parts);
-			$new_path = implode('/', $path_parts);		// der evtl. neu anzulegende Pfad ohne Datei
+			$new_path = implode('/', $path_parts); // der evtl. neu anzulegende Pfad ohne Datei
 			@mkdir($new_path, 0777, true);
 		}
-		else{			// andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
-			if(!$doc_url){
-				$filename = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999);
+		else { // andernfalls werden keine weiteren Unterordner generiert und der Dateiname aus Zeitstempel und Zufallszahl zusammengesetzt
+			if (!$doc_url) {
+				$filename = date('Y-m-d_H_i_s',time()) . '-' . rand(100000, 999999);
 			}
-			else{
-				$filename = $originalname.'-'.rand(100000, 999999);
+			else {
+				$filename = $originalname . '-' . rand(100000, 999999);
 				$doc_url .= $filename;
 			}
 			$doc_path .= $filename;
 		}
-    return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
-  }
+		return array('doc_path' => $doc_path, 'doc_url' => $doc_url);
+	}
 
 	function getlayerdatabase($layer_id, $host) {
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id; exit;
@@ -17160,14 +17247,26 @@ class db_mapObj{
 								$attributes['options'][$i] = $optionen[0];
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
-										$sql = $attributes['options'][$i];
+										$options_sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
 										if ($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))) {			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
-											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
-											$ret = $database->execSQL($sql, 4, 0);
-											if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-											$rs = pg_fetch_array($ret[1]);
-											$attributes['enum_output'][$i][$k] = $rs['output'];
+											$values = json_decode($value);
+											if (is_array($values)) {		# Array-Typ
+												foreach ($values as $value) {
+													$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+													$ret = $database->execSQL($sql, 4, 0);
+													if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+													$rs = pg_fetch_array($ret[1]);
+													$attributes['enum_output'][$i][$k][] = $rs['output'];
+												}
+											}
+											else {
+												$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+												$ret = $database->execSQL($sql, 4, 0);
+												if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+												$rs = pg_fetch_array($ret[1]);
+												$attributes['enum_output'][$i][$k] = $rs['output'];
+											}
 										}
 									}
 								}
@@ -17993,6 +18092,8 @@ class db_mapObj{
 		$attribute_sets = array();
 
 		if (!$duplicate) {
+			# Diese Attribute nicht auf Dublikate übertragen
+			# Schreibt alle String-Attribute, die NULL sein sollen wenn sie einen Leerstring enthalten.
 			foreach(
 				array(
 					'alias',
@@ -18019,9 +18120,10 @@ class db_mapObj{
 					'uptodateness',
 					'updatecycle',
 					'metalink',
+					'comment'
 				) AS $key
 			) {
-				$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+				$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 			}
 
 			# Scheibt alle unterstützten Language Attribute, außer german dafür heißt das Attribut nur Name
@@ -18032,6 +18134,7 @@ class db_mapObj{
 			}
 		}
 
+		# Die nächsten Attribute auch schreiben wenn Daten auf Dublikate übertragen werden.
 		# Schreibt alle Attribute, die nur geschrieben werden sollen wenn Wert != '' ist
 		foreach(
 			array(
@@ -18055,7 +18158,7 @@ class db_mapObj{
 				'shared_from'
 			) AS $key
 		) {
-			$attribute_sets[] = $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+			$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 		}
 
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
@@ -18066,7 +18169,7 @@ class db_mapObj{
 				'listed'
 			) AS $key
 		) {
-			$attribute_sets[] = $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
+			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
 		# Schreibt alle Attribute, die getrimmt werden sollen
@@ -18080,6 +18183,24 @@ class db_mapObj{
 			}
 		}
 
+		# Hängt Character / an Attribute an wenn es am Ende fehlt
+		foreach(
+			array(
+				'document_path'
+			) AS $key
+		) {
+				$attribute_sets[] = "`" . $key . "` = '" . append_slash($formvars[$key]) . "'";
+		}
+
+		# Setzt Wert auf default wenn leer
+		foreach(
+			array(
+				'version'
+			) AS $key
+		) {
+				$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '1.0.0' : $formvars[$key]) . "'";
+		}
+
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
@@ -18091,9 +18212,9 @@ class db_mapObj{
 				'pfad',
 				'maintable',
 				'oid',
+				'identifier_text',
 				'Data',
 				'schema',
-				'document_path',
 				'document_url',
 				'ddl_attribute',
 				'tileindex',
@@ -18144,11 +18265,19 @@ class db_mapObj{
 		}
 	}
 
+	/**
+	* function create a new layer based on layerdata.
+	* layerdata can be an array of parameters from a formular or
+	* a layer object where the values for the new layer will be taken from the object variables
+	* params $layerdata [Array|Object]
+	* return Integer The ID of new created layer or in case of error the number 0
+	*/
 	function newLayer($layerdata) {
 		global $supportedLanguages;
 		# Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
 		if (is_array($layerdata)) {
-			$formvars = $layerdata; # formvars wurden übergeben
+			# formvars wurden übergeben
+			$formvars = $layerdata;
 			$name_columns = '';
 			$names = '';
 			foreach ($supportedLanguages as $language) {
@@ -18168,6 +18297,7 @@ class db_mapObj{
 					`pfad`,
 					`maintable`,
 					`oid`,
+					`identifier_text`,
 					`Data`,
 					`schema`,
 					`document_path`,
@@ -18229,7 +18359,9 @@ class db_mapObj{
 					`listed`,
 					`duplicate_from_layer_id`,
 					`duplicate_criterion`,
-					`shared_from`
+					`shared_from`,
+					`version`,
+					`comment`
 				) VALUES (
 					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
 					" . quote_or_null($formvars['Name']) . ",
@@ -18240,9 +18372,10 @@ class db_mapObj{
 					" . quote_or_null($formvars['pfad']) . ",
 					" . quote_or_null($formvars['maintable']) . ",
 					" . quote_or_null($formvars['oid']) . ",
+					" . quote_or_null($formvars['identifier_text']) . ",
 					" . quote_or_null($formvars['Data']) . ",
 					" . quote_or_null($formvars['schema']) . ",
-					" . quote_or_null($formvars['document_path']) . ",
+					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
 					" . quote($formvars['tileindex']) . ",
 					" . quote($formvars['tileitem']) . ",
@@ -18301,12 +18434,15 @@ class db_mapObj{
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
 					" . quote($formvars['duplicate_criterion']) . ",
-					" . quote_or_null($formvars['shared_from']) . "
+					" . quote_or_null($formvars['shared_from']) . ",
+					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
+					" . quote_or_null($formvars['comment']) . "
 				)
 			";
     }
 		else {
-			$layer = $layerdata;      # ein Layerobject wurde übergeben
+			# ein Layerobject wurde übergeben
+			$layer = $layerdata;
 			$projection = explode('epsg:', $layer->getProjection());
 			$sql = "
 				INSERT INTO layer (
@@ -18334,7 +18470,9 @@ class db_mapObj{
 					`wms_format`,
 					`wms_connectiontimeout`,
 					`trigger_function`,
-					`sync`
+					`sync`,
+					`version`,
+					`comment`
 				) VALUES (
 					'" . $layer->name . "',
 					" . quote($layer->type) . ",
@@ -18360,7 +18498,9 @@ class db_mapObj{
 					'',
 					60,
 					'" . $layer->trigger_function . "',
-					" . quote($layer->sync) . "
+					" . quote($layer->sync) . ",
+					'" . $layer->version . "',
+					'" . $layer->comment . "'
 				)
 			";
 		}

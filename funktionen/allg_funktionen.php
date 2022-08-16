@@ -18,6 +18,7 @@ function urlencode2($str){
 	$str = str_replace('%3D', '=', $str);
 	$str = str_replace('%3A', ':', $str);
 	$str = str_replace('%2F', '/', $str);
+	$str = str_replace('%23', '#', $str);
 	$str = str_replace('%25', '%', $str);
 	return $str;
 }
@@ -30,7 +31,7 @@ function quote($var, $type = NULL){
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
-		}break;
+		} break;
 		default : {
 			return is_numeric($var) ? $var : "'" . $var . "'";
 		}
@@ -39,6 +40,10 @@ function quote($var, $type = NULL){
 
 function quote_or_null($var) {
 	return ($var == '' ? 'NULL' : quote($var));
+}
+
+function append_slash($var) {
+	return $var . ((trim($var) != '' AND substr(trim($var), -1) != '/') ? '/' : '');
 }
 
 function pg_quote($column) {
@@ -158,42 +163,70 @@ function url2filepath($url, $doc_path, $doc_url) {
 	return $doc_path . $url_parts[1];
 }
 
-/*
-* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
-* @param string $img_path Absolute Path of file with Exif Data to read
-* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
-*/
-function get_exif_data($img_path) {
-	$exif = @exif_read_data($img_path, 'EXIF, GPS');
-	if ($exif === false) {
-		return array(
-			'success' => false,
-			'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
-		);
+function exif_identify_data($file) {
+	$lines = '';
+	$result = '';
+	$exif = array();
+	exec("identify -verbose " . $file . " | grep -E 'exif:GPSLatitude:|exif:GPSLongitude:|exif:GPSImgDirection|DateTimeOriginal'", $lines, $result);
+	foreach ($lines AS $line) {
+		$line_parts = explode(': ', trim($line));
+		$key = $line_parts[0];
+		$values = $line_parts[1];
+		switch ($key) {
+			case 'exif:GPSLatitude' : $exif['GPSLatitude'] = explode(', ', $values); break;
+			case 'exif:GPSLongitude' : $exif['GPSLongitude'] = explode(', ', $values); break;
+			case 'exif:GPSImgDirection' : $exif['GPSImgDirection'] = $values; break;
+			case 'exif:DateTimeOriginal' : $exif['DateTimeOriginal'] = $values; break;
+		}
 	}
-	else {
-#		echo '<br>' . print_r($exif['GPSLatitude'], true);
-#		echo '<br>' . print_r($exif['GPSLongitude'], true);
-#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
-		return array(
-			'success' => true,
-			'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
-				floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
-				+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
-				+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
-			) . ' ' . (
-				floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
-				+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
-				+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
-			) : NULL),
-			'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
-			'Erstellungszeit' => (array_key_exists('DateTimeOriginal', $exif) ? (
-					substr($exif['DateTimeOriginal'], 0 , 4) . '-'
-				. substr($exif['DateTimeOriginal'], 5, 2) . '-'
-				. substr($exif['DateTimeOriginal'], 8, 2) . ' '
-				. substr($exif['DateTimeOriginal'], 11)
-			) : NULL)
-		);
+	return $exif;
+}
+
+/**
+	function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+	It uses php to read exif data per default. If coordinates are not found it try to read the values with identify command
+	@param string $img_path Absolute Path of file with Exif Data to read
+	@param boolean $force_identify Forces to use only function identify to read exif data from image, default is false
+	@return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*/
+function get_exif_data($img_path, $force_identify = false) {
+	if ($img_path != '') {
+		if ($force_identify) {
+			$exif = exif_identify_data($img_path);
+		}
+		else {
+			$exif = @exif_read_data($img_path, 'EXIF, GPS');
+			if (!array_key_exists('GPSLatitude', $exif) OR !array_key_exists('GPSLongitude', $exif)) {
+				$exif = exif_identify_data($img_path);
+			}
+		}
+		if ($exif === false) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Keine Exif-Daten im Header der Bilddatei ' . $img_path . ' gefunden!'
+			);
+		}
+		else {
+			return array(
+				'success' => true,
+				'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
+					floatval(substr($exif['GPSLatitude' ][0], 0, strlen($exif['GPSLatitude' ][0]) - 2))
+					+ float_from_slash_text($exif['GPSLatitude' ][1]) / 60
+					+ float_from_slash_text($exif['GPSLatitude' ][2]) / 3600
+				) . ' ' . (
+					floatval(substr($exif['GPSLongitude'][0], 0, strlen($exif['GPSLongitude'][0]) - 2))
+					+ float_from_slash_text($exif['GPSLongitude'][1]) / 60
+					+ float_from_slash_text($exif['GPSLongitude'][2]) / 3600
+				) : NULL),
+				'Richtung' => (array_key_exists('GPSImgDirection', $exif) ? float_from_slash_text($exif['GPSImgDirection']) : NULL),
+				'Erstellungszeit' => ((array_key_exists('DateTimeOriginal', $exif) AND substr($exif['DateTimeOriginal'], 0 , 4) != '0000') ? (
+						substr($exif['DateTimeOriginal'], 0 , 4) . '-'
+					. substr($exif['DateTimeOriginal'], 5, 2) . '-'
+					. substr($exif['DateTimeOriginal'], 8, 2) . ' '
+					. substr($exif['DateTimeOriginal'], 11)
+				) : NULL)
+			);
+		}
 	}
 }
 
@@ -829,11 +862,14 @@ function createRandomPassword($passwordLength) {
 
 function get_remote_ip() {
 	$ip = '172.0.0.1';
-	if (strpos(getenv('REMOTE_ADDR'), '172.') === false) {
+	if (strpos(getenv('REMOTE_ADDR'), '172.') !== 0) {
 		$ip = getenv('REMOTE_ADDR');
 	}
 	else {
-		$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		$ip = $_SERVER['HTTP_X_REAL_IP'];
+		if ($ip == '') {
+			$ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+		}
 	}
 	return $ip;
 }

@@ -308,8 +308,8 @@ if (!$show_login_form) {
 			# login case 15
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'] . '<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner Stelle zugeordnet.' ? true : $GUI->echo));
-			if($permission['reason'] == 'Der Nutzer ist keiner Stelle zugeordnet.'){
+			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'] . '<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
+			if($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
 				exit;
 			}
 
@@ -673,7 +673,7 @@ function get_permission_in_stelle($GUI) {
 	else {
 		$GUI->debug->write('Nutzer gehört nicht zur Stelle ' . $GUI->Stelle->id, 4, $GUI->echo);
 		if($GUI->user->Stellen['ID'] == NULL){
-			$reason = 'Der Nutzer ist keiner Stelle zugeordnet.';
+			$reason = 'Der Nutzer ist keiner aktiven Stelle zugeordnet.';
 		}
 		else{
 			$reason = 'Der Nutzer ist nicht der Stelle mit der ID: ' . $GUI->Stelle->id . ' zugeordnet oder es gibt diese Stelle in der Anwendung nicht.';

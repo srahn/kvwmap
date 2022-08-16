@@ -488,6 +488,20 @@ class PgObject {
 		return $this->childs[$child_table];
 	}
 
+	function validate_date($key, $format) {
+		$invalid_msg = array();
+		DateTime::createFromFormat($format, $this->get($key));
+		$last_errors = DateTime::getLastErrors();
+		if ($last_errors === false) {
+			return '';
+		}
+		else {
+			if ($last_errors['warning_count'] > 0) $invalide_msg[] = '<b>Warung:</b><br>' . implode('<br>', $last_errors['warnings']);
+			if ($last_errors['error_count']   > 0) $invalide_msg[] = '<b>Fehler:</b><br>' . implode('<br>', $last_errors['errors']);
+			return implode('<p>', $invalid_msg);
+		}
+	}
+
 	/*
 	* Fragt die fkey constraints der Tabelle ab
 	* Fragt die dazugehörigen childs ab uns setzt sie in der Variable $this->childs mit den child_table_name als keys im array

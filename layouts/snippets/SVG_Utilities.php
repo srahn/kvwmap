@@ -2425,7 +2425,7 @@ function mouseup(evt){
 	}
 	
 	function split_geometry(){
-		applypolygons();
+		applypolygons(false);
 		remove_second_line();
 		clear_first_line();
 		enclosingForm.last_doing.value = "split_geometry";
@@ -3173,7 +3173,7 @@ function mouseup(evt){
 		redraw();
 	}
 
-	function applypolygons(){
+	function applypolygons(isvalid_check = true){
 		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
@@ -3182,7 +3182,9 @@ function mouseup(evt){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 			}
 		}
-		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		if (isvalid_check) {
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=isvalid", new Array(""), new Array("execute_function"));
+		}
 		remove_second_poly();
 	}
 	

@@ -829,7 +829,7 @@ class user {
 	function getall_Users($order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$more_from = '';
-		$where = '';
+		$where = 'archived IS NULL ';
 
 		#echo '<br>getall_Users für Stelle: ' . $stelle_id . ' und User: ' . $admin_id;
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
@@ -837,7 +837,7 @@ class user {
 					JOIN rolle rall ON u.ID = rall.user_id
 					JOIN rolle radm ON rall.stelle_id = radm.stelle_id
 			";
-			$where = " WHERE radm.user_id = " . $admin_id;
+			$where .= " AND radm.user_id = " . $admin_id;
 		}
 
 		if ($order != '') {
@@ -849,8 +849,9 @@ class user {
 				u.*
 			FROM
 				user u " .
-				$more_from .
-			$where .
+				$more_from . "
+			WHERE " .
+				$where .
 			$order . "
 		";
 		#echo '<br>getall_Users sql: ' . $sql;
@@ -871,7 +872,23 @@ class user {
 
 	function get_Unassigned_Users(){
 		# Lesen der User, die keiner Stelle zugeordnet sind
-		$sql ='SELECT * FROM user WHERE ID NOT IN (SELECT DISTINCT user.ID FROM user, rolle WHERE rolle.user_id = user.ID) ORDER BY Name';
+		$sql = '
+			SELECT 
+				* 
+			FROM 
+				user 
+			WHERE 
+				archived IS NULL AND 
+				ID NOT IN (
+					SELECT DISTINCT 
+						user.ID 
+					FROM 
+						user, 
+						rolle 
+					WHERE 
+						rolle.user_id = user.ID
+				) 
+			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Unassigned_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -896,7 +913,16 @@ class user {
 
 	function get_Expired_Users(){
 		# Lesen der User, die abgelaufen sind
-		$sql ='SELECT * FROM user WHERE stop != "0000-00-00 00:00:00" AND "'.date('Y-m-d h:i:s').'" > stop ORDER BY Name';
+		$sql ='
+			SELECT 
+				* 
+			FROM 
+				user 
+			WHERE 
+				archived IS NULL AND 
+				stop != "0000-00-00 00:00:00" AND 
+				"'.date('Y-m-d h:i:s').'" > stop 
+			ORDER BY Name';
 		$this->debug->write("<p>file:users.php class:user->get_Expired_Users - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -922,6 +948,8 @@ class user {
 	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
 		global $admin_stellen;
 		$where = array();
+
+		$where[] = 'u.archived IS NULL';
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -980,7 +1008,7 @@ class user {
 		}
 	}
 
-	function getStellen($stelle_ID) {
+	function getStellen($stelle_ID, $with_expired = false) {
 		global $language;
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
@@ -1002,12 +1030,13 @@ class user {
 			WHERE
 				s.ID = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . "
+				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
+				(!$with_expired ? "
 				AND (
 					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
-				)
+				)" : "") . "
 			ORDER BY
 				Bezeichnung;
 		";
@@ -1394,6 +1423,23 @@ class user {
 		}
 		return $ret;
 	}
+	
+	function archivieren() {
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`archived` = CURRENT_TIMESTAMP
+			WHERE
+				`ID`= " . $this->id . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1].='<br>Der Benutzer konnte nicht archiviert werden.<br>'.$ret[1];
+		}
+		return $ret;
+	}	
 
 	/**
 	 * Aktualisiert das Passwort und setzt ein neuen Zeitstempel
@@ -1446,6 +1492,10 @@ class user {
 			}
 		}
 		return $ret;
+	}
+
+	function is_gast() {
+		return ($this->Name == 'gast' && $this->Vorname =='gast' && $this->funktion == 'gast');
 	}
 }
 
