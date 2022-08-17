@@ -2001,11 +2001,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fa {
-	color: gray;
+	/*color: gray;*/
 }
 
 .fa:hover {
-	color: #555;
+/*	color: #555; */
 }
 
 .fa-7x {

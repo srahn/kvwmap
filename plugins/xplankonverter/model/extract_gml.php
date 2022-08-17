@@ -23,10 +23,9 @@ class Gml_extractor {
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
-
 		$this->build_basic_tables();
 		$gmlas_output = $this->ogr2ogr_gmlas();
-		if($gmlas_output == "Nothing returned from ogr2ogr curl request") {
+		if ($gmlas_output == "Nothing returned from ogr2ogr curl request") {
 			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
 			return;
 		}
@@ -38,12 +37,11 @@ class Gml_extractor {
 		# It must be assumed that source data conforms to the GML standard (left hand order) on all geometries
 		# For Polygons alone, this could be deduced through an inside/outside check (e.g. with ST_ForceRHR())
 		$fachobjekte_tables_and_geometries = $this->get_fachobjekte_geometry_tables_attributes($this->gmlas_schema);
-		if(!empty($fachobjekte_tables_and_geometries)) {			
-			foreach($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
+		if (!empty($fachobjekte_tables_and_geometries)) {
+			foreach ($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
-
 
 		$layername = '';
 		$tablename = strtolower($classname); #for DB
@@ -87,7 +85,18 @@ class Gml_extractor {
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
-			#echo 'key:' . $r_key . ' value:' . $r_value . '<br>';
+			if ($r_key == 'externereferenz') {
+				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
+				$referenzen = json_decode($r_value);
+				if (count($referenzen) > 0) {
+					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
+					foreach ($referenzen AS $referenz) {
+						$path_parts = pathinfo(basename($referenz->referenzurl));
+						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+					}
+					$r_value = str_replace('\/', '/', json_encode($referenzen));
+				}
+			}
 			$GUI->formvars['attributenames'][] = $r_key;
 			$GUI->formvars['values'][] = $r_value;
 			# for filling the geometry data
@@ -103,7 +112,7 @@ class Gml_extractor {
 				$oid = $r_value;
 			}
 		}
-		if(empty($oid)) {
+		if (empty($oid)) {
 			$oid = $this->trim_gml_prefix_if_exists($gml_id); # workaround for now
 		}
 
@@ -872,7 +881,7 @@ class Gml_extractor {
 	*/
 	function build_basic_tables() {
 		# Prepare schema 
-		if($this->check_if_schema_exists($this->gmlas_schema)) {
+		if ($this->check_if_schema_exists($this->gmlas_schema)) {
 			$this->drop_schema($this->gmlas_schema);
 		}
 		$this->create_schema($this->gmlas_schema);

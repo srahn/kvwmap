@@ -25,6 +25,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 
 /**
 * Anwendungsfälle
+* xplankonverter_create_geoweb_service
 * xplankonverter_download_edited_shapes
 * xplankonverter_download_inspire_gml
 * xplankonverter_download_uploaded_shapes
@@ -52,6 +53,8 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 * xplankonverter_upload_geltungsbereich
 * xplankonverter_upload_xplan_gml
 * xplankonverter_validierungsergebnisse
+* xplankonverter_xplanvalidator
+* xplankonverter_validator_report
 */
 
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
@@ -704,6 +707,75 @@ function go_switch_xplankonverter($go) {
 			$GUI->output();
 		} break;
 
+		case 'xplankonverter_xplanvalidator' : {
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$GUI->main = 'Hinweis.php';
+			}
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+				}
+				else {
+					$result = $GUI->konvertierung->xplanvalidator();
+					$status = '';
+					if ($result['success']) {
+						$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+					}
+				}
+			}
+			#$GUI->output();
+		} break;
+
+		case 'xplankonverter_xplankonverter_report' : {
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$GUI->main = 'Hinweis.php';
+			}
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$GUI->Hinweis = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+					$GUI->main = 'Hinweis.php';
+				}
+				else {
+					# XPlankonverter Ergebnisse anzeigen.
+					$GUI->main = '../../plugins/xplankonverter/view/xplanvalidator_report.php';
+				}
+			}
+			$GUI->output();
+		} break;
+
+		case 'xplankonverter_create_geoweb_service' : {
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+				$GUI->main = 'Hinweis.php';
+			}
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$GUI->Hinweis = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+					$GUI->main = 'Hinweis.php';
+				}
+				else {
+					$result = $GUI->konvertierung->create_geoweb_service();
+					# Ergebnis der Erstellung des Dienstes anzeigen.
+					$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
+				}
+			}
+			$GUI->output();
+		} break;
+
 		case 'xplankonverter_validierungsergebnisse' : {
 			if ($GUI->formvars['konvertierung_id'] == '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
@@ -1209,6 +1281,7 @@ function go_switch_xplankonverter($go) {
 				$GUI->output();
 				return;
 			}
+			echo 'Download file from location: ' . $filename; exit;
 			header('Content-Disposition: attachment; filename="xplan_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
 		} break;
@@ -1304,42 +1377,152 @@ function go_switch_xplankonverter($go) {
 			return;
 		} break;
 
+		/**
+			Schritt 1:	In xplankonverter_upload_xplan_gml wird view upload_xplan_gml ausgeliefert. Der enthält ein Formular zum hochladen der gml oder zip Datei.
+			Schritt 2:	Der Ajax-Aufruf im Formular ruft nochmal den case xplankonverter_upload_xplan_gml auf, aber dieses mal mit einem upload_file
+									Das wird in XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() zwischengespeichert und wenn es ein Zip-File ist
+									im Unterverzeichnis zip/ ausgepackt und die externen referenzen in das document_path des Layers mit random_number als Postfix verschoben.
+									Die Namen der gml und referenz-Dateien werden per json an das upload_xplan_gml Formular zurückgeliefert und dort angezeigt.
+			Schritt 3:	Der View upload_xplan_gml ruft den case xplankonverter_extract_gml_to_form auf mit dem gml_file und der random_number als parameter.
+									Darin wird die Methode extract_gml_class der Klasse gml_extractor ausgeführt, die folgendes macht:
+									- GML-Datei in das gmlastmp Schema schreiben mit ogr2ogr_gmlas
+									- Formularvariablen mit dem was in GML-Datei steht belegen
+										außer bei externereferenz. Da wird die document_url + doc_file + random_number eingetragen und Vorschaubilder erzeugt.
+			Schritt 4:	Speichern des Formulars. Dabei wird der Plandatensatz angelegt und der Trigger handle_xp_plan ausgeführt in dem:
+									- der temporäre Schemaname xplan_gmlas_tmp_$konvertierung_id in xplan_gmlas_$konvertierung_id umbenannt wird
+									- Bereiche und Regeln erzeugt werden
+									- Verschieben der xplan_gml-Datei von 'tmp/' . session_id() nach $konvertierung_id . '/uploaded_xplan_gml/'
+		*/
 		case 'xplankonverter_upload_xplan_gml' : {
-			$upload_file = $_FILES['gml_file'];
-			if ($upload_file != '') {
-				Konvertierung::$write_debug = true;
-				# TODO check $_FILES['userfile']['type'] == gml or xml else abort (possibly also zip
-				# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
-				$gml_file = IMAGEPATH . $upload_file['name']; # the original filename from the computer of the file-owner
-				$response = array(
-					'success' => false
-				);
-				$importer = new data_import_export();
-
-				if (move_uploaded_file($upload_file['tmp_name'], $gml_file . '_' . $GUI->user->id . '.gml')) {
-					$response['success'] = true;
-				}
-				echo $gml_file . '_' . $GUI->user->id . '.gml';
-
-				#$zip_file = IMAGEPATH . $upload_file['name'];
+			$GUI->check_csrf_token();
+			switch ($GUI->formvars['planart']) {
+				case 'BP-Plan' : $layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID; break;
+				case 'FP-Plan' : $layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID; break;
+				case 'SO-Plan' : $layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID; break;
+				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
 			}
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			$GUI->plan_layerset = $GUI->user->rolle->getLayer($layer_id)[0];
+			$upload_file = $_FILES['gml_file'];
+			$success = false;
+			$gml_file = '';
+			$doc_files = array();
+			if ($upload_file != '') {
+				# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
+				# Die Dateien kommer erstmal nach tmp, weil es ja noch keine Konvertierungs Id gibt (zumindest nicht beim neu Anlegen von Plänen)
+				$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
+				if (!is_dir($upload_dir)) {
+					mkdir($upload_dir, 0777, true);
+				};
+				$target_file = $upload_dir . $upload_file['name'];
+				if (move_uploaded_file($upload_file['tmp_name'], $target_file)) {
+					$zip = new ZipArchive();
+					$res = $zip->open($target_file, ZipArchive::CHECKCONS);
+					if ($res === true) {
+						# Es ist eine ZIP-Datei, erzeuge einen Ordner in den entpackt wird
+						$zip_dir = $upload_dir . 'zip/';
+						if (!is_dir($zip_dir)) {
+							mkdir($zip_dir, 0777, true);
+						}
+						$zip->extractTo($zip_dir);
+						# Schließe ZIP-Datei und lösche die hochgeladene Datei
+						$zip->close();
+						exec('rm ' . $target_file);
+						$random_number = rand(1, 1000000);
+						foreach (scandir($zip_dir) AS $index => $entry) {
+							if ($index > 1) { # do not for . and .. entry
+								if (strpos(strrev(strtolower($entry)), 'lmg.') === 0 OR strpos(strrev(strtolower($entry)), 'lmx.') === 0) {
+									$gml_file = $entry;
+									$success = true;
+									exec('mv ' . $zip_dir . $entry . ' ' . $upload_dir);
+								}
+								else {
+									$path_parts = pathinfo($entry);
+									$doc_files[] = array(
+										'upload_file_name' => $entry,
+										'file_name' => $path_parts['filename'],
+										'store_file_name' => $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
+										'thumb_file_name' => $path_parts['filename'] . '-' . $random_number . '_thumb.jpg'
+									);
+									exec('mv ' . $zip_dir . $entry . ' ' . $GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']);
+									$GUI->create_dokument_vorschau('local_img', pathinfo($GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']));
+									/*
+									$msg .= print_r($GUI->get_dokument_vorschau(
+										$GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
+										$GUI->plan_layerset['document_path'],
+										$GUI->plan_layerset['document_url']
+									), true);
+									*/
+								}
+							}
+						}
+						exec('rm -R ' . $zip_dir);
+						if ($gml_file == '') {
+							$msg = 'Die ZIP-Datei ' . $upload_file['name'] . ' enthält keine GML-Datei!';
+						}
+					}
+					else {
+						if ($res == ZipArchive::ER_NOZIP) {
+							# Es ist keine ZIP-Datei
+							if (strpos(strrev(strtolower($upload_file['name'])), 'lmg.') === 0 OR strpos(strrev(strtolower($upload_file['name'])), 'lmx.') === 0) {
+								$gml_file = $upload_file['name'];
+								exec('mv ' . $target_file . ' ' . $xplan_gml_dir);
+								$success = true;
+							}
+							else {
+								$msg .= 'Die hochgeladene Datei ' . $upload_file['name'] . ' ist keine GML-Datei';
+							}
+						}
+						else {
+							# Es ist eine fehlerhafte ZIP-Datei
+							switch ($res) {
+								case ZipArchive::ER_INCONS : {
+									$msg .= 'Die ZIP-Datei hat den Konsistenztest nicht bestanden!';
+								} break;
+								case ZipArchive::ER_CRC : {
+									$msg .= 'Die Check-Summe der ZIP-Datei stimmt nicht!';
+								} break;
+								default : {
+									$msg .= 'Die ZIP-Datei konnte nicht geöffnet werden!';
+								}
+							}
+						}
+					}
+					$msg .= ' Prüfen Sie den Inhalt und versuchen Sie es erneut.';
+				}
+				else {
+					$response['msg'] = 'Kann Datei nicht auf dem Server zwischenspeichern. Prüfen Sie ob genüg Speicherplatz auf dem Server ist und ob im Verzeichnis ' . IMAGEPATH . ' Schreibrechte vorhanden sind.';
+				}
+				$response = array(
+					'success' => $success,
+					'msg' => $msg,
+					'random_number' => $random_number,
+					'doc_files' => $doc_files,
+					'gml_file' => $gml_file
+				);
+				header('Content-Type: application/json');
+				echo json_encode($response);
+			}
+			else {
+				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+				$GUI->output();
+			}
 		} break;
 
 		case 'xplankonverter_extract_gml_to_form' : {
 			$GUI->checkCaseAllowed($go);
 
-			if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
+#			if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
+			$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
+			$gml_file = $upload_dir . $GUI->formvars['gml_file'];
+			if (!is_file($gml_file)) {
 				$GUI->add_message('error', 'GML-Datei nicht gefunden. Bitte hochladen.');
 				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
 				$GUI->output();
 				exit;
 			}
-			# echo 'File:' . $_POST['gml_file'] . '<br>';
-			$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
-
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_location, 'xplan_gmlas_tmp_' . $GUI->user->id);
+			#echo 'uploaded gml file: ' . $gml_file
+			#$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
+			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_file, 'xplan_gmlas_tmp_' . $GUI->user->id);
 			$gml_extractor->extract_gml_class($GUI->plan_class);
 
 			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];

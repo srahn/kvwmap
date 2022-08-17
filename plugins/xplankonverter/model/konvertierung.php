@@ -20,6 +20,9 @@ class Konvertierung extends PgObject {
 		'IN_GML_ERSTELLUNG'     => 'in GML-Erstellung',
 		'GML_ERSTELLUNG_OK'     => 'GML-Erstellung abgeschlossen',
 		'GML_ERSTELLUNG_ERR'    => 'GML-Erstellung abgebrochen',
+		'GML_VALIDIERUNG_OK'    => 'GML-Validierung abgeschlossen',
+		'GML_VALIDIERUNG_ERR'   => 'GML-Validierung mit Fehlern',
+		'GEOWEB_SERVICE_ERSTELLT' => 'GeoWeb-Dienst erstellt',
 		'IN_INSPIRE_GML_ERSTELLUNG'  => 'in INSPIRE-GML-Erstellung',
 		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE-GML-Erstellung abgeschlossen',
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
@@ -167,6 +170,7 @@ class Konvertierung extends PgObject {
 		$directories = array(
 			'uploaded_shapes',
 			'edited_shapes',
+			'uploaded_xml_gml',
 			'xplan_gml',
 			'xplan_shapes',
 			'inspire_gml'
@@ -178,7 +182,7 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0770, true);
+				mkdir($path, 0777, true);
 				umask($old);
 			}
 		}
@@ -799,6 +803,130 @@ class Konvertierung extends PgObject {
 				}
 			}
 		}
+	}
+
+	/**
+		This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
+		and write the report in xplankonverter database tables
+	*/
+	function xplanvalidator() {
+		$msg = array();
+		if (!$this->files_exists('xplan_gml_file')) {
+			return array(
+				'success' => false,
+				'msg' => 'In dem Konvertierungsvorgang gibt es noch keine GML-Datei die validiert werden kann. Bitte erst eine erzeugen.'
+			);
+		}
+		$gml_file = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_gml/xplan_' . $this->get($this->identifier) . '.gml';
+		$url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
+						'name=xplanvalidator_konvertierung_' . $this->get($this->identifier) . '&' .
+						'skipSemantisch=false' . '&' .
+						'skipGeometrisch=false' . '&' .
+						'skipFlaechenschluss=false' . '&' .
+						'skipGeltungsbereich=false';
+
+		$cmd = "curl -X 'POST' '" . $url  . "'-H 'accept: application/json' -H 'X-Filename: " . basename($gml_file) . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
+		#echo '<br>Frage Validierung mit folgendem Befehl ab: ' . $cmd;
+		exec($cmd, $output, $result_code);
+		$result = $output[0];
+		#echo '<br>output: ' . $result;
+		#echo '<br>result: : ' . $result_code;
+		$msg[] = 'Validierungsergebnis erfolgreich abgefragt.';
+		$report = json_decode($result, false);
+		#echo '<br>Report: ' . print_r($report->externalReferences, true);
+
+		$sql = "
+			INSERT INTO xplankonverter.xplanvalidator_reports(
+				konvertierung_id,
+			  version,
+			  filename,
+			  name,
+			  box_minx,
+			  box_miny,
+			  box_maxx,
+			  box_maxy,
+			  box_crs,
+			  datetime,
+			  valid,
+			  externalreferences,
+			  wmsurl,
+			  rulesmetadata_version,
+			  rulesmetadata_source,
+			  semantisch_valid,
+			  geometrisch_valid,
+			  geometrisch_errors,
+			  geometrisch_warnings,
+			  syntaktisch_valid,
+			  syntaktisch_messages
+			) VALUES (
+				" . $this->get($this->identifier) . ",
+				'" . $report->version . "',
+				'" . $report->filename . "',
+				'" . $report->name . "',
+				" . $report->bbox->minX . ",
+				" . $report->bbox->minY . ",
+				" . $report->bbox->maxX . ",
+				" . $report->bbox->maxY . ",
+				'" . $report->bbox->crs . "',
+				'" . $report->date . "',
+				" . ($report->valid ? 'true' : 'false') . ",
+				" . (count($report->externalReferences) > 0 ? "ARRAY['" . implode("', '", $report->externalReferences) . "']" : "NULL") . ",
+				'" . $report->wmsUrl . "',
+				'" . $report->rulesMetadata->version . "',
+				'" . $report->rulesMetadata->source . "',
+				" . ($report->validationResult->semantisch->valid ? 'true' : 'false') . ",
+				" . ($report->validationResult->geometrisch->valid ? 'true' : 'false') . ",
+				" . (count($report->validationResult->geometrisch->errors) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->errors) . "']" : "NULL") . ",
+				" . (count($report->validationResult->geometrisch->warnings) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->warnings) . "']" : "NULL") . ",
+				" . ($report->validationResult->syntaktisch->valid ? 'true' : 'false') . ",
+			  " . (count($report->validationResult->syntaktisch->messages) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->syntaktisch->messages) . "']" : "NULL") . "
+			) RETURNING id
+		";
+		#echo '<br>SQL to create a validation report: ' . $sql;
+		$ret = $this->database->execSQL($sql);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'msg' => $ret['msg']
+			);
+		}
+		$msg[] = 'Validierungsergebnis erfolgreich in Tabelle validation_reports eingetragen.';
+		$rs = pg_fetch_assoc($ret[1]);
+		$values = array();
+		foreach ($report->validationResult->semantisch->rules AS $rule) {
+			echo '<br>rule: ' . print_r($rule, true);
+			$values[] = '(' . $rs['id'] . ",
+				'" . $rule->name . "',
+				" . ($rule->isValid ? 'true' : 'false') . ",
+				'" . $rule->message . "',
+				" . (count($rule->invalidFeatures) > 0 ? "ARRAY['" . implode("', '", $rule->invalidFeatures) . "']" : "NULL") . ')';
+		}
+		$sql = "
+			INSERT INTO xplankonverter.xplanvalidator_semantische_results(
+				xplanvalidator_report_id,
+				name,
+				isvalid,
+				message,
+				invalidefeatures
+			)
+			VALUES
+				" . implode(', ', $values) . "
+		";
+		#echo '<br>SQL to create the semantic results: ' . $sql; exit;
+		$ret = $this->database->execSQL($sql);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'msg' => $ret['msg']
+			);
+		}
+		$msg[] = 'Ergebnisse der semantischen Prüfung erfolgreich in Tabelle validation_results_semantisch eingetragen.';
+
+		return array(
+			'success' => true,
+			'valid' => $report->valid,
+			'msg' => implode('<br>', $msg)
+		);
 	}
 
 	/**
