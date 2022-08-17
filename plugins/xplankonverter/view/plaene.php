@@ -417,7 +417,14 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 
 		funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-generate-gml' + (funcIsAllowed ? ' xpk-func-btn" onclick="starteXplanGmlGenerierung(this)' : ' disabled" onclick="message([{type: \'info\', msg: \'Sie müssen den Plan erst konvertieren!\'}])') + '" href="#"><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-code') + '"></i></a>';
+		output += '<a ' +
+								'title="XPlan-GML-Datei erzeugen" ' +
+								'class="btn btn-link btn-xs xpk-func-generate-gml' + (funcIsAllowed ? ' xpk-func-btn" ' +
+								'onclick="starteXplanGmlGenerierung(this)' : disableFrag) + '" ' +
+								'href="#"' +
+							'>' +
+								'<i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-code') + '"></i>' +
+							'</a>';
 
 		// GML-Validieren
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
@@ -427,17 +434,18 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 
 		if (funcIsAllowed) {
-			funcOnClick = "message([{ type: 'confirm', msg: 'XPlanGML bei der Leitstelle validieren.<br>Die alten Validierungsergebnisse werden dabei überschrieben!'}], 2000, 1000, 400, " + row.konvertierung_id + ", 'starteXplanGmlValidation', 'Validerung starten')";
+			funcOnClick = "";
 		}
 		else {
 			funcOnClick = "message([{type: 'info', msg: 'Sie müssen erst das XPlanGML-Dokument erzeugen!'}], 2000, 1000, 400)";
 		}
 		output += '<a ' +
 					 			'title="XPlanGML-Datei mit dem XPlanValidator der XPlanung-Leitstelle validieren" ' +
-								'class="btn btn-link btn-xs xpk-func-validate-gml ' + (funcIsAllowed ? 'xpk-func-btn' : 'disabled') + '" ' +
-								'onclick="' + funcOnClick + '" ' +
+								'class="btn btn-link btn-xs xpk-func-validate-gml ' + (funcIsAllowed ? 'xpk-func-btn" onclick="message([{ type: \'confirm\', msg: \'XPlanGML bei der Leitstelle validieren.<br>Die alten Validierungsergebnisse werden dabei überschrieben!\'}], 2000, 1000, 400, \'' + row.konvertierung_id + '\', \'starteXplanGmlValidation\', \'Validerung starten\')' : disableFrag) + '" ' +
 								'href="#"' +
-							'><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-check') + '"></i></a>';
+							'>' +
+								'<i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-check') + '"></i>' +
+							'</a>';
 
 		// GML-Validierungsergebnisse ansehen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
@@ -465,7 +473,10 @@
 		// Dienst-erzeugen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-output += '<a title="GeoWeb-Dienst für den Plan anlegen" class="btn btn-link btn-xs xpk-func-create-geoweb-service' + (funcIsAllowed ? ' xpk-func-btn" onclick="createGeoWebService()' : ' disabled" onclick="message([{type: \'info\', msg: \'Der Dienst kann erst angelegt werden, wenn Sie eine erfolgreiche Validierung des XPlanGML-Dokumentes vorgenommen haben.!\'}])') + '" href="#">\
+		output += '<a ' +
+								 'title="GeoWeb-Dienst für den Plan anlegen" ' +
+								 'class="btn btn-link btn-xs xpk-func-create-geoweb-service' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" ' +
+								 'href="index.php?go=">\
 <i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-map-o') + '"></i>\
 <i class="fa fa-plus-circle" style="position: absolute; top: 14px; left: 25px;"></i>\
 </a>';
