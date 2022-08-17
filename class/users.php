@@ -789,6 +789,7 @@ class user {
 		$this->stop = $rs['stop'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->tokens = $rs['tokens'];
 	}
 
 	/*
@@ -1082,6 +1083,20 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
+	
+	function updateTokens($token) {
+		$sql = "
+			UPDATE
+				user
+			SET
+				tokens = '" . implode(',', array_merge([$token], array_slice(array_filter(explode(',', $this->tokens, 5)), 0, 4))) . "'
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->updateTokens - Speichern des Tokens.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+	}	
 
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';

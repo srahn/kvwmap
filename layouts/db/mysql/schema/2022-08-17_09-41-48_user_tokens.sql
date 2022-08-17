@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE `user` ADD `tokens` TEXT NOT NULL AFTER `ips`;
+
+COMMIT;
