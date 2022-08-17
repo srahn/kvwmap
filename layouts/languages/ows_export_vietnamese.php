@@ -1,16 +1,31 @@
 <?php
-$strTitle="Chức năng xuất dữ liệu bản đồ";
-$strWMSExportWarning="Chức năng này lưu bản đồ hiện tại cùng với thông tin metadata của dự án vào một file bản đồ, nội dung trong OGC có thể được đưa lên dịch vụ bản đồ mạng Web map service (WMS) độc lập với dữ liệu kvwmap đã có. File được lưu theo thông số WMS_MAPFILE_PATH.";
-$strAllOrActiveLayer="Xuất tất cả các lớp thông tin của tác vụ đang thực hiện hay chỉ xuất riêng lớp thông tin đang được kích hoạt?";
- $strAll="Tất cả các lớp";
- $strActiveLayer="Lớp đang kích hoạt";
- $strNameOfMapFile="Chọn tên cho file map";
- $strOwsTitle ="Tên dịch vụ sử dụng (ows_title)";
- $strOwsAbstract="Mô tả ngắn gọn về dịch vụ Web Map Service (ows_abstract):";
- $strContactInfo="Thông tin liên hệ";
- $strContactPerson="Người liên hệ (ows_contactperson):";
- $strOrganisation="Cơ quan (ows_contactorganization):";
- $strEMail="E-Mail (ows_contactelectronicmailaddress):";
- $strFee="Phí sử dụng dịch vụ (ows_fees)";
- 
-?>  
+	$strActiveLayer = 'Lớp đang kích hoạt';
+	$strAll = 'Tất cả các lớp';
+	$strAllOrActiveLayer = 'Xuất tất cả các lớp thông tin của tác vụ đang thực hiện hay chỉ xuất riêng lớp thông tin đang được kích hoạt?';
+	$strAttributeFilter = 'Filte over attribute';
+	$strAttributeFilterHilfe = 'If attribute name and value defined, this filter will be applied for all layer that have this attribute. The user must be sure that the attribute is in data statement of the layers on which it shall be supplied.';
+	$strButtonCancel = 'Cancle';
+	$strButtonSend = 'Send';
+	$strContactInfo = 'Thông tin liên hệ';
+	$strContactPerson = 'Người liên hệ (ows_contactperson):';
+	$strContactPosition = 'Position (ows_contactposition):';
+	$strCurrentExtent = 'only current selected extent of the map';
+	$strEMail = 'E-Mail (ows_contactelectronicmailaddress):';
+	$strExported1 = 'The current map configuration was exported to the mapfile '.WMS_MAPFILE_PATH.$this->formvars['mapfile_name'].'. The mapfile can now be used for OWS.';
+	$strExported2 = 'A getCapabilities-request of this WMS looks like this';
+	$strExported3 = 'An image of the map can be requested with a getMap-request, e.g.';
+	$strExportedWFSExample = 'The vector data of the features can be queried with a getFeature request, e.g.';
+	$strExportList = 'The following mapfiles has been created in this working group allready';
+	$strFee = 'Phí sử dụng dịch vụ (ows_fees)';
+	$strGefilterteLayerList = 'The following layer will be delivered filtered in this service';
+	$strNameOfMapFile = 'Chọn tên cho file map';
+	$strNurVeroeffentlichteFilter = 'Show only published data in this service';
+	$strNurVeroeffentlichteHilfe = 'If you select this option only layer with an attribute veroeffentlicht will be filtered in this way. Layer without such attribute will not be filtered. This option is on by default.';
+	$strOrganisation = 'Cơ quan (ows_contactorganization):';
+	$strOwsAbstract = 'Mô tả ngắn gọn về dịch vụ Web Map Service (ows_abstract):';
+	$strOwsTitle  = 'Tên dịch vụ sử dụng (ows_title)';
+	$strTitle = 'Chức năng xuất dữ liệu bản đồ';
+	$strTotalExtent = 'entire extend of the working group area';
+	$strTotalOrCurrentExtent = 'Select the map extent of the service';
+	$strWMSExportWarning = 'Chức năng này lưu bản đồ hiện tại cùng với thông tin metadata của dự án vào một file bản đồ, nội dung trong OGC có thể được đưa lên dịch vụ bản đồ mạng Web map service (WMS) độc lập với dữ liệu kvwmap đã có. File được lưu theo thông số WMS_MAPFILE_PATH.';
+?>

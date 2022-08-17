@@ -1033,6 +1033,11 @@ function go_switch($go, $exit = false) {
 
 			case 'WMS_Export_Senden' : {
 				$GUI->checkCaseAllowed('WMS_Export');
+				$GUI->sanitize([
+					'filter_attribute_name' => 'text',
+					'filter_attribute_operator' => 'text',
+					'filter_attribute_value' => 'text'
+				]);
 				$GUI->wmsExportSenden();
 			} break;
 
