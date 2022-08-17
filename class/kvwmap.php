@@ -3305,7 +3305,10 @@ echo '			</table>
 		if (
 			!$this->user->has_logged_in AND (
 				!$csrf_token OR
-				$csrf_token !== $_SESSION['csrf_token']
+				(
+					$csrf_token !== $_SESSION['csrf_token'] AND 
+					!in_array($csrf_token, explode(',', $this->user->tokens))
+				)
 			)
 		) {
 			# return 405 http status code
