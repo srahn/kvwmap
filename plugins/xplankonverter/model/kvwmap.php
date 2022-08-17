@@ -140,10 +140,19 @@
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $konvertierung_id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
+					
+					# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
+					$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
+					foreach($textabschnitte as $textabschnitt) {
+						if($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $konvertierung_id)) {
+							$gml_extractor->insert_into_textabschnitt($textabschnitt, $konvertierung_id, $GUI->user->id);
+						}
+					}
+					
 					# Inserts regeln for each possible class loaded with GMLAS
 					$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $GUI->Stelle->id);
 					
-					# directories should be created (if they do no exist yet e.g. for shape export)
+					# directories to be created (if they do no exist yet e.g. for shape export)
 					$konvertierung->create_directories();
 
 					# mv uploaded xplan_gml from tmp to uploaded_xml_gml

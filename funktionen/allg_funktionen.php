@@ -163,14 +163,43 @@ function url2filepath($url, $doc_path, $doc_url) {
 	return $doc_path . $url_parts[1];
 }
 
-/*
-* function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
-* @param string $img_path Absolute Path of file with Exif Data to read
-* @return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+function exif_identify_data($file) {
+	$lines = '';
+	$result = '';
+	$exif = array();
+	exec("identify -verbose " . $file . " | grep -E 'exif:GPSLatitude:|exif:GPSLongitude:|exif:GPSImgDirection|DateTimeOriginal'", $lines, $result);
+	foreach ($lines AS $line) {
+		$line_parts = explode(': ', trim($line));
+		$key = $line_parts[0];
+		$values = $line_parts[1];
+		switch ($key) {
+			case 'exif:GPSLatitude' : $exif['GPSLatitude'] = explode(', ', $values); break;
+			case 'exif:GPSLongitude' : $exif['GPSLongitude'] = explode(', ', $values); break;
+			case 'exif:GPSImgDirection' : $exif['GPSImgDirection'] = $values; break;
+			case 'exif:DateTimeOriginal' : $exif['DateTimeOriginal'] = $values; break;
+		}
+	}
+	return $exif;
+}
+
+/**
+	function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+	It uses php to read exif data per default. If coordinates are not found it try to read the values with identify command
+	@param string $img_path Absolute Path of file with Exif Data to read
+	@param boolean $force_identify Forces to use only function identify to read exif data from image, default is false
+	@return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
-function get_exif_data($img_path) {
+function get_exif_data($img_path, $force_identify = false) {
 	if ($img_path != '') {
-		$exif = @exif_read_data($img_path, 'EXIF, GPS');
+		if ($force_identify) {
+			$exif = exif_identify_data($img_path);
+		}
+		else {
+			$exif = @exif_read_data($img_path, 'EXIF, GPS');
+			if (!array_key_exists('GPSLatitude', $exif) OR !array_key_exists('GPSLongitude', $exif)) {
+				$exif = exif_identify_data($img_path);
+			}
+		}
 		if ($exif === false) {
 			return array(
 				'success' => false,
@@ -178,9 +207,6 @@ function get_exif_data($img_path) {
 			);
 		}
 		else {
-	#		echo '<br>' . print_r($exif['GPSLatitude'], true);
-	#		echo '<br>' . print_r($exif['GPSLongitude'], true);
-	#		echo '<br>' . print_r($exif['GPSImgDirection'], true);
 			return array(
 				'success' => true,
 				'LatLng' => ((array_key_exists('GPSLatitude', $exif) AND array_key_exists('GPSLongitude', $exif)) ? (
@@ -407,6 +433,32 @@ function removeTausenderTrenner($number){
 		$number = str_replace('.', '', $number);		# Punkt entfernen
 		$number = str_replace(',', '.', $number);		# Komma in Punkt umwandeln
 		return $number;
+	}
+}
+
+function buildsvgpolygonfromwkt($wkt){
+	if ($wkt != '') {
+		$type = substr($wkt, 0, 9);
+		if ($type == 'MULTIPOLY') {
+			$start = 15;
+			$end = strlen($wkt) - 18;
+			$delim = ')),((';
+		}
+		else{			// POLYGON
+			$start = 9;
+			$end = strlen($wkt) - 11;
+			$delim = '),(';
+		}
+		$wkt = substr($wkt, $start, $end);
+		$parts = explode($delim, $wkt);
+		for ($j = 0; $j < count($parts); $j++) {
+			$parts[$j] = str_replace(',', ' ', $parts[$j]);
+		}
+		$svg = "M " . implode(' M ', $parts);
+		return $svg;
+	}
+	else{
+		return '';
 	}
 }
 
@@ -1216,7 +1268,7 @@ function copy_file_to_tmp($frompath, $dateiname = ''){
 	#return TEMPPATH_REL.$dateiname;
 }
 
-function read_epsg_codes($database){
+function read_epsg_codes($database) {
   $epsg_codes = $database->read_epsg_codes();
   return $epsg_codes;
 }
@@ -2269,7 +2321,6 @@ function sanitize(&$value, $type) {
 		case 'int4' :
 		case '_int4' :
 		case 'oid' :
-		case 'bool':
 		case 'boolean':
 		case 'int8' : {
 			$value = (int) $value;
@@ -2290,6 +2341,11 @@ function sanitize(&$value, $type) {
 		case 'varchar' : {
 			$value = pg_escape_string($value);
 		} break;
+
+		case 'bool': {
+			$value = (is_string($value) ? pg_escape_string($value) : (int) $value);
+		} break;
+
 		default : {
 			// let $value as it is
 		}

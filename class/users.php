@@ -788,6 +788,8 @@ class user {
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
+		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->tokens = $rs['tokens'];
 	}
 
 	/*
@@ -1081,6 +1083,20 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
+	
+	function updateTokens($token) {
+		$sql = "
+			UPDATE
+				user
+			SET
+				tokens = '" . implode(',', array_merge([$token], array_slice(array_filter(explode(',', $this->tokens, 5)), 0, 4))) . "'
+			WHERE
+				ID = " . $this->id . "
+		";
+		$this->debug->write("<p>file:users.php class:user->updateTokens - Speichern des Tokens.<br>" . $sql, 4);
+		$this->database->execSQL($sql);
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
+	}	
 
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';
@@ -1330,8 +1346,12 @@ class user {
 		if ($userdaten['position']!='') {
 			$sql.=',position="'.$userdaten['position'].'"';
 		}
-		$sql.=',start="'.$userdaten['start'].'"';
-		$sql.=',stop="'.$userdaten['stop'].'"';
+		if ($userdaten['start'] != '') {
+			$sql.=',start="'.$userdaten['start'].'"';
+		}
+		if ($userdaten['stop'] != '') {
+			$sql.=',stop="'.$userdaten['stop'].'"';
+		}
 		if ($userdaten['ips']!='') {
 			$sql.=',ips="'.$userdaten['ips'].'"';
 		}
@@ -1406,7 +1426,8 @@ class user {
 				`organisation` = '".$userdaten['organisation']."',
 				`position` = '".$userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) .
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
+				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .				
 				$passwort_column .
 				$passwort_setting_time_column . "
 			WHERE

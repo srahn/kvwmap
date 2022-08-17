@@ -249,12 +249,12 @@
 				}
 				chdir(WWWROOT.APPLVERSION);
       }
+	    $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
+			$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
+			$tmpfilename = copy_file_to_tmp($filename, $dateiname);
+			unlink($filename);
+			return $tmpfilename;
     }
-    $filename = RECHERCHEERGEBNIS_PATH.$antragsnr.'.zip';
-		$dateiname = $GUI->antrag->nr.'_'.date('Y-m-d_H-i-s',time()).'.zip';
-    $tmpfilename = copy_file_to_tmp($filename, $dateiname);
-    unlink($filename);
-    return $tmpfilename;
   };
 	
 	$GUI->DokumenteZumAntragInOrdnerZusammenstellen = function() use ($GUI){
@@ -595,7 +595,7 @@
 		$sql.='sdatum2="'.$sdatum2.'",';
 		if ($svermstelle!='') { $sql.='sVermStelle='.$svermstelle.','; }else{$sql.='sVermStelle= NULL,' ;}
 		$sql.='suchbemerkung="'.$suchbemerkung.'",';
-		$sql.='flur_thematisch="'.$flur_thematisch.'",';
+		$sql.='flur_thematisch = '.($flur_thematisch ?: 0).',';
 		$sql.='alle_der_messung = ' . (int)$alle_der_messung . ',';
 		if ($order != '') {
 			$sql.='`order`="'.$order.'",';

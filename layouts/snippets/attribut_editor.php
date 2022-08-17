@@ -26,6 +26,11 @@
 			'title' => 'Auswahlfeld'
 		),
 		array(
+			'value' => 'Auswahlfeld_Bild',
+			'output' => 'Auswahlfeld mit Bild',
+			'title' => 'Auswahlfeld mit Bild'
+		),		
+		array(
 			'value' => 'Autovervollständigungsfeld',
 			'output' => 'Autovervollständigungsfeld',
 			'title' => 'Autovervollständigungsfeld'

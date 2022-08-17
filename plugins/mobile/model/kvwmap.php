@@ -226,7 +226,7 @@
 			}
 		}
 		else {
-			$err_msg[] = 'Die Deltas wurde nicht übertragen.';
+			$err_msg[] = 'Die Deltas wurden nicht übertragen.';
 		}
 		$result['msg'] .= ' deltas';
 
@@ -370,6 +370,9 @@
 	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
 		# create table for deltas
 		$sql = "
+			--
+			-- Deltas Table
+			--
 			CREATE TABLE " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (
 				version serial NOT NULL,
 				sql text,
@@ -381,6 +384,9 @@
 				OIDS=TRUE
 			);
 
+			--
+			-- INSERT Trigger
+			--
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta()
 			RETURNS trigger AS
 			$$
@@ -390,6 +396,7 @@
 					_sql TEXT;
 					part TEXT;
 					search_path_schema TEXT;
+					version_column TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
@@ -416,9 +423,12 @@
 								TG_TABLE_SCHEMA = search_path_schema
 							)
 						THEN
-						_sql := part;
+							part := replace(part, '\"' || TG_TABLE_NAME || '\"', TG_TABLE_NAME);
+							--RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
+
+							_sql := part;
 						END IF;
-					end loop;
+					END LOOP;
 					--raise notice 'sql nach split by ; und select by update: %', _sql;
 
 					_sql := kvw_replace_line_feeds(_sql);
@@ -427,20 +437,38 @@
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
 					--RAISE notice 'sql nach add schema %', TG_TABLE_SCHEMA || '.';
 
-					_sql := kvw_insert_str_before(_sql, ', version', ')');
-					--RAISE notice 'sql nach add column version %', _sql;
+					-- Frage ab ob es eine Spalte version gibt
+					EXECUTE FORMAT('
+						SElECT *
+						FROM information_schema.columns
+						WHERE
+							table_schema = %1\$L AND
+							table_name = %2\$L AND
+							column_name = %3\$L
+						', TG_TABLE_SCHEMA, TG_TABLE_NAME, 'version'
+					)
+					INTO version_column;
+
+					-- Version wird nur angehaengt wenn es die Spalte version gibt
+					IF version_column IS NOT NULL THEN
+						_sql := kvw_insert_str_before(_sql, ', version', ')');
+						--RAISE notice 'sql nach add column version %', _sql;
+					END IF;
 
 					_sql := substr(_sql, 1 , strpos(lower(_sql), 'values') - 1) || 'VALUES' || substr(_sql, strpos(lower(_sql), 'values') + 6, length(_sql) - strpos(lower(_sql), 'values') - 5);
 					--RAISE notice 'sql nach upper VALUES %', _sql;
 
-					_sql := substr(_sql, 1, strpos(_sql, 'VALUES') - 1) || regexp_replace(substr(_sql, strpos(_sql, 'VALUES')), '\)+', ', ' || new_version || ')', 'g');
-					--RAISE notice 'sql nach add values for version %', _sql;
+					-- Version wird nur angehaengt wenn es die Spalte version gibt
+					IF version_column IS NOT NULL THEN
+						_sql := substr(_sql, 1, strpos(_sql, 'VALUES') - 1) || regexp_replace(substr(_sql, strpos(_sql, 'VALUES')), '\)+', ', ' || new_version || ')', 'g');
+						--RAISE notice 'sql nach add values for version %', _sql;
+					END IF;
 
-					_sql := replace(_sql, 'RETURNING uuid', '');
+					_sql := substr(_sql, 1, strpos(lower(_sql), 'returning') -1);
 					--RAISE notice 'sql nach entfernen von RETURNING uuid';
 
-					--RAISE notice 'Eintragen des INSERT-Statements mit Version: %', new_version; 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+					RAISE NOTICE 'Neuen Datensatz mit Version % für Synchronisierung eingetragen.', new_version; 
 
 					RETURN NEW;
 				END;
@@ -453,6 +481,9 @@
 			FOR EACH STATEMENT
 			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
 
+			--
+			-- UPDATE Trigger
+			--
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta()
 			RETURNS trigger AS
 			$$
@@ -462,6 +493,7 @@
 					_sql TEXT;
 					part TEXT;
 					search_path_schema TEXT;
+					version_column TEXT;
 				BEGIN
 					SET datestyle to 'German';
 					_query := current_query();
@@ -476,9 +508,12 @@
 						--raise notice 'suche nach %', 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME;
 
 						IF strpos(lower(part), 'set search_path') = 1 THEN
-						search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-						--RAISE notice 'schema in search_path %', search_path_schema;
+							search_path_schema = trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
+							--RAISE notice 'schema in search_path %', search_path_schema;
 						END IF;
+
+						part := replace(part, '\"' || TG_TABLE_NAME || '\"', TG_TABLE_NAME);
+						--RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
 
 						IF strpos(lower(part), 'update ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'update ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
 						_sql := part;
@@ -493,11 +528,26 @@
 						_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
 						--RAISE notice 'sql nach remove %', TG_TABLE_SCHEMA || '.';
 
-						_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
-						--RAISE NOTICE 'sql nach insert version value %', _sql;
+						-- Frage ab ob es eine Spalte version gibt
+						EXECUTE FORMAT('
+							SElECT *
+							FROM information_schema.columns
+							WHERE
+								table_schema = %1\$L AND
+								table_name = %2\$L AND
+								column_name = %3\$L
+							', TG_TABLE_SCHEMA, TG_TABLE_NAME, 'version'
+						)
+						INTO version_column;
 
-						RAISE notice 'Eintragen des UPDATE-Statements mit Version %', new_version;
+						-- Version wird nur angehaengt wenn es die Spalte version gibt
+						IF version_column IS NOT NULL THEN
+							_sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
+							--RAISE NOTICE 'sql nach insert version value %', _sql;
+						END IF;
+
 						INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+						RAISE NOTICE 'Änderung mit Version % für Synchronisierung eingetragen.', new_version;
 					END IF;
 
 					RETURN NEW;
@@ -511,6 +561,9 @@
 			FOR EACH STATEMENT
 			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta();
 
+			--
+			-- DELETE Trigger
+			--
 			CREATE OR REPLACE FUNCTION " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta()
 			RETURNS trigger AS
 			$$
@@ -524,7 +577,7 @@
 					SET datestyle to 'German';
 					_query := current_query();
 
-					--raise notice '_query: %', _query;
+					--RAISE NOTICE 'Current Query unverändert: %', _query;
 					foreach part in array string_to_array(_query, ';')
 					loop
 						-- replace horizontal tabs, new lines and carriage returns
@@ -547,14 +600,11 @@
 					_sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
 					--RAISE notice 'sql nach replace tablename by schema and tablename: %', _sql;
 
-					--RAISE notice 'old uuid: %', OLD.uuid;
-
-					_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
-					--RAISE notice 'sql nach replace where by uuid: %', _sql
-
-					--RAISE notice 'Write deta sql: %', _sql;
+					--_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
+					--RAISE NOTICE 'sql ohne replace where by uuid: %', _sql;
 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
+					--RAISE NOTICE 'Löschung mit Version % für Synchronisierung eingetragen.', new_version;
 
 					RETURN OLD;
 				END;

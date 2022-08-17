@@ -355,8 +355,8 @@ class jagdkataster {
 				f.nenner, 
 				g.bezeichnung as gemkgname, 
 				f.flurstueckskennzeichen as flurstkennz, 
-				st_area_utm(f.wkb_geometry, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS flurstflaeche, 
-				st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") AS schnittflaeche, 
+				st_area(f.wkb_geometry) AS flurstflaeche, 
+				st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) AS schnittflaeche, 
 				jagdbezirke.name, 
 				jagdbezirke.art, 
 				f.amtlicheflaeche AS albflaeche 
@@ -369,7 +369,7 @@ class jagdkataster {
 				jagdbezirke." . $this->oid_column . " IN (".implode(',', $oids).") AND 
 				f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND 
 				st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AND 
-				st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1 
+				st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1 
 				" . $this->database->build_temporal_filter(array('g', 'f')) . "
 			ORDER BY 
 				jagdbezirke.name";
@@ -379,12 +379,12 @@ class jagdkataster {
 	function getEigentuemerListeFromJagdbezirke($oids){
 		$sql = "
 			SELECT 
-				round((st_area_utm(st_union(the_geom_inter), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")*100/j_flaeche)::numeric, 2) as anteil_alk, 
-				round(sum(flaeche*(st_area_utm(the_geom_inter, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")/st_area_utm(the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")))::numeric, 1) AS albflaeche, 
+				round((st_area(st_union(the_geom_inter))*100/j_flaeche)::numeric, 2) as anteil_alk, 
+				round(sum(flaeche*(st_area(the_geom_inter)/st_area(the_geom)))::numeric, 1) AS albflaeche, 
 				eigentuemer 
 			FROM(
 				SELECT distinct 
-					st_area_utm(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") as j_flaeche, 
+					st_area(jagdbezirke.the_geom) as j_flaeche, 
 					f.amtlicheflaeche as flaeche, 
 					array_to_string(array(
 						SELECT distinct 
@@ -415,7 +415,7 @@ class jagdkataster {
 					jagdbezirke." . $this->oid_column . " IN (".implode(',', $oids).") AND 
 					f.wkb_geometry && st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.") AND 
 					st_intersects(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")) AND 
-					st_area_utm(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS.")), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.") > 1
+					st_area(st_intersection(f.wkb_geometry, st_transform(jagdbezirke.the_geom, ".EPSGCODE_ALKIS."))) > 1
 			) as foo
 			group by 
 				eigentuemer, 

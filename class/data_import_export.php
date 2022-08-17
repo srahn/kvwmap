@@ -47,7 +47,7 @@ class data_import_export {
 		$this->unique_column = 'gid';
 		switch ($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
-				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $pgdatabase, $epsg);
+				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $stelle, $pgdatabase, $epsg, $formvars['selected_layer_id']);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'kml' : case 'kmz' : {
@@ -92,18 +92,23 @@ class data_import_export {
 				}
 			}
 			else {
-				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-					$layer_id = $this->create_rollenlayer(
-						$pgdatabase,
-						$stelle,
-						$user,
-						basename($filename) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
-						$custom_table,
-						$epsg,
-						$this->unique_column
-					);
+				if ($formvars['selected_layer_id'] == '') {
+					foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+						$layer_id = -$this->create_rollenlayer(
+							$pgdatabase,
+							$stelle,
+							$user,
+							basename($filename) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
+							$custom_table,
+							$epsg,
+							$this->unique_column
+						);
+					}
 				}
-				return -$layer_id;
+				else {
+					$layer_id = $formvars['selected_layer_id'];
+				}
+				return $layer_id;
 			}
 		}
 		else {
@@ -227,7 +232,7 @@ class data_import_export {
 		return $result[0];
 	}
 
-	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1') {
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
 		if (file_exists($uploadpath.$file.'.dbf')) {
 			$filename = $uploadpath.$file.'.dbf';
 		}
@@ -246,11 +251,14 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
-			$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
-			$sql = "
-				SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
-				" . $this->rename_reserved_attribute_names($schemaname, $tablename) . "
-				SELECT geometrytype(the_geom) AS geometrytype FROM " . $schemaname . "." . $tablename . " LIMIT 1;
+			if ($adjustments) {
+				$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
+				$sql = "
+					SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
+					" . $this->rename_reserved_attribute_names($schemaname, $tablename);
+			}
+			$sql .= "
+				SELECT geometrytype(the_geom) AS geometrytype FROM " . pg_quote($schemaname) . "." . pg_quote($tablename) . " LIMIT 1;
 			";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if ($ret[0]) {
@@ -289,7 +297,7 @@ class data_import_export {
 		}
 	}
 
-	function import_custom_shape($filenameparts, $user, $pgdatabase, $epsg){
+	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $selected_layer_id = NULL){
 		if ($filenameparts[0] != '') {
 			if ((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
 				 (file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))) {
@@ -306,7 +314,29 @@ class data_import_export {
 				return;
 			}
 			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
-			$custom_table = $this->load_shp_into_pgsql($pgdatabase, '', $formvars['shapefile'], $epsg, CUSTOM_SHAPE_SCHEMA, 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))).rand(1,1000000), $encoding);
+			
+			if ($selected_layer_id) {
+				$layerset = $user->rolle->getLayer($selected_layer_id);
+				if ($user->layer_data_import_allowed AND $layerset[0]['privileg'] > 0) {
+					$mapDB = new db_mapObj($stelle->id, $user->id);
+					$db = $mapDB->getlayerdatabase($selected_layer_id, $stelle->pgdbhost);
+					$schema = $layerset[0]['schema'];
+					$table = $layerset[0]['maintable'];
+					$adjustments = false;
+				}
+				else {
+					$custom_table[0]['error'] = 'Der Daten-Import in diesen Layer ist nicht erlaubt.';
+					return $custom_table;
+				}
+			}
+			else {
+				$db = $pgdatabase;
+				$schema = CUSTOM_SHAPE_SCHEMA;
+				$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))) . date("_Y_m_d_H_i_s", time());
+				$adjustments = true;
+			}
+			
+			$custom_table = $this->load_shp_into_pgsql($db, '', $formvars['shapefile'], $epsg, $schema, $table, $encoding, $adjustments);
 			if ($custom_table != NULL) {
 				exec('rm ' . UPLOADPATH . $user->id . '/' . basename($formvars['shapefile']) . '.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
 			}
@@ -930,7 +960,7 @@ class data_import_export {
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		$command = '';
 		if ($options != NULL) $command.= $options;
-		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
 		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
@@ -1157,7 +1187,8 @@ class data_import_export {
 		global $kvwmap_plugins;
 		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
-		$layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
+		$layerset = ($export_rollen_layer ? $user->rolle->getRollenLayer((int) $this->formvars['selected_layer_id'] * -1) : $user->rolle->getLayer($this->formvars['selected_layer_id']));
 		$mapdb = new db_mapObj($stelle->id,$user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 		$sql = replace_params(
@@ -1170,6 +1201,12 @@ class data_import_export {
 		);
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+		if ($export_rollen_layer) {
+			include_once(CLASSPATH . 'LayerAttribute.php');
+			$attribute = new LayerAttribute($GUI);
+			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
+			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
+		}
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);
@@ -1183,7 +1220,6 @@ class data_import_export {
 			else {
 				$t_epsg = '4326';
 			}
-
 			$contenttype = 'application/vnd.geo+json';
 			$command = 'ogr2ogr -f GeoJSON ' . $exportfile . ' -t_srs "epsg:' . $t_epsg . '" "WFS:' . $layerset[0]['connection'] . 'Service=WFS&Request=GetFeature&Version=2.0.0&TypeName=' . $layerset[0]['wms_name'] . '"';
 			$errorfile = rand(0, 1000000);
@@ -1239,9 +1275,9 @@ class data_import_export {
 				if ($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument') {			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
 					$selection[$this->attributes['name'][$i]] = 1;
 				}
-	    }
+			}
 
-	    $sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
+			$sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
 
 			# oid auch abfragen
 			$distinctpos = strpos(strtolower($sql), 'distinct');
@@ -1313,11 +1349,10 @@ class data_import_export {
 			";
 			#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 			$ret = $layerdb->execSQL($sql,4, 0);
-
-			for ($s = 0; $s < count($selected_attributes); $s++){
+			for ($s = 0; $s < count($selected_attributes); $s++) {
 				$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
 				# Transformieren der Geometrie
-				if ($this->attributes['the_geom'] == $selected_attributes[$s]) {
+				if (trim($this->attributes['the_geom'], "'\"") == trim($selected_attributes[$s], "'\"")) {
 					$selected_attributes[$s] = 'st_transform(' . $selected_attributes[$s] . ', ' . $this->formvars['epsg'] . ') ';
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
@@ -1360,8 +1395,9 @@ class data_import_export {
 				$exportfile = IMAGEPATH.$folder.'/'.$this->formvars['layer_name'];
 				switch($this->formvars['export_format']){
 					case 'Shape' : {
-						$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile.'.shp', $layerdb);
-						if(!file_exists($exportfile.'.cpg')){		// ältere ogr-Versionen erzeugen die cpg-Datei nicht
+						$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile . '.shp', $layerdb);
+						if (!file_exists($exportfile.'.cpg')) {
+							// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 							$fp = fopen($exportfile.'.cpg', 'w');
 							fwrite($fp, 'UTF-8');
 							fclose($fp);
@@ -1451,7 +1487,7 @@ class data_import_export {
 							$result[] = $rs;
 						}
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, true);
+					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
 					for ($i = 0; $i < count($result); $i++) {
 						$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder, $layerset[0]['document_path'], $layerset[0]['document_url']);
 						$zip = $zip || $doc_zip;
@@ -1541,15 +1577,15 @@ class data_import_export {
 		}
 	}
 
-	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url){
+	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url, $recursion_depth = 0){
 		global $GUI;
 		$zip = false;
 		foreach ($result As $key => $value) {
 			$j = $attributes['indizes'][$key];
-			if ($attributes['form_element_type'][$j] == 'SubFormEmbeddedPK') {
+			if ($recursion_depth < 1 AND in_array($attributes['form_element_type'][$j], ['SubFormEmbeddedPK', 'SubFormPK'])) {
 				$GUI->getSubFormResultSet($attributes, $j, $maintable, $result);
 				foreach ($GUI->qlayerset[0]['shape'] as $sub_result) {
-					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url);
+					$zip2 = $this->copy_documents_to_export_folder($sub_result, $GUI->qlayerset[0]['attributes'], $GUI->qlayerset[0]['maintable'], $folder, $doc_path, $doc_url, $recursion_depth + 1);
 					$zip = $zip || $zip2;
 				}
 			}

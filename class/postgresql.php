@@ -623,14 +623,15 @@ FROM
 		};
 		set_error_handler($myErrorHandler);
 		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		#echo '<br>sql: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
-		error_reporting($error_reporting);		
+		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			if($pseudo_realnames){
+			if ($pseudo_realnames) {
 				$select_attr = attributes_from_select($select);
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
@@ -644,7 +645,7 @@ FROM
 				$table_oid = pg_field_table($ret[1], $i, true);			
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if ($table_oid > 0){					
+				if ($table_oid > 0) {
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
 					if ($tablename != NULL) {

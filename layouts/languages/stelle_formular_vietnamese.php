@@ -14,6 +14,8 @@
 	$strOwsContactDistribution = 'Contact distribution';
   $strOwsTitle =  'Tiêu đ�? OWS';
   $strOwsTitleHint = 'A short headline. It will used eg. to list the service in search results.';
+	$strOwsNameSpace = 'Namespace';
+	$strOwsNameSpaceHint = 'The Namespace is used to make identifier unique in service and beyond.';
   $strOwsAbstract = 'Tóm lược OWS';
   $strOwsAbstractHint = 'A short description about the content and the spatial extent of the geodata delivered by the service.';
   $strWmsAccessConstraints = 'Rào cản truy cập WMS';

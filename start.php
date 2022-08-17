@@ -177,9 +177,18 @@ else {
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 				set_session_vars($GUI->formvars);
+				$GUI->user->updateTokens($_SESSION['csrf_token']);
 				$GUI->user->has_logged_in = true;
 				$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
 				Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
+				if ($GUI->user->stelle_id == '') {
+					# Nutzer hat keine stellen_id
+					$GUI->user->Stellen = $GUI->user->getStellen(0);
+					if (count($GUI->user->Stellen['ID']) > 0) {
+						# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
+						$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
+					}
+				}
 			}
 			else { # Anmeldung ist fehlgeschlagen
 				$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
@@ -300,8 +309,8 @@ if (!$show_login_form) {
 			# login case 15
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'].'<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
-			if($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.'){
+			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'] . '<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
+			if($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
 				exit;
 			}
 

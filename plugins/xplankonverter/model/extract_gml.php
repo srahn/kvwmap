@@ -223,10 +223,18 @@ class Gml_extractor {
 		} else if (preg_match('/5\/0/', $matched_ns_str[1], $matched_version_str)) {
 			$version = '5.0';
 		} else if (preg_match('/5.0/', $matched_ns_str[1], $matched_version_str)) {
-			$version = '5.0';	
+			$version = '5.0';
+		} else if (preg_match('/5\/3/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.3';
+		} else if (preg_match('/5.3/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.3';
+		} else if (preg_match('/5\/4/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.4';
+		} else if (preg_match('/5.4/', $matched_ns_str[1], $matched_version_str)) {
+			$version = '5.4';
 		} else {
 			$msg  = 'Die XPlan-GML Version der Datei kann nicht identifiziert werden.<br>';
-			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1 oder 5.2 liegt<br>';
+			$msg .= 'Bitte überprüfen Sie, ob die XPlan-Version valide ist und der Namespace in Version 5.1, 5.2, 5.3 oder 5.4 liegt<br>';
 			$msg .= 'Es wird eine Fallback-Version 5.1 verwendet.<br>';
 			#$GUI->add_message('warning', $msg);
 			#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
@@ -252,6 +260,30 @@ class Gml_extractor {
 						schema_name = '" . $schema . "'
 					AND
 						catalog_name = '" . POSTGRES_DBNAME . "'
+				)
+			;";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_row($ret[1]);
+		return ($result[0] === 't');
+	}
+	
+	/*
+	* Returns TRUE OR FALSE, depending on whether the schema exists
+	*/
+	function check_if_table_exists_in_schema($table,$schema) {
+		$sql = "
+			SELECT
+				EXISTS(
+					SELECT
+						1
+					FROM
+						information_schema.tables
+					WHERE 
+						table_name = '" . $table . "'
+					AND
+						table_schema = '" . $schema . "'
+					AND
+						table_catalog = '" . POSTGRES_DBNAME . "'
 				)
 			;";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
@@ -858,6 +890,104 @@ class Gml_extractor {
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_assoc($ret[1]);
 		return $result;
+	}
+
+	/*
+	* Inserts values of xplan_gmlas_... into xplan_gml textabschnitte tables, depending on the specific bereich (xp_textabschnitt, fp_textabschnitt etc.)
+	*/
+	function insert_into_textabschnitt($table, $konvertierung_id, $user_id) {
+		# Based on XPlanung 5.0.1
+		# currently no inverszu_baugebietsteilflaeche and nebenanlagenausschlussflaeche bp
+		$prefix_arr = explode("_", $table, 2);
+		$prefix = $prefix_arr[0];
+		
+		$all_tables_in_schema = $this->get_all_tables_in_schema($this->gmlas_schema);
+		$all_tables_with_reftextinhalt_suffix = [];
+		#print_r($all_tables_in_schema);
+		foreach($all_tables_in_schema as $table_in_schema) {
+			if($this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt")) {
+				array_push($all_tables_with_reftextinhalt_suffix, $table_in_schema['table_name']);
+			}
+		}
+		
+		$sql = "INSERT INTO xplan_gml." . $table . "(gml_id, schluessel, gesetzlichegrundlage, text, reftext, user_id, konvertierung_id, inverszu_texte_xp_plan, rechtscharakter";
+		$sql .= ", inverszu_reftextinhalt_" . $prefix . "_objekt";
+		// bp_special attributes xplan 5.0.1
+		if($prefix == 'bp') {
+			$sql .= ", inverszu_abweichungtext_bp_baugebietsteilflaeche, inverszu_abweichungtext_bp_nebenanlagenausschlussflaeche";
+		}
+		$sql .= ")";
+		$sql .= "
+			SELECT
+				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM gmlas.id)))::text::uuid AS gml_id,
+				gmlas.schluessel AS schluessel,
+				gmlas.gesetzlichegrundlage AS gesetzlichegrundlage,
+				gmlas.text AS text, ";
+		if($this->check_if_table_exists_in_schema("fp_textabschnitt_externereferenz", $this->gmlas_schema)) {
+			$sql .= "
+				CASE
+					WHEN count_externeref > 0
+					THEN array_to_json(externeref.externereferenz)
+					ELSE NULL
+				END AS reftext,";
+		} ELSE {
+			$sql .= 'NULL AS reftext,';
+		}
+		$sql .= $user_id . " AS user_id,
+						" . $konvertierung_id . " AS konvertierung_id,
+						NULL AS inverszu_texte_xp_plan,
+						gmlas.rechtscharakter::xplan_gml." . $prefix . "_rechtscharakter AS rechtscharakter,
+						NULL AS inverszu_reftextinhalt_" . $prefix . "_objekt";
+		if($prefix == "bp") {
+			$sql .= "
+			,NULL AS inverszu_abweichungtext_bp_baugebietsteilflaeche,
+			NULL AS inverszu_abweichungtext_bp_nebenanlagenausschlussflaeche";
+		}
+						
+		$sql .= "
+			FROM
+				" . $this->gmlas_schema . "." . $table . " gmlas ";
+		if($this->check_if_table_exists_in_schema("fp_textabschnitt_externereferenz", $this->gmlas_schema)) {
+			$sql .= "	LEFT JOIN
+				(
+					SELECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY')
+							)::xplan_gml.xp_externereferenz) AS externereferenz
+					FROM
+						" . $this->gmlas_schema . "." . $prefix . "_textabschnitt_externereferenz externereferenzlink_sub ";
+
+			$sql .=	" LEFT JOIN
+						" . $this->gmlas_schema . ".xp_externereferenz e_sub ON externereferenzlink_sub.xp_externereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id 
+				";
+		}
+		for($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
+			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
+		}
+		$sql .= ";";
+		# echo $sql;
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$result = pg_fetch_assoc($ret[1]);
+		return $result;
+	}
+	
+		/* string ends with 
+		* in php 8.0+ str_ends_with
+		*/
+	function string_ends_with( $haystack, $needle ) {
+		return substr($haystack, -strlen($needle))===$needle;
 	}
 
 	/*
@@ -1950,7 +2080,7 @@ class Gml_extractor {
 		# attributes of normalized gmlas tables, e.g. praesentationsobjekte '_dientzurdarstellungvon', '_wirddargestelltdurch'
 		# TODO generically read all normalized tables
 		# zweckbestimmung e.g. for fp_generischesobjekt_zweckbestimmung
-		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon","detailliertezweckbestimmung","zweckbestimmung");
+		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon","reftextinhalt","detailliertezweckbestimmung","zweckbestimmung");
 		$i = 0;
 		foreach($norm_attributes AS $n_a) {
 			$i++;
@@ -1967,7 +2097,7 @@ class Gml_extractor {
 			if($result[0] === 't') {
 				# single ' escaped later
 				$norm_1 = "norm_table_" . $i;
-				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon") {
+				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon" or $n_a == "reftextinhalt") {
 						$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
 					$gml_attributes[] = $n_a;
 				}

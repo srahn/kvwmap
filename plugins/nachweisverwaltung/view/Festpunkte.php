@@ -1,6 +1,6 @@
 <hr><h2>Festpunkte</h2><br>
 <?php
-  $anzObj=count($this->qlayerset[$i]['shape']);
+  $anzObj = @count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
     ?><table border="1" cellspacing="0" cellpadding="2">
     <tr align="right" bgcolor="<?php echo BG_DEFAULT ?>"> 
