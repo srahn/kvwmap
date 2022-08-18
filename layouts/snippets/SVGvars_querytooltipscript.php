@@ -264,7 +264,7 @@ $SVGvars_querytooltipscript .= '
 		function tooltip_query(){
 			var querylayer = "";
 			var querylayer_id;
-			if(doing == "ppquery" && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
+			if((doing == "ppquery" || doing == "edit_other_object") && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
 					for(i = 0; i < layernumber.length; i++){
