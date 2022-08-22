@@ -13776,12 +13776,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select ="nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, highlighting, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
+    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
     $from ='rolle';
     $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,highlighting,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.Stelle_ID.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
@@ -15343,7 +15343,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$layerset = $this->user->rolle->getLayer('');
 		}
     $anzLayer=count($layerset);
-		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj('') : new mapObj('');
+    $map=ms_newMapObj('');
     $map->set('shapepath', SHAPEPATH);
 		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {
@@ -15435,26 +15435,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 
 				# SVG-Geometrie abfragen für highlighting
-				if($this->user->rolle->highlighting == '1'){
-					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
-						$rand = $this->map_scaledenom/1000;
-						$tolerance = $this->map_scaledenom/10000;
-						if($client_epsg == 4326){
-							$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
-							$rand = $rand / 60000;		# wegen der Einheit Grad
-						}
-						$box_wkt ="POLYGON((";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
+				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
+					$rand = $this->map_scaledenom/1000;
+					$tolerance = $this->map_scaledenom/10000;
+					if($client_epsg == 4326){
+						$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
+						$rand = $rand / 60000;		# wegen der Einheit Grad
 					}
-					else{
-						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
-					}
+					$box_wkt ="POLYGON((";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
+					$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
+				}
+				else{
+					$buffer = $this->map_scaledenom/260;
+					$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -15463,13 +15461,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 								
-				#if($the_geom == 'query.the_geom'){
-					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
-				/*}
-				else{
-					$sql = "SELECT ".$pfad." ".$sql_where;
-				}
-				*/
+				$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
 
 				# order by wieder einbauen
 				if($layerset[$i]['attributes']['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
@@ -15496,7 +15488,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
     } # ende der Schleife zur Abfrage der Layer der Stelle
     # Tooltip-Abfrage
-    if($found AND $this->show_query_tooltip == true){
+    if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
 				$output .= $layer['Name'].' : || ';

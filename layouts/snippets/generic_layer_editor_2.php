@@ -100,7 +100,7 @@ if ($doit == true) {
 						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 						<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 							<?
-							if ($this->new_entry != true AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
+							if ($this->new_entry != true AND $this->user->rolle->tooltipquery == 1 AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
 								onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"<?
 							} ?>
 						><?php

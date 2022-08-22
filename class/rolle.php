@@ -422,7 +422,7 @@ class rolle {
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->fontsize_gle=$rs['fontsize_gle'];
-			$this->highlighting=$rs['highlighting'];
+			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
 			$this->result_hatching=$rs['result_hatching'];
@@ -1565,7 +1565,7 @@ class rolle {
 					`hidemenue`,
 					`hidelegend`,
 					`fontsize_gle`,
-					`highlighting`,
+					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
@@ -1610,7 +1610,7 @@ class rolle {
 					`hidemenue`,
 					`hidelegend`,
 					`fontsize_gle`,
-					`highlighting`,
+					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
