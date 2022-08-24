@@ -5,12 +5,14 @@ function go_switch_alkis($go){
 	switch($go){
 		
 		case "Flurstueckshistorie" : {
+			sanitize(['flurstueckskennzeichen' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstueckshistorie();
 			$GUI->output();
 		} break;
 		
 		case "ZoomToFlst" : {
+			$GUI->sanitize(['FlurstKennz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->loadMap('DataBase');
 			if (strpos($GUI->formvars['FlurstKennz'], '/') !== false)$GUI->formvars['FlurstKennz'] = formatFlurstkennzALKIS($GUI->formvars['FlurstKennz']);
@@ -76,6 +78,7 @@ function go_switch_alkis($go){
 		} break;
 
 		case "Flurstueck_GetVersionen" : {
+			$GUI->sanitize(['flurstkennz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->Flurstueck_GetVersionen();
 		} break;
@@ -98,23 +101,27 @@ function go_switch_alkis($go){
 		} break;
 
 		case 'ALKIS_Auszug' : {
+			$GUI->sanitize(['formnummer' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
 			$GUI->ALKIS_Auszug($flurst_array, $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt'], $GUI->formvars['Buchungsstelle'], $GUI->formvars['formnummer']);
 		} break;
 
 		case  'ALB_Anzeige' : {
+			$GUI->sanitize(['FlurstKennz' => 'text', 'formnummer' => 'text', 'wz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
 			$GUI->ALB_Anzeigen($flurst_array,$GUI->formvars['formnummer'], NULL, NULL);
 		} break;
 
 		case  'ALB_Anzeige_Bestand' : {
+			$GUI->sanitize(['Grundbuchbezirk' => 'text', 'Grundbuchblatt' => 'text', 'formnummer' => 'text', 'wz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->ALB_Anzeigen(NULL, $GUI->formvars['formnummer'], $GUI->formvars['Grundbuchbezirk'], $GUI->formvars['Grundbuchblatt']);
 		} break;
 		
 		case  'generischer_Flurstuecksauszug' : {
+			$GUI->sanitize(['selected_layer_id' => 'text', 'formnummer' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$flurst_array = explode(';', $GUI->formvars['FlurstKennz']);
 			$GUI->generischer_Flurstuecksauszug($flurst_array);
@@ -140,32 +147,38 @@ function go_switch_alkis($go){
 		} break;
 
 		case 'Flurstuecks-CSV-Export_Auswahl_speichern' : {
+			$GUI->sanitize(['name' => 'text', 'attributes' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->export_flurst_csv_auswahl_speichern();
 		} break;
 
 		case 'Flurstuecks-CSV-Export_Auswahl_laden' : {
+			$GUI->sanitize(['selection' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->export_flurst_csv_auswahl_laden();
 		} break;
 
 		case 'Flurstuecks-CSV-Export_Auswahl_loeschen' : {
+			$GUI->sanitize(['selection' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->export_flurst_csv_auswahl_loeschen();
 		} break;
 
 		case 'Flurstuecks-CSV-Export_Exportieren' : {
+			$GUI->sanitize(['FlurstKennz' => 'text', 'formnummer' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->export_flurst_csv_exportieren();
 		} break;
 
 		case 'Grundbuchblatt_Auswaehlen' : {
+			$GUI->sanitize(['Bezirk' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed($go);
 			$GUI->grundbuchblattWahl();
 		} break;
 
 		case 'Grundbuchblatt_Auswaehlen_Suchen' : {
+			$GUI->sanitize(['selBlatt' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed('Grundbuchblatt_Auswaehlen');
 			if($GUI->last_query != ''){
@@ -175,6 +188,7 @@ function go_switch_alkis($go){
 		} break;
 
 		case 'Flurstueck_Anzeigen' : {
+			$GUI->sanitize(['FlurstKennz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed($go);
 			if($GUI->last_query != ''){
@@ -185,34 +199,35 @@ function go_switch_alkis($go){
 			$GUI->output();
 		} break;
 		
-		case 'Nutzung_auswaehlen' : {
-			include_once(PLUGINS.'alkis/model/kvwmap.php');
-			$GUI->checkCaseAllowed($go);
-			$GUI->nutzungWahl();
-		} break;
-
-		case 'Nutzung_auswaehlen_Suchen' : {
-			include_once(PLUGINS.'alkis/model/kvwmap.php');
-			$GUI->nutzungsuchen();
-		} break;
-
 		case 'Namen_Auswaehlen' : {
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->namenWahl();
 		} break;
 
 		case 'Namen_Auswaehlen_Suchen' : {
+			$GUI->sanitize([
+				'name*' => 'text', 
+				'gml_id' => 'text', 
+				'bezirk' => 'text', 
+				'blatt' => 'text', 
+				'GemkgID' => 'text', 
+				'FlurID' => 'int', 
+				'anzahl' => 'int', 
+				'offset' => 'int',
+				'order' => 'text']);			
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed('Namensuche');
 			$GUI->nameSuchen();
 		} break;
 
 		case 'Suche_Flurstuecke_zu_Grundbuechern' : {
+			$GUI->sanitize(['selBlatt' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstuecksSucheByGrundbuecher();
 		} break;
 
 		case 'Zeige_Flurstuecke_zu_Grundbuechern' : {
+			$GUI->sanitize(['selBlatt' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstuecksAnzeigeByGrundbuecher();
 		} break;
@@ -228,6 +243,7 @@ function go_switch_alkis($go){
 		} break;
 
 		case "Suche_Flurstueck_zu_LatLng" : {
+			$GUI->sanitize(['latitude' => 'float', 'longitude' => 'float']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstSuchenByLatLng();
 			$GUI->output();
