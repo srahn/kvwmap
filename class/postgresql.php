@@ -1904,17 +1904,17 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
-    $sql .= " ORDER BY ". replace_semicolon($order);
+    $sql .= " ORDER BY ". $order;
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";
       if ($limitStart!='' AND $limitAnzahl != '') {
-        $sql .= intval($limitAnzahl) . " OFFSET " . intval($limitStart);
+        $sql .= $limitAnzahl . " OFFSET " . $limitStart;
       }
       if ($limitStart!='' AND $limitAnzahl=='') {
-        $sql .= " ALL OFFSET " . intval($limitStart);
+        $sql .= " ALL OFFSET " . $limitStart;
       }
       if ($limitStart == '' AND $limitAnzahl != '') {
-        $sql .= intval($limitAnzahl);
+        $sql .= $limitAnzahl;
       }
     }
     #echo $sql;
