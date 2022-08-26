@@ -11938,11 +11938,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
      else {
         $neue_stelle_id = $ret[1];
         $Stelle = new stelle($neue_stelle_id,$this->user->database);
-        $menues = explode(', ',$this->formvars['selmenues']);
-        $functions = explode(', ',$this->formvars['selfunctions']);
-        $frames = explode(', ',$this->formvars['selframes']);
-        $layer = array_filter(explode(', ',$this->formvars['sellayer']));
-        $users = explode(', ',$this->formvars['selusers']);
+				$menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
+				$functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
+				$frames = (trim($this->formvars['selframes']) == '' ? array() : explode(', ', $this->formvars['selframes']));
+				$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
+				$layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
+				$users = array_filter(explode(', ',$this->formvars['selusers']));
+				$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
+				
+				# die menues, functions, frames, layouts, layers und users der Oberstellen zusätzlich zuordnen oder entfernen
+				# Parameterübergabe erfolgt per Referenz
+				$results = $Stelle->apply_parent_selection(
+					$selectedparents,
+					$menues,
+					$functions,
+					$frames,
+					$layouts,
+					$layer
+				);				
+				
         # wenn Stelle ausgewählt, Daten kopieren
         if($this->formvars['selected_stelle_id']) {
           $Stelle->copyLayerfromStelle($layer, $this->formvars['selected_stelle_id']);
