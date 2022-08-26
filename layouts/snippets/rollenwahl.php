@@ -635,11 +635,11 @@ if ($this->Fehlermeldung!='') {
 								</tr>
 								<tr>
 									<td class="rollenwahl-option-header">
-										<? echo $strHighlight; ?>:
+										<? echo $strTooltipQuery; ?>:
 									</td>
 									<td  class="rollenwahl-option-data">
-										<input name="highlighting" type="checkbox" value="1" <? if($this->user->rolle->highlighting == '1'){echo 'checked="true"';} ?> >&nbsp;
-										<span data-tooltip="<? echo $strHintHighlight; ?>"></span>
+										<input name="tooltipquery" type="checkbox" value="1" <? if($this->user->rolle->tooltipquery == '1'){echo 'checked="true"';} ?> >&nbsp;
+										<span data-tooltip="<? echo $strHintTooltipQuery; ?>"></span>
 									</td>
 								</tr>		
 								<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
