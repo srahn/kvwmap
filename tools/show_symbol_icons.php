@@ -50,7 +50,9 @@
 			$class->set('name', 'testClass' . $symbolid);
 			$style = new styleObj($class);
 			$style->set('symbol', $symbolnr);
-			$style->set('size', $size);
+			if (isset($size)) {
+				$style->set('size', $size);
+			}
 			$style->set('width', $width);
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
@@ -68,11 +70,18 @@
 			'<br>',
 			array_map(
 				function($symbol) {
-					$html = '<img src="' . IMAGEURL . $symbol['icon'] . '" border="1" style="
-						margin-right: 7px;
-						margin-bottom: 2px;
-						vertical-align:middle
-						">' . $symbol['id'] . '. ' . $symbol['name'] . ($symbol['bild'] != '' ? ' (' . $symbol['bild'] . ')' : '') . ' Symboltyp: ' . $symbol['type'];
+					$html = '<img
+						src="' . IMAGEURL . $symbol['icon'] . '"
+						border="1"
+						style="
+							margin-right: 7px;
+							margin-bottom: 2px;
+							vertical-align:middle
+						"' . ($symbol['bild'] ? '
+						onmouseover="this.src = \'' . URL . APPLVERSION . CUSTOM_PATH . 'symbols/' . $symbol['bild'] . '\';this.width=\'250\'"
+						onmouseout="this.src = \'' . IMAGEURL . $symbol['icon'] . '\';this.width=\'35\'"' : '') . '
+						width="35"
+					>' . $symbol['id'] . '. ' . $symbol['name'] . ($symbol['bild'] != '' ? ' (' . $symbol['bild'] . ')' : '') . ' Symboltyp: ' . $symbol['type'];
 					return $html;
 				},
 				$symbols
