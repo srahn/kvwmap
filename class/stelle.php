@@ -395,6 +395,7 @@ class stelle {
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
 				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
 				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
 				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
