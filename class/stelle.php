@@ -404,30 +404,18 @@ class stelle {
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`comment` = '" . $stellendaten['comment'] . "'
+			RETURNING ID
 		";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
 		}
 		else {
 			# Stelle Erfolgreich angelegt
-			# Abfragen der stelle_id des neu eingetragenen Benutzers
-			$sql ='SELECT ID FROM stelle WHERE';
-			$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
-			# Starten der Anfrage
-			$this->database->execSQL($sql,4, 0);
-			#echo $sql;
-			if (!$this->database->success) {
-				# Fehler bei der Datenbankanfrage
-				$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>' . $this->database->errormessage;
-			}
-			else {
-				# Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
-				$rs = $this->database->result->fetch_array();
-				$ret[1] = $rs['ID'];
-			}
+			$rs = $this->database->result->fetch_array();
+			$ret[1] = $rs['ID'];
 		}
 		return $ret;
 	}
