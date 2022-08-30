@@ -33,6 +33,41 @@ class Konvertierung extends PgObject {
 		parent::__construct($gui, Konvertierung::$schema, Konvertierung::$tableName);
 	}
 
+	/**
+		Function create a geoweb service for the plan
+		it uses the gui function wmsExportSenden to create a mapfile
+		that have the metadata, layers and filter for that plan
+		This service is not acitve per default. It can be published by
+		calling function publish_service()
+	*/
+	function create_geoweb_service() {
+		$wms_online_resource = URL . 'services/plan/' . $this->get($this->identifier);
+		# Setting formvars
+		$formvars = array(
+			'nurNameLike' => $this->plan->planartAbk . '_%',
+			'totalExtent' => 1,
+			'ows_title' => $this->Stelle->ows_title,
+			'ows_abstract' => $this->Stelle->ows_abstract,
+			'wms_accessconstraints' => $this->Stelle->wms_accessconstraints,
+			'ows_contactperson' => $this->Stelle->ows_contentperson,
+			'ows_contactorganization' => $this->Stelle->ows_contentorganization,
+			'ows_contactelectronicmailaddress' => $this->Stelle->ows_contentelectronicmailaddress,
+			'ows_contactposition' => $this->Stelle->ows_contentposition,
+			'ows_fees' => $this->Stelle->ows_fees,
+			'wms_onlineresource' => $wms_onlineresource,
+			'ows_srs' => OWS_SRS . ' EPSG:3857'
+		);
+		# if OWS_SRS 3867 nicht enthält anhängen.
+		$this->mapfile = $this->get_geoweb_mapfile();
+		
+		# call $this->gui->wmsExportSenden() aber ohne output nur result aufnehmen und zurückgeben
+		return $this->gui->wmsExportSenden();
+	}
+	
+	function get_geoweb_mapfile() {
+		return WMS_MAPFILE_PATH . $this->get($this->identifier) . '/mapfile.map';
+	}
+
 	public static	function find_by_id($gui, $by, $id, $select = '*') {
 		$konvertierung = new Konvertierung($gui);
 		$konvertierung->select = $select;
