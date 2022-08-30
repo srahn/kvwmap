@@ -3,7 +3,7 @@
 kvwmap_config="$(dirname $0)/../config.php"
 
 smtp_server=`grep "define('MAILSMTPSERVER'" ${kvwmap_config} | awk -F "'" '{print $4}'`
-smtp_port=`grep "define('MAILSMTPPORT'" ${kvwmap_config} | awk -F "'" '{print $4}'`
+smtp_port=`grep "define('MAILSMTPPORT'" ${kvwmap_config} | awk -F " " '{print $2}' | awk -F "\)" '{print $1}'`
 mail_queue_path=`grep "define('MAILQUEUEPATH'" ${kvwmap_config} | awk -F "'" '{print $4}'`
 mail_archiv_path=`grep "define('MAILARCHIVPATH'" ${kvwmap_config} | awk -F "'" '{print $4}'`
 mail_smtp_user=`grep "define('MAILSMTPUSER'" ${kvwmap_config} | awk -F "'" '{print $4}'`

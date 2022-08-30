@@ -355,8 +355,8 @@ class stelle {
 				`maxxmax` = " . $stellendaten['maxxmax'] . ",
 				`maxymax` = " . $stellendaten['maxymax'] . ",
 				`epsg_code` = " . $stellendaten['epsg_code'] . ",
-				`start` = '" . $stellendaten['start'] . "',
-				`stop` = '" . $stellendaten['stop'] . "',
+				`start` = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
+				`stop` = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
@@ -395,38 +395,27 @@ class stelle {
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
-				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
-				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				`check_client_ip` = '" . ($stellendaten['checkClientIP'] == '1'	? "1" : "0") . "',
+				`check_password_age` = '" . ($stellendaten['checkPasswordAge'] == '1' ? "1" : "0") . "',
 				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
-				`use_layer_aliases` = " . ($stellendaten['use_layer_aliases'] == '1' ? 1 : 0) . ",
-				`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? 1 : 0) . ",
+				`use_layer_aliases` = '" . (value_of($stellendaten, 'use_layer_aliases') == '1'	? "1" : "0") . "',
+				`hist_timestamp` = '" . (value_of($stellendaten, 'hist_timestamp') == '1' ? 1 : 0) . "',
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`comment` = '" . $stellendaten['comment'] . "'
+			RETURNING ID
 		";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
 		}
 		else {
 			# Stelle Erfolgreich angelegt
-			# Abfragen der stelle_id des neu eingetragenen Benutzers
-			$sql ='SELECT ID FROM stelle WHERE';
-			$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
-			# Starten der Anfrage
-			$this->database->execSQL($sql,4, 0);
-			#echo $sql;
-			if (!$this->database->success) {
-				# Fehler bei der Datenbankanfrage
-				$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>' . $this->database->errormessage;
-			}
-			else {
-				# Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
-				$rs = $this->database->result->fetch_array();
-				$ret[1] = $rs['ID'];
-			}
+			$rs = $this->database->result->fetch_array();
+			$ret[1] = $rs['ID'];
 		}
 		return $ret;
 	}

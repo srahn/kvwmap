@@ -31,4 +31,6 @@
 	$strRedlineFontFamily = "Font family";
 	$strRedlineFontSize = "Font size";
 	$strRedlineFontWeight = "Font weight";
+	$strTooltipQuery="Quick-Info";	
+	$strHintTooltipQuery="If you activate this option, you will get a short Information about an object of your requested theme if you hover it with the mouse.";	
 ?>  

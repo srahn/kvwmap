@@ -422,7 +422,7 @@ class rolle {
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->fontsize_gle=$rs['fontsize_gle'];
-			$this->highlighting=$rs['highlighting'];
+			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
 			$this->result_hatching=$rs['result_hatching'];
@@ -857,7 +857,16 @@ class rolle {
 	}
 
 	function get_csv_attribute_selection($name){
-		$sql = 'SELECT name, attributes FROM rolle_csv_attributes WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND name = "'.$name.'"';
+		$sql = "
+			SELECT 
+				name, 
+				attributes 
+			FROM 
+				rolle_csv_attributes 
+			WHERE 
+				user_id = " . $this->user_id . " AND 
+				stelle_id = " . $this->stelle_id . " AND 
+				name = '" . $name . "'";
 		$this->debug->write("<p>file:rolle.php class:rolle->get_csv_attribute_selection - Abfragen einer CSV-Attributliste der Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
@@ -1565,7 +1574,7 @@ class rolle {
 					`hidemenue`,
 					`hidelegend`,
 					`fontsize_gle`,
-					`highlighting`,
+					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
@@ -1610,7 +1619,7 @@ class rolle {
 					`hidemenue`,
 					`hidelegend`,
 					`fontsize_gle`,
-					`highlighting`,
+					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
 					`result_color`,
@@ -2209,14 +2218,17 @@ class rolle {
 		if (LOG_CONSUME_ACTIVITY==1) {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
-				$sql ='INSERT IGNORE INTO u_consumeALB SET';
-				$sql.=' user_id='.$this->user_id;
-				$sql.=', stelle_id='.$this->stelle_id;
-				$sql.=', time_id="'.$time.'"';
-				$sql.=', format="'.$format.'"';
-				$sql .= ', log_number = "'.$log_number[$i].'"';
-				$sql .= ', wz = "'.$wz.'"';
-				$sql .= ', numpages = '.$pagecount;
+				$sql = "
+					INSERT IGNORE INTO 
+						u_consumeALB 
+					SET
+						user_id = " . $this->user_id . ",
+						stelle_id = " . $this->stelle_id . ",
+						time_id = '" . $time . "',
+						format = '" . $format . "',
+						log_number = '" . $log_number[$i] . "',
+						wz = '" . $wz . "',
+						numpages = " . $pagecount;
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {
