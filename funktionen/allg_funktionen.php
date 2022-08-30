@@ -4,6 +4,27 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function mapserverExp2SQL($exp, $classitem){
+	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = str_replace(' eq ', '=', $exp);
+	$exp = str_replace(' ne ', '!=', $exp);
+	
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
+		if (strpos($exp, '/') === 0) {		# regex
+			$operator = '~';
+			$exp = str_replace('/', '', $exp);
+		}
+		else {
+			$operator = '=';
+		}
+		if (substr($exp, 0, 1) != "'") {
+			$quote = "'";
+		}						
+		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
+	}
+	return $exp;
+}
+
 function add_csrf($url){
 	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
 		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
