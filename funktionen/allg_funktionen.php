@@ -8,6 +8,7 @@ function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', '=', $exp);
 	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
 		if (strpos($exp, '/') === 0) {		# regex

@@ -16155,6 +16155,18 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 	
+	function checkClassCompletenessAll(){
+		$this->main = 'classCompletenessCheck.php';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
+		for ($i = 0; $i < count($layerdaten['ID']); $i++) {
+			$this->classCompletenessResult .= '<a target="_blank" href="index.php?go=Layereditor&selected_layer_id=' . $layerdaten['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Layer ' . $layerdaten['Bezeichnung'][$i] . '</a><br>';
+			$this->formvars['layer_id'] = $layerdaten['ID'][$i];
+			$this->classCompletenessResult .= $this->checkClassCompleteness();
+		}
+		$this->output();
+	}
+	
 	function checkClassCompleteness(){
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id']) {
@@ -16170,7 +16182,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 			if (empty($expressions)) {
-				echo 'Keine Expressions vorhanden.';
+				$result .= 'Keine Expressions vorhanden.<br><br>';
 			}
 			else {
 				foreach ($expressions as $classification => $exps) {
@@ -16179,21 +16191,27 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$ret = $layerdb->execSQL($sql, 4, 0);
 					if ($ret['success']) {
 						$count = pg_num_rows($ret[1]);
-						echo 'Klassifizierung ' . $classification;
+						$result .= '<div style="background: ' . ($count == 0 ? 'lightgreen' : '#fd907d') . '">Klassifizierung ' . $classification;
 						if ($count == 0) {
-							echo ' vollständig.<br><br>';
+							$result .= ' vollständig.</div><br><br>';
 						}
 						else {
-							echo ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.<br>';
-							echo '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br><br>';
+							while ($rs = pg_fetch_assoc($ret[1])) {
+								$ids[] = "\'" . $rs[$this->layerdaten['oid']] . "\'";
+							}
+							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
+							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
+							$result .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a><br><br>';
 						}
 					}
 					else {
-						echo $ret[1];
+						$result .= '<div style="background: #fd907d">' . $ret[1] . '</div>';
+						$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br><br>';
 					}
 				}
 			}
 		}
+		return $result;
 	}
 	
 } # end of class GUI

@@ -1396,7 +1396,12 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompleteness' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->checkClassCompleteness();
+				echo $GUI->checkClassCompleteness();
+			} break;
+			
+			case 'checkClassCompletenessAll' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->checkClassCompletenessAll();
 			} break;
 
 			case 'Attributeditor' : {
