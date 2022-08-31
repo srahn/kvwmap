@@ -20,6 +20,13 @@
 			document.getElementById('tr_color').style.display='';
 		}
 	}
+	
+	function checkClassCompleteness(){
+		message([{ type: 'info', msg: '<? echo $strCheckClassCompleteness; ?>...'}]);
+		message([{ type: 'info', msg: ' '}]);
+		ahah('index.php', 'go=checkClassCompleteness&layer_id=' + document.GUI.selected_layer_id.value, new Array(document.getElementById('messages').childNodes[1].childNodes[1]), new Array("sethtml"));
+	}
+	
 </script>
 
 <style>
@@ -211,6 +218,7 @@
 						<i style="padding: 6px" class="fa fa-plus buttonlink" aria-hidden="true"></i>
 					</a>
 					<a href="javascript:void(0);" onclick="toggleAutoClassForm();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strAddAutoClasses; ?>">AUTO</a>
+					<a href="javascript:void(0);" onclick="checkClassCompleteness();" class="buttonlink" style="margin-left: 10px; padding: 6px; line-height: 13px;" title="<? echo $strCheckClassCompleteness; ?>">Check</a>
 				</td>
 			</tr>
 			<tr id="autoClassForm" style="display:none">

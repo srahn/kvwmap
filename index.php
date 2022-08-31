@@ -1393,6 +1393,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor_AutoklassenHinzufuegen();
 			} break;
+			
+			case 'checkClassCompleteness' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				echo $GUI->checkClassCompleteness();
+			} break;
+			
+			case 'checkClassCompletenessAll' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->checkClassCompletenessAll();
+			} break;
 
 			case 'Attributeditor' : {
 				$GUI->checkCaseAllowed('Attributeditor');
