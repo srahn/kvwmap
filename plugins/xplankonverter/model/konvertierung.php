@@ -8,23 +8,23 @@ class Konvertierung extends PgObject {
 	static $schema = 'xplankonverter';
 	static $tableName = 'konvertierungen';
 	static $STATUS = array(
-		'IN_ERSTELLUNG'      => 'in Erstellung',
-		'ERSTELLT'           => 'erstellt',
-		//    'IN_VALIDIERUNG'     => 'in Validierung',
-		//    'VALIDIERUNG_ERR'    => 'Validierung fehlgeschlagen',
-		//    'VALIDIERUNG_OK'     => 'validiert',
-		'ANGABEN_VOLLSTAENDIG'  => 'Angaben vollständig',
-		'IN_KONVERTIERUNG'      => 'in Konvertierung',
-		'KONVERTIERUNG_OK'      => 'Konvertierung abgeschlossen',
-		'KONVERTIERUNG_ERR'     => 'Konvertierung abgebrochen',
-		'IN_GML_ERSTELLUNG'     => 'in GML-Erstellung',
-		'GML_ERSTELLUNG_OK'     => 'GML-Erstellung abgeschlossen',
-		'GML_ERSTELLUNG_ERR'    => 'GML-Erstellung abgebrochen',
-		'GML_VALIDIERUNG_OK'    => 'GML-Validierung abgeschlossen',
-		'GML_VALIDIERUNG_ERR'   => 'GML-Validierung mit Fehlern',
+		'IN_ERSTELLUNG'			=> 'in Erstellung',
+		'ERSTELLT'					 => 'erstellt',
+		//		'IN_VALIDIERUNG'		 => 'in Validierung',
+		//		'VALIDIERUNG_ERR'		=> 'Validierung fehlgeschlagen',
+		//		'VALIDIERUNG_OK'		 => 'validiert',
+		'ANGABEN_VOLLSTAENDIG'	=> 'Angaben vollständig',
+		'IN_KONVERTIERUNG'			=> 'in Konvertierung',
+		'KONVERTIERUNG_OK'			=> 'Konvertierung abgeschlossen',
+		'KONVERTIERUNG_ERR'		 => 'Konvertierung abgebrochen',
+		'IN_GML_ERSTELLUNG'		 => 'in GML-Erstellung',
+		'GML_ERSTELLUNG_OK'		 => 'GML-Erstellung abgeschlossen',
+		'GML_ERSTELLUNG_ERR'		=> 'GML-Erstellung abgebrochen',
+		'GML_VALIDIERUNG_OK'		=> 'GML-Validierung abgeschlossen',
+		'GML_VALIDIERUNG_ERR'	 => 'GML-Validierung mit Fehlern',
 		'GEOWEB_SERVICE_ERSTELLT' => 'GeoWeb-Dienst erstellt',
-		'IN_INSPIRE_GML_ERSTELLUNG'  => 'in INSPIRE-GML-Erstellung',
-		'INSPIRE_GML_ERSTELLUNG_OK'  => 'INSPIRE-GML-Erstellung abgeschlossen',
+		'IN_INSPIRE_GML_ERSTELLUNG'	=> 'in INSPIRE-GML-Erstellung',
+		'INSPIRE_GML_ERSTELLUNG_OK'	=> 'INSPIRE-GML-Erstellung abgeschlossen',
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
 	static $write_debug = false;
@@ -499,7 +499,7 @@ class Konvertierung extends PgObject {
 
 	function send_export_file($exportfile, $contenttype) {
 		header('Content-type: ' . $contenttype);
-		header("Content-disposition:  attachment; filename=" . basename($exportfile));
+		header("Content-disposition:	attachment; filename=" . basename($exportfile));
 		header("Content-Length: " . filesize($exportfile));
 		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
 		header('Pragma: public');
@@ -582,6 +582,169 @@ class Konvertierung extends PgObject {
 			}
 		}
 		return $this->plan;
+	}
+
+	function create_plaene_from_gmlas($table_schema, $planart) {
+		$planartAbk = strtolower(substr($planart, 0, 2));
+		$sql = "
+			INSERT INTO xplankonverter.konvertierungen (bezeichnung, status, stelle_id, user_id, geom_precision, gml_layer_group_id, epsg, output_epsg, input_epsg, planart, veroeffentlicht, beschreibung)
+			SELECT
+				gmlas.xplan_name AS bezeichnung,
+				'erstellt' AS status,
+				" . $this->gui->Stelle->id . " AS stelle_id,
+				" . $this->gui->user->id . " AS user_id,
+				" . $this->gui->user->id . " AS geom_precision,
+				null AS gml_layer_group_id,
+				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS epsg,
+				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS output_epsg,
+				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS input_epsg,
+				'" . $planart . "' AS planart,
+				false AS veroeffentlicht,
+				gmlas.id AS beschreibung
+			FROM
+				" . $table_schema . "." . strtolower($planart) . " gmlas;
+
+			INSERT INTO xplan_gml." . strtolower($planart) . " (
+				gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
+				wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
+				auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
+				traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
+				planart, planbeschlussdatum, aufstellungsbeschlussdatum
+			)
+			SELECT
+				trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
+				k.id AS konvertierung_id,
+				gmlas.xplan_name AS name,
+				gmlas.nummer AS nummer,
+				gmlas.internalid AS internalid,
+				gmlas.beschreibung AS beschreibung,
+				gmlas.kommentar AS kommentar,
+				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
+				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
+				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
+				CASE
+					WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+						ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+					ELSE NULL
+				END AS aendert,
+				CASE
+					WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+						ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+					ELSE NULL
+				END AS wurdegeaendertvon,
+				gmlas.erstellungsmassstab AS erstellungsmassstab,
+				gmlas.bezugshoehe AS bezugshoehe,
+				ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+				CASE
+					WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+						ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
+					ELSE NULL
+				END AS verfahrensmerkmale,
+				CASE
+					WHEN count_externeref > 0
+					THEN externeref.externereferenz
+					ELSE NULL
+				END AS externereferenz,
+				ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
+				ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+				(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
+				gmlas.sachgebiet AS sachgebiet,
+				(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
+				gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
+				to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
+				ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
+				ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
+				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
+				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
+				ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
+				gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
+				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
+				gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
+				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
+				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum
+			FROM
+				" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
+				xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
+				" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+				(
+					SElECT
+						COUNT(*) AS count_externeref,
+						externereferenzlink_sub.parent_id,
+						array_agg((e_sub.georefurl,
+								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.art::xplan_gml.xp_externereferenzart,
+								e_sub.informationssystemurl,
+								e_sub.referenzname,
+								e_sub.referenzurl,
+								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+								e_sub.beschreibung,
+								to_char(e_sub.datum, 'DD.MM.YYYY'),
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+					FROM
+						" . $table_schema . "." . strtolower($planart) . "_externereferenz externereferenzlink_sub LEFT JOIN
+						" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+					GROUP BY
+						externereferenzlink_sub.parent_id
+				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+				" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+				" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+				" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+				" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
+				" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
+				" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+				" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+
+			INSERT INTO xplan_gml." . $planartAbk . "_bereich (
+				gml_id, nummer, name, bedeutung, detailliertebedeutung, erstellungsmassstab, geltungsbereich, user_id, konvertierung_id, rasterbasis,
+				versionbaunvodatum, versionbaugbtext, versionsonstrechtsgrundlagetext, versionbaunvotext, versionsonstrechtsgrundlagedatum, versionbaugbdatum, gehoertzuplan
+			)
+			SELECT
+				trim(replace(lower(b.id), 'gml_', ''))::text::uuid AS id,
+				b.nummer AS nummer,
+				b.xplan_name AS name,
+				b.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
+				b.detailliertebedeutung AS detailliertebedeutung,
+				b.erstellungsmassstab AS erstellungsmassstab,
+				ST_Multi(ST_ForceRHR(st_transform(b.geltungsbereich, 25832))) AS geltungsbereich,
+				" . $this->gui->user->id . " AS user_id,
+				k.id AS konvertierung_id,
+				trim(replace(lower(b.rasterbasis_href), '#gml_', ''))::text AS rasterbasis,
+				b.versionbaunvodatum AS versionbaunvodatum,
+				b.versionbaugbtext AS versionbaugbtext,
+				b.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+				b.versionbaunvotext AS versionbaunvotext,
+				b.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
+				b.versionbaugbdatum AS versionbaugbdatum,
+				trim(replace(lower(b.gehoertzuplan_pkid), 'gml_', ''))::text::uuid	AS gehoertzuplan
+			FROM
+				" . $table_schema . "." . $planartAbk . "_bereich AS b JOIN
+				xplankonverter.konvertierungen k ON b.gehoertzuplan_pkid = k.beschreibung;
+
+			SELECT
+				plan.gml_id
+			FROM
+				" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
+				xplan_gml." . strtolower($planart) . " AS plan ON trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid = plan.gml_id;
+		";
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'msg' => $ret['msg']
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => pg_num_rows($ret[1]) . ' Pläne angelegt.'
+		);
 	}
 
 	function get_bereiche($plan_id) {
@@ -798,7 +961,7 @@ class Konvertierung extends PgObject {
 						$result = $regel->convert($this);
 						// TODO: Fix this, currently no gids break the result
 						/*if (!empty($result)) {
-							if($regel->is_source_shape_or_gmlas($regel,  $this->get($this->identifier)) != 'gmlas') {
+							if($regel->is_source_shape_or_gmlas($regel,	$this->get($this->identifier)) != 'gmlas') {
 								$regel->rewrite_gml_ids($result);
 							}
 						}*/
@@ -860,7 +1023,7 @@ class Konvertierung extends PgObject {
 						'skipFlaechenschluss=false' . '&' .
 						'skipGeltungsbereich=false';
 
-		$cmd = "curl -X 'POST' '" . $url  . "'-H 'accept: application/json' -H 'X-Filename: " . basename($gml_file) . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
+		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . basename($gml_file) . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
 		#echo '<br>Frage Validierung mit folgendem Befehl ab: ' . $cmd;
 		exec($cmd, $output, $result_code);
 		$result = $output[0];
@@ -873,26 +1036,26 @@ class Konvertierung extends PgObject {
 		$sql = "
 			INSERT INTO xplankonverter.xplanvalidator_reports(
 				konvertierung_id,
-			  version,
-			  filename,
-			  name,
-			  box_minx,
-			  box_miny,
-			  box_maxx,
-			  box_maxy,
-			  box_crs,
-			  datetime,
-			  valid,
-			  externalreferences,
-			  wmsurl,
-			  rulesmetadata_version,
-			  rulesmetadata_source,
-			  semantisch_valid,
-			  geometrisch_valid,
-			  geometrisch_errors,
-			  geometrisch_warnings,
-			  syntaktisch_valid,
-			  syntaktisch_messages
+				version,
+				filename,
+				name,
+				box_minx,
+				box_miny,
+				box_maxx,
+				box_maxy,
+				box_crs,
+				datetime,
+				valid,
+				externalreferences,
+				wmsurl,
+				rulesmetadata_version,
+				rulesmetadata_source,
+				semantisch_valid,
+				geometrisch_valid,
+				geometrisch_errors,
+				geometrisch_warnings,
+				syntaktisch_valid,
+				syntaktisch_messages
 			) VALUES (
 				" . $this->get($this->identifier) . ",
 				'" . $report->version . "',
@@ -914,7 +1077,7 @@ class Konvertierung extends PgObject {
 				" . (count($report->validationResult->geometrisch->errors) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->errors) . "']" : "NULL") . ",
 				" . (count($report->validationResult->geometrisch->warnings) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->warnings) . "']" : "NULL") . ",
 				" . ($report->validationResult->syntaktisch->valid ? 'true' : 'false') . ",
-			  " . (count($report->validationResult->syntaktisch->messages) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->syntaktisch->messages) . "']" : "NULL") . "
+				" . (count($report->validationResult->syntaktisch->messages) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->syntaktisch->messages) . "']" : "NULL") . "
 			) RETURNING id
 		";
 		#echo '<br>SQL to create a validation report: ' . $sql;
@@ -1156,8 +1319,8 @@ class Konvertierung extends PgObject {
 		# Destroy the xplan_shapes_ + $konvertierung_id if it exists
 		# Destroy the xplan_gmlas: + $konvertierung_id schema if it exists
 		$sql = "
-			DROP SCHEMA IF EXISTS xplan_shapes_" .  $this->get($this->identifier) . " CASCADE;
-			DROP SCHEMA IF EXISTS xplan_gmlas_" .  $this->get($this->identifier) . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_shapes_" .	$this->get($this->identifier) . " CASCADE;
+			DROP SCHEMA IF EXISTS xplan_gmlas_" .	$this->get($this->identifier) . " CASCADE;
 		";
 		pg_query($this->database->dbConn, $sql);
 	}

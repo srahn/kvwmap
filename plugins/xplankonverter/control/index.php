@@ -26,6 +26,7 @@ include(PLUGINS . 'xplankonverter/model/extract_standard_shp.php');
 /**
 * Anwendungsfälle
 * xplankonverter_create_geoweb_service
+* xplankonverter_create_plaene_from_gmlas
 * xplankonverter_download_edited_shapes
 * xplankonverter_download_inspire_gml
 * xplankonverter_download_uploaded_shapes
@@ -1281,7 +1282,6 @@ function go_switch_xplankonverter($go) {
 				$GUI->output();
 				return;
 			}
-			echo 'Download file from location: ' . $filename; exit;
 			header('Content-Disposition: attachment; filename="xplan_' . $GUI->formvars['konvertierung_id'] . '.gml"; subtype="gml/3.3"');
 			echo fread(fopen($filename, "r"), filesize($filename));
 		} break;
@@ -1383,11 +1383,16 @@ function go_switch_xplankonverter($go) {
 									Das wird in XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() zwischengespeichert und wenn es ein Zip-File ist
 									im Unterverzeichnis zip/ ausgepackt und die externen referenzen in das document_path des Layers mit random_number als Postfix verschoben.
 									Die Namen der gml und referenz-Dateien werden per json an das upload_xplan_gml Formular zurückgeliefert und dort angezeigt.
+									Dort klickt der Anwender auf den Button zum Übernehmen der Daten in das Plan-Formular
 			Schritt 3:	Der View upload_xplan_gml ruft den case xplankonverter_extract_gml_to_form auf mit dem gml_file und der random_number als parameter.
 									Darin wird die Methode extract_gml_class der Klasse gml_extractor ausgeführt, die folgendes macht:
 									- GML-Datei in das gmlastmp Schema schreiben mit ogr2ogr_gmlas
-									- Formularvariablen mit dem was in GML-Datei steht belegen
-										außer bei externereferenz. Da wird die document_url + doc_file + random_number eingetragen und Vorschaubilder erzeugt.
+									- Hier wurde der Sonderfall eingeführt wenn in dem XPlanGML mehrere Pläne sind.
+										- In dem Fall wird dem Nutzer nicht das eine Formular mit den Daten des ersten Plans angezeigt, sondern eine Auswahl gestellt:
+											- Ersten Plan in das Formular übernehmen weiter mit Schritt 4
+											- Alle Pläne aus dem XPlanGML-Dokument automatisch in den XPlankonverter aufnehmen => Anzeige der Pläne der Stelle
+										- Wenn es nur ein Plan ist oder nur der erste Plan genommen werden soll formularvariablen mit dem was in GML-Datei steht belegen
+											außer bei externereferenz. Da wird die document_url + doc_file + random_number eingetragen und Vorschaubilder erzeugt.
 			Schritt 4:	Speichern des Formulars. Dabei wird der Plandatensatz angelegt und der Trigger handle_xp_plan ausgeführt in dem:
 									- der temporäre Schemaname xplan_gmlas_tmp_$konvertierung_id in xplan_gmlas_$konvertierung_id umbenannt wird
 									- Bereiche und Regeln erzeugt werden
@@ -1467,6 +1472,7 @@ function go_switch_xplankonverter($go) {
 								$gml_file = $upload_file['name'];
 								exec('mv ' . $target_file . ' ' . $xplan_gml_dir);
 								$success = true;
+								$msg .= 'Keine weiteren Dateien hochgeladen.';
 							}
 							else {
 								$msg .= 'Die hochgeladene Datei ' . $upload_file['name'] . ' ist keine GML-Datei';
@@ -1485,9 +1491,9 @@ function go_switch_xplankonverter($go) {
 									$msg .= 'Die ZIP-Datei konnte nicht geöffnet werden!';
 								}
 							}
+							$msg .= ' Prüfen Sie den Inhalt und versuchen Sie es erneut.';
 						}
 					}
-					$msg .= ' Prüfen Sie den Inhalt und versuchen Sie es erneut.';
 				}
 				else {
 					$response['msg'] = 'Kann Datei nicht auf dem Server zwischenspeichern. Prüfen Sie ob genüg Speicherplatz auf dem Server ist und ob im Verzeichnis ' . IMAGEPATH . ' Schreibrechte vorhanden sind.';
@@ -1530,7 +1536,21 @@ function go_switch_xplankonverter($go) {
 			$GUI->user->rolle->oGeorefExt->maxx = $GUI->formvars['maxx'];
 			$GUI->user->rolle->oGeorefExt->maxy = $GUI->formvars['maxy'];
 
+			$num_plane = $gml_extractor->get_num_plaene('xplan_gmlas_tmp_' . $GUI->user->id, strtolower($GUI->plan_class));
+			if ($num_plane > 1) {
+				$GUI->add_message('waring', 'Im hochgeladenen GML-Dokument befinden sich ' . $num_plane . ' Pläne.<p>Sollen alle Pläne automatisch zur Planliste der Stelle hinzugefügt werden klicken Sie <a href="index.php?go=xplankonverter_create_plaene_from_gmlas&planart=' . $GUI->formvars['planart'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">hier</a>.<p>Soll nur der erste im GML-Dokument enthaltene Plan übernommen werden klicken Sie "ok" und speichern das Formular.');
+			}
 			$GUI->neuer_Layer_Datensatz();
+		} break;
+
+		case 'xplankonverter_create_plaene_from_gmlas' : {
+			$GUI->checkCaseAllowed('xplankonverter_extract_gml_to_form');
+			$GUI->konvertierung = new Konvertierung($GUI);
+			$res = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class);
+			$GUI->add_message(($res['success'] ? 'notice' : 'error'), $res['msg']);
+			$GUI->title = str_replace('an', 'äne', $GUI->title);
+			$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
+			$GUI->output();
 		} break;
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {

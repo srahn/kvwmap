@@ -291,6 +291,24 @@ class Gml_extractor {
 		return ($result[0] === 't');
 	}
 
+	/**
+		Funktion liefert true wenn in angegebener Tabelle mehr als ein Plan liegt, sonst false
+	*/
+	function get_num_plaene($table_schema, $table_name) {
+		$sql = "
+			SELECT
+				count(*) AS num_plaene
+			FROM
+				" . $table_schema . '.' . $table_name . "
+		";
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return 0;
+		}
+		$rs = pg_fetch_assoc($ret[1]);
+		return $rs['num_plaene'];
+	}
+
 	/*
 	* Returns the gml_id of the first found instance of a class (usually *_plan or *_bereich) inside the gml_file
 	*/
