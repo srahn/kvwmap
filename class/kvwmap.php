@@ -16162,6 +16162,72 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 	}
+	
+	function checkClassCompletenessAll(){
+		$this->main = 'classCompletenessCheck.php';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
+		for ($i = 0; $i < count($layerdaten['ID']); $i++) {
+			$this->classCompletenessResult .= '<a target="_blank" href="index.php?go=Layereditor&selected_layer_id=' . $layerdaten['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Layer ' . $layerdaten['Bezeichnung'][$i] . '</a><br>';
+			$this->formvars['layer_id'] = $layerdaten['ID'][$i];
+			$this->classCompletenessResult .= $this->checkClassCompleteness();
+		}
+		$this->output();
+	}
+	
+	function checkClassCompleteness(){
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		if ($this->formvars['layer_id']) {
+			$expressions = [];
+			$this->show_attribute = [];
+			$this->layerdaten = $mapDB->get_Layer($this->formvars['layer_id'], true);
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$select = $mapDB->getSelectFromData($this->layerdaten['Data']);
+			$classes = $mapDB->read_Classes($this->layerdaten['Layer_ID']);
+			$anzahl = count($classes);
+			for ($i = 0; $i < $anzahl; $i++) {
+				if ($classes[$i]['Expression'] != '') {
+					$expressions[$classes[$i]['classification']][] = mapserverExp2SQL($classes[$i]['Expression'], $this->layerdaten['classitem']);
+				}
+			}
+			if (empty($expressions)) {
+				$result .= 'Keine Expressions vorhanden.<br><br>';
+			}
+			else {
+				foreach ($expressions as $classification => $exps) {
+					$sql = 'SELECT * FROM (' . $select . ') as foo WHERE NOT (' . implode(' OR ', $exps) . ')';
+					$this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
+					$ret = $layerdb->execSQL($sql, 4, 0);
+					if ($ret['success']) {
+						$count = pg_num_rows($ret[1]);
+						$result .= '<div style="background: ' . ($count == 0 ? 'lightgreen' : '#fd907d') . '">Klassifizierung ' . $classification;
+						if ($count == 0) {
+							$result .= ' vollständig.</div><br><br>';
+						}
+						else {
+							while ($rs = pg_fetch_assoc($ret[1])) {
+								$ids[] = "\'" . $rs[$this->layerdaten['oid']] . "\'";
+								$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
+							}
+							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
+							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
+							$result .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a>';
+							foreach ($this->show_attribute as $attributename => $values) {
+								$result .= '<br>' . $attributename . ': '. implode(', ', array_keys($values));
+							}
+							$result .= '<br><br>';
+						}
+					}
+					else {
+						$result .= '<div style="background: #fd907d">' . $ret[1] . '</div>';
+						$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br><br>';
+					}
+				}
+			}
+		}
+		return $result;
+	}
+	
 } # end of class GUI
 
 class db_mapObj{
@@ -19582,7 +19648,7 @@ class db_mapObj{
 		$rs = $this->db->result->fetch_array();
 		return $rs;
 	}
-
+	
   function getClassFromObject($select, $layer_id, $classitem){
     # diese Funktion bestimmt für ein über die oid gegebenes Objekt welche Klasse dieses Objekt hat
     $classes = $this->read_Classes($layer_id);
@@ -19595,38 +19661,8 @@ class db_mapObj{
 				if ($classes[$i]['Expression'] == '') {
           return $classes[$i]['Class_ID'];
         }
-				if (strpos($classes[$i]['Expression'], '/') === 0) {		# regex
-					$operator = '~';
-					$classes[$i]['Expression'] = str_replace('/', '', $classes[$i]['Expression']);
-				}
-				else {
-					$operator = '=';
-				}
-        $exp = str_replace(array("'[", "]'", '[', ']'), '', $classes[$i]['Expression']);
-        $exp = str_replace(' eq ', '=', $exp);
-        $exp = str_replace(' ne ', '!=', $exp);
-
-				# wenn im Data sowas wie "tabelle.attribut" vorkommt, soll das anstatt dem "attribut" aus der Expression verwendet werden
-        //$attributes = explode(',', substr($select, 0, strpos(strtolower($select), ' from ')));
-        $attributes = get_select_parts(substr($select, 0, strpos(strtolower($select), ' from ')));
-				if(substr($exp, 0, 1) == '('){
-					$exp_parts = explode(' ', $exp);
-					for($k = 0; $k < count($exp_parts); $k++){
-						for($j = 0; $j < count($attributes); $j++){
-							if($exp_parts[$k] != '' AND strpos(strtolower($attributes[$j]), '.'.$exp_parts[$k]) !== false){
-								$exp_parts[$k] = str_replace('select ', '', strtolower($attributes[$j]));
-							}
-						}
-					}
-					$exp = implode(' ', $exp_parts);
-				}
-				elseif($classitem != ''){		# Classitem davor setzen
-					if(substr($exp, 0, 1) != "'")$quote = "'";
-					$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
-				}
-				if($exp == ''){
-					$exp = 'true';
-				}
+				$exp = mapserverExp2SQL($classes[$i]['Expression'], $classitem);
+				
 				$sql = 'SELECT * FROM ('.$select.") as foo WHERE (" . $exp.")";
         $this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
         $query=pg_query($sql);
