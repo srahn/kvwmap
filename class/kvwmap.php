@@ -16171,6 +16171,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id']) {
 			$expressions = [];
+			$this->show_attribute = [];
 			$this->layerdaten = $mapDB->get_Layer($this->formvars['layer_id'], true);
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$select = $mapDB->getSelectFromData($this->layerdaten['Data']);
@@ -16198,10 +16199,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						else {
 							while ($rs = pg_fetch_assoc($ret[1])) {
 								$ids[] = "\'" . $rs[$this->layerdaten['oid']] . "\'";
+								$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
 							}
 							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
 							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
-							$result .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a><br><br>';
+							$result .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a>';
+							foreach ($this->show_attribute as $attributename => $values) {
+								$result .= '<br>' . $attributename . ': '. implode(', ', array_keys($values));
+							}
+							$result .= '<br><br>';
 						}
 					}
 					else {
