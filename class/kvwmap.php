@@ -1544,7 +1544,7 @@ echo '			</table>
 		$class = ms_newClassObj($layer);
 		if($texts != NULL){
 			$label = new labelObj();
-			$label->set('size', 10*$map_factor);
+			$label->set('size', 10 * $map_factor);
 			$label->color->setRGB(255, 0, 0);
 			#$label->set('type', 'TRUETYPE');
 			$label->set('font', 'arial');
@@ -1582,6 +1582,13 @@ echo '			</table>
 		}
 	}
 
+	/**
+		function uses the following formvars to set the filter for reading layers
+			- nurAktiveLayer
+			- nurAufgeklappteLayer
+			- nurFremdeLayer
+			- nurNameLike
+	*/
   function loadMap($loadMapSource) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
@@ -1942,10 +1949,11 @@ echo '			</table>
 					$this->groupset = $mapDB->read_Groups();
 				}
 
-        # Layer
+				# Layer
 				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
-        $mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
-        $mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
+				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
+				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
+				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
@@ -16339,7 +16347,7 @@ class db_mapObj{
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
@@ -16347,11 +16355,11 @@ class db_mapObj{
 			END AS Name";
 			$group_column = '
 			CASE
-				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'`
+				WHEN `Gruppenname_' . $language . '` IS NOT NULL THEN `Gruppenname_' . $language . '`
 				ELSE `Gruppenname`
 			END AS Gruppenname';
 		}
-		else{
+		else {
 			$name_column = "l.Name";
 			$group_column = 'Gruppenname';
 		}
@@ -16385,7 +16393,7 @@ class db_mapObj{
 				l.dataowner_tel,
 				l.uptodateness,
 				l.updatecycle,
-				g.id, ".$group_column.", g.obergruppe, g.order
+				g.id, " . $group_column . ", g.obergruppe, g.order
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
@@ -16406,7 +16414,8 @@ class db_mapObj{
 				($this->nurAufgeklappteLayer ? " AND (rl.aktivStatus != '0' OR gr.status != '0' OR ul.requires != '')" : '') .
 				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
-				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') . "
+				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
+				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . "
 			ORDER BY
 				drawingorder
 		";
@@ -16420,7 +16429,7 @@ class db_mapObj{
 		$i = 0;
 		while ($rs = $ret['result']->fetch_assoc()) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == ''){
+				if ($rs['Filter'] == '') {
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
@@ -16460,7 +16469,7 @@ class db_mapObj{
 				# requires-Array füllen
 				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
 			}
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
 		return $layer;

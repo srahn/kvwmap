@@ -51,6 +51,7 @@ div.td {
 .xpk-func-btn.disabled {
   pointer-events: auto !important;
   cursor: default;
+	color: green;
 }
 
 .xpk-func-btn.disabled:hover,

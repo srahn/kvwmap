@@ -1,4 +1,10 @@
 <?php include('header.php'); ?>
+<?
+	if ($this->formvars['planart'] == 'Plan') {
+		$this->formvars['planart'] = '';
+	}
+?>
+
 <script language="javascript" type="text/javascript">
 	$('#gui-table').css('width', '100%');
 	$(function () {
@@ -350,79 +356,81 @@
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
 </div//-->
-<table
-	id="konvertierungen_table"
-	data-toggle="table"
-	data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&anzahl=10000&mime_type=formatter&format=json<?php echo ($this->formvars['planart'] != '' ? '&value_planart=' . $this->formvars['planart'] . '&operator_planart==' : '') ?>"
-	data-height="100%"
-	data-click-to-select="false"
-	data-filter-control="true" 
-	data-sort-name="bezeichnung"
-	data-sort-order="asc"
-	data-search="true"
-	data-show-export="false"
-	data-show-refresh="false"
-	data-show-toggle="false"
-	data-show-columns="true"
-	data-query-params="queryParams"
-	data-pagination="true"
-	data-page-size="25"
-	data-show-export="false"
-	data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
-	data-toggle="table"
-	data-toolbar="#toolbar"
->
-	<thead>
-		<tr>
-			<th
-				data-field="konvertierung_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Konvertierung Id</th>
-			<th
-				data-field="stelle_id"
-				data-sortable="true"
-				data-visible="false"
-				data-switchable="true"
-			>Stelle Id</th>
-			<th
-				data-field="planart"
-				data-sortable="true"
-				data-visible="true"
-				data-switchable="true"
-				data-filter-control="select"
-			>Planart</th>
-			<th
-				data-field="bezeichnung"
-				data-sortable="true"
-				data-visible="true"
-			>Bezeichnung</th>
-			<th
-				data-field="status"
-				data-visible="true"
-				data-sortable="true"
-				class="col-md-2"
-			>Status</th>
-			<th
-				data-field="beschreibung"
-				data-visible="false"
-			>Beschreibung</th>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungFunctionsFormatter"
-				data-switchable="false"
-				class="col-md-2"
-			>Funktionen</th>
-			<th
-				data-field="konvertierung_id"
-				data-visible="true"
-				data-formatter="konvertierungDownloadsFormatter"
-				data-switchable="false"
-				class="col-md-2"
-			>Downloads</th>
-		</tr>
-	</thead>
-</table>
+<div class="table-wrapper">
+	<table
+		id="konvertierungen_table"
+		data-toggle="table"
+		data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&anzahl=10000&mime_type=formatter&format=json<?php echo ($this->formvars['planart'] != '' ? '&value_planart=' . $this->formvars['planart'] . '&operator_planart==' : '') ?>"
+		data-height="100%"
+		data-click-to-select="false"
+		data-filter-control="true" 
+		data-sort-name="bezeichnung"
+		data-sort-order="asc"
+		data-search="true"
+		data-show-export="false"
+		data-show-refresh="false"
+		data-show-toggle="false"
+		data-show-columns="true"
+		data-query-params="queryParams"
+		data-pagination="true"
+		data-page-size="25"
+		data-show-export="false"
+		data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+		data-toggle="table"
+		data-toolbar="#toolbar"
+	>
+		<thead>
+			<tr>
+				<th
+					data-field="konvertierung_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Konvertierung Id</th>
+				<th
+					data-field="stelle_id"
+					data-sortable="true"
+					data-visible="false"
+					data-switchable="true"
+				>Stelle Id</th>
+				<th
+					data-field="planart"
+					data-sortable="true"
+					data-visible="true"
+					data-switchable="true"
+					data-filter-control="select"
+				>Planart</th>
+				<th
+					data-field="bezeichnung"
+					data-sortable="true"
+					data-visible="true"
+				>Bezeichnung</th>
+				<th
+					data-field="status"
+					data-visible="true"
+					data-sortable="true"
+					class="col-md-2"
+				>Status</th>
+				<th
+					data-field="beschreibung"
+					data-visible="false"
+				>Beschreibung</th>
+				<th
+					data-field="konvertierung_id"
+					data-visible="true"
+					data-formatter="konvertierungFunctionsFormatter"
+					data-switchable="false"
+					class="col-md-2"
+				>Funktionen</th>
+				<th
+					data-field="konvertierung_id"
+					data-visible="true"
+					data-formatter="konvertierungDownloadsFormatter"
+					data-switchable="false"
+					class="col-md-2"
+				>Downloads</th>
+			</tr>
+		</thead>
+	</table>
+</div>
 <button style="margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID; ?>&attributenames[0]=planart&values[0]=<?php echo $this->formvars['planart']; ?>'">neu</button>

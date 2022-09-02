@@ -1,53 +1,100 @@
-<h2 style="margin-top: 20px;"><?php echo$this->formvars['planart']; ?> GML hochladen</h2>
-<form id="file_form" action="" method="post" enctype="multipart/form-data">
-	<input type="file" id="file_select" name="gml_file" style="margin-top: 50px;"/><br>
-	<button id="upload_button" style="margin-top: 50px;">Hochladen</button><br>
-	<div id="upload_message" style="margin-top: 50px; margin-bottom: 20px;"></div>
-</form>
+<h2 style="margin-top: 20px;"><?php echo $this->formvars['planart']; ?> Plan-Daten hochladen</h2>
+<div style="padding: 20px">
+	<div id="upload_hint_div" style="text-align: left;">
+		Sie können entweder nur eine XPlanGML-Datei hochladen oder eine ZIP-Datei, die neben der GML-Datei auch die Dokumente enthält auf die in den externen Referenzen der GML-Datei verwiesen wird.<p>
+		Wenn Sie eine ZIP-Datei hochladen beachten Sie folgende Konventionen:
+		<ol>
+			<!--li>Die Dateien dürfen nicht größer als 500 MB sein.</li//-->
+			<li>Die GML-Datei muss die Dateiendung <i>.gml</i> oder <i>.xml</i> haben.
+			<li>Die Dateien der Plandokumente müssen den Namen haben, der auch in der externen Referenz des GML-Dokumentes im Attribut <i>referenzurl</i> angegeben ist.</li>
+			<li>Die Dateien liegen in der Wurzel der ZIP-Datei, nicht in Unterverzeichnissen.</li>
+			<li>Plandokumente ohne Georeferenz müssen das Format PDF haben.</li>
+			<li>Die im Attribut <i>referenzurl</i> angegebene URL wird nach dem Einlesen so angepasst, dass die Dokumente von diesem Server abgerufen werden können.</li>
+			<li>
+				Plandokumente mit Georeferenz müssen das Format GeoTiff mit der Endung tiff haben. Dazu reicht eine Datei die zur <i>referenzURL</i> passt.<br>
+				Besteht das Dokument aus Bild und Georeferenz-Datei, muss die Georeferenz-Datei im Attribut <i>georefURL</i> wie im Beispiel angegeben sein.<br>
+				<pre>
+					&lt;xplan:XP_ExterneReferenz&gt;
+						&lt;xplan:georefURL&gt;BPlan001_5-1.pgw&lt;/xplan:georefURL&gt;
+						&lt;xplan:referenzURL&gt;BPlan001_5-1.png&lt;/xplan:referenzURL&gt;
+					&lt;/xplan:XP_ExterneReferenz&gt;
+				</pre>
+			</li>
+		</ol>
+	</div>
 
-<form action="index.php?go=xplankonverter_extract_gml_to_form&planart=<?php echo $this->formvars['planart']?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" method="post">
-	<button id="extract_to_form" style="display:none" name="gml_file" value="">Daten in Formular laden</button>
-</form>
+	<form id="file_form" action="" method="post" enctype="multipart/form-data">
+		<input type="file" id="file_select" name="gml_file" style="height: 50px"/><br>
+		<button id="upload_button">Hochladen</button><br>
+	</form>
+
+	<div id="waiting_info_div" style="display: none">Lade Daten hoch ...</div>
+
+	<form action="index.php?go=xplankonverter_extract_gml_to_form&planart=<?php echo $this->formvars['planart']?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" method="post">
+		<div id="upload_message" style="text-align: left; padding: 20px;"></div>
+		<input id="random_number" type="hidden" name="random_number" value=""/>
+		<button id="extract_to_form" style="display:none" name="gml_file" value="" style="margin-bottom: 20px">Daten in Formular laden</button>
+	</form>
+</div>
 <script>
 	var form = $('#file_form');
-	var fileSelect = $('#file_select');
-	var uploadButton = $('#upload_button');
-	var uploadMessage = $('#upload_message');
-	var extractToForm = $('#extract_to_form');
 
-	uploadButton.on(
+	$('#upload_button').on(
 		'click',
 		function(event) {
 			event.preventDefault();
 
 			// checks if exists
-			if (fileSelect.val() == '' ){
+			if ($('#file_select').val() == '' ) {
 				message([{ type: 'error', msg: 'Keine Datei ausgewählt!'}]);
 				return;
 			}
-			// Update button text.
-			uploadButton.html('Uploading...');
+			$('#upload_hint_div, #file_select, #upload_button').hide();
+			$('#waiting_info_div').show();
 
-			var file = fileSelect[0].files[0];
+			var file = $('#file_select')[0].files[0];
 			var formData = new FormData();
+			var err = '';
 			formData.append('gml_file', file, file.name);
 			formData.append('go', 'xplankonverter_upload_xplan_gml');
+			formData.append('csrf_token', '<? echo $_SESSION['csrf_token']; ?>');
+			formData.append('planart', '<? echo $this->formvars['planart']; ?>');
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', 'index.php', true);
 			xhr.onload = function () {
+				$('#waiting_info_div').hide();
 				if (xhr.status === 200) {
-					// File(s) uploaded.
-					uploadButton.hide();
-					fileSelect.hide();
-					uploadMessage.html('Die GML-Datei ' + file.name + ' wurde erfolgreich hochgeladen');
-				} else {
-					message([{ type: 'notice', msg: 'Fehler beim hochladen!'}]);
+					result = JSON.parse(xhr.response);
+					if (result.success) {
+						html = 'Erfolgreich hochgeladene GML-Datei:<br><ul><li><b>' + result.gml_file + '</b></li></ul>';
+						html += result.msg;
+						if (result.doc_files.length > 0) {
+							html += '<br>Zusätzlich hochgeladene Referenzen:<ul><li>' + result.doc_files.map(
+								function(doc_file) {
+									return  '<b>' + doc_file['upload_file_name'] + '</b><br><a href="<? echo $this->plan_layerset['document_url']; ?>' + doc_file['store_file_name'] + '"><img src="<? echo $this->plan_layerset['document_url']; ?>' + doc_file['thumb_file_name'] + '" width="100" name="' + doc_file['file_name'] + '" onmouseover="' + doc_file['file_name'] + '.width=\'800\';" onmouseout="' + doc_file['file_name'] + '.width=\'100\'"></a>';
+								}
+							).join('</li><li>') + '</li></ul>';
+						}
+						$('#upload_message').html(html);
+						$('#random_number').val(result.random_number);
+						$('#extract_to_form').val(result.gml_file).show();
+					}
+					else {
+						err = result.msg;
+					}
+				}
+				else {
+					err = 'Fehler beim hochladen!';
+				}
+				if (err != '') {
+					$('#upload_hint_div').show();
+					$('#upload_button').show();
+					$('#file_select').show();
+					message([{ type: 'error', msg: err}]);
 				}
 			};
-			// Send the Data.
-			xhr.send(formData);
 
-			extractToForm.val(file.name).show();
+			xhr.send(formData);
 		}
 	);
 </script>
