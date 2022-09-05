@@ -853,7 +853,8 @@ function prepare_sha1($login_name, $password) {
 		UPDATE
 			user
 		SET
-			password = SHA1('" . $password . "')
+			password = SHA1('" . $password . "'),
+			passwort = NULL
 		WHERE
 			passwort = MD5('" . $password . "') AND
 			password IS NULL
