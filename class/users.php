@@ -668,14 +668,14 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 
-	function __construct($login_name, $id, $database, $passwort = '') {
+	function __construct($login_name, $id, $database, $password = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
 		$this->has_logged_in = false;
 		if ($login_name) {
 			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name, $passwort);
+			$this->readUserDaten(0, $login_name, $password);
 			$this->remote_addr = getenv('REMOTE_ADDR');
 		}
 		else {
@@ -752,11 +752,11 @@ class user {
     return 0;
   }
 
-	function readUserDaten($id, $login_name, $passwort = '') {
+	function readUserDaten($id, $login_name, $password = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
+		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*
@@ -765,7 +765,7 @@ class user {
 			WHERE
 				" . implode(" AND ", $where) . "
 		";
-		#echo '<br>Sql: ' . $sql;
+		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql, 4, 0, true);
@@ -788,6 +788,7 @@ class user {
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
+		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
 	}
 
@@ -995,20 +996,6 @@ class user {
 		return $userdaten;
 	}
 
-	function getFunktion($id) {
-		# Abfragen der Rollen und Funktion, die dem Benutzer zugewiesen sind
-		$sql ="SELECT Name, Vorname, Funktion FROM user,rolle";
-		$sql.=" WHERE user.ID=rolle.user_id";
-		$sql.=" AND user.ID LIKE '".$id."' AND passwort LIKE '".$passwort."'";
-		$this->debug->write("<p>file:users.php class:user->getFunktion - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		if ($this->database->result->num_rows == 0) {
-			$err_nr = 1;
-			$view = 'anmelden';
-		}
-	}
-
 	function getStellen($stelle_ID, $with_expired = false) {
 		global $language;
 		if ($language != '' AND $language != 'german') {
@@ -1146,7 +1133,7 @@ class user {
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
-					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
 					, result_transparency = '" . $formvars['result_transparency'] . "'
@@ -1331,7 +1318,7 @@ class user {
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',passwort = MD5("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
+		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
 		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
@@ -1401,12 +1388,12 @@ class user {
 
 	function Aendern($userdaten) {
 		if ($userdaten['changepasswd'] == 1) {
-			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
-			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
+			$password_column = ", `password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
+			$password_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}
 		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
 		if ($userdaten['password_setting_time']) {
-			$passwort_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
+			$password_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
 		}
 
 		$sql = "
@@ -1419,26 +1406,27 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "',
-				`ID` =  ".$userdaten['id'].",
-				`phon` = '".$userdaten['phon']."',
-				`email` = '".$userdaten['email']."',
-				`organisation` = '".$userdaten['organisation']."',
-				`position` = '".$userdaten['position']."',
+				`ID` =  " . $userdaten['id'].",
+				`phon` = '" . $userdaten['phon']."',
+				`email` = '" . $userdaten['email']."',
+				`organisation` = '" . $userdaten['organisation']."',
+				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) .
-				$passwort_column .
-				$passwort_setting_time_column . "
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
+				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
+				$password_column .
+				$password_setting_time_column . "
 			WHERE
 				`ID`= " . $userdaten['selected_user_id'] . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
 		}
 		return $ret;
 	}
-	
+
 	function archivieren() {
 		$sql = "
 			UPDATE
@@ -1475,7 +1463,7 @@ class user {
 			UPDATE
 				user
 			SET
-				`passwort` = MD5('" . $this->database->mysqli->real_escape_string($password) . "'),
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
 				`password_setting_time` = '" . $password_setting_time . "'
 			WHERE
 				`ID` = " . $this->id . "

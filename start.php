@@ -169,10 +169,16 @@ else {
 
 		if (is_login($GUI->formvars)) {
 			$GUI->debug->write('Es ist eine reguläre Anmeldung.', 4, $GUI->echo);
-
-			# Frage den Nutzer mit dem login_namen ab
+			/**
+				This set the passwort with the sha1 method before each login
+				if not allready exists and only if it matches with the old md5 method.
+			*/
+			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
+				$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
+			};
+			# Frage den Nutzer mit dem login_namen und password ab
 			$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
-			$GUI->debug->write('Nutzer mit login_name: ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
+			$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
 
 			if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
 				$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
@@ -830,5 +836,32 @@ function set_session_vars($formvars) {
 	$_SESSION['login_name'] = $formvars['login_name'];
 	$_SESSION['login_routines'] = true;
 	$_SESSION['csrf_token'] = md5(uniqid(mt_rand(), true));
+}
+
+/**
+	Here we switch from the old md5 to the new sha1 password encryption method.
+	The new password reside in the new attribut password (with d at the end)
+	This function set the password in attribut password with method sha1
+	when password match with md5 method in attribut passwort.
+	This function is to prepare the use of sha1 password encryption in kvwmap
+	If any user have been switched to the new sha1 method, this function and as well
+	the attribut passwort (with t at the end) will become useless and can be removed.
+*/
+function prepare_sha1($login_name, $password) {
+	global $GUI;
+	$sql = "
+		UPDATE
+			user
+		SET
+			password = SHA1('" . $password . "')
+		WHERE
+			passwort = MD5('" . $password . "') AND
+			password IS NULL
+	";
+	#echo "SQL to update the password with method sha1: ", $sql;
+	$GUI->debug->write("<p>file:users.php class:user->prepare_sha1 - Setzen des Passworthash in Attribut password mit SHA1 Methode:<br>", 3);
+	$ret = $GUI->database->execSQL($sql, 4, 0, true);
+	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $GUI->database->mysqli->error, 4); return 0; }
+	return $GUI->database->mysqli->affected_rows > 0;
 }
 ?>
