@@ -9,7 +9,6 @@
 		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
     $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 

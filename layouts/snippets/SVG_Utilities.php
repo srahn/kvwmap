@@ -8,6 +8,10 @@
 <script language="JavaScript">
 
 	var enclosingForm = <? echo $this->currentform; ?>;
+	
+	function saveDrawmode(){
+		ahah("index.php", 'go=saveDrawmode&always_draw=' + +document.GUI.always_draw.checked, new Array(""), new Array(""));
+	}
 
 	function geom_from_layer_change(selected_layer_id){
 		// selected_layer_id ist die Layer-ID des Layers, der gerade im Geometrie-Editor bearbeitet wird
