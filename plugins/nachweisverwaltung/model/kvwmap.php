@@ -360,7 +360,6 @@
 			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 			if ($GUI->formvars['CMD']!='') {
 				$GUI->navMap($GUI->formvars['CMD']);
-				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
@@ -1407,7 +1406,6 @@
 		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
     if ($GUI->formvars['CMD']!=''){			
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
     elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
       $GUI->scaleMap($GUI->formvars['nScale']);
@@ -1682,7 +1680,6 @@
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);

@@ -253,6 +253,11 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 			
+			case 'saveDrawmode' : {
+				$GUI->sanitize(['always_draw' => 'boolean']);
+				$GUI->saveDrawmode();
+			} break;
+			
 			case 'layer_check_oids' : {
 				$GUI->sanitize([
 					'layer_id' => 'int',

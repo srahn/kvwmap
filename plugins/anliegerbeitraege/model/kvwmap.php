@@ -9,18 +9,14 @@
 		if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
     if ($GUI->formvars['CMD']!='') {
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
     $GUI->queryable_postgis_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 
   	if(!$GUI->formvars['geom_from_layer']){
       $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
       $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
+			$GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
     }
-    if(!$GUI->formvars['geom_from_layer']){
-      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-      $GUI->formvars['layer_id'] = $layerset[0]['Layer_ID'];
-    }    
     $currenttime=date('Y-m-d H:i:s',time());
     $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
     $GUI->drawMap();

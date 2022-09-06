@@ -169,6 +169,10 @@ class GUI {
 			sanitize($this->formvars[$name], $type);
 		}
 	}
+	
+	function saveDrawmode(){
+		$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+	}
 
 	function layer_check_oids() {
 		$this->main = 'layer_check_oids.php';
@@ -5013,7 +5017,6 @@ echo '			</table>
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
-			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else{
 			$this->loadMap('DataBase');
@@ -5197,7 +5200,6 @@ echo '			</table>
 			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
 		) {
 			$this->neuLaden();
-			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else {
 			$this->loadMap('DataBase');
@@ -10212,7 +10214,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != value_of($this->formvars, 'nScale') OR value_of($this->formvars, 'neuladen') OR $this->formvars['CMD'] != '') {
 						$this->neuLaden();
-						$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 					}
 					else {
 						$this->loadMap('DataBase');

@@ -12,6 +12,7 @@
 
 			# Anliegerbeiträge Strasse speichern
 			case 'anliegerbeitraege_strasse_speichern' : {
+				$GUI->sanitize(['newpathwkt' => 'text']);
 				include(PLUGINS.'anliegerbeitraege/model/kvwmap.php');
 				include(PLUGINS.'anliegerbeitraege/model/anliegerbeitraege.php');
 				$GUI->Anliegerbeiträge_strasse_speichern();
@@ -19,6 +20,7 @@
 
 			# Anliegerbeiträge Buffer speichern
 			case 'anliegerbeitraege_buffer_speichern' : {
+				$GUI->sanitize(['newpathwkt' => 'text']);
 				include(PLUGINS.'anliegerbeitraege/model/kvwmap.php');
 				include(PLUGINS.'anliegerbeitraege/model/anliegerbeitraege.php');
 				$GUI->Anliegerbeiträge_buffer_speichern();

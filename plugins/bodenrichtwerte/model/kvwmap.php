@@ -49,7 +49,6 @@
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
     elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
       $GUI->scaleMap($GUI->formvars['nScale']);
