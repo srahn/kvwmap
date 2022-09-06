@@ -318,7 +318,7 @@ $legendheight = $this->map->height + 20;
 					</div>
 					<div id="dokein-draw">
 						<div class="dokein-draw-child">
-							<input type="checkbox" name="always_draw" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen
+							<input type="checkbox" name="always_draw" onclick="saveDrawmode();" value="1" <?if($always_draw == 1 OR $always_draw == 'true')echo 'checked'; ?>>&nbsp;weiterzeichnen
 						</div>
 						<div class="dokein-draw-child">
 							<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
