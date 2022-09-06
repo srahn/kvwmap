@@ -4,6 +4,7 @@ function go_switch_bauleitplanung($go){
 	global $GUI;
 	switch($go){  
 		case 'delete_bplan' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -23,6 +24,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'delete_fplan' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -42,6 +44,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'copy_bplan' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -51,6 +54,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'copy_fplan' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -60,6 +64,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'update_bplan_from_rok' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -69,6 +74,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'update_fplan_from_rok' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'plan_id' => 'int']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -78,6 +84,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'zoomtobplan' : {
+			$GUI->sanitize(['roknr' => 'text']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$rok = new rok($GUI->pgdatabase);
 			$rect = $rok->getExtentFromRokNrBplan($GUI->formvars['roknr'], $GUI->formvars['art'], 10, $GUI->user->rolle->epsg_code);
@@ -102,6 +109,7 @@ function go_switch_bauleitplanung($go){
 		} break;
 		
 		case 'zoomtofplan' : {
+			$GUI->sanitize(['gkz' => 'text']);
 			include(PLUGINS.'bauleitplanung/model/rok.php');
 			$rok = new rok($GUI->pgdatabase);
 			$rect = $rok->getExtentFromRokNrFplan($GUI->formvars['gkz'], 10, $GUI->user->rolle->epsg_code);
