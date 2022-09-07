@@ -1718,6 +1718,7 @@ class stelle {
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
+		$sql .=' AND layer.Datentyp != 5';
 		if($use_geom != NULL){
 			$sql .=' AND used_layer.use_geom = 1';
 		}
