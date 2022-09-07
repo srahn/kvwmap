@@ -56,7 +56,7 @@
 		$('<input>').attr({
 			type: 'hidden',
 			name: 'password_setting_time',
-			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->Stelle->allowedPasswordAge > 0 ? $this->Stelle->allowedPasswordAge : 1))); ?>'
+			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->user_stelle->allowedPasswordAge > 0 ? $this->user_stelle->allowedPasswordAge : 1))); ?>'
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
