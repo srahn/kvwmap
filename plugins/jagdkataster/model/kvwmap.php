@@ -238,7 +238,7 @@
   };
   
 	$GUI->jagdkatastereditor_listflurst = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names_'.$GUI->formvars['chosen_layer_id'] => 'text', 'oid' => 'int']]);
+		$GUI->sanitize(['checkbox_names_'.$GUI->formvars['chosen_layer_id'] => 'text', 'oid' => 'int']);
 		include(PLUGINS.'alkis/model/kataster.php');	
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_flurstlist.php';
     if($GUI->formvars['oid'])$GUI->titel='Im Jagdbezirk '.$GUI->formvars['name'].' enthaltene Flurstücke';
@@ -250,7 +250,7 @@
   };
 	
 	$GUI->jagdkatastereditor_listeigentuemer_csv = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']]);
+		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
   	$layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
     $GUI->jagdkataster = new jagdkataster($GUI->pgdatabase, $layer);
   	$GUI->eigentuemer = $GUI->jagdkataster->getEigentuemerListe($GUI->formvars);
@@ -271,7 +271,7 @@
   };
 	
 	$GUI->jagdkatastereditor_listeigentuemer = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']]);
+		$GUI->sanitize(['checkbox_names' => 'text', 'oid' => 'int']);
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_eigentuemerlist.php';
     $GUI->titel='Eigentümer im Jagdbezirk '.$GUI->formvars['name'];
     $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
@@ -281,7 +281,7 @@
   };
   
 	$GUI->jagdkatastereditor_listpaechter = function() use ($GUI){
-		$GUI->sanitize(['oid' => 'int']]);
+		$GUI->sanitize(['oid' => 'int']);
     $GUI->main = PLUGINS.'jagdkataster/view/jagdkataster_paechterlist.php';
     $GUI->titel='P&auml;chter im Jagdbezirk '.$GUI->formvars['name'].'';
     $layer = $GUI->user->rolle->getLayer(LAYER_ID_JAGDBEZIRKE);
