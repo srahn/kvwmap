@@ -5,6 +5,7 @@ function go_switch_jagdkataster($go){
 	switch($go){
 	  # Jagdbezirke Sachdaten anzeigen
 	  case 'jagdbezirk_show_data' : {
+			$GUI->sanitize(['oid' => 'int']);
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 			$GUI->jagdbezirk_show_data();
@@ -12,6 +13,7 @@ function go_switch_jagdkataster($go){
 
 	  # zoomtoJagdbezirke
 	  case 'zoomtojagdbezirk' : {
+			$GUI->sanitize(['oid' => 'int']);
 			include(PLUGINS.'jagdkataster/model/kvwmap.php');						# GUI-Objekt erweitern
 			include (PLUGINS.'jagdkataster/model/jagdkataster.php');		# jagdkataster-Klasse einbinden
 			$GUI->zoomtojagdbezirk();
