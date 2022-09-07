@@ -712,6 +712,10 @@
 		font-size: 1.5em;
 	}
 
+	.xpk-func-btn .fa {
+		color: #007bff;
+	}
+
 	.xpk-func-btn:hover {
 /*		color: white;
 		padding: 5 2 5 2;

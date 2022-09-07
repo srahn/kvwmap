@@ -623,6 +623,28 @@ a.red {
 	font-weight: 600; 
 }
 
+a.red .fa {
+	color: #993333;
+}
+
+a.blue {
+	color: #007bff;
+	font-weight: 600; 
+}
+
+a.blue .fa {
+	color: #007bff;
+}
+
+a.orange {
+	color: orange;
+	font-weight: 600; 
+}
+
+a.orange .fa {
+	color: orange;
+}
+
 a.link {
 	color: firebrick; 
 }
@@ -636,6 +658,10 @@ a.blue_underline {
 a.green {
 	color: #339933;
 	TEXT-DECORATION: none; 
+}
+
+a.green .fa {
+	color: #339933;
 }
 
 a.metalink {
@@ -2092,7 +2118,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fa {
-	/*color: gray;*/
+	color: gray;
 }
 
 .fa:hover {
