@@ -169,6 +169,10 @@ class GUI {
 			sanitize($this->formvars[$name], $type);
 		}
 	}
+	
+	function saveDrawmode(){
+		$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
+	}
 
 	function layer_check_oids() {
 		$this->main = 'layer_check_oids.php';
@@ -1871,12 +1875,12 @@ echo '			</table>
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
-					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  value_of($_REQUEST, 'passwort');
+					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
 				}
         $map->setMetaData("ows_onlineresource", $ows_onlineresource);
 				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 
-        $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+        $map->setMetaData("wms_extent",$bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				// enable service types
         $map->setMetaData("ows_enable_request", '*');
 
@@ -5013,7 +5017,6 @@ echo '			</table>
     $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
 			$this->neuLaden();
-			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else{
 			$this->loadMap('DataBase');
@@ -5197,7 +5200,6 @@ echo '			</table>
 			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
 		) {
 			$this->neuLaden();
-			$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 		}
 		else {
 			$this->loadMap('DataBase');
@@ -10212,7 +10214,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$oldscale=round($this->map_scaledenom);
 					if ($oldscale != value_of($this->formvars, 'nScale') OR value_of($this->formvars, 'neuladen') OR $this->formvars['CMD'] != '') {
 						$this->neuLaden();
-						$this->user->rolle->saveDrawmode($this->formvars['always_draw']);
 					}
 					else {
 						$this->loadMap('DataBase');
@@ -12772,6 +12773,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
 			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id);
+			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->database);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['Name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
@@ -13787,20 +13789,20 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
   function rollenwahl($Stelle_ID) {
-		include_once(CLASSPATH.'FormObject.php');
+		include_once(CLASSPATH . 'FormObject.php');
     $this->user->Stellen = $this->user->getStellen(0);
-    $this->Hinweis.='Aktuelle Stellen_ID: '.$Stelle_ID;
-    $StellenFormObj=new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'max12', "", "", NULL , NULL, "vertical-align: middle;");
+    $this->Hinweis .= 'Aktuelle Stellen_ID: ' . $Stelle_ID;
+    $StellenFormObj = new FormObject("Stelle_ID", "select", $this->user->Stellen['ID'], $Stelle_ID, $this->user->Stellen['Bezeichnung'], 'max12', "", "", NULL , NULL, "vertical-align: middle;");
     # hinzufügen von Javascript welches dafür sorgt, dass die Angegebenen Werte abgefragt werden
     # und die genannten Formularobjekte mit diesen Werten bestückt werden
     # übergebene Werte
     # SQL für die Abfrage, es darf nur eine Zeile zurückkommen
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
-    $select ="nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select.=",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
-    $from ='rolle';
-    $where ="stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
+    $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
+    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
+    $from = "rolle";
+    $where = "stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
 			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
@@ -13808,7 +13810,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
     $StellenFormObj->outputHTML();
-    $this->StellenForm=$StellenFormObj;
+    $this->StellenForm = $StellenFormObj;
     $this->main = 'rollenwahl.php';
     # Suchen nach verfügbaren Layouts
     # aus dem Stammordner layouts (vom System angebotene)
@@ -13834,16 +13836,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     # Abfragen der Farben für die Suchergebnisse
     $this->result_colors = read_colors($this->database);
 		# Speichern des neuen Passworts, falls übergeben
-		if($this->formvars['go'] == 'Stelle_waehlen_Passwort_aendern'){
-			if($this->formvars['passwort'] == ''){									# Test ob altes Passwort korrekt angegeben´
+		if ($this->formvars['go'] == 'Stelle_waehlen_Passwort_aendern') {
+			if ($this->formvars['passwort'] == '') {
+				# Test ob altes Passwort korrekt angegeben
 				$this->PasswordError = 'Geben Sie bitte ihr aktuelles Passwort an.';
 			}
-			else{
+			else {
 				$user = new user($this->user->login_name, 0, $this->database, $this->formvars['passwort']);
-				if($user->login_name != $this->user->login_name){
+				if ($user->login_name != $this->user->login_name) {
 					$this->PasswordError = 'Das angegebene Passwort stimmt nicht mit dem aktuellen Passwort überein.';
 				}
-				else{
+				else {
 					$this->PasswordError = isPasswordValide($this->formvars['passwort'], $this->formvars['new_password'], $this->formvars['new_password_2']);		# Test ob neues Passwort in Ordnung
 					if($this->PasswordError == ''){
 						$this->user->setNewPassword($this->formvars['new_password']);

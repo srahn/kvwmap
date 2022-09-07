@@ -36,27 +36,27 @@ class database {
 	var $success;
 	var $errormessage;
 
-  function __construct($open = false) {
-    global $debug;
+	function __construct($open = false) {
+		global $debug;
 		global $GUI;
 		$this->gui = $GUI;
-    $this->debug=$debug;
-    $this->loglevel=LOG_LEVEL;
- 		$this->defaultloglevel=LOG_LEVEL;
- 		global $log_mysql;
-    $this->logfile=$log_mysql;
- 		$this->defaultlogfile=$log_mysql;
-    $this->ist_Fortfuehrung=1;
-    $this->type="MySQL";
-    $this->commentsign='#';
-    # Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
-    # BEGIN TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
-    # Anweisungen nicht in Transactionsblöcken ablaufen.
-    # Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
-    # Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
-    # und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
-    # Dazu Fehlerausschriften bearchten.
-    $this->blocktransaction=0;
+		$this->debug = $debug;
+		$this->loglevel = LOG_LEVEL;
+		$this->defaultloglevel = LOG_LEVEL;
+		global $log_mysql;
+		$this->logfile = $log_mysql;
+		$this->defaultlogfile = $log_mysql;
+		$this->ist_Fortfuehrung = 1;
+		$this->type = "MySQL";
+		$this->commentsign = '#';
+		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
+		# BEGIN TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
+		# Anweisungen nicht in Transactionsblöcken ablaufen.
+		# Kann zur Steigerung der Geschwindigkeit von großen Datenbeständen verwendet werden
+		# Vorsicht: Wenn Fehler beim Einlesen passieren, ist der Datenbestand inkonsistent
+		# und der Einlesevorgang muss wiederholt werden bis er fehlerfrei durchgelaufen ist.
+		# Dazu Fehlerausschriften bearchten.
+		$this->blocktransaction = 0;
 		if ($open) {
 			$this->host = MYSQL_HOST;
 			$this->user = MYSQL_USER;
@@ -64,83 +64,23 @@ class database {
 			$this->dbName = MYSQL_DBNAME;
 			$this->open();
 		}
-  }
-
-	function login_user($username, $passwort, $agreement = ''){
-		$sql = "
-			SELECT
-				* 
-			FROM
-				information_schema.COLUMNS 
-			WHERE
-				TABLE_SCHEMA = '" . $this->dbName . "' AND
-				TABLE_NAME = 'user' AND
-				COLUMN_NAME = 'agreement_accepted'
-		";
-		$ret = $this->execSQL($sql, 4, 0);
-		if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-
-		$colunn_aggreement_accepted = (mysqli_num_rows($this->result) == 1 ? ', agreement_accepted' : ', 1');
-
-		$sql = "
-			SELECT
-				ID,
-				login_name" .
-				$colunn_aggreement_accepted . "
-			FROM
-				user
-			WHERE
-				login_name = '" . $this->mysqli->real_escape_string($username) . "' AND
-				passwort = md5('" . $this->mysqli->real_escape_string($passwort) . "') AND
-				(
-					('" . date('Y-m-d h:i:s') . "' >= start AND '" . date('Y-m-d h:i:s') . "' <= stop) OR
-					(start='0000-00-00 00:00:00' AND stop='0000-00-00 00:00:00')
-				)
-		"; # Zeiteinschränkung wird nicht berücksichtigt.
-		#echo $sql;
-		$this->execSQL("SET NAMES '" . MYSQL_CHARSET . "'", 0, 0);
-		$this->execSQL($sql, 4, 0);
-		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4); return 0; }
-		$rs = $this->result->fetch_array();
-		if (mysqli_num_rows($this->result) != '') {
-			# wenn Nutzer bisher noch nicht akzeptiert hatte
-			if (defined('AGREEMENT_MESSAGE') AND AGREEMENT_MESSAGE != '' AND $rs['agreement_accepted'] == 0) {
-				if ($agreement != '') { # es wurde jetzt akzeptiert
-					$sql = "
-						UPDATE
-							user
-						SET
-							agreement_accepted = TRUE
-						WHERE
-							ID = " . $rs['ID'] . "
-					";
-					$this->execSQL($sql, 4, 0);
-					return true;
-				}
-				else { # jetzt wurde auch nicht akzeptiert
-					$this->agreement_not_accepted = true;
-					return false;
-				}
-			}
-			else {
-				return true;
-			}
-		}
-		else{
-			return false;
-		}
 	}
 
-  function read_colors(){	
-  	$sql = "SELECT * FROM colors";
-  	#echo $sql;
-  	$this->execSQL($sql, 4, 0);
-    if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->result->fetch_assoc()) {
-      $colors[] = $rs;
-    }
-    return $colors;
-  }
+	function read_colors() {
+		$sql = "
+			SELECT
+				*
+			FROM
+				colors
+		";
+		#echo $sql;
+		$this->execSQL($sql, 4, 0);
+		if (!$this->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while ($rs = $this->result->fetch_assoc()) {
+			$colors[] = $rs;
+		}
+		return $colors;
+	}
 
   function read_color($id){
   	$sql = "SELECT * FROM colors WHERE id = ".$id;
@@ -154,12 +94,12 @@ class database {
   }
 
 	function create_new_gast($gast_stelle) {
-		$loginname = "";
+		$login_name = "";
 		$laenge = 10;
 		$string = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 		mt_srand((double)microtime() * 1000000);
-		for ($i=1; $i <= $laenge; $i++) {
-			$loginname .= substr($string, mt_rand(0, strlen($string) - 1), 1);
+		for ($i = 1; $i <= $laenge; $i++) {
+			$login_name .= substr($string, mt_rand(0, strlen($string) - 1), 1);
 		}
 		# Gastnutzer anlegen
 		$sql = "
@@ -168,17 +108,17 @@ class database {
 				`Name`,
 				`Vorname`,
 				`Namenszusatz`,
-				`passwort`,
+				`password`,
 				`ips`,
 				`Funktion`,
 				`stelle_id`
 			)
 			VALUES (
-				'" . $loginname . "',
+				'" . $login_name . "',
 				'gast',
 				'gast',
 				'',
-				'd4061b1486fe2da19dd578e8d970f7eb',
+				SHA1('gast'),
 				'',
 				'gast',
 				'" . $this->mysqli->real_escape_string($gast_stelle) . "'
@@ -206,7 +146,7 @@ class database {
 		$rolle->setGroups($new_user_id, $gast_stelle, $stelle->default_user_id, $layers['ID']);
 		$rolle->setSavedLayersFromDefaultUser($new_user_id, $gast_stelle, $stelle->default_user_id);
 
-		$gast['username'] = $loginname;
+		$gast['username'] = $login_name;
 		$gast['passwort'] = 'gast';
 		return $gast;
 	}

@@ -2240,7 +2240,7 @@ FROM
 					WHERE 
 						1=1 " .
 						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
+						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurnummer";
@@ -2287,7 +2287,7 @@ FROM
 					WHERE 
 						1=1 " .
 						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
+						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					UNION
 					SELECT distinct 

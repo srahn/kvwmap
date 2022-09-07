@@ -46,7 +46,7 @@ class Nutzer extends MyObject {
 				'Name' => $gui->formvars['Name'],
 				'Vorname' => $gui->formvars['Vorname'],
 				'Namenszusatz' => $gui->formvars['Namenszusatz'],
-				'passwort' => md5($gui->formvars['new_password']),
+				'password' => SHA1($gui->formvars['new_password']),
 				'phon' => $gui->formvars['phon'],
 				'email' => $gui->formvars['email'],
 				'stelle_id' => $stelle_id
