@@ -26,8 +26,9 @@ function go_switch_bevoelkerung($go){
 		} break;
 
 		case 'bevoelkerung_transpose_table' : {
-			$year = $_REQUEST['year'];
-			$tablename = $_REQUEST['tablename'];
+			$GUI->sanitize(['year' => 'int', 'tablename' => 'text']);
+			$year = $GUI->formvars['year'];
+			$tablename = $GUI->formvars['tablename'];
 			if (empty($year) or empty($tablename)) {
 				echo 'Es müssen die Parameter <b>year</b> und <b>tablename</b> angegeben werden.';
 			}
@@ -39,6 +40,7 @@ function go_switch_bevoelkerung($go){
 		} break;
 
 		case 'show_ternary_charts' : {
+			$GUI->sanitize(['layer_parameter_jahr' => 'int', 'layer_parameter_geschlecht' => 'text']);
 			include(PLUGINS.'bevoelkerung/model/prognose.php');
 			$prog = new prognose($GUI->pgdatabase);
 			$GUI->triple = $prog->find_triple($GUI->formvars['layer_parameter_jahr'], $GUI->formvars['layer_parameter_geschlecht'], 'junge', 'ew', 'alte');

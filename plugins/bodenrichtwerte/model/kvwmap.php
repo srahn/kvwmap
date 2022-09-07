@@ -63,6 +63,7 @@
   };
 	
 	$GUI->aendernBodenRichtWert = function() use ($GUI){
+		$GUI->sanitize(['gid' => 'int']);
     # Bodenrichtwertzone aus der Datenbank abfragen
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $bodenrichtwertzone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
@@ -99,6 +100,45 @@
   };
 	
 	$GUI->bodenRichtWertFormSenden = function() use ($GUI){
+		$GUI->sanitize([
+			'stichtag' => 'text',
+			'gemeinde' => 'int',
+			'gemarkung' => 'int',
+			'ortsteilname' => 'text',
+			'postleitzahl' => 'int',
+			'zonentyp' => 'text',
+			'gutachterausschuss' => 'text',
+			'bodenrichtwertnummer' => 'int',
+			'oertliche_bezeichnung' => 'text',
+			'bodenrichtwert' => 'float',
+			'brwu' => 'float',
+			'brws' => 'float',
+			'brwb' => 'float',
+			'bedarfswert' => 'float',
+			'basiskarte' => 'text',
+			'entwicklungszustand' => 'text',
+			'beitragszustand' => 'text',
+			'nutzungsart' => 'text',
+			'ergaenzende_nutzung' => 'text',
+			'bauweise' => 'text',
+			'geschosszahl' => 'text',
+			'grundflaechenzahl' => 'text',
+			'geschossflaechenzahl' => 'text',
+			'baumassenzahl' => 'text',
+			'flaeche' => 'text',
+			'tiefe' => 'text',
+			'breite' => 'text',
+			'wegeerschliessung' => 'text',
+			'erschliessung' => 'text',
+			'ackerzahl' => 'text',
+			'gruenlandzahl' => 'text',
+			'aufwuchs' => 'text',
+			'bodenart' => 'text',
+			'verfahrensgrund' => 'text',
+			'verfahrensgrund_zusatz' => 'text',
+			'bemerkungen' => 'text',
+			'umring' => 'text',
+			'textposition' => 'text']);
     # Zusammensetzen der übergebenen Parameter für das Polygon und die Textposition
     #echo 'formvars[loc_x, loc_y]: '.$GUI->formvars['loc_x'].', '.$GUI->formvars['loc_x'];
     if ($GUI->formvars['loc_x']!='' OR $GUI->formvars['loc_y']!='') {
@@ -170,6 +210,7 @@
   };
 	
 	$GUI->bodenRichtWertZoneLoeschen = function() use ($GUI){
+		$GUI->sanitize(['gid' => 'int']);
     $layer = $GUI->user->rolle->getLayer(LAYERNAME_BODENRICHTWERTE);
     $zone=new bodenrichtwertzone($GUI->pgdatabase, $layer[0]['epsg_code'], $GUI->user->rolle->epsg_code);
     $ret=$zone->deleteBodenrichtwertzonen(array($GUI->formvars['gid']));
