@@ -1704,7 +1704,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $no_query_layers = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1718,15 +1718,14 @@ class stelle {
 		$sql .=' WHERE stelle_id = '.$this->id;
 		$sql .=' AND layer.Gruppe = u_groups.id AND (layer.connectiontype = 6 OR layer.connectiontype = 9)';
 		$sql .=' AND layer.Layer_ID = used_layer.Layer_ID';
-		$sql .=' AND layer.Datentyp != 5';
 		if($use_geom != NULL){
 			$sql .=' AND used_layer.use_geom = 1';
 		}
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_line_and_polygon_layer){
-			$sql .=' AND layer.Datentyp IN (2,3)';
+		if($no_query_layers){
+			$sql .=' AND layer.Datentyp != 5';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
