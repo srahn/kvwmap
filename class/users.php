@@ -1133,7 +1133,7 @@ class user {
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
-					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
+					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
 					, result_transparency = '" . $formvars['result_transparency'] . "'
@@ -1412,8 +1412,7 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
-				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . 
 				$password_column .
 				$password_setting_time_column . "
 			WHERE

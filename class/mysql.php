@@ -114,7 +114,7 @@ class database {
 				`stelle_id`
 			)
 			VALUES (
-				'" . $logi_nname . "',
+				'" . $login_name . "',
 				'gast',
 				'gast',
 				'',
