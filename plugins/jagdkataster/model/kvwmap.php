@@ -204,7 +204,7 @@
   };
 
 	$GUI->jagdkatastereditor_listflurst_csv = function() use ($GUI){
-		$GUI->sanitize(['checkbox_names_'.$GUI->formvars['chosen_layer_id'] => 'text', 'oid' => 'int']]);
+		$GUI->sanitize(['checkbox_names_'.$GUI->formvars['chosen_layer_id'] => 'text', 'oid' => 'int']);
 		include(PLUGINS.'alkis/model/kataster.php');	
 		if($GUI->formvars['FlurstKennz'] != ''){
 			$selected_flurstuecke = explode(';', $GUI->formvars['FlurstKennz']);
