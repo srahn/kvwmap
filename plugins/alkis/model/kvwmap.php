@@ -1290,7 +1290,7 @@
     # Abragen der Fluren zur Gemarkung
     if($GemkgID > 0){
     	$Flur=new Flur('','','',$GUI->pgdatabase);
-			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], false);
+			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], 'aktuell');
     	# Erzeugen des Formobjektes für die Flurauswahl
     	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
     }
