@@ -154,7 +154,6 @@ function go_switch_nachweisverwaltung($go){
 		
 	  # Rechercheanfrage an die Datenbank senden / mit prüfen der Eingabedaten
 	  case 'Nachweisanzeige' : {
-			$GUI->sanitizeNachweisSearch();
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweis = new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
 			if($GUI->formvars['bearbeitungshinweis_id'] != ''){
