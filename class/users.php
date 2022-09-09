@@ -763,7 +763,8 @@ class user {
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . "
+				" . implode(" AND ", $where) . " AND
+				archived IS NULL
 		";
 		#echo '<br>SQL to read user data: ' . $sql;
 
