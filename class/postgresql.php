@@ -2659,8 +2659,8 @@ FROM
 				md_metadata
 			WHERE
 				true" .
-				($md['oid'] != '' 			? " AND oid = " . (int)$md['oid'] : '') .
-				($md['mdfileid'] != '' 	? " AND mdfileid = " . (int)$md['mdfileid'] : '') . "
+				($md['oid'] != '' 			? " AND oid = " . $md['oid'] : '') .
+				($md['mdfileid'] != '' 	? " AND mdfileid = " . $md['mdfileid'] : '') . "
 		";
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]==0) {
