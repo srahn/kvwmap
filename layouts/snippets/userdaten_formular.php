@@ -155,7 +155,7 @@
 
 <div class="udf_back"><?
 	if ($this->formvars['nutzerstellen']) { ?>
-		<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a><?
+		<a href="index.php?go=BenutzerStellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a><?
 	} ?>
 </div>
 
