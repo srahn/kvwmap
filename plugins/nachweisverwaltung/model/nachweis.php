@@ -803,13 +803,31 @@ class Nachweis {
   }
   
   function eintragenNeuesDokument($datum,$flurid,$VermStelle,$unterart,$gueltigkeit,$geprueft,$stammnr,$blattformat,$blattnr,$rissnummer,$fortf,$bemerkungen,$bemerkungen_intern,$zieldatei,$umring,$user) {
-    #2005-11-24_pk
     if($fortf == '')$fortf = 'NULL';
-    $this->debug->write('Einfügen der Metadaten zum neuen Nachweisdokument in die Sachdatenbank',4);
-    $sql ="INSERT INTO nachweisverwaltung.n_nachweise (flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)";
-    $sql.=" VALUES (".$flurid.",'".trim($stammnr)."',".$unterart.",'".trim($blattnr)."','".$datum."'";
-    $sql.=",'".$VermStelle."','".$gueltigkeit."','".$geprueft."','".$blattformat."','".$zieldatei."',st_transform(st_geometryfromtext('".$umring."', ".$this->client_epsg."), (select srid from geometry_columns where f_table_name = 'n_nachweise'))";
-    $sql.=",".trim($fortf).",'".trim($rissnummer)."','".$bemerkungen."','".$bemerkungen_intern."','".$user->Vorname." ".$user->Name."', '".date('Y-m-d G:i:s')."', '".date('Y-m-d G:i:s')."')";
+    $sql = "
+			INSERT INTO 
+				nachweisverwaltung.n_nachweise 
+				(flurid,stammnr,art,blattnummer,datum,vermstelle,gueltigkeit,geprueft,format,link_datei,the_geom,fortfuehrung,rissnummer,bemerkungen,bemerkungen_intern,bearbeiter,zeit,erstellungszeit)
+			VALUES (
+				" . $flurid . ",
+				'" . trim($stammnr) . "',
+				" . $unterart . ",
+				'" . trim($blattnr) . "',
+				'" . $datum . "',
+				'" . $VermStelle . "',
+				'" . $gueltigkeit . "',
+				'" . $geprueft . "',
+				'" . $blattformat . "',
+				'" . $zieldatei . "',
+				st_transform(st_geometryfromtext('" . $umring . "', ".$this->client_epsg."), 25833),
+				" . trim($fortf) . ",
+				'" . trim($rissnummer) . "',
+				'" . $bemerkungen . "',
+				'" . $bemerkungen_intern . "',
+				'" . $user->Vorname . " ".$user->Name."',
+				'" . date('Y-m-d G:i:s') . "',
+				'" . date('Y-m-d G:i:s') . "'
+			)";
 		#echo '<br>Polygon-SQL: '.$sql;
     $ret=$this->database->execSQL($sql,4, 1);
     if ($ret[0]) {
@@ -1075,7 +1093,7 @@ class Nachweis {
           $sql.=" AND n.rissnummer='".$rissnr."'";
         }
       	if($fortf!=''){
-          $sql.=" AND n.fortfuehrung=".(int)$fortf;
+          $sql.=" AND n.fortfuehrung=" . $fortf;
         }
 				if($blattnr!=''){
 					$sql.=" AND n.blattnummer='".$blattnr."'";
@@ -1192,10 +1210,10 @@ class Nachweis {
 	        }
 	      	if($fortf!=''){
 						if($fortf2!=''){
-							$sql.=" AND ".$n.".fortfuehrung between ".(int)$fortf." AND ".(int)$fortf2;
+							$sql.=" AND ".$n.".fortfuehrung between " . $fortf." AND " . $fortf2;
 						}
 						else{
-							$sql.=" AND ".$n.".fortfuehrung=".(int)$fortf;
+							$sql.=" AND ".$n.".fortfuehrung=" . $fortf;
 						}
 	        }
 					if($blattnr!=''){

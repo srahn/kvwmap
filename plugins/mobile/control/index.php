@@ -15,18 +15,20 @@ function go_switch_mobile($go){
 		} break;
 
 		case 'mobile_sync' : {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'table_name' => 'text', 'last_client_version' => 'int']);
 			$result = $GUI->mobile_sync();
 			echo json_encode($result);
 		} break;
 
 		case 'mobile_delete_images' : {
-			#var_dump($GUI->formvars['images']);
+			$GUI->sanitize(['selected_layer_id' => 'int']);
 			$GUI->checkCaseAllowed($GUI->go);
 			$result = $GUI->mobile_delete_images($GUI->formvars['selected_layer_id'], $GUI->formvars['images']);
 			echo json_encode($result);
 		} break;
 
 		case 'mobile_upload_image' : {
+			$GUI->sanitize(['selected_layer_id' => 'int']);
 			# Prüfen was hier kommt wenn go nicht erlaubt ist und ob checkCaseAllowed false liefert.
 			if (($GUI->Stelle->isMenueAllowed($go) OR $GUI->Stelle->isFunctionAllowed($go))) {
 				$result = $GUI->mobile_upload_image($GUI->formvars['selected_layer_id'], $_FILES);
