@@ -1,5 +1,24 @@
 <?
 
+	$GUI->sanitizeBauauskunftSuche = function() use ($GUI){
+		$GUI->sanitize([
+		'jahr' => 'text',
+    'obergruppe' => 'text',
+    'nummer' => 'text',
+    'vorhaben' => 'text',
+    'verfahrensart' => 'text',
+    'gemarkung' => 'text',
+    'flur' => 'text',
+    'flurstueck' => 'text',
+    'vorname' => 'text',
+    'nachname' => 'text',
+    'strasse' => 'text',
+    'hausnummer' => 'text',
+    'plz' => 'text',
+    'ort' => 'text',
+    'vonJahr' => 'text']);
+	}
+
 	$GUI->zoom2bauakte = function() use ($GUI){
 		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
 			$GUI->bau = new Bauauskunft($GUI->baudatabase);
@@ -58,11 +77,8 @@
     $GUI->titel='Bauauskunftsuche';
   };
 
-	$GUI->bauauskunftSucheSenden = function($flurstkennz) use ($GUI){
+	$GUI->bauauskunftSucheSenden = function() use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
-    if($GUI->formvars['flurstkennz'] != ''){
-      $GUI->formvars['flurstkennz'] = $flurstkennz;
-    }
     if($GUI->bau->checkformdaten($GUI->formvars)){
       if(!$GUI->formvars['anzahl']){
         $GUI->formvars['anzahl'] = $GUI->bau->countbaudaten($GUI->formvars);
