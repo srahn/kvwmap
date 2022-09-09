@@ -41,7 +41,7 @@
 	$strShareRollenlayerAllowedDescription = 'Wenn der Nutzer das Recht hat, darf er seine eigenen importierten Rollenlayer sich selbst und anderen Nutzern als reguläre Layer zuweisen! Die Zuweisung erfolgt für alle Nutzer in Stellen, die das Recht haben dass ihr freigegebene Rollenlayer zugeordnet werden dürfen, siehe Stelleneinstellungen. Nur der Nutzer selbst und der Admin kann diese sogenannten freigegebenen Layer wieder löschen.';
 	$strStart = 'Start ranlaten';
 	$strStop = 'Stop ranlaten';
-	$strTakeOverPassword = 'Take over password';
+	$strTakeOverPassword = 'Cancle new password';
 	$strTitle = 'Brukerdaten Editor';
 	$strUserTitle = 'Tosatz';
 ?>

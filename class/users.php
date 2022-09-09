@@ -763,7 +763,8 @@ class user {
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . "
+				" . implode(" AND ", $where) . " AND
+				archived IS NULL
 		";
 		#echo '<br>SQL to read user data: ' . $sql;
 
@@ -787,6 +788,7 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];

@@ -174,7 +174,7 @@ else {
 				if not allready exists and only if it matches with the old md5 method.
 			*/
 			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
-				$GUI->debug->write('prepare_sha1 erfolgreich ausgeführt.', 4, $GUI->echo);
+				$GUI->debug->write('prepare_sha1 ausgeführt.', 4, $GUI->echo);
 				if ($GUI->database->mysqli->affected_rows > 0) {
 					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
 				}
@@ -182,32 +182,39 @@ else {
 				# Frage den Nutzer mit dem login_namen und password ab
 				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
 				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
-
-				if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
-					$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
-					set_session_vars($GUI->formvars);
-					$GUI->user->updateTokens($_SESSION['csrf_token']);
-					$GUI->user->has_logged_in = true;
-					$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
-					Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
-					if ($GUI->user->stelle_id == '') {
-						# Nutzer hat keine stellen_id
-						$GUI->user->Stellen = $GUI->user->getStellen(0);
-						if (count($GUI->user->Stellen['ID']) > 0) {
-							# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
-							$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
+				if ($GUI->database->success) {
+					if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
+						$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
+						set_session_vars($GUI->formvars);
+						$GUI->user->updateTokens($_SESSION['csrf_token']);
+						$GUI->user->has_logged_in = true;
+						$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
+						Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
+						if ($GUI->user->stelle_id == '') {
+							# Nutzer hat keine stellen_id
+							$GUI->user->Stellen = $GUI->user->getStellen(0);
+							if (count($GUI->user->Stellen['ID']) > 0) {
+								# Nutzer hat aber rollen, weise die stellen_id der ersten Rolle zu
+								$GUI->formvars['Stelle_ID'] = $GUI->user->Stellen['ID'][0];
+							}
 						}
 					}
-				}
-				else { # Anmeldung ist fehlgeschlagen
-					$GUI->debug->write('Anmeldung ist fehlgeschlagen.', 4, $GUI->echo);
-					if ($GUI->login_failed_reason == 'authentication') {
-						$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
-						sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+					else { # Anmeldung ist fehlgeschlagen
+						$GUI->debug->write('Anmeldung ist fehlgeschlagen. ' . $GUI->login_failed_reason, 4, $GUI->echo);
+						if ($GUI->login_failed_reason == 'authentication') {
+							$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
+							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+						}
+						$show_login_form = true;
+						$go = 'login_failed';
+						# login case 7
 					}
+				}
+				else {
+					$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ' . $GUI->database->mysqli->error);
 					$show_login_form = true;
 					$go = 'login_failed';
-					# login case 7
+					# login case 7 b
 				}
 			}
 			else {
@@ -871,6 +878,7 @@ function prepare_sha1($login_name, $password) {
 	#echo "SQL to update the password with method sha1: ", $sql;
 	$GUI->debug->write("<p>file:users.php class:user->prepare_sha1 - Setzen des Passworthash in Attribut password mit SHA1 Methode:<br>", 3);
 	$ret = $GUI->database->execSQL($sql, 4, 0, true);
+	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $GUI->database->mysqli->error, 4); return 0; }
 	return $ret['success'];
 }
 ?>
