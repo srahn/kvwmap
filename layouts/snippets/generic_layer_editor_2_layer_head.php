@@ -32,7 +32,30 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 									$output[$p] = $identifier_attributes[$p];
 									for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
 										if ($identifier_attributes[$p] == $layer['attributes']['name'][$j]) {
-											$output[$p] = $layer['shape'][$k][$identifier_attributes[$p]];
+											switch ($layer['attributes']['form_element_type'][$j]) {
+												case 'Auswahlfeld' : case 'Radiobutton' : {
+													if (is_array($layer['attributes']['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j][$k]); $e++) {
+															if ($layer['attributes']['enum_value'][$j][$k][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
+																$output[$p] = $layer['attributes']['enum_output'][$j][$k][$e];
+																break;
+															}
+														}
+													}
+													else {
+														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j]); $e++) {
+															if ($layer['attributes']['enum_value'][$j][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
+																$output[$p] = $layer['attributes']['enum_output'][$j][$e];
+																break;
+															}
+														}
+													} 
+												} break;
+												
+												default : {
+													$output[$p] = $layer['shape'][$k][$identifier_attributes[$p]];
+												}
+											}
 										}
 									}
 								}

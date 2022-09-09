@@ -12,10 +12,21 @@ function go_switch_metadata($go){
 		} break;
 
 		case 'Metadaten_Auswaehlen_Senden' : {
+			$GUI->sanitize([
+			'was' => 'text',
+			'wer' => 'text'
+			'wo' => 'text'
+			'vonwann' => 'text'
+			'biswann' => 'text'
+			'eastbl' => 'float'
+			'southbl' => 'float'
+			'westbl' => 'float'
+			'northbl' => 'float']);
 			$GUI->metadatenSuchen();
 		} break;
 
 		case 'Metadateneingabe' : {
+			$GUI->sanitize(['oid' => 'int', 'mdfileid' => 'int']);
 			$GUI->metadateneingabe();
 		} break;
 
