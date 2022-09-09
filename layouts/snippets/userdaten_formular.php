@@ -32,7 +32,9 @@
 			$('#change_password_text').html('<? echo $strChangePassword; ?>');
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled = true;
+			document.GUI.password1.value = '';
 			document.GUI.password2.disabled = true;
+			document.GUI.password2.value = '';
 			document.GUI.changepasswd.value = 0;
 		}
 	}

@@ -193,6 +193,10 @@ class GUI {
 			$this->login_failed_reason = 'authentication';
 			return false;
 		}
+		if ($user->archived) {
+			$this->login_failed_reason = 'archived';
+			return false;
+		}
 		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
