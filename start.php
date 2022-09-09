@@ -174,7 +174,10 @@ else {
 				if not allready exists and only if it matches with the old md5 method.
 			*/
 			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
-				$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
+				$GUI->debug->write('prepare_sha1 erfolgreich ausgeführt.', 4, $GUI->echo);
+				if ($GUI->database->mysqli->affected_rows > 0) {
+					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
+				}
 
 				# Frage den Nutzer mit dem login_namen und password ab
 				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
@@ -868,7 +871,6 @@ function prepare_sha1($login_name, $password) {
 	#echo "SQL to update the password with method sha1: ", $sql;
 	$GUI->debug->write("<p>file:users.php class:user->prepare_sha1 - Setzen des Passworthash in Attribut password mit SHA1 Methode:<br>", 3);
 	$ret = $GUI->database->execSQL($sql, 4, 0, true);
-	if (!$ret['success']) { $GUI->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $GUI->database->mysqli->error, 4); return 0; }
-	return $GUI->database->mysqli->affected_rows > 0;
+	return $ret['success'];
 }
 ?>
