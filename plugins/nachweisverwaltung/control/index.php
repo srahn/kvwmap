@@ -244,6 +244,11 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Antrag_Aendern' : {
+			$GUI->sanitize([
+			'antr_nr' => 'text',
+			'VermStelle' => 'int',
+			'verm_art' => 'int',
+			'datum' => 'text']);
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->vermessungsantragAendern();
@@ -256,6 +261,11 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Nachweis_antragsnummer_Senden' : {
+			$GUI->sanitize([
+			'antr_nr' => 'text',
+			'VermStelle' => 'int',
+			'verm_art' => 'int',
+			'datum' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->vermessungsantragAnlegen();
 	  } break;
@@ -345,6 +355,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Sachdaten_FestpunkteSkizzenZuordnung' : {
+			$GUI->sanitize(['pkn' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->showFestpunkteSkizze();
 	  } break;
