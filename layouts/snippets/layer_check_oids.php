@@ -13,6 +13,109 @@ if(!in_array($this->Stelle->id, $admin_stellen)){
 
 $this->layer_dbs = array();
 
+$db_check_sqls[] = [
+										'name' => 'Views',
+										'sql' => "
+											WITH RECURSIVE views AS (
+												SELECT  v.oid::regclass         AS \"view\"
+																,v.relkind = 'm'        AS is_materialized
+																,1                      AS level
+																,ns.nspname             AS \"schema\"
+																,d.refobjid::regclass   AS \"tabelle\"
+												FROM    pg_attribute    AS a
+												JOIN    pg_depend       AS d    ON  d.refobjsubid = a.attnum
+																												AND d.refobjid = a.attrelid
+												JOIN    pg_class        AS c    ON  a.attrelid = c.oid
+												JOIN    pg_rewrite      AS r    ON  r.oid = d.objid
+												JOIN    pg_class        AS v    ON  v.oid = r.ev_class
+												JOIN    pg_namespace    AS ns   ON  ns.oid = v.relnamespace
+												JOIN    pg_class        AS t    ON  d.refobjid = t.oid
+												WHERE   v.relkind IN ('v','m')
+												AND     d.classid = 'pg_rewrite'::regclass
+												AND     d.refclassid = 'pg_class'::regclass
+												AND     d.deptype = 'n'    -- normal dependency
+												AND     a.attname = 'oid'
+												AND     a.attnum < 0
+
+										--		UNION
+										--			 -- von Views abhängige Views
+										--		SELECT   v.oid::regclass,
+										--						 v.relkind = 'm',
+										--						 views.level + 1
+										--						,ns.nspname       AS \"schema\"
+										--						,null::regclass  AS \"tabelle\"
+										--		FROM     views
+										--		JOIN     pg_depend   AS d    ON d.refobjid = views.view
+										--		JOIN     pg_rewrite  AS r    ON r.oid = d.objid
+										--		JOIN     pg_class    AS v    ON v.oid = r.ev_class
+										--		JOIN     pg_namespace    AS ns   ON  ns.oid = v.relnamespace
+										--		WHERE    v.relkind IN ('v', 'm')
+										--		AND      d.classid = 'pg_rewrite'::regclass
+										--		AND      d.refclassid = 'pg_class'::regclass
+										--		AND      d.deptype = 'n'
+										--		AND      v.oid <> views.view  -- bitte keine Schleife
+										)
+
+										SELECT
+											views.schema                    AS \"Schema\"
+											,substring(views.view::text FROM strpos(views.view::text, '.')+1 ) 			 AS \"View\"
+											,views.tabelle as \"Tabelle\"
+										FROM
+											views
+										GROUP BY view, is_materialized, level, schema, tabelle
+										ORDER BY level ASC"
+									 ];
+									 
+$db_check_sqls[] = [
+										'name' => 'Contraints',
+										'sql' => "
+											SELECT  ns.nspname     AS \"Schema\"
+															,c.relname      AS \"Tabelle\"
+															,con.conname    AS \"Constraint\"
+											FROM    pg_catalog.pg_class c
+											JOIN    pg_catalog.pg_namespace ns      ON ns.oid = c.relnamespace
+											JOIN    pg_catalog.pg_constraint con    ON c.oid = con.conrelid
+											JOIN    pg_catalog.pg_attribute  attr   ON  (
+																																			(attr.attnum = any(con.conkey) AND con.confkey IS NULL)
+																																	OR
+																																			(attr.attnum = any(con.confkey) AND con.conkey IS NULL)
+																																	)
+																																	AND c.oid = attr.attrelid
+											WHERE   ns.nspname NOT IN ('pg_catalog')
+											AND     attr.attnum < 1 /*system columns wie oid*/
+											AND     lower(attr.attname) LIKE '%oid%'"
+										];
+										
+$db_check_sqls[] = [
+										'name' => 'Funktionen',
+										'sql' => "
+											SELECT ns.nspname AS \"Schema\",
+													p.proname as \"Funktion\"
+											FROM pg_proc p
+											JOIN pg_namespace ns ON p.pronamespace = ns.oid
+											WHERE (ns.nspname <> ALL (ARRAY['pg_catalog'::name, 'information_schema'::name, 'public'::name]))
+											AND regexp_replace(upper(pg_get_functiondef(p.oid)), 'PG_[A-Z]*\.OID', '', 'g') ~~ '%.OID%'::text
+											AND p.proisagg = false
+											ORDER BY ns.nspname"
+										];
+										
+$db_check_sqls[] = [
+										'name' => 'Indizes',
+										'sql' => "
+											SELECT  ns.nspname              AS  \"Schema\"
+															,t.relname              AS  \"Tabelle\"
+															,ci.relname     	AS  \"Index\"
+											FROM    pg_index        i
+											JOIN    pg_class        ci  ON  i.indexrelid = ci.oid
+											JOIN    pg_class        t   ON  i.indrelid = t.oid
+											JOIN    pg_namespace    ns  ON  ci.relnamespace = ns.oid
+											JOIN    pg_attribute    a   ON  a.attrelid = t.oid
+																											AND a.attnum = any(i.indkey)
+											WHERE   ns.nspname NOT IN ('pg_catalog','pg_toast')
+											AND     a.attnum < 0 --system columns, vermutlich oids
+											AND     a.attname = 'oid'"
+										];
+
 function checkStatus($layer) {
 	$status['oid'] = ($layer['oid'] == 'oid' ? false : true);
 	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false OR strpos($layer['pfad'], '.oid') !== false)? false : true);
@@ -232,6 +335,21 @@ $result = $this->database->execSQL($query);
     margin-left: -6px;
     margin-top: -6px;
 	}
+	
+	#db_check {
+		margin-top: 20px;
+		padding: 5px;
+		text-align: left;
+	}
+	#db_check table{
+		border: 1px solid #555;
+		border-collapse: collapse;
+	}
+	#db_check td {
+		border: 1px solid #555;
+		padding: 2px 5px 2px 5px;
+	}
+	
 </style>
 
 <script type="text/javascript">
@@ -301,7 +419,7 @@ while ($layer = $this->database->result->fetch_assoc()) {
 				<div style="width: 200px; margin-top: 40px;">
 					<input type="hidden" name="layer_id[]" value="' . $layer["Layer_ID"] . '">
 					<input style="float: left" type="checkbox" name="check_' . $layer["Layer_ID"] . '" value="1">
-					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'"target="_blank">'.$layer["Name"].'</a></div>
+					<div>&nbsp;<a href="index.php?go=Layereditor&selected_layer_id='.$layer["Layer_ID"].'&csrf_token=' . $_SESSION['csrf_token'] . '"target="_blank">'.$layer["Name"].'</a></div>
 				</div>
 			</td>
 			<td style="background-color: '.$color[$status['oid']].'">
@@ -362,5 +480,43 @@ echo '</tbody></table></div>';
 		</table>
 	</div>
 </div>
+
+<div id="db_check">
+	<h2>Datenbankobjekte die oids verwenden</h2>
+<?
+		include_once(CLASSPATH . 'Connection.php');
+		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
+		foreach ($this->connections as $connection) {
+			if ($this->layer_dbs[$connection->data['id']]->dbConn != false) {
+				echo '<h3>' . $connection->data['dbname'] . ':</h3>';
+				foreach ($db_check_sqls as $db_check_sql) {
+					$ret = @pg_query($this->layer_dbs[$connection->data['id']]->dbConn, $db_check_sql['sql']);
+					if($ret == false){
+						echo @pg_last_error($this->layer_dbs[$layer['connection_id']]->dbConn);
+					}
+					else{
+						if ($rs = pg_fetch_all($ret)) {
+							echo '<h4>' . $db_check_sql['name'] . '</h4>';
+							echo '<table>';
+							foreach ($rs[0] as $key => $value) {
+									echo "<th>" . $key . "</th>";
+							}
+							foreach ($rs as $row) {
+								echo "<tr>";
+								foreach ($row as $cell) {
+									echo "<td>" . $cell . "</td>";
+								} 
+								echo "</tr>";
+							} 
+							echo "</table>";
+						}
+					}
+				}
+			}
+		}
+?>
+</div>
+
+
 <input type="hidden" name="go" value="layer_check_oids">
 <input type="hidden" name="action" value="">
