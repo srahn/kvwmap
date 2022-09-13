@@ -1,5 +1,6 @@
 BEGIN;
-INSERT INTO xplan_gml.fp_detailzweckbestspielsportanlage
+DELETE FROM xplan_gml.fp_detailzweckbestspielsportanlage;
+INSERT INTO xplan_gml.fp_detailzweckbestspielsportanlage (codespace,value,id)
 VALUES 
 ('https://registry.gdi-de.org/codelist/de.xleitstelle.xplanung/FP_DetailZweckbestSpielSportanlage','American Football','1000_01'),
 ('https://registry.gdi-de.org/codelist/de.xleitstelle.xplanung/FP_DetailZweckbestSpielSportanlage','Badminton','1000_02'),
