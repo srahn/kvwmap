@@ -6023,7 +6023,7 @@ echo '			</table>
 			$this->map->legend->label->set("type", 'truetype');
 		}
 		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_C);
+    $this->map->legend->label->set("position", MS_CC);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
@@ -6052,7 +6052,10 @@ echo '			</table>
 						if($layerset['list'][$i]['showclasses']){
 							for($j = 0; $j < $layer->numclasses; $j++){
 								$class = $layer->getClass($j);
-								if($class->name != '')$draw = true;
+								if ($class->name == '') {
+									$class->name = ' ';
+								}
+								$draw = true;
 							}
 						}
 					}
