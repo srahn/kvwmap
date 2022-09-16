@@ -1357,7 +1357,7 @@ class Nachweis {
           while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente=count($nachweise);
+          $this->erg_dokumente = @count($nachweise);
           $this->Dokumente=$nachweise;      
         }
       } break;
@@ -1383,7 +1383,7 @@ class Nachweis {
         while ($rs=pg_fetch_array($queryret[1])) {
           $ergebnis[]=$rs['nachweis_id'];
         }
-        $this->nachweisanz=count($ergebnis);
+        $this->nachweisanz = @count($ergebnis);
         $this->nachweise_id=$ergebnis;
       }
       else {
