@@ -34,12 +34,13 @@ function go_switch_probaug($go){
 		
 		case 'zoom2bauakte' : {
 			$GUI->sanitizeBauauskunftSuche();
-			$GUI->checkCaseAllowed('Bauakteneinsicht');
-			include_once(PLUGINS.'alkis/model/kvwmap.php');
-			include_once(PLUGINS.'alkis/model/kataster.php');
-			include_once(PLUGINS.'probaug/model/kvwmap.php');
-			include_once(PLUGINS.'probaug/model/bau.php');
-			$GUI->zoom2bauakte();
+			if ($GUI->Stelle->isFunctionAllowed('Bauakteneinsicht')) {	# damit es auch ohne csrf-Token geht
+				include_once(PLUGINS.'alkis/model/kvwmap.php');
+				include_once(PLUGINS.'alkis/model/kataster.php');
+				include_once(PLUGINS.'probaug/model/kvwmap.php');
+				include_once(PLUGINS.'probaug/model/bau.php');
+				$GUI->zoom2bauakte();
+			}
 	  } break;		
 		
 		default : {
