@@ -17,7 +17,7 @@
     'plz' => 'text',
     'ort' => 'text',
     'vonJahr' => 'text']);
-	}
+	};
 
 	$GUI->zoom2bauakte = function() use ($GUI){
 		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
