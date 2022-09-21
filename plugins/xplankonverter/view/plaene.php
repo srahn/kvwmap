@@ -642,7 +642,7 @@ else { ?>
 <div id="downloadMessageSperrDiv" class="sperr-div"></div>
 <div id="editVeroeffentlichungsdatumDiv" class="edit-veroeffentlichungsdatum-div">
 	<h2>Veröffentlichungsdatum</h2>
-Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht. Damit erscheint er in den Diensten des Bauleitplanservers und im Bau- und Planungsportal des Geoportals MV.<p></p>
+Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht.<p></p>
 	<input id="input_konvertierung_id" type="hidden">
 	<input id="input_veroeffentlichungsdatum" type="date" style="margin: 20px"><p></p>
 	<input type="button" value="<? echo $this->strCancel; ?>" onclick="$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide()"/>
