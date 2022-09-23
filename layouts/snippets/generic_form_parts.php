@@ -291,7 +291,7 @@
 				if ($attributes['nullable'][$j] != '0' OR $gui->new_entry == true) {
 					$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
 				}
-				for ($e = 0; $e < count($attributes['enum_value'][$j]); $e++) {
+				for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
 					$datapart .= '<option'
 						. ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]] ? ' selected' : '')
 						. ' value="' . $attributes['enum_value'][$j][$e] . '">'
