@@ -46,13 +46,13 @@
 	}
 
 	function resetPassword() {
-		// das Passwort wird zweimal URL codiert, damit es auch in der Mail URL codiert erscheint
+		// das Passwort und der Loginname wird zweimal URL codiert, damit es auch in der Mail URL codiert erscheint
 		var newPassword = getRandomPassword(),
 		loginName = $('form[name="GUI"] input[name="loginname"]').val(),
 		host = window.location.href.split('?')[0];
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=<? echo $strInvitationBody1; ?>%20' + loginName + ',%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword)) + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=<? echo $strInvitationBody1; ?>%20' + loginName + ',%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + host + '%3Fgo=logout%26login_name=' + encodeURIComponent(encodeURIComponent(loginName)) + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword)) + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A'
 		);
 		message('<span style="font-size: larger;"><? echo $strInvitationConfirmation1; ?></span><br><br><? echo $strInvitationConfirmation2; ?>.<br><span style="color: red"><? echo $strInvitationConfirmation3; ?>!</span>', 1000, 2000, '', '<? echo $strInvitationConfirmation4; ?>');
 		$('<input>').attr({
