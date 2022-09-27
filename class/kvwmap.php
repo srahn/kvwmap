@@ -8107,9 +8107,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->use_form_data = true;
 		}
 		else {
-			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
-			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
-			$this->formvars['duplicate_criterion'] = pg_escape_string($this->formvars['duplicate_criterion']);
+			$this->formvars['pfad'] = $this->db->mysqli->real_escape_string($this->formvars['pfad']);
+			$this->formvars['Data'] = $this->db->mysqli->real_escape_string($this->formvars['Data']);
+			$this->formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($this->formvars['duplicate_criterion']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 			if ($this->formvars['selected_layer_id'] == 0) {
 				return false;
@@ -18213,10 +18213,10 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		$formvars['pfad'] = pg_escape_string($formvars['pfad']);
-		$formvars['Data'] = pg_escape_string($formvars['Data']);
-		$formvars['metalink'] = pg_escape_string($formvars['metalink']);
-		$formvars['duplicate_criterion'] = pg_escape_string($formvars['duplicate_criterion']);
+		$formvars['pfad'] = $this->db->mysqli->real_escape_string($formvars['pfad']);
+		$formvars['Data'] = $this->db->mysqli->real_escape_string($formvars['Data']);
+		$formvars['metalink'] = $this->db->mysqli->real_escape_string($formvars['metalink']);
+		$formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($formvars['duplicate_criterion']);
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];
 		}
