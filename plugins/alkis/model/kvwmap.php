@@ -552,11 +552,21 @@
 		$selFlstID = explode(', ',$GUI->formvars['selFlstID']);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		$Gemarkung=new gemarkung('',$GUI->pgdatabase);
-		if($GemeindenStelle == NULL){
-			$GemkgListe = $Gemarkung->getGemarkungListeAll(NULL, NULL);
+		if ($GUI->formvars['ALK_Suche'] == 1) {
+			if($GemeindenStelle == NULL){
+				$GemkgListe = $Gemarkung->getGemarkungListe(NULL, NULL);
+			}
+			else{
+				$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			}
 		}
-		else{
-			$GemkgListe = $Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		else {
+			if ($GemeindenStelle == NULL) {
+				$GemkgListe = $Gemarkung->getGemarkungListeAll(NULL, NULL);
+			}
+			else{
+				$GemkgListe = $Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			}
 		}
 		if ($GemkgListe['hist'][$GemkgID]) {
 			$GUI->formvars['history_mode'] = 'historisch';
@@ -1290,7 +1300,7 @@
     # Abragen der Fluren zur Gemarkung
     if($GemkgID > 0){
     	$Flur=new Flur('','','',$GUI->pgdatabase);
-			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], false);
+			$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], 'aktuell');
     	# Erzeugen des Formobjektes für die Flurauswahl
     	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
     }

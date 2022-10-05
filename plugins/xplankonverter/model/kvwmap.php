@@ -136,7 +136,7 @@
 					";
 					#echo $sql;
 					$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
-					
+
 					# Creates Bereiche for each Plan loaded with GMLAS
 					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $konvertierung_id);
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
@@ -154,6 +154,13 @@
 					
 					# directories to be created (if they do no exist yet e.g. for shape export)
 					$konvertierung->create_directories();
+
+					# mv uploaded xplan_gml from tmp to uploaded_xml_gml
+					$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
+					$store_dir = XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/';
+					$gml_file = scandir($upload_dir)[2];
+					# Speichern der externen referenzen im Filesystem und Anpassen der Werte im Datensatz des Planes.
+					exec('mv ' . XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/* ' . XPLANKONVERTER_FILE_PATH . $konvertierung_id . '/uploaded_xplan_gml/');
 				}
 			} break;
 

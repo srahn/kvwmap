@@ -404,7 +404,7 @@ function resizemap2window(){
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancle_button_value = 'Abbrechen') {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -474,8 +474,8 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
-			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="Ja" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="Abbrechen" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancle_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	

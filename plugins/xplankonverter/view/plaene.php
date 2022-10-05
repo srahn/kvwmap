@@ -6,7 +6,7 @@
 	$(function () {
 		result = $('#eventsResult');
 		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 4000, 1000, '13%');
+			message([{ type: 'notice', msg: text}], 1000, 100, 400);
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -40,7 +40,8 @@
 		.on('load-error.bs.table', function (e, status) {
 			console.log('loaderror');
 			result.error('Event: load-error.bs.table');
-		});
+		})
+
 		// more examples for register events on data tables: http://jsfiddle.net/wenyi/e3nk137y/36/
 	});
 
@@ -161,6 +162,20 @@
 			}
 		});
 	};
+
+	starteXplanGmlValidation = function(konvertierung_id) {
+		console.log('Starte Validierung des XPlanGML-Dokumentes mit konvertierung_id: ' + konvertierung_id + ' beim XPlanValidator der Leitstelle');
+	};
+
+	showXplanGmlValidationResult = function() {
+		console.log('Zeige Ergebnisse der Validierung vom XPlanValidator der Leitstelle');
+		event.stopImmediatePropagation();
+	};
+
+	createGeoWebService = function() {
+		console.log('Create GeoWebService');
+		event.stopImmediatePropagation();
+	}
 
 	starteInspireGmlGenerierung = function(e) {
 		e.preventDefault();
@@ -353,7 +368,7 @@
 				disableFrag = ' disabled" onclick="return false',
 				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
 		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
-		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="btn-link fa fa-lg fa-trash"></i></a>';
+		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
 		return output;
 	}
@@ -366,45 +381,111 @@
 
 		// enabled by status of konvertierung
 		// Shapefile upload
-    funcIsAllowed = true; // function is always allowed
-		output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs	xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="btn-link fa fa-lg fa-upload"></i></a>';
+		funcIsAllowed = true; // function is always allowed
+		output += '<a title="Shapefiles bearbeiten" class="btn btn-link btn-xs	xpk-func-btn' + (funcIsAllowed ? '' : disableFrag) + '" href="index.php?go=xplankonverter_shapefiles_index&konvertierung_id=' + value + '"><i class="fa fa-lg fa-upload"></i></a>';
 
 		// Konvertieren und validieren
-    funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'  ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-cogs"></i></a>';
+		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'	]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
-    funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'  ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-                 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validierungsergebnisse anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="btn-link fa fa-lg fa-list"></i></a>';
+		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'	]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="Validierungsergebnisse der Konvertierung anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-list-alt"></i></a>';
 
 		// GML-Erzeugen
-		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'          ]; ?>"
-                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'         ]; ?>"
-                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-                  || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
 
 		funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_GML_ERSTELLUNG']; ?>";
-		output += '<a title="XPlan-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-generate-gml' + (funcIsAllowed ? ' xpk-func-btn" onclick="starteXplanGmlGenerierung(this)' : ' disabled" onclick="message([{type: \'info\', msg: \'Sie müssen den Plan erst konvertieren!\'}])') + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-code') + '"></i></a>';
+		output += '<a ' +
+								'title="XPlan-GML-Datei erzeugen" ' +
+								'class="btn btn-link btn-xs xpk-func-generate-gml' + (funcIsAllowed ? ' xpk-func-btn" ' +
+								'onclick="starteXplanGmlGenerierung(this)' : disableFrag) + '" ' +
+								'href="#"' +
+							'>' +
+								'<i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-code') + '"></i>' +
+							'</a>';<?
 
-		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
-			// INSPIRE-Erstellung
-			funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>"
-										|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-			funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
-			output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-generate-inspire-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'btn-link fa fa-spinner fa-pulse fa-fw' : 'btn-link fa fa-lg fa-globe') + '"></i></a>';
+		if (XPLANKONVERTER_FUNC_VALIDATOR) { ?>
+			// GML-Validieren
+			funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+
+			if (funcIsAllowed) {
+				funcOnClick = "";
+			}
+			else {
+				funcOnClick = "message([{type: 'info', msg: 'Sie müssen erst das XPlanGML-Dokument erzeugen!'}], 2000, 1000, 400)";
+			}
+			output += '<a ' +
+						 			'title="XPlanGML-Datei mit dem XPlanValidator der XPlanung-Leitstelle validieren" ' +
+									'class="btn btn-link btn-xs xpk-func-validate-gml ' + (funcIsAllowed ? 'xpk-func-btn" onclick="message([{ type: \'confirm\', msg: \'XPlanGML bei der Leitstelle validieren.<br>Die alten Validierungsergebnisse werden dabei überschrieben!\'}], 2000, 1000, 400, \'' + row.konvertierung_id + '\', \'starteXplanGmlValidation\', \'Validerung starten\')' : disableFrag) + '" ' +
+									'href="#"' +
+								'>' +
+									'<i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-check') + '"></i>' +
+								'</a>';
+
+			// GML-Validierungsergebnisse ansehen
+			funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+			output += '<a ' +
+									'title="Validierungsergebnisse der Konvertierung anzeigen" ' +
+									'class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" ' +
+									'href="index.php?go=Layer-Suche_Suchen&selected_layer_id=522&konvertierung_id_operator==&konvertierung_id_value=' + row.konvertierung_id +
+									'onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"' +
+								'>' +
+									 '<i class="fa fa-lg fa-list-alt"></i>' +
+									 '<i class="fa fa-lg fa-check" style="position: absolute; top: 7px; left: 13px;"></i>' +
+								'</a>';<?
 		}
+		
+		if (XPLANKONVERTER_FUNC_INSPIRE) { ?>
+			if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
+				// INSPIRE-Erstellung
+				funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK']; ?>"
+											|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+				funcIsInProgress = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_INSPIRE_GML_ERSTELLUNG']; ?>";
+				output += '<a title="INSPIRE-GML-Datei erzeugen" class="btn btn-link btn-xs xpk-func-generate-inspire-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="#"><i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-globe') + '"></i></a>';
+			} <?
+		}
+
+		if (XPLANKONVERTER_FUNC_SERVICE) { ?>
+			// Dienst-erzeugen
+			funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK'				 ]; ?>"
+									 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+			output += '<a ' +
+									 'title="GeoWeb-Dienst für den Plan anlegen" ' +
+									 'class="btn btn-link btn-xs xpk-func-create-geoweb-service' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" ' +
+									 'href="index.php?go=">\
+									 <i class="' + (funcIsInProgress ? 'fa fa-spinner fa-pulse fa-fw' : 'fa fa-lg fa-map-o') + '"></i>\
+									 <i class="fa fa-plus-circle" style="position: absolute; top: 14px; left: 25px;"></i>\
+								</a>'; <?
+		} ?>
 
 		output += '</span>';
 		return output;
@@ -413,17 +494,16 @@
 	function konvertierungVeroeffentlichtFormatter(value, row) {
 		var output = '<a\
 			title="' + (row.veroeffentlicht == 'Ja' ? 'Planveröffentlichung zurücknehmen' : 'Plan veröffentlichen') + ' (Bei Auswahl wird der Datensatz im Bauportal M-V angezeigt. Bitte nur Pläne veröffentlichen, für die mindestens eine Plandatei verfügbar ist.)"\
-			class="btn btn-link btn-xs xpk-func-btn"\
+			class="btn btn-link btn-xs xpk-func-btn ' + (row.veroeffentlicht == 'Ja' ? 'green' : 'red') + '"\
 			href="#"\
 			onclick="toggleVeroeffentlicht(' + row.konvertierung_id + ', \'' + row.veroeffentlicht + '\')");\
 		><i\
 			id="veroeffentlicht_button_' + row.konvertierung_id + '"\
-			class="btn-link fa fa-lg ' + (row.veroeffentlicht == 'Ja' ? 'fa-eye' : 'fa-eye-slash') + '"\
-			style="color: ' + (row.veroeffentlicht == 'Ja' ? '#2cb03c' : '#d82c2c') + '"\
+			class="fa fa-lg ' + (row.veroeffentlicht == 'Ja' ? 'fa-eye' : 'fa-eye-slash') + '"\
 		></i></a>\
 		<i\
 			id="veroeffentlicht_spinner_' + row.konvertierung_id + '"\
-			class="color: fa fa-spinner fa-spin"\
+			class="fa fa-spinner fa-spin"\
 			style="display: none"\
 		></i>';
 
@@ -441,34 +521,33 @@
 
 		if (veroeffentlichungsdatum === '') {
 			symbol.title = 'Plan ist nicht veröffentlicht. Kein Datum angegeben!';
-			symbol.color = '#d82c2c'; // Rot
+			symbol.colorClass = 'red';
 			symbol.class = 'fa-eye-slash'; // ist nicht veröffentlicht
 		}
 		else if (new Date(veroeffentlichungsdatum) > today) {
 			symbol.title = 'Plan wird am ' + value + ' veröffentlicht.';
-			symbol.color = '#b0952c' // Gelb
+			symbol.colorClass = 'yellow';
 			symbol.class = 'fa-clock-o'; // wird noch veröffentlicht
 		}
 		else if ((new Date(veroeffentlichungsdatum)).toDateString() == today.toDateString()) {
 			symbol.title = 'Plan wurde heute veröffentlicht.';
-			symbol.color = '#2cb03c'; // Grün
+			symbol.colorClass = 'green';
 			symbol.class = 'fa-eye'; // ist veröffentlicht
 		}
 		else {
 			symbol.title = 'Plan wurde am ' + value + ' veröffentlicht.';
-			symbol.color = '#2cb03c'; // Grün
+			symbol.colorClass = 'green';
 			symbol.class = 'fa-eye'; // ist veröffentlicht
 		}
 
 		var output = '<a\
 			title="' + symbol['title'] + '"\
-			class="btn btn-link btn-xs xpk-func-btn"\
+			class="btn btn-link btn-xs xpk-func-btn ' + symbol['colorClass'] + '"\
 			href="#"\
 			onclick="editVeroeffentlichungsdatum(' + row.konvertierung_id + ', \'' + veroeffentlichungsdatum + '\')");\
 		><i\
 			id="veroeffentlichungsdatum_button_' + row.konvertierung_id + '"\
-			class="btn-link fa fa-lg ' + symbol['class'] + '"\
-			style="color: ' + symbol['color'] + '"\
+			class="fa fa-lg ' + symbol['class'] + '"\
 		></i></a>\
 		<i\
 			id="veroeffentlichungsdatum_spinner_' + row.konvertierung_id + '"\
@@ -485,40 +564,58 @@
 		output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" konvertierung_id="' + value + '">';
 
 		// hochgeladene Shapes
-		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'     ]; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'          ]; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'  ]; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-		             || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Hochgeladene Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=uploaded_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="btn-link fa fa-lg fa-file-photo-o" style="color: green;"></i></a>';
+		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['IN_ERSTELLUNG'		 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'	]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_ERR' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK' ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="Hochgeladene Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' green" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=uploaded_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-photo-o"></i></a>';
 
 		// geänderte Shapes
-		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'         ]; ?>"
-		              || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-		              || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Geänderte Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=edited_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="btn-link fa fa-lg fa-file-image-o" style="color: orange;"></i></a>';
+		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="Geänderte Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' orange" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=edited_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-image-o"></i></a>';
 
 		// XPlanung-GML
-		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'         ]; ?>"
-	                || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-	                || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="btn-link fa fa-lg fa-file-excel-o" style="color: red;"></i></a>';
+		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-excel-o";"></i></a>';
 
 		// XPlanung-Shapes
-		funcIsAllowed =  row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'          ]; ?>"
-		              || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'         ]; ?>"
-		              || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
-		              || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-	output += '<a title="XPlanung-Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="btn-link fa fa-lg fa-file-picture-o" style="color: red;"></i></a>';
+		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_ERSTELLUNG_OK'				 ]; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_OK']; ?>"
+								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
+									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
+		output += '<a title="XPlanung-Shapes" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_shape_files&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-picture-o"></i></a>';<?
 
-		if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
-			// INSPIRE-GML
-			funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-			output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + '" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a>';
+		if (XPLANKONVERTER_FUNC_INSPIRE) { ?>
+			if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
+				// INSPIRE-GML
+				funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
+				output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + ' blue" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="fa fa-lg fa-file-code-o"></i></a>';
+			}<?
 		}
+
+		if (XPLANKONVERTER_FUNC_SERVICE) { ?>
+			// GeoWebService Capabilities
+			funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GEO_WEBSERVICE_ERSTELLT']; ?>";
+			output += '<a title="Dienst-Capabilities" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_capabilities&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-code-o"></i></a>';
+
+			// Dienst-Metadaten
+			funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GEO_WEBSERVICE_ERSTELLT']; ?>";
+			output += '<a title="Dienst-Metadaten" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=geoweb_service_metadata&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-text-o"></i></a>';<?
+		} ?>
 
 		output += '</span>';
 		return output;
@@ -528,7 +625,7 @@
 <h2><?php echo htmlspecialchars($this->title); ?></h2><?php
 if ($this->Stelle->id > 200) { ?>
 	<button type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
-	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button><?
+	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">Neuer Plan aus XPlanGML</button><?
 }
 else { ?>
 	Neue Pläne können nur in Amts oder Gemeindestellen angelegt werden. Wechseln Sie dazu die Stelle über <a href="#" onclick="

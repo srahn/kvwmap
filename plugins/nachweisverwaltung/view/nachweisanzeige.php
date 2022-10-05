@@ -618,7 +618,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 								</tr>
 								<tr>
 									<td align="center">
-										<input type="submit" value="Aktualisieren">
+										<input type="button" value="Aktualisieren" onclick="overlay_submit(currentform, false);">
 									</td>
 								</tr>
 							</table>

@@ -58,8 +58,8 @@ if(!isset($_SESSION)){
 
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
-	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+	if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/config/config.php')) {
+		include(PLUGINS . $kvwmap_plugins[$i] . '/config/config.php');
 	}
 }
 
@@ -251,6 +251,11 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
+			} break;
+			
+			case 'saveDrawmode' : {
+				$GUI->sanitize(['always_draw' => 'boolean']);
+				$GUI->saveDrawmode();
 			} break;
 			
 			case 'layer_check_oids' : {
@@ -1392,6 +1397,16 @@ function go_switch($go, $exit = false) {
 			case 'Klasseneditor_Autoklassen_Hinzufügen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor_AutoklassenHinzufuegen();
+			} break;
+			
+			case 'checkClassCompleteness' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				echo $GUI->checkClassCompleteness();
+			} break;
+			
+			case 'checkClassCompletenessAll' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->checkClassCompletenessAll();
 			} break;
 
 			case 'Attributeditor' : {

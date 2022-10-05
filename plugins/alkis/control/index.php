@@ -5,7 +5,7 @@ function go_switch_alkis($go){
 	switch($go){
 		
 		case "Flurstueckshistorie" : {
-			sanitize(['flurstueckskennzeichen' => 'text']);
+			$GUI->sanitize(['flurstueckskennzeichen' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->flurstueckshistorie();
 			$GUI->output();

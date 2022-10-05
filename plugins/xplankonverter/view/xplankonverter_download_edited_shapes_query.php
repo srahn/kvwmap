@@ -48,6 +48,16 @@
 				Es wurde keine INSPIRE-GML Datei zum Download gefunden. Sie müssen erst die Konvertierung nach INSPIRE-GML über den Button <i class="btn-link fa fa-lg fa-globe"></i> starten. Dann können Sie hier die Datei erunterladen.<?
 			}
 		} break;
+		case 'geoweb_service_capabilities' : { ?>
+			Noch nicht implementiert<p>
+			Hier erscheint der Link zum Download des Capabilities-Dokumentes des Dienstes<p>
+			<a title="GeoWebDienst Capabilities Datei" class="btn btn-link btn-xs xpk-func-download-gml xpk-func-btn" href="index.php?go=xplankonverter_download_service_capabilities&konvertierung_id=<? echo $this->formvars['konvertierung_id']; ?>"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a><?
+		} break;
+		case 'geoweb_service_metadata' : { ?>
+			Noch nicht implementiert<p>
+			Hier erscheint der Link zum Download des Metadatendokumentes des Dienstes<p>
+			<a title="GeoWebDienst Metadaten-Datei" class="btn btn-link btn-xs xpk-func-download-gml xpk-func-btn" href="index.php?go=xplankonverter_download_service_metadata&konvertierung_id=<? echo $this->formvars['konvertierung_id']; ?>"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a><?
+		} break;
 		default : { ?>
 			Beachten Sie den Bearbeitungsstatus der Konvertierung.<?
 		}

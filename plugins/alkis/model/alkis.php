@@ -1716,7 +1716,32 @@ class ALKIS {
 								$pdf->addText($col2,$row,$fontSize,$BestandStr);
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
-									$pdf->addText($col2,$row-=24,$fontSize,'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.');
+									$row = $row - 12;
+									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+									while(strlen($sondereigentum) > 60){
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										if($positionkomma>$positionleerzeichen){
+											$positiontrenner=$positionkomma;
+										}
+										else{
+											$positiontrenner=$positionleerzeichen;
+										}
+										if($row<120) {
+											# Seitenumbruch
+											$seite++;
+											# aktuelle Seite abschließen
+											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+											# neue Seite beginnen
+											$pageid=$pdf->newPage();
+											$pagecount[$f] = $pagecount[$f] + 1;
+											$row=825; # 812 -> 825 2007-04-02 Schmidt;
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+										}
+										$pdf->addText($col2,$row-=12,$fontSize,utf8_decode(mb_substr($sondereigentum,0,$positiontrenner,'utf8')));
+										$sondereigentum=mb_substr($sondereigentum,$positiontrenner+1, 999,'utf8');
+									}
+									$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($sondereigentum));
 								}
 
 								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
@@ -1779,7 +1804,32 @@ class ALKIS {
 								$pdf->addText($col2,$row,$fontSize,$BestandStr);
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
-									$pdf->addText($col2,$row-=24,$fontSize,'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.');
+									$row = $row - 12;
+									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+									while(strlen($sondereigentum) > 60){
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										if($positionkomma>$positionleerzeichen){
+											$positiontrenner=$positionkomma;
+										}
+										else{
+											$positiontrenner=$positionleerzeichen;
+										}
+										if($row<120) {
+											# Seitenumbruch
+											$seite++;
+											# aktuelle Seite abschließen
+											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
+											# neue Seite beginnen
+											$pageid=$pdf->newPage();
+											$pagecount[$f] = $pagecount[$f] + 1;
+											$row=825; # 812 -> 825 2007-04-02 Schmidt;
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+										}
+										$pdf->addText($col2,$row-=12,$fontSize,utf8_decode(mb_substr($sondereigentum,0,$positiontrenner,'utf8')));
+										$sondereigentum=mb_substr($sondereigentum,$positiontrenner+1, 999,'utf8');
+									}
+									$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($sondereigentum));
 								}
 
 								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt

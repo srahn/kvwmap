@@ -116,4 +116,5 @@
 	$strSharedFromHelp  =  "Lösche die ID wenn der Layer in der Layerlegende nicht länger als geteilt markiert werden soll.";
 	$strSizeUnits = "Sizeunits";
 	$strIdentifierText = "Kennungstext";
+	$strCheckClassCompleteness = "überprüfe Klassen auf Vollständigkeit";
 ?>

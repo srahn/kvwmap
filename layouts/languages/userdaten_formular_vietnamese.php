@@ -42,7 +42,7 @@
 	$strShareRollenlayerAllowedLabel = 'Share Layer';
 	$strStart = 'Start Access';
 	$strStop = 'Stop Access';
-	$strTakeOverPassword = 'Take over password';
+	$strTakeOverPassword = 'Cancle new password';
 	$strTitle = 'Biên tập thông tin người dùng';
 	$strUserTitle = 'User title';
 ?>

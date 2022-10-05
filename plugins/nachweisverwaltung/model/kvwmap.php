@@ -334,33 +334,12 @@
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
 	      $GUI->formvars['geom_from_layer'] = $layerset[0]['Layer_ID'];
-	    }
-	    # Spaltenname und from-where abfragen
-	    if($GUI->formvars['geom_from_layer']){
-		    $data = $GUI->mapDB->getData($GUI->formvars['geom_from_layer']);
-		    $data_explosion = explode(' ', $data);
-		    $GUI->formvars['columnname'] = $data_explosion[0];
-		    $select = $fromwhere = $GUI->mapDB->getSelectFromData($data);
-				# order by rausnehmen
-				$GUI->formvars['orderby'] = '';
-				$orderbyposition = strrpos(strtolower($select), 'order by');
-				$lastfromposition = strrpos(strtolower($select), 'from');
-				if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-					$fromwhere = substr($select, 0, $orderbyposition);
-					$GUI->formvars['orderby'] = ' '.substr($select, $orderbyposition);
-				}
-				$GUI->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-		    if(strpos(strtolower($GUI->formvars['fromwhere']), ' where ') === false){
-		      $GUI->formvars['fromwhere'] .= ' where (1=1)';
-		    }
-	    }
-      
+	    }      
       # Ausführen von Aktionen vor der Anzeige der Karte und der Zeichnung
 			$oldscale=round($GUI->map_scaledenom);  
 			$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
 			if ($GUI->formvars['CMD']!='') {
 				$GUI->navMap($GUI->formvars['CMD']);
-				$GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
 			}
 			elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
 				$GUI->scaleMap($GUI->formvars['nScale']);
@@ -421,96 +400,6 @@
     }
   };
 	
-	$GUI->suchparameterSetzen = function() use ($GUI){
-    # speichern der Suchparameter und der Markierungsparameter
-    if ($GUI->formvars['f'] OR $GUI->formvars['k'] OR $GUI->formvars['g']) {
-      if (!$GUI->formvars['f']) {
-        $GUI->formvars['f']='0';
-      }
-      if (!$GUI->formvars['k']) {
-        $GUI->formvars['k']='0';
-      }
-      if (!$GUI->formvars['g']) {
-        $GUI->formvars['g']='0';
-      }
-      $GUI->formvars['art_einblenden']=$GUI->formvars['f'].$GUI->formvars['k'].$GUI->formvars['g'];
-    }
-
-    $_SESSION['f']=$GUI->formvars['f'];
-    $_SESSION['k']=$GUI->formvars['k'];
-    $_SESSION['g']=$GUI->formvars['g'];
-
-    if ($GUI->formvars['art_einblenden']!='') {
-      $_SESSION['art_einblenden']=$GUI->formvars['art_einblenden'];
-    }
-      if ($GUI->formvars['art_einblenden']=='111'){
-        $_SESSION['f']='1' AND $_SESSION['k']='1' AND $_SESSION['g']='1';
-      }
-      if ($GUI->formvars['art_einblenden']=='100'){
-        $_SESSION['f']='1';
-      }
-      if ($GUI->formvars['art_einblenden']=='010'){
-        $_SESSION['k']='1';
-      }
-      if ($GUI->formvars['art_einblenden']=='001'){
-        $_SESSION['g']='1';
-      }
-      if ($GUI->formvars['art_einblenden']=='110'){
-        $_SESSION['f']='1' AND $_SESSION['k']='1' AND $_SESSION['g']='0';
-      }
-      if ($GUI->formvars['art_einblenden']=='101'){
-        $_SESSION['f']='1' AND $_SESSION['g']='1' AND $_SESSION['k']='0';
-      }
-      if ($GUI->formvars['art_einblenden']=='011'){
-        $_SESSION['k']='1' AND $_SESSION['g']='1' AND $_SESSION['f']='0' ;
-      }
-
-    if ($GUI->formvars['art_markieren']!='') {
-      $_SESSION['art_markieren']=$GUI->formvars['art_markieren'];
-    }
-    if ($GUI->formvars['abfrage_art']!='') {
-      $_SESSION['abfrage_art']=$GUI->formvars['abfrage_art'];
-    }
-    if($GUI->formvars['FlurID']!=''){
-      $_SESSION['FlurID']=$GUI->formvars['FlurID'];
-    }
-    if($GUI->formvars['stammnr']!=''){
-      $_SESSION['stammnr']=$GUI->formvars['stammnr'];
-    }
-  	if($GUI->formvars['rissnummer']!=''){
-      $_SESSION['rissnummer']=$GUI->formvars['rissnummer'];
-    }
-    if($GUI->formvars['antr_nr_a']!=''){
-      $_SESSION['antr_nr_a']=$GUI->formvars['antr_nr_a'];
-    }
-    if($GUI->formvars['antr_nr_b']!=''){
-      $_SESSION['antr_nr_b']=$GUI->formvars['antr_nr_b'];
-
-    }
-    if($GUI->formvars['antr_nr']!=''){
-      $_SESSION['antr_nr']=$GUI->formvars['antr_nr'];
-    }
-    if($GUI->suchpolygon!=''){
-      $_SESSION['suchpolygon']=$GUI->suchpolygon;
-    }
-  };
-
-	$GUI->suchparameterLesen = function() use ($GUI){
-    $GUI->formvars['art_einblenden']=$_SESSION['art_einblenden'];
-    $GUI->formvars['art_markieren']=$_SESSION['art_markieren'];
-    $GUI->formvars['abfrage_art']=$_SESSION['abfrage_art'];
-    $GUI->formvars['FlurID']=$_SESSION['FlurID'];
-    $GUI->formvars['stammnr']=$_SESSION['stammnr'];
-    $GUI->formvars['rissnummer']=$_SESSION['rissnummer'];
-    $GUI->formvars['antr_nr_a']=$_SESSION['antr_nr_a'];
-    $GUI->formvars['antr_nr_b']=$_SESSION['antr_nr_b'];
-    $GUI->formvars['f']=$_SESSION['f'];
-    $GUI->formvars['k']=$_SESSION['k'];
-    $GUI->formvars['g']=$_SESSION['g'];
-    $GUI->formvars['antr_nr']=$_SESSION['antr_nr'];
-    $GUI->suchpolygon=$_SESSION['suchpolygon'];
-  };
-
 	$GUI->DokumenteZuAntraegeAnzeigen = function() use ($GUI){
 		if(strpos($GUI->formvars['antr_selected'], '~') == false)$GUI->formvars['antr_selected'] = str_replace('|', '~', $GUI->formvars['antr_selected']); # für Benutzung im GLE
     $GUI->formvars['suchantrnr']=$GUI->formvars['antr_selected'];
@@ -563,9 +452,14 @@
 	};
 
 	$GUI->setNachweisOrder = function($stelle_id, $user_id, $order) use ($GUI){
-		$sql ='UPDATE rolle_nachweise SET ';
-		$sql.='`order`="'.$order.'"';
-		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$sql = "
+			UPDATE 
+				rolle_nachweise 
+			SET 
+				`order` = '" . $order . "' 
+			WHERE 
+				user_id = " . $user_id . " AND 
+				stelle_id = " . $stelle_id;
 		#echo $sql;
 		$GUI->debug->write("<p>setNachweisOrder - Setzen der aktuellen Order für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
@@ -611,11 +505,16 @@
 	$GUI->setNachweisAnzeigeparameter = function($stelle_id, $user_id, $showhauptart,$markhauptart) use ($GUI){
 		if($showhauptart == NULL)$showhauptart = array();
 		if($markhauptart == NULL)$markhauptart = array();
-		$sql ='UPDATE rolle_nachweise SET ';
-		$sql.='showhauptart="'.implode(',', $showhauptart).'",';
-		$sql.='markhauptart="'.implode(',', $markhauptart).'",';
-		$sql .= 'user_id = '.$user_id;
-		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$sql = "
+			UPDATE 
+				rolle_nachweise 
+			SET 
+				showhauptart = '" . implode(',', $showhauptart) . "', 
+				markhauptart = '" . implode(',', $markhauptart) . "', 
+				user_id = " . $user_id . "
+			WHERE 
+				user_id = " . $user_id . " AND 
+				stelle_id = " . $stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->setNachweisAnzeigeparameter - Setzen der aktuellen Anzeigeparameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 		return 1;
@@ -645,13 +544,15 @@
 	};
 	
 	$GUI->save_Dokumentauswahl = function($stelle_id, $user_id, $formvars) use ($GUI){
-		$sql ='
-			INSERT INTO rolle_nachweise_dokumentauswahl (stelle_id, user_id, name, suchhauptart, suchunterart) VALUES (
-			' . $stelle_id . ', 
-			' . $user_id . ',
-			"' . $formvars['dokauswahl_name'] . '", 
-			"' . implode(',', $formvars['suchhauptart']) . '", 
-			"' . implode(',', $formvars['suchunterart']) . '")';
+		$sql ="
+			INSERT INTO rolle_nachweise_dokumentauswahl 
+				(stelle_id, user_id, name, suchhauptart, suchunterart) 
+			VALUES (
+			" . $stelle_id . ", 
+			" . $user_id . ",
+			'" . $formvars['dokauswahl_name'] . "', 
+			'" . implode(',', $formvars['suchhauptart']) . "', 
+			'" . implode(',', $formvars['suchunterart']) . "')";
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
@@ -659,8 +560,10 @@
 	};
 	
 	$GUI->delete_Dokumentauswahl = function($id) use ($GUI){
-		$sql ='DELETE FROM rolle_nachweise_dokumentauswahl ';
-		$sql.='WHERE id='.$id;
+		$sql = "
+			DELETE FROM 
+				rolle_nachweise_dokumentauswahl 
+			WHERE id = " . $id;
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->delete_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);
@@ -699,14 +602,34 @@
 	};
 		
 	$GUI->Suchparameter_loggen = function($formvars, $stelle_id, $user_id) use ($GUI){
-		$sql ='INSERT INTO u_consumeNachweise SELECT ';
-		$sql.='"'.$formvars['suchantrnr'].'", ';
-		$sql.=$stelle_id.', ';
-		$sql.='"'.date('Y-m-d H:i:s',time()).'", ';
-		$sql.='`suchhauptart`, `suchunterart`, `abfrageart`, `suchgemarkung`, `suchflur`, `suchstammnr`, `suchstammnr2`, `suchrissnummer`, `suchrissnummer2`, `suchfortfuehrung`, `suchpolygon`, `suchantrnr`, `sdatum`, `sdatum2`, `sVermStelle`,';
-		if($formvars['flur_thematisch']!='') { $sql.='"'.$formvars['flur_thematisch'].'"'; }else{$sql.='"0"';}
-		$sql.=' FROM rolle_nachweise';
-		$sql.=' WHERE user_id='.$user_id.' AND stelle_id='.$stelle_id;
+		$sql = "
+			INSERT INTO 
+				u_consumeNachweise 
+			SELECT
+				'" . $formvars['suchantrnr'] . "', 
+				" . $stelle_id . ", 
+				'" . date('Y-m-d H:i:s',time()) . "', 
+				`suchhauptart`, 
+				`suchunterart`, 
+				`abfrageart`, 
+				`suchgemarkung`, 
+				`suchflur`, 
+				`suchstammnr`, 
+				`suchstammnr2`, 
+				`suchrissnummer`, 
+				`suchrissnummer2`, 
+				`suchfortfuehrung`, 
+				`suchpolygon`, 
+				`suchantrnr`, 
+				`sdatum`, 
+				`sdatum2`, 
+				`sVermStelle`, " .
+				(($formvars['flur_thematisch'] != '') ? $formvars['flur_thematisch'] : "0") . "
+			FROM 
+				rolle_nachweise 
+			WHERE 
+				user_id = " . $user_id . " AND 
+				stelle_id = " . $stelle_id;
 		$GUI->debug->write("<p>file:users.php class:rolle->Suchparameter_loggen - Setzen der aktuellen Parameter für die Nachweissuche",4);
 		$GUI->database->execSQL($sql,4, 1);
 	};
@@ -755,6 +678,31 @@
 			$pdf->ezText(' ', 12, $options);
 		}		
 		return $pdf;
+	};
+	
+	$GUI->sanitizeNachweisSearch = function() use ($GUI){
+		$GUI->sanitize([
+			'bearbeitungshinweis_id' => 'int', 
+			'bearbeitungshinweis_text' => 'text',
+			'showhauptart' => 'text',
+			'markhauptart' => 'text',
+			'order' => 'text',
+			'suchpolygon' => 'text',
+			'suchgemarkung' => 'text',
+			'suchstammnr' => 'text',
+			'suchrissnummer' => 'text',
+			'suchfortfuehrung' => 'int',
+			'suchantrnr' => 'text',
+			'sdatum' => 'text',
+			'sVermStelle' => 'text',
+			'suchgueltigkeit' => 'boolean',
+			'sdatum2' => 'text',
+			'suchflur' => 'text',
+			'suchbemerkung' => 'text',
+			'suchstammnr2' => 'text',
+			'suchrissnummer2' => 'text',
+			'suchfortfuehrung2' => 'int',
+			'suchgeprueft' => 'boolean']);
 	};
 	
 	$GUI->nachweiseRecherchieren = function() use ($GUI){
@@ -1384,6 +1332,7 @@
 	};
 
 	$GUI->nachweisFormAnzeige = function($nachweis = NULL) use ($GUI){
+		$GUI->sanitize(['id' => 'int', 'FlurstKennz' => 'text']);
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
@@ -1407,7 +1356,6 @@
 		$GUI->formvars['unterart'] = $GUI->formvars['unterart_'.$GUI->formvars['hauptart']];
     if ($GUI->formvars['CMD']!=''){			
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
     elseif($oldscale!=$GUI->formvars['nScale'] AND $GUI->formvars['nScale'] != '') {
       $GUI->scaleMap($GUI->formvars['nScale']);
@@ -1516,7 +1464,7 @@
     # Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
     # Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
     $GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
-		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
+		$ret=$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
     if ($ret!='') {
       $errmsg.=$ret;
     }    
@@ -1553,7 +1501,7 @@
 		# Zurück zur Anzeige des Rechercheergebnisses mit Meldung über Zuordnung der Dokumente zum Auftrag
 		# Abfragen aller aktuellen Such- und Anzeigeparameter aus der Datenbank
 		$GUI->formvars = array_merge($GUI->formvars, $GUI->getNachweisParameter($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id));
-		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['suchhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
+		$GUI->nachweis->getNachweise(0,$GUI->formvars['suchpolygon'],$GUI->formvars['suchgemarkung'],$GUI->formvars['suchstammnr'],$GUI->formvars['suchrissnummer'],$GUI->formvars['suchfortfuehrung'],$GUI->formvars['showhauptart'],$GUI->formvars['richtung'],$GUI->formvars['abfrageart'], $GUI->formvars['order'],$GUI->formvars['suchantrnr'], $GUI->formvars['sdatum'], $GUI->formvars['sVermStelle'], $GUI->formvars['suchgueltigkeit'], $GUI->formvars['sdatum2'], $GUI->formvars['suchflur'], $GUI->formvars['flur_thematisch'], $GUI->formvars['suchunterart'], $GUI->formvars['suchbemerkung'], NULL, $GUI->formvars['suchstammnr2'], $GUI->formvars['suchrissnummer2'], $GUI->formvars['suchfortfuehrung2'], $GUI->formvars['suchgeprueft']);
 		# Anzeige der Rechercheergebnisse			
 		if($errmsg)$GUI->add_message('error', $errmsg);
 		if($okmsg)$GUI->add_message('notice', $okmsg);
@@ -1611,6 +1559,7 @@
   };
 	
 	$GUI->rechercheFormAnzeigen = function() use ($GUI){
+		$GUI->sanitize(['dokauswahl_name' => 'text', 'dokauswahlen' => 'int', 'FlurstKennz' => 'text']);
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
 		# Speichern einer neuen Dokumentauswahl
@@ -1682,7 +1631,6 @@
     if ($GUI->formvars['CMD']!='') {
       # Nur Navigieren
       $GUI->navMap($GUI->formvars['CMD']);
-      $GUI->user->rolle->saveDrawmode($GUI->formvars['always_draw']);
     }
 	
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
@@ -1759,6 +1707,7 @@
 
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$GUI->festpunkteZeigen = function() use ($GUI){
+		$GUI->sanitize(['pkn' => 'text']);
     $GUI->loadMap('DataBase');
     if (is_array($GUI->formvars['pkn'])) {
       $punktliste=array_keys($GUI->formvars['pkn']);
@@ -1815,6 +1764,7 @@
 
 # 2016-11-03 H.Riedel - pkz durch pkn ersetzt
 	$GUI->festpunkteSuchen = function() use ($GUI){
+		$GUI->sanitize(['antr_selected' => 'text', 'pkn' => 'text', 'kiloquad' => 'text']);
 		$explosion = explode('~', $GUI->formvars['antr_selected']);
 		$GUI->formvars['antr_selected'] = $explosion[0];
 		$stelle_id = $explosion[1];

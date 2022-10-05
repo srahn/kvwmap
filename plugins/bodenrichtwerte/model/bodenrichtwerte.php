@@ -103,7 +103,7 @@ class bodenrichtwertzone {
 			FROM bodenrichtwerte.bw_zonen
 			WHERE 1=1";
     if ($gid != '') {
-      $sql.=" AND gid = ".sprintf("%.0f", $gid);
+      $sql.=" AND gid = " . $gid;
     }
     $ret=$this->database->execSQL($sql,4, 0);    
     if ($ret[0]) {
@@ -209,9 +209,9 @@ class bodenrichtwertzone {
 			if($formvars['ergaenzende_nutzung']){$sql.= ",'".$formvars['ergaenzende_nutzung']."' ";}
 			if($formvars['bauweise']){$sql.= ",'".$formvars['bauweise']."' ";}
 			if($formvars['geschosszahl']){$sql.= ",'".$formvars['geschosszahl']."' ";}
-			if($formvars['grundflaechenzahl']){$sql.= ",".$formvars['grundflaechenzahl'];}
-			if($formvars['geschossflaechenzahl']){$sql.= ",".$formvars['geschossflaechenzahl'];}
-			if($formvars['baumassenzahl']){$sql.= ",".$formvars['baumassenzahl'];}
+			if($formvars['grundflaechenzahl']){$sql.= ",'" . $formvars['grundflaechenzahl'] . "' ";}
+			if($formvars['geschossflaechenzahl']){$sql.= ",'" . $formvars['geschossflaechenzahl'] . "'";}
+			if($formvars['baumassenzahl']){$sql.= ",'" . $formvars['baumassenzahl'] . "'";}
 			if($formvars['flaeche']){$sql.= ",'".$formvars['flaeche']."' ";}
 			if($formvars['tiefe']){$sql.= ",'".$formvars['tiefe']."' ";}
 			if($formvars['breite']){$sql.= ",'".$formvars['breite']."' ";}

@@ -796,11 +796,11 @@ class user {
 		}
 	}
 
-	function readUserDaten($id, $login_name, $passwort = '') {
+	function readUserDaten($id, $login_name, $password = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
+		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*
@@ -809,10 +809,10 @@ class user {
 			WHERE
 				" . implode(" AND ", $where) . "
 		";
-		#echo '<br>Sql: ' . $sql;
+		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql);
+		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
@@ -833,6 +833,7 @@ class user {
 		$this->stop = $rs['stop'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->tokens = $rs['tokens'];
 	}
 
 	function setRolle($stelle_id) {

@@ -4,6 +4,7 @@ function go_switch_baumfaellantrag($go){
 	global $GUI;	
 	switch($go) {
 		case 'baumfaellantrag_get_flurstueck' : {
+			$GUI->sanitize(['latitude' => 'float', 'longitude' => 'float', 'epsg_code' => 'int', 'format' => 'text']);
 			# example for request
 			# http://myserver.de/kvwmap/index.php?Stelle_IDgo=baumfaellantrag_get_flurstueck&latitude=53.71181&longitude=11.97404
 			# example for response
@@ -36,6 +37,7 @@ function go_switch_baumfaellantrag($go){
 		} break;
 
 		case 'baumfaellantrag_get_zustaendige_stelle' : {
+			$GUI->sanitize(['latitude' => 'float', 'longitude' => 'float', 'epsg_code' => 'int', 'format' => 'text']);
 			# example for request
 			# http://myserver.de/kvwmap/index.php?Stelle_IDgo=baumfaellantrag_get_zustaendige_stelle&latitude=53.71181&longitude=11.97404
 			# example for response
@@ -68,6 +70,7 @@ function go_switch_baumfaellantrag($go){
 		} break;
 
 		case 'baumfaellantrag_get_satzungsgebiet' : {
+			$GUI->sanitize(['latitude' => 'float', 'longitude' => 'float', 'epsg_code' => 'int', 'format' => 'text']);
 			# example for request
 			# http://myserver.de/kvwmap/index.php?Stelle_IDgo=baumfaellantrag_get_satzungsgebiet&latitude=53.71181&longitude=11.97404
 			# example for response
