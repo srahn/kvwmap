@@ -11246,7 +11246,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$_files = $_FILES;
 		if ($this->formvars['upload_id'] !== '') {
 			if ($_files['uploadfile']['name']) {
-				$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+				$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 				@mkdir($user_upload_folder);
 				$nachDatei = $user_upload_folder . $_files['uploadfile']['name'];
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
@@ -11263,7 +11263,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11273,9 +11273,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id) {
 		sanitize($filename, 'text');
-		include_once (CLASSPATH.'data_import_export.php');
+		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
+		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
