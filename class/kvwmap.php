@@ -2033,7 +2033,7 @@ echo '			</table>
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
 
-		$layer->set('name', $layerset['Name']);
+		$layer->set('name', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name']));
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -6023,7 +6023,7 @@ echo '			</table>
 			$this->map->legend->label->set("type", 'truetype');
 		}
 		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_C);
+    $this->map->legend->label->set("position", MS_CC);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
@@ -6052,7 +6052,10 @@ echo '			</table>
 						if($layerset['list'][$i]['showclasses']){
 							for($j = 0; $j < $layer->numclasses; $j++){
 								$class = $layer->getClass($j);
-								if($class->name != '')$draw = true;
+								if ($class->name == '') {
+									$class->name = ' ';
+								}
+								$draw = true;
 							}
 						}
 					}
@@ -8060,9 +8063,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->use_form_data = true;
 		}
 		else {
-			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
-			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
-			$this->formvars['duplicate_criterion'] = pg_escape_string($this->formvars['duplicate_criterion']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 			if ($this->formvars['selected_layer_id'] == 0) {
 				return false;
@@ -8071,8 +8071,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != '') {
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$duplicate_criterion = strip_pg_escape_string($this->formvars['duplicate_criterion']);
+				$path = $this->formvars['pfad'];
+				$duplicate_criterion = $this->formvars['duplicate_criterion'];
 				$all_layer_params = $mapDB->get_all_layer_params_default_values();
 			  $attributes = $mapDB->load_attributes(
 					$layerdb,
@@ -18105,10 +18105,10 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		$formvars['pfad'] = pg_escape_string($formvars['pfad']);
-		$formvars['Data'] = pg_escape_string($formvars['Data']);
-		$formvars['metalink'] = pg_escape_string($formvars['metalink']);
-		$formvars['duplicate_criterion'] = pg_escape_string($formvars['duplicate_criterion']);
+		$formvars['pfad'] = $this->db->mysqli->real_escape_string($formvars['pfad']);
+		$formvars['Data'] = $this->db->mysqli->real_escape_string($formvars['Data']);
+		$formvars['metalink'] = $this->db->mysqli->real_escape_string($formvars['metalink']);
+		$formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($formvars['duplicate_criterion']);
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];
 		}
@@ -18393,11 +18393,11 @@ class db_mapObj{
 					" . quote($formvars['alias']) . ",
 					" . quote_or_null($formvars['Datentyp']) . ",
 					" . quote_or_null($formvars['Gruppe']) . ",
-					" . quote_or_null($formvars['pfad']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['pfad'])) . ",
 					" . quote_or_null($formvars['maintable']) . ",
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['identifier_text']) . ",
-					" . quote_or_null($formvars['Data']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['Data'])) . ",
 					" . quote_or_null($formvars['schema']) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
@@ -18457,7 +18457,7 @@ class db_mapObj{
 					" . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
-					" . quote($formvars['duplicate_criterion']) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
 					" . quote_or_null($formvars['comment']) . "

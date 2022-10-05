@@ -874,7 +874,7 @@ function prepare_sha1($login_name, $password) {
 			passwort = NULL
 		WHERE
 			passwort = MD5('" . $password . "') AND
-			password IS NULL
+			(password IS NULL OR password = '')
 	";
 	#echo "SQL to update the password with method sha1: ", $sql;
 	$GUI->debug->write("<p>file:users.php class:user->prepare_sha1 - Setzen des Passworthash in Attribut password mit SHA1 Methode:<br>", 3);

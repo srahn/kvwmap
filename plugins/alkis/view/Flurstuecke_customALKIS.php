@@ -291,7 +291,7 @@ hide_versions = function(flst){
 										<tr>
 											<td align="right" valign="top"><span class="fett">Amtsgericht</span>&nbsp;</td>
 											<td><? 
-												for ($a = 0; $a < count($flst->Amtsgerichte); $a++) {
+												for ($a = 0; $a < @count($flst->Amtsgerichte); $a++) {
 													if ($privileg_['amtsgerichtname']) { 
 														echo $flst->Amtsgerichte[$a]['name'];
 													}

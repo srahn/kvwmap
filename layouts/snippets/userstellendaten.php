@@ -76,7 +76,7 @@ function Bestaetigung(link,text) {
 	}
 	for ($i = 0; $i < @count($this->unassigned_users['ID']); $i++) { ?>
 		<div id="unassigneduser<? echo $this->unassigned_users['ID'][$i]; ?>" class="usd-nutzer">
-			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>"><?
+			<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=unassigned&selected_user_id=<? echo $this->unassigned_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?
 				echo $this->unassigned_users['Bezeichnung'][$i]; ?>      
 			</a>
 			<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->unassigned_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->unassigned_users['Bezeichnung'][$i], $loeschen); ?>?')" title="<?php echo $this->strDelete; ?>">
@@ -95,7 +95,7 @@ if ($this->expired_users['ID']) { ?>
 }
 for ($i = 0; $i < @count($this->expired_users['ID']); $i++) { ?>
 	<div id="expireduser<? echo $this->expired_users['ID'][$i]; ?>" class="usd-nutzer">
-		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>"><?
+		<a href="index.php?go=Benutzerdaten_Formular&nutzerstellen=expired&selected_user_id=<? echo $this->expired_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?
 			echo $this->expired_users['Bezeichnung'][$i]; ?>
 		</a>
 		<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->expired_users['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->expired_users['Bezeichnung'][$i], $loeschen); ?>?')" title="<?php echo $this->strDelete; ?>">
