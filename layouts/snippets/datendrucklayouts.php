@@ -716,7 +716,7 @@ function scrolltop(){
 													</select>
 												</td>
 												<td align="right">
-													<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
+													<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Linieloeschen&line_id=<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie die Linie wirklich löschen?');">löschen&nbsp;</a>
 												</td>
 											</tr>
 										</tbody><?
@@ -798,7 +798,7 @@ function scrolltop(){
 											</select>
 										</td>
 										<td align="right">
-											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Rechteckloeschen&rect_id=<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>', 'Wollen Sie das Rechteck wirklich löschen?');">löschen&nbsp;</a>
+											<a href="javascript:Bestaetigung('index.php?go=sachdaten_druck_editor_Rechteckloeschen&rect_id=<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id'] ?>&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&aktivesLayout=<? echo $this->formvars['aktivesLayout']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie das Rechteck wirklich löschen?');">löschen&nbsp;</a>
 										</td>
 									</tr>
 									</tbody>
@@ -815,7 +815,7 @@ function scrolltop(){
 <? if($this->formvars['selected_layer_id']){ ?>		
 		<div style="margin-top: 10px">
 <? if($this->ddl->selectedlayout[0]['name']){ ?>
-			<input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
+			<input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=sachdaten_druck_editor_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_layout_id=<? echo $this->ddl->selectedlayout[0]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
 			<input id="save_submit_button" type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;
 <? } ?>
 			<input type="button" name="go_plus" onclick="save_layout();" value="als neues Layout speichern">
