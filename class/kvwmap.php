@@ -8107,9 +8107,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->use_form_data = true;
 		}
 		else {
-			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
-			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
-			$this->formvars['duplicate_criterion'] = pg_escape_string($this->formvars['duplicate_criterion']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 			if ($this->formvars['selected_layer_id'] == 0) {
 				return false;
@@ -8118,8 +8115,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != '') {
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$duplicate_criterion = strip_pg_escape_string($this->formvars['duplicate_criterion']);
+				$path = $this->formvars['pfad'];
+				$duplicate_criterion = $this->formvars['duplicate_criterion'];
 				$all_layer_params = $mapDB->get_all_layer_params_default_values();
 			  $attributes = $mapDB->load_attributes(
 					$layerdb,
@@ -11262,7 +11259,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$_files = $_FILES;
 		if ($this->formvars['upload_id'] !== '') {
 			if ($_files['uploadfile']['name']) {
-				$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+				$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 				@mkdir($user_upload_folder);
 				$nachDatei = $user_upload_folder . $_files['uploadfile']['name'];
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
@@ -11279,7 +11276,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11289,9 +11286,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id) {
 		sanitize($filename, 'text');
-		include_once (CLASSPATH.'data_import_export.php');
+		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
+		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
@@ -18213,10 +18210,10 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		$formvars['pfad'] = pg_escape_string($formvars['pfad']);
-		$formvars['Data'] = pg_escape_string($formvars['Data']);
-		$formvars['metalink'] = pg_escape_string($formvars['metalink']);
-		$formvars['duplicate_criterion'] = pg_escape_string($formvars['duplicate_criterion']);
+		$formvars['pfad'] = $this->db->mysqli->real_escape_string($formvars['pfad']);
+		$formvars['Data'] = $this->db->mysqli->real_escape_string($formvars['Data']);
+		$formvars['metalink'] = $this->db->mysqli->real_escape_string($formvars['metalink']);
+		$formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($formvars['duplicate_criterion']);
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];
 		}
@@ -18501,11 +18498,11 @@ class db_mapObj{
 					" . quote($formvars['alias']) . ",
 					" . quote_or_null($formvars['Datentyp']) . ",
 					" . quote_or_null($formvars['Gruppe']) . ",
-					" . quote_or_null($formvars['pfad']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['pfad'])) . ",
 					" . quote_or_null($formvars['maintable']) . ",
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['identifier_text']) . ",
-					" . quote_or_null($formvars['Data']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['Data'])) . ",
 					" . quote_or_null($formvars['schema']) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
@@ -18565,7 +18562,7 @@ class db_mapObj{
 					" . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
-					" . quote($formvars['duplicate_criterion']) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
 					" . quote_or_null($formvars['comment']) . "

@@ -2374,4 +2374,21 @@ function sanitize(&$value, $type) {
 	}
 	return $value;
 }
+
+/**
+	Function determine the max allowed file size in MB
+	If php configuration parameter are defined with G the values
+	will be multiplied by 1024
+*/
+function get_max_file_size() {
+	$post_max_size_txt = ini_get('post_max_size');
+	if (strpos($post_max_size_txt, 'G') !== false) {
+		$post_max_size = (int)$post_max_size_txt * 1024;
+	}
+	$upload_max_filesize_txt = ini_get('upload_max_filesize');
+	if (strpos($upload_max_filesize_txt, 'G') !== false) {
+		$upload_max_filesize = (int)$upload_max_filesize_txt * 1024;
+	}
+	return min($post_max_size, $upload_max_filesize);
+}
 ?>
