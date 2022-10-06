@@ -88,7 +88,7 @@ class Gml_extractor {
 			if ($r_key == 'externereferenz') {
 				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
 				$referenzen = json_decode($r_value);
-				if (count($referenzen) > 0) {
+				if (is_array($referenzen) AND count($referenzen) > 0) {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
