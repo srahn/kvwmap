@@ -166,8 +166,26 @@ BEGIN;
 
   -- Geänderte Beschreibung zum Code-Wert 5000 und zusätzliche Codes in Aufzählung BP_Rechtsstand
   UPDATE xplan_gml.enum_bp_rechtsstand SET beschreibung = 'Der Plan wurde außer Kraft gesetzt.' WHERE wert = 5000;
-  ALTER TYPE xplan_gml.bp_rechtsstand ADD VALUE '50000' AFTER '5000';
-  ALTER TYPE xplan_gml.bp_rechtsstand ADD VALUE '50001' AFTER '50000';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.bp_rechtsstand'::regtype::oid, '50000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '5000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '5000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '50000' );		
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.bp_rechtsstand'::regtype::oid, '50001', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '50000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '50000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_rechtsstand'::regtype AND enumlabel = '50001' );	
+	
+  --ALTER TYPE xplan_gml.bp_rechtsstand ADD VALUE '50000' AFTER '5000';
+  --ALTER TYPE xplan_gml.bp_rechtsstand ADD VALUE '50001' AFTER '50000';
   INSERT INTO xplan_gml.enum_bp_rechtsstand (wert, abkuerzung, beschreibung) VALUES
   (50000, 'Aufgehoben', 'Der Plan wurde durch ein förmliches Verfahren aufgehoben'),
   (50001, 'Ausser Kraft', 'Der Plan ist ohne förmliches Verfahren z.B. durch Überplanung außer Kraft getreten');
@@ -210,7 +228,16 @@ BEGIN;
     ADD COLUMN detaillierteSondernutzung xplan_gml.bp_detailsondernutzung[];
 
   -- Add Enum Value to BP_BebauungsArt
-  ALTER TYPE xplan_gml.bp_bebauungsart ADD VALUE '80000' AFTER '7000';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.bp_bebauungsart'::regtype::oid, '80000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_bebauungsart'::regtype AND enumlabel = '7000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_bebauungsart'::regtype AND enumlabel = '7000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_bebauungsart'::regtype AND enumlabel = '80000' );	
+	
+  --ALTER TYPE xplan_gml.bp_bebauungsart ADD VALUE '80000' AFTER '7000';
   INSERT INTO xplan_gml.enum_bp_bebauungsart (wert, abkuerzung, beschreibung) VALUES
   (8000, 'EinzelhaeuserDoppelhaeuserHausgruppen', 'Es sind Einzelhäuser, Doppelhäuser und Hausgruppen zulässig.');
 
@@ -226,7 +253,18 @@ BEGIN;
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Flachdach, Empfohlene Abkürzung: FD' WHERE abkuerzung = 'Flachdach';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Pultdach, Empfohlene Abkürzung: PD' WHERE abkuerzung = 'Pultdach';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Versetztes Pultdach, Empfohlene Abkürzung: VPD' WHERE abkuerzung = 'Versetztes Pultdach';
-  ALTER TYPE xplan_gml.bp_dachform ADD VALUE '3000' AFTER '2200';
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.bp_dachform'::regtype::oid, '3000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '2200') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '2200')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '3000' );	
+	
+	
+  --ALTER TYPE xplan_gml.bp_dachform ADD VALUE '3000' AFTER '2200';
   INSERT INTO xplan_gml.enum_bp_dachform (wert, abkuerzung, beschreibung) VALUES (3000, 'Geneigtes Dach', 'Kein Flachdach, Empfohlene Abkürzung: GD');
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Satteldach, Empfohlene Abkürzung: SD' WHERE abkuerzung = 'Satteldach';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Walmdach, Empfohlene Abkürzung: WD' WHERE abkuerzung = 'Walmdach';
@@ -238,7 +276,18 @@ BEGIN;
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Sheddach, Empfohlene Abkürzung: ShD' WHERE abkuerzung = 'Sheddach';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Bogendach, Empfohlene Abkürzung: BD' WHERE abkuerzung = 'Mansardendach';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Turmdach, Empfohlene Abkürzung: TuD' WHERE abkuerzung = 'Turmdach';
-  ALTER TYPE xplan_gml.bp_dachform ADD VALUE '4100' AFTER '4000';
+	
+		INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.bp_dachform'::regtype::oid, '4100', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '4000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '4000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.bp_dachform'::regtype AND enumlabel = '4100' );	
+	
+	
+  --ALTER TYPE xplan_gml.bp_dachform ADD VALUE '4100' AFTER '4000';
   INSERT INTO xplan_gml.enum_bp_dachform (wert, abkuerzung, beschreibung) VALUES (4100, 'Tonnendach', 'Tonnendach, Empfohlene Abkürzung: ToD');
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Gemischte Dachform, Empfohlene Abkürzung: GDF' WHERE abkuerzung = 'Mischform';
   UPDATE xplan_gml.enum_bp_dachform SET beschreibung = 'Sonstige Dachform, Empfohlene Abkürzung: SDF' WHERE abkuerzung = 'Sonstiges';
@@ -568,20 +617,66 @@ BEGIN;
 
 
   -- Zusätzliche Aufzählung in enum XP_ArtHoehenbezug
-  ALTER TYPE xplan_gml.xp_arthoehenbezug ADD VALUE '3500' AFTER '3000';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_arthoehenbezug'::regtype::oid, '3500', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezug'::regtype AND enumlabel = '3000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezug'::regtype AND enumlabel = '3000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezug'::regtype AND enumlabel = '3500');	
+	
+	
+  --ALTER TYPE xplan_gml.xp_arthoehenbezug ADD VALUE '3500' AFTER '3000';
   INSERT INTO xplan_gml.enum_xp_arthoehenbezug (wert, abkuerzung, beschreibung) VALUES
   (3500, 'relativStrasse', 'Höhenangabe relativ zur Strassenoberkante an der Position des Planinhalts');
 
   -- Zusätzliche Aufzählung in enum XP_ArtHoehenbezugspunkt
-  ALTER TYPE xplan_gml.xp_arthoehenbezugspunkt ADD VALUE '6500' AFTER '6000';
-  ALTER TYPE xplan_gml.xp_arthoehenbezugspunkt ADD VALUE '6600' AFTER '6500';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_arthoehenbezugspunkt'::regtype::oid, '6500', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6500');	
+		
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_arthoehenbezugspunkt'::regtype::oid, '6600', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6500') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6500')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_arthoehenbezugspunkt'::regtype AND enumlabel = '6600');	
+	
+  --ALTER TYPE xplan_gml.xp_arthoehenbezugspunkt ADD VALUE '6500' AFTER '6000';
+  --ALTER TYPE xplan_gml.xp_arthoehenbezugspunkt ADD VALUE '6600' AFTER '6500';
   INSERT INTO xplan_gml.enum_xp_arthoehenbezugspunkt (wert, abkuerzung, beschreibung) VALUES
   (6500, 'WH', 'Wandhöhe'),
   (6600, 'GOK' , 'Geländeoberkante');
 
   -- Zusätzliche Aufzählung in enum XP_RechtscharakterPlanaenderung
-  ALTER TYPE xplan_gml.xp_rechtscharakterplanaenderung ADD VALUE '20000' AFTER '2000';
-  ALTER TYPE xplan_gml.xp_rechtscharakterplanaenderung ADD VALUE '20001' AFTER '20000';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_rechtscharakterplanaenderung'::regtype::oid, '20000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '2000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '2000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '20000' );	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_rechtscharakterplanaenderung'::regtype::oid, '20001', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '20000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '20000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_rechtscharakterplanaenderung'::regtype AND enumlabel = '20001' );	
+	
+  --ALTER TYPE xplan_gml.xp_rechtscharakterplanaenderung ADD VALUE '20000' AFTER '2000';
+  --ALTER TYPE xplan_gml.xp_rechtscharakterplanaenderung ADD VALUE '20001' AFTER '20000';
   INSERT INTO xplan_gml.enum_xp_rechtscharakterplanaenderung (wert, abkuerzung, beschreibung) VALUES
   (20000, 'Aufhebungsverfahren', 'Das altes Planrecht wurde durch ein förmliches Verfahren aufgehoben'),
   (20001, 'Ueberplanung' , 'Der alte Plan tritt ohne förmliches Verfahren außer Kraft');
@@ -595,8 +690,26 @@ BEGIN;
   UPDATE xplan_gml.enum_xp_sondernutzungen SET beschreibung = replace(beschreibung, ' nach §10 der BauNVO 1977 und 1990', '');
   UPDATE xplan_gml.enum_xp_sondernutzungen SET beschreibung = replace(beschreibung, ' nach §11 der BauNVO 1977 und 1990', '');
   -- Neue Aufzählung in enum XP_Sondernutzungen
-  ALTER TYPE xplan_gml.xp_sondernutzungen ADD VALUE '23000' AFTER '2300';
-  ALTER TYPE xplan_gml.xp_sondernutzungen ADD VALUE '2720' AFTER '2700';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_sondernutzungen'::regtype::oid, '23000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '2300') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '2300')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '23000' );	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_sondernutzungen'::regtype::oid, '2720', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '2700') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '2700')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_sondernutzungen'::regtype AND enumlabel = '2720' );	
+	
+  --ALTER TYPE xplan_gml.xp_sondernutzungen ADD VALUE '23000' AFTER '2300';
+  --ALTER TYPE xplan_gml.xp_sondernutzungen ADD VALUE '2720' AFTER '2700';
   INSERT INTO xplan_gml.enum_xp_sondernutzungen (wert, abkuerzung, beschreibung) VALUES
     (23000, 'Klinikgebiet', 'Klinikgebiet'),
     (2720, 'SondergebietJustiz', 'Sondergebiet für Einrichtungen der Justiz');
@@ -604,12 +717,31 @@ BEGIN;
   -- geänderte Beschreibung in enum XP_ZweckbestimmungGemeinbedarf
   UPDATE xplan_gml.enum_xp_zweckbestimmunggemeinbedarf SET beschreibung = 'Religiöse Einrichtung' WHERE wert = 1400;
   UPDATE xplan_gml.enum_xp_zweckbestimmunggemeinbedarf SET beschreibung = 'Religiöses Verwaltungsgebäude, z. B. Pfarramt, Bischöfliches Ordinariat, Konsistorium.' WHERE wert = 14001;
-  ALTER TYPE xplan_gml.xp_zweckbestimmunggemeinbedarf ADD VALUE '16005' AFTER '16004';
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmunggemeinbedarf'::regtype::oid, '16005', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggemeinbedarf'::regtype AND enumlabel = '16004') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggemeinbedarf'::regtype AND enumlabel = '16004')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggemeinbedarf'::regtype AND enumlabel = '16005' );	
+	
+  --ALTER TYPE xplan_gml.xp_zweckbestimmunggemeinbedarf ADD VALUE '16005' AFTER '16004';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmunggemeinbedarf (wert, abkuerzung, beschreibung) VALUES
     (16005, 'EinrichtungBehinderte', 'Soziale Einrichtung für Menschen mit Beeinträchtigung, wie z. B. Behindertentagesstätte, Behindertenwohnheim, Behindertenwerkstatt');
 
   -- zusätzliche Aufzählung in enum XP_ZweckbestimmungGewaesser
-  ALTER TYPE xplan_gml.xp_zweckbestimmunggewaesser ADD VALUE '10000' AFTER '1000';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmunggewaesser'::regtype::oid, '10000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggewaesser'::regtype AND enumlabel = '1000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggewaesser'::regtype AND enumlabel = '1000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmunggewaesser'::regtype AND enumlabel = '10000' );	
+	
+  --ALTER TYPE xplan_gml.xp_zweckbestimmunggewaesser ADD VALUE '10000' AFTER '1000';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmunggewaesser (wert, abkuerzung, beschreibung) VALUES
     (10000, 'Sportboothafen', 'Sportboothafen');
 
@@ -620,9 +752,36 @@ BEGIN;
   UPDATE xplan_gml.enum_xp_zweckbestimmungkennzeichnung SET beschreibung = 'Für bauliche Nutzung vorgesehene Flächen, deren Böden erheblich mit umweltgefährdenden Stoffen belastet sind (§5, Abs. 3, Nr. 3 BauGB).' WHERE wert = 4000;
 
   -- zusätzliche Aufzählungen in XP_ZweckbestimmungVerEntsorgung
-  ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100011' AFTER '100010';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100012' AFTER '100011';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100013' AFTER '100012';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype::oid, '100011', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100010') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100010')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100011' );
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype::oid, '100012', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100011') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100011')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100012' );	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype::oid, '100013', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100012') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100012')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungverentsorgung'::regtype AND enumlabel = '100013' );		
+	
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100011' AFTER '100010';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100012' AFTER '100011';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungverentsorgung ADD VALUE '100013' AFTER '100012';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmungverentsorgung (wert, abkuerzung, beschreibung) VALUES
     (100011, 'Kernkraftwerk', 'Kernkraftwerk'),
     (100012, 'Kohlekraftwerk', 'Kohlekraftwerk'),
@@ -630,13 +789,77 @@ BEGIN;
   UPDATE xplan_gml.enum_xp_zweckbestimmungverentsorgung SET abkuerzung = 'Mobilfunkanlage', beschreibung = 'Mobilfunkanlage' WHERE wert = 26001;
 
   -- Neue werte für Aufzählung XP_ZweckbestimmungWald
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '10000' AFTER '1000';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16000' AFTER '1600';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16001' AFTER '16000';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16002' AFTER '16001';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16003' AFTER '16002';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '1700' AFTER '1600';
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '1900' AFTER '1800';
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '10000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '10000');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '16000', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1600') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1600')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16000');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '16001', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16000') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16000')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16001');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '16002', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16001') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16001')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16002');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '16003', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16002') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16002')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16003');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '1700', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16003') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '16003')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1700');	
+	
+	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwald'::regtype::oid, '1900', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1800') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1800')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwald'::regtype AND enumlabel = '1900');	
+
+
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '10000' AFTER '1000';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16000' AFTER '1600';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16001' AFTER '16000';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16002' AFTER '16001';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '16003' AFTER '16002';
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '1700' AFTER '1600'; --> fixed to AFTER '16003'
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwald ADD VALUE '1900' AFTER '1800';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmungwald (wert, abkuerzung, beschreibung) VALUES
     (10000, 'Waldschutzgebiet', 'Waldschutzgebiet'),
     (16000, 'Bodenschutzwald', 'Bodenschutzwald'),
@@ -646,11 +869,22 @@ BEGIN;
     (16004, 'Schonwald', 'Schonwald'),
     (1700, 'Bannwald', 'Fläche für die Forstwirtschaft.'),
     (1900, 'ImmissionsgeschaedigterWald', 'Immissionsgeschädigter Wald');
-  UPDATE xplan_gml.enum_xp_zweckbestimmungwald SET beschreibung = 'Sonstigr Wald' WHERE wert = 9999;
+  UPDATE xplan_gml.enum_xp_zweckbestimmungwald SET beschreibung = 'Sonstiger Wald' WHERE wert = 9999;
 
   -- geänderte Beschreibung enum XP_ZweckbestimmungWasserwirtschaft
   UPDATE xplan_gml.enum_xp_zweckbestimmungwasserwirtschaft SET beschreibung = 'Überschwemmungsgefährdetes Gebiet nach §31c des vor dem 1.10.2010 gültigen WHG' WHERE wert = 1100;
-  ALTER TYPE xplan_gml.xp_zweckbestimmungwasserwirtschaft ADD VALUE '1500' AFTER '1400';
+	
+		INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
+	SELECT
+		'xplan_gml.xp_zweckbestimmungwasserwirtschaft'::regtype::oid, '1500', 
+	CASE
+		WHEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwasserwirtschaft'::regtype AND enumlabel = '1400') IS NOT NULL
+		THEN (SELECT enumsortorder + 0.001 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwasserwirtschaft'::regtype AND enumlabel = '1400')
+		ELSE 1 END
+	WHERE NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.xp_zweckbestimmungwasserwirtschaft'::regtype AND enumlabel = '1500' );	
+
+	
+  --ALTER TYPE xplan_gml.xp_zweckbestimmungwasserwirtschaft ADD VALUE '1500' AFTER '1400';
   INSERT INTO xplan_gml.enum_xp_zweckbestimmungwasserwirtschaft (wert, abkuerzung, beschreibung) VALUES
     (1500, 'RegenRueckhaltebecken', 'Regen-Rückhaltebecken');
 

@@ -233,11 +233,11 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
-		if (file_exists($uploadpath.$file.'.dbf')) {
-			$filename = $uploadpath.$file.'.dbf';
+		if (file_exists($uploadpath . $file . '.dbf')) {
+			$filename = $uploadpath . $file . '.dbf';
 		}
-		elseif (file_exists($uploadpath.$file.'.DBF')) {
-			$filename = $uploadpath.$file.'.DBF';
+		elseif (file_exists($uploadpath . $file . '.DBF')) {
+			$filename = $uploadpath . $file . '.DBF';
 		}
 		else {
 			return;
@@ -299,8 +299,18 @@ class data_import_export {
 
 	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $selected_layer_id = NULL){
 		if ($filenameparts[0] != '') {
-			if ((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
-				 (file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))) {
+			if (
+				(
+					file_exists($filenameparts[0] . '.shp') AND
+					file_exists($filenameparts[0] . '.dbf') AND
+					file_exists($filenameparts[0] . '.shx')
+				) OR
+				(
+					file_exists($filenameparts[0] . '.SHP') AND
+					file_exists($filenameparts[0] . '.DBF') AND
+					file_exists($filenameparts[0] . '.SHX')
+				)
+			) {
 				$formvars['shapefile'] = $filenameparts[0];
 				if ($epsg == NULL) {
 					$epsg = $this->get_shp_epsg($filenameparts[0], $pgdatabase);		# EPSG-Code aus prj-Datei ermitteln
@@ -335,7 +345,6 @@ class data_import_export {
 				$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))) . date("_Y_m_d_H_i_s", time());
 				$adjustments = true;
 			}
-			
 			$custom_table = $this->load_shp_into_pgsql($db, '', $formvars['shapefile'], $epsg, $schema, $table, $encoding, $adjustments);
 			if ($custom_table != NULL) {
 				exec('rm ' . UPLOADPATH . $user->id . '/' . basename($formvars['shapefile']) . '.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
@@ -959,14 +968,17 @@ class data_import_export {
 
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		$command = '';
-		if ($options != NULL) $command.= $options;
+		if ($options != NULL) {
+			$command.= $options;
+		}
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
-		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
+		if ($sql != NULL) {
+			$command .= ' -sql \'' . $sql . '\'';
+		}
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
-			#echo '<p>command: ' . $command;
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
@@ -982,18 +994,20 @@ class data_import_export {
 			}
 		}
 		else {
-			$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ' . $command;
+			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
 			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
-			if ($ret != 0) {
-				# versuche mit noch mal mit UTF-8
+			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
+			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
+				# versuche noch mal mit UTF-8
 				$command = str_replace('PGCLIENTENCODING='.$encoding, 'PGCLIENTENCODING=UTF-8', $command);
 				#echo '<p>command mit UTF-8: ' . $command;
 				exec($command, $output, $ret);
 				if ($ret != 0) {
-					exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+					# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+					exec("sed -i -e 's/" . $database->passwd."/xxxx/g' " . IMAGEPATH . $tablename . '.err');
 					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
 				}
 			}

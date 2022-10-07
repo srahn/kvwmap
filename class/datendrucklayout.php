@@ -1995,27 +1995,33 @@ class ddl {
 					</select>
 				</td>
 				<td align="right">
-					<a href="javascript:Bestaetigung(\'index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id='.$texts[$i]['id'].'&selected_layer_id='.$layer_id.'&aktivesLayout='.$ddl_id.'\', \'Wollen Sie den Freitext wirklich löschen?\');">löschen&nbsp;</a>
+					<a href="javascript:Bestaetigung(\'index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=' . $texts[$i]['id'] . '&selected_layer_id=' . $layer_id . '&aktivesLayout=' . $ddl_id . '&csrf_token=' . $_SESSION['csrf_token'] . '\', \'Wollen Sie den Freitext wirklich löschen?\');">löschen&nbsp;</a>
 				</td>
 			</tr>';
 		}
 	}
-	
-  function load_lines($ddl_id){
+
+	function load_lines($ddl_id){
 		$lines = array();
-    $sql = 'SELECT druckfreilinien.* FROM druckfreilinien, ddl2freilinien';
-    $sql.= ' WHERE ddl2freilinien.ddl_id = '.$ddl_id;
-    $sql.= ' AND ddl2freilinien.line_id = druckfreilinien.id';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
-    $ret1 = $this->database->execSQL($sql, 4, 1);
-    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
-      $lines[] = $rs;
-    }
-    return $lines;
-  }	
-	
+		$sql = "
+			SELECT
+				druckfreilinien.*
+			FROM
+				druckfreilinien, ddl2freilinien
+			WHERE
+				ddl2freilinien.ddl_id = " . $ddl_id . " AND
+				ddl2freilinien.line_id = druckfreilinien.id
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = $this->database->result->fetch_assoc()){
+			$lines[] = $rs;
+		}
+		return $lines;
+	}
+
   function load_rectangles($ddl_id){
 		$rects = array();
     $sql = 'SELECT druckfreirechtecke.* FROM druckfreirechtecke, ddl2freirechtecke';
