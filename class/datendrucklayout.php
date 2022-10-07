@@ -795,9 +795,9 @@ class ddl {
 		$dateiname = $pfadteil[0];
 		if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
 		if($dateiname != '' AND file_exists($dateiname)){
-			$dateinamensteil=explode('.', $dateiname);
-			if(in_array(strtolower($dateinamensteil[1]), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
-				$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
+			$dateinamensteil = pathinfo($dateiname);
+			if(in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
+				$new_filename = IMAGEPATH.$dateinamensteil['filename'].'.jpg';
 				exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
 				$size = getimagesize($new_filename);
 				$ratio = $size[1]/$size[0];
