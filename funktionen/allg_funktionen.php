@@ -2382,6 +2382,8 @@ function sanitize(&$value, $type) {
 */
 function get_max_file_size() {
 	$post_max_size_txt = ini_get('post_max_size');
+	$post_max_size = 0;
+	$upload_max_filesize = 0;
 	if (strpos($post_max_size_txt, 'G') !== false) {
 		$post_max_size = (int)$post_max_size_txt * 1024;
 	}
@@ -2389,6 +2391,11 @@ function get_max_file_size() {
 	if (strpos($upload_max_filesize_txt, 'G') !== false) {
 		$upload_max_filesize = (int)$upload_max_filesize_txt * 1024;
 	}
-	return min($post_max_size, $upload_max_filesize);
+	if ($post_max_size == 0 AND $upload_max_filesize == 0) {
+		return MAXUPLOADSIZE;
+	}
+	else {
+		min($post_max_size, $upload_max_filesize);
+	}
 }
 ?>
