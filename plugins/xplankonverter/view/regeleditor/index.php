@@ -3,10 +3,10 @@
 	<HEAD>
 		<TITLE>Regeleditor</TITLE>
 		<META charset="UTF-8">
-		<script src="<?php echo JQUERY_PATH; ?>jquery.min.js"></script>
-		<?php include('config.php'); ?>
-		<?php include(PLUGINS . 'xplankonverter/view/header.php'); ?>
-
+		<script src="<?php echo JQUERY_PATH; ?>jquery.min.js"></script><?php
+			include('config.php');
+			include(PLUGINS . 'xplankonverter/view/header.php');
+			$formvars = $_REQUEST; ?>
 		<script src="plugins/xplankonverter/view/regeleditor/control.js">"use strict";</script>
 		<!-- Setzt PHP Variable als (Global) Javascript Variable -->
 		<script>konvertierung_id = '<?php echo $konvertierung_id; ?>';</script>
@@ -16,7 +16,8 @@
 	</HEAD>
 	<BODY>
 		<div id="debug"></div>
-		<input type="hidden" id="field_id" value="<? echo $_REQUEST['field_id']; ?>">
+		<?php sanitize($formvars['field_id'], 'int'); ?>
+		<input type="hidden" id="field_id" value="<? echo $formvars['field_id']; ?>">
 		<h1 align="center">Regeleditor</h1>
 		<!-- Reload-->
 		<a onClick="reloadPage()" href="" class="float-right" title="Lädt die Seite neu und löscht alle Einträge"><i class="fa fa-undo fa-lg"></i></a>
