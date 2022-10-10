@@ -9552,7 +9552,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] = $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
