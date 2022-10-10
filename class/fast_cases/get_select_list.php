@@ -154,7 +154,9 @@ class GUI {
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					if ($reqby_start > 0 OR pg_num_rows($ret[1]) > 1) {
+						$html .= '<option value="">-- Bitte Auswählen --</option>';
+					}
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
