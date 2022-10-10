@@ -242,6 +242,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_plan_edit' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			$error = true;
 			if ($GUI->formvars['konvertierung_id'] != '') {
 				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
@@ -340,6 +343,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 	*/
 		case 'xplankonverter_shapefiles_index': {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			if ($GUI->formvars['konvertierung_id'] == '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 				$GUI->main = 'Hinweis.php';
@@ -496,6 +502,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_konvertierung_status': {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 	    header('Content-Type: application/json');
 	    $response = array();
 	    if ($GUI->formvars['konvertierung_id'] == '') {
@@ -604,6 +613,9 @@ function go_switch_xplankonverter($go) {
 	  } break;
 	
 		case 'xplankonverter_konvertierung_veroffentlichen': {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			header('Content-Type: application/json');
 			$response = array();
 			if ($GUI->formvars['konvertierung_id'] == '') {
@@ -681,6 +693,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 	  case 'xplankonverter_konvertierung': {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			if ($GUI->formvars['konvertierung_id'] == '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 				$GUI->main = 'Hinweis.php';
@@ -778,6 +793,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_validierungsergebnisse' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			if ($GUI->formvars['konvertierung_id'] == '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 				$GUI->main = 'Hinweis.php';
@@ -942,6 +960,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_inspire_gml_generieren' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			$success = true;
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
 			if ($konvertierung_id == '') {
@@ -994,9 +1015,14 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor' : {
-			$konvertierung_id = $_REQUEST['konvertierung_id'];
-			$bereich_gml_id = $_REQUEST['bereich_gml_id'];
-			$class_name = $_REQUEST['class_name'];
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'bereich_gml_id' => 'text',
+				'class_name' => 'text'
+			]);
+			$konvertierung_id = $GUI->formvars['konvertierung_id'];
+			$bereich_gml_id = $GUI->formvars['bereich_gml_id'];
+			$class_name = $GUI->formvars['class_name'];
 
 			if (empty($konvertierung_id)) {
 				if (!empty($bereich_gml_id)) {
@@ -1016,6 +1042,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getxplanattributes' : {
+			$GUI->sanitize([
+				'featuretype' => 'text'
+			]);
 			$sql = "
 			SELECT
 				column_name, udt_name, data_type, is_nullable
@@ -1033,6 +1062,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getshapeattributes' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'shapefile' => 'text'
+			]);
 			// Sets für alle Option in Regeleditor
 			$sql = "
 				SELECT
@@ -1050,6 +1083,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getshapeattributes2' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'shapefile' => 'text'
+			]);
 			// Sets Wenn dann Option in Regeleditor
 			$sql = "
 				SELECT
@@ -1070,6 +1107,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getshapeattributes3' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'shapefile' => 'text'
+			]);
 			// Sets WHERE Filter for Shapes in Regeleditor
 			$sql = "
 				SELECT
@@ -1089,6 +1130,11 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'shapefile_attribut' => 'text',
+				'shapefile' => 'text'
+			]);
 			// Sets DISTINCT value für alle aus Shape
 			$sql = "
 				SELECT
@@ -1105,6 +1151,11 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getshapeattributesdistinctvalues2' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'shapefile_attribut' => 'text',
+				'shapefile' => 'text'
+			]);
 			// Sets DISTINCT value für WHERE Selector
 			$sql = "
 				SELECT
@@ -1121,6 +1172,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getxplanenumerationattributes' : {
+			$GUI->sanitize([
+				'featuretype' => 'text',
+				'xplanattribut' => 'text'
+			]);
 			//Enumerationsliste Auswahl von Shape
 			$sql = "
 				SELECT
@@ -1160,6 +1215,11 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_regeleditor_getxplanenumerationattributes2' : {
+			$GUI->sanitize([
+				'featuretype' => 'text',
+				'xplanattribut' => 'text'
+			]);
+
 			//Enumerationsliste Wenn-Dann Auswahl von Shape
 			$sql = "
 				SELECT
@@ -1295,6 +1355,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_go_to_plan' : {
+			$GUI->sanitize([
+				'plan_gml_id' => 'text'
+			]);
+
 			# query planart by gml_id
 			$sql = "
 				SELECT
@@ -1554,12 +1618,15 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_extract_standardshapes_to_regeln' : {
+			$GUI->sanitize([
+				'konvertierung_id' => 'int'
+			]);
 			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
 			if ($GUI->konvertierung->get('id') != '') {
 				if (isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
-					$bereich_gml_id = $_REQUEST['bereich_gml_id'];
-					$konvertierung_id = $_REQUEST['konvertierung_id'];
-					$stelle_id = $_REQUEST['stelle_id'];
+					$bereich_gml_id = $GUI->formvars['bereich_gml_id'];
+					$konvertierung_id = $GUI->formvars['konvertierung_id'];
+					$stelle_id = $GUI->formvars['stelle_id'];
 
 					$shp_extractor = new Standard_shp_extractor($GUI->pgdatabase,
 																											$konvertierung_id,
