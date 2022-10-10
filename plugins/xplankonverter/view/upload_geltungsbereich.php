@@ -7,7 +7,7 @@
 	</head>
 	<body style="text-align: center;">
 		<h2>Shape-Datei mit Geltungsbereich des Planes hochladen</h2>
-		Upload für das Feld: <?php echo $_REQUEST['field_id']; ?><br>
+		Upload für das Feld: <?php echo $this->formvars['field_id']; ?><br>
 		<form id="file_form" action="index.php" method="post" enctype="multipart/form-data">
 			<input type="file" id="file_select" name="shape_file" type="file" style="margin-top: 50px;"/><br>
 			<button id="upload_button" type="submit" style="margin-top: 50px;">Hochladen</button><br>
@@ -36,7 +36,7 @@
 				    uploadButton.innerHTML = 'Fertig';
 						var tableName = JSON.parse(xhr.responseText).result;
 						$('#upload_message').html('Die Shapedatei wurde in die Tabelle: ' + tableName + ' importiert!')
-						top.document.getElementById('<?php echo $_REQUEST['field_id']; ?>').value = tableName;
+						top.document.getElementById('<?php echo $this->formvars['field_id']; ?>').value = tableName;
 						top.closeCustomSubform();
 				  } else {
 				    alert('Fehler beim hochladen!');

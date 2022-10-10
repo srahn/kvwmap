@@ -170,7 +170,7 @@ class administration{
 				#echo '<br>Execute SQL from seed file: ' . $filepath;
 				$result = $this->database->exec_commands(
 					file_get_contents($filepath),
-					$this->pgdatabase->get_connection_string(),
+					null, # Do not replace connection since we have connection_id's in layer defenitions ($this->pgdatabase->get_connection_string(),)
 					$this->pgdatabase->connection_id,
 					true
 				); # replace known constants

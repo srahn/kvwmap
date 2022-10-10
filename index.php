@@ -59,7 +59,7 @@ if(!isset($_SESSION)){
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
 	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+		include(PLUGINS . $kvwmap_plugins[$i] . '/config/config.php');
 	}
 }
 

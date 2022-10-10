@@ -9,6 +9,7 @@ class Databaserelation {
 	var $password = "kvwmap";
 
 	function connect() {
+		echo 'Sie sind nicht berechtigt diese Funktion auszuführen.'; exit;
 		$this->conn_string = "host=$this->host port=$this->port dbname=$this->dbname user=$this->user password=$this->password";
 		$this->conn = pg_connect($this->conn_string);
 		if (!$this->conn) {
@@ -17,7 +18,7 @@ class Databaserelation {
 		}
 		return $this->conn;
 	}
-	
+
 	function findBySQL($sql) {
 		$this->connect();
 
