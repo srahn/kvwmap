@@ -2395,7 +2395,7 @@ function get_max_file_size() {
 		return MAXUPLOADSIZE;
 	}
 	else {
-		min($post_max_size, $upload_max_filesize);
+		return min($post_max_size, $upload_max_filesize);
 	}
 }
 ?>
