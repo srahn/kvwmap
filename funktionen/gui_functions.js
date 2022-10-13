@@ -21,7 +21,7 @@ root.getlegend_requests = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
-	if(root.document && root.document.GUI.gle_changed.value == 1){
+	if(root.document && root.document.GUI && root.document.GUI.gle_changed.value == 1){
 		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
 	}
 }
