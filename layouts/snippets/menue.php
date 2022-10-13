@@ -85,10 +85,15 @@ function showMenue() {
 				hspace="0"
 			>';
 
-		if (MENU_WAPPEN=="oben") { ?>
-		<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-			echo $wappen_html; ?>
-		</div><? }
+		$wappen_html = '
+			<div id="wappen_div" style="position: relative; visibility: visible; left: 0px; top: 0px">' .
+				$wappen_html . '
+			</div>
+		';
+
+		if (MENU_WAPPEN=="oben") {
+			echo $wappen_html;
+		}
 
 		if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") {
 			echo $refmap_html;
@@ -113,15 +118,13 @@ function showMenue() {
 			</div>
 		</div>
 
-		<div id="menuefooter">
-			<?
-			if($this->img['referenzkarte']!='' AND MENU_REFMAP !="oben")echo $refmap_html;
-			
-			if(MENU_WAPPEN=="unten"){ ?>
-			<div style="position: relative; visibility: visible; left: 0px; top: 0px"><?
-				echo $wappen_html; ?>
-			</div>
-			<? } ?>
-		</div>
-<? } ?>
+		<div id="menuefooter"><?
+			if ($this->img['referenzkarte'] != '' AND MENU_REFMAP !="oben") {
+				echo $refmap_html;
+			}
+			if (MENU_WAPPEN == "unten") {
+				echo $wappen_html;
+			} ?>
+		</div><?
+	} ?>
 </div>
