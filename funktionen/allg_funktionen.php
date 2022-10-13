@@ -218,7 +218,7 @@ function get_exif_data($img_path, $force_identify = false) {
 		}
 		else {
 			$exif = @exif_read_data($img_path, 'EXIF, GPS');
-			if (!array_key_exists('GPSLatitude', $exif) OR !array_key_exists('GPSLongitude', $exif)) {
+			if ((is_array($exif) && !array_key_exists('GPSLatitude', $exif)) OR (is_array($exif) && !array_key_exists('GPSLongitude', $exif))) {
 				$exif = exif_identify_data($img_path);
 			}
 		}
