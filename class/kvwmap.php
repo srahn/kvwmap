@@ -9596,7 +9596,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] = $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -10438,14 +10438,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function sachdaten_druck_editor_loeschen(){
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
-    $this->ddl=$ddl;
-    $this->ddl->delete_layout($this->formvars);
+		$ddl = new ddl($this->database);
+		$this->ddl = $ddl;
+		$this->ddl->delete_layout($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
 
 	function sachdaten_druck_editor_add2stelle(){
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$ddl=new ddl($this->database);
     $this->ddl=$ddl;
     $this->ddl->add_layout2stelle($this->formvars['aktivesLayout'], $this->formvars['stelle']);

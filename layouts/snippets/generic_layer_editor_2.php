@@ -111,7 +111,9 @@ if ($doit == true) {
 								$privileg = 0;
 							}
 						}
-						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+						?>
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+						<input type="hidden" value="0" id="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>" name="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>">
 						<table class="tgle dstable" border="0" cellpadding="5" cellspacing="0">
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 			        <tbody <? if(!$show_geom_editor AND $layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
@@ -132,14 +134,14 @@ if ($doit == true) {
 									$visibility_geom = 'style="visibility: collapse"';
 								}
 							}
-							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab'] ?: 0];
+							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: $this->formvars['opentab'] ?: 0];
 							echo '
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
-										foreach ($layer['attributes']['tabs'] as $tab) {
+										foreach ($layer['attributes']['tabs'] as $t => $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 										}
 										echo '
 									</div>
