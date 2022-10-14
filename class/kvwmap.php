@@ -5371,11 +5371,11 @@ echo '			</table>
 			$this->map->zoomscale($this->map->scaledenom,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 			$this->map_scaledenom = $this->map->scaledenom;
     }
-    $this->saveMap('');		
+    $this->saveMap('');
 		if ($this->formvars['go_next'] != ''){
 			go_switch($this->formvars['go_next']);
 			exit();
-		}		
+		}
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->drawMap();
@@ -9074,7 +9074,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if (value_of($this->formvars, 'printversion') != ''){
 				$this->mime_type = 'printversion';
 			}
-			if (value_of($this->formvars, 'printversion') == '' AND $this->user->rolle->querymode == 1) {
+			if (value_of($this->formvars, 'printversion') == '' AND ($this->user->rolle->querymode == 1 OR $this->formvars['go_next'] == 'default')) {
 				# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
 				if ($geometries_found) {
@@ -9103,6 +9103,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
+			}
+			if ($this->formvars['go_next'] == 'default') {
+				$this->main = 'map.php';
+				go_switch($this->formvars['go_next']);
+				exit();
 			}
 			$this->output();
 		}
