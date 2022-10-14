@@ -113,7 +113,7 @@ if ($doit == true) {
 						}
 						?>
 						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
-						<input type="hidden" value="0" id="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>" name="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>">
+						<input type="hidden" value="<? echo $this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: '0'; ?>" id="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>" name="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>">
 						<table class="tgle dstable" border="0" cellpadding="5" cellspacing="0">
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 			        <tbody <? if(!$show_geom_editor AND $layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
