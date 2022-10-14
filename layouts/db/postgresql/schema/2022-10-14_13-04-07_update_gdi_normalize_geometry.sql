@@ -10,7 +10,6 @@ BEGIN;
       RETURNS geometry
       LANGUAGE 'plpgsql'
       COST 100
-      VOLATILE PARALLEL UNSAFE
   AS $BODY$
   -- Full documentation at https://gasparesganga.com/labs/postgis-normalize-geometry/
   DECLARE
