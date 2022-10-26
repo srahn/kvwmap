@@ -88,7 +88,7 @@ class Gml_extractor {
 			if ($r_key == 'externereferenz') {
 				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
 				$referenzen = json_decode($r_value);
-				if (count($referenzen) > 0) {
+				if (is_array($referenzen) AND count($referenzen) > 0) {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
@@ -354,7 +354,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 		
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 		#echo 'url: ' . $url . '<br><br>';
