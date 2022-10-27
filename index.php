@@ -232,7 +232,7 @@ function go_switch($go, $exit = false) {
 		}
 	}
 	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
-		switch($go) {
+		switch ($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
