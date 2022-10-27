@@ -17886,16 +17886,6 @@ class db_mapObj{
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
 			$this->db->execSQL($sql);
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-			if (MYSQLVERSION > 412){
-				# Den Autowert für die Layer_id zurücksetzen
-				$sql ="
-					ALTER TABLE rollenlayer AUTO_INCREMENT = 1
-				";
-				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
-				#echo $sql;
-				$this->db->execSQL($sql);
-				if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-			}
 			$this->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 			# auch die Klassen und styles löschen
 			if ($rollenlayerset[$i]['Class'] != ''){
