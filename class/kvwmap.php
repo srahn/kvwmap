@@ -2926,7 +2926,6 @@ echo '			</table>
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-
 		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();
@@ -5337,9 +5336,9 @@ echo '			</table>
     $this->output();
 	}
 
-  function zoomto_dataset(){
-    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+	function zoomto_dataset(){
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 		if ($this->formvars['layer_id'] > 0) {
 			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		}
@@ -5353,31 +5352,41 @@ echo '			</table>
 		if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 			$layerset[0]['oid'] = $attributes['pk'][0];
 		}
-    if($this->formvars['oid'] != ''){
-    	if($this->formvars['selektieren'] != 'zoomonly'){
+		if ($this->formvars['oid'] != '') {
+			if ($this->formvars['selektieren'] != 'zoomonly') {
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset, array($this->formvars['oid']));
-    	}
-      $this->loadMap('DataBase');
-      $rect = $dbmap->zoomToDatasets(array($this->formvars['oid']), $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
-      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+			}
+
+			$this->loadMap('DataBase');
+			$rect = $dbmap->zoomToDatasets(array($this->formvars['oid']), $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 
 			# damit nicht außerhalb des Stellen-Extents gezoomt wird
-	    $oPixelPos=ms_newPointObj();
+			$oPixelPos=ms_newPointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			$this->map->zoomscale($this->map->scaledenom,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 			$this->map_scaledenom = $this->map->scaledenom;
-    }
-    $this->saveMap('');		
+		}
+		$this->saveMap('');
+		if ($this->formvars['maponly']) {
+			$this->drawMap(true);
+			$file_name = IMAGEPATH . basename($this->img['hauptkarte']);
+			header("Content-Type: image/png");
+			header("Content-Length: " . filesize($file_name));
+			readfile($file_name);
+			exit();
+		}
+
 		if ($this->formvars['go_next'] != ''){
 			go_switch($this->formvars['go_next']);
 			exit();
-		}		
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
+		}
+		$currenttime=date('Y-m-d H:i:s',time());
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		$this->drawMap();
 		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
-    $this->output();
-  }
+		$this->output();
+	}
 
 	function createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute = NULL, $result = NULL){
 		# Layer erzeugen
