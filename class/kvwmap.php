@@ -2112,9 +2112,9 @@ echo '			</table>
 		}
 		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
 		if ($layerset['connection']!='') {
-			if($layerset['connectiontype'] == 7) {		# WMS-Layer
-				$layerset['connection'] .= '&SERVICE=WMS';
-				if ($this->map_factor != ''){
+			if($layerset['connectiontype'] == 7) { # WMS-Layer
+				# $layerset['connection'] .= '&SERVICE=WMS'; # Das kann zu Fehler führen. MapServer setzt selber SERVICE=WMS
+				if ($this->map_factor != '') {
 					if ($layerset['printconnection']!=''){
 						$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
 					}
