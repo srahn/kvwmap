@@ -1407,111 +1407,113 @@ function go_switch_xplankonverter($go) {
 				case 'RP-Plan' : $layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID; break;
 			}
 			$GUI->plan_layerset = $GUI->user->rolle->getLayer($layer_id)[0];
-			$upload_file = $_FILES['gml_file'];
 			$success = false;
 			$gml_file = '';
 			$doc_files = array();
-			if ($upload_file != '') {
-				# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
-				# Die Dateien kommer erstmal nach tmp, weil es ja noch keine Konvertierungs Id gibt (zumindest nicht beim neu Anlegen von Plänen)
-				$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
-				if (!is_dir($upload_dir)) {
-					mkdir($upload_dir, 0777, true);
-				};
-				$target_file = $upload_dir . $upload_file['name'];
-				if (move_uploaded_file($upload_file['tmp_name'], $target_file)) {
-					$zip = new ZipArchive();
-					$res = $zip->open($target_file, ZipArchive::CHECKCONS);
-					if ($res === true) {
-						# Es ist eine ZIP-Datei, erzeuge einen Ordner in den entpackt wird
-						$zip_dir = $upload_dir . 'zip/';
-						if (!is_dir($zip_dir)) {
-							mkdir($zip_dir, 0777, true);
-						}
-						$zip->extractTo($zip_dir);
-						# Schließe ZIP-Datei und lösche die hochgeladene Datei
-						$zip->close();
-						exec('rm ' . $target_file);
-						$random_number = rand(1, 1000000);
-						foreach (scandir($zip_dir) AS $index => $entry) {
-							if ($index > 1) { # do not for . and .. entry
-								if (strpos(strrev(strtolower($entry)), 'lmg.') === 0 OR strpos(strrev(strtolower($entry)), 'lmx.') === 0) {
-									$gml_file = $entry;
-									$success = true;
-									exec('mv ' . $zip_dir . $entry . ' ' . $upload_dir);
-								}
-								else {
-									$path_parts = pathinfo($entry);
-									$doc_files[] = array(
-										'upload_file_name' => $entry,
-										'file_name' => $path_parts['filename'],
-										'store_file_name' => $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
-										'thumb_file_name' => $path_parts['filename'] . '-' . $random_number . '_thumb.jpg'
-									);
-									exec('mv ' . $zip_dir . $entry . ' ' . $GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']);
-									$GUI->create_dokument_vorschau('local_img', pathinfo($GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']));
-									/*
-									$msg .= print_r($GUI->get_dokument_vorschau(
-										$GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
-										$GUI->plan_layerset['document_path'],
-										$GUI->plan_layerset['document_url']
-									), true);
-									*/
+			$GUI->response = array();
+			if ($GUI->formvars['upload_xplan_gml'] == 'Daten hochladen') {
+				$upload_file = $_FILES['gml_file'];
+				if ($upload_file['name'] != '') {
+					# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
+					# Die Dateien kommer erstmal nach tmp, weil es ja noch keine Konvertierungs Id gibt (zumindest nicht beim neu Anlegen von Plänen)
+					$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
+					if (!is_dir($upload_dir)) {
+						mkdir($upload_dir, 0777, true);
+					};
+					$target_file = $upload_dir . $upload_file['name'];
+					if (move_uploaded_file($upload_file['tmp_name'], $target_file)) {
+						$zip = new ZipArchive();
+						$res = $zip->open($target_file, ZipArchive::CHECKCONS);
+						if ($res === true) {
+							# Es ist eine ZIP-Datei, erzeuge einen Ordner in den entpackt wird
+							$zip_dir = $upload_dir . 'zip/';
+							if (!is_dir($zip_dir)) {
+								mkdir($zip_dir, 0777, true);
+							}
+							$zip->extractTo($zip_dir);
+							# Schließe ZIP-Datei und lösche die hochgeladene Datei
+							$zip->close();
+							exec('rm ' . $target_file);
+							$random_number = rand(1, 1000000);
+							foreach (scandir($zip_dir) AS $index => $entry) {
+								if ($index > 1) { # do not for . and .. entry
+									if (strpos(strrev(strtolower($entry)), 'lmg.') === 0 OR strpos(strrev(strtolower($entry)), 'lmx.') === 0) {
+										$gml_file = $entry;
+										$success = true;
+										exec('mv ' . $zip_dir . $entry . ' ' . $upload_dir);
+									}
+									else {
+										$path_parts = pathinfo($entry);
+										$doc_files[] = array(
+											'upload_file_name' => $entry,
+											'file_name' => $path_parts['filename'],
+											'store_file_name' => $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
+											'thumb_file_name' => $path_parts['filename'] . '-' . $random_number . '_thumb.jpg'
+										);
+										exec('mv ' . $zip_dir . $entry . ' ' . $GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']);
+										$GUI->create_dokument_vorschau('local_img', pathinfo($GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension']));
+										/*
+										$msg .= print_r($GUI->get_dokument_vorschau(
+											$GUI->plan_layerset['document_path'] . $path_parts['filename'] . '-' . $random_number . '.' . $path_parts['extension'],
+											$GUI->plan_layerset['document_path'],
+											$GUI->plan_layerset['document_url']
+										), true);
+										*/
+									}
 								}
 							}
-						}
-						exec('rm -R ' . $zip_dir);
-						if ($gml_file == '') {
-							$msg = 'Die ZIP-Datei ' . $upload_file['name'] . ' enthält keine GML-Datei!';
-						}
-					}
-					else {
-						if ($res == ZipArchive::ER_NOZIP) {
-							# Es ist keine ZIP-Datei
-							if (strpos(strrev(strtolower($upload_file['name'])), 'lmg.') === 0 OR strpos(strrev(strtolower($upload_file['name'])), 'lmx.') === 0) {
-								$gml_file = $upload_file['name'];
-								exec('mv ' . $target_file . ' ' . $xplan_gml_dir);
-								$success = true;
-								$msg .= 'Keine weiteren Dateien hochgeladen.';
-							}
-							else {
-								$msg .= 'Die hochgeladene Datei ' . $upload_file['name'] . ' ist keine GML-Datei';
+							exec('rm -R ' . $zip_dir);
+							if ($gml_file == '') {
+								$msg = 'Die ZIP-Datei ' . $upload_file['name'] . ' enthält keine GML-Datei!';
 							}
 						}
 						else {
-							# Es ist eine fehlerhafte ZIP-Datei
-							switch ($res) {
-								case ZipArchive::ER_INCONS : {
-									$msg .= 'Die ZIP-Datei hat den Konsistenztest nicht bestanden!';
-								} break;
-								case ZipArchive::ER_CRC : {
-									$msg .= 'Die Check-Summe der ZIP-Datei stimmt nicht!';
-								} break;
-								default : {
-									$msg .= 'Die ZIP-Datei konnte nicht geöffnet werden!';
+							if ($res == ZipArchive::ER_NOZIP) {
+								# Es ist keine ZIP-Datei
+								if (strpos(strrev(strtolower($upload_file['name'])), 'lmg.') === 0 OR strpos(strrev(strtolower($upload_file['name'])), 'lmx.') === 0) {
+									$gml_file = $upload_file['name'];
+									exec('mv ' . $target_file . ' ' . $xplan_gml_dir);
+									$success = true;
+									$msg .= 'Keine weiteren Dateien hochgeladen.';
+								}
+								else {
+									$msg .= 'Die hochgeladene Datei ' . $upload_file['name'] . ' ist keine GML-Datei';
 								}
 							}
-							$msg .= ' Prüfen Sie den Inhalt und versuchen Sie es erneut.';
+							else {
+								# Es ist eine fehlerhafte ZIP-Datei
+								switch ($res) {
+									case ZipArchive::ER_INCONS : {
+										$msg .= 'Die ZIP-Datei hat den Konsistenztest nicht bestanden!';
+									} break;
+									case ZipArchive::ER_CRC : {
+										$msg .= 'Die Check-Summe der ZIP-Datei stimmt nicht!';
+									} break;
+									default : {
+										$msg .= 'Die ZIP-Datei konnte nicht geöffnet werden!';
+									}
+								}
+								$msg .= ' Prüfen Sie den Inhalt und versuchen Sie es erneut.';
+							}
 						}
 					}
+					else {
+						$msg = 'Kann Datei nicht auf dem Server zwischenspeichern. Prüfen Sie ob genüg Speicherplatz auf dem Server ist und ob im Verzeichnis ' . IMAGEPATH . ' Schreibrechte vorhanden sind.';
+					}
+					$GUI->response = array(
+						'success' => $success,
+						'msg' => $msg,
+						'random_number' => $random_number,
+						'doc_files' => $doc_files,
+						'gml_file' => $gml_file
+					);
 				}
 				else {
-					$response['msg'] = 'Kann Datei nicht auf dem Server zwischenspeichern. Prüfen Sie ob genüg Speicherplatz auf dem Server ist und ob im Verzeichnis ' . IMAGEPATH . ' Schreibrechte vorhanden sind.';
+					$GUI->add_message('error', 'Es wurde keine Datei hochgeladen.');
 				}
-				$response = array(
-					'success' => $success,
-					'msg' => $msg,
-					'random_number' => $random_number,
-					'doc_files' => $doc_files,
-					'gml_file' => $gml_file
-				);
-				header('Content-Type: application/json');
-				echo json_encode($response);
 			}
-			else {
-				$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-				$GUI->output();
-			}
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
 		} break;
 
 		case 'xplankonverter_extract_gml_to_form' : {

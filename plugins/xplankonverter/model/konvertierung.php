@@ -603,105 +603,232 @@ class Konvertierung extends PgObject {
 				gmlas.id AS beschreibung
 			FROM
 				" . $table_schema . "." . strtolower($planart) . " gmlas;
+		";
 
-			INSERT INTO xplan_gml." . strtolower($planart) . " (
-				gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
-				wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
-				auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
-				traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
-				planart, planbeschlussdatum, aufstellungsbeschlussdatum
-			)
-			SELECT
-				trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
-				k.id AS konvertierung_id,
-				gmlas.xplan_name AS name,
-				gmlas.nummer AS nummer,
-				gmlas.internalid AS internalid,
-				gmlas.beschreibung AS beschreibung,
-				gmlas.kommentar AS kommentar,
-				to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
-				to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
-				to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
-				CASE
-					WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
-						ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
-					ELSE NULL
-				END AS aendert,
-				CASE
-					WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
-						ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
-					ELSE NULL
-				END AS wurdegeaendertvon,
-				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				gmlas.bezugshoehe AS bezugshoehe,
-				ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
-				CASE
-					WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
-						ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
-					ELSE NULL
-				END AS verfahrensmerkmale,
-				CASE
-					WHEN count_externeref > 0
-					THEN externeref.externereferenz
-					ELSE NULL
-				END AS externereferenz,
-				ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
-				ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
-				(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
-				gmlas.sachgebiet AS sachgebiet,
-				(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
-				gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
-				to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-				ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
-				ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
-				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
-				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
-				ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
-				gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
-				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
-				gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
-				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
-				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum
-			FROM
-				" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
-				xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
-				" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
-				(
-					SElECT
-						COUNT(*) AS count_externeref,
-						externereferenzlink_sub.parent_id,
-						array_agg((e_sub.georefurl,
-								(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
-								e_sub.art::xplan_gml.xp_externereferenzart,
-								e_sub.informationssystemurl,
-								e_sub.referenzname,
-								e_sub.referenzurl,
-								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
-								e_sub.beschreibung,
-								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp
-							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+		switch ($planart) {
+			case ('BP-Plan') : {
+				$sql .= "
+					INSERT INTO xplan_gml." . strtolower($planart) . " (
+						gml_id, user_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
+						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, , externereferenz, auslegungsenddatum, gemeinde,
+						status, plangeber, rechtsstand, auslegungsstartdatum, traegerbeteiligungsstartdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren,
+						sonstplanart, planart, aufstellungsbeschlussdatum, technischerplanersteller, veraenderungssperre, inkrafttretensdatum, durchfuehrungsvertrag,
+						staedtebaulichervertrag, erschliessungsvertrag, rechtsverordnungsdatum, ausfertigungsdatum, satzungsbeschlussdatum, versionbaunvodatum, versionbaunvotext,
+						versionbaugbdatum, versionbaugbtext, versionsonstrechtsgrundlagedatum, versionsonstrechtsgrundlagetext, hoehenbezug, gruenordnungsplan
+					)
+					SELECT
+						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
+						" . $this->user->id . " AS user_id,
+						k.id AS konvertierung_id,
+						gmlas.xplan_name AS name,
+						gmlas.nummer AS nummer,
+						gmlas.internalid AS internalid,
+						gmlas.beschreibung AS beschreibung,
+						gmlas.kommentar AS kommentar,
+						to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
+						to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
+						to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
+						CASE
+							WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS aendert,
+						CASE
+							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS wurdegeaendertvon,
+						gmlas.erstellungsmassstab AS erstellungsmassstab,
+						gmlas.bezugshoehe AS bezugshoehe,
+						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						CASE
+							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
+							ELSE NULL
+						END AS verfahrensmerkmale,
+						CASE
+							WHEN count_externeref > 0
+							THEN externeref.externereferenz
+							ELSE NULL
+						END AS externereferenz,
+						ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
+						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
+						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
+						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
+						ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
+						ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
+						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
+						ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
+						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
+						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
+						gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
+						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum,
+						gmlas.technischerplanersteller AS technischerplanersteller,
+						gmlas.veraenderungssperredatum AS traegerbeteiligungsenddatum,
+						gmlas.veraenderungssperre AS veraenderungssperre,
+						gmlas.inkrafttretensdatum AS inkrafttretensdatum,
+						gmlas.durchfuehrungsvertrag AS durchfuehrungsvertrag,
+						gmlas.staedtebaulichervertrag AS staedtebaulichervertrag,
+						gmlas.erschliessungsvertrag AS erschliessungsvertrag,
+						gmlas.rechtsverordnungsdatum AS rechtsverordnungsdatum,
+						gmlas.ausfertigungsdatum AS ausfertigungsdatum,
+						gmlas.satzungsbeschlussdatum AS satzungsbeschlussdatum,
+						gmlas.versionbaunvodatum AS versionbaunvodatum,
+						gmlas.versionbaunvotext AS versionbaunvotext,
+						gmlas.versionbaugbdatum AS versionbaugbdatum,
+						gmlas.versionbaugbtext AS versionbaugbtext, 
+						gmlas.versionsonstrechtsgrundlagedatum AS versionsonstrechtsgrundlagedatum,
+						gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext,
+						gmlas.hoehenbezug AS hoehenbezug,
+						gmlas.gruenordnungsplan AS gruenordnungsplan
 					FROM
-						" . $table_schema . "." . strtolower($planart) . "_externereferenz externereferenzlink_sub LEFT JOIN
-						" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
-					GROUP BY
-						externereferenzlink_sub.parent_id
-				) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
-				" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
-				" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
-				" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
-				" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
-				" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
-				" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
-				" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+						" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
+						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
+						" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+						(
+							SElECT
+								COUNT(*) AS count_externeref,
+								externereferenzlink_sub.parent_id,
+								array_agg((e_sub.georefurl,
+										(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.art::xplan_gml.xp_externereferenzart,
+										e_sub.informationssystemurl,
+										e_sub.referenzname,
+										e_sub.referenzurl,
+										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.beschreibung,
+										to_char(e_sub.datum, 'DD.MM.YYYY'),
+										e_sub.typ::xplan_gml.xp_externereferenztyp
+									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+							FROM
+								" . $table_schema . "." . strtolower($planart) . "_externereferenz externereferenzlink_sub LEFT JOIN
+								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+							GROUP BY
+								externereferenzlink_sub.parent_id
+						) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
+						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+				";
+				# ToDo weitere relationen von bp_plan_ ... aus gmlas_tmp_41 im Left join einbinden
+			} break;
 
+			case ('FP-Plan') : {
+				$sql .= "
+					INSERT INTO xplan_gml." . strtolower($planart) . " (
+						gml_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
+						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz,
+						auslegungsenddatum, gemeinde, status, sachgebiet, plangeber, rechtsstand, wirksamkeitsdatum, auslegungsstartdatum,
+						traegerbeteiligungsstartdatum, entwurfsbeschlussdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren, sonstplanart,
+						planart, planbeschlussdatum, aufstellungsbeschlussdatum
+					)
+					SELECT
+						trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid AS gml_id,
+						k.id AS konvertierung_id,
+						gmlas.xplan_name AS name,
+						gmlas.nummer AS nummer,
+						gmlas.internalid AS internalid,
+						gmlas.beschreibung AS beschreibung,
+						gmlas.kommentar AS kommentar,
+						to_char(gmlas.technherstelldatum, 'DD.MM.YYYY')::date AS technherstelldatum,
+						to_char(gmlas.genehmigungsdatum, 'DD.MM.YYYY')::date AS genehmigungsdatum,
+						to_char(gmlas.untergangsdatum, 'DD.MM.YYYY')::date AS untergangsdatum,
+						CASE
+							WHEN vpa.planname IS NOT NULL OR vpa.rechtscharakter IS NOT NULL OR vpa.nummer IS NOT NULL OR vpa.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpa.planname, vpa.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpa.nummer, vpa.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS aendert,
+						CASE
+							WHEN vpwgv.planname IS NOT NULL OR vpwgv.rechtscharakter IS NOT NULL OR vpwgv.nummer IS NOT NULL OR vpwgv.verbundenerplan_href IS NOT NULL THEN
+								ARRAY[(vpwgv.planname, vpwgv.rechtscharakter::xplan_gml.xp_rechtscharakterplanaenderung, vpwgv.nummer, vpwgv.verbundenerplan_href)]::xplan_gml.xp_verbundenerplan[]
+							ELSE NULL
+						END AS wurdegeaendertvon,
+						gmlas.erstellungsmassstab AS erstellungsmassstab,
+						gmlas.bezugshoehe AS bezugshoehe,
+						ST_Multi(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS raeumlichergeltungsbereich,
+						CASE
+							WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
+								ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[]
+							ELSE NULL
+						END AS verfahrensmerkmale,
+						CASE
+							WHEN count_externeref > 0
+							THEN externeref.externereferenz
+							ELSE NULL
+						END AS externereferenz,
+						ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
+						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
+						gmlas.sachgebiet AS sachgebiet,
+						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
+						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
+						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
+						ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
+						ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
+						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
+						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
+						ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
+						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
+						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
+						gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
+						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
+						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum
+					FROM
+						" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
+						xplankonverter.konvertierungen k ON gmlas.id = k.beschreibung LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
+						" . $table_schema . ".xp_gemeinde g ON gemeindelink.xp_gemeinde_pkid = g.ogr_pkid LEFT JOIN
+						(
+							SElECT
+								COUNT(*) AS count_externeref,
+								externereferenzlink_sub.parent_id,
+								array_agg((e_sub.georefurl,
+										(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.art::xplan_gml.xp_externereferenzart,
+										e_sub.informationssystemurl,
+										e_sub.referenzname,
+										e_sub.referenzurl,
+										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+										e_sub.beschreibung,
+										to_char(e_sub.datum, 'DD.MM.YYYY'),
+										e_sub.typ::xplan_gml.xp_externereferenztyp
+									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+							FROM
+								" . $table_schema . "." . strtolower($planart) . "_externereferenz externereferenzlink_sub LEFT JOIN
+								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+							GROUP BY
+								externereferenzlink_sub.parent_id
+						) externeref ON gmlas.id = externeref.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_aendert_aendert aendertlink ON gmlas.id = aendertlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".aendert aendertlinktwo ON aendertlink.child_pkid = aendertlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpa ON aendertlinktwo.xp_verbundenerplan_pkid = vpa.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_wurdegeaendertvon_wurdegeaendertvon wurdegeaendertvonlink ON gmlas.id = wurdegeaendertvonlink.parent_pkid LEFT JOIN
+						" . $table_schema . ".wurdegeaendertvon wurdegeaendertvonlinktwo ON wurdegeaendertvonlink.child_pkid = wurdegeaendertvonlinktwo.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_verbundenerplan vpwgv ON wurdegeaendertvonlinktwo.xp_verbundenerplan_pkid = vpwgv.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_verfahrensmerkmale_verfahrensmerkmale verfahrensmerkmalelink ON gmlas.id = verfahrensmerkmalelink.parent_pkid LEFT JOIN
+						" . $table_schema . ".verfahrensmerkmale vm ON verfahrensmerkmalelink.child_pkid = vm.ogr_pkid LEFT JOIN
+						" . $table_schema . ".xp_plangeber pg ON gmlas.plangeber_xp_plangeber_pkid = pg.ogr_pkid LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_auslegungsstartdatum alsd ON gmlas.id = alsd.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_auslegungsenddatum aled ON gmlas.id = aled.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsstartdatum tbsd ON gmlas.id = tbsd.parent_id LEFT JOIN
+						" . $table_schema . "." . strtolower($planart) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
+				";
+			} break;
+		}
+
+		$sql .= "
 			INSERT INTO xplan_gml." . $planartAbk . "_bereich (
 				gml_id, nummer, name, bedeutung, detailliertebedeutung, erstellungsmassstab, geltungsbereich, user_id, konvertierung_id, rasterbasis,
 				versionbaunvodatum, versionbaugbtext, versionsonstrechtsgrundlagetext, versionbaunvotext, versionsonstrechtsgrundlagedatum, versionbaugbdatum, gehoertzuplan
