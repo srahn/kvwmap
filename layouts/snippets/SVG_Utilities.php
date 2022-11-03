@@ -225,6 +225,7 @@
 	var new_distance = 0;
 	var doing;
 	var doing_save;
+	var suppresszoom = false;
 	';
 
 	$polygonANDpoint = '
@@ -680,6 +681,35 @@
 		sendpath("zoomin_box", navX, navY);
 	}
 	
+	function suppressZoom(evt){
+		if (evt.keyCode == 17) {
+			suppresszoom = true;
+		}
+	}
+	
+	function unSuppressZoom(evt){
+		if (evt.keyCode == 17) {
+			suppresszoom = false;
+			document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+			resizeElementsForSuppressedZoom(1);
+		}
+	}
+	
+	function resizeElementsForSuppressedZoom(z){
+		if (z == 1) {
+			for (circle of document.getElementById("foreignvertices").childNodes) {
+				circle.setAttribute("r", 7);
+			}
+			document.getElementById("polygon_first").style.strokeWidth = "1.5px";
+		}
+		else {
+			for (circle of document.getElementById("foreignvertices").childNodes) {
+				circle.setAttribute("r", circle.getAttribute("r") / z);
+			}
+			document.getElementById("polygon_first").style.strokeWidth = (parseFloat(document.getElementById("polygon_first").style.strokeWidth) / z) + "px";
+		}
+	}
+	
 	function mousewheelchange(evt){
 		if(!evt)evt = window.event; // For IE
 		if(top.document.GUI.stopnavigation.value == 0){
@@ -697,7 +727,12 @@
 				p = p.matrixTransform(g.getCTM().inverse());
 				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 				setCTM(g, g.getCTM().multiply(k));
-				mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+				if (!suppresszoom) {
+					mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+				}
+				else {
+					resizeElementsForSuppressedZoom(z);
+				}
 			}
 		}
 	}
@@ -731,6 +766,8 @@
 			}
 			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
 			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
+			window.addEventListener(\'keydown\', suppressZoom, {passive: false});
+			window.addEventListener(\'keyup\', unSuppressZoom, {passive: false});
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -861,9 +898,15 @@
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
 	  if(top.document.GUI.stopnavigation.value == 0){
-		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)
-			client_x = evt.clientX;
-	  	client_y = resy - evt.clientY;
+		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
+			var g = document.getElementById("moveGroup");
+			zx = g.getCTM().inverse();
+			console.log(zx);
+			console.log(evt.clientX);
+			console.log((evt.clientX * zx.a));
+			client_x = (evt.clientX * zx.a) + zx.e;
+			console.log(client_x);
+			client_y = resy - ((evt.clientY * zx.a) + zx.f);
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
 		}
@@ -2746,7 +2789,6 @@ function mouseup(evt){
 						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
 						wktarray[parseInt(vertex_id[2])-1] = wktarray[parseInt(vertex_id[1])+1];
 					}
-					console.log(wktarray);
 					wktstring = "";
 					komma = 1;
 					for(i = 0; i < wktarray.length; i++){

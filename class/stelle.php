@@ -2159,11 +2159,13 @@ class stelle {
 				user.*
 			FROM
 				user JOIN
-				rolle ON user.ID = rolle.user_id
+				rolle ON user.ID = rolle.user_id JOIN 
+				stelle ON stelle.ID = rolle.stelle_id
 			WHERE
 				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
-			ORDER BY Name
+			ORDER BY 
+				user.ID = stelle.default_user_id desc, user.Name
 		";
 		#echo "<br>Sql: " . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
@@ -2176,14 +2178,6 @@ class stelle {
 				$user['ID'][]=$rs['ID'];
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
-			}
-			if(!empty($user['ID'])){
-				// Sortieren der User unter Berücksichtigung von Umlauten
-				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-				$user['Bezeichnung'] = $sorted_arrays['array'];
-				$user['ID'] = $sorted_arrays['second_array'];
-				$user['email'] = $sorted_arrays2['second_array'];
 			}
 		}
 		if ($result == 'only_ids') {
