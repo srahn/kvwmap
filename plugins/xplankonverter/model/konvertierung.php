@@ -75,6 +75,7 @@ class Konvertierung extends PgObject {
 		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
 		if ($konvertierung->get('planart') != '') {
 			$konvertierung->get_plan();
+			$konvertierung->plan->get_center_coord();
 		}
 		return $konvertierung;
 	}
@@ -158,6 +159,27 @@ class Konvertierung extends PgObject {
 			default :
 				return false;
 		}
+	}
+
+	public static function find_zusammenzeichnungen($gui, $planart, $order_by) {
+		$konvertierung = new Konvertierung($gui);
+		$sql = "
+			SELECT
+				k.id
+			FROM
+				xplankonverter.konvertierungen k JOIN
+				xplan_gml.xp_plan p ON k.id = p.konvertierung_id
+			WHERE
+				p.zusammenzeichnung AND
+				k.stelle_id = " . $gui->Stelle->id . " AND
+				k.planart = '" . $planart . "'
+			ORDER BY " . $order_by . "
+		";
+		$results = $konvertierung->getSQLResults($sql);
+		foreach ($results AS $result) {
+			$zusammenzeichnungen[] = Konvertierung::find_by_id($gui, 'id', $result['id']);
+		}
+		return $zusammenzeichnungen;
 	}
 
 	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
@@ -256,8 +278,16 @@ class Konvertierung extends PgObject {
 				$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
 				$result = (pg_num_rows(pg_query($this->database->dbConn, $sql)) > 0);
 			} break;
-			case 'xplan_gml_file' : {
-				$filename = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_gml/xplan_' . $this->get($this->identifier) . '.gml';
+			case 'zusammenzeichnung_gml' : {
+				$filename = $this->get_file_name('zusammenzeichnung_gml');
+				$result = file_exists($filename);
+			} break;
+			case 'zusammenzeichnung-neu_gml' : {
+				$filename = $this->get_file_name('zusammenzeichnung-neu_gml');
+				$result = file_exists($filename);
+			} break;
+			case 'xplan_gml' : {
+				$filename = $this->get_file_name('xplan_gml');
 				$result = file_exists($filename);
 			} break;
 			case 'xplan_shape_files' : {
@@ -280,8 +310,8 @@ class Konvertierung extends PgObject {
 					}
 				}
 			} break;
-			case 'inspire_gml_file' : {
-				$filename = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/inspire_gml/inspire_' . $this->get($this->identifier) . '.gml';
+			case 'inspire_gml' : {
+				$filename = $this->get_file_name('inspire_gml');
 				$result = file_exists($filename);
 			} break;
 			default : {
@@ -289,6 +319,14 @@ class Konvertierung extends PgObject {
 			}
 		}
 		return $result;
+	}
+
+	function zusammenzeichnung_exists() {
+		return $this->files_exists('zusammenzeichnung_gml');
+	}
+
+	function neue_zusammenzeichnung_exists() {
+		return $this->files_exists('zusammenzeichnung-neu_gml');
 	}
 
 	function create_edited_shapes() {
@@ -584,6 +622,10 @@ class Konvertierung extends PgObject {
 		return $this->plan;
 	}
 
+	/**
+		ToDo: Berücksichtigen, dass neue Pläne ggf. die gleiche gml_id haben können wie alte. Das gilt vor allem für Zusammenzeichnungen.
+		Es muss geklärt werden ob das als Fehler abgelehnt wird oder einfach eine eigene intern vergeben wird wenn es die aus dem importierten gml-Dokument schon in der Datenbank gibt.
+	*/
 	function create_plaene_from_gmlas($table_schema, $planart) {
 		$planartAbk = strtolower(substr($planart, 0, 2));
 		$sql = "
@@ -1134,15 +1176,16 @@ class Konvertierung extends PgObject {
 		This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
 		and write the report in xplankonverter database tables
 	*/
-	function xplanvalidator() {
+	function xplanvalidator($file_type) {
 		$msg = array();
-		if (!$this->files_exists('xplan_gml_file')) {
+		if (!$this->files_exists($file_type)) {
 			return array(
 				'success' => false,
 				'msg' => 'In dem Konvertierungsvorgang gibt es noch keine GML-Datei die validiert werden kann. Bitte erst eine erzeugen.'
 			);
 		}
-		$gml_file = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_gml/xplan_' . $this->get($this->identifier) . '.gml';
+		#$gml_file = XPLANKONVERTER_FILE_PATH . $this->get($this->identifier) . '/xplan_gml/xplan_' . $this->get($this->identifier) . '.gml';
+		$gml_file = $this->get_file_name($file_type);
 		$url =	'https://www.xplanungsplattform.de/xplan-api-validator/xvalidator/api/v1/validate' . '?' .
 						'name=xplanvalidator_konvertierung_' . $this->get($this->identifier) . '&' .
 						'skipSemantisch=false' . '&' .
@@ -1155,10 +1198,15 @@ class Konvertierung extends PgObject {
 		exec($cmd, $output, $result_code);
 		$result = $output[0];
 		#echo '<br>output: ' . $result;
-		#echo '<br>result: : ' . $result_code;
+		if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage beim XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.'
+			);
+		}
+		#echo '<br>result_code: : ' . $result_code;
 		$msg[] = 'Validierungsergebnis erfolgreich abgefragt.';
 		$report = json_decode($result, false);
-		#echo '<br>Report: ' . print_r($report->externalReferences, true);
 
 		$sql = "
 			INSERT INTO xplankonverter.xplanvalidator_reports(
@@ -1188,23 +1236,23 @@ class Konvertierung extends PgObject {
 				'" . $report->version . "',
 				'" . $report->filename . "',
 				'" . $report->name . "',
-				" . $report->bbox->minX . ",
-				" . $report->bbox->minY . ",
-				" . $report->bbox->maxX . ",
-				" . $report->bbox->maxY . ",
+				" . quote_or_null($report->bbox->minX) . ",
+				" . quote_or_null($report->bbox->minY) . ",
+				" . quote_or_null($report->bbox->maxX) . ",
+				" . quote_or_null($report->bbox->maxY) . ",
 				'" . $report->bbox->crs . "',
 				'" . $report->date . "',
 				" . ($report->valid ? 'true' : 'false') . ",
-				" . (count($report->externalReferences) > 0 ? "ARRAY['" . implode("', '", $report->externalReferences) . "']" : "NULL") . ",
+				" . ((is_array($report->externalReferences) AND count($report->externalReferences) > 0) ? "ARRAY['" . pg_escape_string(implode("', '", $report->externalReferences)) . "']" : "NULL") . ",
 				'" . $report->wmsUrl . "',
 				'" . $report->rulesMetadata->version . "',
 				'" . $report->rulesMetadata->source . "',
 				" . ($report->validationResult->semantisch->valid ? 'true' : 'false') . ",
 				" . ($report->validationResult->geometrisch->valid ? 'true' : 'false') . ",
-				" . (count($report->validationResult->geometrisch->errors) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->errors) . "']" : "NULL") . ",
-				" . (count($report->validationResult->geometrisch->warnings) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->geometrisch->warnings) . "']" : "NULL") . ",
+				" . ((is_array($report->validationResult->geometrisch->errors) AND count($report->validationResult->geometrisch->errors) > 0) ? "ARRAY['" . pg_escape_string(implode("', '", $report->validationResult->geometrisch->errors)) . "']" : "NULL") . ",
+				" . ((is_array($report->validationResult->geometrisch->warnings) AND count($report->validationResult->geometrisch->warnings) > 0) ? "ARRAY['" . pg_escape_string(implode("', '", $report->validationResult->geometrisch->warnings)) . "']" : "NULL") . ",
 				" . ($report->validationResult->syntaktisch->valid ? 'true' : 'false') . ",
-				" . (count($report->validationResult->syntaktisch->messages) > 0 ? "ARRAY['" . implode("', '", $report->validationResult->syntaktisch->messages) . "']" : "NULL") . "
+				" . ((is_array($report->validationResult->syntaktisch->messages) AND count($report->validationResult->syntaktisch->messages) > 0) ? "ARRAY['" . pg_escape_string(implode("', '", $report->validationResult->syntaktisch->messages)) . "']" : "NULL") . "
 			) RETURNING id
 		";
 		#echo '<br>SQL to create a validation report: ' . $sql;
@@ -1212,44 +1260,53 @@ class Konvertierung extends PgObject {
 		if (!$ret['success']) {
 			return array(
 				'success' => false,
-				'msg' => $ret['msg']
+				'msg' => 'Fehler beim Eintragen der Ergebnisse des XPlan-Validators!<br>' . $ret['msg']
 			);
 		}
-		$msg[] = 'Validierungsergebnis erfolgreich in Tabelle validation_reports eingetragen.';
+		if (is_array($report->validationResult->geometrisch->errors) AND count($report->validationResult->geometrisch->errors) > 0) {
+			$msg[] = '<p>Der XPlanValidator liefert folgende geometrischen Fehlermeldungen:<br>.' . implode("<br>", $report->validationResult->geometrisch->errors);
+		}
+		if (is_array($report->validationResult->geometrisch->warnings) AND count($report->validationResult->geometrisch->warnings) > 0) {
+			$msg[] = '<p>Der XPlanValidator liefert folgende geometrischen Warnungen:<br>.' . implode("<br>", $report->validationResult->geometrisch->warnings);
+		}
+		if (is_array($report->validationResult->syntaktisch->messages) AND count($report->validationResult->syntaktisch->messages) > 0) {
+			$msg[] = '<p>Der XPlanValidator liefert folgende syntaktischen Fehlermeldungen:<br>.' . implode("<br>", $report->validationResult->syntaktisch->messages);
+		}
 		$rs = pg_fetch_assoc($ret[1]);
 		$values = array();
 		foreach ($report->validationResult->semantisch->rules AS $rule) {
-			echo '<br>rule: ' . print_r($rule, true);
-			$values[] = '(' . $rs['id'] . ",
+			$values[] = "(" . $rs['id'] . ",
 				'" . $rule->name . "',
 				" . ($rule->isValid ? 'true' : 'false') . ",
 				'" . $rule->message . "',
-				" . (count($rule->invalidFeatures) > 0 ? "ARRAY['" . implode("', '", $rule->invalidFeatures) . "']" : "NULL") . ')';
+				" . ((is_array($rule->invalidFeatures) AND count($rule->invalidFeatures) > 0) ? "ARRAY['" . implode("', '", $rule->invalidFeatures) . "']" : "NULL") . "
+			)";
 		}
-		$sql = "
-			INSERT INTO xplankonverter.xplanvalidator_semantische_results(
-				xplanvalidator_report_id,
-				name,
-				isvalid,
-				message,
-				invalidefeatures
-			)
-			VALUES
-				" . implode(', ', $values) . "
-		";
-		#echo '<br>SQL to create the semantic results: ' . $sql; exit;
-		$ret = $this->database->execSQL($sql);
-		if (!$ret['success']) {
-			return array(
-				'success' => false,
-				'msg' => $ret['msg']
-			);
+		if (count($values) > 0) {
+			$sql = "
+				INSERT INTO xplankonverter.xplanvalidator_semantische_results(
+					xplanvalidator_report_id,
+					name,
+					isvalid,
+					message,
+					invalidefeatures
+				)
+				VALUES
+					" . implode(', ', $values) . "
+			";
+			#echo '<br>SQL to create the semantic results: ' . $sql; exit;
+			$ret = $this->database->execSQL($sql);
+			if (!$ret['success']) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler beim Eintragen der Ergebnisse des XPlan-Validators!<br>' . $ret['msg']
+				);
+			}
+			$msg[] = 'Ergebnisse der semantischen Prüfung erfolgreich in Tabelle validation_results_semantisch eingetragen.';
 		}
-		$msg[] = 'Ergebnisse der semantischen Prüfung erfolgreich in Tabelle validation_results_semantisch eingetragen.';
-
 		return array(
 			'success' => true,
-			'valid' => $report->valid,
+			'valid' => ($report->valid ? true : false),
 			'msg' => implode('<br>', $msg)
 		);
 	}

@@ -763,7 +763,8 @@ class user {
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . "
+				" . implode(" AND ", $where) . " AND
+				archived IS NULL
 		";
 		#echo '<br>SQL to read user data: ' . $sql;
 
@@ -787,6 +788,7 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
@@ -1133,7 +1135,7 @@ class user {
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
-					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
 					, result_transparency = '" . $formvars['result_transparency'] . "'

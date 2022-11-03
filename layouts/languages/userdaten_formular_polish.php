@@ -42,7 +42,7 @@
 	$strShareRollenlayerAllowedLabel = 'Share Layer';
 	$strStart = 'Start Access';
 	$strStop = 'Stop Access';
-	$strTakeOverPassword = 'Take over password';
+	$strTakeOverPassword = 'Cancle new password';
 	$strTitle = 'dane użytkownika edytor';
 	$struserFormNewPasswdAccepted = 'Accepted';
 	$strUserFormNewPasswdAssigned = 'New passwort assigned';

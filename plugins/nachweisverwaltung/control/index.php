@@ -61,12 +61,14 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Antrag_loeschen' : {
+			$GUI->sanitize(['id' => 'text']);
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->Antrag_Loeschen();
 	  } break;
 
 	  case 'Antraganzeige_Festpunkte_in_Karte_Anzeigen' : {
+			$GUI->sanitize(['antr_selected' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->festpunkteZuAntragZeigen();
 	  } break;
@@ -83,12 +85,14 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Antraganzeige_Zugeordnete_Dokumente_Anzeigen' : {
+			$GUI->sanitize(['antr_selected' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->checkCaseAllowed($go);
 			$GUI->DokumenteZuAntraegeAnzeigen();
 	  } break;
 
 	  case 'Antraganzeige_Uebergabeprotokoll_Zusammenstellen' : {
+			$GUI->sanitize(['antr_selected' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->zusammenstellenUebergabeprotokollNachweise($GUI->formvars['antr_selected']);
 	  }break;
@@ -99,6 +103,7 @@ function go_switch_nachweisverwaltung($go){
 	  }break;
 
 	  case 'Antraganzeige_Zusammenstellen_Zippen' : {
+			$GUI->sanitize(['antr_selected' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
@@ -107,6 +112,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 		
 	  case 'Antraganzeige_Zusammenstellen_Zippen_mit_Uebersichten' : {
+			$GUI->sanitize(['antr_selected' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$ret=$GUI->DokumenteZumAntragInOrdnerZusammenstellen();
 			if($ret != '')showAlert($ret);
@@ -115,6 +121,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;		
 
 	  case 'Nachweisloeschen':{
+			$GUI->sanitizeNachweisSearch();
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweisLoeschen();
@@ -125,18 +132,22 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 		
 	  case 'Nachweisanzeige_zum_Auftrag_hinzufuegen' : {
+			$GUI->sanitize(['flur_thematisch' => 'int']);
+			$GUI->sanitizeNachweisSearch();
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweiseZuAuftrag();
 	  } break;
 
 	  case 'Nachweisanzeige_aus_Auftrag_entfernen':{
+			$GUI->sanitizeNachweisSearch();
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweiseZuAuftragEntfernen();
 	  } break;
 
 		case 'Nachweisanzeige_Geometrieuebernahme':{
+			$GUI->sanitizeNachweisSearch();
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweiseGeometrieuebernahme();
 		} break;
@@ -199,6 +210,21 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 		
 	  case 'Nachweisformular_Senden' : {
+			$GUI->sanitize([
+			'datum' => 'text',
+			'flurid' => 'int',
+			'VermStelle' => 'text',
+			'unterart' => 'int',
+			'gueltigkeit' => 'text',
+			'geprueft' => 'text',
+			'stammnr' => 'text',
+			'Blattformat' => 'text',
+			'Blattnr' => 'text',
+			'rissnummer' => 'text',
+			'fortfuehrung' => 'int',
+			'bemerkungen' => 'text',
+			'bemerkungen_intern' => 'text',
+			'umring' => 'text']);
 	  	$_files = $_FILES;
 			$GUI->formvars['Bilddatei']=$_files['Bilddatei']['tmp_name'];
 			$GUI->formvars['Bilddatei_name']=$_files['Bilddatei']['name'];
@@ -212,10 +238,16 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 		case 'check_nachweis_poly' : {
+			$GUI->sanitize(['umring' => 'text']);
 			$GUI->check_nachweis_poly();
 	  } break;
 
 	  case 'Antrag_Aendern' : {
+			$GUI->sanitize([
+			'antr_nr' => 'text',
+			'VermStelle' => 'int',
+			'verm_art' => 'int',
+			'datum' => 'text']);
 			$GUI->checkCaseAllowed($go);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->vermessungsantragAendern();
@@ -228,6 +260,11 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Nachweis_antragsnummer_Senden' : {
+			$GUI->sanitize([
+			'antr_nr' => 'text',
+			'VermStelle' => 'int',
+			'verm_art' => 'int',
+			'datum' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->vermessungsantragAnlegen();
 	  } break;
@@ -252,6 +289,7 @@ function go_switch_nachweisverwaltung($go){
 
 	  # Rechercheanfrage an die Datenbank senden/ mit prüfen der Eingabedaten
 	  case 'Nachweisrechercheformular_Senden':{
+			$GUI->sanitizeNachweisSearch();
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->nachweiseRecherchieren();
 	  } break;
@@ -298,6 +336,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Festpunkte zum Antrag Hinzufügen_Senden' : {
+			$GUI->sanitize(['antr_selected' => 'text', 'pkn' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->festpunkteZuAuftragSenden();
 	  } break;
@@ -315,6 +354,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 
 	  case 'Sachdaten_FestpunkteSkizzenZuordnung' : {
+			$GUI->sanitize(['pkn' => 'text']);
 			include (PLUGINS.'nachweisverwaltung/model/antrag.php');						# antrag-Klasse einbinden
 			$GUI->showFestpunkteSkizze();
 	  } break;
@@ -326,6 +366,7 @@ function go_switch_nachweisverwaltung($go){
 	  } break;
 		
 		case 'get_geom_preview' : {
+			$GUI->sanitize(['id' => 'int']);
 			$GUI->getGeomPreview($GUI->formvars['id']);
 	  } break;
 		

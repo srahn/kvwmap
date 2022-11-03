@@ -552,11 +552,16 @@
 		$selFlstID = explode(', ',$GUI->formvars['selFlstID']);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
 		$Gemarkung=new gemarkung('',$GUI->pgdatabase);
-		if($GemeindenStelle == NULL){
-			$GemkgListe = $Gemarkung->getGemarkungListeAll(NULL, NULL);
+		if ($GUI->formvars['ALK_Suche'] == 1 OR $GemeindenStelle != NULL) {
+			if($GemeindenStelle == NULL){
+				$GemkgListe = $Gemarkung->getGemarkungListe(NULL, NULL);
+			}
+			else{
+				$GemkgListe = $Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+			}
 		}
-		else{
-			$GemkgListe = $Gemarkung->getGemarkungListeAll(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
+		else {
+			$GemkgListe = $Gemarkung->getGemarkungListeAll(NULL, NULL);
 		}
 		if ($GemkgListe['hist'][$GemkgID]) {
 			$GUI->formvars['history_mode'] = 'historisch';

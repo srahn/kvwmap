@@ -193,6 +193,10 @@ class GUI {
 			$this->login_failed_reason = 'authentication';
 			return false;
 		}
+		if ($user->archived) {
+			$this->login_failed_reason = 'archived';
+			return false;
+		}
 		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
@@ -989,7 +993,7 @@ echo '			</table>
 		$this->user->rolle->setClassStatus($this->formvars);
 		$this->loadMap('DataBase');
 		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
-		echo $this->create_group_legend($this->formvars['group']);
+		echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
 	}
 
   function close_group_legend() {
@@ -1026,7 +1030,7 @@ echo '			</table>
 		return $legend;
   }
 
-	function create_group_legend($group_id) {
+	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
@@ -1063,7 +1067,7 @@ echo '			</table>
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}
@@ -2041,7 +2045,7 @@ echo '			</table>
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
 
-		$layer->set('name', $layerset['Name']);
+		$layer->set('name', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name']));
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -2108,9 +2112,9 @@ echo '			</table>
 		}
 		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
 		if ($layerset['connection']!='') {
-			if($layerset['connectiontype'] == 7) {		# WMS-Layer
-				$layerset['connection'] .= '&SERVICE=WMS';
-				if ($this->map_factor != ''){
+			if($layerset['connectiontype'] == 7) { # WMS-Layer
+				# $layerset['connection'] .= '&SERVICE=WMS'; # Das kann zu Fehler führen. MapServer setzt selber SERVICE=WMS
+				if ($this->map_factor != '') {
 					if ($layerset['printconnection']!=''){
 						$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
 					}
@@ -5376,13 +5380,12 @@ echo '			</table>
 			readfile($file_name);
 			exit();
 		}
-
 		if ($this->formvars['go_next'] != ''){
 			go_switch($this->formvars['go_next']);
 			exit();
 		}
-		$currenttime=date('Y-m-d H:i:s',time());
-		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		$currenttime = date('Y-m-d H:i:s', time());
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap', $this->user->rolle->last_time_id);
 		$this->drawMap();
 		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
 		$this->output();
@@ -6050,7 +6053,7 @@ echo '			</table>
 			$this->map->legend->label->set("type", 'truetype');
 		}
 		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_C);
+    $this->map->legend->label->set("position", MS_CC);
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
@@ -6079,7 +6082,10 @@ echo '			</table>
 						if($layerset['list'][$i]['showclasses']){
 							for($j = 0; $j < $layer->numclasses; $j++){
 								$class = $layer->getClass($j);
-								if($class->name != '')$draw = true;
+								if ($class->name == '') {
+									$class->name = ' ';
+								}
+								$draw = true;
 							}
 						}
 					}
@@ -8109,9 +8115,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->use_form_data = true;
 		}
 		else {
-			$this->formvars['pfad'] = pg_escape_string($this->formvars['pfad']);
-			$this->formvars['Data'] = pg_escape_string($this->formvars['Data']);
-			$this->formvars['duplicate_criterion'] = pg_escape_string($this->formvars['duplicate_criterion']);
 			$this->formvars['selected_layer_id'] = $mapDB->newLayer($this->formvars);
 			if ($this->formvars['selected_layer_id'] == 0) {
 				return false;
@@ -8120,8 +8123,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['connectiontype'] == 6 AND $this->formvars['pfad'] != '') {
 				#---------- Speichern der Layerattribute -------------------
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$path = strip_pg_escape_string($this->formvars['pfad']);
-				$duplicate_criterion = strip_pg_escape_string($this->formvars['duplicate_criterion']);
+				$path = $this->formvars['pfad'];
+				$duplicate_criterion = $this->formvars['duplicate_criterion'];
 				$all_layer_params = $mapDB->get_all_layer_params_default_values();
 			  $attributes = $mapDB->load_attributes(
 					$layerdb,
@@ -9079,7 +9082,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if (value_of($this->formvars, 'printversion') != ''){
 				$this->mime_type = 'printversion';
 			}
-			if (value_of($this->formvars, 'printversion') == '' AND $this->user->rolle->querymode == 1) {
+			if (value_of($this->formvars, 'printversion') == '' AND ($this->user->rolle->querymode == 1 OR $this->formvars['go_next'] != '')) {
 				# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
 				if ($geometries_found) {
@@ -9108,6 +9111,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
+			}
+			if ($this->formvars['go_next'] != '') {
+				if ($this->formvars['go_next'] == 'default') {
+					$this->main = 'map.php';
+				}
+				go_switch($this->formvars['go_next']);
+				exit();
 			}
 			$this->output();
 		}
@@ -9601,7 +9611,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument'){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -10443,14 +10453,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function sachdaten_druck_editor_loeschen(){
 		include_(CLASSPATH.'datendrucklayout.php');
-		$ddl=new ddl($this->database);
-    $this->ddl=$ddl;
-    $this->ddl->delete_layout($this->formvars);
+		$ddl = new ddl($this->database);
+		$this->ddl = $ddl;
+		$this->ddl->delete_layout($this->formvars);
 		$this->sachdaten_druck_editor();
 	}
 
 	function sachdaten_druck_editor_add2stelle(){
-		include_(CLASSPATH.'datendrucklayout.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
 		$ddl=new ddl($this->database);
     $this->ddl=$ddl;
     $this->ddl->add_layout2stelle($this->formvars['aktivesLayout'], $this->formvars['stelle']);
@@ -11264,7 +11274,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$_files = $_FILES;
 		if ($this->formvars['upload_id'] !== '') {
 			if ($_files['uploadfile']['name']) {
-				$user_upload_folder = UPLOADPATH.$this->user->id.'/';
+				$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 				@mkdir($user_upload_folder);
 				$nachDatei = $user_upload_folder . $_files['uploadfile']['name'];
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
@@ -11281,7 +11291,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11289,11 +11299,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id = NULL) {
 		sanitize($filename, 'text');
-		include_once (CLASSPATH.'data_import_export.php');
+		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
-		$user_upload_folder = UPLOADPATH . $this->user->id.'/';
+		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
 		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
@@ -16219,7 +16229,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						else {
 							while ($rs = pg_fetch_assoc($ret[1])) {
 								$ids[] = "\'" . $rs[$this->layerdaten['oid']] . "\'";
-								$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
+								if ($this->formvars['show_attribute'] != '') {
+									$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
+								}
 							}
 							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
 							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
@@ -17996,16 +18008,6 @@ class db_mapObj{
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
 			$this->db->execSQL($sql);
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-			if (MYSQLVERSION > 412){
-				# Den Autowert für die Layer_id zurücksetzen
-				$sql ="
-					ALTER TABLE rollenlayer AUTO_INCREMENT = 1
-				";
-				$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Zurücksetzen des Auto_Incrementwertes:<br>" . $sql,4);
-				#echo $sql;
-				$this->db->execSQL($sql);
-				if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-			}
 			$this->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 			# auch die Klassen und styles löschen
 			if ($rollenlayerset[$i]['Class'] != ''){
@@ -18215,10 +18217,10 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		$formvars['pfad'] = pg_escape_string($formvars['pfad']);
-		$formvars['Data'] = pg_escape_string($formvars['Data']);
-		$formvars['metalink'] = pg_escape_string($formvars['metalink']);
-		$formvars['duplicate_criterion'] = pg_escape_string($formvars['duplicate_criterion']);
+		$formvars['pfad'] = $this->db->mysqli->real_escape_string($formvars['pfad']);
+		$formvars['Data'] = $this->db->mysqli->real_escape_string($formvars['Data']);
+		$formvars['metalink'] = $this->db->mysqli->real_escape_string($formvars['metalink']);
+		$formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($formvars['duplicate_criterion']);
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];
 		}
@@ -18503,11 +18505,11 @@ class db_mapObj{
 					" . quote($formvars['alias']) . ",
 					" . quote_or_null($formvars['Datentyp']) . ",
 					" . quote_or_null($formvars['Gruppe']) . ",
-					" . quote_or_null($formvars['pfad']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['pfad'])) . ",
 					" . quote_or_null($formvars['maintable']) . ",
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['identifier_text']) . ",
-					" . quote_or_null($formvars['Data']) . ",
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['Data'])) . ",
 					" . quote_or_null($formvars['schema']) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
@@ -18567,7 +18569,7 @@ class db_mapObj{
 					" . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
-					" . quote($formvars['duplicate_criterion']) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
 					" . quote_or_null($formvars['comment']) . "

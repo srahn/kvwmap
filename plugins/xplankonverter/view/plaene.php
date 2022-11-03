@@ -588,7 +588,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 									|| row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-excel-o";"></i></a>';
+		output += '<a title="XPlanung-GML" class="btn btn-link btn-xs xpk-func-download-gml' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + ' red" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=xplan_gml&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);"><i class="fa fa-lg fa-file-excel-o";"></i></a>';
 
 		// XPlanung-Shapes
 		funcIsAllowed =	row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
@@ -603,7 +603,7 @@
 			if (<?php echo ((defined('XPLANKONVERTER_INSPIRE_KONVERTER') AND !XPLANKONVERTER_INSPIRE_KONVERTER) ? 'false' : 'true'); ?>) {
 				// INSPIRE-GML
 				funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK']; ?>";
-				output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + ' blue" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml_file&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="fa fa-lg fa-file-code-o"></i></a>';
+				output += '<a title="INSPIRE-GML" class="btn btn-link btn-xs xpk-func-btn xpk-func-download-inspire-gml' + (funcIsAllowed ? '' : disableFrag) + ' blue" href="javascript:void(0);" onclick="$(\'#downloadMessageSperrDiv\').show(); $(\'#downloadMessage\').show(); ahah(\'index.php?go=xplankonverter_download_files_query\', \'file_type=inspire_gml&konvertierung_id=' + value + '\', [$(\'#downloadMessage\')[0]], [\'sethtml\']);" download="inspire_gml.gml" download="inspire"><i class="fa fa-lg fa-file-code-o"></i></a>';
 			}<?
 		}
 
@@ -642,7 +642,7 @@ else { ?>
 <div id="downloadMessageSperrDiv" class="sperr-div"></div>
 <div id="editVeroeffentlichungsdatumDiv" class="edit-veroeffentlichungsdatum-div">
 	<h2>Veröffentlichungsdatum</h2>
-Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht. Damit erscheint er in den Diensten des Bauleitplanservers und im Bau- und Planungsportal des Geoportals MV.<p></p>
+Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröffentlicht. Wird das Datum gelöscht, gilt der Plan als nicht veröffentlicht. Ein Datum in der Vergangenheit oder heute setzt den Plan als veröffentlicht.<p></p>
 	<input id="input_konvertierung_id" type="hidden">
 	<input id="input_veroeffentlichungsdatum" type="date" style="margin: 20px"><p></p>
 	<input type="button" value="<? echo $this->strCancel; ?>" onclick="$('#downloadMessageSperrDiv, .edit-veroeffentlichungsdatum-div').hide()"/>

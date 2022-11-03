@@ -570,7 +570,7 @@ INSERT INTO u_styles2classes (
 					$query_to_execute = '';
 					$query = trim($query);
 					if ($replace_connection != NULL) {
-						$query = str_replace('user=xxxx password=xxxx dbname=kvwmapsp', $replace_connection, $query);
+						$query = str_replace('user=xxxx password=xxxx dbname=kvwmapsp', $this->mysqli->real_escape_string($replace_connection), $query);
 					}
 					if ($replace_connection_id != NULL) {
 						$query = str_replace('xxxx_connection_id_xxxx', $replace_connection_id, $query);

@@ -404,7 +404,6 @@ class stelle {
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`comment` = '" . $stellendaten['comment'] . "'
-			RETURNING ID
 		";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -414,8 +413,21 @@ class stelle {
 		}
 		else {
 			# Stelle Erfolgreich angelegt
-			$rs = $this->database->result->fetch_array();
-			$ret[1] = $rs['ID'];
+			# Abfragen der stelle_id des neu eingetragenen Benutzers
+			$sql ='SELECT ID FROM stelle WHERE';
+			$sql.=' Bezeichnung="'.$stellendaten['bezeichnung'].'"';
+			# Starten der Anfrage
+			$this->database->execSQL($sql,4, 0);
+			#echo $sql;
+			if (!$this->database->success) {
+				# Fehler bei der Datenbankanfrage
+				$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>' . $this->database->errormessage;
+			}
+			else {
+				# Abfrage erfolgreich durchgeführt, übergeben der stelle_id zur Rückgabe der Funktion
+				$rs = $this->database->result->fetch_array();
+				$ret[1] = $rs['ID'];
+			}
 		}
 		return $ret;
 	}
@@ -2147,11 +2159,13 @@ class stelle {
 				user.*
 			FROM
 				user JOIN
-				rolle ON user.ID = rolle.user_id
+				rolle ON user.ID = rolle.user_id JOIN 
+				stelle ON stelle.ID = rolle.stelle_id
 			WHERE
 				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
-			ORDER BY Name
+			ORDER BY 
+				user.ID = stelle.default_user_id desc, user.Name
 		";
 		#echo "<br>Sql: " . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
@@ -2164,14 +2178,6 @@ class stelle {
 				$user['ID'][]=$rs['ID'];
 				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
-			}
-			if(!empty($user['ID'])){
-				// Sortieren der User unter Berücksichtigung von Umlauten
-				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-				$user['Bezeichnung'] = $sorted_arrays['array'];
-				$user['ID'] = $sorted_arrays['second_array'];
-				$user['email'] = $sorted_arrays2['second_array'];
 			}
 		}
 		if ($result == 'only_ids') {

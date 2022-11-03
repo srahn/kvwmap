@@ -218,7 +218,7 @@ function get_exif_data($img_path, $force_identify = false) {
 		}
 		else {
 			$exif = @exif_read_data($img_path, 'EXIF, GPS');
-			if (!array_key_exists('GPSLatitude', $exif) OR !array_key_exists('GPSLongitude', $exif)) {
+			if ((is_array($exif) && !array_key_exists('GPSLatitude', $exif)) OR (is_array($exif) && !array_key_exists('GPSLongitude', $exif))) {
 				$exif = exif_identify_data($img_path);
 			}
 		}
@@ -2373,5 +2373,29 @@ function sanitize(&$value, $type) {
 		}
 	}
 	return $value;
+}
+
+/**
+	Function determine the max allowed file size in MB
+	If php configuration parameter are defined with G the values
+	will be multiplied by 1024
+*/
+function get_max_file_size() {
+	$post_max_size_txt = ini_get('post_max_size');
+	$post_max_size = 0;
+	$upload_max_filesize = 0;
+	if (strpos($post_max_size_txt, 'G') !== false) {
+		$post_max_size = (int)$post_max_size_txt * 1024;
+	}
+	$upload_max_filesize_txt = ini_get('upload_max_filesize');
+	if (strpos($upload_max_filesize_txt, 'G') !== false) {
+		$upload_max_filesize = (int)$upload_max_filesize_txt * 1024;
+	}
+	if ($post_max_size == 0 AND $upload_max_filesize == 0) {
+		return MAXUPLOADSIZE;
+	}
+	else {
+		return min($post_max_size, $upload_max_filesize);
+	}
 }
 ?>
