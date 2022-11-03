@@ -16219,7 +16219,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						else {
 							while ($rs = pg_fetch_assoc($ret[1])) {
 								$ids[] = "\'" . $rs[$this->layerdaten['oid']] . "\'";
-								$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
+								if ($this->formvars['show_attribute'] != '') {
+									$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
+								}
 							}
 							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
 							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';

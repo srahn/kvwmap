@@ -169,14 +169,14 @@ if ($doit == true) {
 								$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
 							}				
 				
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-								$visibility = '';
+							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
 								$groupname_short = explode('<br>', $groupname);
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
-								if ($layer['attributes']['tab'][$j] != ''){
+								if ($layer['attributes']['tab'][$j] != '') {
+									$visibility = '';
 									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
 										$visibility = 'style="visibility: collapse"';
