@@ -665,7 +665,7 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" style="font-size: ' . $fontsize . 'px" href="' . htmlspecialchars($value) . '">';
+						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" style="font-size: ' . $fontsize . 'px" href="' . htmlspecialchars(add_csrf($value)) . '">';
 						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
