@@ -154,7 +154,7 @@ class GUI {
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
 		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
-    echo $this->create_group_legend($this->formvars['group']);
+    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
 
   function loadMap($loadMapSource) {
@@ -1283,11 +1283,11 @@ class GUI {
     } # end of Schleife Class
   }
 
-	function create_group_legend($group_id){
+	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if(value_of($this->groupset[$group_id], 'untergruppen') == NULL AND $this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
-	  $groupstatus = $this->groupset[$group_id]['status'];
+	  $groupstatus = $status ?: $this->groupset[$group_id]['status'];
     $legend =  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
       <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
@@ -1320,7 +1320,7 @@ class GUI {
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}

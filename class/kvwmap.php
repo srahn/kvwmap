@@ -993,7 +993,7 @@ echo '			</table>
 		$this->user->rolle->setClassStatus($this->formvars);
 		$this->loadMap('DataBase');
 		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
-		echo $this->create_group_legend($this->formvars['group']);
+		echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
 	}
 
   function close_group_legend() {
@@ -1030,7 +1030,7 @@ echo '			</table>
 		return $legend;
   }
 
-	function create_group_legend($group_id) {
+	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if (@$this->groupset[$group_id]['untergruppen'] == NULL AND @$this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
@@ -1067,7 +1067,7 @@ echo '			</table>
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}
@@ -2112,9 +2112,9 @@ echo '			</table>
 		}
 		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
 		if ($layerset['connection']!='') {
-			if($layerset['connectiontype'] == 7) {		# WMS-Layer
-				$layerset['connection'] .= '&SERVICE=WMS';
-				if ($this->map_factor != ''){
+			if($layerset['connectiontype'] == 7) { # WMS-Layer
+				# $layerset['connection'] .= '&SERVICE=WMS'; # Das kann zu Fehler führen. MapServer setzt selber SERVICE=WMS
+				if ($this->map_factor != '') {
 					if ($layerset['printconnection']!=''){
 						$layerset['connection'] = $layerset['printconnection']; 		# wenn es eine Druck-Connection gibt, wird diese verwendet
 					}
@@ -9074,7 +9074,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if (value_of($this->formvars, 'printversion') != ''){
 				$this->mime_type = 'printversion';
 			}
-			if (value_of($this->formvars, 'printversion') == '' AND ($this->user->rolle->querymode == 1 OR $this->formvars['go_next'] == 'default')) {
+			if (value_of($this->formvars, 'printversion') == '' AND ($this->user->rolle->querymode == 1 OR $this->formvars['go_next'] != '')) {
 				# bei aktivierter Datenabfrage in extra Fenster --> Laden der Karte und zoom auf Treffer (das Zeichnen der Karte passiert in einem separaten Ajax-Request aus dem Overlay heraus)
 				$this->loadMap('DataBase');
 				if ($geometries_found) {
@@ -9104,8 +9104,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
 			}
-			if ($this->formvars['go_next'] == 'default') {
-				$this->main = 'map.php';
+			if ($this->formvars['go_next'] != '') {
+				if ($this->formvars['go_next'] == 'default') {
+					$this->main = 'map.php';
+				}
 				go_switch($this->formvars['go_next']);
 				exit();
 			}
