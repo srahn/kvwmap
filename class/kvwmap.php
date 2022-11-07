@@ -13091,6 +13091,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include_once(CLASSPATH . 'CronJob.php');
 		$this->cronjob = new CronJob($this);
 		$this->cronjob->data = formvars_strip($this->formvars, $this->cronjob->getKeys(), 'keep');
+		$this->cronjob->set('user_id', $this->user->id);
+		$this->cronjob->set('stelle_id', $this->Stelle->id);
 		$this->cronjob->set('query', $this->formvars['query']);
 		$results = $this->cronjob->validate();
 		if (empty($results)) {
