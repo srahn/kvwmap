@@ -6176,7 +6176,7 @@ echo '			</table>
 		}	
 		if($dbStyle['size'] != ''){
 			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-			else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
+			else $style->set('size', 16);		# Dummywert 16 da size-Attribut verwendet wird
 		}
     if($dbStyle['width']!='') {
       $style->set('width', $dbStyle['width']);
