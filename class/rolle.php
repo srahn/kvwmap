@@ -1696,6 +1696,25 @@ class rolle {
 				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
 				return 0;
 			}
+			# default_user_id
+			$sql = "
+				UPDATE
+					`stelle` 
+				SET	
+					default_user_id = NULL
+				WHERE 
+					default_user_id = " . $user_id . " AND 
+					ID = " . $stellen[$i];
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
+			else {
+				if ($this->database->mysqli->affected_rows > 0){
+					GUI::add_message_('notice', 'Achtung! Der Standardnutzer wurde von der Stelle entfernt.');
+				}
+			}
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
 				$sql = "
