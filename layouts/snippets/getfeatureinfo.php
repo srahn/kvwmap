@@ -23,6 +23,7 @@
 			$response = utf8_encode($response);
 		}
 		$response = str_replace('css', '', $response);
+		$response = str_replace('a href', 'a target=_blank href', $response);		# die fehlenden " sind gewollt
 		if ($response=='') {
 			?><br>An dieser Position konnten zu diesem Layer keine Objekte gefunden werden.<br><?php
 		}
