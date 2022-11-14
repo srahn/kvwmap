@@ -123,6 +123,10 @@ function ahahDone(url, targets, req, actions) {
 							}
 						break;
 						
+						case "setouterhtml":
+							targets[i].outerHTML = responsevalues[i];
+						break;
+						
 						case "prependhtml":
 							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
 						break;
@@ -818,16 +822,17 @@ function update_legend(layerhiddenstring){
 }
 
 /*
-* optional status to set values irrespective of current value
+* optional status to set values irrespective of current value and open all subgroups
 */
 function getlegend(groupid, layerid, fremde, status) {
+	status = status || 0;
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		status = status || !parseInt(group.value);
-		if (status) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		open = status || !parseInt(group.value);
+		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
 		}
 		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
 			group.value = 0;
@@ -846,7 +851,7 @@ function getlegend(groupid, layerid, fremde, status) {
 		else{
 			layer.value = 0;
 		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), ['setouterhtml']);
 	}
 }
 
@@ -983,35 +988,40 @@ function preventDefault(e){
 }
 
 function selectgroupquery(group, instantreload){
-  value = group.value+"";
-  layers = value.split(",");
-  i = 0;
-  test = null;
-  while(test == null){
-    test = document.getElementById("qLayer"+layers[i]);
-    i++;
-    if(i > layers.length){
-      return;
-    }
-  }
-  check = !test.checked;
-  for(i = 0; i < layers.length; i++){
-    query = document.getElementById("qLayer"+layers[i]);
-    if(query){
-      query.checked = check;
-      thema = document.getElementById("thema_"+layers[i]);
-      updateThema('', thema, query, '', '', 0);
-    }
-  }
-	if(instantreload)neuLaden();
+	if (group) {
+		if(Array.isArray(group)) {
+			group = group.filter(function( x ) {
+				return x !== undefined;
+			});
+			value = group.map(function(x){return x.value+""}).join(",");
+		} else {
+			value = group.value+"";
+		}
+		
+		var layers = value.split(",");
+		var check;
+		for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query && query.type == 'checkbox' && !query.disabled){
+				check = !query.checked;
+				break;
+			}
+		}
+		for(i = 0; i < layers.length; i++){
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query){
+				query.checked = check;
+				thema = document.getElementById("thema_"+layers[i]);
+				updateThema('', thema, query, '', '', 0);
+			}
+		}
+		if(instantreload)neuLaden();
+	}
 }
 
 function selectgroupthema(group, instantreload){
 	var value = "";
 	if(Array.isArray(group)) {
-		//activates/deactivates all passed array of groups layers. 
-		//non-opened groups will be undefined and skipped (can be worked around with getlegend(..) on group-id call before this function
-		// remove potential undefined values
 		group = group.filter(function( x ) {
 			return x !== undefined;
 		});

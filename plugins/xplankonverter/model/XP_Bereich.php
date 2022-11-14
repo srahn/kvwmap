@@ -51,7 +51,7 @@ class XP_Bereich extends PgObject {
 			WHERE
 				gehoertzubereich = '" . $this->get('gml_id') .
 			"';";
-			echo $sql;
+			#echo $sql;
 		pg_query($this->database->dbConn, $sql);
 	}
 

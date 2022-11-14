@@ -1,4 +1,5 @@
 BEGIN;
+  CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
   CREATE TABLE syncs (
     id serial NOT NULL,
