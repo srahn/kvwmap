@@ -38,7 +38,7 @@
 										$this->add_message('error', sprintf($strLoginFailedMsg['login_is_locked'], (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s')));
 									} break;
 									default : {
-										$this->add_message('error', $strLoginFailedMsg[$this->login_reason]);
+										$this->add_message('error', $strLoginFailedMsg[$this->login_failed_reason]);
 									}
 								}
 							}
