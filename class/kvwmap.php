@@ -193,15 +193,15 @@ class GUI {
 		@return true if granted, false if not.
 	*/
 	function is_login_granted($user, $login_name, $password) {
-		# check if login_name exists
-		if ($user->login_name != $login_name) {
-			$this->login_failed_reason = 'wrong_login_name';
-			return false;
-		}
-
 		# check if login_name is locked
 		if ($user->login_is_locked()) {
 			$this->login_failed_reason = 'login_is_locked';
+			return false;
+		}
+
+		# check if login_name exists
+		if ($user->login_name != $login_name) {
+			$this->login_failed_reason = 'wrong_login_name';
 			return false;
 		}
 
