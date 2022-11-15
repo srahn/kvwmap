@@ -196,11 +196,6 @@
       $legendentext.=",<br>" . $FlurstListe[$i];
     }
    	$datastring.=") ";
-		# Filter
-		if($layerset[0]['Layer_ID'] != ''){
-			$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
-			if($filter != '')$datastring.= ' AND '.$filter;
-		}
 		$datastring.=") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('Suchergebnis');
     if($group != ''){
