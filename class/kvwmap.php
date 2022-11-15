@@ -188,23 +188,47 @@ class GUI {
 		$this->output();
 	}
 
-	function is_login_granted($user, $login_name) {
+	/**
+		Check if the login is granted. If not set the login failed reason
+		@return true if granted, false if not.
+	*/
+	function is_login_granted($user, $login_name, $password) {
+		# check if login_name exists
 		if ($user->login_name != $login_name) {
-			$this->login_failed_reason = 'authentication';
+			$this->login_failed_reason = 'wrong_login_name';
 			return false;
 		}
+
+		# check if login_name is locked
+		if ($user->login_is_locked()) {
+			$this->login_failed_reason = 'login_is_locked';
+			return false;
+		}
+
+		# check if user is archived
 		if ($user->archived) {
 			$this->login_failed_reason = 'archived';
 			return false;
 		}
+
+		# check if the password ist correct
+		if ($user->wrong_password($password)) {
+			$this->login_failed_reason = 'authentication';
+			return false;
+		}
+
+		# check if the login is granted not yet
 		if ($user->start != '0000-00-00' AND date('Y-m-d') < $user->start) {
 			$this->login_failed_reason = 'not_yet_started';
 			return false;
 		}
+
+		# check if the login is not granted any more
 		if ($user->stop != '0000-00-00' AND date('Y-m-d') > $user->stop) {
 			$this->login_failed_reason = 'expired';
 			return false;
 		}
+
 		return true;
 	}
 
@@ -213,17 +237,6 @@ class GUI {
 		$this->expect = array('login_name', 'passwort', 'mobile');
 		if ($this->formvars['go'] == 'logout') {
 			$this->expect[] = 'go';
-		}
-		switch ($this->login_failed_reason) {
-			case 'authentication' : {
-				$this->add_message('error', 'Benutzername oder Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!<br>Versuchen Sie es noch einmal.');
-			} break;
-			case 'expired' : {
-				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
-			} break;
-			case 'not_yet_started' : {
-				$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
-			} break;
 		}
 		$this->log_loginfail->write(
 			date("Y:m:d H:i:s", time()) .
@@ -234,6 +247,22 @@ class GUI {
 			getenv('HTTP_USER_AGENT')
 		);
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
+		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
+			switch ($this->login_failed_reason) {
+				case 'authentication' : {
+					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
+				} break;
+				case 'login_is_locked' : {
+					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
+				} break;
+				case 'expired' : {
+					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
+				} break;
+				case 'not_yet_started' : {
+					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
+				} break;
+			}
+		}
 		$this->output();
 	}
 

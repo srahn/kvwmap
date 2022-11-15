@@ -1554,3 +1554,19 @@ function copyToClipboard(text) {
 		}
 	}
 }
+
+format_duration = function (sec_num) {
+	var hours   = Math.floor(sec_num / 3600);
+	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	var seconds = sec_num - (hours * 3600) - (minutes * 60);
+	var parts = [];
+
+	if (hours 		> 0) parts.push(hours 	+ ' Stunde' 	+ (hours 		> 1 ? 'n' : ''));
+	if (minutes 	> 0) parts.push(minutes + ' Minute' 	+ (minutes 	> 1 ? 'n' : ''));
+	if (seconds 	> 0) parts.push(seconds + ' Sekunde' 	+ (seconds 	> 1 ? 'n' : ''));
+	if (parts.length == 0) return '';
+	if (parts.length == 1) return parts[0];
+	if (parts.length == 2) return parts[0] + ' und ' + parts[1];
+	if (parts.length == 3) return parts[0] + ', ' + parts[1] + ' und ' + parts[2]
+}
+
