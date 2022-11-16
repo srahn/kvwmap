@@ -344,43 +344,56 @@
 						><?php echo $strShareRollenlayerAllowedCheckboxText; ?>
 						<span data-tooltip="<?php echo $strShareRollenlayerAllowedDescription; ?>"></span>
 			</div>
+		</div>
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strLayerDataImportAllowedLabel; ?></div>
+			<div><input
+							name="layer_data_import_allowed"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['layer_data_import_allowed'] ? 'checked' : ''); ?>
+						><?php echo $strLayerDataImportAllowedCheckboxText; ?>
+			</div>
+		</div>
+		
+		<?
+	if ($this->formvars['selected_user_id'] > 0) {
+		if (is_array($this->formvars['selstellen'])) {
+			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
+			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
+		} ?>
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strActiveSite;?></div>
+			<div>
+				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
+			</div>
+		</div>
+
+		<div class="form_formular-input">
+			<div><? echo $strActiveLayers;?></div>
+			<div class="udf_eingabe-layers">
+				<table><?	
+					for ($i = 0; $i < count($this->active_layers); $i++) { ?>
+						<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+							<td>
+								<? echo $this->active_layers[$i]['alias']; ?>
+							</td>
+							<td>
+								<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
+							</td>
+						</tr><?
+					} ?>
+				</table>
+			</div>
+		</div>
+
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strChangeUser;?></div>
+			<div>
+				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+			</div>
 		</div><?
-		if ($this->formvars['selected_user_id'] > 0) {
-			if (is_array($this->formvars['selstellen'])) {
-				$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
-				$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
-			} ?>
-			<div class="form_formular-input form_formular-aic">
-				<div><? echo $strActiveSite;?></div>
-				<div>
-					<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
-				</div>
-			</div>
-
-			<div class="form_formular-input">
-				<div><? echo $strActiveLayers;?></div>
-				<div class="udf_eingabe-layers">
-					<table><?	
-						for ($i = 0; $i < count($this->active_layers); $i++) { ?>
-							<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
-								<td>
-									<? echo $this->active_layers[$i]['alias']; ?>
-								</td>
-								<td>
-									<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
-								</td>
-							</tr><?
-						} ?>
-					</table>
-				</div>
-			</div>
-
-			<div class="form_formular-input form_formular-aic">
-				<div><? echo $strChangeUser;?></div>
-				<div>
-					<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
-				</div>
-			</div><?
 		} ?>
 	</div>
 </div>

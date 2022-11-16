@@ -1,19 +1,31 @@
 <?php
-$strTitle="Map service Map data export";
-$strWMSExportWarning="This function stores the current map displays with additional metadata of the project in a map file, so that contents in an OGC can be put to Web Map Service (WMS) independently of available kvwmap. The saving location is to be specified in the constant WMS_MAPFILE_PATH.";
-$strAllOrActiveLayer="Are all layers of the task or only the active layer to be used?"; 
-$strAll="All layers";
-$strActiveLayer="Only activated layer";
-$strNameOfMapFile="Select a name for the map file:";
-$strOwsTitle ="Which service is to be designated (ows_title)";
-$strOwsAbstract="Give a short description to the Web Map Service (ows_abstract):";
-$strContactInfo="Contact information";
-$strContactPerson="Person (ows_contactperson):";
-$strOrganisation="Organisation (ows_contactorganization):";
-$strEMail="E-Mail (ows_contactelectronicmailaddress):";
-$strFee="Costs of the use of the service (ows_fees)";
-$strExported1="The current map configuration was exported to the mapfile ".WMS_MAPFILE_PATH.$this->formvars['mapfile_name'].". The mapfile can now be used for OWS.";
-$strExported2="A getCapabilities-request of this WMS looks like this";
-$strExported3="An image of the map can be requested with a getMap-request, e.g.";
- 
-?>  
+	$strActiveLayer = 'Only activated layer';
+	$strAll = 'All layers';
+	$strAllOrActiveLayer = 'Are all layers of the task or only the active layer to be used?'; 
+	$strAttributeFilter = 'Filte over attribute';
+	$strAttributeFilterHilfe = 'If attribute name and value defined, this filter will be applied for all layer that have this attribute. The user must be sure that the attribute is in data statement of the layers on which it shall be supplied.';
+	$strButtonCancel = 'Cancle';
+	$strButtonSend = 'Send';
+	$strContactInfo = 'Contact information';
+	$strContactPerson = 'Person (ows_contactperson):';
+	$strContactPosition = 'Position (ows_contactposition):';
+	$strCurrentExtent = 'only current selected extent of the map';
+	$strEMail = 'E-Mail (ows_contactelectronicmailaddress):';
+	$strExported1 = 'The current map configuration was exported to the mapfile '.WMS_MAPFILE_PATH.$this->formvars['mapfile_name'].'. The mapfile can now be used for OWS.';
+	$strExported2 = 'A getCapabilities-request of this WMS looks like this';
+	$strExported3 = 'An image of the map can be requested with a getMap-request, e.g.';
+	$strExportedWFSExample = 'The vector data of the features can be queried with a getFeature request, e.g.';
+	$strExportList = 'The following mapfiles has been created in this working group allready';
+	$strFee = 'Costs of the use of the service (ows_fees)';
+	$strGefilterteLayerList = 'The following layer will be delivered filtered in this service';
+	$strNameOfMapFile = 'Select a name for the map file:';
+	$strNurVeroeffentlichteFilter = 'Show only published data in this service';
+	$strNurVeroeffentlichteHilfe = 'If you select this option only layer with an attribute veroeffentlicht will be filtered in this way. Layer without such attribute will not be filtered. This option is on by default.';
+	$strOrganisation = 'Organisation (ows_contactorganization):';
+	$strOwsAbstract = 'Give a short description to the Web Map Service (ows_abstract):';
+	$strOwsTitle  = 'Which service is to be designated (ows_title)';
+	$strTitle = 'Map service Map data export';
+	$strTotalExtent = 'entire extend of the working group area';
+	$strTotalOrCurrentExtent = 'Select the map extent of the service';
+	$strWMSExportWarning = 'This function stores the current map displays with additional metadata of the project in a map file, so that contents in an OGC can be put to Web Map Service (WMS) independently of available kvwmap. The saving location is to be specified in the constant WMS_MAPFILE_PATH.';
+?>

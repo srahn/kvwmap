@@ -1,17 +1,31 @@
 <?php
-$strTitle="MapService Map-Datei Export";
-$strWMSExportWarning="Disse Funktion spiekert de aktuellen Koortdarstellungen mit mihr Metadaten taun Projekt in een Map-Datei ap, jüst so dat de Inholts in'n OGC konformen Web Map Service (WMS) annern eendoont vunn ollen kvwmap to Verfögen gestellt werden könt. De Spiekeruurt mööst du in de Konstante WMS_MAPFILE_PATH fastleggen.";
-$strAllOrActiveLayer="Söhn olle Layer vun de Stäe utgeben wern odder blot de utwählt sünd?";
-$strAll="all";
-$strActiveLayer="blot de Utwählt";
-$strNameOfMapFile="Wähl een Nomen ut för de Map-Datei:";
-$strOwsTitle="As wie sall de Service benömt weren (ows_title):";
-$strOwsAbstract="Gev een kott Beschrieven taun Web Map Service (ows_abstract):";
-$strContactInfo="Kontaktinformatschoon:";
-$strContactPerson="Setter (ows_contactperson):";
-$strOrganisation="Organisatschoon (ows_contactorganization)";
-$strEMail="E-Mail (ows_contactelectronicmailaddress):";
-$strFee="Kosten för de Bruuk van de Deenst (ows_fees):";
-$strButtonCancel="Afbreken";
-$strButtonSend="Sennen";
-?>  
+	$strActiveLayer = 'blot de Utwählt';
+	$strAll = 'all';
+	$strAllOrActiveLayer = 'Söhn olle Layer vun de Stäe utgeben wern odder blot de utwählt sünd?';
+	$strAttributeFilter = 'Filter mit Attribut';
+	$strAttributeFilterHilfe = 'Wenn ein Attributname und ein Wert angegeben worden sind, wird dieser Filter für alle Layer die über das angegebene Attribut verfügen angewendet. Der Anwender muss sicherstellen, dass das Attribut im Data-Statement der Layer, die gefiltert werden sollen existiert.';
+	$strButtonCancel = 'Afbreken';
+	$strButtonSend = 'Sennen';
+	$strContactInfo = 'Kontaktinformatschoon:';
+	$strContactPerson = 'Setter (ows_contactperson):';
+	$strContactPosition = 'Position (ows_contactposition):';
+	$strCurrentExtent = 'nur die aktuell eingestellte Ausdehnung';
+	$strEMail = 'E-Mail (ows_contactelectronicmailaddress):';
+	$strExported1 = 'Die Karteneinstellungen wurden in die Mapdatei ' . $this->mapfile .' exportiert. Die exportierte Datei kann nun f&uuml;r OWS verwendet werden.';
+	$strExported2 = 'GetCapabilities-Request:';
+	$strExported3 = 'Die Karte l&auml;&szlig;t sich abfragen mit einem getMap-Request, z.B.';
+	$strExportedWFSExample = 'Die Daten lassen sich abfragen mit einem getFeature-Request, z.B.';
+	$strExportList = 'Folgende Map-Dateien wurden bereits in dieser Stelle exportiert';
+	$strFee = 'Kosten för de Bruuk van de Deenst (ows_fees):';
+	$strGefilterteLayerList = 'Folgende Layer werden gefiltert in diesem Dienst ausgegeben';
+	$strNameOfMapFile = 'Wähl een Nomen ut för de Map-Datei:';
+	$strNurVeroeffentlichteFilter = 'Nur zur Veröffentlichung vorgesehene Daten im Dienst anzeigen';
+	$strNurVeroeffentlichteHilfe = 'Wenn Sie diese Option wählen, werden von Layern die ein Attribut veroeffentlicht haben, nur Objekte im Dienst ausgegeben, dessen Wert 'Ja' ist.&#xa;Bei Layern, die dieses Attribut nicht haben, werden alle Daten ausgegeben. Diese Option ist standardmäßig bei jedem Export eingeschaltet.';
+	$strOrganisation = 'Organisatschoon (ows_contactorganization)';
+	$strOwsAbstract = 'Gev een kott Beschrieven taun Web Map Service (ows_abstract):';
+	$strOwsTitle = 'As wie sall de Service benömt weren (ows_title):';
+	$strTitle = 'MapService Map-Datei Export';
+	$strTotalExtent = 'die gesamte Stelle';
+	$strTotalOrCurrentExtent = 'Welche räumliche Kartenausdehnung soll der Dienst abdecken?';
+	$strWMSExportWarning = "Disse Funktion spiekert de aktuellen Koortdarstellungen mit mihr Metadaten taun Projekt in een Map-Datei ap, jüst so dat de Inholts in'n OGC konformen Web Map Service (WMS) annern eendoont vunn ollen kvwmap to Verfögen gestellt werden könt. De Spiekeruurt mööst du in de Konstante WMS_MAPFILE_PATH fastleggen.";
+?>

@@ -69,11 +69,12 @@
 	function startup(){
 		document.getElementById("svghelp").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}
+	
+	function showtooltip(result, showdata){
+		document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}	
 
 	var nbh = new Array();
-	
-	function showtooltip(){
-	}
 		
 </script>
  
@@ -125,6 +126,13 @@
 
 	$SVG_end = '
 		'.$SVGvars_tooltipblank.'
+			</g>
+			<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
+				<rect id="frame" width="0" height="20" rx="5" ry="5" style="fill-opacity:0.8;fill:rgb(255, 250, 240);stroke:rgb(140, 140, 140);stroke-width:1.5"/>
+				<text id="querytooltip" x="100" y="100" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
+				<text id="link0" cursor="pointer" onmousedown="top.document.body.style.cursor=\'pointer\';" onmousemove="top.document.body.style.cursor=\'pointer\';" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
+				<g id="tooltipcontent">
+				</g>	
 			</g>
 	</svg>';
 
@@ -205,6 +213,7 @@
 	var vertex_new_world_x;
 	var vertex_new_world_y;
 	var vertex_moved = false;
+	var mouse_down = false;
 	var time_mouse_down;
 	var mouse_coords_type = "image";
 	var measuring  = false;
@@ -214,7 +223,9 @@
 	var mousewheelloop = 0;
 	var measured_distance = 0;
 	var new_distance = 0;
+	var doing;
 	var doing_save;
+	var suppresszoom = false;
 	';
 
 	$polygonANDpoint = '
@@ -305,6 +316,7 @@
 	function edit_other_object(){
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		enclosingForm.last_doing.value = "edit_other_object";
+		doing = "edit_other_object";
 		document.getElementById("canvas").setAttribute("cursor", "pointer");
 	}
 	
@@ -447,6 +459,33 @@
 	';
 
 	$basicfunctions = '
+	
+	function world2pixelsvg(pathWelt){
+		var path  = new Array();
+		pathWelt = pathWelt.replace(/L /g, "");		// neuere Postgis-Versionen haben ein L mit drin
+		explosion = pathWelt.split(" ");
+		for(i = 0; i < explosion.length; i++){
+			if(explosion[i] == "M"){
+				path.push("M");
+				laststartx = Math.round((explosion[i+1] - minx)/scale);
+				laststarty = Math.round((Math.abs(explosion[i+2]) - top.document.GUI.miny.value)/scale);
+			}
+			if(explosion[i] != "M" && explosion[i] != "Z" && explosion[i] != ""){
+				path.push(Math.round((explosion[i] - minx)/scale));
+				path.push(Math.round((Math.abs(explosion[i+1]) - miny)/scale));
+				i++;
+			}
+			if(explosion[i] == "Z"){			// neuere Postgis-Versionen liefern bei asSVG ein Z zum Schliessen des Rings anstatt der Startkoordinate
+				path.push(laststartx);
+				path.push(laststarty);
+			}
+		}
+		pixelpath = "";
+		for(i = 0; i < path.length; i++){
+			pixelpath = pixelpath + path[i] + " ";
+		}
+		return pixelpath;
+	}
 
 	function redrawpoint(){
 		if(document.getElementById("pointposition")){
@@ -642,6 +681,35 @@
 		sendpath("zoomin_box", navX, navY);
 	}
 	
+	function suppressZoom(evt){
+		if (evt.keyCode == 17) {
+			suppresszoom = true;
+		}
+	}
+	
+	function unSuppressZoom(evt){
+		if (evt.keyCode == 17) {
+			suppresszoom = false;
+			document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+			resizeElementsForSuppressedZoom(1);
+		}
+	}
+	
+	function resizeElementsForSuppressedZoom(z){
+		if (z == 1) {
+			for (circle of document.getElementById("foreignvertices").childNodes) {
+				circle.setAttribute("r", 7);
+			}
+			document.getElementById("polygon_first").style.strokeWidth = "1.5px";
+		}
+		else {
+			for (circle of document.getElementById("foreignvertices").childNodes) {
+				circle.setAttribute("r", circle.getAttribute("r") / z);
+			}
+			document.getElementById("polygon_first").style.strokeWidth = (parseFloat(document.getElementById("polygon_first").style.strokeWidth) / z) + "px";
+		}
+	}
+	
 	function mousewheelchange(evt){
 		if(!evt)evt = window.event; // For IE
 		if(top.document.GUI.stopnavigation.value == 0){
@@ -659,7 +727,12 @@
 				p = p.matrixTransform(g.getCTM().inverse());
 				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 				setCTM(g, g.getCTM().multiply(k));
-				mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+				if (!suppresszoom) {
+					mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+				}
+				else {
+					resizeElementsForSuppressedZoom(z);
+				}
 			}
 		}
 	}
@@ -693,6 +766,8 @@
 			}
 			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
 			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
+			window.addEventListener(\'keydown\', suppressZoom, {passive: false});
+			window.addEventListener(\'keyup\', unSuppressZoom, {passive: false});
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -823,9 +898,15 @@
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
 	  if(top.document.GUI.stopnavigation.value == 0){
-		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)
-			client_x = evt.clientX;
-	  	client_y = resy - evt.clientY;
+		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
+			var g = document.getElementById("moveGroup");
+			zx = g.getCTM().inverse();
+			console.log(zx);
+			console.log(evt.clientX);
+			console.log((evt.clientX * zx.a));
+			client_x = (evt.clientX * zx.a) + zx.e;
+			console.log(client_x);
+			client_y = resy - ((evt.clientY * zx.a) + zx.f);
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
 		}
@@ -1031,6 +1112,9 @@ function mousemove(evt){
 				}
 			}
 		}
+	}
+	if (enclosingForm.last_doing.value == "edit_other_object") {
+		hidetooltip(evt);
 	}
 }
 
@@ -1741,22 +1825,6 @@ function mouseup(evt){
 		else{
 			return "";
 		}
-	}
-
-	function world2pixelsvg(pathWelt) {
-		explosion = pathWelt.split(" ");
-		for(i = 0; i < explosion.length; i++){
-			if(explosion[i] != "M" && explosion[i] != ""){
-				explosion[i] = Math.round((explosion[i] - minx)/scale);
-				explosion[i+1] = Math.round((explosion[i+1] - miny)/scale);
-				i++;
-			}
- 		}
-		pixelpath = "";
-		for(i = 0; i < explosion.length; i++){
-			pixelpath = pixelpath + explosion[i] + " ";
-		}
-		return pixelpath;
 	}
 
 	function getxcoordsfromsvgpath(path){
@@ -2721,7 +2789,6 @@ function mouseup(evt){
 						wktarray[parseInt(vertex_id[2])-2] = wktarray[parseInt(vertex_id[1])];
 						wktarray[parseInt(vertex_id[2])-1] = wktarray[parseInt(vertex_id[1])+1];
 					}
-					console.log(wktarray);
 					wktstring = "";
 					komma = 1;
 					for(i = 0; i < wktarray.length; i++){
@@ -3056,22 +3123,6 @@ function mouseup(evt){
 		}
 		ycoords.pop();
 		return ycoords;
-	}
-
-	function world2pixelsvg(pathWelt) {
-		explosion = pathWelt.split(" ");
-		for(i = 0; i < explosion.length; i++){
-			if(explosion[i] != "M" && explosion[i] != ""){
-				explosion[i] = Math.round((explosion[i] - minx)/scale);				
-				explosion[i+1] = Math.round((explosion[i+1] - miny)/scale);
-				i++;
-			}
- 		}
-		pixelpath = "";
-		for(i = 0; i < explosion.length; i++){
-			pixelpath = pixelpath + explosion[i] + " ";
-		}
-		return pixelpath;
 	}
 
 	function deletelast(evt){
@@ -3648,6 +3699,7 @@ $measurefunctions = '
 				<use id="gps_position" style="stroke:red;" xlink:href="#crosshair_red" x="-1000" y="-1000"/>
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
+				<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
 			</g>
 			<rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt);" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0" visibility="visible"/>
 			<g id="in_between_vertices" transform="translate(0,'.$res_y.') scale(1,-1)"></g>

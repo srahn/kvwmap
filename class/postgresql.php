@@ -364,7 +364,12 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
+	/**
+		Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
+		For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
+		and in correct order.
+	*/
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
 		$strip_context = true;
@@ -391,10 +396,17 @@ FROM
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			#echo "<br>SQL in execSQL: " . $sql;
-			$query = @pg_query($this->dbConn, $sql);
+			if (count($prepared_params) > 0) {
+				$query_id = 'query_' . rand();
+				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
+			}
+			else {
+				#echo "<br>SQL in execSQL: " . $sql;
+				$query = @pg_query($this->dbConn, $sql);
+			}
 			//$query=0;
-			if ($query == 0) {
+			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
 				# erzeuge eine Fehlermeldung;
@@ -623,14 +635,15 @@ FROM
 		};
 		set_error_handler($myErrorHandler);
 		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		#echo '<br>sql: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
-		error_reporting($error_reporting);		
+		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			if($pseudo_realnames){
+			if ($pseudo_realnames) {
 				$select_attr = attributes_from_select($select);
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
@@ -644,7 +657,7 @@ FROM
 				$table_oid = pg_field_table($ret[1], $i, true);			
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if ($table_oid > 0){					
+				if ($table_oid > 0) {
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
 					if ($tablename != NULL) {

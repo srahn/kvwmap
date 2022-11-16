@@ -291,7 +291,7 @@
 				if ($attributes['nullable'][$j] != '0' OR $gui->new_entry == true) {
 					$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
 				}
-				for ($e = 0; $e < count($attributes['enum_value'][$j]); $e++) {
+				for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
 					$datapart .= '<option'
 						. ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]] ? ' selected' : '')
 						. ' value="' . $attributes['enum_value'][$j][$e] . '">'
@@ -345,6 +345,23 @@
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+				} break;
+
+				case 'Auswahlfeld_Bild' : {
+					if(is_array($attributes['dependent_options'][$j])){
+						# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+						$enum_value = $attributes['enum_value'][$j][$k];
+						$enum_output = $attributes['enum_output'][$j][$k];
+						$enum_image = $attributes['enum_image'][$j][$k];
+					}
+					else{
+						$enum_value = $attributes['enum_value'][$j];
+						$enum_output = $attributes['enum_output'][$j];
+						$enum_image = $attributes['enum_image'][$j];
+					}
+					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
+					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
+					$datapart .= Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 				
 				case 'Farbauswahl' : {
@@ -1171,6 +1188,76 @@
 		}
 		return $datapart;
 	}
+	
+	function Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+		if (!is_array($req)) {
+			$req = array();
+		}
+		for($e = 0; $e < @count($enum_value); $e++){
+			if($enum_value[$e] == $value){
+				$auswahlfeld_output = $enum_output[$e];
+				$auswahlfeld_image = $enum_image[$e];
+				$auswahlfeld_output_laenge = strlen($auswahlfeld_output)+1;
+				break;
+			}
+		}
+		$datapart .= '<div class="image-select" id="image_select_' . $layer_id . '_' . $name . '_' . $k . '">';
+		if ($privileg == '0') {
+			$datapart .= '
+				<div class="placeholder" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
+					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
+					<span>' . $auswahlfeld_output . '</span>
+					<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
+				</div>';
+			$auswahlfeld_output = '';
+			$auswahlfeld_output_laenge = '';
+		}
+		else {
+			if ($change_all) {
+				$onchange = 'change_all(' . $layer_id . ', ' . $k . ', \'' . $layer_id . '_' . $name . '\');';
+			}
+			if ($req_by != '') {
+				$onchange = 'update_require_attribute(this, \'' . $req_by . '\', ' . $k . ',' . $layer_id . ', new Array(\'' . implode("','", $attributenames) . '\'));' . $onchange;
+			}
+			$datapart .= '
+				<input type="hidden" class="' . $field_class . '" onchange="' . $onchange . '"
+							 id="' . $layer_id . '_' . $name . '_' . $k . '" 
+							 name="' . $fieldname . '"
+							 value="' . $value . '">
+				<div class="placeholder editable" onclick="toggle_image_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
+					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
+					<span>' . $auswahlfeld_output . '</span>
+				</div>
+				<div style="position:relative">
+					<ul class="dropdown" id="dropdown">';
+			for($e = 0; $e < @count($enum_value); $e++){
+				$datapart .= '
+						<li class="item" data-value="' . $enum_value[$e] . '" onclick="image_select(this)">
+							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum_image[$e])) . '">
+							<span>' . $enum_output[$e] . '</span>
+						</li>';
+			}
+			$datapart .= '</ul></div>';
+			if($subform_layer_id != ''){
+				if($subform_layer_privileg > 0){
+					if($embedded == true){
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" href="javascript:void(0);" onclick="ahah(\'index.php\', \'go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id;
+						for($p = 0; $p < count($req); $p++){
+							$datapart .= '&attributenames['.$p.']='.$req[$p];
+							$datapart .= '&values['.$p.']=\'+document.getElementById(\''.$layer_id.'_'.$req[$p].'_'.$k.'\').value+\'';
+						}
+						$datapart .= '&embedded=true&fromobject=subform'.$layer_id.'_'.$k.'_'.$j.'&targetobject='.$layer_id.'_'.$name.'_'.$k.'&targetlayer_id='.$layer_id.'&targetattribute='.$name.'\', new Array(document.getElementById(\'subform'.$layer_id.'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));">&nbsp;neu&nbsp;</a>';
+						$datapart .= '<div style="display:inline" id="subform'.$layer_id.'_'.$k.'_'.$j.'"></div>';
+					}
+					else{
+						$datapart .= '&nbsp;&nbsp;<a class="buttonlink" target="_blank" href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'] . '">&nbsp;neu&nbsp;</a>';
+					}
+				}
+			}
+		}
+		$datapart .= '</div>';
+		return $datapart;
+	}	
 	
 	function output_statistic($statistic) {
 		echo '<table>';

@@ -166,6 +166,16 @@ class GUI {
 					$rs = pg_fetch_array($ret[1]);
 					$html = $rs['output'];
 				}break;
+				
+				case 'hidden' : {					# ein Bild-Auswahlfeld soll mit den Optionen aufgefüllt werden 
+					while($rs = pg_fetch_array($ret[1])){
+						$html .= '						
+						<li class="item" data-value="' . $rs['value'] . '" onclick="image_select(this);">
+							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($rs['image'])) . '">
+							<span>' . $rs['output'] . '</span>
+						</li>';
+					}
+				}break;
 			}
 		}
 		echo $html;
@@ -607,7 +617,7 @@ class rolle {
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->fontsize_gle=$rs['fontsize_gle'];
-			$this->highlighting=$rs['highlighting'];
+			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
 			$this->result_hatching=$rs['result_hatching'];

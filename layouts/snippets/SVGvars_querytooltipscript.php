@@ -18,7 +18,7 @@ $SVGvars_querytooltipscript .= '
 		var xpos = 5;
 		var ypos = 0;
 		
-		window.setInterval("tooltip_query()", 100);
+		' . ($this->user->rolle->tooltipquery ? 'window.setInterval("tooltip_query()", 100);' : '') . '
 		
 		top.document.getElementById("svghelp").SVGshowtooltip = showtooltip;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 				
@@ -264,7 +264,7 @@ $SVGvars_querytooltipscript .= '
 		function tooltip_query(){
 			var querylayer = "";
 			var querylayer_id;
-			if(doing == "ppquery" && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
+			if((doing == "ppquery" || doing == "edit_other_object") && mouse_down == false && tooltipstate == "ready_for_request" && prevent != 1){ 		// wenn bereit fuer Request
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
 					for(i = 0; i < layernumber.length; i++){

@@ -2864,7 +2864,7 @@ function addJpegFromFile($img,$x,$y,$w=0,$h=0){
 
   $fp=fopen($img,'rb');
 
-  $tmp = get_magic_quotes_runtime();
+  #$tmp = get_magic_quotes_runtime();
   #set_magic_quotes_runtime(0);
   $data = fread($fp,filesize($img));
   #set_magic_quotes_runtime($tmp);

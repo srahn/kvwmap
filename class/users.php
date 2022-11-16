@@ -667,21 +667,23 @@ class user {
 	var $database;
 	var $remote_addr;
 	var $has_logged_in;
+	var $language = 'german';
 
+	/**
+		Create a user object
+		if only login_name is defined, find_by login_name only
+		if login_name and password is defined, find_by login_name and password
+		if
+	*/
 	function __construct($login_name, $id, $database, $password = '') {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
 		$this->has_logged_in = false;
-		if ($login_name) {
-			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name, $password);
-			$this->remote_addr = getenv('REMOTE_ADDR');
-		}
-		else {
-			$this->id = $id;
-			$this->readUserDaten($id, 0);
-		}
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password);
 	}
 
 	/*
@@ -751,8 +753,31 @@ class user {
     }
     return 0;
   }
+	
+	function wrong_password($password) {
+		$stmt = $this->database->mysqli->prepare("
+			SELECT
+				1
+			FROM
+				user
+			WHERE
+				id = ? AND
+				password = SHA1(?)
+		");
+		# echo '<br>SQL: ' . $sql;
+		$stmt->bind_param("is", $args1, $args2);
+		$args1 = $this->id;
+		$args2 = $password;
+		$stmt->execute();
+		$stmt->store_result();
+		return $stmt->num_rows == 0;
+	}
 
-	function readUserDaten($id, $login_name, $password = '') {
+	function login_is_locked() {
+		return ($this->login_locked_until != '' AND strtotime($this->login_locked_until) > time());
+	}
+
+	function readUserDaten($id, $login_name = '', $password = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
@@ -763,14 +788,15 @@ class user {
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . "
+				" . implode(" AND ", $where) . " AND
+				archived IS NULL
 		";
 		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = $this->database->result->fetch_array(MYSQLI_ASSOC);
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -791,6 +817,8 @@ class user {
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
+		$this->num_login_failed = $rs['num_login_failed'];
+		$this->login_locked_until = $rs['login_locked_until'];
 	}
 
 	/*
@@ -1070,8 +1098,8 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
-	
-	function updateTokens($token) {
+
+	function update_tokens($token) {
 		$sql = "
 			UPDATE
 				user
@@ -1134,7 +1162,7 @@ class user {
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
-					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
 					, result_transparency = '" . $formvars['result_transparency'] . "'

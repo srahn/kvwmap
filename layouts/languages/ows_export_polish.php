@@ -1,19 +1,31 @@
 <?php
-$strTitle="Mapa MapService eksport plików"; 
-$strWMSExportWarning="Funkcja zapisuje bieżącąmapę wraz z metadanymi dot. projektu w formacie OGC zgodny z Web Map Service (WMS), które mogą zostać udostępnione niezależnie od kvwmap. Plik ścieżek do danych jest zapisany w WMS_MAPFILE_PATH."; 
-$strAllOrActiveLayer="Mają zostać udostępnione wszystkie warstwy, czy tylko te aktywne?"; 
-$strAll="wszystkie"; 
-$strActiveLayer="tylko aktywne"; 
-$strNameOfMapFile="Wybierz nazwę dla pliku mapy:"; 
-$strOwsTitle="Jaka będzie nazwa dostępnej usługi (podaj tytuł):"; 
-$strOwsAbstract="Podaj krótki opis mapy serwisu www (nazwa skrótowa):"; 
-$strContactInfo="informacje dot. kontaktu:"; 
-$strContactPerson="osoba (podanie osoby do kontaktu):"; 
-$strOrganisation="organizacja (podanie kontaktu do organizacji OWS)"; 
-$strEMail="e-mail (podanie adresu e-mail do kontaktu):";
-$strFee="koszty korzystania z usługi (podane opłaty):"; 
-$strButtonCancel="anuluj"; 
-$strButtonSend="wyślij";
-
-  
-?>  
+	$strActiveLayer = 'tylko aktywne';
+	$strAll = 'wszystkie';
+	$strAllOrActiveLayer = 'Mają zostać udostępnione wszystkie warstwy, czy tylko te aktywne?';
+	$strAttributeFilter = 'Filte over attribute';
+	$strAttributeFilterHilfe = 'If attribute name and value defined, this filter will be applied for all layer that have this attribute. The user must be sure that the attribute is in data statement of the layers on which it shall be supplied.';
+	$strButtonCancel = 'anuluj';
+	$strButtonSend = 'wyślij';
+	$strContactInfo = 'informacje dot. kontaktu:';
+	$strContactPerson = 'osoba (podanie osoby do kontaktu):';
+	$strContactPosition = 'Position (ows_contactposition):';
+	$strCurrentExtent = 'only current selected extent of the map';
+	$strEMail = 'e-mail (podanie adresu e-mail do kontaktu):';
+	$strExported1 = 'The current map configuration was exported to the mapfile '.WMS_MAPFILE_PATH.$this->formvars['mapfile_name'].'. The mapfile can now be used for OWS.';
+	$strExported2 = 'A getCapabilities-request of this WMS looks like this';
+	$strExported3 = 'An image of the map can be requested with a getMap-request, e.g.';
+	$strExportedWFSExample = 'The vector data of the features can be queried with a getFeature request, e.g.';
+	$strExportList = 'The following mapfiles has been created in this working group allready';
+	$strFee = 'koszty korzystania z usługi (podane opłaty):';
+	$strGefilterteLayerList = 'The following layer will be delivered filtered in this service';
+	$strNameOfMapFile = 'Wybierz nazwę dla pliku mapy:';
+	$strNurVeroeffentlichteFilter = 'Show only published data in this service';
+	$strNurVeroeffentlichteHilfe = 'If you select this option only layer with an attribute veroeffentlicht will be filtered in this way. Layer without such attribute will not be filtered. This option is on by default.';
+	$strOrganisation = 'organizacja (podanie kontaktu do organizacji OWS)';
+	$strOwsAbstract = 'Podaj krótki opis mapy serwisu www (nazwa skrótowa):';
+	$strOwsTitle = 'Jaka będzie nazwa dostępnej usługi (podaj tytuł):';
+	$strTitle = 'Mapa MapService eksport plików';
+	$strTotalExtent = 'entire extend of the working group area';
+	$strTotalOrCurrentExtent = 'Select the map extent of the service';
+	$strWMSExportWarning = 'Funkcja zapisuje bieżącąmapę wraz z metadanymi dot. projektu w formacie OGC zgodny z Web Map Service (WMS), które mogą zostać udostępnione niezależnie od kvwmap. Plik ścieżek do danych jest zapisany w WMS_MAPFILE_PATH.';
+?>
