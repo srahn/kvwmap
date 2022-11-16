@@ -8,6 +8,15 @@
 		setTimeout(function(){if (keypressed == random) {startQuery();}}, 500);
 	}
 	
+	function keydown(event){
+		if (event.keyCode == 13) {
+			var links = document.querySelectorAll('#geo_name_search_result_div a');
+			if (links[1]) {
+				links[1].click();
+			}
+		}
+	}
+	
 	function startQuery(){
 		query = document.GUI.geo_name_query.value;
 		if (query.length > 3) {
@@ -21,7 +30,7 @@
 	}
 </script>
 <div id="search_div">
-	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeyup="wait();">
+	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeydown="keydown(event);" onkeyup="wait();">
 </div>
 <div id="geo_name_search_result_div">
 </div>
