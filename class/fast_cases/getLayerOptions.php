@@ -234,6 +234,7 @@ class GUI {
 	
 	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){
 		include_once(CLASSPATH.'FormObject.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($layer_id == NULL){
 			if($stelle_id == NULL){			# Parameter der aktuellen Stelle abfragen
 				$stelle = $this->Stelle;
@@ -244,10 +245,10 @@ class GUI {
 				$rolle = new rolle($this->user->id, $stelle_id, $this->database);
 				$rolle->readSettings();
 			}
+			$this->params_layer = $mapDB->get_layer_params_layer();
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id)));
 			$rolle = $this->user->rolle;
 		}
@@ -261,7 +262,7 @@ class GUI {
 					echo '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
-								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">'.$this->strLayerParameters.'</span></td>
+								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">&nbsp;'.$this->strLayerParameters.'</span></td>
 							</tr>
 							<tr>
 								<td class="rollenwahl-option-data">
@@ -271,7 +272,9 @@ class GUI {
 										echo '
 										<tr id="layer_parameter_'.$param['key'].'_tr">
 											<td valign="top" class="rollenwahl-option-header">
-												<span>'.$param['alias'].':</span>
+												<span>' . $param['alias'] .
+												 ((@count($this->params_layer[$param['id']]) == 1)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
+												</span>
 											</td>
 											<td>
 												'.FormObject::createSelectField(
