@@ -8463,9 +8463,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function invitations_list() {
 		include_once(CLASSPATH . 'Invitation.php');
+		global $admin_stellen;
 		$this->invitations = Invitation::find(
 			$this,
-			($this->formvars['all'] != '' ? 'true' : 'inviter_id = ' . $this->user->id),
+			(in_array($this->Stelle->id, $admin_stellen) ? 'true' : 'inviter_id = ' . $this->user->id),
 			($this->formvars['order'] == '' ? 'email' : '')
 		);
 
