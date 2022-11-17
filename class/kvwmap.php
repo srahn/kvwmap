@@ -18037,11 +18037,6 @@ class db_mapObj{
 			if ($rollenlayerset[$i]['Class'] != ''){
 				foreach ($rollenlayerset[$i]['Class'] as $class){
 					$this->delete_Class($class['Class_ID']);
-					if ($class['Style'] != ''){
-						foreach ($class['Style'] as $style){
-							$this->delete_Style($style['Style_ID']);
-						}
-					}
 				}
 			}
 		}
