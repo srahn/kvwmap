@@ -12812,7 +12812,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->main = 'userdaten_formular.php';
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
-			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id);
+			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
 			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->database);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['Name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
@@ -12827,8 +12827,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['organisation'] 							= $this->userdaten[0]['organisation'];
 			$this->formvars['position'] 									= $this->userdaten[0]['position'];
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
+			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			# Abfragen der Stellen des Nutzers
-			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database);
+			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
 			# Abfragen der aktiven Layer des Nutzers
 			if ($this->userdaten[0]['stelle_id'] != '') {
@@ -12844,7 +12845,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
   function BenutzerLöschen(){
-    $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database);
+    $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database, '', true);
 		if (NUTZER_ARCHIVIEREN) {
 			$this->selected_user->archivieren();
 		}
@@ -12871,7 +12872,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->titel='Benutzerdaten';
 		$this->main='userdaten.php';
 		# Abfragen aller Benutzer
-		$this->userdaten = $this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->userdaten = $this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id, true);
 		$this->output();
 	}
 
@@ -12935,7 +12936,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$stelle->updateLayerParams();
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
-      $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
+      $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
 			$deletestellen = array();

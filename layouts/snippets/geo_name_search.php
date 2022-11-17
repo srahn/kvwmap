@@ -10,6 +10,7 @@
 	
 	function keydown(event){
 		if (event.keyCode == 13) {
+			// bei Return zum ersten Treffer zoomen
 			var links = document.querySelectorAll('#geo_name_search_result_div a');
 			if (links[1]) {
 				links[1].click();
