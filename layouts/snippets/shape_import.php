@@ -73,18 +73,18 @@
   				<td colspan="2">&nbsp;</td>
 					<td align="center" height="35"><input name="schema_name" type="text" value="" size="15" class="input"></td>
   				<td align="center" height="35"><input name="table_name" type="text" value="" size="15" class="input"></td>
-  			</tr>
-  			<? for($i = 0; $i < count($this->data_import_export->dbf->header); $i++){ ?>
-				<tr>
-					<td><input name="dbf_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" readonly size="25"></td>
-					<!--td><input name="dbf_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" readonly size="10"></td-->
-					<td>&nbsp;&nbsp;==>&nbsp;&nbsp;</td>
-					<td><input name="check_<? echo $this->data_import_export->dbf->header[$i][0] ?>" type="checkbox" onclick="update_inputs('<? echo $this->data_import_export->dbf->header[$i][0]; ?>');" checked></td>
-					<td colspan="2"><input name="sql_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" size="34"></td>
-					<!--td><input name="sql_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" size="10"></td-->
-					<!--td><input name="primary_key" id="pkey_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" title="Primärschlüssel" type="radio" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>"></td-->
-				</tr>
-  			<? } ?>
+  			</tr><?
+				for ($i = 0; $i < count($this->data_import_export->dbf->header ? $this->data_import_export->dbf->header : array()); $i++) { ?>
+					<tr>
+						<td><input name="dbf_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" readonly size="25"></td>
+						<!--td><input name="dbf_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" readonly size="10"></td-->
+						<td>&nbsp;&nbsp;==>&nbsp;&nbsp;</td>
+						<td><input name="check_<? echo $this->data_import_export->dbf->header[$i][0] ?>" type="checkbox" onclick="update_inputs('<? echo $this->data_import_export->dbf->header[$i][0]; ?>');" checked></td>
+						<td colspan="2"><input name="sql_name_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>" size="34"></td>
+						<!--td><input name="sql_type_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" type="text" value="<? echo $this->data_import_export->dbf->header[$i]['type']; ?>" size="10"></td-->
+						<!--td><input name="primary_key" id="pkey_<? echo $this->data_import_export->dbf->header[$i][0]; ?>" title="Primärschlüssel" type="radio" value="<? echo $this->data_import_export->dbf->header[$i][0]; ?>"></td-->
+					</tr><?
+				} ?>
   		</table>
   	</td>
   	<td>&nbsp;</td>
