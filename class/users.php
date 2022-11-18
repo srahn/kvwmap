@@ -1058,7 +1058,7 @@ class user {
 				Bezeichnung;
 		";
 
-		#echo '<br>sql: ' . $sql;
+		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
@@ -1507,19 +1507,24 @@ class user {
 		return $ret;
 	}
 
-	function Löschen($user_id) {
-		$sql ='DELETE FROM user';
-		$sql.=' WHERE ID = '.$user_id;
-		$ret=$this->database->execSQL($sql,4, 0);
+	function delete($user_id) {
+		$sql ="
+			DELETE FROM
+				`user`
+			WHERE
+				ID = " . $user_id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Der Benutzer konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Der Benutzer konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		else {
-			$sql ='ALTER TABLE `user` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0';
-			$sql.=' AUTO_INCREMENT =1';
-			$ret=$this->database->execSQL($sql,4, 0);
+			$sql = "
+				ALTER TABLE `user` PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+			";
+			$ret = $this->database->execSQL($sql, 4, 0);
 			if ($ret[0]) {
-				$ret[1].='<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
 			}
 		}
 		return $ret;
