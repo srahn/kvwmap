@@ -1601,9 +1601,9 @@ class rolle {
 					`redline_font_size`,
 					`redline_font_weight`
 				) 
-				SELECT ".
-					$user_id.", ".
-					$stelle_id.",
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
 					`nImageWidth`, `nImageHeight`,
 					`auto_map_resize`,
 					`minx`, `miny`, `maxx`, `maxy`,
@@ -1648,8 +1648,8 @@ class rolle {
 				FROM
 					`rolle`
 				WHERE
-					`user_id` = ".$default_user_id." AND
-					`stelle_id` = ".$stelle_id."
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $stelle_id . "
 			";
 		}
 		else {
@@ -1667,10 +1667,10 @@ class rolle {
 				FROM
 					stelle
 				WHERE
-					ID = ".$stelle_id."
+					ID = " . $stelle_id . "
 			";
 		}
-		#echo '<br>'.$sql;
+		#echo '<br>' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {

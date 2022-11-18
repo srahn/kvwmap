@@ -1278,33 +1278,33 @@ class user {
 	function checkUserDaten($userdaten) {
 		$Meldung='';
 		# Prüfen ob die user_id schon existiert
-		if ($userdaten['id']!='') {
-			$ret=$this->exist($userdaten['id']);
+		if ($userdaten['id'] != '') {
+			$ret = $this->exist($userdaten['id']);
 			if ($ret[0]) {
-				$Meldung.=$ret[1];
+				$Meldung .= $ret[1];
 			}
 		}
-		if ($userdaten['nachname']=='') { $Meldung.='<br>Nachname fehlt.'; }
-		if ($userdaten['vorname']=='') { $Meldung.='<br>Vorname fehlt.'; }
-		if ($userdaten['loginname']=='') { $Meldung.='<br>Login Name fehlt.'; }
-		elseif($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
-			$ret=$this->loginname_exists($userdaten['loginname']);
+		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
+		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
+		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
+		elseif ($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
+			$ret = $this->loginname_exists($userdaten['loginname']);
 			if ($ret[1] == 1) {
-				$Meldung.= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
 		}
-		if($userdaten['changepasswd'] == 1){
-			if ($userdaten['password1']=='') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
-			if ($userdaten['password2']=='') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
-			if ($userdaten['password1']!=$userdaten['password2']) { $Meldung.='<br>Die Passwörter stimmen nicht überein.'; }
+		if ($userdaten['changepasswd'] == 1){
+			if ($userdaten['password1'] == '') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
+			if ($userdaten['password2'] == '') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
+			if ($userdaten['password1'] != $userdaten['password2']) { $Meldung .= '<br>Die Passwörter stimmen nicht überein.'; }
 		}
-		if ($userdaten['phon']!='' AND strlen($userdaten['phon'])<3) { $Meldung.='<br>Die Telefonnummer ist zu kurz.'; }
-		if ($userdaten['email']!='') { $Meldung.=emailcheck($userdaten['email']); }
-		if ($Meldung!='') {
-			$ret[0]=1; $ret[1]=$Meldung;
+		if ($userdaten['phon'] != '' AND strlen($userdaten['phon']) < 3) { $Meldung .= '<br>Die Telefonnummer ist zu kurz.'; }
+		if ($userdaten['email'] != '') { $Meldung .= emailcheck($userdaten['email']); }
+		if ($Meldung != '') {
+			$ret[0] = 1; $ret[1] = $Meldung;
 		}
 		else {
-			$ret[0]=0;
+			$ret[0] = 0;
 		}
 		return $ret;
 	}

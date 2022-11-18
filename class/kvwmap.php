@@ -12903,7 +12903,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['id'] != '') {
 				$this->formvars['selected_user_id'] = $this->formvars['id'];
 			}
-			for($i = 0; $i < count($stellen); $i++){
+			for ($i = 0; $i < count($stellen); $i++) {
 				$stelle = new stelle($stellen[$i], $this->database);
 				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -12914,7 +12914,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$stelle->updateLayerParams();
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
-      $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
+      $this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
 			$deletestellen = array();
