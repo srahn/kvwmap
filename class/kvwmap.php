@@ -12199,7 +12199,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
   function StelleLoeschen(){
     $selected_stelle=new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $selected_stelle->Löschen();
     $selected_stelle->deleteMenue(0);
 		$selected_stelle->deleteDruckrahmen();
 		$selected_stelle->deleteStelleGemeinden();
@@ -12213,6 +12212,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       $this->user->rolle->deleteGroups($user['ID'][$i], $stelle_id);
       $this->user->rolle->deleteLayer($user['ID'][$i], $stelle_id, 0);
     }
+    $selected_stelle->Löschen();		
     $this->titel='Stellendaten';
     $this->main='stellendaten.php';
     # Abfragen aller Stellen
