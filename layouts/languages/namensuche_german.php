@@ -44,5 +44,5 @@
  $strBack="zurück";
  $strNext="weiter";
  $strFlur="Flur";
- $strCheckAll="alle auswählen";
+ $strCheckAll="alle angezeigten auswählen";
 ?>

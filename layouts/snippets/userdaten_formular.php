@@ -301,6 +301,11 @@
 			<div><? echo $strStop;?></div>
 			<div><input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>"></div>
 		</div>
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strArchived;?></div>
+			<div><input name="archived" type="text" value="<? echo $this->formvars['archived']; ?>"></div>
+		</div>		
 
 		<div class="form_formular-input">
 			<div class="udf_eingabe-stelle-title"><? echo $strAuthorizeTask;?></div>

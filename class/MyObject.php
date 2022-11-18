@@ -15,6 +15,68 @@ class MyObject {
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 		$this->validations = array();
+		$this->field_types = array(
+			MYSQLI_TYPE_DECIMAL => 'MYSQLI_TYPE_DECIMAL',
+			MYSQLI_TYPE_NEWDECIMAL => 'MYSQLI_TYPE_NEWDECIMAL',
+			MYSQLI_TYPE_BIT => 'MYSQLI_TYPE_BIT',
+			MYSQLI_TYPE_TINY => 'MYSQLI_TYPE_TINY',
+			MYSQLI_TYPE_SHORT => 'MYSQLI_TYPE_SHORT',
+			MYSQLI_TYPE_LONG => 'MYSQLI_TYPE_LONG',
+			MYSQLI_TYPE_FLOAT => 'MYSQLI_TYPE_FLOAT',
+			MYSQLI_TYPE_DOUBLE => 'MYSQLI_TYPE_DOUBLE',
+			MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL',
+			MYSQLI_TYPE_TIMESTAMP => 'MYSQLI_TYPE_TIMESTAMP',
+			MYSQLI_TYPE_LONGLONG => 'MYSQLI_TYPE_LONGLONG',
+			MYSQLI_TYPE_INT24 => 'MYSQLI_TYPE_INT24',
+			MYSQLI_TYPE_DATE => 'MYSQLI_TYPE_DATE',
+			MYSQLI_TYPE_TIME => 'MYSQLI_TYPE_TIME',
+			MYSQLI_TYPE_DATETIME => 'MYSQLI_TYPE_DATETIME',
+			MYSQLI_TYPE_YEAR => 'MYSQLI_TYPE_YEAR',
+			MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE',
+			MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL',
+			MYSQLI_TYPE_ENUM => 'MYSQLI_TYPE_ENUM',
+			MYSQLI_TYPE_SET => 'MYSQLI_TYPE_SET',
+			MYSQLI_TYPE_TINY_BLOB => 'MYSQLI_TYPE_TINY_BLOB',
+			MYSQLI_TYPE_MEDIUM_BLOB => 'MYSQLI_TYPE_MEDIUM_BLOB',
+			MYSQLI_TYPE_LONG_BLOB => 'MYSQLI_TYPE_LONG_BLOB',
+			MYSQLI_TYPE_BLOB => 'MYSQLI_TYPE_BLOB',
+			MYSQLI_TYPE_VAR_STRING => 'MYSQLI_TYPE_VAR_STRING',
+			MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING',
+			MYSQLI_TYPE_CHAR => 'MYSQLI_TYPE_CHAR',
+			MYSQLI_TYPE_GEOMETRY => 'MYSQLI_TYPE_GEOMETRY',
+			MYSQLI_TYPE_JSON => 'MYSQLI_TYPE_JSON'
+		);
+/*
+		tinyint_    1
+		boolean_    1
+		smallint_    2
+		int_        3
+		float_        4
+		double_        5
+		real_        5
+		timestamp_    7
+		bigint_        8
+		serial        8
+		mediumint_    9
+		date_        10
+		time_        11
+		datetime_    12
+		year_        13
+		bit_        16
+		decimal_    246
+		text_        252
+		tinytext_    252
+		mediumtext_    252
+		longtext_    252
+		tinyblob_    252
+		mediumblob_    252
+		blob_        252
+		longblob_    252
+		varchar_    253
+		varbinary_    253
+		char_        254
+		binary_        254
+*/
 	}
 
 	/*
@@ -33,7 +95,7 @@ class MyObject {
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
-		$rs = $this->database->result->fetch_assoc();
+		$rs = $this->mysqli_fetch_assoc_casted($this->database->result);
 		if ($rs !== false) {
 			$this->data = $rs;
 		}
@@ -149,6 +211,60 @@ class MyObject {
 		return $results;
 	}
 
+	function mysqli_fetch_assoc_casted($result) {
+		$fields = mysqli_fetch_fields($result);
+		$types = array();
+		foreach ($fields as $field) {
+			switch ($field->type) {
+				case MYSQLI_TYPE_DECIMAL:
+				case MYSQLI_TYPE_NEWDECIMAL:
+				case MYSQLI_TYPE_FLOAT:
+				case MYSQLI_TYPE_DOUBLE:
+					$types[$field->name] = 'float';
+					break;
+				case MYSQLI_TYPE_BIT:
+					$types[$field->name] = 'boolean';
+					break;
+				case MYSQLI_TYPE_TINY:
+				case MYSQLI_TYPE_SHORT:
+				case MYSQLI_TYPE_LONG:
+				case MYSQLI_TYPE_LONGLONG:
+				case MYSQLI_TYPE_INT24:
+				case MYSQLI_TYPE_YEAR:
+				case MYSQLI_TYPE_ENUM:
+					$types[$field->name] = 'int';
+					break;
+				case MYSQLI_TYPE_TIMESTAMP:
+				case MYSQLI_TYPE_DATE:
+				case MYSQLI_TYPE_TIME:
+				case MYSQLI_TYPE_DATETIME:
+				case MYSQLI_TYPE_NEWDATE:
+				case MYSQLI_TYPE_INTERVAL:
+				case MYSQLI_TYPE_SET:
+				case MYSQLI_TYPE_VAR_STRING:
+				case MYSQLI_TYPE_STRING:
+				case MYSQLI_TYPE_CHAR:
+				case MYSQLI_TYPE_GEOMETRY:
+					$types[$field->name] = 'string';
+					break;
+				case MYSQLI_TYPE_TINY_BLOB:
+				case MYSQLI_TYPE_MEDIUM_BLOB:
+				case MYSQLI_TYPE_LONG_BLOB:
+				case MYSQLI_TYPE_BLOB:
+					$types[$field->name] = 'string';
+					break;
+				default:
+					$types[$field->name] = 'string';
+			}
+			$this->debug->show('Cast attribute: ' . $field->name . ' (' . $field->type . ':' . $this->field_types[$field->type] . ' => ' . $types[$field->name] . ')', MyObject::$write_debug);
+		}
+		$rs = mysqli_fetch_assoc($result);
+		foreach ($types as $name => $type) {
+			settype($rs[$name], $type);
+		}
+		return $rs;
+	}
+
 	function exists($key) {
 		$types = $this->getTypesFromColumns();
 
@@ -245,9 +361,10 @@ class MyObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-		#echo '<br>Class MyObject Method get_identifier_expression';
+		$this->debug->show('<br>Class MyObject Method get_identifier_expression', MyObject::$write_debug);
 		$where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
+			$this->debug->show('<br>identifier: ' . print_r($this->identifier, true), MyObject::$write_debug);
 			$where = array_map(
 				function($id) {
 					$quote = ($id['type'] == 'text' ? "'" : "");
@@ -287,16 +404,17 @@ class MyObject {
 		return array_values($this->data);
 	}
 
-	function getKVP($options = array('escaped' => false)) {
+	function getKVP($options = array('escaped' => false), $data = array()) {
 		#$this->debug->show('getKVP', MyObject::$write_debug);
+		$data = (count($data) > 0 ? $data : $this->data);
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
-		if (is_array($this->data)) {
-			foreach ($this->data AS $key => $value) {
+		if (is_array($data)) {
+			foreach ($data AS $key => $value) {
 				if ($options['escaped']) {
 					$value = str_replace("'", "''", $value);
 				}
-				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
+				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false OR stripos($types[$key], 'time') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
@@ -326,7 +444,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL OR $value == '' AND $value != 0) {
+							if ($value === NULL OR $value == '' AND $value !== 0) {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {
@@ -413,16 +531,18 @@ class MyObject {
 		return $result;
 	}
 
-	function update($data = array()) {
+	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
+			$this->debug->show('Merge this->data: ' . print_r($this->data, true) . ' mit data: ' . print_r($data, true), MyObject::$write_debug);
 			$this->data = array_merge($this->data, $data);
 		}
+		$data = (count($data) > 0 ? $data : $this->data);
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
 			SET
-				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
+				" . implode(', ', $this->getKVP(array('escaped' => true), $data)) . "
 			WHERE
 				" . $this->get_identifier_expression() . "
 		";

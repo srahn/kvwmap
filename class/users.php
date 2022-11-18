@@ -667,21 +667,23 @@ class user {
 	var $database;
 	var $remote_addr;
 	var $has_logged_in;
+	var $language = 'german';
 
-	function __construct($login_name, $id, $database, $password = '') {
+	/**
+		Create a user object
+		if only login_name is defined, find_by login_name only
+		if login_name and password is defined, find_by login_name and password
+		if
+	*/
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
 		$this->has_logged_in = false;
-		if ($login_name) {
-			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name, $password);
-			$this->remote_addr = getenv('REMOTE_ADDR');
-		}
-		else {
-			$this->id = $id;
-			$this->readUserDaten($id, 0);
-		}
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
 	/*
@@ -751,27 +753,49 @@ class user {
     }
     return 0;
   }
+	
+	function wrong_password($password) {
+		$stmt = $this->database->mysqli->prepare("
+			SELECT
+				1
+			FROM
+				user
+			WHERE
+				id = ? AND
+				password = SHA1(?)
+		");
+		# echo '<br>SQL: ' . $sql;
+		$stmt->bind_param("is", $args1, $args2);
+		$args1 = $this->id;
+		$args2 = $password;
+		$stmt->execute();
+		$stmt->store_result();
+		return $stmt->num_rows == 0;
+	}
 
-	function readUserDaten($id, $login_name, $password = '') {
+	function login_is_locked() {
+		return ($this->login_locked_until != '' AND strtotime($this->login_locked_until) > time());
+	}
+
+	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . " AND
-				archived IS NULL
-		";
+				" . implode(" AND ", $where);
 		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = $this->database->result->fetch_array(MYSQLI_ASSOC);
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -792,6 +816,8 @@ class user {
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
+		$this->num_login_failed = $rs['num_login_failed'];
+		$this->login_locked_until = $rs['login_locked_until'];
 	}
 
 	/*
@@ -949,11 +975,13 @@ class user {
 		return $user;
 	}
 
-	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0, $archived = false) {
 		global $admin_stellen;
 		$where = array();
 
-		$where[] = 'u.archived IS NULL';
+		if (!$archived) {
+			$where[] = 'u.archived IS NULL';
+		}
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -1031,7 +1059,7 @@ class user {
 				Bezeichnung;
 		";
 
-		#echo '<br>sql: ' . $sql;
+		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
@@ -1071,8 +1099,8 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
-	
-	function updateTokens($token) {
+
+	function update_tokens($token) {
 		$sql = "
 			UPDATE
 				user
@@ -1251,7 +1279,7 @@ class user {
 
 	function loginname_exists($login) {
 		$Meldung='';
-		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
+		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
 		$sql ="
 			SELECT
 				*
@@ -1267,6 +1295,7 @@ class user {
 		else {
 			if ($this->database->result->num_rows > 0) {
 				$ret[1] = 1;
+				$ret['user'] = $this->database->result->fetch_array();
 			}
 			else {
 				$ret[1] = 0;
@@ -1408,6 +1437,7 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "',
+				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
 				`ID` =  " . $userdaten['id'].",
 				`phon` = '" . $userdaten['phon']."',
 				`email` = '" . $userdaten['email']."',
@@ -1480,19 +1510,24 @@ class user {
 		return $ret;
 	}
 
-	function Löschen($user_id) {
-		$sql ='DELETE FROM user';
-		$sql.=' WHERE ID = '.$user_id;
-		$ret=$this->database->execSQL($sql,4, 0);
+	function delete($user_id) {
+		$sql ="
+			DELETE FROM
+				`user`
+			WHERE
+				ID = " . $user_id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Der Benutzer konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Der Benutzer konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		else {
-			$sql ='ALTER TABLE `user` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0';
-			$sql.=' AUTO_INCREMENT =1';
-			$ret=$this->database->execSQL($sql,4, 0);
+			$sql = "
+				ALTER TABLE `user` PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+			";
+			$ret = $this->database->execSQL($sql, 4, 0);
 			if ($ret[0]) {
-				$ret[1].='<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
 			}
 		}
 		return $ret;

@@ -1600,7 +1600,7 @@ class rolle {
 					`redline_font_family`,
 					`redline_font_size`,
 					`redline_font_weight`
-				) 
+				)
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
@@ -1670,7 +1670,7 @@ class rolle {
 					ID = " . $stelle_id . "
 			";
 		}
-		#echo '<br>' . $sql;
+		#debug_write('Rolle eintragen', $sql, 1);
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
@@ -1695,6 +1695,25 @@ class rolle {
 			if (!$ret['success']) {
 				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
 				return 0;
+			}
+			# default_user_id
+			$sql = "
+				UPDATE
+					`stelle` 
+				SET	
+					default_user_id = NULL
+				WHERE 
+					default_user_id = " . $user_id . " AND 
+					ID = " . $stellen[$i];
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
+			else {
+				if ($this->database->mysqli->affected_rows > 0){
+					GUI::add_message_('notice', 'Achtung! Der Standardnutzer wurde von der Stelle entfernt.');
+				}
 			}
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
