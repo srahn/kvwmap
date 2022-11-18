@@ -675,7 +675,7 @@ class user {
 		if login_name and password is defined, find_by login_name and password
 		if
 	*/
-	function __construct($login_name, $id, $database, $password = '') {
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
@@ -683,7 +683,7 @@ class user {
 		$this->login_name = $login_name;
 		$this->id = (int) $id;
 		$this->remote_addr = getenv('REMOTE_ADDR');
-		$this->readUserDaten($this->id, $this->login_name, $password);
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
 	/*
@@ -777,20 +777,19 @@ class user {
 		return ($this->login_locked_until != '' AND strtotime($this->login_locked_until) > time());
 	}
 
-	function readUserDaten($id, $login_name = '', $password = '') {
+	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . " AND
-				archived IS NULL
-		";
+				" . implode(" AND ", $where);
 		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
@@ -976,11 +975,13 @@ class user {
 		return $user;
 	}
 
-	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0, $archived = false) {
 		global $admin_stellen;
 		$where = array();
 
-		$where[] = 'u.archived IS NULL';
+		if (!$archived) {
+			$where[] = 'u.archived IS NULL';
+		}
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -1278,7 +1279,7 @@ class user {
 
 	function loginname_exists($login) {
 		$Meldung='';
-		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
+		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
 		$sql ="
 			SELECT
 				*
@@ -1294,6 +1295,7 @@ class user {
 		else {
 			if ($this->database->result->num_rows > 0) {
 				$ret[1] = 1;
+				$ret['user'] = $this->database->result->fetch_array();
 			}
 			else {
 				$ret[1] = 0;
@@ -1315,9 +1317,9 @@ class user {
 		if ($userdaten['vorname']=='') { $Meldung.='<br>Vorname fehlt.'; }
 		if ($userdaten['loginname']=='') { $Meldung.='<br>Login Name fehlt.'; }
 		elseif($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
-			$ret=$this->loginname_exists($userdaten['loginname']);
+			$ret = $this->loginname_exists($userdaten['loginname']);
 			if ($ret[1] == 1) {
-				$Meldung.= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+				$Meldung.= '<br>Es existiert bereits ein ' . ($ret['user']['archived']? 'archivierter ' : '') . 'Nutzer mit diesem Loginnamen.';
 			}
 		}
 		if($userdaten['changepasswd'] == 1){
@@ -1435,6 +1437,7 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "',
+				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
 				`ID` =  " . $userdaten['id'].",
 				`phon` = '" . $userdaten['phon']."',
 				`email` = '" . $userdaten['email']."',
