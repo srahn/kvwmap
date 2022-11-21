@@ -69,6 +69,7 @@
 	$this->strLayerParameters = "Themenparameter";
 	$this->strColor = "Farbe";
 	$this->strHatching = "Schraffur";
+	$this->strBuffer = "Puffer";
 	$this->strShareRollenlayer = "Layer freigeben";
 	$this->strShareRollenLayerLong = "Diesen Layer für andere Nutzer in diesem WebGIS freigeben.";
 	$this->strLayerSharedFrom = "Dieser Layer wurde geteilt durch den Nutzer";

@@ -1444,6 +1444,23 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setBuffer($formvars) {
+		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					id = -1* " . $formvars['layer_options_open'] . "
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {

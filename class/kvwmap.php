@@ -646,6 +646,16 @@ class GUI {
 										<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
 									</td>
 								</tr>';
+								
+							echo '
+								<tr>
+									<td>
+										<span>' . $this->strBuffer.': </span>
+									</td>
+									<td>
+										<input type="input" style="width: 60px" value="' . $layer[0]['buffer'] . '" name="layer_options_buffer"> m
+									</td>
+								</tr>';
 						}
 						echo '<tr>
 										<td>
@@ -819,6 +829,7 @@ echo '			</table>
 
 	function saveLayerOptions() {
 		$this->user->rolle->setTransparency($this->formvars);
+		$this->user->rolle->setBuffer($this->formvars);
 		$this->user->rolle->setLabelitem($this->formvars);
 		$this->user->rolle->setRollenFilter($this->formvars);
 		$this->setLayerParams('options_');
@@ -2181,6 +2192,10 @@ echo '			</table>
 				$layer->setProcessing($processing);
 			}
 		}
+		
+		if (value_of($layerset, 'buffer') != 0) {
+			$layer->updateFromString("LAYER GEOMTRANSFORM (buffer([shape], " . $layerset['buffer'] . ")) END END");
+		}		
 
 		if (value_of($layerset, 'postlabelcache') != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -16400,6 +16415,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
+				l.`buffer`,
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,

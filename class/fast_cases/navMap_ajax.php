@@ -553,6 +553,10 @@ class GUI {
 				$layer->setProcessing($processing);
 			}
 		}
+		
+		if (value_of($layerset, 'buffer') != 0) {
+			$layer->updateFromString("LAYER GEOMTRANSFORM (buffer([shape], " . $layerset['buffer'] . ")) END END");
+		}			
 
 		if ($layerset['postlabelcache'] != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -3886,6 +3890,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
+				l.`buffer`,				
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,

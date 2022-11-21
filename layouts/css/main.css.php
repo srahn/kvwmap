@@ -281,6 +281,7 @@ ul{
 	margin: 4px;
 	padding: 0;
 	list-style: square outside none;
+	line-height: 22px;
 }
 
 h1 {
@@ -2261,6 +2262,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions li, #legendOptions li{
 	margin-bottom: 5px;
+}
+
+.layerOptions li{
+	line-height: 22px;
 }
 
 .layerOptions span, #legendOptions span, label{

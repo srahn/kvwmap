@@ -70,6 +70,7 @@
 	$this->strLayerParameters = "Layer Parameter";
 	$this->strColor = "Draw Color";
 	$this->strHatching = "Hatching";
+	$this->strBuffer = "Buffer";
 	$this->strShareRollenlayer = "Share Layer";
 	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
 	$this->strLayerSharedFrom = "This Layer was shared by user";
