@@ -693,7 +693,7 @@ class spatial_processor {
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
 				$sql .= ' LIMIT ' . MAXQUERYROWS;
 				$ret = $this->pgdatabase->execSQL($sql,4, 0);
-				echo '<br>SQL: ' . $sql;
+				#echo '<br>SQL: ' . $sql;
 				if ($ret[0]) {
 					echo $ret['msg'];
 				}
