@@ -1059,7 +1059,7 @@ class user {
 				Bezeichnung;
 		";
 
-		#echo '<br>sql: ' . $sql;
+		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
@@ -1307,33 +1307,33 @@ class user {
 	function checkUserDaten($userdaten) {
 		$Meldung='';
 		# Prüfen ob die user_id schon existiert
-		if ($userdaten['id']!='') {
-			$ret=$this->exist($userdaten['id']);
+		if ($userdaten['id'] != '') {
+			$ret = $this->exist($userdaten['id']);
 			if ($ret[0]) {
-				$Meldung.=$ret[1];
+				$Meldung .= $ret[1];
 			}
 		}
-		if ($userdaten['nachname']=='') { $Meldung.='<br>Nachname fehlt.'; }
-		if ($userdaten['vorname']=='') { $Meldung.='<br>Vorname fehlt.'; }
-		if ($userdaten['loginname']=='') { $Meldung.='<br>Login Name fehlt.'; }
-		elseif($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
+		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
+		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
+		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
+		elseif ($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
 			$ret = $this->loginname_exists($userdaten['loginname']);
 			if ($ret[1] == 1) {
-				$Meldung.= '<br>Es existiert bereits ein ' . ($ret['user']['archived']? 'archivierter ' : '') . 'Nutzer mit diesem Loginnamen.';
+				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
 		}
-		if($userdaten['changepasswd'] == 1){
-			if ($userdaten['password1']=='') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
-			if ($userdaten['password2']=='') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
-			if ($userdaten['password1']!=$userdaten['password2']) { $Meldung.='<br>Die Passwörter stimmen nicht überein.'; }
+		if ($userdaten['changepasswd'] == 1){
+			if ($userdaten['password1'] == '') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
+			if ($userdaten['password2'] == '') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
+			if ($userdaten['password1'] != $userdaten['password2']) { $Meldung .= '<br>Die Passwörter stimmen nicht überein.'; }
 		}
-		if ($userdaten['phon']!='' AND strlen($userdaten['phon'])<3) { $Meldung.='<br>Die Telefonnummer ist zu kurz.'; }
-		if ($userdaten['email']!='') { $Meldung.=emailcheck($userdaten['email']); }
-		if ($Meldung!='') {
-			$ret[0]=1; $ret[1]=$Meldung;
+		if ($userdaten['phon'] != '' AND strlen($userdaten['phon']) < 3) { $Meldung .= '<br>Die Telefonnummer ist zu kurz.'; }
+		if ($userdaten['email'] != '') { $Meldung .= emailcheck($userdaten['email']); }
+		if ($Meldung != '') {
+			$ret[0] = 1; $ret[1] = $Meldung;
 		}
 		else {
-			$ret[0]=0;
+			$ret[0] = 0;
 		}
 		return $ret;
 	}
@@ -1510,19 +1510,24 @@ class user {
 		return $ret;
 	}
 
-	function Löschen($user_id) {
-		$sql ='DELETE FROM user';
-		$sql.=' WHERE ID = '.$user_id;
-		$ret=$this->database->execSQL($sql,4, 0);
+	function delete($user_id) {
+		$sql ="
+			DELETE FROM
+				`user`
+			WHERE
+				ID = " . $user_id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Der Benutzer konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Der Benutzer konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		else {
-			$sql ='ALTER TABLE `user` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0';
-			$sql.=' AUTO_INCREMENT =1';
-			$ret=$this->database->execSQL($sql,4, 0);
+			$sql = "
+				ALTER TABLE `user` PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+			";
+			$ret = $this->database->execSQL($sql, 4, 0);
 			if ($ret[0]) {
-				$ret[1].='<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
 			}
 		}
 		return $ret;

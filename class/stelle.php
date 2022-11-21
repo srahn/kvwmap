@@ -197,13 +197,16 @@ class stelle {
     }
     return 0;
   }
-	
-	function Löschen() {
-		$sql ='DELETE FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
-		$ret=$this->database->execSQL($sql,4, 0);
+
+	function delete() {
+		$sql = "
+			DELETE FROM stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Stelle konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stelle konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		return $ret;
 	}
@@ -2167,7 +2170,7 @@ class stelle {
 			ORDER BY 
 				user.ID = stelle.default_user_id desc, user.Name
 		";
-		#echo "<br>Sql: " . $sql;
+		#debug_write('Abfrage der Nutzer der Stelle mit getUser', $sql, 1);
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -2175,9 +2178,9 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
-				$user['email'][]=$rs['email'];
+				$user['ID'][] = $rs['ID'];
+				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['email'][] = $rs['email'];
 			}
 		}
 		if ($result == 'only_ids') {
