@@ -1623,7 +1623,7 @@ function go_switch_xplankonverter($go) {
 			}
 
 			if ($GUI->konvertierung->neue_zusammenzeichnung_exists()) {
-				send_error('Es existiert schon eine neue Zusammenzeichnung.<br>Sie müssen erst die vorhandene neu Version löschen bevor Sie eine neue hochladen können!');
+				send_error('Es existiert schon eine neue Zusammenzeichnung.<br>Sie müssen erst die vorhandene neue Version löschen bevor Sie eine neue hochladen können!');
 				break;
 			}
 
@@ -1764,6 +1764,36 @@ function go_switch_xplankonverter($go) {
 		*/
 		case 'xplankonverter_import_plaene_from_dienst' : {
 			
+		} break;
+
+		case 'xplankonverter_validate_zusammenzeichnung' : {
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$result = array(
+					'success' => false,
+					'msg' => 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.'
+				);
+			}
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$result = array(
+						'success' => true,
+						'msg' => "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an."
+					);
+				}
+				else {
+					$result = $GUI->konvertierung->xplanvalidator('zusammenzeichnung-neu_gml');
+					$status = '';
+					if ($result['success']) {
+						$GUI->konvertierung->set_status($result['valid'] ? Konvertierung::$STATUS['GML_VALIDIERUNG_OK'] : Konvertierung::$STATUS['GML_VALIDIERUNG_ERR']);
+					}
+				}
+			}
+			$GUI->data = $result;
+			$GUI->output();
 		} break;
 
 		case 'xplankonverter_xplanvalidator' : {

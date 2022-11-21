@@ -162,6 +162,7 @@ class Konvertierung extends PgObject {
 	}
 
 	public static function find_zusammenzeichnungen($gui, $planart, $order_by) {
+		$zusammenzeichnungen = array();
 		$konvertierung = new Konvertierung($gui);
 		$sql = "
 			SELECT
@@ -628,6 +629,7 @@ class Konvertierung extends PgObject {
 	*/
 	function create_plaene_from_gmlas($table_schema, $planart) {
 		$planartAbk = strtolower(substr($planart, 0, 2));
+		$planart_as_text = str_replace("_","-",$planart);
 		$sql = "
 			INSERT INTO xplankonverter.konvertierungen (bezeichnung, status, stelle_id, user_id, geom_precision, gml_layer_group_id, epsg, output_epsg, input_epsg, planart, veroeffentlicht, beschreibung)
 			SELECT
@@ -640,7 +642,7 @@ class Konvertierung extends PgObject {
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS epsg,
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS output_epsg,
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS input_epsg,
-				'" . $planart . "' AS planart,
+				'" . $planart_as_text . "' AS planart,
 				false AS veroeffentlicht,
 				gmlas.id AS beschreibung
 			FROM

@@ -1,8 +1,20 @@
 <?
 /* Beispiel für einen Aufruf
-	https://testportal-plandigital.de/kvwmap/index.php?go=Layer-Suche_Suchen&selected_layer_id=235&operator_plan_gml_id==&value_plan_gml_id=0f66326b-3c18-4fe8-ba14-7b287a3b6366&go_next=show_snippet&snippet=zusammenzeichnung&csrf_token=72cc0b1e303f657b80eaa160c62534fb
+	https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan&neue_version=
+	Process steps xplankonverter
+		_upload_zusammenzeichnung
+		_validate_zusammenzeichnung
+		_import_zusammenzeichnung
+		_convert_zusammenzeichnung
+		_create_gml_file
+		_create_geoweb_service
+		_create_service_metadata
 	*/
-?>
+?><link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css">
+<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script>
+<script>
+	let zz = new Zusammenzeichnung(<? echo $this->zusammenzeichnung->get('id'); ?>);
+</script>
 <h2 style="margin-top: 15px; margin-bottom: 10px">Zusammenzeichnung F-Plan <? echo $this->Stelle->Bezeichnung; ?></h2>
 <style>
 	#container_paint {
@@ -84,12 +96,7 @@
 	}
 
 	.step {
-		float: left;
-		border: 1px solid black;
-		border-radius: 10px;
-		margin-right: 15px;
-		padding: 5px;
-		background: lightgray
+		margin-top: 10px;
 	}
 
 	.between_step {
@@ -124,17 +131,17 @@
 		<input id="upload_zusammenzeichnung_button" type="button" value="Zusammenzeichnung hochladen" onclick="show_upload_zusammenzeichnung('Zusammenzeichnung hier reinziehen.')">
 	</div>
 
-	<div id="steps_div">
+	<!--div id="steps_div">
 		<div id="Schritt_1" class="step step_in_progress">Schritt 1<br>Plandaten hochladen</div><div class="between_step">=></div>
 		<div id="Schritt_2" class="step">Schritt 2<br>Dienst erzeugen</div><div class="between_step">=></div>
 		<div id="Schritt_3" class="step">Schritt 3<br>Dienst veröffentlichen</div>
 		<div class="clear"></div>
-	</div>
+	</div///-->
 
 	<div id="neue_zusammenzeichnung" class="centered_div hidden">
 		<div
 			id="upload_zusammenzeichnung_div"
-			ondrop="upload_zusammenzeichnung(event)"
+			ondrop="zz.upload_zusammenzeichnung(event,<? echo $this->zusammenzeichnung->get('id'); ?>)"
 			ondragover="$(this).addClass('dragover');"
 			ondragleave="$(this).removeClass('dragover')"
 		>
@@ -269,6 +276,38 @@
 
 ?>
 <script>
+
+	const process = {
+		'upload_zusammenzeichnung' : {
+			'nr' : 1,
+			'msg' : 'Hochladen der Zusammenzeichnung auf den Server'
+		},
+		'validate_zusammenzeichnung' : {
+			'nr' : 2,
+			'msg' : 'Validierung der hochgeladenen GML-Datei mit dem XPlanValidator'
+		},
+		'import_zusammenzeichnung' : {
+			'nr' : 3,
+			'msg' : 'Importieren der GML-Datei in die Portaldatenbank'
+		},
+		'convert_zusammenzeichnung' : {
+			'nr' : 4,
+			'msg' : 'Konvertierung der Plandaten in die Version 5.4'
+		},
+		'create_gml_file' : {
+			'nr' : 5,
+			'msg' : 'Erzeugen der GML-Datei in Version 5.4'
+		},
+		'create_geoweb_service' : {
+			'nr' : 6,
+			'msg' : 'Erzeugen des GeoWeb-Dienstes für den Plan'
+		},
+		'create_service_metadata' : {
+			'nr' : 7,
+			'msg' : 'Anlegen der Metadaten für den Dienst'
+		}
+	}
+
 	function toggle_head(head_div) {
 		console.log('toggle_head');
 		$(head_div).children().toggleClass('fa-caret-down fa-caret-right');
@@ -279,7 +318,7 @@
 		console.log('show_upload_zusammenzeichnung');
 		$('#zusammenzeichnung, #keine_zusammenzeichnung').hide();
 		$('#upload_zusammenzeichnung_msg').html(msg);
-		$('#neue_zusammenzeichnung, #steps_div').show();
+		$('#neue_zusammenzeichnung').show();
 	}
 
 	var fileobj;
@@ -310,33 +349,27 @@
 		if (file_obj != undefined) {
 			var form_data = new FormData();
 			form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
-//			form_data.append('konvertierung_id', <? #echo $this->zusammenzeichnung->get('id'); ?>);
+			form_data.append('konvertierung_id', <? echo $this->zusammenzeichnung->get('id'); ?>);
 			form_data.append('upload_file', file_obj);
 			var xhttp = new XMLHttpRequest();
 			xhttp.open("POST", "index.php", true);
 			xhttp.onload = function(event) {
 				if (xhttp.status == 200) {
-					$('#upload_zusammenzeichnung_msg').removeClass('blink');
-					$('#waitingdiv').hide();
 					try {
 						response = JSON.parse(this.responseText);
 						if (!Array.isArray(response.msg)) { response.msg = [response.msg]; }
 						if (response.success) {
-							$('#Schritt_1').toggleClass('step_in_progress step_ready');
-							message(response.msg, 5000);
-							$('#upload_zusammenzeichnung_div, #cancel_zusammenzeichnung_button, #waiting_div').hide();
+							confirm_step('upload_zusammenzeichnung', true);
+							validate_zusammenzeichnung();
 						}
 						else {
-							show_upload_zusammenzeichnung('Neue Version der Zusammenzeichnung hier reinziehen.');
-							$('#upload_zusammenzeichnung_msg').removeClass('blink');
-							$('#upload_zusammenzeichnung_div').removeClass('dragover');
+							confirm_step('upload_zusammenzeichnung', false);
 							message(response.msg);
 						}
 					} catch (err) {
 						if (this.responseText.indexOf('<input id="login_name"') > 0) {
 							window.location = 'index.php';
 						}
-						$('#waitingdiv').hide();
 						show_upload_zusammenzeichnung('Neue Version der Zusammenzeichnung hier reinziehen.');
 						$('#upload_zusammenzeichnung_msg').removeClass('blink');
 						$('#upload_zusammenzeichnung_div').removeClass('dragover');
@@ -344,22 +377,41 @@
 					}
 				}
 				else {
-					$('#upload_zusammenzeichnung_msg').removeClass('blink');
-					$('#upload_zusammenzeichnung_div').removeClass('dragover');
-					$('#waitingdiv').hide();
 					message([{ type: 'error', msg: 'Fehler ' + xhttp.status + ' aufgetreten beim Versuch die Datei hochzuladen! ' + this.responseText }]);
 				}
 				//$('#upload_result_msg_div').show();
 			}
-			show_upload_zusammenzeichnung('Zusammenzeichnung wird verarbeitet');
-			$('#waitingdiv').show();
-			$('#upload_zusammenzeichnung_msg').addClass('blink');
+
+//			show_upload_zusammenzeichnung('Zusammenzeichnung wird verarbeitet');
+			$('#sperr_div').show();
+			$('#sperr_div').html('\
+				<div id="upload_zusammenzeichnung_progress_div" class="xplankonverter-upload-zusammenzeichnung-div">\
+					<h2 style="margin-bottom: 20px; float:left">Neue Zusammenzeichnung</h2>\
+					<i class="fa fa-times" aria-hidden="true" style="float: right; margin: -5"></i>\
+				</div>\
+			');
+			next_step('upload_zusammenzeichnung');
+//			$('#upload_zusammenzeichnung_msg').addClass('blink');
 			xhttp.send(form_data);
 		}
 	}
+	
+	function next_step(step) {
+		$('#upload_zusammenzeichnung_progress_div').append('\
+			<div id="upload_zusammenzeichnung_step_' + process[step].nr + '" style="float:left">' + process[step].msg + '</div>\
+			<div id="upload_zusammenzeichnung_step_confirm_' + process[step].nr + '" style="float: right"></div>\
+			<div style="clear: both"></div>\
+		');
+	}
+
+	function confirm_step(step, success) {
+		$('#upload_zusammenzeichnung_step_' + process[step].nr).addClass(success ? 'green' : 'red');
+		$('#upload_zusammenzeichnung_step_confirm_' + process[step].nr).html('<i class="fa fa-' + (success ? 'check green' : 'times red') + '" aria-hidden="true" ></i>');
+	}
 
 	function cancel_upload_zusammenzeichnung() {
-		$('#neue_zusammenzeichnung, #steps_div').hide();
+		$('#neue_zusammenzeichnung').hide();
+		$('#sperr_div').hide().html('');
 		$('#<? if (!$this->zusammenzeichnung_exists) { ?>keine_<? } ?>zusammenzeichnung').show();
 	}
 

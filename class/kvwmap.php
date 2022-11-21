@@ -3164,12 +3164,12 @@ echo '			</table>
 		}
 		switch ($this->mime_type) {
 			case 'printversion' : {
-				include (LAYOUTPATH.'snippets/printversion.php');
+				include (LAYOUTPATH . 'snippets/printversion.php');
 			} break;
 			case 'html' : {
 				if ($this->formvars['window_type'] == 'overlay') {
 					$this->overlaymain = $this->main;
-					include (LAYOUTPATH.'snippets/overlay.php');
+					include (LAYOUTPATH . 'snippets/overlay.php');
 				}
 				else {
 					if ($this->formvars['only_main']) {
@@ -3181,7 +3181,7 @@ echo '			</table>
 						include($guifile);
 					}
 				}
-				if($this->alert != ''){
+				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty(GUI::$messages)) {
@@ -3190,10 +3190,10 @@ echo '			</table>
       } break;
 			case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
-				include (LAYOUTPATH.'snippets/map_ajax.php');
+				include (LAYOUTPATH . 'snippets/map_ajax.php');
 			} break;
 			case 'pdf' : {
-				$this->formvars['file']=1;
+				$this->formvars['file'] = 1;
 				if ($this->formvars['file']) {
 					header("Content-type: application/pdf");
 					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
@@ -3209,7 +3209,12 @@ echo '			</table>
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['content_type'], $this->formvars['callback']);
+					$this->formatter = new formatter(
+						($this->formvars['format'] == 'json_result' ? $this->data : $this->qlayersetParamStrip()),
+						$this->formvars['format'],
+						$this->formvars['content_type'],
+						$this->formvars['callback']
+					);
 					echo utf8_encode($this->formatter->output());
 				}
 			}
