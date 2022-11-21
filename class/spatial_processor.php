@@ -600,7 +600,8 @@ class spatial_processor {
 				$data = str_replace('$scale', 1000, $data);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
-				$select = $fromwhere = $dbmap->getSelectFromData($data);
+				$select = $dbmap->getSelectFromData($data);
+				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');
@@ -692,7 +693,7 @@ class spatial_processor {
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
 				$sql .= ' LIMIT ' . MAXQUERYROWS;
 				$ret = $this->pgdatabase->execSQL($sql,4, 0);
-				#echo '<br>SQL: ' . $sql;
+				echo '<br>SQL: ' . $sql;
 				if ($ret[0]) {
 					echo $ret['msg'];
 				}
