@@ -1723,20 +1723,10 @@ echo '			</table>
             $this->map_factor=1;
           }
           if($layerset[$i]['maxscale'] > 0) {
-            if(MAPSERVERVERSION > 500){
-              $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
-            }
-            else{
-              $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
-            }
+            $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
           }
           if($layerset[$i]['minscale'] > 0) {
-            if(MAPSERVERVERSION > 500){
-              $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-            }
-            else{
-              $layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-            }
+						$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
           }
           if($layerset[$i][epsg_code] != ''){
             $layer->setProjection('+init='.strtolower($layerset[$i][epsg_code])); # recommended
@@ -1957,7 +1947,7 @@ echo '			</table>
         $reference_map->reference->set('height',$this->ref['height']);
         $reference_map->reference->set('status','MS_ON');
 				if (MAPSERVERVERSION < 600) {
-					$extent=ms_newRectObj();
+					$extent = ms_newRectObj();
 				}
 				else {
 				  $extent = new rectObj();
@@ -2453,12 +2443,7 @@ echo '			</table>
 					$style->updateFromString("STYLE ANGLE " . $dbStyle['angle']." END"); 		# wegen AUTO
 				}
         if ($dbStyle['angleitem']!=''){
-          if(MAPSERVERVERSION < 500){
-            $style->set('angleitem',$dbStyle['angleitem']);
-          }
-          else{
-            $style->setbinding(MS_STYLE_BINDING_ANGLE, $dbStyle['angleitem']);
-          }
+					$style->setbinding(MS_STYLE_BINDING_ANGLE, $dbStyle['angleitem']);
         }
         if ($dbStyle['width']!='') {
 					if($this->map_factor != '') {
@@ -2534,6 +2519,9 @@ echo '			</table>
 				if (MAPSERVERVERSION < 700 ) {
 					$label->type = 'truetype';
 				}
+				if ($dbLabel['text'] != '') {
+					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
+				}				
 				$label->font = $dbLabel['font'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -2548,7 +2536,6 @@ echo '			</table>
 					$label->shadowsizex = $dbLabel['shadowsizex'];
 					$label->shadowsizey = $dbLabel['shadowsizey'];
 				}
-
 				if($dbLabel['backgroundshadowcolor']!='') {
 					$RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
 					$style = new styleObj($label);
@@ -2595,6 +2582,12 @@ echo '			</table>
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				if ($dbLabel['maxscale'] != '') {
+					$label->set('maxscaledenom', $dbLabel['maxscale']);
+				}
+				if ($dbLabel['minscale'] != '') {
+					$label->set('minscaledenom', $dbLabel['minscale']);
+				}
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
@@ -2959,7 +2952,6 @@ echo '			</table>
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-
 		if (!$img_urls) {
 			ob_start();
 			$this->image_map->saveImage();
@@ -4748,8 +4740,13 @@ echo '			</table>
 			ob_start();
 			switch (strtolower($request['REQUEST'])) {
 				case 'getmap' : {
-					if ( $contenttype != 'image/png') {
-						$contenttype = 'image/jpeg';
+					if (strtolower($request['FORMAT']) == '') {
+						if ( $contenttype != 'image/png') {
+							$contenttype = 'image/jpeg';
+						}
+					}
+					else {
+						$contenttype = strtolower($request['FORMAT']);
 					}
 				} break;
 				case 'getfeature': {
@@ -5375,9 +5372,9 @@ echo '			</table>
     $this->output();
 	}
 
-  function zoomto_dataset(){
-    $dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
-    $layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+	function zoomto_dataset(){
+		$dbmap = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layerdb = $dbmap->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 		if ($this->formvars['layer_id'] > 0) {
 			$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
 		}
@@ -5391,31 +5388,40 @@ echo '			</table>
 		if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 			$layerset[0]['oid'] = $attributes['pk'][0];
 		}
-    if($this->formvars['oid'] != ''){
-    	if($this->formvars['selektieren'] != 'zoomonly'){
+		if ($this->formvars['oid'] != '') {
+			if ($this->formvars['selektieren'] != 'zoomonly') {
 				$this->createZoomRollenlayer($dbmap, $layerdb, $layerset, array($this->formvars['oid']));
-    	}
-      $this->loadMap('DataBase');
-      $rect = $dbmap->zoomToDatasets(array($this->formvars['oid']), $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
-      $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+			}
+
+			$this->loadMap('DataBase');
+			$rect = $dbmap->zoomToDatasets(array($this->formvars['oid']), $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 
 			# damit nicht außerhalb des Stellen-Extents gezoomt wird
-	    $oPixelPos=ms_newPointObj();
+			$oPixelPos=ms_newPointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			$this->map->zoomscale($this->map->scaledenom,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 			$this->map_scaledenom = $this->map->scaledenom;
-    }
-    $this->saveMap('');
+		}
+		$this->saveMap('');
+		if ($this->formvars['maponly']) {
+			$this->drawMap(true);
+			$file_name = IMAGEPATH . basename($this->img['hauptkarte']);
+			header("Content-Type: image/png");
+			header("Content-Length: " . filesize($file_name));
+			readfile($file_name);
+			exit();
+		}
 		if ($this->formvars['go_next'] != ''){
 			go_switch($this->formvars['go_next']);
 			exit();
 		}
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
+		$currenttime = date('Y-m-d H:i:s', time());
+		$this->user->rolle->setConsumeActivity($currenttime,'getMap', $this->user->rolle->last_time_id);
+		$this->drawMap();
 		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
-    $this->output();
-  }
+		$this->output();
+	}
 
 	function createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute = NULL, $result = NULL){
 		# Layer erzeugen
@@ -8424,7 +8430,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->layergruppe = new LayerGroup($this);
 		$this->layergruppe->data = formvars_strip($this->formvars, $this->layergruppe->setKeysFromTable(), 'keep');
 		$this->layergruppe->set('Gruppenname', $this->formvars['Gruppenname']);
-		if ($this->layergruppe->get('selectable_for_shared_layers') == '') {
+		if (!$this->layergruppe->get('obergruppe')) {
+			$this->layergruppe->set('obergruppe', '');
+		}
+		if (!$this->layergruppe->get('selectable_for_shared_layers')) {
 			$this->layergruppe->set('selectable_for_shared_layers', 0);
 		}
 		$results = $this->layergruppe->validate();
@@ -8468,9 +8477,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function invitations_list() {
 		include_once(CLASSPATH . 'Invitation.php');
+		global $admin_stellen;
 		$this->invitations = Invitation::find(
 			$this,
-			($this->formvars['all'] != '' ? 'true' : 'inviter_id = ' . $this->user->id),
+			(in_array($this->Stelle->id, $admin_stellen) ? 'true' : 'inviter_id = ' . $this->user->id),
 			($this->formvars['order'] == '' ? 'email' : '')
 		);
 
@@ -11969,35 +11979,73 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->Stelleneditor();
   }
 
+	function create_reference_map() {
+		if (MAPSERVERVERSION < 600) {
+			$map = ms_newMapObj(DEFAULTMAPFILE);
+		}
+		else {
+			$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
+		}
 
-  function StelleAnlegen() {
-  	$_files = $_FILES;
-    if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
-      # Fehler bei der Formulareingabe
-      showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
-    }
-    else {
-      if($_files['wappen']['name']){
-        $this->formvars['wappen'] = $_files['wappen']['name'];
-        $nachDatei = WWWROOT.APPLVERSION.WAPPENPATH.$_files['wappen']['name'];
-        if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
-            #echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-        }
-      }
-      $ret=$this->Stelle->NeueStelleAnlegen($this->formvars);
-      if ($ret[0]) {
-          # Fehler beim Eintragen der Stellendaten
-          $this->Meldung=$ret[1];
-      }
-     else {
-        $neue_stelle_id = $ret[1];
-        $Stelle = new stelle($neue_stelle_id,$this->user->database);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+	}
+
+	function StelleAnlegen() {
+		include_once(CLASSPATH . 'Referenzkarte.php');
+		$_files = $_FILES;
+		if (!$this->formvars['bezeichnung'] or !$this->formvars['Referenzkarte_ID']) {
+			# Fehler bei der Formulareingabe
+			showAlert('Füllen Sie alle mit * gekennzeichneten Formularfelder aus.');
+		}
+		else {
+			if ($_files['wappen']['name']) {
+				$this->formvars['wappen'] = $_files['wappen']['name'];
+				$nachDatei = WWWROOT . APPLVERSION . WAPPENPATH . $_files['wappen']['name'];
+				if (move_uploaded_file($_files['wappen']['tmp_name'],$nachDatei)) {
+					#echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
+				}
+			}
+			if ($this->formvars['create_referencemap']) {
+				$refmap_width = 250;
+				$refmap_height = $refmap_width * ($this->formvars['maxymax'] - $this->formvars['minymax']) / ($this->formvars['maxxmax'] - $this->formvars['minxmax']);
+				$refmap = $this->createReferenceMap($refmap_width, $refmap_height, $refmap_width, $refmap_height, 0, $this->formvars['minxmax'], $this->formvars['minymax'], $this->formvars['maxxmax'], $this->formvars['maxymax'], 1, REFMAPFILE, 'png');
+				$refmap_file_name = 'refmap_' . $this->formvars['id'] . '.png';
+				rename(IMAGEPATH . basename($refmap), REFERENCEMAPPATH . $refmap_file_name);
+#				echo '<br>cp refmap: ' . IMAGEPATH . basename($refmap) . ' nach: ' . REFERENCEMAPPATH . $refmap_file_name;
+				$refmap = new Referenzkarte($this);
+				$result = $refmap->create(array(
+					'Name' => 'refmap_' . $this->formvars['id'],
+					'Dateiname' => $refmap_file_name,
+					'epsg_code' => $this->formvars['epsg_code'],
+					'xmin' => $this->formvars['minxmax'],
+					'ymin' => $this->formvars['minymax'],
+					'xmax' => $this->formvars['maxxmax'],
+					'ymax' => $this->formvars['maxymax'],
+					'width' => $refmap_width,
+					'height' => $refmap_height
+				));
+				if ($result[0]['success']) {
+					$refmap_id = $result[0]['id'];
+					$this->formvars['Referenzkarte_ID'] = $refmap_id;
+				}
+				else {
+					$this->add_message('error', $result[0]['msg']);
+				}
+			}
+			$ret = $this->Stelle->NeueStelleAnlegen($this->formvars);
+			if ($ret[0]) {
+				# Fehler beim Eintragen der Stellendaten
+				$this->Meldung = $ret[1];
+			}
+			else {
+				$neue_stelle_id = $ret[1];
+				$Stelle = new stelle($neue_stelle_id,$this->user->database);
 				$menues = ($this->formvars['selmenues'] == '' ? array() : explode(', ',$this->formvars['selmenues']));
 				$functions = (trim($this->formvars['selfunctions']) == '' ? array() : explode(', ', $this->formvars['selfunctions']));
 				$frames = (trim($this->formvars['selframes']) == '' ? array() : explode(', ', $this->formvars['selframes']));
 				$layouts = (trim($this->formvars['sellayouts']) == '' ? array() : explode(', ', $this->formvars['sellayouts']));
 				$layer = (trim($this->formvars['sellayer']) == '' ? array() : explode(', ', $this->formvars['sellayer']));
-				$users = array_filter(explode(', ',$this->formvars['selusers']));
+				$users = array_filter(explode(', ', $this->formvars['selusers']));
 				$selectedparents = ($this->formvars['selparents'] == '' ? array() : explode(', ', $this->formvars['selparents']));
 				
 				# die menues, functions, frames, layouts, layers und users der Oberstellen zusätzlich zuordnen oder entfernen
@@ -12009,46 +12057,49 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$frames,
 					$layouts,
 					$layer
-				);				
+				);
 				
-        # wenn Stelle ausgewählt, Daten kopieren
-        if($this->formvars['selected_stelle_id']) {
-          $Stelle->copyLayerfromStelle($layer, $this->formvars['selected_stelle_id']);
-        }
-        $Stelle->addMenue($menues);
-        if($functions[0] != NULL){
-          $Stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
-        }
-        if($layer[0] != NULL){
-          $Stelle->addLayer($layer, 0);
-        }
-        $document = new Document($this->database);
-        if($frames[0] != NULL){
-          for($i = 0; $i < count($frames); $i++){
-            $document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
-          }
-        }
-        for($i=0; $i<count($users); $i++){
-          $this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+				# wenn Stelle ausgewählt, Daten kopieren
+				if ($this->formvars['selected_stelle_id']) {
+					$Stelle->copyLayerfromStelle($layer, $this->formvars['selected_stelle_id']);
+				}
+				$Stelle->addMenue($menues);
+				if ($functions[0] != NULL) {
+					$Stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
+				}
+				if ($layer[0] != NULL) {
+					$Stelle->addLayer($layer, 0);
+				}
+				$document = new Document($this->database);
+				if ($frames[0] != NULL) {
+					for ($i = 0; $i < count($frames); $i++) {
+						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
+					}
+				}
+				if ($Stelle->default_user_id !== '') {
+					$users = put_value_first($users, $Stelle->default_user_id);
+				}
+				for ($i = 0; $i < count($users); $i++) {
+					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
 					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
-          $this->selected_user = new user(0,$users[$i],$this->user->database);
-          $this->selected_user->checkstelle();
-        }
+					$this->selected_user = new user(0,$users[$i],$this->user->database);
+					$this->selected_user->checkstelle();
+				}
 				$Stelle->updateLayerParams();
-        if ($ret[0]) {
-          $this->Meldung=$ret[1];
-        }
-        else {
-          $this->Meldung='Daten der Stelle erfolgreich eingetragen!';
-        }
-      }
-    }
-    $this->formvars['selected_stelle_id'] = $ret[1];
+				if ($ret[0]) {
+					$this->Meldung = $ret[1];
+				}
+				else {
+					$this->Meldung = 'Daten der Stelle erfolgreich eingetragen!';
+				}
+			}
+		}
+		$this->formvars['selected_stelle_id'] = $ret[1];
 		$this->Stelleneditor();
-  }
+	}
 
 	function StellenAnzeigen() {
 		# Abfragen aller Stellen
@@ -12208,28 +12259,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $this->output();
   }
 
-  function StelleLoeschen(){
-    $selected_stelle=new stelle($this->formvars['selected_stelle_id'],$this->user->database);
-    $selected_stelle->Löschen();
-    $selected_stelle->deleteMenue(0);
+	function StelleLoeschen() {
+		$selected_stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
+		$selected_stelle->deleteMenue(0);
 		$selected_stelle->deleteDruckrahmen();
 		$selected_stelle->deleteStelleGemeinden();
 		$selected_stelle->deleteFunktionen();
-    $selected_stelle->deleteLayer(0, $this->pgdatabase);
-    $user = $selected_stelle->getUser();
-    $stelle_id = explode(',',$selected_stelle->id);
-    for($i = 0; $i < count($user['ID']); $i++){
-      $this->user->rolle->deleteRollen($user['ID'][$i], $stelle_id);
-      $this->user->rolle->deleteMenue($user['ID'][$i], $stelle_id, 0);
-      $this->user->rolle->deleteGroups($user['ID'][$i], $stelle_id);
-      $this->user->rolle->deleteLayer($user['ID'][$i], $stelle_id, 0);
-    }
-    $this->titel='Stellendaten';
-    $this->main='stellendaten.php';
-    # Abfragen aller Stellen
-    $this->stellendaten=$this->Stelle->getStellen($this->formvars['order']);
-    $this->output();
-  }
+		$selected_stelle->deleteLayer(0, $this->pgdatabase);
+		$user = $selected_stelle->getUser();
+		$stelle_id = explode(',', $selected_stelle->id);
+		for ($i = 0; $i < count($user['ID']); $i++) {
+			$this->user->rolle->deleteRollen($user['ID'][$i], $stelle_id);
+			$this->user->rolle->deleteMenue($user['ID'][$i], $stelle_id, 0);
+			$this->user->rolle->deleteGroups($user['ID'][$i], $stelle_id);
+			$this->user->rolle->deleteLayer($user['ID'][$i], $stelle_id, 0);
+		}
+		$selected_stelle->delete();
+		$this->titel = 'Stellendaten';
+		$this->main = 'stellendaten.php';
+		# Abfragen aller Stellen
+		$this->stellendaten = $this->Stelle->getStellen($this->formvars['order']);
+		$this->output();
+	}
 
 	function Filterverwaltung() {
 		$this->loadMap('DataBase');
@@ -12817,7 +12868,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->main = 'userdaten_formular.php';
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
-			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id);
+			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
 			$this->user_stelle = new stelle($this->userdaten[0]['stelle_id'], $this->database);
 			$this->formvars['nachname'] 									= $this->userdaten[0]['Name'];
 			$this->formvars['vorname'] 										= $this->userdaten[0]['Vorname'];
@@ -12832,8 +12883,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['organisation'] 							= $this->userdaten[0]['organisation'];
 			$this->formvars['position'] 									= $this->userdaten[0]['position'];
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
+			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			# Abfragen der Stellen des Nutzers
-			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database);
+			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
 			# Abfragen der aktiven Layer des Nutzers
 			if ($this->userdaten[0]['stelle_id'] != '') {
@@ -12849,25 +12901,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
   function BenutzerLöschen(){
-    $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database);
+    $this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
 		if (NUTZER_ARCHIVIEREN) {
 			$this->selected_user->archivieren();
 		}
 		else {
 			$stellen = $this->selected_user->getStellen(0);
-			$this->selected_user->Löschen($this->formvars['selected_user_id']);
 			$this->user->rolle->deleteRollen($this->formvars['selected_user_id'], $stellen['ID']);
 			$this->user->rolle->deleteMenue($this->formvars['selected_user_id'], $stellen['ID'], 0);
 			$this->user->rolle->deleteGroups($this->formvars['selected_user_id'], $stellen['ID']);
 			$this->user->rolle->deleteLayer($this->formvars['selected_user_id'], $stellen['ID'], 0);
+			$this->selected_user->delete($this->formvars['selected_user_id']);
 		}
-		if($this->formvars['nutzerstellen']){
+		if ($this->formvars['nutzerstellen']) {
 			$this->BenutzerNachStellenAnzeigen();
 		}
-		else{
+		else {
 			$this->BenutzerdatenAnzeigen();
 		}
-  }
+	}
 
 	function BenutzerdatenAnzeigen() {
 		if($this->formvars['order'] == ''){
@@ -12876,7 +12928,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->titel='Benutzerdaten';
 		$this->main='userdaten.php';
 		# Abfragen aller Benutzer
-		$this->userdaten = $this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id);
+		$this->userdaten = $this->user->getUserDaten(0, '', $this->formvars['order'], $this->Stelle->id, $this->user->id, true);
 		$this->output();
 	}
 
@@ -12929,7 +12981,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($this->formvars['id'] != '') {
 				$this->formvars['selected_user_id'] = $this->formvars['id'];
 			}
-			for($i = 0; $i < count($stellen); $i++){
+			for ($i = 0; $i < count($stellen); $i++) {
 				$stelle = new stelle($stellen[$i], $this->database);
 				$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				$this->user->rolle->setMenue($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -12940,7 +12992,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$stelle->updateLayerParams();
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
-      $this->selected_user=new user(0,$this->formvars['selected_user_id'],$this->user->database);
+      $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
 			$deletestellen = array();
@@ -15148,53 +15200,51 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->main = 'sachdatenanzeige.php';
 	}
 
-  function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile){
+	function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile, $output_format = '') {
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
-    $refmap->set('width', $width);
-    $refmap->set('height', $height);
-    $refmap->setextent($minx,$miny,$maxx,$maxy);
-    $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-    $projTO = ms_newprojectionobj("init=epsg:".EPSGCODE);
-    $refmap->extent->project($projFROM, $projTO);
-    # zoomen
-    $oPixelPos=ms_newPointObj();
-    $oPixelPos->setXY($width/2,$height/2);
-    //$refmap->zoomscale($scale,$oPixelPos,$width,$height,$refmap->extent,$this->Stelle->MaxGeorefExt);
-    $refmap->zoompoint($zoomfactor,$oPixelPos,$width,$height,$refmap->extent);
-
-    if($refmap->selectOutputFormat('jpeg_print') == 1){
-      $refmap->selectOutputFormat('jpeg');
-    }
+		$refmap->set('width', $width);
+		$refmap->set('height', $height);
+		$refmap->setextent($minx, $miny, $maxx, $maxy);
+#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
+#		$refmap->extent->project($projFROM, $projTO);
+		# zoomen
+		$oPixelPos = ms_newPointObj();
+		$oPixelPos->setXY($width / 2, $height / 2);
+		//$refmap->zoomscale($scale,$oPixelPos,$width,$height,$refmap->extent,$this->Stelle->MaxGeorefExt);
+		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent);
+		if ($output_format == '' AND $refmap->selectOutputFormat('jpeg_print') == 1) {
+			$refmap->selectOutputFormat('jpeg');
+		}
 		set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
-    $image_map = $refmap->draw() OR die($this->layer_error_handling());
-    $filename = $this->map_saveWebImage($image_map,'jpeg');
+		$image_map = $refmap->draw() OR die($this->layer_error_handling());
+		$filename = $this->map_saveWebImage($image_map,'jpeg');
 
-
-    $image = imagecreatefromjpeg(IMAGEPATH.basename($filename));
-		if($angle != 0){
-      $rotatedimage = imagerotate($image, $angle, 0);
-      $width = imagesx($rotatedimage);
-      $height = imagesy($rotatedimage);
-      $clipwidth = $refwidth;
-      $clipheight = $refheight;
-      $clipx = ($width - $clipwidth) / 2;
-      $clipy = ($height - $clipheight) / 2;
-      $image = imagecreatetruecolor($clipwidth, $clipheight);
-      ImageCopy($image, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
+		$image = imagecreatefromjpeg(IMAGEPATH . basename($filename));
+		if ($angle != 0) {
+			$rotatedimage = imagerotate($image, $angle, 0);
+			$width = imagesx($rotatedimage);
+			$height = imagesy($rotatedimage);
+			$clipwidth = $refwidth;
+			$clipheight = $refheight;
+			$clipx = ($width - $clipwidth) / 2;
+			$clipy = ($height - $clipheight) / 2;
+			$image = imagecreatetruecolor($clipwidth, $clipheight);
+			ImageCopy($image, $rotatedimage, 0, 0, $clipx, $clipy, $clipwidth, $clipheight);
 		}
 		# Rahmen
-		$color = imagecolorallocate($image, 0,0,0);
-		$x1 = ($refwidth + $refwidth/$zoomfactor)/2;
-		$y1 = ($refheight + $refheight/$zoomfactor)/2;
-		$x2 = $x1 - $refwidth/$zoomfactor;
-		$y2 = $y1 - $refheight/$zoomfactor;
+		$color = imagecolorallocate($image, 0, 0, 0);
+		$x1 = ($refwidth + $refwidth/$zoomfactor) / 2;
+		$y1 = ($refheight + $refheight/$zoomfactor) / 2;
+		$x2 = $x1 - $refwidth / $zoomfactor;
+		$y2 = $y1 - $refheight / $zoomfactor;
 		imagerectangle($image, $x1, $y1, $x2, $y2, $color);
-    imagejpeg($image, IMAGEPATH.basename($filename), 100);
-    $newname = $this->user->id.basename($filename);
-    rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
-    $uebersichtskarte = IMAGEURL.$newname;
-    return $uebersichtskarte;
-  }
+		imagejpeg($image, IMAGEPATH . basename($filename), 100);
+		$newname = $this->user->id . basename($filename);
+		rename(IMAGEPATH . basename($filename), IMAGEPATH . $newname);
+		$uebersichtskarte = IMAGEURL . $newname;
+		return $uebersichtskarte;
+	}
 
 	function spatial_processing() {
 		include_(CLASSPATH . 'spatial_processor.php');
@@ -16147,6 +16197,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){
 		include_once(CLASSPATH.'FormObject.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($layer_id == NULL){
 			if($stelle_id == NULL){			# Parameter der aktuellen Stelle abfragen
 				$stelle = $this->Stelle;
@@ -16157,10 +16208,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$rolle = new rolle($this->user->id, $stelle_id, $this->database);
 				$rolle->readSettings();
 			}
+			$this->params_layer = $mapDB->get_layer_params_layer();
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id)));
 			$rolle = $this->user->rolle;
 		}
@@ -16174,7 +16225,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					echo '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
-								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">'.$this->strLayerParameters.'</span></td>
+								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">&nbsp;'.$this->strLayerParameters.'</span></td>
 							</tr>
 							<tr>
 								<td class="rollenwahl-option-data">
@@ -16184,7 +16235,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 										echo '
 										<tr id="layer_parameter_'.$param['key'].'_tr">
 											<td valign="top" class="rollenwahl-option-header">
-												<span>'.$param['alias'].':</span>
+												<span>' . $param['alias'] .
+												 ((@count($this->params_layer[$param['id']]) == 1)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
+												</span>
 											</td>
 											<td>
 												'.FormObject::createSelectField(
@@ -18041,11 +18094,6 @@ class db_mapObj{
 			if ($rollenlayerset[$i]['Class'] != ''){
 				foreach ($rollenlayerset[$i]['Class'] as $class){
 					$this->delete_Class($class['Class_ID']);
-					if ($class['Style'] != ''){
-						foreach ($class['Style'] as $style){
-							$this->delete_Style($style['Style_ID']);
-						}
-					}
 				}
 			}
 		}
@@ -20163,6 +20211,8 @@ class db_mapObj{
     if($formvars["label_size"]){$sql.="size = '" . $formvars["label_size"]."',";}
     if($formvars["label_minsize"]){$sql.="minsize = '" . $formvars["label_minsize"]."',";}
     if($formvars["label_maxsize"]){$sql.="maxsize = '" . $formvars["label_maxsize"]."',";}
+		if($formvars["label_minscale"]){$sql.="minscale = '" . $formvars["label_minscale"]."',";}
+		if($formvars["label_maxscale"]){$sql.="maxscale = '" . $formvars["label_maxscale"]."',";}
     if($formvars["label_position"] != ''){$sql.="position = '" . $formvars["label_position"]."',";}
     if($formvars["label_offsetx"] != ''){$sql.="offsetx = '" . $formvars["label_offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["label_offsety"] != ''){$sql.="offsety = '" . $formvars["label_offsety"]."',";}else{$sql.="offsety = NULL,";}
@@ -20175,6 +20225,7 @@ class db_mapObj{
 		if($formvars["label_maxlength"] != ''){$sql.="maxlength = '" . $formvars["label_maxlength"]."',";}
 		if($formvars["label_repeatdistance"] != ''){$sql.="repeatdistance = '" . $formvars["label_repeatdistance"]."',";}
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}else{$sql .= "wrap = NULL,";}
+		if($formvars["label_text"] != ''){$sql.="text = '" . $formvars["label_text"]."',";}else{$sql .= "text = NULL,";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
     $sql.="Label_ID = " . $formvars["label_Label_ID"];
     $sql.=" WHERE Label_ID = " . $formvars["label_id"];

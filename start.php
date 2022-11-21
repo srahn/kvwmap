@@ -532,23 +532,10 @@ else {
 		# Löschen der Rollenfilter
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
-		if(DELETE_ROLLENLAYER == 'true'){
-			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
-	    for($i = 0; $i < count($rollenlayerset); $i++){
-	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-	      # auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						if($class['Style'] != ''){
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
-							}
-						}
-					}
-				}
-	    }
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
+		for($i = 0; $i < count($rollenlayerset); $i++){
+			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}
 		# Zurücksetzen des histtimestamps
 		if ($GUI->user->rolle->hist_timestamp_de != '') {

@@ -1025,7 +1025,6 @@ FROM
   	}
     $select = substr($query, $offset, $fromposition-$offset);
     $from = substr($query, $fromposition);
-    $column = explode(',', $select);
     $column = get_select_parts($select);
     for($i = 0; $i < count($column); $i++){
       if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){

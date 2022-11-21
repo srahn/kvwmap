@@ -48,7 +48,7 @@
 												</div><?php
 											}
 										?>
-										<i title="Sicheres Passwort generieren" class="fa fa-random pointer" aria-hidden="true" style="margin-left: 5px" onclick="setRandomPassword()"></i>
+										<i title="Sicheres Passwort generieren" class="fa fa-random pointer" aria-hidden="true" style="margin-left: 5px" onclick="$('#new_password, #new_password_2').val(getRandomPassword())"></i>
 										<i title="Sichtbarkeit des Passwortes" style="margin-left: 5px" class="fa fa-eye-slash pointer" aria-hidden="true" onclick="togglePasswordVisibility(this, 'new_password', 'new_password_2')"></i>
 										<i title="Password in Zwischenablage kopieren" class="fa fa-clipboard pointer" aria-hidden="true" onclick="copyToClipboard($('#new_password').val())"></i>
 									</div>

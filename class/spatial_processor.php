@@ -600,7 +600,8 @@ class spatial_processor {
 				$data = str_replace('$scale', 1000, $data);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
-				$select = $fromwhere = $dbmap->getSelectFromData($data);
+				$select = $dbmap->getSelectFromData($data);
+				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');
