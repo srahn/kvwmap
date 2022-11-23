@@ -5525,7 +5525,7 @@ echo '			</table>
 									$enum_value = $attributes['enum_value'][$j];
 									$enum_output = $attributes['enum_output'][$j];
 								}
-								for($o = 0; $o < count($enum_value); $o++){
+								for($o = 0; $o < @count($enum_value); $o++){
 									if($value == $enum_value[$o]){
 										$name = $enum_output[$o];
 										break;
@@ -19833,7 +19833,7 @@ class db_mapObj{
 					}
 				}
 				$sql .= $attrib['layer_id'] . ",
-					'" . $attrib['expression'] . "',
+					'" . $this->db->mysqli->real_escape_string($attrib['expression']) . "',
 					'" . value_of($attrib, 'classification') . "',
 					'" . value_of($attrib, 'legendgraphic') . "',
 					" . $attrib['legendimagewidth'] . ",
