@@ -545,6 +545,16 @@ class GUI {
 										<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
 									</td>
 								</tr>';
+								
+							echo '
+								<tr>
+									<td>
+										<span>' . $this->strBuffer.': </span>
+									</td>
+									<td>
+										<input type="input" style="width: 60px" value="' . $layer[0]['buffer'] . '" name="layer_options_buffer"> m
+									</td>
+								</tr>';
 						}
 						echo '<tr>
 										<td>
