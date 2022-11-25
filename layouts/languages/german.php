@@ -26,6 +26,7 @@
   $this->strCreate = "Anlegen";
 	$this->strSend = "Senden";
 	$this->strSearch = "Suchen";
+	$this->strAddToOwnQueries = "zu eigenen Abfragen hinzufügen";
 	$this->strEnter = "Übernehmen";
 	$this->strConnect = "Verbinden";
 	$this->strReset = 'Zurücksetzen';

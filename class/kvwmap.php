@@ -543,6 +543,9 @@ class GUI {
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 						}
+						if ($layer[0]['connectiontype'] == MS_POSTGIS) {
+							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
+						}						
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 							if ($this->user->layer_data_import_allowed) {
@@ -1093,7 +1096,7 @@ echo '			</table>
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'Suchergebnis' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
@@ -2192,10 +2195,6 @@ echo '			</table>
 				$layer->setProcessing($processing);
 			}
 		}
-		
-		if (value_of($layerset, 'buffer') != 0) {
-			$layer->updateFromString("LAYER GEOMTRANSFORM (buffer([shape], " . $layerset['buffer'] . ")) END END");
-		}		
 
 		if (value_of($layerset, 'postlabelcache') != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -2234,6 +2233,14 @@ echo '			</table>
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->set('data', $layerset['Data']);
+			}
+			
+			if (value_of($layerset, 'buffer') != 0) {
+				$geom = explode(' ', $layer->data)[0];
+				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
+				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data;
+				$layer->set('type', 2);
 			}
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
@@ -2362,6 +2369,10 @@ echo '			</table>
 				}
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
+				}
+				if (value_of($layerset, 'buffer') != 0) {
+					$dbStyle['symbolname'] = NULL;
+					$dbStyle['symbol'] = NULL;
 				}
 				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
 					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
@@ -2807,12 +2818,12 @@ echo '			</table>
 				$miny = dms2dec($miny);
 			}
 			$datastring = "the_geom from (select st_geomfromtext('POINT(" . $minx . " " . $miny . ")', " . $this->user->rolle->epsg_code . ") as the_geom, 1 as oid) as foo using unique oid using srid=" . $this->user->rolle->epsg_code;
-			$group = $this->mapDB->getGroupbyName('Suchergebnis');
+			$group = $this->mapDB->getGroupbyName('eigene Abfragen');
 			if ($group != '') {
 				$groupid = $group['id'];
 			}
 			else {
-				$groupid = $this->mapDB->newGroup('Suchergebnis', 0);
+				$groupid = $this->mapDB->newGroup('eigene Abfragen', 0);
 			}
 			$this->formvars['user_id'] = $this->user->id;
 			$this->formvars['stelle_id'] = $this->Stelle->id;
@@ -5362,9 +5373,9 @@ echo '			</table>
 			$auto_class_attribute = $this->formvars['klass_'.$this->formvars['chosen_layer_id']];
 			$result= $this->qlayerset[0]['shape'];
 		}
-    if($oids != ''){
-      $this->createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute, $result);
-      $this->loadMap('DataBase');
+		$this->createZoomRollenlayer($dbmap, $layerdb, $layerset, $oids, $auto_class_attribute, $result);
+		$this->loadMap('DataBase');
+    if ($oids != '') {
       # Polygon abfragen und Extent setzen
       $rect = $dbmap->zoomToDatasets($oids, $layerset[0], $this->formvars['layer_columnname'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
@@ -5429,7 +5440,7 @@ echo '			</table>
 		$currenttime = date('Y-m-d H:i:s', time());
 		$this->user->rolle->setConsumeActivity($currenttime,'getMap', $this->user->rolle->last_time_id);
 		$this->drawMap();
-		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
+		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit eigene Abfragen-Layer angezeigt werden
 		$this->output();
 	}
 
@@ -5452,22 +5463,24 @@ echo '			</table>
 		if($auto_class_attribute != '' AND strpos($select, '*') === false AND strpos($select, $auto_class_attribute) === false){			# Attribut für automatische Klassifizierung mit ins data packen
 			$select = str_replace(' from ', ', '.$auto_class_attribute.' from ', strtolower($select));
 		}
-		$wherepos = strpos(strtolower($select), 'where');
-		if($wherepos === false){
-			$select .= " WHERE ";
-		}
-		else{
-			$select .= " AND ";
-		}
-		$oid = $layerset[0]['oid'];
-		$explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
-		for($i = 0; $i < count($explosion); $i++){
-			if(strpos(strtolower($explosion[$i]), '.'.$layerset[0]['oid']) !== false){
-				$oid = str_replace('select ', '', strtolower(str_replace([chr(10), chr(13)], '', $explosion[$i])));
-				break;
+		if ($oids != NULL) {
+			$wherepos = strpos(strtolower($select), 'where');
+			if($wherepos === false){
+				$select .= " WHERE ";
 			}
-		}		
-		$select .= $oid." IN ('" . implode("','", $oids) . "')";
+			else{
+				$select .= " AND ";
+			}
+			$oid = $layerset[0]['oid'];
+			$explosion = explode(',', $select);							# wenn im Data sowas wie tabelle.oid vorkommt, soll das anstatt oid verwendet werden
+			for($i = 0; $i < count($explosion); $i++){
+				if(strpos(strtolower($explosion[$i]), '.'.$layerset[0]['oid']) !== false){
+					$oid = str_replace('select ', '', strtolower(str_replace([chr(10), chr(13)], '', $explosion[$i])));
+					break;
+				}
+			}		
+			$select .= $oid." IN ('" . implode("','", $oids) . "')";
+		}
 
 		$datastring = $datageom." from (" . $select;
 		$datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
@@ -5476,12 +5489,12 @@ echo '			</table>
 		}
 		$legendentext = $layerset[0]['Name']." (".date('d.m. H:i',time()).")";
 
-		$group = $dbmap->getGroupbyName('Suchergebnis');
+		$group = $dbmap->getGroupbyName('eigene Abfragen');
 		if($group != ''){
 			$groupid = $group['id'];
 		}
 		else{
-			$groupid = $dbmap->newGroup('Suchergebnis', 0);
+			$groupid = $dbmap->newGroup('eigene Abfragen', 0);
 		}
 		$this->formvars['user_id'] = $this->user->id;
 		$this->formvars['stelle_id'] = $this->Stelle->id;
@@ -5605,7 +5618,7 @@ echo '			</table>
     $currenttime=date('Y-m-d H:i:s',time());
     $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
     $this->drawMap();
-		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit Suchergebnis-Layer angezeigt werden
+		$this->layerhiddenstring = 'reload ';		// Legenden-Reload erzwingen, damit eigene Abfragen-Layer angezeigt werden
     $this->output();
   }	
 

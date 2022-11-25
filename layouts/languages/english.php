@@ -27,6 +27,7 @@
   $this->strCreate = "Create";
 	$this->strSend = "Send";
 	$this->strSearch = "Search";
+	$this->strAddToOwnQueries = "Add to own queries";
 	$this->strEnter = "Apply";
 	$this->strConnect = "Connect";
 	$this->strReset = "Reset";
