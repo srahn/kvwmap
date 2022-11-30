@@ -545,7 +545,6 @@ span[data-tooltip]:hover::after {
 select {
 	font-size: 14px;
 	font-family: SourceSansPro1;
-	padding: 0 0;
 }
 
 select option{
