@@ -1840,6 +1840,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	return $str;
 }
 
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
+	return $str;
+}
+
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
 * siehe http://www.php-einfach.de/codeschnipsel_1114.php
