@@ -552,7 +552,7 @@ class GUI {
 			foreach ($processings as $processing) {
 				$layer->setProcessing($processing);
 			}
-		}
+		}	
 
 		if ($layerset['postlabelcache'] != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -592,6 +592,14 @@ class GUI {
 				}				
 				$layer->set('data', $layerset['Data']);
 			}
+			
+			if (value_of($layerset, 'buffer') != 0) {
+				$geom = explode(' ', $layer->data)[0];
+				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
+				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data;
+				$layer->set('type', 2);
+			}			
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
@@ -1228,6 +1236,10 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
+				if (value_of($layerset, 'buffer') != 0) {
+					$dbStyle['symbolname'] = NULL;
+					$dbStyle['symbol'] = NULL;
+				}				
 				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
 					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
 				}
@@ -1414,6 +1426,9 @@ class GUI {
 				if (MAPSERVERVERSION < 700 ) {
 					$label->type = 'truetype';
 				}
+				if ($dbLabel['text'] != '') {
+					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
+				}
 				$label->font = $dbLabel['font'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -1475,6 +1490,12 @@ class GUI {
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				if ($dbLabel['maxscale'] != '') {
+					$label->set('maxscaledenom', $dbLabel['maxscale']);
+				}
+				if ($dbLabel['minscale'] != '') {
+					$label->set('minscaledenom', $dbLabel['minscale']);
+				}				
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
@@ -2176,11 +2197,11 @@ class user {
 		}
 	}
 
-	function readUserDaten($id, $login_name, $passwort = '') {
+	function readUserDaten($id, $login_name, $password = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
+		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*
@@ -2189,10 +2210,10 @@ class user {
 			WHERE
 				" . implode(" AND ", $where) . "
 		";
-		#echo '<br>Sql: ' . $sql;
+		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql);
+		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
@@ -2211,6 +2232,9 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
+		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->tokens = $rs['tokens'];
 	}
 
 	function getLastStelle() {
@@ -2803,7 +2827,7 @@ class rolle {
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->fontsize_gle=$rs['fontsize_gle'];
-			$this->highlighting=$rs['highlighting'];
+			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
 			$this->result_hatching=$rs['result_hatching'];
@@ -3874,6 +3898,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
+				l.`buffer`,				
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,

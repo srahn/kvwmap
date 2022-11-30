@@ -21,7 +21,7 @@ root.getlegend_requests = new Array();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
-	if(root.document && root.document.GUI.gle_changed.value == 1){
+	if(root.document && root.document.GUI && root.document.GUI.gle_changed.value == 1){
 		return "Es existieren ungespeicherte Datensätze. Wollen Sie wirklich fortfahren?";
 	}
 }
@@ -121,6 +121,10 @@ function ahahDone(url, targets, req, actions) {
 									}
 								}
 							}
+						break;
+						
+						case "setouterhtml":
+							targets[i].outerHTML = responsevalues[i];
 						break;
 						
 						case "prependhtml":
@@ -404,7 +408,7 @@ function resizemap2window(){
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback) {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancle_button_value = 'Abbrechen') {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -474,8 +478,8 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 			msgBoxDiv.append('<input id="message_ok_button" type="button" onclick="$(\'#message_box\').hide();" value="' + confirm_value + '" style="margin: 10px 0px 0px 0px;">');
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
-			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="Ja" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="Abbrechen" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancle_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -818,16 +822,17 @@ function update_legend(layerhiddenstring){
 }
 
 /*
-* optional status to set values irrespective of current value
+* optional status to set values irrespective of current value and open all subgroups
 */
 function getlegend(groupid, layerid, fremde, status) {
+	status = status || 0;
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		status = status || !parseInt(group.value);
-		if (status) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		var open = status || !parseInt(group.value);
+		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
 		}
 		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
 			group.value = 0;
@@ -846,7 +851,7 @@ function getlegend(groupid, layerid, fremde, status) {
 		else{
 			layer.value = 0;
 		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), ['setouterhtml']);
 	}
 }
 
@@ -983,35 +988,40 @@ function preventDefault(e){
 }
 
 function selectgroupquery(group, instantreload){
-  value = group.value+"";
-  layers = value.split(",");
-  i = 0;
-  test = null;
-  while(test == null){
-    test = document.getElementById("qLayer"+layers[i]);
-    i++;
-    if(i > layers.length){
-      return;
-    }
-  }
-  check = !test.checked;
-  for(i = 0; i < layers.length; i++){
-    query = document.getElementById("qLayer"+layers[i]);
-    if(query){
-      query.checked = check;
-      thema = document.getElementById("thema_"+layers[i]);
-      updateThema('', thema, query, '', '', 0);
-    }
-  }
-	if(instantreload)neuLaden();
+	if (group) {
+		if(Array.isArray(group)) {
+			group = group.filter(function( x ) {
+				return x !== undefined;
+			});
+			value = group.map(function(x){return x.value+""}).join(",");
+		} else {
+			value = group.value+"";
+		}
+		
+		var layers = value.split(",");
+		var check;
+		for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query && query.type == 'checkbox' && !query.disabled){
+				check = !query.checked;
+				break;
+			}
+		}
+		for(i = 0; i < layers.length; i++){
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query){
+				query.checked = check;
+				thema = document.getElementById("thema_"+layers[i]);
+				updateThema('', thema, query, '', '', 0);
+			}
+		}
+		if(instantreload)neuLaden();
+	}
 }
 
 function selectgroupthema(group, instantreload){
 	var value = "";
 	if(Array.isArray(group)) {
-		//activates/deactivates all passed array of groups layers. 
-		//non-opened groups will be undefined and skipped (can be worked around with getlegend(..) on group-id call before this function
-		// remove potential undefined values
 		group = group.filter(function( x ) {
 			return x !== undefined;
 		});
@@ -1544,3 +1554,19 @@ function copyToClipboard(text) {
 		}
 	}
 }
+
+format_duration = function (sec_num) {
+	var hours   = Math.floor(sec_num / 3600);
+	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	var seconds = sec_num - (hours * 3600) - (minutes * 60);
+	var parts = [];
+
+	if (hours 		> 0) parts.push(hours 	+ ' Stunde' 	+ (hours 		> 1 ? 'n' : ''));
+	if (minutes 	> 0) parts.push(minutes + ' Minute' 	+ (minutes 	> 1 ? 'n' : ''));
+	if (seconds 	> 0) parts.push(seconds + ' Sekunde' 	+ (seconds 	> 1 ? 'n' : ''));
+	if (parts.length == 0) return '';
+	if (parts.length == 1) return parts[0];
+	if (parts.length == 2) return parts[0] + ' und ' + parts[1];
+	if (parts.length == 3) return parts[0] + ', ' + parts[1] + ' und ' + parts[2]
+}
+

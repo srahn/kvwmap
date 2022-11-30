@@ -55,7 +55,7 @@
 			node.append("g")
 					.attr("transform", 'translate(-40, 20)')
 					.append("a")
-							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id })
+							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>'})
 							.append("text")
 									.text(function(d) { return d.name });
 					

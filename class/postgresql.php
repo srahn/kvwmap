@@ -364,7 +364,12 @@ FROM
     return $ret;
   }
 
-	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false) {
+	/**
+		Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
+		For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
+		and in correct order.
+	*/
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
 		$strip_context = true;
@@ -391,10 +396,17 @@ FROM
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			#echo "<br>SQL in execSQL: " . $sql;
-			$query = @pg_query($this->dbConn, $sql);
+			if (count($prepared_params) > 0) {
+				$query_id = 'query_' . rand();
+				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
+			}
+			else {
+				#echo "<br>SQL in execSQL: " . $sql;
+				$query = @pg_query($this->dbConn, $sql);
+			}
 			//$query=0;
-			if ($query == 0) {
+			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
 				# erzeuge eine Fehlermeldung;
@@ -1013,7 +1025,6 @@ FROM
   	}
     $select = substr($query, $offset, $fromposition-$offset);
     $from = substr($query, $fromposition);
-    $column = explode(',', $select);
     $column = get_select_parts($select);
     for($i = 0; $i < count($column); $i++){
       if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
@@ -1905,17 +1916,17 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
-    $sql .= " ORDER BY ". replace_semicolon($order);
+    $sql .= " ORDER BY ". $order;
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";
       if ($limitStart!='' AND $limitAnzahl != '') {
-        $sql .= intval($limitAnzahl) . " OFFSET " . intval($limitStart);
+        $sql .= $limitAnzahl . " OFFSET " . $limitStart;
       }
       if ($limitStart!='' AND $limitAnzahl=='') {
-        $sql .= " ALL OFFSET " . intval($limitStart);
+        $sql .= " ALL OFFSET " . $limitStart;
       }
       if ($limitStart == '' AND $limitAnzahl != '') {
-        $sql .= intval($limitAnzahl);
+        $sql .= $limitAnzahl;
       }
     }
     #echo $sql;
@@ -2228,7 +2239,7 @@ FROM
 					WHERE 
 						1=1 " .
 						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
+						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurnummer";
@@ -2275,7 +2286,7 @@ FROM
 					WHERE 
 						1=1 " .
 						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
+						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					UNION
 					SELECT distinct 
@@ -2660,8 +2671,8 @@ FROM
 				md_metadata
 			WHERE
 				true" .
-				($md['oid'] != '' 			? " AND oid = " . (int)$md['oid'] : '') .
-				($md['mdfileid'] != '' 	? " AND mdfileid = " . (int)$md['mdfileid'] : '') . "
+				($md['oid'] != '' 			? " AND oid = " . $md['oid'] : '') .
+				($md['mdfileid'] != '' 	? " AND mdfileid = " . $md['mdfileid'] : '') . "
 		";
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0]==0) {

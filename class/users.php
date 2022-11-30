@@ -667,21 +667,23 @@ class user {
 	var $database;
 	var $remote_addr;
 	var $has_logged_in;
+	var $language = 'german';
 
-	function __construct($login_name, $id, $database, $passwort = '') {
+	/**
+		Create a user object
+		if only login_name is defined, find_by login_name only
+		if login_name and password is defined, find_by login_name and password
+		if
+	*/
+	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
 		$this->debug = $debug;
 		$this->database = $database;
 		$this->has_logged_in = false;
-		if ($login_name) {
-			$this->login_name = $login_name;
-			$this->readUserDaten(0, $login_name, $passwort);
-			$this->remote_addr = getenv('REMOTE_ADDR');
-		}
-		else {
-			$this->id = $id;
-			$this->readUserDaten($id, 0);
-		}
+		$this->login_name = $login_name;
+		$this->id = (int) $id;
+		$this->remote_addr = getenv('REMOTE_ADDR');
+		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
 	/*
@@ -751,26 +753,49 @@ class user {
     }
     return 0;
   }
+	
+	function wrong_password($password) {
+		$stmt = $this->database->mysqli->prepare("
+			SELECT
+				1
+			FROM
+				user
+			WHERE
+				id = ? AND
+				password = SHA1(?)
+		");
+		# echo '<br>SQL: ' . $sql;
+		$stmt->bind_param("is", $args1, $args2);
+		$args1 = $this->id;
+		$args2 = $password;
+		$stmt->execute();
+		$stmt->store_result();
+		return $stmt->num_rows == 0;
+	}
 
-	function readUserDaten($id, $login_name, $passwort = '') {
+	function login_is_locked() {
+		return ($this->login_locked_until != '' AND strtotime($this->login_locked_until) > time());
+	}
+
+	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
 		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
+		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
 				*
 			FROM
 				user
 			WHERE
-				" . implode(" AND ", $where) . "
-		";
-		#echo '<br>Sql: ' . $sql;
+				" . implode(" AND ", $where);
+		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
 		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array();
+		$rs = $this->database->result->fetch_array(MYSQLI_ASSOC);
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
@@ -787,9 +812,12 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
 		$this->tokens = $rs['tokens'];
+		$this->num_login_failed = $rs['num_login_failed'];
+		$this->login_locked_until = $rs['login_locked_until'];
 	}
 
 	/*
@@ -947,11 +975,13 @@ class user {
 		return $user;
 	}
 
-	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0) {
+	function getUserDaten($id, $login_name, $order, $stelle_id = 0, $admin_id = 0, $archived = false) {
 		global $admin_stellen;
 		$where = array();
 
-		$where[] = 'u.archived IS NULL';
+		if (!$archived) {
+			$where[] = 'u.archived IS NULL';
+		}
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
@@ -996,20 +1026,6 @@ class user {
 		return $userdaten;
 	}
 
-	function getFunktion($id) {
-		# Abfragen der Rollen und Funktion, die dem Benutzer zugewiesen sind
-		$sql ="SELECT Name, Vorname, Funktion FROM user,rolle";
-		$sql.=" WHERE user.ID=rolle.user_id";
-		$sql.=" AND user.ID LIKE '".$id."' AND passwort LIKE '".$passwort."'";
-		$this->debug->write("<p>file:users.php class:user->getFunktion - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		if ($this->database->result->num_rows == 0) {
-			$err_nr = 1;
-			$view = 'anmelden';
-		}
-	}
-
 	function getStellen($stelle_ID, $with_expired = false) {
 		global $language;
 		if ($language != '' AND $language != 'german') {
@@ -1043,7 +1059,7 @@ class user {
 				Bezeichnung;
 		";
 
-		#echo '<br>sql: ' . $sql;
+		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
@@ -1083,8 +1099,8 @@ class user {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 	}
-	
-	function updateTokens($token) {
+
+	function update_tokens($token) {
 		$sql = "
 			UPDATE
 				user
@@ -1147,7 +1163,7 @@ class user {
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
 					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
-					, highlighting = '" . ($formvars['highlighting'] != '' ? "1" : "0") . "'
+					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
 					, result_transparency = '" . $formvars['result_transparency'] . "'
@@ -1263,7 +1279,7 @@ class user {
 
 	function loginname_exists($login) {
 		$Meldung='';
-		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt
+		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
 		$sql ="
 			SELECT
 				*
@@ -1279,6 +1295,7 @@ class user {
 		else {
 			if ($this->database->result->num_rows > 0) {
 				$ret[1] = 1;
+				$ret['user'] = $this->database->result->fetch_array();
 			}
 			else {
 				$ret[1] = 0;
@@ -1290,33 +1307,33 @@ class user {
 	function checkUserDaten($userdaten) {
 		$Meldung='';
 		# Prüfen ob die user_id schon existiert
-		if ($userdaten['id']!='') {
-			$ret=$this->exist($userdaten['id']);
+		if ($userdaten['id'] != '') {
+			$ret = $this->exist($userdaten['id']);
 			if ($ret[0]) {
-				$Meldung.=$ret[1];
+				$Meldung .= $ret[1];
 			}
 		}
-		if ($userdaten['nachname']=='') { $Meldung.='<br>Nachname fehlt.'; }
-		if ($userdaten['vorname']=='') { $Meldung.='<br>Vorname fehlt.'; }
-		if ($userdaten['loginname']=='') { $Meldung.='<br>Login Name fehlt.'; }
-		elseif($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
-			$ret=$this->loginname_exists($userdaten['loginname']);
+		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
+		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
+		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
+		elseif ($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
+			$ret = $this->loginname_exists($userdaten['loginname']);
 			if ($ret[1] == 1) {
-				$Meldung.= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
+				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
 		}
-		if($userdaten['changepasswd'] == 1){
-			if ($userdaten['password1']=='') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
-			if ($userdaten['password2']=='') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
-			if ($userdaten['password1']!=$userdaten['password2']) { $Meldung.='<br>Die Passwörter stimmen nicht überein.'; }
+		if ($userdaten['changepasswd'] == 1){
+			if ($userdaten['password1'] == '') { $Meldung.='<br>Die erste Passwordeingabe fehlt.'; }
+			if ($userdaten['password2'] == '') { $Meldung.='<br>Die Passwordwiederholung fehlt.'; }
+			if ($userdaten['password1'] != $userdaten['password2']) { $Meldung .= '<br>Die Passwörter stimmen nicht überein.'; }
 		}
-		if ($userdaten['phon']!='' AND strlen($userdaten['phon'])<3) { $Meldung.='<br>Die Telefonnummer ist zu kurz.'; }
-		if ($userdaten['email']!='') { $Meldung.=emailcheck($userdaten['email']); }
-		if ($Meldung!='') {
-			$ret[0]=1; $ret[1]=$Meldung;
+		if ($userdaten['phon'] != '' AND strlen($userdaten['phon']) < 3) { $Meldung .= '<br>Die Telefonnummer ist zu kurz.'; }
+		if ($userdaten['email'] != '') { $Meldung .= emailcheck($userdaten['email']); }
+		if ($Meldung != '') {
+			$ret[0] = 1; $ret[1] = $Meldung;
 		}
 		else {
-			$ret[0]=0;
+			$ret[0] = 0;
 		}
 		return $ret;
 	}
@@ -1332,7 +1349,7 @@ class user {
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',passwort = MD5("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
+		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
 		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
@@ -1402,12 +1419,12 @@ class user {
 
 	function Aendern($userdaten) {
 		if ($userdaten['changepasswd'] == 1) {
-			$passwort_column = ", `passwort` = MD5('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
-			$passwort_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
+			$password_column = ", `password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
+			$password_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
 		}
 		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
 		if ($userdaten['password_setting_time']) {
-			$passwort_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
+			$password_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
 		}
 
 		$sql = "
@@ -1420,27 +1437,27 @@ class user {
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . $userdaten['start'] . "',
 				`stop`= '" . $userdaten['stop'] . "',
-				`ID` =  ".$userdaten['id'].",
-				`phon` = '".$userdaten['phon']."',
-				`email` = '".$userdaten['email']."',
-				`organisation` = '".$userdaten['organisation']."',
-				`position` = '".$userdaten['position']."',
+				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
+				`ID` =  " . $userdaten['id'].",
+				`phon` = '" . $userdaten['phon']."',
+				`email` = '" . $userdaten['email']."',
+				`organisation` = '" . $userdaten['organisation']."',
+				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
-				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .				
-				$passwort_column .
-				$passwort_setting_time_column . "
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . 
+				$password_column .
+				$password_setting_time_column . "
 			WHERE
 				`ID`= " . $userdaten['selected_user_id'] . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Benutzerdaten konnten nicht aktualisiert werden.<br>'.$ret[1];
 		}
 		return $ret;
 	}
-	
+
 	function archivieren() {
 		$sql = "
 			UPDATE
@@ -1477,7 +1494,7 @@ class user {
 			UPDATE
 				user
 			SET
-				`passwort` = MD5('" . $this->database->mysqli->real_escape_string($password) . "'),
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
 				`password_setting_time` = '" . $password_setting_time . "'
 			WHERE
 				`ID` = " . $this->id . "
@@ -1493,19 +1510,24 @@ class user {
 		return $ret;
 	}
 
-	function Löschen($user_id) {
-		$sql ='DELETE FROM user';
-		$sql.=' WHERE ID = '.$user_id;
-		$ret=$this->database->execSQL($sql,4, 0);
+	function delete($user_id) {
+		$sql ="
+			DELETE FROM
+				`user`
+			WHERE
+				ID = " . $user_id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Der Benutzer konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Der Benutzer konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		else {
-			$sql ='ALTER TABLE `user` PACK_KEYS =0 CHECKSUM =0 DELAY_KEY_WRITE =0';
-			$sql.=' AUTO_INCREMENT =1';
-			$ret=$this->database->execSQL($sql,4, 0);
+			$sql = "
+				ALTER TABLE `user` PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+			";
+			$ret = $this->database->execSQL($sql, 4, 0);
 			if ($ret[0]) {
-				$ret[1].='<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
+				$ret[1] .= '<br>Das Autoincrement für die Tabelle Benutzer konnte nicht zurückgesetzt werden.<br>'.$ret[1];
 			}
 		}
 		return $ret;

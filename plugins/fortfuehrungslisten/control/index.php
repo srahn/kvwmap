@@ -8,7 +8,8 @@ function go_switch_fortfuehrungslisten($go){
 	global $GUI;
 	switch($go) {
 		case 'auftragsdatei_loeschen': {
-			$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
+			$GUI->sanitize(['ff_auftrag_id' => 'int']);
+			$ff_auftrag_id = $GUI->formvars['ff_auftrag_id'];
 			if (empty($ff_auftrag_id)) {
 				GUI::$messages[] = array(
 					'msg' => 'Sie müssen eine Fortführungsauftrags Id angeben im Parameter ff_auftrag_id!',
@@ -26,7 +27,8 @@ function go_switch_fortfuehrungslisten($go){
 		} break;
 
 		case 'lade_fortfuehrungsfaelle': {
-			$ff_auftrag_id = $_REQUEST['ff_auftrag_id'];
+			$GUI->sanitize(['ff_auftrag_id' => 'int']);
+			$ff_auftrag_id = $GUI->formvars['ff_auftrag_id'];
 			if (empty($ff_auftrag_id)) {
 				GUI::$messages[] = array(
 					'type' => 'error',
@@ -88,6 +90,7 @@ function go_switch_fortfuehrungslisten($go){
 		* als Bedingung für die Suche mit den weiteren Suchparametern
 		*/
 		case 'fortfuehrungslisten_fn_suche_Suchen': {
+			$GUI->sanitize(['value_flurstueckskennzeichen' => 'text', 'value_altesneues' => 'text']);
 			$where = array();
 
 			if ($GUI->formvars['value_flurstueckskennzeichen'] != '') {

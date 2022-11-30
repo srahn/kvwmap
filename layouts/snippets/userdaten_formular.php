@@ -32,7 +32,9 @@
 			$('#change_password_text').html('<? echo $strChangePassword; ?>');
 			document.getElementById('udf_changepasswd').classList.remove('udf_pw-active');
 			document.GUI.password1.disabled = true;
+			document.GUI.password1.value = '';
 			document.GUI.password2.disabled = true;
+			document.GUI.password2.value = '';
 			document.GUI.changepasswd.value = 0;
 		}
 	}
@@ -44,18 +46,19 @@
 	}
 
 	function resetPassword() {
+		// das Passwort und der Loginname wird zweimal URL codiert, damit es auch in der Mail URL codiert erscheint
 		var newPassword = getRandomPassword(),
 		loginName = $('form[name="GUI"] input[name="loginname"]').val(),
 		host = window.location.href.split('?')[0];
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=<? echo $strInvitationBody1; ?>%20' + loginName + ',%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + host + '%3Fgo=logout%26login_name=' + loginName + '%26passwort=' + newPassword + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=<? echo $strInvitationBody1; ?>%20' + loginName + ',%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + host + '%3Fgo=logout%26login_name=' + encodeURIComponent(encodeURIComponent(loginName)) + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword)) + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A'
 		);
 		message('<span style="font-size: larger;"><? echo $strInvitationConfirmation1; ?></span><br><br><? echo $strInvitationConfirmation2; ?>.<br><span style="color: red"><? echo $strInvitationConfirmation3; ?>!</span>', 1000, 2000, '', '<? echo $strInvitationConfirmation4; ?>');
 		$('<input>').attr({
 			type: 'hidden',
 			name: 'password_setting_time',
-			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->Stelle->allowedPasswordAge > 0 ? $this->Stelle->allowedPasswordAge : 1))); ?>'
+			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->user_stelle->allowedPasswordAge > 0 ? $this->user_stelle->allowedPasswordAge : 1))); ?>'
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
@@ -154,11 +157,11 @@
 
 <div class="udf_back"><?
 	if ($this->formvars['nutzerstellen']) { ?>
-		<a href="index.php?go=BenutzerStellen_Anzeigen#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a><?
+		<a href="index.php?go=BenutzerStellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#<? echo $this->formvars['nutzerstellen'].'user'.$this->formvars['selected_user_id']; ?>">&raquo;&nbsp;<? echo $this->strButtonBack; ?></a><?
 	} ?>
 </div>
 
-<? $selstellen = (is_array($this->formvars['selstellen']) AND array_key_exists('ID', $this->formvars['selstellen']) ? implode(', ', $this->formvars['selstellen']["ID"]) : ''); ?>
+<? $selstellen = ((is_array($this->formvars['selstellen']) AND array_key_exists('ID', $this->formvars['selstellen'])) ? implode(', ', $this->formvars['selstellen']["ID"]) : ''); ?>
 <div id="form_formular-main">
 	<input type="hidden" name="go" value="Benutzerdaten">
 	<input type="hidden" name="selstellen" value="<? echo $selstellen; ?>"><?
@@ -298,6 +301,11 @@
 			<div><? echo $strStop;?></div>
 			<div><input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>"></div>
 		</div>
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strArchived;?></div>
+			<div><input name="archived" type="text" value="<? echo $this->formvars['archived']; ?>"></div>
+		</div>		
 
 		<div class="form_formular-input">
 			<div class="udf_eingabe-stelle-title"><? echo $strAuthorizeTask;?></div>

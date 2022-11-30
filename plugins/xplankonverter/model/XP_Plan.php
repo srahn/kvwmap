@@ -28,6 +28,12 @@ class XP_Plan extends PgObject {
 		return $xp_plan;
 	}
 
+	public static	function find_where_by_planart($gui, $planart, $where, $order = '') {
+		$plan = new XP_Plan($gui, $planart);
+		$plaene = $plan->find_where($where, $order);
+		return $plaene;
+	}
+
 	function get_anzeige_name() {
 		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
 	}
@@ -87,6 +93,32 @@ class XP_Plan extends PgObject {
 		  $g = json_decode(str_replace(array( '{', '}' ), array('[',']'), $g))[0];
 		}
 		return trim(explode(',',trim($g,'()'))[2]);
+	}
+
+	function get_center_coord() {
+		$sql = "
+			SELECT
+				ST_Y(
+					ST_Transform(
+						ST_Centroid(raeumlichergeltungsbereich),
+						4326
+					)
+				) AS lat,
+				ST_X(
+					ST_Transform(
+						ST_Centroid(raeumlichergeltungsbereich),
+						4326
+					)
+				) AS lon
+			FROM
+				" . $this->qualifiedTableName . "
+			WHERE
+				gml_id = '" . $this->get($this->identifier) . "'
+		";
+		#echo 'SQL zur Abfrage der Centroid-Koordinate: ' . $sql;
+		$results = $this->getSQLResults($sql);
+		$this->center_coord = $results[0];
+		return $this->center_coord;
 	}
 
 	function get_bereiche() {

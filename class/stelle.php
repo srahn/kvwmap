@@ -197,13 +197,16 @@ class stelle {
     }
     return 0;
   }
-	
-	function Löschen() {
-		$sql ='DELETE FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
-		$ret=$this->database->execSQL($sql,4, 0);
+
+	function delete() {
+		$sql = "
+			DELETE FROM stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Stelle konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stelle konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		return $ret;
 	}
@@ -355,8 +358,8 @@ class stelle {
 				`maxxmax` = " . $stellendaten['maxxmax'] . ",
 				`maxymax` = " . $stellendaten['maxymax'] . ",
 				`epsg_code` = " . $stellendaten['epsg_code'] . ",
-				`start` = '" . $stellendaten['start'] . "',
-				`stop` = '" . $stellendaten['stop'] . "',
+				`start` = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
+				`stop` = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
 				`ows_title` = '" . $stellendaten['ows_title'] . "',
 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
 				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
@@ -395,11 +398,12 @@ class stelle {
 				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
-				`check_client_ip` = " . ($stellendaten['checkClientIP'] == '1' ? 1 : 0) . ",
-				`check_password_age` = " . ($stellendaten['checkPasswordAge'] == '1' ? 1 : 0) . ",
+				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				`check_client_ip` = '" . ($stellendaten['checkClientIP'] == '1'	? "1" : "0") . "',
+				`check_password_age` = '" . ($stellendaten['checkPasswordAge'] == '1' ? "1" : "0") . "',
 				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
-				`use_layer_aliases` = " . ($stellendaten['use_layer_aliases'] == '1' ? 1 : 0) . ",
-				`hist_timestamp` = " . ($stellendaten['hist_timestamp'] ? 1 : 0) . ",
+				`use_layer_aliases` = '" . (value_of($stellendaten, 'use_layer_aliases') == '1'	? "1" : "0") . "',
+				`hist_timestamp` = '" . (value_of($stellendaten, 'hist_timestamp') == '1' ? 1 : 0) . "',
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`comment` = '" . $stellendaten['comment'] . "'
@@ -408,7 +412,7 @@ class stelle {
 		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
-			$ret[1].='<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stellendaten konnten nicht eingetragen werden.<br>'.$ret[1];
 		}
 		else {
 			# Stelle Erfolgreich angelegt
@@ -1703,7 +1707,7 @@ class stelle {
 		return $layer;
 	}
 
-	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $only_line_and_polygon_layer = false,  $export_privileg = NULL){
+	function getqueryableVectorLayers($privileg, $user_id, $group_id = NULL, $layer_ids = NULL, $rollenlayer_type = NULL, $use_geom = NULL, $no_query_layers = false,  $export_privileg = NULL){
 		global $language;
 		$sql = 'SELECT layer.Layer_ID, ';
 		if($language != 'german') {
@@ -1723,8 +1727,8 @@ class stelle {
 		else{
 			$sql .=' AND used_layer.queryable = \'1\'';
 		}
-		if($only_line_and_polygon_layer){
-			$sql .=' AND layer.Datentyp IN (2,3)';
+		if($no_query_layers){
+			$sql .=' AND layer.Datentyp != 5';
 		}
 		if($privileg != NULL){
 			$sql .=' AND used_layer.privileg >= "'.$privileg.'"';
@@ -1740,7 +1744,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -2158,13 +2162,15 @@ class stelle {
 				user.*
 			FROM
 				user JOIN
-				rolle ON user.ID = rolle.user_id
+				rolle ON user.ID = rolle.user_id JOIN 
+				stelle ON stelle.ID = rolle.stelle_id
 			WHERE
 				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
-			ORDER BY Name
+			ORDER BY 
+				user.ID = stelle.default_user_id desc, user.Name
 		";
-		#echo "<br>Sql: " . $sql;
+		#debug_write('Abfrage der Nutzer der Stelle mit getUser', $sql, 1);
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -2172,17 +2178,9 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
-				$user['email'][]=$rs['email'];
-			}
-			if(!empty($user['ID'])){
-				// Sortieren der User unter Berücksichtigung von Umlauten
-				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-				$user['Bezeichnung'] = $sorted_arrays['array'];
-				$user['ID'] = $sorted_arrays['second_array'];
-				$user['email'] = $sorted_arrays2['second_array'];
+				$user['ID'][] = $rs['ID'];
+				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['email'][] = $rs['email'];
 			}
 		}
 		if ($result == 'only_ids') {

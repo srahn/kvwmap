@@ -25,8 +25,8 @@
 	$gisDb = new pgdatabase();
 	$gisDb->open(POSTGRES_CONNECTION_ID);
 	$GUI->pgdatabase = $gisDb;
-
-	if ($konvertierung = Konvertierung::find_by_document($GUI, $_REQUEST['document'])) {
+	$GUI->sanitize(['document' => 'text']);
+	if ($konvertierung = Konvertierung::find_by_document($GUI, $GUI->formvars['document'])) {
 		$konvertierung->send_export_file($konvertierung->exportfile, $konvertierung->contenttype);
 	}
 	else {

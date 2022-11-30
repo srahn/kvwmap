@@ -100,7 +100,7 @@ if ($doit == true) {
 						<img height="7" src="<? echo GRAPHICSPATH ?>leer.gif">
 						<div id="datensatz_<? echo $layer['Layer_ID'].'_'.$k; ?>" class="datensatz"
 							<?
-							if ($this->new_entry != true AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
+							if ($this->new_entry != true AND $this->user->rolle->tooltipquery == 1 AND $this->user->rolle->querymode == 1 AND $layer['attributes']['the_geom'] != '') { ?>
 								onmouseenter="highlight_object(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"<?
 							} ?>
 						><?php
@@ -111,7 +111,9 @@ if ($doit == true) {
 								$privileg = 0;
 							}
 						}
-						?><input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+						?>
+						<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>">
+						<input type="hidden" value="<? echo $this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: '0'; ?>" id="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>" name="opentab_<? echo $layer['Layer_ID'] . '_' . $k; ?>">
 						<table class="tgle dstable" border="0" cellpadding="5" cellspacing="0">
 							<? if (!$this->user->rolle->visually_impaired) include(LAYOUTPATH . 'snippets/generic_layer_editor_2_layer_head.php'); ?>
 			        <tbody <? if(!$show_geom_editor AND $layer['attributes']['group'][0] == '')echo 'class="gle gledata"'; ?>>
@@ -132,14 +134,14 @@ if ($doit == true) {
 									$visibility_geom = 'style="visibility: collapse"';
 								}
 							}
-							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab'] ?: 0];
+							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: $this->formvars['opentab'] ?: 0];
 							echo '
 							<tr>
 								<th>
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
-										foreach ($layer['attributes']['tabs'] as $tab) {
+										foreach ($layer['attributes']['tabs'] as $t => $tab) {
 											$tabname = str_replace(' ', '_', $tab);
-											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', \'' . $tabname . '\');">' . $tab . '</div>';
+											echo '<div class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 										}
 										echo '
 									</div>
@@ -167,14 +169,14 @@ if ($doit == true) {
 								$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
 							}				
 				
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen
-								$visibility = '';
+							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
 								$groupname_short = explode('<br>', $groupname);
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
-								if ($layer['attributes']['tab'][$j] != ''){
+								if ($layer['attributes']['tab'][$j] != '') {
+									$visibility = '';
 									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
 										$visibility = 'style="visibility: collapse"';

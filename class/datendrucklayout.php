@@ -590,7 +590,7 @@ class ddl {
 													$y2 = $miny_array - 20;
 												}
 											}
-											$y = $this->putImage($values[$v], $j, $x2, $y2, $width, $preview);
+											$y = $this->putImage($values[$v], $j, $x2, $y2, $offsetx, $width, $preview);
 											if ($y < $miny_array) {
 												$miny_array = $y;
 											}
@@ -610,7 +610,7 @@ class ddl {
 									# normal
 									$value = $this->result[$i][$attributes['name'][$j]];
 									if ($attributes['form_element_type'][$j] == 'Dokument') {
-										$y = $this->putImage($value, $j, $x, $y, $width, $preview);
+										$y = $this->putImage($value, $j, $x, $y, $offsetx, $width, $preview);
 									}
 									else {
 										$text = $this->get_result_value_output($value, $i, $j, $preview);
@@ -784,7 +784,7 @@ class ddl {
 	}
 	
 
-	function putImage($dokumentpfad, $j, $x, $y, $width, $preview){
+	function putImage($dokumentpfad, $j, $x, $y, $offsetx, $width, $preview){
 		if($width == '')$width = 50;
 		if(substr($dokumentpfad, 0, 4) == 'http'){
 			$file = file_get_contents($dokumentpfad);
@@ -795,15 +795,19 @@ class ddl {
 		$dateiname = $pfadteil[0];
 		if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
 		if($dateiname != '' AND file_exists($dateiname)){
-			$dateinamensteil=explode('.', $dateiname);
-			if(in_array(strtolower($dateinamensteil[1]), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
-				$new_filename = IMAGEPATH.basename($dateinamensteil[0]).'.jpg';
+			$dateinamensteil = pathinfo($dateiname);
+			if(in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
+				$new_filename = IMAGEPATH.$dateinamensteil['filename'].'.jpg';
 				exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
 				$size = getimagesize($new_filename);
 				$ratio = $size[1]/$size[0];
 				$height = $ratio*$width;
-				$y = $y-$height;
+				$x = $x + $offsetx;
+				$y = $y - $height;
 				$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+				if ($this->layout['maxx'] < ($x + $width)){
+					$this->layout['maxx'] = ($x + $width);			# maximaler x-Wert für Spaltenanordnung
+				}
 			}
 		}
 		return $y;
@@ -974,6 +978,7 @@ class ddl {
 		#$this->miny = 1000000;
 		$this->i_on_page = -1;
 		$this->xoffset_onpage = 0;
+		$new_column = false;
 		$this->page_overflow = false;
 		if ($pdfobject == NULL) {
 			include_once (CLASSPATH . 'class.ezpdf.php');
@@ -1040,20 +1045,24 @@ class ddl {
 			// else $new_column = false;
 			# spaltenweiser Typ von links nach rechts
 			if ($this->layout['columns'] AND $this->i_on_page > 0) {
-				if ($this->layout['maxx'] > ($this->layout['width'] - $this->layout['margin_right'] - 30)) {
+				$column_i = 1;
+				if ((($this->layout['maxx'] - $offsetx) * ($column_i + 1) / $column_i) > ($this->layout['width'] - $this->layout['margin_right'] - $offsetx)) {
 					$this->xoffset_onpage = 0;
 					$new_column = false;
 					$this->layout['maxx'] = 0;
+					$column_i = 1;
 				}
 				else {
-					$this->xoffset_onpage = $this->xoffset_onpage + $this->layout['maxx'] + $this->layout['gap'];
+					$this->xoffset_onpage = $this->xoffset_onpage + $this->layout['maxx'] - $offsetx + $this->layout['gap'];
+					if ($this->yoffset_onpage < 0) {
+						$this->yoffset_onpage = 0;
+					}
 					$new_column = true;
-					$this->miny[$lastpage] = $this->maxy;
+					$column_i++;
 				}
 			}
-			$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage]; # der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			if (!$new_column) {
-				$this->yoffset_onpage = $this->yoffset_onpage + $this->layout['gap'];	# Abstand zwischen den Datensätzen addieren
+				$this->yoffset_onpage = $this->maxy - $this->miny[$lastpage] + $this->layout['gap']; # der Offset mit dem die Elemente beim Untereinander-Typ nach unten versetzt werden
 			}
 			if (
 				!$new_column AND
@@ -1995,27 +2004,33 @@ class ddl {
 					</select>
 				</td>
 				<td align="right">
-					<a href="javascript:Bestaetigung(\'index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id='.$texts[$i]['id'].'&selected_layer_id='.$layer_id.'&aktivesLayout='.$ddl_id.'\', \'Wollen Sie den Freitext wirklich löschen?\');">löschen&nbsp;</a>
+					<a href="javascript:Bestaetigung(\'index.php?go=sachdaten_druck_editor_Freitextloeschen&freitext_id=' . $texts[$i]['id'] . '&selected_layer_id=' . $layer_id . '&aktivesLayout=' . $ddl_id . '&csrf_token=' . $_SESSION['csrf_token'] . '\', \'Wollen Sie den Freitext wirklich löschen?\');">löschen&nbsp;</a>
 				</td>
 			</tr>';
 		}
 	}
-	
-  function load_lines($ddl_id){
+
+	function load_lines($ddl_id){
 		$lines = array();
-    $sql = 'SELECT druckfreilinien.* FROM druckfreilinien, ddl2freilinien';
-    $sql.= ' WHERE ddl2freilinien.ddl_id = '.$ddl_id;
-    $sql.= ' AND ddl2freilinien.line_id = druckfreilinien.id';
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
-    $ret1 = $this->database->execSQL($sql, 4, 1);
-    if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
-      $lines[] = $rs;
-    }
-    return $lines;
-  }	
-	
+		$sql = "
+			SELECT
+				druckfreilinien.*
+			FROM
+				druckfreilinien, ddl2freilinien
+			WHERE
+				ddl2freilinien.ddl_id = " . $ddl_id . " AND
+				ddl2freilinien.line_id = druckfreilinien.id
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
+		$ret1 = $this->database->execSQL($sql, 4, 1);
+		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		while($rs = $this->database->result->fetch_assoc()){
+			$lines[] = $rs;
+		}
+		return $lines;
+	}
+
   function load_rectangles($ddl_id){
 		$rects = array();
     $sql = 'SELECT druckfreirechtecke.* FROM druckfreirechtecke, ddl2freirechtecke';

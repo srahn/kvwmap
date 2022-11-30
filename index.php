@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 # CLI-Parameterübergabe
-if(isset($argv)){
+if (isset($argv)) {
 	array_shift($argv);
 	$_REQUEST = array();
 	foreach ($argv AS $arg) {
@@ -58,8 +58,8 @@ if(!isset($_SESSION)){
 
 # Laden der Plugins config.phps
 for ($i = 0; $i < count($kvwmap_plugins); $i++) {
-	if (file_exists(PLUGINS.$kvwmap_plugins[$i] . '/config/config.php')) {
-		include(PLUGINS.$kvwmap_plugins[$i].'/config/config.php');
+	if (file_exists(PLUGINS . $kvwmap_plugins[$i] . '/config/config.php')) {
+		include(PLUGINS . $kvwmap_plugins[$i] . '/config/config.php');
 	}
 }
 
@@ -232,7 +232,7 @@ function go_switch($go, $exit = false) {
 		}
 	}
 	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
-		switch($go) {
+		switch ($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
@@ -251,6 +251,11 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
+			} break;
+			
+			case 'saveDrawmode' : {
+				$GUI->sanitize(['always_draw' => 'boolean']);
+				$GUI->saveDrawmode();
 			} break;
 			
 			case 'layer_check_oids' : {
@@ -1102,7 +1107,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['selected_layer_id']);
 			} break;
 
 			case 'Daten_Export' : {
@@ -1392,6 +1397,16 @@ function go_switch($go, $exit = false) {
 			case 'Klasseneditor_Autoklassen_Hinzufügen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Klasseneditor_AutoklassenHinzufuegen();
+			} break;
+			
+			case 'checkClassCompleteness' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				echo $GUI->checkClassCompleteness();
+			} break;
+			
+			case 'checkClassCompletenessAll' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->checkClassCompletenessAll();
 			} break;
 
 			case 'Attributeditor' : {

@@ -281,6 +281,7 @@ ul{
 	margin: 4px;
 	padding: 0;
 	list-style: square outside none;
+	line-height: 22px;
 }
 
 h1 {
@@ -545,7 +546,6 @@ span[data-tooltip]:hover::after {
 select {
 	font-size: 14px;
 	font-family: SourceSansPro1;
-	padding: 0 0;
 }
 
 select option{
@@ -623,6 +623,28 @@ a.red {
 	font-weight: 600; 
 }
 
+a.red .fa {
+	color: #993333;
+}
+
+a.blue {
+	color: #007bff;
+	font-weight: 600; 
+}
+
+a.blue .fa {
+	color: #007bff;
+}
+
+a.orange {
+	color: orange;
+	font-weight: 600; 
+}
+
+a.orange .fa {
+	color: orange;
+}
+
 a.link {
 	color: firebrick; 
 }
@@ -636,6 +658,10 @@ a.blue_underline {
 a.green {
 	color: #339933;
 	TEXT-DECORATION: none; 
+}
+
+a.green .fa {
+	color: #339933;
 }
 
 a.metalink {
@@ -1565,7 +1591,7 @@ a:hover .preview_image{
 .raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 .raster_record .tr_hide .datensatz_header{display: none}
 /* Attribute, die eingeblendet werden sollen: */
-.raster_record .tr_show{visibility:visible;}
+.raster_record .tr_show{visibility:inherit;}
 .raster_record .tr_show .readonly_text{font-size: 15px;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
@@ -2096,7 +2122,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fa:hover {
-	color: #555;
+/*	color: #555; */
 }
 
 .fa-7x {
@@ -2235,6 +2261,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .layerOptions li, #legendOptions li{
 	margin-bottom: 5px;
+}
+
+.layerOptions li{
+	line-height: 22px;
 }
 
 .layerOptions span, #legendOptions span, label{

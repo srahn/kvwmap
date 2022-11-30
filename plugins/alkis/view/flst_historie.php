@@ -68,7 +68,7 @@
 					.attr("transform", 'translate(0, 20)')
 					.append("a")
 						.attr("href", 'javascript:void(0)')
-						.attr("onclick", function(d) { return "overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=" + d.fkz + "', true)"})
+						.attr("onclick", function(d) { return "overlay_link('go=Flurstueck_Anzeigen&FlurstKennz=" + d.fkz + "&without_temporal_filter=1', true)"})
 						.append("text")
 							.attr('text-anchor', 'middle')
 							.attr('x', 0)

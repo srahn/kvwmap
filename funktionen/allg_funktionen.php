@@ -4,6 +4,28 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function mapserverExp2SQL($exp, $classitem){
+	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = str_replace(' eq ', '=', $exp);
+	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
+		if (strpos($exp, '/') === 0) {		# regex
+			$operator = '~';
+			$exp = str_replace('/', '', $exp);
+		}
+		else {
+			$operator = '=';
+		}
+		if (substr($exp, 0, 1) != "'") {
+			$quote = "'";
+		}						
+		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
+	}
+	return $exp;
+}
+
 function add_csrf($url){
 	if (strpos($url, 'javascript:') === false AND strpos($url, 'go=') !== false) {
 		$url = (strpos($url, '#') === false ? $url . '&csrf_token=' . $_SESSION['csrf_token'] : str_replace('#', '&csrf_token=' . $_SESSION['csrf_token'] . '#', $url));
@@ -196,7 +218,7 @@ function get_exif_data($img_path, $force_identify = false) {
 		}
 		else {
 			$exif = @exif_read_data($img_path, 'EXIF, GPS');
-			if (!array_key_exists('GPSLatitude', $exif) OR !array_key_exists('GPSLongitude', $exif)) {
+			if ((is_array($exif) && !array_key_exists('GPSLatitude', $exif)) OR (is_array($exif) && !array_key_exists('GPSLongitude', $exif))) {
 				$exif = exif_identify_data($img_path);
 			}
 		}
@@ -1693,7 +1715,11 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
 	return $result;
 }
 
-function debug_write($msg, $debug = false) {
+function debug_write($msg, $var = NULL, $user_id = NULL) {
+	global $GUI;
+	if ($user_id AND $user_id == $GUI->user->id) {
+		echo "<p>Debug msg: " . $msg . ' val: ' . print_r($var, true) . ' type: ' . getType($var);
+	}
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";
@@ -1811,6 +1837,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
+	return $str;
+}
+
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
 	return $str;
 }
 
@@ -2351,5 +2386,45 @@ function sanitize(&$value, $type) {
 		}
 	}
 	return $value;
+}
+
+/**
+	Function determine the max allowed file size in MB
+	If php configuration parameter are defined with G the values
+	will be multiplied by 1024
+*/
+function get_max_file_size() {
+	$post_max_size_txt = ini_get('post_max_size');
+	$post_max_size = 0;
+	$upload_max_filesize = 0;
+	if (strpos($post_max_size_txt, 'G') !== false) {
+		$post_max_size = (int)$post_max_size_txt * 1024;
+	}
+	$upload_max_filesize_txt = ini_get('upload_max_filesize');
+	if (strpos($upload_max_filesize_txt, 'G') !== false) {
+		$upload_max_filesize = (int)$upload_max_filesize_txt * 1024;
+	}
+	if ($post_max_size == 0 AND $upload_max_filesize == 0) {
+		return MAXUPLOADSIZE;
+	}
+	else {
+		return min($post_max_size, $upload_max_filesize);
+	}
+}
+
+/**
+	Function searches for $value in $array and if exists
+	remove it and put it at first position in array
+	@param $array, Array
+	@param $value, Any
+	@return Array
+*/
+function put_value_first($array, $value) {
+	$key = array_search($val, $array);
+	if ($key !== false) {
+		unset($array[$key]);
+	}
+	array_unshift($array, $value);
+	return $array;
 }
 ?>

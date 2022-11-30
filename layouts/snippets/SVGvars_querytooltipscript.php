@@ -18,7 +18,7 @@ $SVGvars_querytooltipscript .= '
 		var xpos = 5;
 		var ypos = 0;
 		
-		window.setInterval("tooltip_query()", 100);
+		' . ($this->user->rolle->tooltipquery ? 'window.setInterval("tooltip_query()", 100);' : '') . '
 		
 		top.document.getElementById("svghelp").SVGshowtooltip = showtooltip;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 				

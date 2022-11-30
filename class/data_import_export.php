@@ -233,11 +233,11 @@ class data_import_export {
 	}
 
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
-		if (file_exists($uploadpath.$file.'.dbf')) {
-			$filename = $uploadpath.$file.'.dbf';
+		if (file_exists($uploadpath . $file . '.dbf')) {
+			$filename = $uploadpath . $file . '.dbf';
 		}
-		elseif (file_exists($uploadpath.$file.'.DBF')) {
-			$filename = $uploadpath.$file.'.DBF';
+		elseif (file_exists($uploadpath . $file . '.DBF')) {
+			$filename = $uploadpath . $file . '.DBF';
 		}
 		else {
 			return;
@@ -299,8 +299,18 @@ class data_import_export {
 
 	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $selected_layer_id = NULL){
 		if ($filenameparts[0] != '') {
-			if ((file_exists($filenameparts[0].'.shp') AND file_exists($filenameparts[0].'.dbf') AND file_exists($filenameparts[0].'.shx')) OR
-				 (file_exists($filenameparts[0].'.SHP') AND file_exists($filenameparts[0].'.DBF') AND file_exists($filenameparts[0].'.SHX'))) {
+			if (
+				(
+					file_exists($filenameparts[0] . '.shp') AND
+					file_exists($filenameparts[0] . '.dbf') AND
+					file_exists($filenameparts[0] . '.shx')
+				) OR
+				(
+					file_exists($filenameparts[0] . '.SHP') AND
+					file_exists($filenameparts[0] . '.DBF') AND
+					file_exists($filenameparts[0] . '.SHX')
+				)
+			) {
 				$formvars['shapefile'] = $filenameparts[0];
 				if ($epsg == NULL) {
 					$epsg = $this->get_shp_epsg($filenameparts[0], $pgdatabase);		# EPSG-Code aus prj-Datei ermitteln
@@ -335,7 +345,6 @@ class data_import_export {
 				$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['shapefile']), 0, 15))) . date("_Y_m_d_H_i_s", time());
 				$adjustments = true;
 			}
-			
 			$custom_table = $this->load_shp_into_pgsql($db, '', $formvars['shapefile'], $epsg, $schema, $table, $encoding, $adjustments);
 			if ($custom_table != NULL) {
 				exec('rm ' . UPLOADPATH . $user->id . '/' . basename($formvars['shapefile']) . '.*');	# aus Sicherheitsgründen rm mit Uploadpfad davor
@@ -348,7 +357,7 @@ class data_import_export {
 	function import_custom_kml($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			# tracks
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -383,7 +392,7 @@ class data_import_export {
 	function import_custom_gpx($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			# tracks
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -418,7 +427,7 @@ class data_import_export {
 				$custom_table['tablename'] = $tablename;
 				$custom_tables[] = $custom_table;
 				# waypoints
-				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
+				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))). date("_Y_m_d_H_i_s", time());
 				$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
 				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 				$ret = $pgdatabase->execSQL($sql,4, 0);
@@ -435,7 +444,7 @@ class data_import_export {
 	function import_custom_ovl($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			$rows = file($filename);
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$i = -1;
 			foreach($rows as $row){
 				$kvp = explode('=', $row);
@@ -522,7 +531,7 @@ class data_import_export {
 				$this->ask_epsg = true;		# EPSG-Code nachfragen
 				return;
 			}
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -573,7 +582,7 @@ class data_import_export {
 			$json = json_decode(file_get_contents($filename));
 			if(strpos($json->crs->properties->name, 'EPSG:') !== false)$epsg = trim(array_pop(explode('EPSG:', $json->crs->properties->name)), ':');
 			else $epsg = 4326;
-			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -623,7 +632,7 @@ class data_import_export {
 
 	function import_custom_pointlist($formvars, $pgdatabase){
 		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
+		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))). date("_Y_m_d_H_i_s", time());
 		$i = 0;
 		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
 			$i++;
@@ -877,7 +886,7 @@ class data_import_export {
 				$this->ask_epsg = true;		# EPSG-Code nachfragen
 				return;
 			}
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$wkt = file_get_contents($filename);
 			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
 			$wkt = str_replace(chr(13), '', $wkt);
@@ -959,14 +968,17 @@ class data_import_export {
 
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		$command = '';
-		if ($options != NULL) $command.= $options;
+		if ($options != NULL) {
+			$command.= $options;
+		}
 		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
-		if ($sql != NULL) $command.= ' -sql \''.$sql.'\'';
+		if ($sql != NULL) {
+			$command .= ' -sql \'' . $sql . '\'';
+		}
 		$command .= ' PG:"' . $database->get_connection_string(true) . ' active_schema=' . $schema . '"';
 		$command .= ' "' . $importfile . '" ' . $layer;
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
-			#echo '<p>command: ' . $command;
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
@@ -982,18 +994,20 @@ class data_import_export {
 			}
 		}
 		else {
-			$command = 'export PGCLIENTENCODING='.$encoding.';'.OGR_BINPATH.'ogr2ogr ' . $command;
+			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
 			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
-			if ($ret != 0) {
-				# versuche mit noch mal mit UTF-8
+			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
+			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
+				# versuche noch mal mit UTF-8
 				$command = str_replace('PGCLIENTENCODING='.$encoding, 'PGCLIENTENCODING=UTF-8', $command);
 				#echo '<p>command mit UTF-8: ' . $command;
 				exec($command, $output, $ret);
 				if ($ret != 0) {
-					exec("sed -i -e 's/".$database->passwd."/xxxx/g' ".IMAGEPATH.$tablename.'.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+					# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
+					exec("sed -i -e 's/" . $database->passwd."/xxxx/g' " . IMAGEPATH . $tablename . '.err');
 					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
 				}
 			}

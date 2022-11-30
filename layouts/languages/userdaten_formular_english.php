@@ -42,9 +42,10 @@
 	$strShareRollenlayerAllowedLabel = 'Share Layer';
 	$strStart = 'Start Access';
 	$strStop = 'Stop Access';
-	$strTakeOverPassword = 'Take over password';
+	$strTakeOverPassword = 'Cancle new password';
 	$strTitle = 'User Data Editor';
 	$strUserTitle = 'User title';
 	$strLayerDataImportAllowedLabel = 'Data-Import in layers';
-	$strLayerDataImportAllowedCheckboxText = 'Permission to create new Records by data-import.';	
+	$strLayerDataImportAllowedCheckboxText = 'Permission to create new Records by data-import.';
+	$strArchived = "archived";
 ?>

@@ -448,26 +448,24 @@ class GUI {
 				}
 
 				# SVG-Geometrie abfragen für highlighting
-				if($this->user->rolle->highlighting == '1'){
-					if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
-						$rand = $this->map_scaledenom/1000;
-						$tolerance = $this->map_scaledenom/10000;
-						if($client_epsg == 4326){
-							$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
-							$rand = $rand / 60000;		# wegen der Einheit Grad
-						}
-						$box_wkt ="POLYGON((";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
-						$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-						$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
+				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
+					$rand = $this->map_scaledenom/1000;
+					$tolerance = $this->map_scaledenom/10000;
+					if($client_epsg == 4326){
+						$tolerance = $tolerance / 60000;		# wegen der Einheit Grad
+						$rand = $rand / 60000;		# wegen der Einheit Grad
 					}
-					else{
-						$buffer = $this->map_scaledenom/260;
-						$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
-					}
+					$box_wkt ="POLYGON((";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
+					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
+					$pfad = "st_assvg(st_transform(st_simplify(st_intersection(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
+				}
+				else{
+					$buffer = $this->map_scaledenom/260;
+					$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -476,13 +474,7 @@ class GUI {
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 								
-				#if($the_geom == 'query.the_geom'){
-					$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
-				/*}
-				else{
-					$sql = "SELECT ".$pfad." ".$sql_where;
-				}
-				*/
+				$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
 
 				# order by wieder einbauen
 				if($layerset[$i]['attributes']['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
@@ -509,7 +501,7 @@ class GUI {
 			}
     } # ende der Schleife zur Abfrage der Layer der Stelle
     # Tooltip-Abfrage
-    if($found AND $this->show_query_tooltip == true){
+    if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
 				$output .= $layer['Name'].' : || ';
@@ -858,11 +850,11 @@ class user {
 		}
 	}
 
-	function readUserDaten($id, $login_name, $passwort = '') {
+	function readUserDaten($id, $login_name, $password = '') {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $login_name . "'");
-		if ($passwort != '') array_push($where, "passwort = md5('" . $this->database->mysqli->real_escape_string($passwort) . "')");
+		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
+		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		$sql = "
 			SELECT
 				*
@@ -871,10 +863,10 @@ class user {
 			WHERE
 				" . implode(" AND ", $where) . "
 		";
-		#echo '<br>Sql: ' . $sql;
+		#echo '<br>SQL to read user data: ' . $sql;
 
-		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>" . $sql, 3);
-		$this->database->execSQL($sql);
+		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
+		$this->database->execSQL($sql, 4, 0, true);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
 		$rs = $this->database->result->fetch_array();
 		$this->id = $rs['ID'];
@@ -893,6 +885,9 @@ class user {
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
+		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
+		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->tokens = $rs['tokens'];
 	}
 
 	function getLastStelle() {
@@ -1222,7 +1217,7 @@ class rolle {
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->fontsize_gle=$rs['fontsize_gle'];
-			$this->highlighting=$rs['highlighting'];
+			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
 			$this->result_hatching=$rs['result_hatching'];

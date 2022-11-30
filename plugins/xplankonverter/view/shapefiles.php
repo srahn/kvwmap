@@ -63,58 +63,60 @@
 <h2>Hochgeladene Dateien</h2>
 <br>
 <h4><?php echo $this->konvertierung->plan->planart . ': ' . htmlspecialchars($this->konvertierung->plan->get_anzeige_name()); ?></h4>
-<table
-  id="shapefiles_table"
-  data-toggle="table"
-  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
-  data-height="100%"
-  data-click-to-select="false"
-  data-sort-name="filename"
-  data-sort-order="asc"
-  data-search="false"
-  data-show-refresh="false"
-  data-show-toggle="false"
-  data-show-columns="true"
-  data-query-params="queryParams"
-  data-pagination="true"
-  data-page-size="25"
-  data-show-export="false"
-  data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
->
-  <thead>
-    <tr>
-      <th
-        data-field="shapefiles_oid"
-        data-visible="false"
-        data-switchable="true"
-        class="text-right"
-      >DB OID</th>
-      <th
-        data-field="shapefile_id"
-        data-visible="false"
-        data-switchable="true"
-        class="text-right"
-      >Shapefile ID</th>
-      <th
-        data-field="filename"
-        data-sortable="true"
-        data-visible="true"
-      >Shapedatei Dateiname</th>
-      <th
-        data-field="epsg_code"
-        data-sortable="true"
-        data-visible="true"
-      >EPSG-Code</th>
-      <th
-        data-field="shapefile_id"
-        data-visible="true"
-        data-formatter="shapeFileFunctionsFormatter"
-        data-switchable="false"
-        class="text-right"
-      >Bearbeiten</th>
-    </tr>
-  </thead>
-</table>
+<div class="table-wrapper">
+	<table
+	  id="shapefiles_table"
+	  data-toggle="table"
+	  data-url="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo XPLANKONVERTER_SHAPEFILES_LAYER_ID; ?>&anzahl=1000&operator_konvertierung_id==&value_konvertierung_id=<?php echo $this->formvars['konvertierung_id']; ?>&mime_type=formatter&format=json"
+	  data-height="100%"
+	  data-click-to-select="false"
+	  data-sort-name="filename"
+	  data-sort-order="asc"
+	  data-search="false"
+	  data-show-refresh="false"
+	  data-show-toggle="false"
+	  data-show-columns="true"
+	  data-query-params="queryParams"
+	  data-pagination="true"
+	  data-page-size="25"
+	  data-show-export="false"
+	  data-export_types=['json', 'xml', 'csv', 'txt', 'sql', 'excel']
+	>
+	  <thead>
+	    <tr>
+	      <th
+	        data-field="shapefiles_oid"
+	        data-visible="false"
+	        data-switchable="true"
+	        class="text-right"
+	      >DB OID</th>
+	      <th
+	        data-field="shapefile_id"
+	        data-visible="false"
+	        data-switchable="true"
+	        class="text-right"
+	      >Shapefile ID</th>
+	      <th
+	        data-field="filename"
+	        data-sortable="true"
+	        data-visible="true"
+	      >Shapedatei Dateiname</th>
+	      <th
+	        data-field="epsg_code"
+	        data-sortable="true"
+	        data-visible="true"
+	      >EPSG-Code</th>
+	      <th
+	        data-field="shapefile_id"
+	        data-visible="true"
+	        data-formatter="shapeFileFunctionsFormatter"
+	        data-switchable="false"
+	        class="text-right"
+	      >Bearbeiten</th>
+	    </tr>
+	  </thead>
+	</table>
+</div>
 <div style="clear:both"></div>
 <input type="hidden" name="konvertierung_id" value="<?php echo $this->formvars['konvertierung_id']; ?>">
 <input type="hidden" name="planart" value="<?php echo $this->konvertierung->get('planart'); ?>">

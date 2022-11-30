@@ -42,9 +42,10 @@
 	$strShareRollenlayerAllowedLabel = 'Layer Teilen';
 	$strStart = 'Zugang Start';
 	$strStop = 'Zugang Stop';
-	$strTakeOverPassword = 'Passwort übernehmen';
+	$strTakeOverPassword = 'Passworterstellung Abbrechen';
 	$strTitle = 'Nutzerdaten Editor';
 	$strUserTitle = 'Namenszusatz';
 	$strLayerDataImportAllowedLabel = 'Daten-Import in Themen';
 	$strLayerDataImportAllowedCheckboxText = 'Darf neue Datensätze über den Daten-Import erzeugen.';	
+	$strArchived = "archiviert";
 ?>

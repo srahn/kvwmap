@@ -116,9 +116,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 	
-	toggle_tab = function(tab, layer_id, k, tabname){
+	toggle_tab = function(tab, layer_id, k, t, tabname){
 		var dataset = document.getElementById('datensatz_' + layer_id + '_' + k);
+		var opentab_field = document.getElementById('opentab_' + layer_id + '_' + k);
 		var active_tab = dataset.querySelector('.active_tab');
+		opentab_field.value = t;
 		active_tab.classList.remove("active_tab");
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
@@ -238,7 +240,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var gap_elements = document.querySelectorAll('.gap_'+groupname);
 		var group = document.getElementById(groupname);
 		var img = document.getElementById('img_'+groupname);
-		if(group.colSpan == group.dataset.colspan){		// wenn aktueller colspan = initialer colspan -> Gruppe ist aufgeklappt
+		if(img.src.indexOf('graphics/minus.gif') != -1){		// Gruppe ist aufgeklappt
 			[].forEach.call(group_elements, function (group_element){
 				group_element.style.display='none';		// Attribute der Gruppe ausblenden
 			});

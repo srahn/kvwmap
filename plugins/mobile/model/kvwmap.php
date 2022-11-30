@@ -248,12 +248,15 @@
 			"alias" => $layerset['alias'],
 			"id_attribute" => $layerset['oid'],
 			"name_attribute" => $layerset['labelitem'],
+			"classitem" => $layerset['classitem'],
+			"transparency" => $layerset['transparency'],
 			"geometry_attribute" => $attributes['the_geom'],
 			"geometry_type" => $geometry_types[$layerset['Datentyp']],
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
 			"document_path" => $layerset['document_path'],
 			"privileg" => $layerset['privileg'],
+			"drawingorder" => $layerset['drawingorder'],
 			"sync" => $layerset['sync']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
@@ -464,8 +467,10 @@
 						--RAISE notice 'sql nach add values for version %', _sql;
 					END IF;
 
-					_sql := substr(_sql, 1, strpos(lower(_sql), 'returning') -1);
-					--RAISE notice 'sql nach entfernen von RETURNING uuid';
+					IF strpos(lower(_sql), ' returning ') > 0 THEN
+						_sql := substr(_sql, 1, strpos(lower(_sql), ' returning ') -1);
+						--RAISE notice 'sql nach entfernen von RETURNING uuid %', _sql;
+					END IF;
 
 					INSERT INTO " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas (version, sql) VALUES (new_version, _sql);
 					RAISE NOTICE 'Neuen Datensatz mit Version % für Synchronisierung eingetragen.', new_version; 
