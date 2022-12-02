@@ -1130,7 +1130,7 @@ class flurstueck {
 		if (rolle::$hist_timestamp != '') {
 			$sql = 'SET enable_mergejoin = OFF;';
 		}
-    $sql.="SET enable_seqscan = OFF;SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
+    $sql.="SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if ($this->hist_alb) {
 			$sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		}
