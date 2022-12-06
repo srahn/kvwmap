@@ -649,7 +649,7 @@ class Konvertierung extends PgObject {
 				" . $table_schema . "." . strtolower($planart) . " gmlas;
 		";
 
-		switch ($planart) {
+		switch ($planart_as_text) {
 			case ('BP-Plan') : {
 				$sql .= "
 					INSERT INTO xplan_gml." . strtolower($planart) . " (
@@ -905,6 +905,7 @@ class Konvertierung extends PgObject {
 				" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
 				xplan_gml." . strtolower($planart) . " AS plan ON trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid = plan.gml_id;
 		";
+		#echo '<br>Anweisung zum Anlegen der Pläne und der Bereiche: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
 			return array(
