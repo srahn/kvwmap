@@ -81,7 +81,6 @@
 						$layer_id,
 						$GUI->Stelle->pgdbhost
 					);
-					$layerdb->setClientEncoding();
 					$attributes = $mapDB->read_layer_attributes(
 						$layer_id,
 						$layerdb,
@@ -256,6 +255,7 @@
 			"schema_name" => $layerset['schema'],
 			"document_path" => $layerset['document_path'],
 			"privileg" => $layerset['privileg'],
+			"drawingorder" => $layerset['drawingorder'],
 			"sync" => $layerset['sync']
 		);
 		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path

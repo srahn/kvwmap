@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 # CLI-Parameterübergabe
-if(isset($argv)){
+if (isset($argv)) {
 	array_shift($argv);
 	$_REQUEST = array();
 	foreach ($argv AS $arg) {
@@ -232,7 +232,7 @@ function go_switch($go, $exit = false) {
 		}
 	}
 	if (FAST_CASE OR $GUI->goNotExecutedInPlugins) {
-		switch($go) {
+		switch ($go) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);

@@ -1444,6 +1444,23 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setBuffer($formvars) {
+		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					id = -1* " . $formvars['layer_options_open'] . "
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
@@ -1600,10 +1617,10 @@ class rolle {
 					`redline_font_family`,
 					`redline_font_size`,
 					`redline_font_weight`
-				) 
-				SELECT ".
-					$user_id.", ".
-					$stelle_id.",
+				)
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
 					`nImageWidth`, `nImageHeight`,
 					`auto_map_resize`,
 					`minx`, `miny`, `maxx`, `maxy`,
@@ -1648,8 +1665,8 @@ class rolle {
 				FROM
 					`rolle`
 				WHERE
-					`user_id` = ".$default_user_id." AND
-					`stelle_id` = ".$stelle_id."
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $stelle_id . "
 			";
 		}
 		else {
@@ -1667,10 +1684,10 @@ class rolle {
 				FROM
 					stelle
 				WHERE
-					ID = ".$stelle_id."
+					ID = " . $stelle_id . "
 			";
 		}
-		#echo '<br>'.$sql;
+		#debug_write('Rolle eintragen', $sql, 1);
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
@@ -1695,6 +1712,25 @@ class rolle {
 			if (!$ret['success']) {
 				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
 				return 0;
+			}
+			# default_user_id
+			$sql = "
+				UPDATE
+					`stelle` 
+				SET	
+					default_user_id = NULL
+				WHERE 
+					default_user_id = " . $user_id . " AND 
+					ID = " . $stellen[$i];
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
+			else {
+				if ($this->database->mysqli->affected_rows > 0){
+					GUI::add_message_('notice', 'Achtung! Der Standardnutzer wurde von der Stelle entfernt.');
+				}
 			}
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {

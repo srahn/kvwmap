@@ -7,7 +7,6 @@
 	<?
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
-		$layerdb->setClientEncoding();
 		$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
 		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
 		$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);

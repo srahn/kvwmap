@@ -604,7 +604,7 @@ if ($anzNamen>0) {
 	</div>
 </div>
 <div id="nsf_grundbuch">
-	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');">'.$strCheckAll.'</a>'; ?></div>
+	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');">'.$strCheckAll.' (' . count($this->namen) . ')</a>'; ?></div>
 	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');"><img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0"></a>'; ?>&nbsp;<?php echo $strSelGbbl; ?>: <a href="javascript:send_selected_grundbuecher('Grundbuchblatt_Auswaehlen_Suchen');">anzeigen</a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Suche_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFst; ?></a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Zeige_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFstInMap; ?></a></div>
 </div>
 <div id="nsf_offset">

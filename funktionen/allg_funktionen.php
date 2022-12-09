@@ -1715,7 +1715,11 @@ function curl_get_contents($url, $username = NULL, $password = NULL) {
 	return $result;
 }
 
-function debug_write($msg, $debug = false) {
+function debug_write($msg, $var = NULL, $user_id = NULL) {
+	global $GUI;
+	if ($user_id AND $user_id == $GUI->user->id) {
+		echo "<p>Debug msg: " . $msg . ' val: ' . print_r($var, true) . ' type: ' . getType($var);
+	}
   #$fp = fopen(LOGPATH.'debug.htm','a+');
 	#$log = getTimestamp().":\n";
 	#$msg = "- ".$msg."\n";
@@ -1833,6 +1837,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
+	return $str;
+}
+
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
 	return $str;
 }
 
@@ -2397,5 +2410,21 @@ function get_max_file_size() {
 	else {
 		return min($post_max_size, $upload_max_filesize);
 	}
+}
+
+/**
+	Function searches for $value in $array and if exists
+	remove it and put it at first position in array
+	@param $array, Array
+	@param $value, Any
+	@return Array
+*/
+function put_value_first($array, $value) {
+	$key = array_search($val, $array);
+	if ($key !== false) {
+		unset($array[$key]);
+	}
+	array_unshift($array, $value);
+	return $array;
 }
 ?>

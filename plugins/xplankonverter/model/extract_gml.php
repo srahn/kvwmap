@@ -14,10 +14,134 @@ class Gml_extractor {
 		$this->epsg = '25832';
 	}
 
+	/**
+		ToDo:
+		Die Funktion zum Importieren der XPlanGML-Datei in das gmlas Schema und die Belegung der formvars auftrennen in import_gml_to_db() und extract_to_form, damit man auch einlesen kann ohne die Forms zu füllen
+		Dann die Übernahme der Daten aus dem import Schema nach konvertierung und xplan_gml ausführen (create_plaene_from_gmlas) und Kennzeichnung als neue Version einer Zusammenzeichnung
+		was geht durch das Attribut zusammenzeichnung Typ boolean der Klasse xp_plan und dem Attribut veroeffentlichungsdatum der Tabelle xplankonverter.konvertierungen
+		Also migration für neues Attribut zusammenzeichnung boolean in Klasse xp_plan.
+		migration 2022-10-18_18-01-17_add_zusammenzeichnung_to_xp_plan.sql schon angelegt.
+	*/
+	function import_gml_to_db() {
+		global $GUI;
+		$this->input_epsg = $this->get_source_srid();
+		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
+		# TODO should the target EPSG be stelle or rolle specific?
+		$this->epsg = $GUI->Stelle->epsg_code;
+		$this->build_basic_tables();
+		$gmlas_output = $this->ogr2ogr_gmlas();
+		if ($gmlas_output == "Nothing returned from ogr2ogr curl request") {
+			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
+			return;
+		}
+		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
+
+		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
+		# NOTE:
+		# As lines have to be reverted as well, it cannot be confirmed automatically whether the order is correct.
+		# It must be assumed that source data conforms to the GML standard (left hand order) on all geometries
+		# For Polygons alone, this could be deduced through an inside/outside check (e.g. with ST_ForceRHR())
+		$fachobjekte_tables_and_geometries = $this->get_fachobjekte_geometry_tables_attributes($this->gmlas_schema);
+		if (!empty($fachobjekte_tables_and_geometries)) {
+			foreach ($fachobjekte_tables_and_geometries as $fachobjekt_table_and_geometry) {
+				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
+			}
+		}
+	}
+
+	function extract_to_form($classname) {
+		$layername = '';
+		$tablename = strtolower($classname); #for DB
+		
+		switch ($classname) {
+			case 'BP_Plan' : {
+				$layername = 'B-Pläne';
+				$GUI->formvars['chosen_layer_id'] = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+			} break;
+			case 'FP_Plan' : {
+				$layername = 'F-Pläne';
+				$GUI->formvars['chosen_layer_id'] = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
+			} break;
+			case 'RP_Plan' : {
+				$layername = 'R-Pläne';
+				$GUI->formvars['chosen_layer_id'] = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
+			} break;
+			case 'SO_Plan' : {
+				$layername = 'SO-Pläne';
+				$GUI->formvars['chosen_layer_id'] = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
+			} break;
+			default : {
+				#Default = BP_Plan
+				$layername = 'B-Pläne';
+				$GUI->formvars['chosen_layer_id'] = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
+			} break;
+		}
+
+		$gml_id = $this->parse_gml_id($classname);
+		if(empty($gml_id)){
+			$GUI->add_message('warning', 'Es konnte keine Klasse ' . $classname . ' mit Pflichtattribut gml:id gefunden werden');
+			return;
+		}
+
+		# Mapping of input to output schema
+		# Dynamic function
+		$formdata = array();
+		$fill_form_table = 'fill_form_' . $tablename;
+		$formdata = $this->$fill_form_table($gml_id);
+		$rect = ms_newRectObj();
+
+		# iterate over all attributes as formvars
+		foreach ($formdata as $r_key => $r_value) {
+			if ($r_key == 'externereferenz') {
+				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
+				$referenzen = json_decode($r_value);
+				if (is_array($referenzen) AND count($referenzen) > 0) {
+					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
+					foreach ($referenzen AS $referenz) {
+						$path_parts = pathinfo(basename($referenz->referenzurl));
+						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+					}
+					$r_value = str_replace('\/', '/', json_encode($referenzen));
+				}
+			}
+			$GUI->formvars['attributenames'][] = $r_key;
+			$GUI->formvars['values'][] = $r_value;
+			# for filling the geometry data
+			if ($r_key == 'newpathwkt') {
+				$GUI->formvars['newpathwkt'] = $r_value;
+				$GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
+			}
+			# for drawing the data onto the polygoneditor
+			if ($r_key == 'newpath') {
+				$GUI->formvars['newpath'] = transformCoordsSVG($r_value);
+			}
+			if ($r_key == 'oid') {
+				$oid = $r_value;
+			}
+		}
+		if (empty($oid)) {
+			$oid = $this->trim_gml_prefix_if_exists($gml_id); # workaround for now
+		}
+
+		# get extent of geometry for zooming 
+		$extent = $this->get_bbox_from_wkt($GUI->formvars['pathwkt']);
+		$GUI->formvars = $GUI->formvars + $extent;
+		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = 'check;' . $layername . ';' . $tablename . ';' . $oid . '|';
+		$GUI->formvars['check;' . $layername .';' . $tablename . ';' . $oid] = 'on';
+		$GUI->formvars['attributenames'][] = 'layer_schemaname';
+		$GUI->formvars['values'][] = $this->gmlas_schema;
+		#print_r($GUI->formvars);
+	}
+
 	/*
 	* Extracts Plan and sends vars to form
 	*/
 	function extract_gml_class($classname) {
+		#$this->import_gml_to_db();
+		#$this->extract_to_form($classname);
+		/**
+			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
+		*/
 		global $GUI;
 		$this->input_epsg = $this->get_source_srid();
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
@@ -354,7 +478,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . $this->gml_location . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 		
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 		#echo 'url: ' . $url . '<br><br>';

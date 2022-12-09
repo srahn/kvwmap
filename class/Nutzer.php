@@ -9,31 +9,36 @@ class Nutzer extends MyObject {
 	}
 
 	public static	function find_by_login_name($gui, $login_name) {
+		$gui->debug->show('Frage Nutzer mit login_name ab.', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
 		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {
 		$num_login_failed = 0;
-		$user = Nutzer::find_by_login_name($gui, $login_name);
-		if ($user->has_key('num_login_failed')) {
-			$num_login_failed = $user->get('num_login_failed') + 1;
-			$user->update(array(
-				'ID' => $user->get('ID'),
-				'num_login_failed' => $num_login_failed
+		$nutzer = Nutzer::find_by_login_name($gui, $login_name);
+		if ($nutzer->has_key('num_login_failed')) {
+			$num_login_failed = $nutzer->get('num_login_failed') + 1;
+			$gui->debug->show('Setze num_login_failed auf ' . $num_login_failed, Nutzer::$write_debug);
+
+			$nutzer->update(array(
+				'num_login_failed' => $num_login_failed,
+				'login_locked_until' => date('Y-m-d H:i:s', time() + ($num_login_failed <= 5 ? 0 : $num_login_failed * 5))
 			));
 		}
-		return $num_login_failed;
+		return $nutzer;
 	}
 
 	public static function reset_num_login_failed($gui, $login_name) {
-		$user = Nutzer::find_by_login_name($gui, $login_name);
-		if ($user->has_key('num_login_failed')) {
-			$user->update(array(
-				'ID' => $user->get('ID'),
-				'num_login_failed' => 0
+		$nutzer = Nutzer::find_by_login_name($gui, $login_name);
+		if ($nutzer->has_key('num_login_failed')) {
+			$nutzer->update(array(
+				'ID' => $nutzer->get('ID'),
+				'num_login_failed' => 0,
+				'login_locked_until' => ''
 			));
 		}
+		return $nutzer;
 	}
 
 	public static function register($gui, $stelle_id) {
@@ -72,6 +77,33 @@ class Nutzer extends MyObject {
 			}
 		}
 		return $result;
+	}
+
+	function get_rolle() {
+		$this->rolle = null;
+		if ($this->get('stelle_id') != '') {
+			$db_object = new MyObject(
+				$this->gui,
+				'rolle',
+				array(
+					array(
+						'key' =>'user_id',
+						'type' => 'integer'
+					),
+					array(
+						'key' => 'stelle_id',
+						'type' => 'integer'
+					)
+				),
+				'array'
+			);
+			$db_object->data = array(
+				'user_id' 	=> $this->get('ID'),
+				'stelle_id' => $this->get('stelle_id')
+			);
+			$this->rolle = $db_object->find_by_ids(array('user_id' => $db_object->get('user_id'), 'stelle_id' => $db_object->get('stelle_id')));
+		}
+		return $this->rolle;
 	}
 }
 ?>

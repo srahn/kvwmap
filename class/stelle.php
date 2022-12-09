@@ -197,13 +197,16 @@ class stelle {
     }
     return 0;
   }
-	
-	function Löschen() {
-		$sql ='DELETE FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
-		$ret=$this->database->execSQL($sql,4, 0);
+
+	function delete() {
+		$sql = "
+			DELETE FROM stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Stelle konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stelle konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		return $ret;
 	}
@@ -1741,7 +1744,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -2159,13 +2162,15 @@ class stelle {
 				user.*
 			FROM
 				user JOIN
-				rolle ON user.ID = rolle.user_id
+				rolle ON user.ID = rolle.user_id JOIN 
+				stelle ON stelle.ID = rolle.stelle_id
 			WHERE
 				archived IS NULL AND 
 				rolle.stelle_id = " . $this->id . "
-			ORDER BY Name
+			ORDER BY 
+				user.ID = stelle.default_user_id desc, user.Name
 		";
-		#echo "<br>Sql: " . $sql;
+		#debug_write('Abfrage der Nutzer der Stelle mit getUser', $sql, 1);
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -2173,17 +2178,9 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
-				$user['email'][]=$rs['email'];
-			}
-			if(!empty($user['ID'])){
-				// Sortieren der User unter Berücksichtigung von Umlauten
-				$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
-				$sorted_arrays2 = umlaute_sortieren($user['Bezeichnung'], $user['email']);
-				$user['Bezeichnung'] = $sorted_arrays['array'];
-				$user['ID'] = $sorted_arrays['second_array'];
-				$user['email'] = $sorted_arrays2['second_array'];
+				$user['ID'][] = $rs['ID'];
+				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['email'][] = $rs['email'];
 			}
 		}
 		if ($result == 'only_ids') {

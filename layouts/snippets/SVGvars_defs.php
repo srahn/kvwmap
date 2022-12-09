@@ -126,6 +126,32 @@ $SVGvars_defs = '
 		</cursor>
 
 		<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" id="free_arrow" style="opacity:1;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:2;"/>
+		
+		<marker
+      id="measure_start"
+      viewBox="0 0 20 20"
+      refX="0"
+      refY="10"
+      markerUnits="userSpaceOnUse"
+      markerWidth="20"
+      markerHeight="20"
+      orient="auto">
+      <line x1="0" y1="20" x2="0" y2="0" stroke="black" stroke-width="3" />
+    </marker>
+		
+		<marker
+      id="measure_end"
+      viewBox="0 0 20 20"
+      refX="20"
+      refY="10"
+      markerUnits="userSpaceOnUse"
+      markerWidth="20"
+      markerHeight="20"
+      orient="auto">
+			<line x1="20" y1="20" x2="20" y2="0" stroke="black" stroke-width="3" />
+			<line x1="0" y1="0" x2="20" y2="10" stroke="black" stroke-width="1.5" />
+			<line x1="0" y1="20" x2="20" y2="10" stroke="black" stroke-width="1.5" />
+    </marker>
 ';
 
 	$ret=$this->user->rolle->getConsume($this->user->rolle->newtime);
