@@ -65,11 +65,11 @@
     $layer->set('template', ' ');
     $layer->set('name',$legendentext);
     $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
+    $layer->set('group','eigene Abfragen');
     $layer->setMetaData('off_requires',0);
     $layer->setMetaData('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_Suchergebnis','0');
-    $GUI->map->setMetaData('group_Suchergebnis_has_active_layers','0');
+    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
+    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
       $layer->set('connectiontype', 6);
     }
@@ -130,11 +130,11 @@
     $layer->set('template', ' ');
     $layer->set('name',$legendentext);
     $layer->set('type',2);
-    $layer->set('group','Suchergebnis');
+    $layer->set('group','eigene Abfragen');
     $layer->setMetaData('off_requires',0);
     $layer->setMetaData('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_Suchergebnis','0');
-    $GUI->map->setMetaData('group_Suchergebnis_has_active_layers','0');
+    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
+    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
       $layer->set('connectiontype', 6);
     }
@@ -196,18 +196,13 @@
       $legendentext.=",<br>" . $FlurstListe[$i];
     }
    	$datastring.=") ";
-		# Filter
-		if($layerset[0]['Layer_ID'] != ''){
-			$filter = $dbmap->getFilter($layerset[0]['Layer_ID'], $GUI->Stelle->id);
-			if($filter != '')$datastring.= ' AND '.$filter;
-		}
 		$datastring.=") as foo using unique " . $end;
-    $group = $dbmap->getGroupbyName('Suchergebnis');
+    $group = $dbmap->getGroupbyName('eigene Abfragen');
     if($group != ''){
       $groupid = $group['id'];
     }
     else{
-      $groupid = $dbmap->newGroup('Suchergebnis', 0);
+      $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
@@ -295,12 +290,12 @@
 
 	    $dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 
-	    $group = $dbmap->getGroupbyName('Suchergebnis');
+	    $group = $dbmap->getGroupbyName('eigene Abfragen');
 	    if($group != ''){
 	      $groupid = $group['id'];
 	    }
 	    else{
-	      $groupid = $dbmap->newGroup('Suchergebnis', 0);
+	      $groupid = $dbmap->newGroup('eigene Abfragen', 0);
 	    }
 
 	    $GUI->formvars['user_id'] = $GUI->user->id;

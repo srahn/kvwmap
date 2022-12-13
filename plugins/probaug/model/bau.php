@@ -142,7 +142,6 @@ class Bauauskunft {
   }
 
   function readaktualitaet(){
-  	$sql = "SET datestyle TO 'German';";
 		$sql.= "SELECT max(datum::date) FROM tabelleninfo WHERE thema = 'probaug'"; 
     $ret = $this->database->execSQL($sql, 4, 0);
     if($ret[0]==0){

@@ -38,6 +38,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	return $str;
 }
 
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
+	return $str;
+}
+
 function html_umlaute($string){
 	$string = str_replace('ä', '&auml;', $string);
 	$string = str_replace('ü', '&uuml;', $string);
@@ -1306,7 +1315,7 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'Suchergebnis' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
@@ -1483,7 +1492,7 @@ class GUI {
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -2284,7 +2293,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -2352,12 +2361,15 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
+    return $ret[1];
+  }
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
@@ -2379,9 +2391,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
-			//if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			//};
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
@@ -2688,6 +2697,11 @@ class db_mapObj {
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
+			$rs['alias_link'] = replace_params_link(
+				$rs['alias'],
+				rolle::$layer_params,
+				$rs['Layer_ID']
+			);				
 			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],

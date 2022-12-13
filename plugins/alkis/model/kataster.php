@@ -1030,7 +1030,7 @@ class flurstueck {
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
-    if (pg_num_rows($ret[1])>0) {
+    if (pg_num_rows($ret[1]) > 0) {
 			$summe_amt = 0;
 			$summe_geom = 0;
 			$groesste = 0;
@@ -1130,7 +1130,7 @@ class flurstueck {
 		if (rolle::$hist_timestamp != '') {
 			$sql = 'SET enable_mergejoin = OFF;';
 		}
-    $sql.="SET enable_seqscan = OFF;SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
+    $sql.="SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if ($this->hist_alb) {
 			$sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 		}
@@ -1470,11 +1470,8 @@ class flurstueck {
     $this->Adresse=$this->getAdresse();
     $this->Lage=$this->getLage();
     $this->Grundbuchbezirke = $this->getGrundbuchbezirke();
-		if (AEQUIVALENZ_BEWERTUNG) {
+		if (!$this->Klassifizierung = $this->getKlassifizierung()) {
 			$this->Klassifizierung = $this->getKlassifizierungAequivalenz();
-		}
-		else {
-			$this->Klassifizierung = $this->getKlassifizierung();
 		}
 		$this->Forstrecht=$this->getForstrecht();
 		$this->Strassenrecht=$this->getStrassenrecht();

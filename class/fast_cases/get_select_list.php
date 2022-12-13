@@ -129,15 +129,14 @@ class GUI {
   function get_select_list(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-    $layerdb->setClientEncoding();
     $attributenames[0] = $this->formvars['attribute'];
 		if($this->formvars['datatype_id'] != '')
 			$attributes = $mapDB->read_datatype_attributes($this->formvars['datatype_id'], $layerdb, $attributenames);
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		$attributes['options'][$this->formvars['attribute']] = str_replace('$user_id', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
-		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelle_id', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$userid', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
+		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelleid', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -1173,7 +1172,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -1246,8 +1245,11 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
@@ -1273,9 +1275,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
-			//if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			//};
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}

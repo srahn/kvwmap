@@ -81,7 +81,6 @@
 						$layer_id,
 						$GUI->Stelle->pgdbhost
 					);
-					$layerdb->setClientEncoding();
 					$attributes = $mapDB->read_layer_attributes(
 						$layer_id,
 						$layerdb,

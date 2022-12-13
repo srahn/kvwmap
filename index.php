@@ -2,7 +2,7 @@
 header('Content-Type: text/html; charset=utf-8');
 
 # CLI-Parameterübergabe
-if(isset($argv)){
+if (isset($argv)) {
 	array_shift($argv);
 	$_REQUEST = array();
 	foreach ($argv AS $arg) {

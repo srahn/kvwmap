@@ -552,7 +552,7 @@ class GUI {
 			foreach ($processings as $processing) {
 				$layer->setProcessing($processing);
 			}
-		}
+		}	
 
 		if ($layerset['postlabelcache'] != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -592,6 +592,14 @@ class GUI {
 				}				
 				$layer->set('data', $layerset['Data']);
 			}
+			
+			if (value_of($layerset, 'buffer') != 0) {
+				$geom = explode(' ', $layer->data)[0];
+				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
+				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data;
+				$layer->set('type', 2);
+			}			
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
@@ -1228,6 +1236,10 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
+				if (value_of($layerset, 'buffer') != 0) {
+					$dbStyle['symbolname'] = NULL;
+					$dbStyle['symbol'] = NULL;
+				}				
 				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
 					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
 				}
@@ -1414,6 +1426,9 @@ class GUI {
 				if (MAPSERVERVERSION < 700 ) {
 					$label->type = 'truetype';
 				}
+				if ($dbLabel['text'] != '') {
+					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
+				}
 				$label->font = $dbLabel['font'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -1475,6 +1490,12 @@ class GUI {
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				if ($dbLabel['maxscale'] != '') {
+					$label->set('maxscaledenom', $dbLabel['maxscale']);
+				}
+				if ($dbLabel['minscale'] != '') {
+					$label->set('minscaledenom', $dbLabel['minscale']);
+				}				
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
@@ -3107,7 +3128,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -3175,11 +3196,14 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
+    return $ret[1];
   }  
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
@@ -3201,9 +3225,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>".$sql;
-			if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			};
 			if ($this->schema != ''){
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
@@ -3877,6 +3898,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
+				l.`buffer`,				
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,

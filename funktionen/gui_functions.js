@@ -829,7 +829,7 @@ function getlegend(groupid, layerid, fremde, status) {
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		open = status || !parseInt(group.value);
+		var open = status || !parseInt(group.value);
 		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
 			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
@@ -1554,3 +1554,19 @@ function copyToClipboard(text) {
 		}
 	}
 }
+
+format_duration = function (sec_num) {
+	var hours   = Math.floor(sec_num / 3600);
+	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	var seconds = sec_num - (hours * 3600) - (minutes * 60);
+	var parts = [];
+
+	if (hours 		> 0) parts.push(hours 	+ ' Stunde' 	+ (hours 		> 1 ? 'n' : ''));
+	if (minutes 	> 0) parts.push(minutes + ' Minute' 	+ (minutes 	> 1 ? 'n' : ''));
+	if (seconds 	> 0) parts.push(seconds + ' Sekunde' 	+ (seconds 	> 1 ? 'n' : ''));
+	if (parts.length == 0) return '';
+	if (parts.length == 1) return parts[0];
+	if (parts.length == 2) return parts[0] + ' und ' + parts[1];
+	if (parts.length == 3) return parts[0] + ', ' + parts[1] + ' und ' + parts[2]
+}
+

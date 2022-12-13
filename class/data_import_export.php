@@ -47,7 +47,7 @@ class data_import_export {
 		$this->unique_column = 'gid';
 		switch ($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
-				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $stelle, $pgdatabase, $epsg, $formvars['selected_layer_id']);
+				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $stelle, $pgdatabase, $epsg, $formvars['chosen_layer_id']);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'kml' : case 'kmz' : {
@@ -175,7 +175,6 @@ class data_import_export {
 
 		if ($custom_table['datatype'] != 3){	# kein Raster
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
@@ -297,7 +296,7 @@ class data_import_export {
 		}
 	}
 
-	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $selected_layer_id = NULL){
+	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $chosen_layer_id = NULL){
 		if ($filenameparts[0] != '') {
 			if (
 				(
@@ -325,11 +324,11 @@ class data_import_export {
 			}
 			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
 			
-			if ($selected_layer_id) {
-				$layerset = $user->rolle->getLayer($selected_layer_id);
+			if ($chosen_layer_id) {
+				$layerset = $user->rolle->getLayer($chosen_layer_id);
 				if ($user->layer_data_import_allowed AND $layerset[0]['privileg'] > 0) {
 					$mapDB = new db_mapObj($stelle->id, $user->id);
-					$db = $mapDB->getlayerdatabase($selected_layer_id, $stelle->pgdbhost);
+					$db = $mapDB->getlayerdatabase($chosen_layer_id, $stelle->pgdbhost);
 					$schema = $layerset[0]['schema'];
 					$table = $layerset[0]['maintable'];
 					$adjustments = false;
@@ -357,7 +356,7 @@ class data_import_export {
 	function import_custom_kml($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			# tracks
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -392,7 +391,7 @@ class data_import_export {
 	function import_custom_gpx($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			# tracks
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'tracks', NULL, NULL, 'UTF8');
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -427,7 +426,7 @@ class data_import_export {
 				$custom_table['tablename'] = $tablename;
 				$custom_tables[] = $custom_table;
 				# waypoints
-				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))).rand(1,1000000);
+				$tablename = 'a'.strtolower(umlaute_umwandeln(basename($filename))). date("_Y_m_d_H_i_s", time());
 				$this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, 'waypoints', NULL, NULL, 'UTF8');
 				$sql = $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
 				$ret = $pgdatabase->execSQL($sql,4, 0);
@@ -444,7 +443,7 @@ class data_import_export {
 	function import_custom_ovl($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
 			$rows = file($filename);
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$i = -1;
 			foreach($rows as $row){
 				$kvp = explode('=', $row);
@@ -531,7 +530,7 @@ class data_import_export {
 				$this->ask_epsg = true;		# EPSG-Code nachfragen
 				return;
 			}
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import(CUSTOM_SHAPE_SCHEMA, $tablename, $epsg, $filename, $pgdatabase, NULL);
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -582,7 +581,7 @@ class data_import_export {
 			$json = json_decode(file_get_contents($filename));
 			if(strpos($json->crs->properties->name, 'EPSG:') !== false)$epsg = trim(array_pop(explode('EPSG:', $json->crs->properties->name)), ':');
 			else $epsg = 4326;
-			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			if($tablename == NULL)$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$ret = $this->ogr2ogr_import($schema, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, NULL, 'UTF8');
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
@@ -632,7 +631,7 @@ class data_import_export {
 
 	function import_custom_pointlist($formvars, $pgdatabase){
 		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))).rand(1,1000000);
+		$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($formvars['file1']), 0, 15))). date("_Y_m_d_H_i_s", time());
 		$i = 0;
 		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
 			$i++;
@@ -886,7 +885,7 @@ class data_import_export {
 				$this->ask_epsg = true;		# EPSG-Code nachfragen
 				return;
 			}
-			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))).rand(1,1000000);
+			$tablename = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
 			$wkt = file_get_contents($filename);
 			$wkt = substr($wkt, strpos($wkt, 'KOO ')+4);
 			$wkt = str_replace(chr(13), '', $wkt);

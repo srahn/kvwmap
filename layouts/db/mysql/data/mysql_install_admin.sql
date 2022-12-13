@@ -78,30 +78,32 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (22, 'Kolibristart', NULL),
 (23, 'Administratorfunktionen', NULL),
 (24, 'Stelle_waehlen', NULL);
+(25, 'show_snippet', NULL);
 
 ####################################################################################
 # Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
 ####################################################################################
 # 2006-05-12
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (5,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (6,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (7,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (8,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (5, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (6, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (7, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (8, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (25, @stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #
@@ -527,7 +529,6 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 ('COORD_ZOOM_SCALE', '', '50000', 'Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird\r\n', 'numeric', 'Administration', '', 1, 2),
 ('ZOOMBUFFER', '', '100', 'Puffer in der Einheit (ZOOMUNIT) der beim Zoom auf ein Objekt hinzugegeben wird\r\n', 'numeric', 'Administration', '', 1, 2),
 ('ZOOMUNIT', '', 'meter', 'Einheit des Puffer der beim Zoom auf ein Objekt hinzugegeben wird\r\n\'meter\' oder \'scale\'\r\n', 'string', 'Administration', '', 1, 2),
-('DELETE_ROLLENLAYER', '', 'true', 'Legt fest, ob die Rollenlayer beim Login eines Nutzers gelöscht werden sollen   # Version 1.6.5\r\n', 'boolean', 'Administration', '', 1, 2),
 ('SHOW_MAP_IMAGE', '', 'true', 'Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht\r\n', 'boolean', 'Administration', '', 1, 2),
 ('kvwmap_plugins', '', '[\r\n]', '', 'array', 'Administration', '', 1, 2),
 ('INFO1', '', 'Prüfen Sie ob Ihr Datenbankmodell aktuell ist.', 'Festlegung von Fehlermeldungen und Hinweisen\r\n', 'string', 'Administration', '', 1, 2),

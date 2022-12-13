@@ -69,7 +69,6 @@ function go_switch_fortfuehrungslisten($go){
 			$layer_id = LAYER_ID_FF_AUFTRAG;
 			$mapdb = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$layerdb = $mapdb->getlayerdatabase($layer_id, $GUI->Stelle->pgdbhost);
-			$layerdb->setClientEncoding();
 			$GUI->attributes = $mapdb->read_layer_attributes($layer_id, $layerdb, $privileges['attributenames']);
 			$GUI->{'attributes'.$m} = $mapdb->add_attribute_values($GUI->attributes, $layerdb, array(), true, $GUI->Stelle->id);
 			$GUI->attributes = fortfuehrungslisten_add_user_names($GUI);
