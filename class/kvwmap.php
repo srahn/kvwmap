@@ -1035,7 +1035,6 @@ echo '			</table>
 		# Ein- oder Ausblenden der Klassen
 		$this->user->rolle->setClassStatus($this->formvars);
 		$this->loadMap('DataBase');
-		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 		echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
 	}
 
