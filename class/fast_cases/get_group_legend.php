@@ -153,7 +153,6 @@ class GUI {
 		for($i = 0; $i < @count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
 
