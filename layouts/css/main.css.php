@@ -1,20 +1,23 @@
 /* main.css.php */
 <?
-#	header('Content-type: text/css');
-#	include('../../config.php');
-
 #	global $sizes;
-#	$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
-#	$size =	$sizes[$key];
-	$size = $sizes[$this->user->rolle->gui];
+	if ($this->user->rolle->font_size_factor) {
+		$key = $this->user->rolle->gui;
+		$font_size_factor = $this->user->rolle->font_size_factor;
+	}
+	else {
+		$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
+		$font_size_factor = 1;
+	}
+	$size =	$sizes[$key];
 ?>
 input {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em
 }
 
 #form-titel {
 	font-family: SourceSansPro3;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	margin-bottom: 0px;
 	margin-top: 20px;
 }
@@ -46,7 +49,7 @@ input {
 	margin-right: 10px;
 	font-family: SourceSansPro3;
 	line-height: 20px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 }
 .form_formular-input-selector > div:first-child {
 	margin-top: 3px;
@@ -62,7 +65,7 @@ input {
 
 .form-label {
 	float: left;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 	width: 32%;
 	text-align: right;
 }
@@ -70,7 +73,7 @@ input {
 .form-value {
 	float: left;
 	margin-left: 10px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height: 16px;
 }
 
@@ -103,7 +106,7 @@ body {
 	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
 	BACKGROUND:white;
 	margin:0px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 #gui-table {
@@ -225,7 +228,7 @@ input[type="radio"]:checked:hover::before {
 input[type="button"][value='«'], input[type="button"][value='»'] {
 	margin: 0.2em;
 	padding: 0px 0.5em 3px 0.5em;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 24; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 24; ?>em;
 	height: 35px;
 }
 
@@ -245,28 +248,28 @@ form {
 }
 
 .px13 {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 13; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 13; ?>em;
 }
 
 .px14 {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 }
 
 .px15{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 .px16{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 16; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 16; ?>em;
 	line-height: 16px;
 }
 
 .px17{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 }
 
 .px20{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 20; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 20; ?>em;
 }
 
 .hidden{
@@ -276,7 +279,7 @@ form {
 ul{
 	color: lightsteelblue;
 	margin: 5px;
-	padding: 0 0 0 <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	padding: 0 0 0 <? echo $font_size_factor / 16 * 15; ?>em;
 	list-style: square outside none;
 }
 
@@ -291,7 +294,7 @@ ul{
 
 h1 {
 	font-family: SourceSansPro3;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 24; ?>em; 
+	font-size: <? echo $font_size_factor / 16 * 24; ?>em; 
 	margin-top: 0px; 
 	margin-bottom: 0px; 
 	padding-top: 0px; 
@@ -300,33 +303,33 @@ h1 {
 
 h2 {
 	font-family: SourceSansPro3;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 20; ?>em; 
+	font-size: <? echo $font_size_factor / 16 * 20; ?>em; 
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
 
 input[type="text"] input[type="float"] {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	font-family: SourceSansPro1;
 	height: 22px;
 	padding-top: 0;
 }
 
 input[type="file"] {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-family: SourceSansPro1;
 	height: 24px;
 }
 
 input[type="button"], input[type="reset"], input[type="submit"] {
 	height: 24px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-family: SourceSansPro1;
-	line-height : <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	line-height : <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 input[type="text"].transparent_input{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-family: SourceSansPro1;
 	border:0px;
 	background-color:	transparent;
@@ -353,11 +356,11 @@ span[data-tooltip]:hover::after {
   top: 24px;
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 11; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 11; ?>em;
 	font-family: verdana, arial;
 	box-shadow: 12px 10px 14px #777;
   border: 1px #236dbf solid;
-	border-top: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em #236dbf solid;
+	border-top: <? echo $font_size_factor / 16 * 15; ?>em #236dbf solid;
   background-color: #DAE4EC;
   padding: 4px;
   z-index: 10000;
@@ -424,7 +427,7 @@ span[data-tooltip]:hover::after {
 
 .image-select .placeholder.editable::after {
   transform: rotate(-45deg);
-  right: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+  right: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 .image-select.active .dropdown {
@@ -502,9 +505,9 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 	width: 240px;
-	height: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	height: <? echo $font_size_factor / 16 * 15; ?>em;
 	margin-right: 10px;
 }
 
@@ -515,7 +518,7 @@ span[data-tooltip]:hover::after {
 }
 
 .input-form input {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em
 }
 
 .input-form input[type=text] {
@@ -550,7 +553,7 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	font-family: SourceSansPro1;
 }
 
@@ -559,7 +562,7 @@ select option{
 }
 
 textarea {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	font-family: SourceSansPro1;
 }
 
@@ -568,18 +571,18 @@ tr.tr_hover:hover{
 }
 
 td {	
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height: 16px;
 	font-family: SourceSansPro1;
 }
 
 th {	
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 	font-family: SourceSansPro2;
 }
 
 th a {	
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 	font-family: SourceSansPro2;
 }
 
@@ -598,7 +601,7 @@ pre {
 a, img, a table span {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	border: none;
 	outline:none;
 }
@@ -728,7 +731,7 @@ select[name="geom_from_layer"] {
 	max-height: 800px;
 	width: 100%;
 	min-width: 600px;
-	margin-right: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	margin-right: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
@@ -749,7 +752,7 @@ select[name="geom_from_layer"] {
 }
 
 #geo_name_search_result_div ul{
-	padding: 10px 0 6px <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	padding: 10px 0 6px <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 #geo_name_search_result_div ul li{
@@ -759,7 +762,7 @@ select[name="geom_from_layer"] {
 .code{
 	text-align: left;
 	font-family: courier;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 12; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 12; ?>em;
 	line-height: 17px;
 }
 
@@ -783,7 +786,7 @@ select[name="geom_from_layer"] {
 }
 
 #ortho_points{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	text-align: left;
 }
 
@@ -831,7 +834,7 @@ select[name="geom_from_layer"] {
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
-	margin-top: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	margin-top: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 #data_import_upload_progress .file_status{
@@ -888,7 +891,7 @@ select[name="geom_from_layer"] {
 	width: 16px; 
 	height: 16px; 
 	padding: 5px; 
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	margin: 0 5px 0 40px;
 }
 
@@ -962,7 +965,7 @@ select[name="geom_from_layer"] {
 
 a.menuered {
 	color: #993333;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height : 17px;
 }
 
@@ -991,7 +994,7 @@ a.menuered:hover {
 
 .obermenue {
 	cursor: pointer;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	color: black;
 	font-family: SourceSansPro2;
 	height: 17px;
@@ -999,7 +1002,7 @@ a.menuered:hover {
 
 .hauptmenue {
 	cursor: pointer;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
@@ -1036,7 +1039,7 @@ a.menuered:hover {
 
 .untermenues {
 	color: #993333;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height: 17px;
 	padding-bottom: 2px;
 }
@@ -1234,7 +1237,7 @@ a.menuered:hover {
 	background-color: #ffffff;
 	border: 2px solid #000000;
 	position: absolute;
-	top: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	top: <? echo $font_size_factor / 16 * 15; ?>em;
 	left: 50%;
 	transform: translate(-50%, 0);
 	height: 90%;
@@ -1251,7 +1254,7 @@ a.menuered:hover {
 	height: 50px;
 	position: relative;
 	text-align: center;
-	padding: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	padding: <? echo $font_size_factor / 16 * 15; ?>em;
 }
 
 #map{
@@ -1301,7 +1304,7 @@ a.menuered:hover {
 
 #lagebezeichnung{
 	padding-top: 5px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-family: SourceSansPro1;
 }
 
@@ -1462,19 +1465,19 @@ a.menuered:hover {
 .legend_group{
 	color: firebrick;
 	font-family: SourceSansPro1;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height: 17px;
 }
 
 .legend_group_active_layers{
 	color: firebrick;
 	font-family: SourceSansPro3;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	line-height: 17px;
 }
 
 .legend_layer_hidden{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	color: gray;
 }
 
@@ -1532,7 +1535,7 @@ tr.selected{
 }
 
 span.red {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;	
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
@@ -1544,7 +1547,7 @@ span.red {
 
 span.black {
 	color: #252525;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-family: SourceSansPro2;
 }
 
@@ -1591,17 +1594,17 @@ a:hover .preview_image{
 .raster_record .tr_hide select{font-size: 0.0001px !important;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
-.raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;height:12px;transition: all 0.25s ease;}
+.raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
 .raster_record .tr_hide div{min-width: 0.0001px !important; transition: all 0.25s ease;}
 .raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 .raster_record .tr_hide .datensatz_header{display: none}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:inherit;}
-.raster_record .tr_show .readonly_text{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
+.raster_record .tr_show .readonly_text{font-size: <? echo $font_size_factor / 16 * 15; ?>em;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
-.raster_record .tr_show input{width:130px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
+.raster_record .tr_show input{width:130px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
 .raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
@@ -1615,16 +1618,16 @@ a:hover .preview_image{
 .raster_record_open .gle tr{border:1px dotted gray;}
 .raster_record_open .gle tr:hover{border:1px solid #03476F;}
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
-.raster_record_open a{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
-.raster_record_open input[type=text]{width:200px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}
-.raster_record_open input[type=checkbox]{width:12px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;height:12px;transition: all 0.25s ease;}
-.raster_record_open textarea{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
+.raster_record_open a{font-size: <? echo $font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
+.raster_record_open input[type=text]{width:200px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}
+.raster_record_open input[type=checkbox]{width:12px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;height:12px;transition: all 0.25s ease;}
+.raster_record_open textarea{font-size: <? echo $font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
-.raster_record_open .readonly_text{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
-.raster_record_open .tr_show input[type=file]{width:290px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}
-.raster_record_open select{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open select:focus{font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open span{line-height:16px;font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
+.raster_record_open .readonly_text{font-size: <? echo $font_size_factor / 16 * 15; ?>em;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
+.raster_record_open .tr_show input[type=file]{width:290px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;height:22px;transition: all 0.25s ease;}
+.raster_record_open select{font-size: <? echo $font_size_factor / 16 * 15; ?>em;display:inline;width:290px;transition: all 0.25s ease;}
+.raster_record_open select:focus{font-size: <? echo $font_size_factor / 16 * 15; ?>em;display:inline;width:290px;transition: all 0.25s ease;}
+.raster_record_open span{line-height:16px;font-size: <? echo $font_size_factor / 16 * 15; ?>em;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
 .raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
@@ -1654,7 +1657,7 @@ a:hover .preview_image{
 
 .identifier_text {
 	font-family: SourceSansPro3;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 }
 
 #message_box {
@@ -1669,7 +1672,7 @@ a:hover .preview_image{
 /*	height:90px; */
 	max-height: 600px;
 	overflow: auto;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 17; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 	font-family: SourceSansPro2;
 	margin: -300px 0 0 -100px;
 	padding: 10px;
@@ -1722,7 +1725,7 @@ table.tgle {
 }
 
 .gledata > tr > td, .glegeom > tr > td {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	border: 1px solid #bbb;
 }
 
@@ -1899,7 +1902,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table thead th{ 
 	font-weight: bold; 
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	line-height: 1.2em;				
 	color: #F6F6F6; 
 	text-align: center;
@@ -1909,7 +1912,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table thead th.weekday{ 
 	font-weight: normal; 
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	line-height: 1.2em;
 	height: 2em;
 	width: 1.3em;
@@ -1922,7 +1925,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	line-height: 1.2em;
 	width: 31px;
 	padding-right: 4px; 
@@ -1932,7 +1935,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .calendar table tfoot td {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 7; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 7; ?>em;
 	border: none;
 }
 
@@ -1968,7 +1971,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 0.1em;
 	padding: 0.1em;
 	line-height: 0.75em;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 11; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 11; ?>em;
 }
 
 .calendar table tbody td.last_month, .calendar table tbody td.next_month {
@@ -1979,7 +1982,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .timepicker{
 	min-width: 205px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 18; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 18; ?>em;
 	line-height: 24px;
 	outline: solid #112A5D 1px;
 	padding: 3px 0px;
@@ -1996,7 +1999,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	cursor: n-resize;
 	width: 33px;
 	padding: 0 5 0 5;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 18; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 18; ?>em;
 	border: 1px solid white;
 }
 
@@ -2013,7 +2016,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: absolute;
 	right: 10px;
 	margin-top: 1px;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 19; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 19; ?>em;
 	color: silver;
 }
 
@@ -2132,7 +2135,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fa-7x {
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 117; ?>em !important;
+	font-size: <? echo $font_size_factor / 16 * 117; ?>em !important;
 }
 
 
@@ -2171,7 +2174,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position:absolute;
 	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
 	top: 30px;
-	right: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	right: <? echo $font_size_factor / 16 * 15; ?>em;
 	z-index: 2000;
 }
 
@@ -2233,7 +2236,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .layerOptionsIcon{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 14; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 14; ?>em;
 	height: 14px;
 	width: 14px;
 	padding: 3px;
@@ -2241,7 +2244,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #legendOptionsIcon{
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 18; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 18; ?>em;
 	margin: 0 5px 0 42px;
 	height: 16px;
 	width: 16px;
@@ -2341,7 +2344,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nu_gruppe_nutzungsart_table th{
 	text-align: left;
 	font-family: SourceSansPro2;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 15; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 15; ?>em;
 	font-weight: 600;
 }
 
@@ -2469,7 +2472,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .sql-statement {
   text-align: left;
-  font-size: <? echo $this->user->rolle->font_size_factor / 16 * 12; ?>em;
+  font-size: <? echo $font_size_factor / 16 * 12; ?>em;
   line-height: 1.3;
   min-height: 50px;
   width: 100%;
@@ -2479,7 +2482,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .small-gray {
 	color: gray;
-	font-size: <? echo $this->user->rolle->font_size_factor / 16 * 12; ?>em;
+	font-size: <? echo $font_size_factor / 16 * 12; ?>em;
 }
 
 .green {

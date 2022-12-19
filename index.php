@@ -415,7 +415,6 @@ function go_switch($go, $exit = false) {
 				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
 					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
 				}
-				$GUI->map->draw();			# sonst werden manche Klassenbilder nicht generiert
 				echo $GUI->create_dynamic_legend();
 			} break;
 
@@ -1867,6 +1866,52 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->drawMap();
 				$GUI->output();
+			} break;
+
+			/**
+				Query for all notifications and show it in a list
+			*/
+			case 'notifications_anzeigen' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->notifications_anzeigen();
+			} break;
+
+			/**
+				Show notifications form to create or update notification
+			*/
+			case 'notification_formular' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->notification_formular();
+			} break;
+
+			/**
+				create or update a user notification
+			*/
+			case 'put_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize([
+					'id' => 'int',
+					'notification' => 'text',
+					'veroeffentlichungsdatum' => 'date',
+					'ablaufdatum' => 'date',
+					'stellen_filter' => 'text'
+				]);
+				$GUI->put_notification();
+			} break;
+
+			/**
+				delete a notification
+			*/
+			case 'delete_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->delete_notification();
+			} break;
+
+			/**
+				query notifications that has to be shown for the current user
+			*/
+			case 'get_user_notifications' : {
+				$GUI->get_user_notifications();
 			} break;
 
 			default : {
