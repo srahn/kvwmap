@@ -110,7 +110,7 @@
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
 		$value = $dataset[$name];																				# der Wert des Attributs
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
-		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
+		$oid = $dataset[$layer['maintable'] . '_oid'];									# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
 
 		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j];
