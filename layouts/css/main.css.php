@@ -490,6 +490,10 @@ span[data-tooltip]:hover::after {
 	padding: 3px;
 }
 
+.listen-tr.archived {
+  background: rgba(255, 0, 0, 0.23);
+}
+
 .input-form {
 	display: inline-block;
 }
