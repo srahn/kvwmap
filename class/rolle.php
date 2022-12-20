@@ -1438,6 +1438,7 @@ class rolle {
 				styles 
 			SET 
 				color = "'.$formvars['layer_options_color'].'",
+				' . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = NULL, width = NULL, angle = NULL, ') . '
 				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
 			WHERE 
 				Style_ID = '.$style_id;

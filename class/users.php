@@ -996,7 +996,7 @@ class user {
 		}
 
 		if ($login_name != '') {
-			$where[] = 'login_name LIKE "' . $login_name . '"';
+			$where[] = 'login_name = "' . $login_name . '"';
 		}
 
 		if ($order != '') {
