@@ -1,6 +1,6 @@
 /* main.css.php */
 <?
-	if ($font_size_factor) {
+	if ($this->user->rolle->font_size_factor) {
 		$key = $this->user->rolle->gui;
 		$font_size_factor = $this->user->rolle->font_size_factor;
 	}
