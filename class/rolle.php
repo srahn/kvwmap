@@ -444,6 +444,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -1613,6 +1614,7 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
@@ -1658,6 +1660,7 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
