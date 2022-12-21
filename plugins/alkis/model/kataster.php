@@ -1000,8 +1000,8 @@ class flurstueck {
 			FROM 
 				(SELECT 
 					amtlicheflaeche, 
-					st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) as fl_geom, 
-					st_area(f.wkb_geometry) as flstflaeche, 
+					a.flaeche as fl_geom,
+					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
 					n.kulturart as objart, 
@@ -1011,15 +1011,26 @@ class flurstueck {
 					n.zustandsstufeoderbodenstufe, 
 					n.sonstigeangaben 
 				FROM 
-					alkis.ax_flurstueck f, 
-					alkis.ax_bewertung be, 
-					alkis.ax_bodenschaetzung n 
+					(SELECT
+						i.intersection,
+						st_area(f.wkb_geometry) as flstflaeche,
+						amtlicheflaeche
+					FROM 
+						alkis.ax_flurstueck f, 
+						alkis.ax_bewertung be, 
+						st_intersection(be.wkb_geometry,f.wkb_geometry) as i (intersection)
+					WHERE 						
+						st_intersects(be.wkb_geometry,f.wkb_geometry) AND 
+						ST_Area(i.intersection) > 0.01 AND 
+						f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+						" .	$this->database->build_temporal_filter(array('f', 'be')) . "
+					) as fbe,
+					alkis.ax_bodenschaetzung n ,
+					st_area(st_intersection(n.wkb_geometry, fbe.intersection)) as a (flaeche)
 				WHERE 
-					st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
-					st_intersects(be.wkb_geometry,f.wkb_geometry) = true AND 
-					st_area(st_intersection(n.wkb_geometry, st_intersection(be.wkb_geometry,f.wkb_geometry))) > 0.001 AND 
-					f.flurstueckskennzeichen='" . $this->FlurstKennz . "'" .
-					$this->database->build_temporal_filter(array('f', 'be', 'n')) . "
+					st_intersects(n.wkb_geometry, fbe.intersection) AND 
+					a.flaeche > 0.01 
+					" .	$this->database->build_temporal_filter(array('n')) . "
 				) as n 
 				LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
 				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
@@ -1060,8 +1071,8 @@ class flurstueck {
 			FROM (
 				SELECT 
 					amtlicheflaeche, 
-					st_area(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry))) as fl_geom, 
-					st_area(f.wkb_geometry) as flstflaeche, 
+					a.flaeche as fl_geom, 
+					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
 					n.kulturart as objart, 
@@ -1071,17 +1082,40 @@ class flurstueck {
 					n.zustandsstufeoderbodenstufe, 
 					n.sonstigeangaben 
 				FROM 
-					alkis.ax_flurstueck f, 
-					alkis.ax_bodenschaetzung n, 
-					alkis.n_nutzung nu
-					left join alkis.n_nutzungsartenschluessel nas on nu.nutzungsartengruppe = nas.nutzungsartengruppe and nu.werteart1 = nas.werteart1 and nu.werteart2 = nas.werteart2
+					(SELECT
+						CASE
+							WHEN (nu.nutzungsartengruppe, nu.werteart1) IN ( (18, 4460), (31, 1010), (31, 1012), (31, 1013) )
+							THEN ARRAY[1000, 2000]
+							WHEN (nu.nutzungsartengruppe, nu.werteart1) = (31, 1020)
+							THEN ARRAY[3000, 4000]
+							ELSE ARRAY[1000, 2000, 3000, 4000]
+						END::int[] AS ableitung_emz,
+						i.intersection,
+						st_area(f.wkb_geometry) as flstflaeche,
+						amtlicheflaeche
+					FROM 
+						alkis.ax_flurstueck f, 
+						alkis.n_nutzung nu,
+						ST_CollectionExtract(st_intersection(nu.wkb_geometry, f.wkb_geometry), 3) as i (intersection)
+					WHERE
+						(
+							(nu.nutzungsartengruppe, nu.werteart1) IN (
+								(18, 4460), (31, 1010), (31, 1011), (31, 1012),	(31, 1013), (31, 1020), (31, 1021), (31, 1030),
+								(31, 1031), (31, 1040), (31, 1050), (31, 1051),	(31, 1052), (31, 1200)
+							) OR nu.nutzungsartengruppe BETWEEN 32 AND 37
+						) AND
+						st_intersects(nu.wkb_geometry, f.wkb_geometry) = true AND 
+						ST_Area(i.intersection) > 0.01 AND 
+						f.flurstueckskennzeichen = '" . $this->FlurstKennz . "' 
+						" . $this->database->build_temporal_filter(array('f', 'nu')) . "
+					) as fnu,
+					alkis.ax_bodenschaetzung n,
+					ST_Area(ST_CollectionExtract(ST_Intersection(n.wkb_geometry, fnu.intersection), 3)) as a (flaeche)
 				WHERE 
-					nas.objektart in (41008, 43001, 43002, 43003, 43004, 43005, 43006, 43007) and
-					st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
-					st_intersects(nu.wkb_geometry,f.wkb_geometry) = true AND 
-					st_area(st_intersection(n.wkb_geometry, st_intersection(nu.wkb_geometry, f.wkb_geometry))) > 0.01 AND 
-					f.flurstueckskennzeichen='" . $this->FlurstKennz . "' 
-					" . $this->database->build_temporal_filter(array('f', 'nu', 'n')) . " 
+					n.kulturart = ANY(fnu.ableitung_emz) and 
+					st_intersects(n.wkb_geometry, fnu.intersection) AND 
+					a.flaeche > 0.01 
+					" . $this->database->build_temporal_filter(array('n')) . " 
 			) as n 
 			LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
 			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
