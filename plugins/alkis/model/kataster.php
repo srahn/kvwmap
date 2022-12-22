@@ -1028,7 +1028,7 @@ class flurstueck {
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
-						i.intersection,
+						ST_CollectionExtract(i.intersection, 3) AS intersection,
 						st_area(f.wkb_geometry) as flstflaeche,
 						amtlicheflaeche
 					FROM 
@@ -1106,7 +1106,7 @@ class flurstueck {
 							THEN ARRAY[3000, 4000]
 							ELSE ARRAY[1000, 2000, 3000, 4000]
 						END::int[] AS ableitung_emz,
-						i.intersection,
+						ST_CollectionExtract(i.intersection, 3) AS intersection,
 						st_area(f.wkb_geometry) as flstflaeche,
 						amtlicheflaeche
 					FROM 
