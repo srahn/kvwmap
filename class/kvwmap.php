@@ -2370,7 +2370,7 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if (value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -20037,7 +20037,14 @@ class db_mapObj{
 	}
 
   function delete_Class($class_id){
-    $sql = 'DELETE FROM classes WHERE Class_ID = '.$class_id;
+    $sql = "
+			DELETE 
+				c, rc 
+			FROM
+				classes c JOIN 
+				u_rolle2used_class rc ON c.Class_ID = rc.class_id
+			WHERE 
+				c.Class_ID = " . $class_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
