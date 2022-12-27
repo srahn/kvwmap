@@ -21,28 +21,34 @@ input {
 	margin-bottom: 0px;
 	margin-top: 20px;
 }
+
 #form_formular-main {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
 	cursor: default;
 }
+
 .form_formular-aic {
 	align-items: center;
 }
+
 .form_formular-input {
 	width:100%;
 	margin: 0px 0px 10px 0px;
 	display: flex;
 	flex-flow: row nowrap;
 }
+
 #form_formular-main select, #form_formular-main input[type="text"], .form_formular-input-selector select {
 	border-radius: 2px;
 	border: 1px solid #777;
 	padding-left: 5px;
 }
+
 #form_formular-main .form_formular-input select, #form_formular-main input[type="text"] {
 	height: 25px;
 }
+
 .form_formular-input > div:first-child, .form_formular-input-selector > div:first-child {
 	width: 210px;
 	text-align: right;
@@ -51,6 +57,7 @@ input {
 	line-height: 20px;
 	font-size: <? echo $font_size_factor / 16 * 17; ?>em;
 }
+
 .form_formular-input-selector > div:first-child {
 	margin-top: 3px;
 }
@@ -83,18 +90,21 @@ input {
 	font-weight: 200;
 	src: local('SourceSansPro'), url(../../fonts/SourceSansPro-Light.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro1';
 	font-style: normal;
 	font-weight: 400;
 	src: local('SourceSansPro1'), url(../../fonts/SourceSansPro-Regular.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro2';
 	font-style: normal;
 	font-weight: 600;
 	src: local('SourceSansPro2'), url(../../fonts/SourceSansPro-Semibold.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro3';
 	font-style: normal;
@@ -112,6 +122,15 @@ body {
 #gui-table {
 	width: 900px;
 	margin: auto;
+}
+
+.notification-box {
+	margin-bottom: 5px;
+	padding: 5px;
+	border-radius: 5px;
+	background-color: antiquewhite;
+	border: 1px dashed gray;
+	min-height: 38px;
 }
 
 input[type="checkbox"], input[type="radio"] {

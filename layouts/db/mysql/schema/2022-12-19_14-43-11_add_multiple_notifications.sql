@@ -13,4 +13,17 @@ BEGIN;
 		user_id int
 	);
 
+	AlTER TABLE user2notifications
+	ADD CONSTRAINT notification_id_fk 
+	FOREIGN KEY(notification_id)
+	REFERENCES notifications(id)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE;
+
+	AlTER TABLE user2notifications
+	ADD CONSTRAINT notification_user_id_fk
+	FOREIGN KEY(user_id)
+	REFERENCES user(ID)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE;
 COMMIT;

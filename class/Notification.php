@@ -68,32 +68,33 @@ class Notification extends MyObject {
 
 	function create_with_users() {
 		$results = $this->create();
-		$sql = "
-			INSERT INTO user2notifications (user_id, notification_id)
-			SELECT DISTINCT
-				user_id,
-				" . $this->get($this->identifier) . " AS notification_id
-			FROM
-				rolle r
-			WHERE
-				true
-		";
-		$this->database->execSQL($sql);
-		if ($this->database->success) {
-			$results[] = array(
-				'success' => true,
-				'msg' => 'Zuordnungen der Benachichtungen zu den Nutzern erfolgreich angelegt.'
-			);
-		}
-		else {
-			$errormessage = $this->database->mysqli->error;
-			$results[] = array(
-				'success' => false,
-				'msg' => $errormessage,
-				'err_msg' => $errormessage
-			);
-		}
+		array_merge($results, User2Notification::create_user2notifications($this->gui, $this->get($this->identifier)));
 		return $results;
+	}
+
+	function update_with_users() {
+		$results = $this->update();
+		array_merge($results, User2Notification::update_notification($this->gui, $this->get($this->identifier)));
+		return $results;
+	}
+
+	function clean_up_stellen_filter() {
+		$this->set(
+			'stellen_filter',
+			trim(
+				str_replace(
+					',,',
+					',',
+					str_replace(
+						' ',
+						'',
+						$this->get('stellen_filter')
+					)
+				),
+				','
+			)
+		);
+		$this->set('stellen_filter', str_replace(' ', '', $this->get('stellen_filter')));
 	}
 
 	public static function find_by_id($gui, $id) {
@@ -119,11 +120,11 @@ class Notification extends MyObject {
 					(
 						m.stellen_filter IS NULL OR
 						m.stellen_filter = '' OR
-						concat(',', m.stellen_filter, ',') LIKE '," . $gui->Stelle->id . ",'
-					) AND
-					NOT (
-						m.stellen_filter = 'nicht in Gaststellen' AND
-						" . $gui->Stelle->is_gast_stelle() . "
+						concat(',', m.stellen_filter, ',') LIKE '%," . $gui->Stelle->id . ",%' OR
+						(
+							m.stellen_filter = 'nicht in Gaststellen' AND
+							NOT " . $gui->Stelle->is_gast_stelle() . "
+						)
 					)
 				",
 				'order' => "veroeffentlichungsdatum, id"

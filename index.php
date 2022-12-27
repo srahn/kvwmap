@@ -1881,6 +1881,7 @@ function go_switch($go, $exit = false) {
 			*/
 			case 'notification_formular' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['id' => 'int']);
 				$GUI->notification_formular();
 			} break;
 
@@ -1900,10 +1901,20 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
+				delete the notification for user
+			*/
+			case 'delete_user2notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['notification_id' => 'int']);
+				$GUI->delete_user2notification();
+			} break;
+
+			/**
 				delete a notification
 			*/
 			case 'delete_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['notification_id' => 'int']);
 				$GUI->delete_notification();
 			} break;
 

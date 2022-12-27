@@ -3170,8 +3170,9 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = new Notification($this);
-		$this->notification->setKeysFromFormvars($this->formvars);
+		#$this->notification->setKeysFromFormvars($this->formvars);
 		$this->notification->data = formvars_strip($this->formvars, $this->notification->getKeys(), 'keep');
+		$this->notification->clean_up_stellen_filter();
 		$results = $this->notification->validate();
 		if (empty($results)) {
 			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users() : $this->notification->create_with_users())[0];
@@ -3192,6 +3193,14 @@ echo '			</table>
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
 		$results = ($this->notification->delete())[0];
 		$formatter = new formatter($results, 'json', 'application/json');
+		echo $formatter->output();
+	}
+
+	function delete_user2notification() {
+		include_once(CLASSPATH . 'User2Notification.php');
+		include(CLASSPATH . 'formatter.php');
+		$result = User2Notification::delete_for_user($this, $this->formvars['notification_id'], $this->user->id)[0];
+		$formatter = new formatter($result, 'json', 'application/json');
 		echo $formatter->output();
 	}
 

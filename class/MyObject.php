@@ -556,13 +556,12 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}
 
 	function delete() {
-		#echo '<br>Class MyObject Method delete';
 		$sql = "
 			DELETE
 			FROM
@@ -575,7 +574,7 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}

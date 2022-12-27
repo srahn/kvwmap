@@ -70,7 +70,7 @@
 	</tr><?
 	} ?>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_notification; ?></th>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_notification; ?>*</th>
 		<td style="border-bottom:1px solid #C3C7C3">
 			<textarea id="notification" name="notification" cols="80" rows="10" placeholder="<? echo $strPlaceholder_notification; ?>"><?
 				echo $this->notification->get('notification');
@@ -78,15 +78,15 @@
 		</td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_veroeffentlichungsdatum;?></th>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_veroeffentlichungsdatum;?> <span data-tooltip="<?php echo $strVeroeffentlichungsdatumHint; ?>"></span></th>
 		<td style="border-bottom:1px solid #C3C7C3"><input id="veroeffentlichungsdatum" name="veroeffentlichungsdatum" type="date" value="<?php echo $this->notification->get('veroeffentlichungsdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_ablaufdatum;?></th>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_ablaufdatum;?>* <span data-tooltip="<?php echo $strAblaufdatumHint; ?>"></span></th>
 		<td style="border-bottom:1px solid #C3C7C3"><input id="ablaufdatum" name="ablaufdatum" type="date" value="<?php echo $this->notification->get('ablaufdatum'); ?>" size="10" maxlength="10" placeholder="DD.MM.JJJJ"></td>
 	</tr>
 	<tr>
-		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_stellen_filter; ?></th>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_stellen_filter; ?> <span data-tooltip="<?php echo $strStellenFilterHint; ?>"></span></th>
 		<td style="border-bottom:1px solid #C3C7C3">
 			<input id="stellen_filter" name="stellen_filter" type="text" placeholder="<? echo $strPlaceholder_stellen_filter; ?>" value="<?php echo $this->notification->get('stellen_filter'); ?>"/>
 		</td>
