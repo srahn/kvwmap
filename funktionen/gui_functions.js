@@ -363,18 +363,20 @@ function stopwaiting() {
 }
 
 function getBrowserSize(){
-	if(typeof(window.innerWidth) == 'number'){
+	if (typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
 		height = window.innerHeight;
-	}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+	} else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
 		width = document.documentElement.clientWidth;
 		height = document.documentElement.clientHeight;
-	}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+	} else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
 		width = document.body.clientWidth;
 		height = document.body.clientHeight;
 	}
-	root.document.GUI.browserwidth.value = width;
-	root.document.GUI.browserheight.value = height;
+  if (root.document.GUI) {
+    root.document.GUI.browserwidth.value = width;
+	  root.document.GUI.browserheight.value = height;
+  }
 }
 
 function resizemap2window(){
