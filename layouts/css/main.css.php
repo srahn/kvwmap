@@ -80,25 +80,25 @@ input {
 	font-family: 'SourceSansPro';
 	font-style: normal;
 	font-weight: 200;
-	src: local('SourceSansPro'), url(../../fonts/SourceSansPro-Light.ttf);
+	src: local('SourceSansPro'), url(fonts/SourceSansPro-Light.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro1';
 	font-style: normal;
 	font-weight: 400;
-	src: local('SourceSansPro1'), url(../../fonts/SourceSansPro-Regular.ttf);
+	src: local('SourceSansPro1'), url(fonts/SourceSansPro-Regular.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro2';
 	font-style: normal;
 	font-weight: 600;
-	src: local('SourceSansPro2'), url(../../fonts/SourceSansPro-Semibold.ttf);
+	src: local('SourceSansPro2'), url(fonts/SourceSansPro-Semibold.ttf);
 }
 @font-face {
 	font-family: 'SourceSansPro3';
 	font-style: normal;
 	font-weight: 700;
-	src: local('SourceSansPro3'), url(../../fonts/SourceSansPro-Bold.ttf);
+	src: local('SourceSansPro3'), url(fonts/SourceSansPro-Bold.ttf);
 }
 
 body {	
@@ -342,7 +342,7 @@ span[data-tooltip] {
 }
 
 span[data-tooltip]::before {
-	content: url(../../graphics/icon_i.png);
+	content: url(<? echo GRAPHICSPATH; ?>icon_i.png);
 }
 
 span[data-tooltip]:hover::after {
@@ -461,7 +461,7 @@ span[data-tooltip]:hover::after {
 
 
 .select_option_link:hover{
-	background-image: url(../../graphics/pfeil_rechts.gif);
+	background-image: url(<? echo GRAPHICSPATH; ?>pfeil_rechts.gif);
 	background-repeat: no-repeat;
 	background-position: 307px;
 }
@@ -739,7 +739,7 @@ select[name="geom_from_layer"] {
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
 	width: 100%;
-	background: url('../../<? echo BG_IMAGE; ?>');
+	background: url('<? echo BG_IMAGE; ?>');
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
@@ -910,7 +910,7 @@ select[name="geom_from_layer"] {
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('../../<? echo BG_IMAGE; ?>');
+	background: url('<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
@@ -987,12 +987,12 @@ a.menuered:hover {
 
 .menue-auf .menue_before {
 	display: inline-block;
-	background: url('../../graphics/menue_top_open.gif');
+	background: url('<? echo GRAPHICSPATH; ?>menue_top_open.gif');
 }
 
 .menue-zu .menue_before {	
 	display: inline-block;
-	background: url('../../graphics/menue_top.gif');
+	background: url('<? echo GRAPHICSPATH; ?>menue_top.gif');
 }
 
 .obermenue {
@@ -1075,119 +1075,119 @@ a.menuered:hover {
 }
 
 .use_for_dataset{
-	background-image: url(../../graphics/use_for_dataset.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>use_for_dataset.png);
 }
 
 .copy_dataset{
-	background-image: url(../../graphics/copy_dataset.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>copy_dataset.png);
 }
 
 .datensatz_exportieren{
-	background-image: url(../../graphics/datensatz_exportieren.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_exportieren.png);
 }
 
 .drucken{
-	background-image: url(../../graphics/drucken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>drucken.png);
 }
 
 .schnelldruck{
-	background-image: url(../../graphics/schnelldruck.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>schnelldruck.png);
 }
 
 .merken{
-	background-image: url(../../graphics/merken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>merken.png);
 }
 
 .nicht_mehr_merken{
-	background-image: url(../../graphics/nicht_mehr_merken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>nicht_mehr_merken.png);
 }
 
 .datensatz_loeschen{
-	background-image: url(../../graphics/datensatz_loeschen.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_loeschen.png);
 }
 
 .edit_geom{
-	background-image: url(../../graphics/edit_geom.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>edit_geom.png);
 }
 
 .zoom_normal{
-	background-image: url(../../graphics/zoom_normal.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_normal.png);
 }
 
 .zoom_highlight{
-	background-image: url(../../graphics/zoom_highlight.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_highlight.png);
 }
 
 .zoom_select{
-	background-image: url(../../graphics/zoom_select.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_select.png);
 }
 
 .switch_gle{
-	background-image: url(../../graphics/switch_gle.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>switch_gle.png);
 }
 
 .url_extent{
-	background-image: url(../../graphics/url_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>url_extent.png);
 }
 
 .save_extent{
-	background-image: url(../../graphics/save_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_extent.png);
 }
 
 .load_extent{
-	background-image: url(../../graphics/load_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>load_extent.png);
 }
 
 .save_image{
-	background-image: url(../../graphics/save_image.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_image.png);
 }
 
 .resize_map{
-	background-image: url(../../graphics/resize_map.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>resize_map.png);
 }
 
 .optionen{
-	background-image: url(../../graphics/optionen.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>optionen.png);
 }
 
 .karte{
-	background-image: url(../../graphics/karte.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>karte.png);
 }
 
 .logout{
-	background-image: url(../../graphics/logout.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>logout.png);
 }
 
 .gesamtansicht {
-	background-image: url(../../graphics/gesamtansicht.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>gesamtansicht.png);
 }
 
 .notiz{
-	background-image: url(../../graphics/notiz.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>notiz.png);
 }
 
 .hilfe{
-	background-image: url(../../graphics/hilfe.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>hilfe.png);
 }
 
 .timetravel{
-	background-image: url(../../graphics/timetravel.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>timetravel.png);
 }
 
 .save_layers{
-	background-image: url(../../graphics/save_layers.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_layers.png);
 }
 
 .load_layers{
-	background-image: url(../../graphics/load_layers.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>load_layers.png);
 }
 
 .tool_info{
-	background-image: url(../../graphics/tool_info.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>tool_info.png);
 }
 
 .layer{
-	background-image: url(../../graphics/layer.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>layer.png);
 }
 
 .button_background{
@@ -1327,7 +1327,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(../../<? echo BG_IMAGE; ?>);
+	background-image: url(<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
