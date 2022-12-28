@@ -139,8 +139,8 @@
 	</div>
 
 	<div title="<? echo $this->strPlaceSearch; ?>">
-		<i class="fa fa-search header-button" aria-hidden="true" style="font-size: 150%;" onclick="$('#search_div, .fa-search, .fa-times').toggle(); $('#geo_name_search_result_div').show()"></i>
-		<i class="fa fa-times header-button" aria-hidden="true" style="font-size: 150%; display: none;" onclick="$('#search_div, .fa-search, .fa-times').toggle(); $('#geo_name_search_result_div').hide()"></i>
+		<i id="search_icon" class="fa fa-search header-button" aria-hidden="true" style="font-size: 150%;" onclick="$('#search_div, #search_icon, #close_icon').toggle(); $('#geo_name_search_result_div').show()"></i>
+		<i id="close_icon" class="fa fa-times header-button" aria-hidden="true" style="font-size: 150%; display: none;" onclick="$('#search_div, #search_icon, #close_icon').toggle(); $('#geo_name_search_result_div').hide()"></i>
 	</div>
 
 	<div style="padding: 4px; float: right; width: 30%;"><?
