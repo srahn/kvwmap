@@ -1868,6 +1868,63 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			/**
+				Query for all notifications and show it in a list
+			*/
+			case 'notifications_anzeigen' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->notifications_anzeigen();
+			} break;
+
+			/**
+				Show notifications form to create or update notification
+			*/
+			case 'notification_formular' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['id' => 'int']);
+				$GUI->notification_formular();
+			} break;
+
+			/**
+				create or update a user notification
+			*/
+			case 'put_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize([
+					'id' => 'int',
+					'notification' => 'text',
+					'veroeffentlichungsdatum' => 'date',
+					'ablaufdatum' => 'date',
+					'stellen_filter' => 'text'
+				]);
+				$GUI->put_notification();
+			} break;
+
+			/**
+				delete the notification for user
+			*/
+			case 'delete_user2notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['notification_id' => 'int']);
+				$GUI->delete_user2notification();
+			} break;
+
+			/**
+				delete a notification
+			*/
+			case 'delete_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['notification_id' => 'int']);
+				$GUI->delete_notification();
+			} break;
+
+			/**
+				query notifications that has to be shown for the current user
+			*/
+			case 'get_user_notifications' : {
+				$GUI->get_user_notifications();
+			} break;
+
 			default : {
 				# Karteninformationen lesen
 				$GUI->loadMap('DataBase');

@@ -3,7 +3,6 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
-
 function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', '=', $exp);
@@ -955,16 +954,16 @@ function isTag($word) {
 }
 
 function drawColorBox($color,$outlinecolor) {
-  # Funktion liefert eine Box als überlagerte Div in html,
-  # die die Farbe $color und die Border $outlinecolor hat.
-  $c=explode(' ',trim($color));
-  $bgcolor='#';
-  for ($i=0;$i<3;$i++) {
-    $bgcolor.=strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
-  }
-  $oc=explode(' ',trim($outlinecolor));
-  $bordercolor='#';
-  for ($i=0;$i<3;$i++) {
+	# Funktion liefert eine Box als überlagerte Div in html,
+	# die die Farbe $color und die Border $outlinecolor hat.
+	$c = explode(' ',trim($color));
+	$bgcolor = '#';
+	for ($i = 0; $i < 3; $i++) {
+		$bgcolor.=strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
+	}
+	$oc = explode(' ',trim($outlinecolor));
+	$bordercolor = '#';
+	for ($i=0;$i<3;$i++) {
     $bordercolor.=strtoupper(str_pad(dechex($oc[$i]), 2, 0, STR_PAD_LEFT));
   }
   ?>
@@ -975,6 +974,14 @@ function drawColorBox($color,$outlinecolor) {
   <?php
 }
 
+function rgb2hex($rgb) {
+	$c = explode(' ',trim($rgb));
+	$hex = '#';
+	for ($i = 0; $i < 3; $i++) {
+		$hex .= strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
+	}
+	return $hex;
+}
 
 // +----------------------------------------------------------------------+
 // | PHP Version 4                                                        |

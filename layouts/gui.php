@@ -47,7 +47,7 @@
 											<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
 										</div>
 										<?php
-										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
+										$this->debug->write("<br>Include <b>" . $this->main . "</b> in gui.php",4);
 										if (file_exists($this->main)) {
 											include($this->main); # Pluginviews
 										}

@@ -1,31 +1,31 @@
 <?php
 class formatter {
-	
-  # Konstruktor
-  function __construct($data, $format, $content_type, $callback) {
+
+	# Konstruktor
+	function __construct($data, $format, $content_type, $callback = '') {
 		$this->data = $data;
 		$this->format = $format;
-    $this->content_type = $content_type;
+		$this->content_type = $content_type;
 		$this->callback = $callback;
-  }
-	
+	}
+
 	function output() {
-    if (in_array($this->format, array('json', 'jsonp', 'dump', 'html', 'print_r'))) {
-      $format = $this->format;
+		if (in_array($this->format, array('json', 'jsonp', 'dump', 'html', 'print_r'))) {
+			$format = $this->format;
 		}
-    else {
-      $format = 'dump';
+		else {
+			$format = 'dump';
 		}
-    
+
 		eval("\$output = \$this->output_" . $format . "();");
 		return $output;
 	}
-	
+
 	function output_dump() {
 		header('Content-Type: text/html; charset=utf-8');
 		return var_dump($this->data);
 	}
-   
+
   function output_html() {
     $recursive = true;
     $null = '&nbsp;';
@@ -76,12 +76,11 @@ class formatter {
     $html .= '</table>';
     $html .= '</body>';
     $html .= '</html>';
-  
     return $html;
-  }  
-	
+  }
+
 	function output_json() {
-		header('Content-Type: ' . $this->content_type.'; charset=utf-8');
+		header('Content-Type: ' . $this->content_type . '; charset=utf-8');
 		empty($this->data) ? $json = '[]' : $json = json_encode($this->data);
 		return utf8_decode($json);
 	}
@@ -91,7 +90,7 @@ class formatter {
 		$this->data ? $json = json_encode($this->data) : $json = '{}';
 		$jsonp = "{$this->callback}($json)";
 		return utf8_decode($jsonp);
-	}   
+	}
 	
 	function output_print_r() {
 		return print_r($this->data, true);

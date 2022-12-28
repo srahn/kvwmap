@@ -1258,8 +1258,9 @@ echo '			</table>
 				if(value_of($layer, 'metalink') != ''){
 					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
-				else
+				else {
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
+				}
 				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['alias']))).'"';
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
@@ -2369,7 +2370,7 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
-				if (value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -3141,6 +3142,80 @@ echo '			</table>
 		}
 	}
 
+	function notifications_anzeigen() {
+		include_once(CLASSPATH . 'Notification.php');
+		$this->notifications = Notification::find($this);
+		$this->main = 'notifications.php';
+		$this->output();
+	}
+
+	function notification_formular() {
+		include_once(CLASSPATH . 'Notification.php');
+		if (value_of($this->formvars, 'id') != '') {
+			$this->sanitize(['id' => 'int']);
+			$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		}
+		else {
+			$this->notification = new Notification($this);
+		}
+		$this->main = 'notification_formular.php';
+		$this->output();
+	}
+
+	/**
+		Create a new user notification or update if an id has been sent
+		Return only success or fail messages.
+	*/
+	function put_notification() {
+		include_once(CLASSPATH . 'Notification.php');
+		include_once(CLASSPATH . 'formatter.php');
+		$this->notification = new Notification($this);
+		#$this->notification->setKeysFromFormvars($this->formvars);
+		$this->notification->data = formvars_strip($this->formvars, $this->notification->getKeys(), 'keep');
+		$this->notification->clean_up_stellen_filter();
+		$results = $this->notification->validate();
+		if (empty($results)) {
+			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users() : $this->notification->create_with_users())[0];
+		}
+		else {
+			$results = array(
+				'success' => false,
+				'validation_errors' => $results
+			);
+		}
+		$formatter = new formatter($results, 'json', 'application/json');
+		echo $formatter->output();
+	}
+
+	function delete_notification() {
+		include_once(CLASSPATH . 'Notification.php');
+		include_once(CLASSPATH . 'formatter.php');
+		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		$results = ($this->notification->delete())[0];
+		$formatter = new formatter($results, 'json', 'application/json');
+		echo $formatter->output();
+	}
+
+	function delete_user2notification() {
+		include_once(CLASSPATH . 'User2Notification.php');
+		include(CLASSPATH . 'formatter.php');
+		$result = User2Notification::delete_for_user($this, $this->formvars['notification_id'], $this->user->id)[0];
+		$formatter = new formatter($result, 'json', 'application/json');
+		echo $formatter->output();
+	}
+
+	function get_user_notifications() {
+		include(CLASSPATH . 'Notification.php');
+		include(CLASSPATH . 'formatter.php');
+		$result = Notification::find_for_user($this);
+		$formatter = new formatter(
+			$result,
+			'json',
+			'application/json'
+		);
+		echo $formatter->output();
+	}
+
 	function add_message($type, $msg) {
 		GUI::add_message_($type, $msg);
 	}
@@ -3181,12 +3256,12 @@ echo '			</table>
 		}
 		switch ($this->mime_type) {
 			case 'printversion' : {
-				include (LAYOUTPATH.'snippets/printversion.php');
+				include (LAYOUTPATH . 'snippets/printversion.php');
 			} break;
 			case 'html' : {
 				if ($this->formvars['window_type'] == 'overlay') {
 					$this->overlaymain = $this->main;
-					include (LAYOUTPATH.'snippets/overlay.php');
+					include (LAYOUTPATH . 'snippets/overlay.php');
 				}
 				else {
 					if ($this->formvars['only_main']) {
@@ -3194,7 +3269,7 @@ echo '			</table>
 					}
 					else {
 						$guifile = $this->get_guifile();
-						$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()",4);
+						$this->debug->write("<br>Include <b>" . $guifile . "</b> in kvwmap.php function output()", 4);
 						include($guifile);
 					}
 				}
@@ -4389,7 +4464,8 @@ echo '			</table>
     $this->get_labels();
   }
 
-	function get_style(){
+	function get_style() {
+		include_once(CLASSPATH . 'FormObject.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
 		$this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
@@ -4400,15 +4476,102 @@ echo '			</table>
 						<td class="px13"><?
 							echo key($this->styledaten); ?>
 						</td>
-						<td>
-							<input
-								class="styleFormField"
-								onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-								name="style_<? echo key($this->styledaten); ?>"
-								size="11"
-								type="text"
-								value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-							>
+						<td><?
+							switch (key($this->styledaten)) {
+								case 'linecap' : {
+									echo FormObject::createSelectField(
+										'style_linecap',
+										array(
+											array('value' => 'butt', 'output' => 'abgefacht'),
+											array('value' => 'round', 'output' => 'rund'),
+											array('value' => 'square', 'output' => 'eckig'),
+											array('value' => 'triangle', 'output' => 'dreieckig')
+										),
+										$this->styledaten[key($this->styledaten)],
+										1,
+										"width: 87px",
+										"",
+										"",
+										"",
+										'styleFormField',
+										"ohne"
+									);
+								} break;
+								case 'linejoin' : {
+									echo FormObject::createSelectField(
+										'style_linejoin',
+										array(
+											array('value' => 'round', 'output' => 'rund'),
+											array('value' => 'miter', 'output' => 'phasig'),
+											array('value' => 'bevel', 'output' => 'abgeschrägt')
+										),
+										$this->styledaten[key($this->styledaten)],
+										1,
+										"width: 87px",
+										"",
+										"",
+										"",
+										'styleFormField',
+										"ohne"
+									);
+								} break;
+								case 'size' : case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="9"
+										type="number"
+										min="0"
+										max="200"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									><?
+								} break;
+								case 'width' : case 'minwidth' : case 'maxwidth' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="9"
+										type="number"
+										min="0"
+										max="100"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									><?
+								} break;
+								case 'offsetx' : case 'offsety' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="9"
+										type="number"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									><?
+								} break;
+								/*
+								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										style="width: 89px"
+										type="color"
+										value=""
+									><?
+								} break;
+*/
+								default : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="11"
+										type="text"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									><?
+								}
+							} ?>
 						</td>
 					</tr><?
 					next($this->styledaten);
@@ -4438,7 +4601,7 @@ echo '			</table>
   }
 
   function get_label(){
-		include_once(CLASSPATH.'FormObject.php');
+		include_once(CLASSPATH . 'FormObject.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->labeldaten = $mapDB->get_Label($this->formvars['label_id']);
@@ -8463,7 +8626,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 			$this->Layergruppe_Editor();
 		}
 	}
@@ -8480,7 +8643,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 		}
 		$this->Layergruppe_Editor();
 	}
@@ -8579,7 +8742,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->invitations_list();
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 			$this->invitation_formular();
 		}
 	}
@@ -8608,7 +8771,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 		}
 		$this->invitation_formular();
 	}
@@ -12554,7 +12717,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->main='menuedaten.php';
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
@@ -12572,7 +12735,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
@@ -13249,7 +13412,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('array', $results);
+			$this->add_message('array', array_value($results));
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
@@ -16446,6 +16609,7 @@ class db_mapObj{
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
 			$Layer[] = $rs;
 		}
 		return $Layer;
@@ -19873,7 +20037,14 @@ class db_mapObj{
 	}
 
   function delete_Class($class_id){
-    $sql = 'DELETE FROM classes WHERE Class_ID = '.$class_id;
+    $sql = "
+			DELETE 
+				c, rc 
+			FROM
+				classes c JOIN 
+				u_rolle2used_class rc ON c.Class_ID = rc.class_id
+			WHERE 
+				c.Class_ID = " . $class_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
