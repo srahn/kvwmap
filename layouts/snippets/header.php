@@ -53,6 +53,29 @@
 		</div>
 	</div>
 
+	<div title="Hinweise" style="float: right; display: block;">
+		<a href="#" onclick="message('<b>Achtung Wartungsarbeiten!</b><br><br>Die Anwendung wird so umgebaut, dass die Layeroptionen zur Einstellung von Kampagne, Kartiergebiet, Kartierebene und Bogenart im Kopf der Anwendung zu sehen ist! Die Anwendung kann während des Umbaus weiter wie gewohnt genutzt werden.');">
+			<i class="fa fa-bell" aria-hidden="true" style="
+				font-size: 150%;
+				padding: 5px 0px 4px 0;
+			"></i>
+			<div style="
+					margin: -27 0 0 14;
+					width: 12;
+					height: 12;
+					border-radius: 8px;
+					background-color: orange;
+					font-size: 10px;
+					font-weight: bold;
+					font-family: arial;
+					color: white;
+					padding: 0px 2px 3px 2px;
+					position: relative;
+					text-align: center;
+					">1</div>
+		</a>
+	</div>
+
 	<div title="<? echo $this->strPrintMapArea; ?>">
 		<a href="index.php?go=Druckausschnittswahl&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-print header-button" style="font-size: 160%" aria-hidden="true"></i></a>
 	</div>
