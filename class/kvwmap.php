@@ -19567,10 +19567,10 @@ class db_mapObj{
 		}
 		else {
 			while ($rs = $this->db->result->fetch_assoc()) {
-				$params[] = $rs;
+				$layer_params[] = $rs;
 			}
 		}
-		return $params;
+		return $layer_params;
 	}
 
 	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
