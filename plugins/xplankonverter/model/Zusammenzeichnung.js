@@ -53,7 +53,7 @@ class Zusammenzeichnung {
             }
             else {
               this.confirm_step('upload_zusammenzeichnung', false);
-              message(response.msg);
+              message([{ type: 'error', msg: response.msg}]);
             }
           } catch (err) {
             if (event.target.responseText.indexOf('<input id="login_name"') > 0) {
@@ -106,7 +106,6 @@ class Zusammenzeichnung {
           }
           else {
             this.confirm_step('validate_zusammenzeichnung', false);
-            this.confirm_step('upload_zusammenzeichnung', false);
             message([{ type: 'error', msg: 'Fehler bei der Validierung der Zusammenzeichnung.<br>' + result.msg }]);
           }
         }
@@ -126,8 +125,38 @@ class Zusammenzeichnung {
 
   import_zusammenzeichnung = () => {
     this.next_step('import_zusammenzeichnung');
-    this.confirm_step('import_zusammenzeichnung', true);
-    this.convert_zusammenzeichnung();
+    $.ajax({
+      url: 'index.php',
+      data: {
+        go: 'xplankonverter_import_zusammenzeichnung',
+        konvertierung_id : this.id,
+        mime_type: 'json',
+        format: 'json_result',
+      },
+      success: (result) => {
+        console.log('Response import_zusammenzeichnung: %o', result);
+        if (result.success) {
+          if (result.valid) {
+            this.confirm_step('import_zusammenzeichnung', true);
+            this.convert_zusammenzeichnung();
+          }
+          else {
+            this.confirm_step('import_zusammenzeichnung', false);
+            message([{ type: 'error', msg: 'Fehler beim Import der Zusammenzeichnung.<br>' + result.msg }]);
+          }
+        }
+        else {
+          this.confirm_step('import_zusammenzeichnung', false);
+          console.error(result.msg);
+          message([{ type: 'error', msg: 'Fehler beim Import der Datei. ' + result.msg }]);
+        }
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        this.confirm_step('import_zusammenzeichnung', false);
+        console.error(jqXHR);
+        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown }]);
+      }
+    })
   }
 
   convert_zusammenzeichnung = () => {

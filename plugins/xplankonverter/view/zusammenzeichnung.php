@@ -11,9 +11,10 @@
 		_create_service_metadata
 	*/
 ?><link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css">
-<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script>
+<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script><?
+$zusammenzeichnung_id = ($this->zusammenzeichnung_exists ? $this->zusammenzeichnung->get('id') : ''); ?>
 <script>
-	let zz = new Zusammenzeichnung(<? echo $this->zusammenzeichnung->get('id'); ?>);
+	let zz = new Zusammenzeichnung(<? echo $zusammenzeichnung_id; ?>);
 </script>
 <h2 style="margin-top: 15px; margin-bottom: 10px">Zusammenzeichnung F-Plan <? echo $this->Stelle->Bezeichnung; ?></h2>
 <style>
@@ -141,7 +142,7 @@
 	<div id="neue_zusammenzeichnung" class="centered_div hidden">
 		<div
 			id="upload_zusammenzeichnung_div"
-			ondrop="zz.upload_zusammenzeichnung(event,<? echo $this->zusammenzeichnung->get('id'); ?>)"
+			ondrop="zz.upload_zusammenzeichnung(event, <? echo $zusammenzeichnung_id; ?>)"
 			ondragover="$(this).addClass('dragover');"
 			ondragleave="$(this).removeClass('dragover')"
 		>
@@ -194,7 +195,7 @@
 						<td>Rechtsstand:</td><td><? echo get_rechtsstand($this->zusammenzeichnung->plan->get('rechtsstand')); ?> (<? echo $this->zusammenzeichnung->plan->get('rechtsstand'); ?>)<td>
 					</tr>
 					<tr>
-						<td>Datum der Wirksamkeit:</td><td><? echo $this->zusammenzeichnung->plan->get('wirksamkeitsdatum'); ?><td>
+						<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $this->zusammenzeichnung->plan->get('wirksamkeitsdatum'); ?><td>
 					</tr>
 					<tr>
 						<td align="center"><!--img src="<? #querymap oder Kartenauszug ?>"//--></td>
@@ -214,13 +215,13 @@
 						<td>Hochgeladene XPlanGML-Datei:</td><td><? ?><td>
 					</tr>
 					<tr>
-						<td>Ergebnisse des XPlan-Validators der Leitstelle:</td><td><a href="index.php?go=xplankonverter_xplankonverter_report&konvertierung_id=<? echo $this->zusammenzeichnung->get('id'); ?>">Anzeigen</a><td>
+						<td>Ergebnisse des XPlan-Validators der Leitstelle:</td><td><a href="index.php?go=xplankonverter_xplankonverter_report&konvertierung_id=<? echo $zusammenzeichnung_id; ?>">Anzeigen</a><td>
 					</tr>
 					<tr>
-						<td>Ergebnisse der internen Konvertierung:</td><td><a href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=<? echo $this->zusammenzeichnung->get('id'); ?>">Anzeigen</a><td>
+						<td>Ergebnisse der internen Konvertierung:</td><td><a href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=<? echo $zusammenzeichnung_id; ?>">Anzeigen</a><td>
 					</tr>
 					<tr>
-						<td>Erzeugte XPlanGML-Datei:</td><td><a href="index.php?go=xplankonverter_download_xplan_gml&konvertierung_id=<? echo $this->zusammenzeichnung->get('id'); ?>">Download</a><td>
+						<td>Erzeugte XPlanGML-Datei:</td><td><a href="index.php?go=xplankonverter_download_xplan_gml&konvertierung_id=<? echo $zusammenzeichnung_id; ?>">Download</a><td>
 					</tr>
 				</table>
 			</div>
@@ -251,6 +252,7 @@
 				}
 			}
 			if ($this->zusammenzeichnung_exists AND !$this->zusammenzeichnung_neu_exists) { ?>
+				<input type="button" value="Zusammenzeichnung Löschen" onclick="delete_zusammenzeichnung()">
 				<input type="button" value="Neue Version hochladen" onclick="show_upload_zusammenzeichnung('Neue Version der Zusammenzeichnung hier reinziehen.')"><?
 			} ?>
 		</div><?
@@ -321,6 +323,11 @@
 		$('#neue_zusammenzeichnung').show();
 	}
 
+	function delete_zusammenzeichnung() {
+		console.log('delete_zusammenzeichnung');
+		alert('Löschen der Zusammenzeichnung noch nicht implementiert.');
+	}
+
 	var fileobj;
 
 	window.addEventListener("dragover",function(e){
@@ -349,7 +356,7 @@
 		if (file_obj != undefined) {
 			var form_data = new FormData();
 			form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
-			form_data.append('konvertierung_id', <? echo $this->zusammenzeichnung->get('id'); ?>);
+			form_data.append('konvertierung_id', <? echo $zusammenzeichnung_id; ?>);
 			form_data.append('upload_file', file_obj);
 			var xhttp = new XMLHttpRequest();
 			xhttp.open("POST", "index.php", true);

@@ -41,31 +41,66 @@ class Konvertierung extends PgObject {
 		calling function publish_service()
 	*/
 	function create_geoweb_service() {
-		$wms_online_resource = URL . 'services/plan/' . $this->get($this->identifier);
-		# Setting formvars
-		$formvars = array(
-			'nurNameLike' => $this->plan->planartAbk . '_%',
-			'totalExtent' => 1,
-			'ows_title' => $this->Stelle->ows_title,
-			'ows_abstract' => $this->Stelle->ows_abstract,
-			'wms_accessconstraints' => $this->Stelle->wms_accessconstraints,
-			'ows_contactperson' => $this->Stelle->ows_contentperson,
-			'ows_contactorganization' => $this->Stelle->ows_contentorganization,
-			'ows_contactelectronicmailaddress' => $this->Stelle->ows_contentelectronicmailaddress,
-			'ows_contactposition' => $this->Stelle->ows_contentposition,
-			'ows_fees' => $this->Stelle->ows_fees,
-			'wms_onlineresource' => $wms_onlineresource,
-			'ows_srs' => OWS_SRS . ' EPSG:3857'
+		$gui = $this->gui;
+		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $this->plan->planartAbk[0] . 'plan/';
+
+		$gui->class_load_level = 2;
+		$gui->loadMap('DataBase');
+
+		# Setze Metadaten
+		$extent = $this->plan->get_extent();
+		$gui->map->extent->setextent($extent['minx'], $extent['miny'], $extent['maxx'], $extent['maxy']);
+    $gui->map->setMetaData("ows_extent", implode(' ', $extent));
+		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+
+		# Filter Layer, die nicht im Dienst zu sehen sein sollen
+		# Und setze bei den anderen die Templates
+		$layers_with_content = $this->plan->get_layers_with_content();
+		$layernames_with_content = array_keys($layers_with_content);
+		$layers_to_remove = array();
+		for ($i = 0; $i < $gui->map->numlayers; $i++) {
+			$layer = $gui->map->getLayer($i);
+			if (in_array($layer->name, $layernames_with_content)) {
+				$layer->set('header', '../templates/' . $layers_with_content[$layer->name]['maintable'] . '_head.html');
+				$layer->set('template', '../templates/' . $layers_with_content[$layer->name]['maintable'] . '_body.html');
+			}
+			else {
+				$gui->map->removeLayer($i);
+				$i--;
+			}
+		}
+
+		try {
+			$this->mapfile = $this->get_geoweb_mapfile();
+		} catch (Exception $ex) {
+			$result = array(
+				'success' => false,
+				'msg' => 'Fehler beim Abfragen des Mapfile-Namen in create_geoweb_service. ' . $ex
+			);
+			return $result;
+		}
+		try {
+			$gui->saveMap($this->mapfile);
+		} catch (Exception $ex) {
+			$result = array(
+				'success' => false,
+				'msg' => 'Fehler beim speichern der Map-Datei in create_geoweb_service. ' . $ex
+			);
+			return $result;
+		}
+
+		# ToDo Hier weiter prüfen ob die Ausgabe im mapfile korrekt ist.
+		echo '<p><textarea cols="200" rows="500">' . file_get_contents($this->mapfile) . '</textarea><p>';
+
+		return array(
+			'success' => true,
+			'msg' => 'Map-Datei erfolgreich geschrieben'
 		);
-		# if OWS_SRS 3867 nicht enthält anhängen.
-		$this->mapfile = $this->get_geoweb_mapfile();
-		
-		# call $this->gui->wmsExportSenden() aber ohne output nur result aufnehmen und zurückgeben
-		return $this->gui->wmsExportSenden();
 	}
 	
 	function get_geoweb_mapfile() {
-		return WMS_MAPFILE_PATH . $this->get($this->identifier) . '/mapfile.map';
+		return WMS_MAPFILE_PATH . $this->get('stelle_id') . '/zusammenzeichnung.map';
 	}
 
 	public static	function find_by_id($gui, $by, $id, $select = '*') {
@@ -812,20 +847,20 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
-						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
+						array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
+						array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde,
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
 						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-						ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
-						ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
+						array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+						array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
 						ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
-						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
+						to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart) AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
 						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
 						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum

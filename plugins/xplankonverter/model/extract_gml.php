@@ -866,7 +866,7 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns an associative array to fill the bp_plan form
+	* Returns an associative array to fill the rp_plan form
 	*/
 	function fill_form_rp_plan($gml_id) {
 		$sql = "
@@ -2297,19 +2297,18 @@ class Gml_extractor {
 		return $sql;
 	}
 
-	/*
-	* Returns all attributes for a specific class in a specific schema in an array
+	/**
+		Returns all attributes for $class in $schema
+		that have not null values
 	*/
 	function get_attributes_with_values_for_class_in_schema($class, $schema) {
-		# This function selects all attributes that have values in a specific class and schema
 		$sql = "
 			SELECT
 				column_name
 			FROM
 				information_schema.columns
 			WHERE
-				table_schema = '" . $schema . "'
-			AND
+				table_schema = '" . $schema . "' AND
 				table_name = '" . $class . "'
 			ORDER BY ordinal_position;
 		";
@@ -2317,25 +2316,47 @@ class Gml_extractor {
 		$all_attributes = pg_fetch_all_columns($ret[1]);
 
 		# Returns an array of t or f values for all attributes for a class
-		$sql = "SELECT ";
-		foreach($all_attributes AS $a) {
-			$sql .= "EXISTS(SELECT " . $a;
-			$sql .= " FROM " . $schema . "." . $class;
-			$sql .= " WHERE " . $a . " IS NOT NULL) AS " . $a . ",";
-		}
-		if(substr($sql, -1, 1) == ",") {
-			$sql = substr($sql, 0, -1);
-		}
+		$sql = "
+			SELECT
+				" . implode(", ", array_map(
+					function($attribut) use ($schema, $class) {
+						return "EXISTS( SELECT " . $attribut . " FROM " . $schema . "." . $class . " WHERE " . $attribut . " IS NOT NULL ) AS " . $attribut;
+					},
+					$all_attributes
+				)) . "
+		";
+		#echo '<br>' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$attributes_exist = pg_fetch_array($ret[1]);
 
 		# Compares both arrays and writes all existing values in a new array
 		$attributes = [];
-		for($i = 0; $i < count($all_attributes); $i++) {
-			if($attributes_exist[$i] == 't') {
+		for ($i = 0; $i < count($all_attributes); $i++) {
+			if ($attributes_exist[$i] == 't') {
 				$attributes[] = $all_attributes[$i];
 			}
 		}
+		return $attributes;
+	}
+
+	/**
+		Returns all none geometry attributes for $class in $schema
+	*/
+	function get_none_geom_attributes_for_class_in_schema($class, $schema) {
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $schema . "' AND
+				table_name = '" . $class . "' AND
+        udt_name NOT LIKE 'geometry'
+			ORDER BY ordinal_position;
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$attributes = pg_fetch_all_columns($ret[1]);
 		return $attributes;
 	}
 

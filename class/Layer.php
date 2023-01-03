@@ -9,9 +9,9 @@ class Layer extends MyObject {
 		$this->identifier = 'Layer_ID';
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$layer = new Layer($gui);
-		return $layer->find_where($where);
+		return $layer->find_where($where, $order);
 	}
 
 	public static	function find_by_id($gui, $id) {
