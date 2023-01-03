@@ -24,7 +24,7 @@ $strConfirm2="€\\r\\n\\r\\nFortfahren?";
 $hoch="hoch";
 $quer="quer";
 $strHelp="Hilfe";
-$strRollenlayerLegend="Wenn Sie diese Option aktivieren, werden in der Legende auch Ihre eigenen Suchergebnislayer sowie importierte Layer angezeigt.";
+$strRollenlayerLegend="Wenn Sie diese Option aktivieren, werden in der Legende auch Ihre eigenen Abfragelayer sowie importierte Layer angezeigt.";
 $strLegendOptions="Legenden-Optionen";
 $strLayers="Themen";
  

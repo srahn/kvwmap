@@ -47,7 +47,7 @@ class data_import_export {
 		$this->unique_column = 'gid';
 		switch ($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
-				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $stelle, $pgdatabase, $epsg, $formvars['selected_layer_id']);
+				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $stelle, $pgdatabase, $epsg, $formvars['chosen_layer_id']);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'kml' : case 'kmz' : {
@@ -175,7 +175,6 @@ class data_import_export {
 
 		if ($custom_table['datatype'] != 3){	# kein Raster
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
-			$layerdb->setClientEncoding();
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
 			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
@@ -297,7 +296,7 @@ class data_import_export {
 		}
 	}
 
-	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $selected_layer_id = NULL){
+	function import_custom_shape($filenameparts, $user, $stelle, $pgdatabase, $epsg, $chosen_layer_id = NULL){
 		if ($filenameparts[0] != '') {
 			if (
 				(
@@ -325,11 +324,11 @@ class data_import_export {
 			}
 			$encoding = $this->getEncoding($filenameparts[0] . '.dbf');
 			
-			if ($selected_layer_id) {
-				$layerset = $user->rolle->getLayer($selected_layer_id);
+			if ($chosen_layer_id) {
+				$layerset = $user->rolle->getLayer($chosen_layer_id);
 				if ($user->layer_data_import_allowed AND $layerset[0]['privileg'] > 0) {
 					$mapDB = new db_mapObj($stelle->id, $user->id);
-					$db = $mapDB->getlayerdatabase($selected_layer_id, $stelle->pgdbhost);
+					$db = $mapDB->getlayerdatabase($chosen_layer_id, $stelle->pgdbhost);
 					$schema = $layerset[0]['schema'];
 					$table = $layerset[0]['maintable'];
 					$adjustments = false;

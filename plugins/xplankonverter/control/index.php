@@ -675,7 +675,7 @@ function go_switch_xplankonverter($go) {
 			// check stelle
 			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
 
-			$validation_msg = $GUI->konvertierung->validate_date($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
+			$validation_msg = $GUI->konvertierung->validate_date_format($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
 			if ($validation_msg != '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut Veroeffentlichungsdatum leer ist oder einen gültigen Datumswert hat.';
 				$response['success'] = false;
@@ -760,28 +760,45 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_create_geoweb_service' : {
 			#header('Content-Type: application/json');
-			$success = true;
-			$msg = [];
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
+			$xplan_layers = $GUI->xplankonverter_get_xplan_layers();
+
 			if ($konvertierung_id == '') {
-				send_error('Fehler beim erzeugen des GeoWeb-Dienstes!<p>Keine Konvertierung-ID angegeben.');
-				break;
+				if ($GUI->formvars['planart'] == 'Plan') {
+					send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.');
+					break;
+				}
+				$mapfile = $GUI->xplankonverter_create_geoweb_service($xplan_layers);
 			}
-			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
-			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
-				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an."
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an."
+					);
+					break;
+				}
+				$mapfile = $GUI->konvertierung->create_geoweb_service($xplan_layers);
+			}
+
+			try {
+				$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
+			} catch (Exception $ex) {
+				$result = array(
+					'success' => false,
+					'msg' => 'Fehler beim speichern der Map-Datei in create_geoweb_service. ' . $ex
 				);
-				break;
+				return $result;
 			}
-			$result = $GUI->konvertierung->create_geoweb_service();
+
+			# ToDo Hier weiter prüfen ob die Ausgabe im mapfile korrekt ist.
+			echo '<p><textarea cols="200" rows="500">' . file_get_contents(WMS_MAPFILE_PATH . $mapfile) . '</textarea><p>';
+
 			$response = array(
-				'success' => $result['success'],
-				'msg' => $result['msg'],
-				'konvertierung_id' => $konvertierung_id,
-				'plan_gml_id' => $GUI->konvertierung->plan->get('gml_id')
+				'success' => true,
+				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' erfolgreich geschrieben.'
 			);
 			echo json_encode($response);
 		} break;
@@ -1876,37 +1893,6 @@ function go_switch_xplankonverter($go) {
 			}
 			$GUI->data = $result;
 			$GUI->output();
-		} break;
-
-		case 'xplankonverter_write_wms_template' : {
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, '', 'xplan_gmlas_tmp_' . $GUI->user->id);
-			$class_names = $gml_extractor->get_possible_classes_for_regeln('xplan_gml');
-			$template_dir = WMS_MAPFILE_PATH . 'templates/';
-			if (!file_exists($template_dir)) {
-				mkdir($template_dir, 0550, true);
-			}
-			$output_for_classes = array();
-			foreach($class_names AS $class_name) {
-				$attributes = $gml_extractor->get_none_geom_attributes_for_class_in_schema($class_name, 'xplan_gml');
-				if (count($attributes) > 0) {
-
-					$fp = fopen($template_dir . $class_name . '_head.html', "w");
-					fwrite($fp, $gml_extractor->get_wms_template_header($class_name, $attributes));
-					fclose($fp);
-
-					$fp = fopen($template_dir . $class_name . '_body.html', "w");
-					fwrite($fp, $gml_extractor->get_wms_template_body($attributes));
-					fclose($fp);
-
-#					file_put_contents($template_dir . $class_name . '_head.html', $gml_extractor->get_wms_template_header($class_name, $attributes));
-#					file_put_contents($template_dir . $class_name . '_body.html', $gml_extractor->get_wms_template_body($attributes));
-					$output_for_classes[] = $class_name;
-				}
-			} ?>
-			<br>Schreibe Template Head und Body Dateien nach <? echo $template_dir; ?> für folgende Klassen:
-			<ul>
-				<li><? echo implode('</li><li>', $output_for_classes); ?></li>
-			</ul><?
 		} break;
 
 		case 'xplankonverter_xplanvalidator' : {

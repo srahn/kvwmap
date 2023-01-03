@@ -1,6 +1,5 @@
 <?
 	include(LAYOUTPATH . 'languages/ows_export_' . $this->user->rolle->language . '.php');
-	include(CLASSPATH . 'FormObject.php');
 ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
 	<tr align="center">

@@ -40,9 +40,10 @@ class Konvertierung extends PgObject {
 		This service is not acitve per default. It can be published by
 		calling function publish_service()
 	*/
-	function create_geoweb_service() {
+	function create_geoweb_service($xplan_layers) {
 		$gui = $this->gui;
-		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $this->plan->planartAbk[0] . 'plan/';
+		$planartkuerzel = $this->plan->planartAbk[0];
+		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $planartkuerzel . 'plan/';
 
 		$gui->class_load_level = 2;
 		$gui->loadMap('DataBase');
@@ -56,51 +57,25 @@ class Konvertierung extends PgObject {
 
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
 		# Und setze bei den anderen die Templates
-		$layers_with_content = $this->plan->get_layers_with_content();
+		$layers_with_content = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
 		$layernames_with_content = array_keys($layers_with_content);
+		$layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
+		$layernames_with_content[] = strtoupper($this->plan->planartAbk) . '-Bereiche';
+		$layernames_with_content[] = 'Geltungsbereiche';
+		#echo '<br>pk layernames_with_content: ' . print_r($layernames_with_content, true);
 		$layers_to_remove = array();
 		for ($i = 0; $i < $gui->map->numlayers; $i++) {
 			$layer = $gui->map->getLayer($i);
 			if (in_array($layer->name, $layernames_with_content)) {
-				$layer->set('header', '../templates/' . $layers_with_content[$layer->name]['maintable'] . '_head.html');
-				$layer->set('template', '../templates/' . $layers_with_content[$layer->name]['maintable'] . '_body.html');
+				$layer->set('header', '../templates/' . $layer->name . '_head.html');
+				$layer->set('template', '../templates/' . $layer->name . '_body.html');
 			}
 			else {
 				$gui->map->removeLayer($i);
 				$i--;
 			}
 		}
-
-		try {
-			$this->mapfile = $this->get_geoweb_mapfile();
-		} catch (Exception $ex) {
-			$result = array(
-				'success' => false,
-				'msg' => 'Fehler beim Abfragen des Mapfile-Namen in create_geoweb_service. ' . $ex
-			);
-			return $result;
-		}
-		try {
-			$gui->saveMap($this->mapfile);
-		} catch (Exception $ex) {
-			$result = array(
-				'success' => false,
-				'msg' => 'Fehler beim speichern der Map-Datei in create_geoweb_service. ' . $ex
-			);
-			return $result;
-		}
-
-		# ToDo Hier weiter prüfen ob die Ausgabe im mapfile korrekt ist.
-		echo '<p><textarea cols="200" rows="500">' . file_get_contents($this->mapfile) . '</textarea><p>';
-
-		return array(
-			'success' => true,
-			'msg' => 'Map-Datei erfolgreich geschrieben'
-		);
-	}
-	
-	function get_geoweb_mapfile() {
-		return WMS_MAPFILE_PATH . $this->get('stelle_id') . '/zusammenzeichnung.map';
+		return $this->get('stelle_id') . '/zusammenzeichnung.map';
 	}
 
 	public static	function find_by_id($gui, $by, $id, $select = '*') {

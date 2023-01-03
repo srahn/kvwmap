@@ -43,6 +43,6 @@
 	$strLegendTypeAlphabetical="Themen alphabetisch";
 	$strDrawingOrder="Zeichenreihenfolge anpassen";
 	$strRemoveAllImportLayers="alle eigenen Importe entfernen";
-	$strRemoveAllSearchLayers="alle Suchergebnislayer entfernen";
+	$strRemoveAllSearchLayers="alle eigenen Abfragen entfernen";
   
 ?>

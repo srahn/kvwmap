@@ -45,64 +45,34 @@ class XP_Plan extends PgObject {
 		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
 	}
 
-	function get_content_layers() {
-		include_once(CLASSPATH . 'Layer.php');
-		$layers = Layer::find($this->gui, "
-				`schema` LIKE 'xplan_gml' AND
-				LOWER(`Name`) NOT LIKE '%textabschnitt' AND
-				LOWER(`Name`) NOT LIKE '%begruendungabschnitt' AND
-				LOWER(`Name`) NOT LIKE '%bereiche' AND
-				LOWER(`Name`) NOT LIKE '%Pläne' AND
-				`Datentyp` IN (0, 1, 2) AND
-				`connectiontype` = 6
-		", 'Name');
-		$content_layers = array_map(
-			function ($layer) {
-				return array(
-					'Name' => $layer->get('Name'),
-					'Datentyp' =>$layer->get('Datentyp'),
-					'schema' => $layer->get('schema'),
-					'maintable' => $layer->get('maintable')
-				);
-			},
-			$layers
-		);
-		return $content_layers;
-	}
-
 	/**
 		Return names of layer that have content from the plan
 	*/
-	function get_layers_with_content() {
+	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
-		$content_layers = $this->get_content_layers();
-		foreach ($content_layers AS $content_layer) {
+		foreach ($xplan_layers AS $xplan_layer) {
 			$sql = "
 				SELECT
-					'" . $content_layer['Name'] . "',
+					'" . $xplan_layer['Name'] . "',
 					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
 					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
 					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
 				FROM
-					" . $content_layer['schema'] . '.' . $content_layer['maintable'] . "
+					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
-					konvertierung_id = " . $this->get('konvertierung_id') . "
+					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
 			";
 			#echo '<br>' . $sql;
 			$ret = $this->database->execSQL($sql, 4, 0);
 			$content = pg_fetch_array($ret[1]);
 			if (
-				($content_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
-				($content_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
-				($content_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
+				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
 			) {
-				$layers_with_content[$content_layer['Name']] = $content_layer;
+				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}
 		}
-		# ToDo Diese Layer auch mit in das Mapfile aufnehmen
-		#$layers_with_contents[] = strtoupper($this->planartAbk) . '-Pläne';
-		#$layers_with_contents[] = strtoupper($this->planartAbk) . '-Bereiche';
-		#$layers_with_contents[] = 'Geltungsbereiche';
 		return $layers_with_content;
 	}
 

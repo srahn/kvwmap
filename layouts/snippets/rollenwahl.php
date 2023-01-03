@@ -244,6 +244,39 @@ if ($this->Fehlermeldung!='') {
 											<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
 											<span data-tooltip="<? echo $strHintVisuallyImpaired; ?>"></span>
 										</td>
+									</tr>
+									<tr>
+										<td class="rollenwahl-option-header">
+											<label for="font_size_factor">Textgröße</label>
+										</td>
+										<td class="rollenwahl-option-data">
+											<input
+											  type="range"
+											  name="font_size_factor"
+											  id="font_size_factor"
+											  min="0.75"
+											  max="1.25"
+											  step="0.125"
+											  value="<?php echo $this->user->rolle->font_size_factor; ?>"
+												style="width: 300px"
+												onchange="$('#font_size_factor_text').css('font-size', ($('#font_size_factor').val() * 15) + 'px')"
+											/>
+											<output class="font_size_factor" for="font_size_factor"></output>
+											<?php
+											/* ToDo pk:
+											  - language for font_size_factor eintragen
+											  - styles mit font_size_factor ausstatten mit laden des Styles zum zeitpunkt des Ladens der Seite in php
+											  - prüfen wo überall mail_css.php geladen wird
+											  - Anpassung laden von custom css
+											*/
+											?>
+											<span data-tooltip="Verändert die Textgröße"></span><br>
+											<div id="font_size_factor_text" style="font-size: <?php echo $this->user->rolle->font_size_factor * 15;?>px">
+												<div style="float: left; width: 100px; text-align: left;">klein</div>
+												<div style="float: left; width: 100px; text-align: center">mittel</div>
+												<div style="float: left; width: 100px; text-align: right">groß</div>
+											</div>
+										</td>
 									</tr><?
 								} ?>
 							</table>

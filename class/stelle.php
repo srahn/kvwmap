@@ -1748,7 +1748,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -2222,6 +2222,11 @@ class stelle {
 		}
 		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
 		return $mapfiles;
+	}
+
+	function is_gast_stelle() {
+		global $gast_stellen;
+		return (in_array($this->id, array_values($gast_stellen)) ? 'true' : 'false');
 	}
 }
 ?>

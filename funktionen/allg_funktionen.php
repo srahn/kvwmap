@@ -3,7 +3,6 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
-
 function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', '=', $exp);
@@ -955,16 +954,16 @@ function isTag($word) {
 }
 
 function drawColorBox($color,$outlinecolor) {
-  # Funktion liefert eine Box als überlagerte Div in html,
-  # die die Farbe $color und die Border $outlinecolor hat.
-  $c=explode(' ',trim($color));
-  $bgcolor='#';
-  for ($i=0;$i<3;$i++) {
-    $bgcolor.=strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
-  }
-  $oc=explode(' ',trim($outlinecolor));
-  $bordercolor='#';
-  for ($i=0;$i<3;$i++) {
+	# Funktion liefert eine Box als überlagerte Div in html,
+	# die die Farbe $color und die Border $outlinecolor hat.
+	$c = explode(' ',trim($color));
+	$bgcolor = '#';
+	for ($i = 0; $i < 3; $i++) {
+		$bgcolor.=strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
+	}
+	$oc = explode(' ',trim($outlinecolor));
+	$bordercolor = '#';
+	for ($i=0;$i<3;$i++) {
     $bordercolor.=strtoupper(str_pad(dechex($oc[$i]), 2, 0, STR_PAD_LEFT));
   }
   ?>
@@ -975,6 +974,14 @@ function drawColorBox($color,$outlinecolor) {
   <?php
 }
 
+function rgb2hex($rgb) {
+	$c = explode(' ',trim($rgb));
+	$hex = '#';
+	for ($i = 0; $i < 3; $i++) {
+		$hex .= strtoupper(str_pad(dechex($c[$i]), 2, 0, STR_PAD_LEFT));
+	}
+	return $hex;
+}
 
 // +----------------------------------------------------------------------+
 // | PHP Version 4                                                        |
@@ -1837,6 +1844,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
+	return $str;
+}
+
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
 	return $str;
 }
 
