@@ -1904,7 +1904,6 @@ function go_switch($go, $exit = false) {
 				delete the notification for user
 			*/
 			case 'delete_user2notification' : {
-				$GUI->checkCaseAllowed('notifications_anzeigen');
 				$GUI->sanitize(['notification_id' => 'int']);
 				$GUI->delete_user2notification();
 			} break;
