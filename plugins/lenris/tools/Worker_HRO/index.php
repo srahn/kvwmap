@@ -136,7 +136,7 @@
 			WHERE 
 				id_nachweis IN (" . $ids . ") and db_action = 'DELETE'";
 		$ret = execSQL($sql);
-		$rest = pg_fetch_row($ret[1]);
+		$rest = pg_fetch_row($ret);
 		echo (substr_count($ids, ',') + 1 - $rest[0]);
 	}		
 
