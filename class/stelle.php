@@ -2219,5 +2219,10 @@ class stelle {
 		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
 		return $mapfiles;
 	}
+
+	function is_gast_stelle() {
+		global $gast_stellen;
+		return (in_array($this->id, array_values($gast_stellen)) ? 'true' : 'false');
+	}
 }
 ?>

@@ -674,7 +674,7 @@ function go_switch_xplankonverter($go) {
 			// check stelle
 			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) return;
 
-			$validation_msg = $GUI->konvertierung->validate_date($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
+			$validation_msg = $GUI->konvertierung->validate_date_format($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
 			if ($validation_msg != '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut Veroeffentlichungsdatum leer ist oder einen gültigen Datumswert hat.';
 				$response['success'] = false;
