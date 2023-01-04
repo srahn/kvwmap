@@ -2500,12 +2500,12 @@
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>anteil_anteil_nenner</Name>
+				<Name>nenner</Name>
 				<ElementPath>anteil|AX_Anteil|nenner</ElementPath>
 				<Type>Real</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>anteil_anteil_zaehler</Name>
+				<Name>zaehler</Name>
 				<ElementPath>anteil|AX_Anteil|zaehler</ElementPath>
 				<Type>Real</Type>
 			</PropertyDefn>
@@ -3189,12 +3189,12 @@
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>anteil_anteil_nenner</Name>
+				<Name>nenner</Name>
 				<ElementPath>anteil|AX_Anteil|nenner</ElementPath>
 				<Type>Real</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>anteil_anteil_zaehler</Name>
+				<Name>zaehler</Name>
 				<ElementPath>anteil|AX_Anteil|zaehler</ElementPath>
 				<Type>Real</Type>
 			</PropertyDefn>
@@ -3360,12 +3360,12 @@
 				<Type>Real</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_blattart</Name>
+				<Name>blattart</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|blattart</ElementPath>
 				<Type>IntegerList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsart</Name>
+				<Name>buchungsart</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsart</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
@@ -3380,17 +3380,17 @@
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsblattkennzeichen</Name>
+				<Name>buchungsblattkennzeichen</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsblattkennzeichen</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsblattnummermitbuchstabenerweiterung</Name>
+				<Name>buchungsblattnummermitbuchstabenerweiterung</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsblattnummerMitBuchstabenerweiterung</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_laufendenummerderbuchungsstelle</Name>
+				<Name>laufendenummerderbuchungsstelle</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|laufendeNummerDerBuchungsstelle</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
@@ -3782,12 +3782,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -7748,12 +7748,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -8800,12 +8800,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -11338,12 +11338,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -11821,12 +11821,12 @@
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_blattart</Name>
+				<Name>blattart</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|blattart</ElementPath>
 				<Type>IntegerList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsart</Name>
+				<Name>buchungsart</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsart</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
@@ -11841,17 +11841,17 @@
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsblattkennzeichen</Name>
+				<Name>buchungsblattkennzeichen</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsblattkennzeichen</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_buchungsblattnummermitbuchstabenerweiterung</Name>
+				<Name>buchungsblattnummermitbuchstabenerweiterung</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|buchungsblattnummerMitBuchstabenerweiterung</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>buchung_laufendenummerderbuchungsstelle</Name>
+				<Name>laufendenummerderbuchungsstelle</Name>
 				<ElementPath>buchung|AX_Buchung_HistorischesFlurstueck|laufendeNummerDerBuchungsstelle</ElementPath>
 				<Type>StringList</Type>
 			</PropertyDefn>
@@ -12047,12 +12047,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -12213,12 +12213,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -12409,12 +12409,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -13104,12 +13104,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -13587,12 +13587,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -14749,12 +14749,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -15388,12 +15388,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -16746,12 +16746,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -17827,12 +17827,12 @@
 				<Type>Integer</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_land</Name>
+				<Name>land</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>ausfuehrendestelle_stelle</Name>
+				<Name>stelle</Name>
 				<ElementPath>ausfuehrendeStelle|AX_Dienststelle_Schluessel|stelle</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
@@ -25813,17 +25813,17 @@
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>kreis_kreis</Name>
+				<Name>kreis</Name>
 				<ElementPath>kreis|AX_Kreis_Schluessel|kreis</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>kreis_land</Name>
+				<Name>land</Name>
 				<ElementPath>kreis|AX_Kreis_Schluessel|land</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>
 			<PropertyDefn>
-				<Name>kreis_regierungsbezirk</Name>
+				<Name>regierungsbezirk</Name>
 				<ElementPath>kreis|AX_Kreis_Schluessel|regierungsbezirk</ElementPath>
 				<Type>String</Type>
 			</PropertyDefn>

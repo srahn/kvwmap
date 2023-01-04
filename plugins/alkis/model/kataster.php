@@ -1020,11 +1020,14 @@ class flurstueck {
 					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
-					n.kulturart as objart, 
-					n.kulturart, 
+					n.nutzungsart as objart, 
+					n.nutzungsart, 
 					n.bodenart, 
-					n.entstehungsartoderklimastufewasserverhaeltnisse, 
-					n.zustandsstufeoderbodenstufe, 
+					n.entstehungsart, 
+					n.klimastufe, 
+					n.wasserverhaeltnisse, 
+					n.zustandsstufe, 
+					n.bodenstufe, 
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
@@ -1048,11 +1051,13 @@ class flurstueck {
 					a.flaeche > 0.01 
 					" .	$this->database->build_temporal_filter(array('n')) . "
 				) as n 
-				LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
-				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
-				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
-				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
-				LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+				LEFT JOIN alkis.ax_nutzungsart_bodenschaetzung k ON k.wert = n.nutzungsart 
+				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert = n.bodenart 
+				LEFT JOIN alkis.ax_entstehungsart e1 ON e1.wert = n.entstehungsart[1] 
+				LEFT JOIN alkis.ax_klimastufe e2 ON e2.wert = n.klimastufe
+				LEFT JOIN alkis.ax_wasserverhaeltnisse e3 ON e3.wert = n.wasserverhaeltnisse
+				LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
+				LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
 				LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]";
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
@@ -1091,11 +1096,14 @@ class flurstueck {
 					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
-					n.kulturart as objart, 
-					n.kulturart, 
+					n.nutzungsart as objart, 
+					n.nutzungsart, 
 					n.bodenart, 
-					n.entstehungsartoderklimastufewasserverhaeltnisse, 
-					n.zustandsstufeoderbodenstufe, 
+					n.entstehungsart, 
+					n.klimastufe, 
+					n.wasserverhaeltnisse, 
+					n.zustandsstufe, 
+					n.bodenstufe, 
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
@@ -1128,16 +1136,18 @@ class flurstueck {
 					alkis.ax_bodenschaetzung n,
 					ST_Area(ST_CollectionExtract(ST_Intersection(n.wkb_geometry, fnu.intersection), 3)) as a (flaeche)
 				WHERE 
-					n.kulturart = ANY(fnu.ableitung_emz) and 
+					n.nutzungsart = ANY(fnu.ableitung_emz) and 
 					st_intersects(n.wkb_geometry, fnu.intersection) AND 
 					a.flaeche > 0.01 
 					" . $this->database->build_temporal_filter(array('n')) . " 
 			) as n 
-			LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
-			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
-			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
-			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
-			LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+			LEFT JOIN alkis.ax_nutzungsart_bodenschaetzung k ON k.wert = n.nutzungsart 
+			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert = n.bodenart 
+			LEFT JOIN alkis.ax_entstehungsart e1 ON e1.wert = n.entstehungsart[1] 
+			LEFT JOIN alkis.ax_klimastufe e2 ON e2.wert = n.klimastufe
+			LEFT JOIN alkis.ax_wasserverhaeltnisse e3 ON e3.wert = n.wasserverhaeltnisse
+			LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
+			LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
 			LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
 		";
 		#echo $sql;
