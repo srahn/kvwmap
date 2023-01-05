@@ -3517,9 +3517,6 @@ class db_mapObj{
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach ($attributes['all_table_names'] as $tablename) {
-				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-			}
 		}
 		else {
 			$attributes['all_table_names'] = array();
