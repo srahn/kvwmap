@@ -1252,13 +1252,6 @@ class flurstueck {
     return $ret[1];
   }
 
-  function getFinanzamt() {
-    if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("kataster.php->flurstueck->getFinanzamt Abfrage des Finanzamtes zum Flurstück<br>".$sql,4);
-    $ret=$this->database->getFinanzamt($this->FlurstKennz);
-    return $ret[1];
-  }
-
   function getAmtsgerichte() {
     $blattnummer = strval($this->Buchungen[0]['blatt']);
     if ($blattnummer >= 90000 and $blattnummer <= 99999 OR $this->Grundbuchbezirke == '') {
