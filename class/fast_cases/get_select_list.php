@@ -1048,9 +1048,6 @@ class db_mapObj{
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach ($attributes['all_table_names'] as $tablename) {
-				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-			}
 		}
 		else {
 			$attributes['all_table_names'] = array();
@@ -1389,19 +1386,5 @@ class pgdatabase {
 		return $ret;
 	}
 
-  function check_oid($tablename){
-    $sql = 'SELECT oid from '.$tablename.' limit 0';
-    if($this->schema != ''){
-    	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-    }
-    $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
-    @$query=pg_query($sql);
-    if ($query==0) {
-			return false;
-    }
-    else{
-      return true;
-    }
-  }
 }
 ?>

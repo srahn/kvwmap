@@ -998,21 +998,6 @@ FROM
 		}
 		return $geom_type;
 	}
-
-  function check_oid($tablename){
-    $sql = 'SELECT oid from '.$tablename.' limit 0';
-    if($this->schema != ''){
-    	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-    }
-    $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
-    @$query=pg_query($sql);
-    if ($query==0) {
-			return false;
-    }
-    else{
-      return true;
-    }
-  }
   
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
