@@ -637,11 +637,13 @@ FROM
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$sql = "
 			SET client_min_messages='log';
+			SET log_min_messages='fatal';
 			SET debug_print_parse=true;" . 
 			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
 		$sql = "
 			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';
 			SET debug_print_parse = false;";
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
