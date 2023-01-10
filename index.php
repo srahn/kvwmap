@@ -142,7 +142,6 @@ define('CASE_COMPRESS', false);
 #											- zoomToMaxLayerExtent() reinkopieren																								#
 #											- getlayerdatabase() reinkopieren																										#
 #											- read_layer_attributes() reinkopieren																							#
-#											- check_oid() reinkopieren																													#
 #											- getFilter() reinkopieren																													#
 #											- setFullExtent() reinkopieren																											#
 #											- setPrevMapExtent()																																#

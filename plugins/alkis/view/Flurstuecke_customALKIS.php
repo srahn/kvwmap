@@ -576,19 +576,19 @@ hide_versions = function(flst){
 												<table border="0" cellspacing="0" cellpadding="2">
 												<?
 												for($j = 0; $j < @count($flst->Strassenrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td>'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->Wasserrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td>'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->Schutzgebiet); $j++){
-													echo '<tr><td valign="top">'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td>'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->NaturUmweltrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td>'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->BauBodenrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->BauBodenrecht[$j]['art'];
+													echo '<tr><td valign="top">'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td>'.$flst->BauBodenrecht[$j]['art'];
 													if($flst->BauBodenrecht[$j]['bezeichnung'] != '')echo ': '.$flst->BauBodenrecht[$j]['bezeichnung'];
 													if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
 													echo '</td></tr>';
@@ -596,13 +596,13 @@ hide_versions = function(flst){
 												if($flst->abweichenderrechtszustand == 'ja')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
 												if($flst->zweifelhafterflurstuecksnachweis == 'ja')echo '<tr><td colspan="2" width="600px">Zweifelhafter Flurstücksnachweis</td></tr>';
 												for($j = 0; $j < @count($flst->Denkmalschutzrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td>'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->Forstrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td>'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
 												}
 												for($j = 0; $j < @count($flst->Sonstigesrecht); $j++){
-													echo '<tr><td valign="top">'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td width="500px">'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
+													echo '<tr><td valign="top">'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td>'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
 												}
 												?>
 												</table>
