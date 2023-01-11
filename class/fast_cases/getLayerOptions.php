@@ -2142,9 +2142,9 @@ class pgdatabase {
 			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
 		$sql = "
+			SET debug_print_parse = false;
 			SET client_min_messages = 'NOTICE';
-			SET log_min_messages='error';
-			SET debug_print_parse = false;";
+			SET log_min_messages='error';";
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		if ($ret['success']) {
