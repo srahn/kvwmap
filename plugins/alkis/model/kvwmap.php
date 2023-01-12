@@ -215,7 +215,7 @@
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
     $GUI->formvars['epsg_code'] = $epsg;
-    $GUI->formvars['transparency'] = 60;
+    $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 		
@@ -309,7 +309,7 @@
 	    $GUI->formvars['connectiontype'] = 6;
 	    $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
 	    $GUI->formvars['epsg_code'] = $epsg;
-	    $GUI->formvars['transparency'] = 60;
+	    $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
 	    $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 
