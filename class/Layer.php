@@ -424,7 +424,7 @@ class Layer extends MyObject {
 		return $this->get('Name' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : ''));
 	}
 
-	function write_mapserver_templates() {
+	function write_mapserver_templates($ansicht = 'Tabelle') {
 		$layer_id = $this->get($this->identifier);
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
@@ -475,12 +475,12 @@ class Layer extends MyObject {
 
 			$fp = fopen($template_dir . $this->get_name() . '_head.html', "w");
 			#if ($this->gui->user->id == 3) echo "Schreibe Datei " . $template_dir . $this->get_name() . '_head.html';
-			fwrite($fp, $this->get_wms_template_header($this->get_name(), $data_attribute_names));
+			fwrite($fp, $this->get_wms_template_header($this->get_name(), $data_attribute_names, $ansicht));
 			fclose($fp);
 
 			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");
 			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html';
-			fwrite($fp, $this->get_wms_template_body($data_attribute_names));
+			fwrite($fp, $this->get_wms_template_body($data_attribute_names, $ansicht));
 			fclose($fp);
 		}
 	}
@@ -494,33 +494,67 @@ class Layer extends MyObject {
 		}
 	}
 
-	function get_wms_template_header($layer_name, $attributes) {
-		$html = "<!-- MapServer Template -->
-<h2>" . $layer_name . "</h2>
-<table>
-  <tr>";
-		foreach ($attributes AS $attribute) {
-			$html .= "
-    <th>
-      " . $attribute['alias'] . "
-    </th>";
-		}
+	function get_wms_template_header($layer_name, $attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->";
 		$html .= "
-  </tr>";
+<style>
+		body {
+				font-family: helvetica;
+		}
+		td {
+			border: 1px solid #cccccc;
+			padding: 5px;
+		}
+		th {
+			background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+			border: 1px solid #cccccc;
+			padding: 5px;
+		}
+</style>
+<h2>" . $layer_name . "</h2>";
+		if ($table_format == 'columns') {
+			$html .= "
+<table>
+	<tr>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+		<th>
+			" . $attribute['alias'] . "
+		</th>";
+			}
+			$html .= "
+	</tr>";
+		}
 		return $html;
 	}
 
-	function get_wms_template_body($attributes) {
-		$html = "<!-- MapServer Template -->
-  <tr>";
-		foreach ($attributes AS $attribute) {
+	function get_wms_template_body($attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->";
+		if ($table_format == 'columns') {
 			$html .= "
-    <th>
-      [item name=" . $attribute['name'] . " escape=none]
-    </th>";
+	<tr>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+		<th>
+			[item name=" . $attribute['name'] . " escape=none]
+		</th>";
+			}
+			$html .= "
+	</tr>";
 		}
-		$html .= "
-  </tr>";
+		else {
+			$html .= "
+<table>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+	<tr>
+		<th align=\"left\">" . $attribute['alias'] . "</th>
+		<td>[item name=" . $attribute['name'] . " escape=none]</td>
+	</tr>";
+			}
+			$html .= "
+</table>";
+		}
 		return $html;
 	}
 

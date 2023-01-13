@@ -8366,7 +8366,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			include_once(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 			if ($layer->get('write_mapserver_templates')) {
-				$layer->write_mapserver_templates($mapDB);
+				$layer->write_mapserver_templates($mapDB, 'Formular');
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
