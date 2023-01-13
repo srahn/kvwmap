@@ -634,9 +634,18 @@ FROM
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
-		#echo '<br>sql: ' . $sql;
+		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = "
+			SET client_min_messages='log';
+			SET log_min_messages='fatal';
+			SET debug_print_parse=true;" . 
+			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
+		$sql = "
+			SET debug_print_parse = false;
+			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';";
+		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
@@ -993,21 +1002,6 @@ FROM
 		}
 		return $geom_type;
 	}
-
-  function check_oid($tablename){
-    $sql = 'SELECT oid from '.$tablename.' limit 0';
-    if($this->schema != ''){
-    	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-    }
-    $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
-    @$query=pg_query($sql);
-    if ($query==0) {
-			return false;
-    }
-    else{
-      return true;
-    }
-  }
   
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){

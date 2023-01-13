@@ -136,6 +136,11 @@ body {
 	background-color: antiquewhite;
 	border: 1px dashed gray;
 	min-height: 38px;
+	-moz-hyphens: auto;
+	-o-hyphens: auto;
+	-webkit-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto; 
 }
 
 input[type="checkbox"], input[type="radio"] {
