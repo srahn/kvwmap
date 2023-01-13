@@ -2466,40 +2466,46 @@ FROM
     return $ret;
   }
   
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(g.zeigtauf) "; 
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-		$sql.=" AND l.lage = lpad(s.lage,5,'0')";
-		$sql.=" WHERE gem.gemeinde = l.gemeinde";
-    if ($Hausnr!='') {
-    	$Hausnr = str_replace(", ", ",", $Hausnr);
-    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
-    }
-    else{
-	    $sql.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
-	    if ($Strasse!='') {
-	      $sql.=" AND l.lage='".$Strasse."'";
-	    }
-    }
-		$sql.= $this->build_temporal_filter(array('gem', 'g', 'l', 's'));
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
+  function getMERfromGebaeude($Gemeinde, $Strasse, $Hausnr, $epsgcode) {
+    $sql ="
+			SELECT 
+				min(st_xmin(env)) AS minx, 
+				max(st_xmax(env)) AS maxx,
+				min(st_ymin(env)) AS miny, 
+				max(st_ymax(env)) AS maxy
+			FROM 
+				alkis.ax_lagebezeichnungmithausnummer lmh 
+				JOIN alkis.ax_gebaeude g ON g.zeigtauf @> array[lmh.gml_id],
+				st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env";
+    if ($Hausnr != '') {
+      $row = array();
+      $Hausnr = explode(', ', $Hausnr);                                                                 // jetzt ist $Hausnr ein Array aus 1..n Hausnummern in der Form '13073070-21721-2'
+      foreach($Hausnr as $key) {
+        $hnr = explode('-', $key);                                                                      // $hnr ist ein Array aus $hnr[0] = '13073070', $hnr[1] = '21721', $hnr[2] = '2'
+        $row[] = "('" . substr($hnr[0], -3) . "', '" . $hnr[1] . "', '" . strtolower($hnr[2]) . "')";   // fügt dem Array $row die Zeichenkette ('070', '21721', '2') als Key hinzu
+      }
+      $sql.=" WHERE (lmh.gemeinde, lmh.lage, trim(lower(lmh.hausnummer))) IN (" . implode(', ', $row) . ")";
     }
     else {
-      $rs=pg_fetch_assoc($ret[1]);
-      if ($rs['minx']==0) {
-        $ret[0]=1;
-        $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+      $sql.=" WHERE lmh.gemeinde = '" . substr($Gemeinde, -3) . "'";
+      if ($Strasse != '') {
+        $sql.=" AND lmh.lage = '" . $Strasse . "'";
+      }
+    }
+    $sql.= $this->build_temporal_filter(array('g', 'lmh'));
+    #echo $sql;
+    $ret = $this->execSQL($sql, 4, 0);
+    if ($ret[0]) {
+      $ret[1] = 'Fehler beim Abfragen des umschliessenden Rechtecks um die Geb&auml;ude.<br>' . $ret[1];
+    }
+    else {
+      $rs = pg_fetch_assoc($ret[1]);
+      if ($rs['minx'] == 0) {
+        $ret[0] = 1;
+        $ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
       }
       else {
-        $ret[1]=$rs;
+        $ret[1] = $rs;
       }
     }
     return $ret;
