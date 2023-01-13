@@ -199,6 +199,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	}
 
 	function send_error($msg) {
+		header('Content-Type: application/json');
 		echo json_encode([
 			'success' => false,
 			'msg' => [[
@@ -759,7 +760,6 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_create_geoweb_service' : {
-			#header('Content-Type: application/json');
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
 			$xplan_layers = $GUI->xplankonverter_get_xplan_layers();
 
@@ -769,6 +769,16 @@ function go_switch_xplankonverter($go) {
 					break;
 				}
 				$mapfile = $GUI->xplankonverter_create_geoweb_service($xplan_layers);
+				try {
+					$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
+					$GUI->save_web_header_template();
+				} catch (Exception $ex) {
+					send_error("Fehler beim speichern der Map-Datei in create_geoweb_service. " . $ex);
+					break;
+				}
+				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
+				$GUI->output();
+				exit;
 			}
 			else {
 				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
@@ -781,21 +791,15 @@ function go_switch_xplankonverter($go) {
 					break;
 				}
 				$mapfile = $GUI->konvertierung->create_geoweb_service($xplan_layers);
+				try {
+					$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
+					$GUI->save_web_header_template();
+				} catch (Exception $ex) {
+					send_error("Fehler beim speichern der Map-Datei in create_geoweb_service. " . $ex);
+					break;
+				}
 			}
-
-			try {
-				$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
-			} catch (Exception $ex) {
-				$result = array(
-					'success' => false,
-					'msg' => 'Fehler beim speichern der Map-Datei in create_geoweb_service. ' . $ex
-				);
-				return $result;
-			}
-
-			# ToDo Hier weiter prüfen ob die Ausgabe im mapfile korrekt ist.
-			echo '<p><textarea cols="200" rows="500">' . file_get_contents(WMS_MAPFILE_PATH . $mapfile) . '</textarea><p>';
-
+			header('Content-Type: application/json');
 			$response = array(
 				'success' => true,
 				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' erfolgreich geschrieben.'

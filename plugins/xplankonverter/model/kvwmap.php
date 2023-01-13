@@ -269,6 +269,7 @@
 		$xplan_layers = array_map(
 			function ($layer) {
 				return array(
+					'id' => $layer->get('Layer_ID'),
 					'Name' => $layer->get('Name'),
 					'Datentyp' =>$layer->get('Datentyp'),
 					'schema' => $layer->get('schema'),
@@ -285,7 +286,7 @@
 		$planartAbk = substr($GUI->formvars['planart'], 0, 2);
 		$planartkuerzel = $GUI->formvars['planart'][0];
 		
-		$ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
+		$GUI->ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
 
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
@@ -294,21 +295,22 @@
 		$bb = $GUI->Stelle->MaxGeorefExt;
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
     $GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
-		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $GUI->ows_onlineresource);
+		$GUI->map->web->set('header', 'templates/header.html');
 
 		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
-		$layers_with_content = $xp_plan->get_layers_with_content($xplan_layers);
-		$layernames_with_content = array_keys($layers_with_content);
-		$layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
-		$layernames_with_content[] = strtoupper($planartAbk) . '-Bereiche';
-		$layernames_with_content[] = 'Geltungsbereiche';
-		#echo '<br>pk layernames_with_content: ' . print_r($layernames_with_content, true);
+		$GUI->layers_with_content = $xp_plan->get_layers_with_content($xplan_layers);
+		$GUI->layernames_with_content = array_keys($GUI->layers_with_content);
+		$GUI->layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
+		$GUI->layernames_with_content[] = strtoupper($planartAbk) . '-Bereiche';
+		$GUI->layernames_with_content[] = 'Geltungsbereiche';
+		#echo '<br>pk layernames_with_content: ' . print_r($GUI->layernames_with_content, true);
 
 		$layers_to_remove = array();
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);
-			if (in_array($layer->name, $layernames_with_content)) {
+			if (in_array($layer->name, $GUI->layernames_with_content)) {
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 			}

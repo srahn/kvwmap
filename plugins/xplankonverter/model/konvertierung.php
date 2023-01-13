@@ -54,6 +54,7 @@ class Konvertierung extends PgObject {
     $gui->map->setMetaData("ows_extent", implode(' ', $extent));
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$gui->map->web->set('header', '../templates/header.html');
 
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
 		# Und setze bei den anderen die Templates
@@ -822,20 +823,20 @@ class Konvertierung extends PgObject {
 							THEN externeref.externereferenz
 							ELSE NULL
 						END AS externereferenz,
-						array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
-						array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde,
+						ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[] AS auslegungsenddatum,
+						ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde,
 						(gmlas.status_codespace, gmlas.status, NULL)::xplan_gml." . $planartAbk . "_status AS status,
 						gmlas.sachgebiet AS sachgebiet,
 						(pg.name, pg.kennziffer)::xplan_gml.xp_plangeber AS plangeber,
 						gmlas.rechtsstand::xplan_gml." . $planartAbk . "_rechtsstand AS rechtsstand,
 						to_char(gmlas.wirksamkeitsdatum, 'DD.MM.YYYY')::date AS wirksamkeitsdatum,
-						array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
-						array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
+						ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[] AS auslegungsstartdatum,
+						ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsstartdatum,
 						to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY')::date AS entwurfsbeschlussdatum,
 						to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY')::date AS aenderungenbisdatum,
 						ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[] AS traegerbeteiligungsenddatum,
 						gmlas.verfahren::xplan_gml." . $planartAbk . "_verfahren AS verfahren,
-						to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart) AS sonstplanart,
+						(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml." . $planartAbk . "_sonstplanart AS sonstplanart,
 						gmlas.planart::xplan_gml." . strtolower($planart) . "art AS planart,
 						to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY')::date AS planbeschlussdatum,
 						to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY')::date AS aufstellungsbeschlussdatum
