@@ -382,7 +382,7 @@ function init_config() {
 	define('APPLVERSION', $applversion . '/');
 	define('WAPPENPATH', 'graphics/wappen/');
 	define('PHPVERSION', 739);
-    define('THIRDPARTY_PATH', '../3rdparty/');
+	define('THIRDPARTY_PATH', '../3rdparty/');
 }
 
 function show_constants() { ?>
