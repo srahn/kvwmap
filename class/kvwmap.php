@@ -19502,6 +19502,7 @@ class db_mapObj{
 				l.Datentyp,
 				l.connectiontype,
 				l.kurzbeschreibung,
+				l.wms_keywordlist,
 				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
@@ -19530,6 +19531,7 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
+			'wms_keywordlist' => array(),
 			'datasource' => array(),
 			'dataowner_name' => array(),
 			'dataowner_email' => array(),
@@ -19550,6 +19552,7 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];
