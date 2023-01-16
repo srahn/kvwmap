@@ -16,8 +16,10 @@
 
 	<div title="<?php echo $this->strSettings; ?>">
 		<i class="fa fa-user header-button" aria-hidden="true" onclick="
-		$('#user_options').toggle();
-		$('#sperr_div').toggle()
+		if ($('#user_options').is(':visible')) {
+			$('#user_options').toggle();
+			$('#sperr_div').toggle();
+		}
 	"></i>
 		<div id="user_options" class="user-options">
 			<div class="user-options-header">

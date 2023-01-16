@@ -75,23 +75,30 @@ class Gml_builder {
 			*,
 			ST_AsGML(
 				3,
-				ST_Reverse(ST_Transform(
-				raeumlichergeltungsbereich,
-				{$konvertierung->get('output_epsg')})),
+				ST_Reverse(
+					ST_Transform(
+						raeumlichergeltungsbereich,
+						{$konvertierung->get('output_epsg')}
+					)
+				),
 				{$konvertierung->get('geom_precision')},
 				0,
 				null,
-				'GML_' || gml_id::text || '_geom') AS gml_raeumlichergeltungsbereich,
-				ST_AsGML(
-					3,
-					ST_Transform(
-						raeumlichergeltungsbereich,
-						{$konvertierung->get('output_epsg')}),
-						{$konvertierung->get('geom_precision')},
-						32,
-						null,
-						'GML_' || gml_id::text || '_envelope' ) AS envelope";
-						$plan->find_by('konvertierung_id',$konvertierung->get('id'));
+				'GML_' || gml_id::text || '_geom'
+			) AS gml_raeumlichergeltungsbereich,
+			ST_AsGML(
+				3,
+				ST_Transform(
+					raeumlichergeltungsbereich,
+					{$konvertierung->get('output_epsg')}
+				),
+				{$konvertierung->get('geom_precision')},
+				32,
+				null,
+				'GML_' || gml_id::text || '_envelope'
+			) AS envelope
+		";
+					$plan->find_by('konvertierung_id',$konvertierung->get('id'));
 
 		# XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
 		fwrite(
