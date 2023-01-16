@@ -136,6 +136,8 @@ class stelle {
 				`ows_contactemailaddress`,
 				`ows_contactperson`,
 				`ows_contactposition`,
+				`ows_contactvoicephone`,
+				`ows_contactfacsimile`,
 				`ows_fees`,
 				`ows_srs`,
 				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
@@ -164,6 +166,8 @@ class stelle {
 		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
 		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 		$this->ows_fees = $rs['ows_fees'];
 		$this->ows_srs = $rs['ows_srs'];
 		$this->check_client_ip = $rs['check_client_ip'];
@@ -2218,6 +2222,11 @@ class stelle {
 		}
 		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
 		return $mapfiles;
+	}
+
+	function is_gast_stelle() {
+		global $gast_stellen;
+		return (in_array($this->id, array_values($gast_stellen)) ? 'true' : 'false');
 	}
 }
 ?>

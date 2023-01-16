@@ -634,9 +634,18 @@ FROM
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
-		#echo '<br>sql: ' . $sql;
+		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = "
+			SET client_min_messages='log';
+			SET log_min_messages='fatal';
+			SET debug_print_parse=true;" . 
+			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
+		$sql = "
+			SET debug_print_parse = false;
+			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';";
+		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
@@ -744,13 +753,15 @@ FROM
 				# Geometrietyp
 				if ($fieldtype == 'geometry') {
 					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
-					$fields['the_geom'] = $fieldname;
-					$fields['the_geom_id'] = $i;
+					$field_the_geom = $fieldname;
+					$field_the_geom_id = $i;
 				}
 				if ($assoc) {
 					$fields_assoc[$fieldname] = $fields[$i];
 				}
 			}
+			$fields['the_geom'] = $field_the_geom;
+			$fields['the_geom_id'] = $field_the_geom_id;
 			$ret[1] = ($assoc ? $fields_assoc : $fields);
 		}
 		else {
@@ -928,26 +939,32 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
-			$sql = "INSERT INTO datatype_attributes SET
-								datatype_id = ".$datatype_id.", 
-								name = '".$fields[$i]['name']."', 
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i." 
-							ON DUPLICATE KEY UPDATE
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i;
+			$sql = "
+				INSERT INTO
+					datatype_attributes
+				SET
+					datatype_id = " . $datatype_id . ",
+					name = '" . $fields[$i]['name'] . "',
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					form_element_type = '" . ($this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+				ON DUPLICATE KEY UPDATE
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+			";
+			#echo "<br>SQL zum Anlegen eines Datentypes: " . $sql;
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
@@ -991,21 +1008,6 @@ FROM
 		}
 		return $geom_type;
 	}
-
-  function check_oid($tablename){
-    $sql = 'SELECT oid from '.$tablename.' limit 0';
-    if($this->schema != ''){
-    	$sql = "SET search_path = ".$this->schema.", public;".$sql;
-    }
-    $this->debug->write("<p>file:kvwmap class:postgresql->check_oid:<br>".$sql,4);
-    @$query=pg_query($sql);
-    if ($query==0) {
-			return false;
-    }
-    else{
-      return true;
-    }
-  }
   
   function eliminate_star($query, $offset){
   	if(substr_count(strtolower($query), ' from ') > 1){
@@ -2472,40 +2474,46 @@ FROM
     return $ret;
   }
   
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(g.zeigtauf) "; 
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-		$sql.=" AND l.lage = lpad(s.lage,5,'0')";
-		$sql.=" WHERE gem.gemeinde = l.gemeinde";
-    if ($Hausnr!='') {
-    	$Hausnr = str_replace(", ", ",", $Hausnr);
-    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
-    }
-    else{
-	    $sql.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
-	    if ($Strasse!='') {
-	      $sql.=" AND l.lage='".$Strasse."'";
-	    }
-    }
-		$sql.= $this->build_temporal_filter(array('gem', 'g', 'l', 's'));
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
+  function getMERfromGebaeude($Gemeinde, $Strasse, $Hausnr, $epsgcode) {
+    $sql ="
+			SELECT 
+				min(st_xmin(env)) AS minx, 
+				max(st_xmax(env)) AS maxx,
+				min(st_ymin(env)) AS miny, 
+				max(st_ymax(env)) AS maxy
+			FROM 
+				alkis.ax_lagebezeichnungmithausnummer lmh 
+				JOIN alkis.ax_gebaeude g ON g.zeigtauf @> array[lmh.gml_id],
+				st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env";
+    if ($Hausnr != '') {
+      $row = array();
+      $Hausnr = explode(', ', $Hausnr);                                                                 // jetzt ist $Hausnr ein Array aus 1..n Hausnummern in der Form '13073070-21721-2'
+      foreach($Hausnr as $key) {
+        $hnr = explode('-', $key);                                                                      // $hnr ist ein Array aus $hnr[0] = '13073070', $hnr[1] = '21721', $hnr[2] = '2'
+        $row[] = "('" . substr($hnr[0], -3) . "', '" . $hnr[1] . "', '" . strtolower($hnr[2]) . "')";   // fügt dem Array $row die Zeichenkette ('070', '21721', '2') als Key hinzu
+      }
+      $sql.=" WHERE (lmh.gemeinde, lmh.lage, trim(lower(lmh.hausnummer))) IN (" . implode(', ', $row) . ")";
     }
     else {
-      $rs=pg_fetch_assoc($ret[1]);
-      if ($rs['minx']==0) {
-        $ret[0]=1;
-        $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
+      $sql.=" WHERE lmh.gemeinde = '" . substr($Gemeinde, -3) . "'";
+      if ($Strasse != '') {
+        $sql.=" AND lmh.lage = '" . $Strasse . "'";
+      }
+    }
+    $sql.= $this->build_temporal_filter(array('g', 'lmh'));
+    #echo $sql;
+    $ret = $this->execSQL($sql, 4, 0);
+    if ($ret[0]) {
+      $ret[1] = 'Fehler beim Abfragen des umschliessenden Rechtecks um die Geb&auml;ude.<br>' . $ret[1];
+    }
+    else {
+      $rs = pg_fetch_assoc($ret[1]);
+      if ($rs['minx'] == 0) {
+        $ret[0] = 1;
+        $ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
       }
       else {
-        $ret[1]=$rs;
+        $ret[1] = $rs;
       }
     }
     return $ret;

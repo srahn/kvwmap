@@ -1,48 +1,65 @@
-<?php
-	header('Content-type: text/css');
-	include('../../config.php');
-	
-	global $sizes;
-	$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
+/* main.css.php */
+<?
+	if ($this->user->rolle->font_size_factor) {
+		$key = $this->user->rolle->gui;
+		$font_size_factor = $this->user->rolle->font_size_factor;
+	}
+	else {
+		$key = ((array_key_exists('gui', $_REQUEST) AND array_key_exists($_REQUEST['gui'], $sizes)) ? $_REQUEST['gui'] : 'layouts/gui.php');
+		$font_size_factor = 1;
+	}
 	$size =	$sizes[$key];
 ?>
+input {
+
+	font-size: <? echo $font_size_factor * 15; ?>px
+}
 
 #form-titel {
 	font-family: SourceSansPro3;
-	font-size: 20px;
+
+	font-size: <? echo $font_size_factor * 20; ?>px;
 	margin-bottom: 0px;
 	margin-top: 20px;
 }
+
 #form_formular-main {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
 	cursor: default;
 }
+
 .form_formular-aic {
 	align-items: center;
 }
+
 .form_formular-input {
 	width:100%;
 	margin: 0px 0px 10px 0px;
 	display: flex;
 	flex-flow: row nowrap;
 }
+
 #form_formular-main select, #form_formular-main input[type="text"], .form_formular-input-selector select {
 	border-radius: 2px;
 	border: 1px solid #777;
 	padding-left: 5px;
 }
+
 #form_formular-main .form_formular-input select, #form_formular-main input[type="text"] {
 	height: 25px;
 }
+
 .form_formular-input > div:first-child, .form_formular-input-selector > div:first-child {
 	width: 210px;
 	text-align: right;
 	margin-right: 10px;
 	font-family: SourceSansPro3;
 	line-height: 20px;
-	font-size: 17px;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 }
+
 .form_formular-input-selector > div:first-child {
 	margin-top: 3px;
 }
@@ -57,7 +74,8 @@
 
 .form-label {
 	float: left;
-	font-size: 17px;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 	width: 32%;
 	text-align: right;
 }
@@ -65,7 +83,8 @@
 .form-value {
 	float: left;
 	margin-left: 10px;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height: 16px;
 }
 
@@ -73,37 +92,55 @@
 	font-family: 'SourceSansPro';
 	font-style: normal;
 	font-weight: 200;
-	src: local('SourceSansPro'), url(../../fonts/SourceSansPro-Light.ttf);
+	src: local('SourceSansPro'), url(fonts/SourceSansPro-Light.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro1';
 	font-style: normal;
 	font-weight: 400;
-	src: local('SourceSansPro1'), url(../../fonts/SourceSansPro-Regular.ttf);
+	src: local('SourceSansPro1'), url(fonts/SourceSansPro-Regular.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro2';
 	font-style: normal;
 	font-weight: 600;
-	src: local('SourceSansPro2'), url(../../fonts/SourceSansPro-Semibold.ttf);
+	src: local('SourceSansPro2'), url(fonts/SourceSansPro-Semibold.ttf);
 }
+
 @font-face {
 	font-family: 'SourceSansPro3';
 	font-style: normal;
 	font-weight: 700;
-	src: local('SourceSansPro3'), url(../../fonts/SourceSansPro-Bold.ttf);
+	src: local('SourceSansPro3'), url(fonts/SourceSansPro-Bold.ttf);
 }
 
 body {	
 	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
 	BACKGROUND:white;
 	margin:0px;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 }
 
 #gui-table {
 	width: 900px;
 	margin: auto;
+}
+
+.notification-box {
+	margin-bottom: 5px;
+	padding: 5px;
+	border-radius: 5px;
+	background-color: antiquewhite;
+	border: 1px dashed gray;
+	min-height: 38px;
+	-moz-hyphens: auto;
+	-o-hyphens: auto;
+	-webkit-hyphens: auto;
+	-ms-hyphens: auto;
+	hyphens: auto; 
 }
 
 input[type="checkbox"], input[type="radio"] {
@@ -220,7 +257,8 @@ input[type="radio"]:checked:hover::before {
 input[type="button"][value='«'], input[type="button"][value='»'] {
 	margin: 0.2em;
 	padding: 0px 0.5em 3px 0.5em;
-	font-size: 1.5em;
+
+	font-size: <? echo $font_size_factor * 24; ?>px;
 	height: 35px;
 }
 
@@ -240,28 +278,28 @@ form {
 }
 
 .px13 {
-	font-size: 13px;
+	font-size: <? echo $font_size_factor * 13; ?>px;
 }
 
 .px14 {
-	font-size: 14px;
+	font-size: <? echo $font_size_factor * 14; ?>px;
 }
 
 .px15{
-	font-size: 15px;
+	font-size: <? echo $font_size_factor * 15; ?>px;
 }
 
 .px16{
-	font-size: 16px;
+	font-size: <? echo $font_size_factor * 16; ?>px;
 	line-height: 16px;
 }
 
 .px17{
-	font-size: 17px;
+	font-size: <? echo $font_size_factor * 17; ?>px;
 }
 
 .px20{
-	font-size: 20px;
+	font-size: <? echo $font_size_factor * 20; ?>px;
 }
 
 .hidden{
@@ -271,7 +309,7 @@ form {
 ul{
 	color: lightsteelblue;
 	margin: 5px;
-	padding: 0 0 0 15px;
+	padding: 0 0 0 <? echo $font_size_factor * 15; ?>px;
 	list-style: square outside none;
 }
 
@@ -286,7 +324,8 @@ ul{
 
 h1 {
 	font-family: SourceSansPro3;
-	font-size: 24px; 
+
+	font-size: <? echo $font_size_factor * 24; ?>px; 
 	margin-top: 0px; 
 	margin-bottom: 0px; 
 	padding-top: 0px; 
@@ -295,33 +334,36 @@ h1 {
 
 h2 {
 	font-family: SourceSansPro3;
-	font-size: 20px; 
+
+	font-size: <? echo $font_size_factor * 20; ?>px; 
 	margin-bottom: 0px;
 	margin-top: 0px;
 }
 
-input[type="text"]{
-	font-size: 14px;
+input[type="text"] input[type="float"] {
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
 	padding-top: 0;
 }
 
 input[type="file"] {
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-family: SourceSansPro1;
 	height: 24px;
 }
 
 input[type="button"], input[type="reset"], input[type="submit"] {
 	height: 24px;
-	font-size: 15px;
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-family: SourceSansPro1;
-	line-height : 15px;
+	line-height : <? echo $font_size_factor * 15; ?>px;
 }
 
 input[type="text"].transparent_input{
-	font-size: 15px;
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-family: SourceSansPro1;
 	border:0px;
 	background-color:	transparent;
@@ -335,7 +377,7 @@ span[data-tooltip] {
 }
 
 span[data-tooltip]::before {
-	content: url(../../graphics/icon_i.png);
+	content: url(<? echo GRAPHICSPATH; ?>icon_i.png);
 }
 
 span[data-tooltip]:hover::after {
@@ -348,11 +390,11 @@ span[data-tooltip]:hover::after {
   top: 24px;
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
-	font-size: 11px;
+	font-size: <? echo $font_size_factor * 11; ?>px;
 	font-family: verdana, arial;
 	box-shadow: 12px 10px 14px #777;
   border: 1px #236dbf solid;
-	border-top: 15px #236dbf solid;
+	border-top: <? echo $font_size_factor * 15; ?>px #236dbf solid;
   background-color: #DAE4EC;
   padding: 4px;
   z-index: 10000;
@@ -419,7 +461,7 @@ span[data-tooltip]:hover::after {
 
 .image-select .placeholder.editable::after {
   transform: rotate(-45deg);
-  right: 15px;
+  right: <? echo $font_size_factor * 15; ?>px;
 }
 
 .image-select.active .dropdown {
@@ -454,7 +496,7 @@ span[data-tooltip]:hover::after {
 
 
 .select_option_link:hover{
-	background-image: url(../../graphics/pfeil_rechts.gif);
+	background-image: url(<? echo GRAPHICSPATH; ?>pfeil_rechts.gif);
 	background-repeat: no-repeat;
 	background-position: 307px;
 }
@@ -485,6 +527,10 @@ span[data-tooltip]:hover::after {
 	padding: 3px;
 }
 
+.listen-tr.archived {
+  background: rgba(255, 0, 0, 0.23);
+}
+
 .input-form {
 	display: inline-block;
 }
@@ -497,9 +543,9 @@ span[data-tooltip]:hover::after {
 .input-form label {
 	float: left;
 	text-align: right;
-	font-size: 17px;
+	font-size: <? echo $font_size_factor * 17; ?>px;
 	width: 240px;
-	height: 15px;
+	height: <? echo $font_size_factor * 15; ?>px;
 	margin-right: 10px;
 }
 
@@ -510,6 +556,8 @@ span[data-tooltip]:hover::after {
 }
 
 .input-form input {
+
+	font-size: <? echo $font_size_factor * 15; ?>px
 }
 
 .input-form input[type=text] {
@@ -544,7 +592,8 @@ span[data-tooltip]:hover::after {
 }
 
 select {
-	font-size: 14px;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 }
 
@@ -553,7 +602,8 @@ select option{
 }
 
 textarea {
-	font-size: 14px;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 }
 
@@ -562,18 +612,21 @@ tr.tr_hover:hover{
 }
 
 td {	
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height: 16px;
 	font-family: SourceSansPro1;
 }
 
 th {	
-	font-size: 17px;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 	font-family: SourceSansPro2;
 }
 
 th a {	
-	font-size: 17px;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 	font-family: SourceSansPro2;
 }
 
@@ -592,7 +645,8 @@ pre {
 a, img, a table span {	
 	color: firebrick; 
 	TEXT-DECORATION: none;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	border: none;
 	outline:none;
 }
@@ -722,12 +776,13 @@ select[name="geom_from_layer"] {
 	max-height: 800px;
 	width: 100%;
 	min-width: 600px;
-	margin-right: 15px;
+
+	margin-right: <? echo $font_size_factor * 15; ?>px;
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table{
 	width: 100%;
-	background: url('../../<? echo BG_IMAGE; ?>');
+	background: url('<? echo BG_IMAGE; ?>');
 }
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
@@ -743,7 +798,7 @@ select[name="geom_from_layer"] {
 }
 
 #geo_name_search_result_div ul{
-	padding: 10px 0 6px 15px;
+	padding: 10px 0 6px <? echo $font_size_factor * 15; ?>px;
 }
 
 #geo_name_search_result_div ul li{
@@ -753,7 +808,7 @@ select[name="geom_from_layer"] {
 .code{
 	text-align: left;
 	font-family: courier;
-	font-size: 12px;
+	font-size: <? echo $font_size_factor * 12; ?>px;
 	line-height: 17px;
 }
 
@@ -777,7 +832,8 @@ select[name="geom_from_layer"] {
 }
 
 #ortho_points{
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	text-align: left;
 }
 
@@ -825,7 +881,7 @@ select[name="geom_from_layer"] {
 	width: 100%;
 	border-collapse: separate;
   border-spacing: 5px;
-	margin-top: 15px;
+	margin-top: <? echo $font_size_factor * 15; ?>px;
 }
 
 #data_import_upload_progress .file_status{
@@ -882,7 +938,8 @@ select[name="geom_from_layer"] {
 	width: 16px; 
 	height: 16px; 
 	padding: 5px; 
-	font-size: 1.1em;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	margin: 0 5px 0 40px;
 }
 
@@ -898,7 +955,7 @@ select[name="geom_from_layer"] {
 
 #menuebar{
 	width: <? echo ($size['menue']['width'] - 2); ?>px;
-	background: url('../../<? echo BG_IMAGE; ?>');
+	background: url('<? echo BG_IMAGE; ?>');
 	border: 1px solid;
 	border-color: #CCC; 
 	border-top: none;
@@ -956,7 +1013,8 @@ select[name="geom_from_layer"] {
 
 a.menuered {
 	color: #993333;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height : 17px;
 }
 
@@ -975,17 +1033,18 @@ a.menuered:hover {
 
 .menue-auf .menue_before {
 	display: inline-block;
-	background: url('../../graphics/menue_top_open.gif');
+	background: url('<? echo GRAPHICSPATH; ?>menue_top_open.gif');
 }
 
 .menue-zu .menue_before {	
 	display: inline-block;
-	background: url('../../graphics/menue_top.gif');
+	background: url('<? echo GRAPHICSPATH; ?>menue_top.gif');
 }
 
 .obermenue {
 	cursor: pointer;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: black;
 	font-family: SourceSansPro2;
 	height: 17px;
@@ -993,7 +1052,8 @@ a.menuered:hover {
 
 .hauptmenue {
 	cursor: pointer;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
@@ -1030,7 +1090,8 @@ a.menuered:hover {
 
 .untermenues {
 	color: #993333;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height: 17px;
 	padding-bottom: 2px;
 }
@@ -1063,119 +1124,119 @@ a.menuered:hover {
 }
 
 .use_for_dataset{
-	background-image: url(../../graphics/use_for_dataset.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>use_for_dataset.png);
 }
 
 .copy_dataset{
-	background-image: url(../../graphics/copy_dataset.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>copy_dataset.png);
 }
 
 .datensatz_exportieren{
-	background-image: url(../../graphics/datensatz_exportieren.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_exportieren.png);
 }
 
 .drucken{
-	background-image: url(../../graphics/drucken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>drucken.png);
 }
 
 .schnelldruck{
-	background-image: url(../../graphics/schnelldruck.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>schnelldruck.png);
 }
 
 .merken{
-	background-image: url(../../graphics/merken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>merken.png);
 }
 
 .nicht_mehr_merken{
-	background-image: url(../../graphics/nicht_mehr_merken.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>nicht_mehr_merken.png);
 }
 
 .datensatz_loeschen{
-	background-image: url(../../graphics/datensatz_loeschen.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_loeschen.png);
 }
 
 .edit_geom{
-	background-image: url(../../graphics/edit_geom.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>edit_geom.png);
 }
 
 .zoom_normal{
-	background-image: url(../../graphics/zoom_normal.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_normal.png);
 }
 
 .zoom_highlight{
-	background-image: url(../../graphics/zoom_highlight.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_highlight.png);
 }
 
 .zoom_select{
-	background-image: url(../../graphics/zoom_select.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>zoom_select.png);
 }
 
 .switch_gle{
-	background-image: url(../../graphics/switch_gle.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>switch_gle.png);
 }
 
 .url_extent{
-	background-image: url(../../graphics/url_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>url_extent.png);
 }
 
 .save_extent{
-	background-image: url(../../graphics/save_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_extent.png);
 }
 
 .load_extent{
-	background-image: url(../../graphics/load_extent.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>load_extent.png);
 }
 
 .save_image{
-	background-image: url(../../graphics/save_image.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_image.png);
 }
 
 .resize_map{
-	background-image: url(../../graphics/resize_map.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>resize_map.png);
 }
 
 .optionen{
-	background-image: url(../../graphics/optionen.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>optionen.png);
 }
 
 .karte{
-	background-image: url(../../graphics/karte.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>karte.png);
 }
 
 .logout{
-	background-image: url(../../graphics/logout.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>logout.png);
 }
 
 .gesamtansicht {
-	background-image: url(../../graphics/gesamtansicht.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>gesamtansicht.png);
 }
 
 .notiz{
-	background-image: url(../../graphics/notiz.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>notiz.png);
 }
 
 .hilfe{
-	background-image: url(../../graphics/hilfe.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>hilfe.png);
 }
 
 .timetravel{
-	background-image: url(../../graphics/timetravel.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>timetravel.png);
 }
 
 .save_layers{
-	background-image: url(../../graphics/save_layers.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>save_layers.png);
 }
 
 .load_layers{
-	background-image: url(../../graphics/load_layers.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>load_layers.png);
 }
 
 .tool_info{
-	background-image: url(../../graphics/tool_info.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>tool_info.png);
 }
 
 .layer{
-	background-image: url(../../graphics/layer.png);
+	background-image: url(<? echo GRAPHICSPATH; ?>layer.png);
 }
 
 .button_background{
@@ -1228,7 +1289,7 @@ a.menuered:hover {
 	background-color: #ffffff;
 	border: 2px solid #000000;
 	position: absolute;
-	top: 15px;
+	top: <? echo $font_size_factor * 15; ?>px;
 	left: 50%;
 	transform: translate(-50%, 0);
 	height: 90%;
@@ -1245,7 +1306,7 @@ a.menuered:hover {
 	height: 50px;
 	position: relative;
 	text-align: center;
-	padding: 15px;
+	padding: <? echo $font_size_factor * 15; ?>px;
 }
 
 #map{
@@ -1295,7 +1356,8 @@ a.menuered:hover {
 
 #lagebezeichnung{
 	padding-top: 5px;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-family: SourceSansPro1;
 }
 
@@ -1315,7 +1377,7 @@ a.menuered:hover {
 	box-shadow: 0px 1px 0px #bbb;
 	display: flex; 
 	flex-direction: column;
-	background-image: url(../../<? echo BG_IMAGE; ?>);
+	background-image: url(<? echo BG_IMAGE; ?>);
 }
 
 #legend_layer{
@@ -1456,19 +1518,22 @@ a.menuered:hover {
 .legend_group{
 	color: firebrick;
 	font-family: SourceSansPro1;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height: 17px;
 }
 
 .legend_group_active_layers{
 	color: firebrick;
 	font-family: SourceSansPro3;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	line-height: 17px;
 }
 
 .legend_layer_hidden{
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: gray;
 }
 
@@ -1526,7 +1591,8 @@ tr.selected{
 }
 
 span.red {
-	font-size: 15px;	
+
+	font-size: <? echo $font_size_factor * 15; ?>px;	
 	color: #a82e2e;
 	font-family: SourceSansPro2;
 }
@@ -1538,7 +1604,8 @@ span.red {
 
 span.black {
 	color: #252525;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-family: SourceSansPro2;
 }
 
@@ -1585,17 +1652,17 @@ a:hover .preview_image{
 .raster_record .tr_hide select{font-size: 0.0001px !important;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide select:focus{display:none;width:0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_hide input{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}
-.raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
+.raster_record .tr_hide input[type=checkbox]{display:none;width:12px;font-size: <? echo $font_size_factor * 15; ?>px;height:12px;transition: all 0.25s ease;}
 .raster_record .tr_hide textarea{font-size: 0.0001px !important;transition: all 0.25s ease;}
 .raster_record .tr_hide div{min-width: 0.0001px !important; transition: all 0.25s ease;}
 .raster_record .tr_hide .readonly_text{font-size: 0.0001px !important;min-width: 0.0001px !important;max-width: 0.0001px !important; transition: all 0.25s ease;}
 .raster_record .tr_hide .datensatz_header{display: none}
 /* Attribute, die eingeblendet werden sollen: */
 .raster_record .tr_show{visibility:inherit;}
-.raster_record .tr_show .readonly_text{font-size: 15px;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
+.raster_record .tr_show .readonly_text{font-size: <? echo $font_size_factor * 15; ?>px;min-width: 122px !important;max-width: 122px !important;transition: all 0.25s ease;}
 .raster_record .tr_show td{border:none;padding: 0.0001px;transition: all 0.25s ease;}
 .raster_record .tr_show select{width: 112%;height:22px;transition: all 0.25s ease;}									/* Selectfelder werden auf 130px Breite verkleinert*/
-.raster_record .tr_show input{width:130px;font-size: 15px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
+.raster_record .tr_show input{width:130px;font-size: <? echo $font_size_factor * 15; ?>px;height:22px;transition: all 0.25s ease;}		/* normale Inputfelder werden auf 130px Breite verkleinert*/
 .raster_record .tr_show input[type=file]{width:0.0001px;font-size: 0.0001px;height:0.0001px;transition: all 0.25s ease;}		/* Das FileUpload-Inputfeld soll auch versteckt werden*/
 .raster_record .tr_show .preview_image{width: 125px;transition: all 0.25s ease;}	/* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf 250px vergrößert */
 .raster_record .tr_show .preview_doc{width: auto;}																/* Vorschaubilder für andere Dokumente nicht */
@@ -1609,16 +1676,16 @@ a:hover .preview_image{
 .raster_record_open .gle tr{border:1px dotted gray;}
 .raster_record_open .gle tr:hover{border:1px solid #03476F;}
 .raster_record_open td{line-height: 16px;padding: 2px;transition: all 0.25s ease;}
-.raster_record_open a{font-size: 15px;transition: all 0.25s ease;}
-.raster_record_open input[type=text]{width:200px;font-size: 15px;height:22px;transition: all 0.25s ease;}
-.raster_record_open input[type=checkbox]{width:12px;font-size: 15px;height:12px;transition: all 0.25s ease;}
-.raster_record_open textarea{font-size: 15px;transition: all 0.25s ease;}
+.raster_record_open a{font-size: <? echo $font_size_factor * 15; ?>px;transition: all 0.25s ease;}
+.raster_record_open input[type=text]{width:200px;font-size: <? echo $font_size_factor * 15; ?>px;height:22px;transition: all 0.25s ease;}
+.raster_record_open input[type=checkbox]{width:12px;font-size: <? echo $font_size_factor * 15; ?>px;height:12px;transition: all 0.25s ease;}
+.raster_record_open textarea{font-size: <? echo $font_size_factor * 15; ?>px;transition: all 0.25s ease;}
 .raster_record_open .tr_show #formelement{width: 100%;overflow: visible}
-.raster_record_open .readonly_text{font-size: 15px;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
-.raster_record_open .tr_show input[type=file]{width:290px;font-size: 15px;height:22px;transition: all 0.25s ease;}
-.raster_record_open select{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open select:focus{font-size: 15px;display:inline;width:290px;transition: all 0.25s ease;}
-.raster_record_open span{line-height:16px;font-size: 15px;transition: all 0.25s ease;}
+.raster_record_open .readonly_text{font-size: <? echo $font_size_factor * 15; ?>px;min-width: 400px !important;max-width: 400px !important;transition: all 0.25s ease;}
+.raster_record_open .tr_show input[type=file]{width:290px;font-size: <? echo $font_size_factor * 15; ?>px;height:22px;transition: all 0.25s ease;}
+.raster_record_open select{font-size: <? echo $font_size_factor * 15; ?>px;display:inline;width:290px;transition: all 0.25s ease;}
+.raster_record_open select:focus{font-size: <? echo $font_size_factor * 15; ?>px;display:inline;width:290px;transition: all 0.25s ease;}
+.raster_record_open span{line-height:16px;font-size: <? echo $font_size_factor * 15; ?>px;transition: all 0.25s ease;}
 .raster_record_open img{width: auto; transition: all 0.25s ease;}
 .raster_record_open .tr_hide{visibility:visible;}
 .raster_record_open .preview_image{width: 125px;transition: all 0.25s ease;}
@@ -1648,7 +1715,8 @@ a:hover .preview_image{
 
 .identifier_text {
 	font-family: SourceSansPro3;
-	font-size: 17;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 }
 
 #message_box {
@@ -1663,7 +1731,8 @@ a:hover .preview_image{
 /*	height:90px; */
 	max-height: 600px;
 	overflow: auto;
-	font-size: 17px;
+
+	font-size: <? echo $font_size_factor * 17; ?>px;
 	font-family: SourceSansPro2;
 	margin: -300px 0 0 -100px;
 	padding: 10px;
@@ -1716,7 +1785,8 @@ table.tgle {
 }
 
 .gledata > tr > td, .glegeom > tr > td {
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	border: 1px solid #bbb;
 }
 
@@ -1893,7 +1963,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table thead th{ 
 	font-weight: bold; 
-	font-size: 14px;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	line-height: 1.2em;				
 	color: #F6F6F6; 
 	text-align: center;
@@ -1903,7 +1974,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table thead th.weekday{ 
 	font-weight: normal; 
-	font-size: 14px;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	line-height: 1.2em;
 	height: 2em;
 	width: 1.3em;
@@ -1916,7 +1988,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .calendar table tbody td, .calendar table tfoot td{ 
 	font-weight: normal; 
-	font-size: 14px;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	line-height: 1.2em;
 	width: 31px;
 	padding-right: 4px; 
@@ -1926,7 +1999,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .calendar table tfoot td {
-	font-size: 7px;
+
+	font-size: <? echo $font_size_factor * 7; ?>px;
 	border: none;
 }
 
@@ -1962,7 +2036,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 0.1em;
 	padding: 0.1em;
 	line-height: 0.75em;
-	font-size: 11px;
+
+	font-size: <? echo $font_size_factor * 11; ?>px;
 }
 
 .calendar table tbody td.last_month, .calendar table tbody td.next_month {
@@ -1973,7 +2048,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .timepicker{
 	min-width: 205px;
-	font-size: 18px;
+
+	font-size: <? echo $font_size_factor * 18; ?>px;
 	line-height: 24px;
 	outline: solid #112A5D 1px;
 	padding: 3px 0px;
@@ -1990,7 +2066,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	cursor: n-resize;
 	width: 33px;
 	padding: 0 5 0 5;
-	font-size: 18px;
+
+	font-size: <? echo $font_size_factor * 18; ?>px;
 	border: 1px solid white;
 }
 
@@ -2007,7 +2084,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: absolute;
 	right: 10px;
 	margin-top: 1px;
-	font-size: 1.2em;
+
+	font-size: <? echo $font_size_factor * 19; ?>px;
 	color: silver;
 }
 
@@ -2126,7 +2204,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fa-7x {
-	font-size: 7em !important;
+	font-size: <? echo $font_size_factor * 117; ?>px !important;
 }
 
 
@@ -2165,7 +2243,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position:absolute;
 	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
 	top: 30px;
-	right: 15px;
+	right: <? echo $font_size_factor * 15; ?>px;
 	z-index: 2000;
 }
 
@@ -2227,7 +2305,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .layerOptionsIcon{
-	font-size: 0.9em;
+
+	font-size: <? echo $font_size_factor * 14; ?>px;
 	height: 14px;
 	width: 14px;
 	padding: 3px;
@@ -2235,7 +2314,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #legendOptionsIcon{
-	font-size: 1.1em;
+
+	font-size: <? echo $font_size_factor * 18; ?>px;
 	margin: 0 5px 0 42px;
 	height: 16px;
 	width: 16px;
@@ -2335,7 +2415,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nu_gruppe_nutzungsart_table th{
 	text-align: left;
 	font-family: SourceSansPro2;
-	font-size: 15px;
+
+	font-size: <? echo $font_size_factor * 15; ?>px;
 	font-weight: 600;
 }
 
@@ -2463,7 +2544,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .sql-statement {
   text-align: left;
-  font-size: 12px;
+  font-size: <? echo $font_size_factor * 12; ?>px;
   line-height: 1.3;
   min-height: 50px;
   width: 100%;
@@ -2473,7 +2554,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .small-gray {
 	color: gray;
-	font-size: 12px;
+
+	font-size: <? echo $font_size_factor * 12; ?>px;
 }
 
 .green {
