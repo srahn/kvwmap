@@ -60,7 +60,7 @@
 			function delete_user2notification(notification_id) {
 				let formData = new FormData();
 				formData.append('go', 'delete_user2notification');
-				formData.append('notification_box_id', notification_id);
+				formData.append('notification_id', notification_id);
 				formData.append('csrf_token', '<? echo $_SESSION['csrf_token']; ?>')
 				let response = fetch('index.php', {
 				  method: 'POST',
