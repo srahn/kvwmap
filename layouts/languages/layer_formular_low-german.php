@@ -78,7 +78,7 @@
 	$strWMSName = "WMS-Naam/Typenaam";
 	$strWMSServerVersion = "OWS-Serverversion*";
 	$strWriteMapserverTemplates = "Schreibe MapServer Templates";
-	$strWriteMapserverTemplatesHelp = "Wenn die Option gesetzt ist, wird für den Layer jeweils beim Speichern eine zum Data-Statement passende MapServer Header und Footer Datei in das Verzeichnis " . WMS_MAPFILE_PATH . "templates/ geschreiben. Der Pfad zum templates Ordner kann in der Konstante WMS_MAPFILE_PATH angepasst werden. Ist das Verzeichnis noch nicht vorhanden wird es angelegt. Der Datenname setzt sich zusammen aus dem Layernamen sowie dem Zusatz _head.html bzw. _body.html. Ist die Datei schon vorhanden wird sie überschrieben. Dateien mit gleichem Layernamen bekommen die gleichen Template-Dateien. Als Layername wird er Name der beim Speichern eingestellten Sprache genommen.";
+	$strWriteMapserverTemplatesHelp = "Wenn die Option gesetzt ist, wird für den Layer jeweils beim Speichern eine zum Data-Statement passende MapServer Header und Template Datei in das Verzeichnis " . WMS_MAPFILE_PATH . "templates/ geschreiben. Der Pfad zum templates Ordner kann in der Konstante WMS_MAPFILE_PATH angepasst werden. Ist das Verzeichnis noch nicht vorhanden wird es angelegt. Der Dateiname setzt sich zusammen aus dem Layernamen sowie dem Zusatz _head.html bzw. _body.html. Ist die Datei schon vorhanden, wird sie überschrieben. Als Layername wird der Name der beim Speichern eingestellten Sprache genommen.";
   $strAddAutoClasses = "Klassen van süllmst tau fögen";
 
 ?>
