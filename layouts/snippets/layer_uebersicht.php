@@ -41,9 +41,7 @@
 				</tr>
 			';			
 		}
-		if ($output_layers != '' OR $output_groups) {
-			return ['output' => $output.$output_groups.$output_layers, 'keywords' => $group_keywords];
-		}
+		return ['output' => $output.$output_groups.$output_layers, 'keywords' => $group_keywords];
 	};
 
 	$this->outputLayer = function($i, $indent = 0) use ($GUI) {
