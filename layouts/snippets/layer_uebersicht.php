@@ -45,9 +45,9 @@
 	};
 
 	$this->outputLayer = function($i, $indent = 0) use ($GUI) {
-		$keywords = explode(',', $GUI->layers['wms_keywordlist'][$i]);
+		$keywords = explode(',', str_replace(' ', '_', $GUI->layers['wms_keywordlist'][$i]));
 		$output = '
-				<tr class="layer_tr ' . str_replace(',', ' ', $GUI->layers['wms_keywordlist'][$i]) . '">
+				<tr class="layer_tr ' . implode(' ', $keywords) . '">
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="id-column">
 						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
@@ -169,7 +169,7 @@
 							<option value="">alle</option>
 							<?
 								foreach($this->keywords as $keyword){
-									echo '<option value="' . $keyword . '">' . $keyword . '</option>';
+									echo '<option value="' . str_replace(' ', '_', $keyword) . '">' . $keyword . '</option>';
 								}
 							?>
 						</select>
