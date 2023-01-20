@@ -1371,7 +1371,7 @@ class Konvertierung extends PgObject {
 		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Topologie!');
 			return false;
 		}
 
@@ -1406,13 +1406,13 @@ class Konvertierung extends PgObject {
 				xplan_gml.bp_flaechenschlussobjekt
 			WHERE
 				flaechenschluss AND
-				ebene = 0 OR ebene IS NULL AND
+				(ebene = 0 OR ebene IS NULL) AND
 				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
 			return false;
 		}
 
