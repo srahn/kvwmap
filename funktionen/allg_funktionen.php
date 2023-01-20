@@ -486,7 +486,7 @@ function buildsvgpolygonfromwkt($wkt){
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
-  $anzahl = count($svgcoords);
+	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
     if($svgcoords[$i] == 'M'){
     	$newsvgcoords[] = 'M';
