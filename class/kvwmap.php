@@ -3193,6 +3193,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$results = ($this->notification->delete())[0];
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();
@@ -8596,6 +8597,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
+	}
+
+	function get_generic_layer_data_sql() {
+		if ($this->formvars['selected_layer_id'] == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+			);
+		}
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		if ($layer->get('Layer_ID') == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Layer mit id: ' . $this->formvars['selected_layer_id'] . ' nicht gefunden.'
+			);
+		}
+		$zusatz = array(
+			array(
+				'select' => 'xplankonverter.konvertierungen.bezeichnung AS planname',
+				'from' => 'JOIN xplankonverter.konvertierungen ON ' . $layer->get('schema') . '.' . $layer->get('maintable') . '.konvertierung_id = xplankonverter.konvertierungen.id'
+			)
+		);
+		return $layer->get_generic_data_sql($zusatz);
 	}
 
 	function Layergruppen_Anzeigen() {
