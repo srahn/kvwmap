@@ -33,7 +33,7 @@
 					<td bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett id-column">
 						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $group['id'] . '</a></div>
 					</td>
-					<td colspan="4" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
+					<td colspan="5" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
 							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $group['Gruppenname'] . '
 						</div>
@@ -147,7 +147,9 @@
 			<h2><?php echo $this->titel; ?></h2>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="$('#column_options_div').toggle()"></i>
 			<div id="column_options_div">
+				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
 				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();"> ID<br>
+				<? } ?>
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
