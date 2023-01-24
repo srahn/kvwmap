@@ -1404,40 +1404,50 @@ FROM
 	}
   
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+		if ($HausNr != '') {
+			$adressen = explode(', ', $HausNr);
+			foreach($adressen as $adresse){
+				$adress = explode('-', $adresse, 3);
+				$kreis = substr($adress[0], 3, 2);
+				$gemeinde = substr($adress[0], 5, 3);
+				$adr[] = "('" . $gemeinde . "', '" . $adress[1] . "', '" . $kreis . "', '" . $adress[2] . "')";
+			}
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis, l.hausnummer) IN (" . implode(',', $adr) . ")";
+    }
+		else {
+			$kreis = substr($GemeindeSchl, 3, 2);
+			$gemeinde = substr($GemeindeSchl, 5, 3);
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis) = ('" . $gemeinde . "', '" . $StrassenSchl . "', '" . $kreis . "')";
+		}
   	$sql = "
 			SELECT 
 				f.flurstueckskennzeichen as flurstkennz
-			FROM 
-				alkis.ax_gemeinde as g, 
+			FROM  
 				alkis.ax_flurstueck as f
-				LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)
-				LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)
-				LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = s.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage = s.lage)
 			WHERE 
-				f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND 
-				g.gemeinde = s.gemeinde";
-    if ($HausNr!='') {
-    	if($HausNr == 'ohne'){
-    		$HausNr = '';
-    	}
-			$adressen = explode(', ', $HausNr);
-			foreach($adressen as $adresse){
-				$adress = explode('-', $adresse);
-				$ors[] = " (
-					g.schluesselgesamt = '".$adress[0]."' 
-					AND l.lage = '".$adress[1]."' 
-					AND TRIM(LOWER(l.hausnummer)) = '".$adress[2]."'
-					)
-				";
-			}
-			$sql.=" AND (".implode(' OR ', $ors).")";
-    }
-    else{
-    	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
-    	$sql.=" AND s.lage='".$StrassenSchl."'";
-    }
-		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 'lo', 's'));
-		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
+				true " .
+				$this->build_temporal_filter(array('f')) . "
+				AND f.weistauf && ARRAY	( 
+																		SELECT 
+																			l.gml_id
+																		FROM 
+																			alkis.ax_lagebezeichnungmithausnummer l
+																		WHERE " .
+																			$adressfilter . 
+																			$this->build_temporal_filter(array('l')) . "
+																		)";
+		if ($HausNr == '') {
+			$sql .= "
+				OR f.zeigtauf && ARRAY	(
+																	SELECT 
+																		l.gml_id
+																	FROM 
+																		alkis.ax_lagebezeichnungohnehausnummer l
+                                  WHERE " . 
+																		$adressfilter . 
+																		$this->build_temporal_filter(array('l')) . "
+																)";
+		}
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -2154,20 +2164,19 @@ FROM
   function getHausNrListe($GemID, $StrID) {
     $sql = "
 			SELECT 
-				CASE WHEN hnr = 'ohne' THEN hnr ELSE
-						 concat_ws('-', lmh.land || lmh.regierungsbezirk || lmh.kreis, lmh.lage, hnr) 
-				END AS id, 
-				hnr AS nrtext
+				concat_ws('-', lmh.land || lmh.regierungsbezirk || lmh.kreis || lmh.gemeinde, lmh.lage, lmh.hausnummer) AS id, 
+				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
 			FROM 
 				alkis.ax_lagebezeichnungmithausnummer lmh,
-				coalesce(nullif(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), ''), 'ohne') hnr,
-				array_remove(regexp_split_to_array(hnr, '(?<=\D|\s)(?=\d)|(?<=\d|\s)(?=\D)'), ' ') o
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
 			WHERE 
 				lmh.gemeinde = '" . substr($GemID, -3) . "'
 				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
 				AND lmh.kreis = '" . substr($GemID, 3, 2) . "'";
     $sql.= $this->build_temporal_filter(array('lmh'));
-		$sql.= " ORDER BY o[1]::int, o[2] NULLS FIRST, o[3]::int";
+		$sql.= " 
+			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
+			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
     $queryret = $this->execSQL($sql, 4, 0);
@@ -2200,12 +2209,14 @@ FROM
     }
     elseif ($GemkgID != '') {
       $sql.= " 
-				WHERE 
-					(lke.lage, lke.gemeinde, lke.kreis) IN (
-						SELECT 
-							coalesce(lmh.lage, loh.lage) AS lage,
-							coalesce(lmh.gemeinde, loh.gemeinde) AS gemeinde,
-							coalesce(lmh.kreis, loh.kreis) AS kreis
+					JOIN (
+						SELECT distinct 
+							lmh.kreis as lmh_kreis, 
+							lmh.gemeinde as lmh_gemeinde, 
+							lmh.lage as lmh_lage,
+              loh.kreis as loh_kreis, 
+							loh.gemeinde as loh_gemeinde, 
+							loh.lage as loh_lage
 						FROM 
 							alkis.ax_flurstueck f
 							LEFT JOIN alkis.ax_lagebezeichnungmithausnummer lmh ON lmh.gml_id = ANY(f.weistauf)
@@ -2213,7 +2224,8 @@ FROM
 					WHERE 
 						f.land || f.gemarkungsnummer = '" . $GemkgID . "'" .
 						$this->build_temporal_filter(array('f', 'lmh', 'loh')) . "
-					)";
+					) lb ON (lke.gemeinde, lke.lage, lke.kreis) IN ( (lb.lmh_gemeinde, lb.lmh_lage, lb.lmh_kreis),
+                                                           (lb.loh_gemeinde, lb.loh_lage, lb.loh_kreis) )";
     }
     $sql.= $this->build_temporal_filter(array('lke'));
     $sql.= $this->build_temporal_filter_fachdatenverbindung(array('lke'));
