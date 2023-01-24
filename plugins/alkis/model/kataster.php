@@ -131,11 +131,9 @@ class adresse {
     }
   }
 
-  function getStrassenListe($GemID,$GemkgID,$extent) {
-    # Funktion liefert eine Liste der Strassen innerhalb der GemID und ggf. des extent
-    $PolygonWKTString=rectObj2WKTPolygon($extent);
-    $StrassenListe=$this->database->getStrassenListe($GemID, $GemkgID, $PolygonWKTString);
-    # liefert Array mit Arrays mit StrID und Name zurück
+  function getStrassenListe($GemID,$GemkgID) {
+    # Funktion liefert eine Liste der Strassen innerhalb der GemID 
+    $StrassenListe=$this->database->getStrassenListe($GemID, $GemkgID);
     return $StrassenListe;
   }
   
@@ -144,7 +142,7 @@ class adresse {
     # Funktion liefert die Hausnummern zu einer GemID, StrID Kombination
     # und bei Bedarf auch im angegebenen extent zurück
     $PolygonWKTString=rectObj2WKTPolygon($extent);
-    $HausNrListe=$this->database->getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order);
+    $HausNrListe=$this->database->getHausNrListe($GemID,$StrID);
     # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array für die Listen zurück
     return $HausNrListe;
   }
