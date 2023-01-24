@@ -40,32 +40,43 @@ class Konvertierung extends PgObject {
 		This service is not acitve per default. It can be published by
 		calling function publish_service()
 	*/
-	function create_geoweb_service() {
-		$wms_online_resource = URL . 'services/plan/' . $this->get($this->identifier);
-		# Setting formvars
-		$formvars = array(
-			'nurNameLike' => $this->plan->planartAbk . '_%',
-			'totalExtent' => 1,
-			'ows_title' => $this->Stelle->ows_title,
-			'ows_abstract' => $this->Stelle->ows_abstract,
-			'wms_accessconstraints' => $this->Stelle->wms_accessconstraints,
-			'ows_contactperson' => $this->Stelle->ows_contentperson,
-			'ows_contactorganization' => $this->Stelle->ows_contentorganization,
-			'ows_contactelectronicmailaddress' => $this->Stelle->ows_contentelectronicmailaddress,
-			'ows_contactposition' => $this->Stelle->ows_contentposition,
-			'ows_fees' => $this->Stelle->ows_fees,
-			'wms_onlineresource' => $wms_onlineresource,
-			'ows_srs' => OWS_SRS . ' EPSG:3857'
-		);
-		# if OWS_SRS 3867 nicht enthält anhängen.
-		$this->mapfile = $this->get_geoweb_mapfile();
-		
-		# call $this->gui->wmsExportSenden() aber ohne output nur result aufnehmen und zurückgeben
-		return $this->gui->wmsExportSenden();
-	}
-	
-	function get_geoweb_mapfile() {
-		return WMS_MAPFILE_PATH . $this->get($this->identifier) . '/mapfile.map';
+	function create_geoweb_service($xplan_layers) {
+		$gui = $this->gui;
+		$planartkuerzel = $this->plan->planartAbk[0];
+		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $planartkuerzel . 'plan/';
+
+		$gui->class_load_level = 2;
+		$gui->loadMap('DataBase');
+
+		# Setze Metadaten
+		$extent = $this->plan->get_extent();
+		$gui->map->extent->setextent($extent['minx'], $extent['miny'], $extent['maxx'], $extent['maxy']);
+    $gui->map->setMetaData("ows_extent", implode(' ', $extent));
+		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$gui->map->web->set('header', '../templates/header.html');
+
+		# Filter Layer, die nicht im Dienst zu sehen sein sollen
+		# Und setze bei den anderen die Templates
+		$layers_with_content = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
+		$layernames_with_content = array_keys($layers_with_content);
+		$layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
+		$layernames_with_content[] = strtoupper($this->plan->planartAbk) . '-Bereiche';
+		$layernames_with_content[] = 'Geltungsbereiche';
+		#echo '<br>pk layernames_with_content: ' . print_r($layernames_with_content, true);
+		$layers_to_remove = array();
+		for ($i = 0; $i < $gui->map->numlayers; $i++) {
+			$layer = $gui->map->getLayer($i);
+			if (in_array($layer->name, $layernames_with_content)) {
+				$layer->set('header', '../templates/' . $layer->name . '_head.html');
+				$layer->set('template', '../templates/' . $layer->name . '_body.html');
+			}
+			else {
+				$gui->map->removeLayer($i);
+				$i--;
+			}
+		}
+		return $this->get('stelle_id') . '/zusammenzeichnung.map';
 	}
 
 	public static	function find_by_id($gui, $by, $id, $select = '*') {
@@ -162,6 +173,7 @@ class Konvertierung extends PgObject {
 	}
 
 	public static function find_zusammenzeichnungen($gui, $planart, $order_by) {
+		$zusammenzeichnungen = array();
 		$konvertierung = new Konvertierung($gui);
 		$sql = "
 			SELECT
@@ -628,6 +640,7 @@ class Konvertierung extends PgObject {
 	*/
 	function create_plaene_from_gmlas($table_schema, $planart) {
 		$planartAbk = strtolower(substr($planart, 0, 2));
+		$planart_as_text = str_replace("_","-",$planart);
 		$sql = "
 			INSERT INTO xplankonverter.konvertierungen (bezeichnung, status, stelle_id, user_id, geom_precision, gml_layer_group_id, epsg, output_epsg, input_epsg, planart, veroeffentlicht, beschreibung)
 			SELECT
@@ -640,14 +653,14 @@ class Konvertierung extends PgObject {
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS epsg,
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS output_epsg,
 				" . XPLANKONVERTER_DEFAULT_EPSG . "::text::xplankonverter.epsg_codes AS input_epsg,
-				'" . $planart . "' AS planart,
+				'" . $planart_as_text . "' AS planart,
 				false AS veroeffentlicht,
 				gmlas.id AS beschreibung
 			FROM
 				" . $table_schema . "." . strtolower($planart) . " gmlas;
 		";
 
-		switch ($planart) {
+		switch ($planart_as_text) {
 			case ('BP-Plan') : {
 				$sql .= "
 					INSERT INTO xplan_gml." . strtolower($planart) . " (
@@ -903,6 +916,7 @@ class Konvertierung extends PgObject {
 				" . $table_schema . "." . strtolower($planart) . " gmlas JOIN
 				xplan_gml." . strtolower($planart) . " AS plan ON trim(replace(lower(gmlas.id), 'gml_', ''))::text::uuid = plan.gml_id;
 		";
+		#echo '<br>Anweisung zum Anlegen der Pläne und der Bereiche: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
 			return array(
@@ -1357,7 +1371,7 @@ class Konvertierung extends PgObject {
 		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Topologie!');
 			return false;
 		}
 
@@ -1392,13 +1406,13 @@ class Konvertierung extends PgObject {
 				xplan_gml.bp_flaechenschlussobjekt
 			WHERE
 				flaechenschluss AND
-				ebene = 0 OR ebene IS NULL AND
+				(ebene = 0 OR ebene IS NULL) AND
 				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
 			return false;
 		}
 

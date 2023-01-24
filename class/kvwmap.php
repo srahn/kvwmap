@@ -1641,6 +1641,7 @@ echo '			</table>
 			- nurAufgeklappteLayer
 			- nurFremdeLayer
 			- nurNameLike
+			- class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
 	*/
   function loadMap($loadMapSource) {
 		$this->group_has_active_layers = array();
@@ -1820,14 +1821,14 @@ echo '			</table>
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
 					$map->set('debug', MS_DEBUG_LEVEL);
 				};
-        $map->imagecolor->setRGB(255,255,255);
-        $map->maxsize = 4096;
-        $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
+				$map->imagecolor->setRGB(255,255,255);
+				$map->maxsize = 4096;
+				$map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
 
-				$bb=$this->Stelle->MaxGeorefExt;
+				$bb = $this->Stelle->MaxGeorefExt;
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
-				if($this->user->rolle->oGeorefExt->minx==='') {
+				if ($this->user->rolle->oGeorefExt->minx==='') {
 				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
@@ -1843,85 +1844,46 @@ echo '			</table>
 					if (value_of($this->formvars, 'go') != 'OWS') {
 						$map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 					}
-					else{
+					else {
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
 
-        # OWS Metadaten
-
-        if($this->Stelle->ows_title != ''){
-          $map->setMetaData("ows_title",$this->Stelle->ows_title);}
-        else{
-          $map->setMetaData("ows_title",OWS_TITLE);
-        }
-        if($this->Stelle->ows_abstract != ''){
-          $map->setMetaData("ows_abstract", $this->Stelle->ows_abstract);}
-        else{
-          $map->setMetaData("ows_abstract", OWS_ABSTRACT);
-        }
-        if($this->Stelle->wms_accessconstraints != ''){
-          $map->setMetaData("ows_accessconstraints",$this->Stelle->wms_accessconstraints);}
-        else{
-          $map->setMetaData("ows_accessconstraints",OWS_ACCESSCONSTRAINTS);
-        }
-        if($this->Stelle->ows_contactperson != ''){
-          $map->setMetaData("ows_contactperson",$this->Stelle->ows_contactperson);}
-        else{
-          $map->setMetaData("ows_contactperson",OWS_CONTACTPERSON);
-        }
-        if($this->Stelle->ows_contactorganization != ''){
-          $map->setMetaData("ows_contactorganization",$this->Stelle->ows_contactorganization);}
-        else{
-          $map->setMetaData("ows_contactorganization",OWS_CONTACTORGANIZATION);
-        }
-        if($this->Stelle->ows_contactelectronicmailaddress != ''){
-          $map->setMetaData("ows_contactelectronicmailaddress",$this->Stelle->ows_contactelectronicmailaddress);}
-        else{
-          $map->setMetaData("ows_contactelectronicmailaddress",OWS_CONTACTELECTRONICMAILADDRESS);
-        }
-        if($this->Stelle->ows_contactposition != ''){
-          $map->setMetaData("ows_contactposition",$this->Stelle->ows_contactposition);}
-        else{
-          $map->setMetaData("ows_contactposition",OWS_CONTACTPOSITION);
-        }
-
+				# OWS Metadaten
+				$map->setMetaData("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
+				$map->setMetaData("ows_abstract", $this->Stelle->ows_abstract ?: OWS_ABSTRACT);
+				$map->setMetaData("ows_accessconstraints", $this->Stelle->wms_accessconstraints ?: OWS_ACCESSCONSTRAINTS);
+				$map->setMetaData("ows_contactorganization", $this->Stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+				$map->setMetaData("ows_contactperson", $this->Stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+				$map->setMetaData("ows_contactposition", $this->Stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+				$map->setMetaData("ows_contactelectronicmailaddress", $this->Stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+				$map->setMetaData("ows_contactvoicetelephone", $this->Stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+				$map->setMetaData("ows_contactfacsimiletelephone", $this->Stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+				$map->setMetaData("ows_stateorprovince", $this->Stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+				$map->setMetaData("ows_address", $this->Stelle->ows_contactaddress ?: OWS_ADDRESS);
+				$map->setMetaData("ows_postcode", $this->Stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+				$map->setMetaData("ows_city", $this->Stelle->ows_contactcity ?: OWS_CITY);
+				$map->setMetaData("ows_country", OWS_COUNTRY);
+				$map->setMetaData("ows_addresstype", 'postal');
+				$map->setMetaData("ows_fees", $this->Stelle->ows_fees ?: OWS_FEES);
 				$map->setMetaData("ows_encoding", 'UTF-8');
 				$map->setMetaData("ows_keywordlist", OWS_KEYWORDLIST);
-				$map->setMetaData("ows_contactvoicetelephone", OWS_CONTACTVOICETELEPHONE);
-				$map->setMetaData("ows_contactfacsimiletelephone", OWS_CONTACTFACSIMILETELEPHONE);
-				$map->setMetaData("ows_addresstype", 'postal');
-				$map->setMetaData("ows_address", OWS_ADDRESS);
-				$map->setMetaData("ows_city", OWS_CITY);
-				$map->setMetaData("ows_stateorprovince", OWS_STATEORPROVINCE);
-				$map->setMetaData("ows_postcode", OWS_POSTCODE);
-				$map->setMetaData("ows_country", OWS_COUNTRY);
 				$map->setMetaData("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
 				$map->setMetaData("ows_hoursofservice", OWS_HOURSOFSERVICE);
 				$map->setMetaData("ows_role", OWS_ROLE);
-
-        if($this->Stelle->ows_fees != ''){
-          $map->setMetaData("ows_fees",$this->Stelle->ows_fees);}
-        else{
-          $map->setMetaData("ows_fees",OWS_FEES);
-        }
-        if($this->Stelle->ows_srs != ''){
-          $map->setMetaData("ows_srs",$this->Stelle->ows_srs);}
-        else{
-          $map->setMetaData("ows_srs",OWS_SRS);
-        }
+				$map->setMetaData("ows_srs", $this->Stelle->ows_srs ?: OWS_SRS);
 				if (value_of($_REQUEST, 'onlineresource') != '') {
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
 					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
 				}
-        $map->setMetaData("ows_onlineresource", $ows_onlineresource);
+				$map->setMetaData("ows_onlineresource", $ows_onlineresource);
 				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 
-        $map->setMetaData("wms_extent",$bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+				$map->setMetaData("wms_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				// enable service types
-        $map->setMetaData("ows_enable_request", '*');
+				$map->setMetaData("ows_enable_request", '*');
 
         ///------------------------------////
 
@@ -1934,7 +1896,7 @@ echo '			</table>
         # Webobject
         $map->web->set('imagepath', IMAGEPATH);
         $map->web->set('imageurl', IMAGEURL);
-        $map->web->set('log', LOGPATH.'mapserver.log');
+        $map->web->set('log', LOGPATH . 'mapserver.log');
         $map->setMetaData('wms_feature_info_mime_type',  'text/html');
         //$map->web->set('ERRORFILE', LOGPATH.'mapserver_error.log');
 
@@ -2000,7 +1962,7 @@ echo '			</table>
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
-        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
@@ -2016,12 +1978,13 @@ echo '			</table>
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if(value_of($layerset['list'][$i], 'requires') != ''){
+					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
-					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
+						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$this->loadlayer($map, $layerset['list'][$i]);
           }
@@ -2042,11 +2005,13 @@ echo '			</table>
   }
 
 	function loadlayer($map, $layerset) {
+		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
+		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
+		$layer->setMetaData('wms_name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
 		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
-		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		if ($layerset['wms_keywordlist']) {
 			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
@@ -2079,8 +2044,6 @@ echo '			</table>
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
-
-		$layer->set('name', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name']));
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -2911,6 +2874,28 @@ echo '			</table>
 		}
   }
 
+	function get_web_header_template($title) {
+		$html = "<!-- MapServer Template -->
+<html lang=\"de\">
+  <head>
+    <title>" . $title . "</title>
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">
+  </head>
+";
+		return $html;
+	}
+
+	function save_web_header_template() {
+		$template_dir = WMS_MAPFILE_PATH . 'templates/';
+		if (!is_dir($template_dir)) {
+			mkdir($template_dir, 0770, true);
+		}
+
+		$fp = fopen($template_dir . 'header.html', "w");
+		fwrite($fp, $this->get_web_header_template($this->Stelle->ows_title ?: OWS_TITLE));
+		fclose($fp);
+	}
+
   # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
   function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
@@ -3276,7 +3261,7 @@ echo '			</table>
 						include($guifile);
 					}
 				}
-				if($this->alert != ''){
+				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty(GUI::$messages)) {
@@ -3285,10 +3270,10 @@ echo '			</table>
       } break;
 			case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
-				include (LAYOUTPATH.'snippets/map_ajax.php');
+				include (LAYOUTPATH . 'snippets/map_ajax.php');
 			} break;
 			case 'pdf' : {
-				$this->formvars['file']=1;
+				$this->formvars['file'] = 1;
 				if ($this->formvars['file']) {
 					header("Content-type: application/pdf");
 					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
@@ -3304,7 +3289,12 @@ echo '			</table>
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['content_type'], $this->formvars['callback']);
+					$this->formatter = new formatter(
+						($this->formvars['format'] == 'json_result' ? $this->data : $this->qlayersetParamStrip()),
+						$this->formvars['format'],
+						$this->formvars['content_type'],
+						$this->formvars['callback']
+					);
 					echo utf8_encode($this->formatter->output());
 				}
 			}
@@ -8377,7 +8367,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			include_once(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
 			if ($layer->get('write_mapserver_templates')) {
-				$layer->write_mapserver_templates($mapDB);
+				$layer->write_mapserver_templates($mapDB, 'Formular');
 			}
 
 			# Klassen übernehmen (aber als neue Klassen anlegen)
@@ -9865,7 +9855,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -14211,7 +14201,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$_FILES[$fieldnames[0]] = $_FILES['uploadfile'];
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['tablename'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
+					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['table_name'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
 					$this->formvars[$fieldname] = $this->qlayerset[0]['shape'][0][$attributes['name'][$i]];
 					$fieldnames[] = $fieldname;
 				}
@@ -17462,7 +17452,7 @@ class db_mapObj{
 			);
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
-				$select = str_replace($database->schema.'.', '', $select);
+				$select = str_replace($database->schema . '.', '', $select);
 			}
 			$ret = $database->getFieldsfromSelect($select);
 			if ($ret[0]) {
@@ -19527,6 +19517,7 @@ class db_mapObj{
 				l.Datentyp,
 				l.connectiontype,
 				l.kurzbeschreibung,
+				l.wms_keywordlist,
 				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
@@ -19555,6 +19546,7 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
+			'wms_keywordlist' => array(),
 			'datasource' => array(),
 			'dataowner_name' => array(),
 			'dataowner_email' => array(),
@@ -19575,6 +19567,7 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];

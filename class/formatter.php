@@ -10,7 +10,7 @@ class formatter {
 	}
 
 	function output() {
-		if (in_array($this->format, array('json', 'jsonp', 'dump', 'html', 'print_r'))) {
+		if (in_array($this->format, array('json', 'json_result', 'jsonp', 'dump', 'html', 'print_r'))) {
 			$format = $this->format;
 		}
 		else {
@@ -26,62 +26,70 @@ class formatter {
 		return var_dump($this->data);
 	}
 
-  function output_html() {
-    $recursive = true;
-    $null = '&nbsp;';
-    // Sanity check
-    if (empty($this->data) || !is_array($this->data))
-      return false;
+	function output_html() {
+		$recursive = true;
+		$null = '&nbsp;';
+		// Sanity check
+		if (empty($this->data) || !is_array($this->data))
+			return false;
 
-    if (!isset($this->data[0]) || !is_array($this->data[0]))
-      $this->data = array($this->data);
-    
+		if (!isset($this->data[0]) || !is_array($this->data[0])) {
+			$this->data = array($this->data);
+		}
+		
 		header('Content-Type: text/html; charset=utf-8');
-    $html  = '<html>';
-    $html .= '<head>';
-    $html .= '</head>';
-    $html .= '<body>';
+		$html  = '<html>';
+		$html .= '<head>';
+		$html .= '</head>';
+		$html .= '<body>';
 
-    // Start the table
-    $html = "<table>\n";
+		// Start the table
+		# ToDo warum wird hier html überschrieben und nicht angehängt?
+		$html = "<table>\n";
 
-    // The header
-    $html .= "\t<tr>";
-    // Take the keys from the first row as the headings
-    foreach (array_keys($this->data[0]) as $heading) {
-      $html .= '<th>' . $heading . '</th>';
-    }
-    $html .= "</tr>\n";
+		// The header
+		$html .= "\t<tr>";
+		// Take the keys from the first row as the headings
+		foreach (array_keys($this->data[0]) as $heading) {
+			$html .= '<th>' . $heading . '</th>';
+		}
+		$html .= "</tr>\n";
 
-    // The body
-    foreach ($this->data as $row) {
-      $html .= "\t<tr>" ;
-      foreach ($row as $cell) {
-        $html .= '<td>';
-        // Cast objects
-        if (is_object($cell)) {
-          $cell = (array) $cell;
-        }
-        if ($recursive === true && is_array($cell) && !empty($cell)) {
-          // Recursive mode
-          $html .= "\n" . array2table($cell, true, true) . "\n";
-        }
-        else {
-          $html .= (strlen($cell) > 0) ? htmlspecialchars((string) $cell) : $null;
-        }
-        $html .= '</td>';
-      }
-      $html .= "</tr>\n";
-    }
-    $html .= '</table>';
-    $html .= '</body>';
-    $html .= '</html>';
-    return $html;
-  }
+		// The body
+		foreach ($this->data as $row) {
+			$html .= "\t<tr>" ;
+			foreach ($row as $cell) {
+				$html .= '<td>';
+				// Cast objects
+				if (is_object($cell)) {
+					$cell = (array) $cell;
+				}
+				if ($recursive === true && is_array($cell) && !empty($cell)) {
+					// Recursive mode
+					$html .= "\n" . array2table($cell, true, true) . "\n";
+				}
+				else {
+					$html .= (strlen($cell) > 0) ? htmlspecialchars((string) $cell) : $null;
+				}
+				$html .= '</td>';
+			}
+			$html .= "</tr>\n";
+		}
+		$html .= '</table>';
+		$html .= '</body>';
+		$html .= '</html>';
+		return $html;
+	}
 
 	function output_json() {
 		header('Content-Type: ' . $this->content_type . '; charset=utf-8');
 		empty($this->data) ? $json = '[]' : $json = json_encode($this->data);
+		return utf8_decode($json);
+	}
+
+	function output_json_result() {
+		header('Content-Type: application/json; charset=utf-8');
+		empty($this->data) ? $json = '{}' : $json = json_encode($this->data);
 		return utf8_decode($json);
 	}
 

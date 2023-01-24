@@ -2134,9 +2134,18 @@ class pgdatabase {
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = "
+			SET client_min_messages='log';
+			SET log_min_messages='fatal';
+			SET debug_print_parse=true;" . 
+			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
-
+		$sql = "
+			SET debug_print_parse = false;
+			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';";
+		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		if ($ret['success']) {
 			$query_plan = $error_list[0];

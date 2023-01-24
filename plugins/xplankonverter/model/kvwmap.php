@@ -253,6 +253,72 @@
 			}
 		}
 		return $forbidden;
-	}
+	};
 
+	$GUI->xplankonverter_get_xplan_layers = function() use ($GUI) {
+		include_once(CLASSPATH . 'Layer.php');
+		$layers = Layer::find($GUI, "
+				`schema` LIKE 'xplan_gml' AND
+				LOWER(`Name`) NOT LIKE '%textabschnitt' AND
+				LOWER(`Name`) NOT LIKE '%begruendungabschnitt' AND
+				LOWER(`Name`) NOT LIKE '%bereiche' AND
+				LOWER(`Name`) NOT LIKE '%Pläne' AND
+				`Datentyp` IN (0, 1, 2) AND
+				`connectiontype` = 6
+		", 'Name');
+		$xplan_layers = array_map(
+			function ($layer) {
+				return array(
+					'id' => $layer->get('Layer_ID'),
+					'Name' => $layer->get('Name'),
+					'Datentyp' =>$layer->get('Datentyp'),
+					'schema' => $layer->get('schema'),
+					'maintable' => $layer->get('maintable')
+				);
+			},
+			$layers
+		);
+		return $xplan_layers;
+	};
+
+	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers) use ($GUI) {
+		# Erzeuge GeoWeb-Service in dem alle Pläne enthalten sind.
+		$planartAbk = substr($GUI->formvars['planart'], 0, 2);
+		$planartkuerzel = $GUI->formvars['planart'][0];
+		
+		$GUI->ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
+
+		$GUI->class_load_level = 2;
+		$GUI->loadMap('DataBase');
+
+		# Setze Metadaten
+		$bb = $GUI->Stelle->MaxGeorefExt;
+		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
+    $GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $GUI->ows_onlineresource);
+		$GUI->map->web->set('header', 'templates/header.html');
+
+		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
+		$GUI->layers_with_content = $xp_plan->get_layers_with_content($xplan_layers);
+		$GUI->layernames_with_content = array_keys($GUI->layers_with_content);
+		$GUI->layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
+		$GUI->layernames_with_content[] = strtoupper($planartAbk) . '-Bereiche';
+		$GUI->layernames_with_content[] = 'Geltungsbereiche';
+		#echo '<br>pk layernames_with_content: ' . print_r($GUI->layernames_with_content, true);
+
+		$layers_to_remove = array();
+		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
+			$layer = $GUI->map->getLayer($i);
+			if (in_array($layer->name, $GUI->layernames_with_content)) {
+				$layer->set('header', 'templates/' . $layer->name . '_head.html');
+				$layer->set('template', 'templates/' . $layer->name . '_body.html');
+			}
+			else {
+				$GUI->map->removeLayer($i);
+				$i--;
+			}
+		}
+		return 'zusammenzeichnung.map';
+	};
 ?>

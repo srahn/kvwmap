@@ -53,7 +53,7 @@ function save(){
 
 	$this->qlayerset[$i]['Layer_ID'] = LAYER_ID_JAGDBEZIRKE;		// damit man alle Jagd-Layer abfragen und editieren kann, wird die Layer-ID vom Lagbezirks_Layer genommen
 
-  $anzObj=count($this->qlayerset[$i]['shape']);
+  $anzObj = @count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
     ?>
 
