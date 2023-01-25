@@ -9,6 +9,7 @@
 		}
 	}
 	$this->keywords = array_unique($this->keywords);
+	sort($this->keywords);
 	
 	$this->outputGroup = function($group, $indent = 0) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
