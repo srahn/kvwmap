@@ -1835,6 +1835,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	padding: 0 0 8px 0;
 }
 
+.subFormListItem > a{
+	display: flex;
+	align-items: center;
+}
+
 .subFormShowCount{
 	margin: 5px 5px 5px 8px;
 }
@@ -1851,7 +1856,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	height: 4px;
 	border-radius: 50%;
 	content: '';
-	margin: 8px 7px 0px 10px;
+	margin: 2px 7px 0px 10px;
 	background-color: #236dbf;
 	vertical-align: top;
 	display: inline-block;
