@@ -531,7 +531,7 @@ FROM
 		}
 		else{
 			foreach($tablenames as $tablename){
-				$filter .= ' AND tsrange(' . $tablename . '.beginnt, ' . $tablename . '.endet) @> COALESCE(NULLIF(\'' . $timestamp . '\', \'\')::timestamp, localtimestamp) ';
+				$filter .= " AND tsrange(" . $tablename . ".beginnt, " . $tablename . ".endet) @> '" . $timestamp . "'::timestamp ";
 			}
 		}
 		return $filter;
@@ -1412,40 +1412,50 @@ FROM
 	}
   
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+		if ($HausNr != '') {
+			$adressen = explode(', ', $HausNr);
+			foreach($adressen as $adresse){
+				$adress = explode('-', $adresse, 3);
+				$kreis = substr($adress[0], 3, 2);
+				$gemeinde = substr($adress[0], 5, 3);
+				$adr[] = "('" . $gemeinde . "', '" . $adress[1] . "', '" . $kreis . "', '" . $adress[2] . "')";
+			}
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis, l.hausnummer) IN (" . implode(',', $adr) . ")";
+    }
+		else {
+			$kreis = substr($GemeindeSchl, 3, 2);
+			$gemeinde = substr($GemeindeSchl, 5, 3);
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis) = ('" . $gemeinde . "', '" . $StrassenSchl . "', '" . $kreis . "')";
+		}
   	$sql = "
 			SELECT 
 				f.flurstueckskennzeichen as flurstkennz
-			FROM 
-				alkis.ax_gemeinde as g, 
+			FROM  
 				alkis.ax_flurstueck as f
-				LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)
-				LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)
-				LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = s.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage = s.lage)
 			WHERE 
-				f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND 
-				g.gemeinde = s.gemeinde";
-    if ($HausNr!='') {
-    	if($HausNr == 'ohne'){
-    		$HausNr = '';
-    	}
-			$adressen = explode(', ', $HausNr);
-			foreach($adressen as $adresse){
-				$adress = explode('-', $adresse);
-				$ors[] = " (
-					g.schluesselgesamt = '".$adress[0]."' 
-					AND l.lage = '".$adress[1]."' 
-					AND TRIM(LOWER(l.hausnummer)) = '".$adress[2]."'
-					)
-				";
-			}
-			$sql.=" AND (".implode(' OR ', $ors).")";
-    }
-    else{
-    	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
-    	$sql.=" AND s.lage='".$StrassenSchl."'";
-    }
-		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 'lo', 's'));
-		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
+				true " .
+				$this->build_temporal_filter(array('f')) . "
+				AND f.weistauf && ARRAY	( 
+																		SELECT 
+																			l.gml_id
+																		FROM 
+																			alkis.ax_lagebezeichnungmithausnummer l
+																		WHERE " .
+																			$adressfilter . 
+																			$this->build_temporal_filter(array('l')) . "
+																		)";
+		if ($HausNr == '') {
+			$sql .= "
+				OR f.zeigtauf && ARRAY	(
+																	SELECT 
+																		l.gml_id
+																	FROM 
+																		alkis.ax_lagebezeichnungohnehausnummer l
+                                  WHERE " . 
+																		$adressfilter . 
+																		$this->build_temporal_filter(array('l')) . "
+																)";
+		}
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -2159,75 +2169,82 @@ FROM
     return $bezirke;
   }
   
-  function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
-    # 2006-01-31
-    $order='ordernr, nrtext';
-    # Abfragen der Hausnummern
-    $sql ="SELECT id,nrtext, to_number(ordernr, '999999') as ordernr FROM (";
-    $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE id END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
-    $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
-    $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_lagebezeichnungmithausnummer l";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = l.gemeinde";
-    if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt='".$GemID."'";
-    }
-    if ($StrID!='') {
-      $sql.=" AND l.lage='".$StrID."'";
-    }
-		$sql.= $this->build_temporal_filter(array('g', 'l', 's'));
-    $sql.=") AS foo ";
-    $sql.=") AS foofoo ORDER BY " . replace_semicolon($order);
+  function getHausNrListe($GemID, $StrID) {
+    $sql = "
+			SELECT 
+				concat_ws('-', lmh.land || lmh.regierungsbezirk || lmh.kreis || lmh.gemeinde, lmh.lage, lmh.hausnummer) AS id, 
+				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
+			FROM 
+				alkis.ax_lagebezeichnungmithausnummer lmh,
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
+			WHERE 
+				lmh.gemeinde = '" . substr($GemID, -3) . "'
+				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
+				AND lmh.kreis = '" . substr($GemID, 3, 2) . "'";
+    $sql.= $this->build_temporal_filter(array('lmh'));
+		$sql.= " 
+			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
+			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
-    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_assoc($queryret[1])) {
-      $Liste['HausID'][]=$rs['id'];
-      $Liste['HausNr'][]=$rs['nrtext'];
+    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $queryret = $this->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($queryret[1])) {
+      $Liste['HausID'][] = $rs['id'];
+      $Liste['HausNr'][] = $rs['nrtext'];
     }
     return $Liste;
   }
     
-  function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {		
+		
 	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
 	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
-  	$sql ="set enable_seqscan = off;SELECT '000' AS gemeinde,'0' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
-    $sql.=" UNION";
-    $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON f.gemeindezugehoerigkeit_gemeinde = s.gemeinde AND l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
-		$sql.=" WHERE s.lage IS NOT NULL AND g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-    if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt='".$GemID."'";
+  function getStrassenListe($GemID, $GemkgID) {
+    $sql = "
+			SELECT 
+				'000'::varchar AS gemeinde, 
+				'0'::varchar AS strasse, 
+				'--Auswahl--'::varchar AS strassenname
+			UNION ALL
+				SELECT 
+					lke.gemeinde, 
+					string_agg(lke.lage, ', ') AS strasse, 
+					lke.bezeichnung AS strassenname
+				FROM 
+					alkis.ax_lagebezeichnungkatalogeintrag lke";
+    if ($GemID != '') {
+      $sql.= " 
+				WHERE lke.gemeinde = '" . substr($GemID, -3) . "' AND lke.kreis = '" . substr($GemID, 3, 2) . "'";
     }
-    if ($GemkgID!='') {
-      $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
+    elseif ($GemkgID != '') {
+      $sql.= " 
+					JOIN (
+						SELECT distinct 
+							lmh.kreis as lmh_kreis, 
+							lmh.gemeinde as lmh_gemeinde, 
+							lmh.lage as lmh_lage,
+              loh.kreis as loh_kreis, 
+							loh.gemeinde as loh_gemeinde, 
+							loh.lage as loh_lage
+						FROM 
+							alkis.ax_flurstueck f
+							LEFT JOIN alkis.ax_lagebezeichnungmithausnummer lmh ON lmh.gml_id = ANY(f.weistauf)
+							LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer loh ON loh.gml_id = ANY(f.zeigtauf)
+					WHERE 
+						f.land || f.gemarkungsnummer = '" . $GemkgID . "'" .
+						$this->build_temporal_filter(array('f', 'lmh', 'loh')) . "
+					) lb ON (lke.gemeinde, lke.lage, lke.kreis) IN ( (lb.lmh_gemeinde, lb.lmh_lage, lb.lmh_kreis),
+                                                           (lb.loh_gemeinde, lb.loh_lage, lb.loh_kreis) )";
     }
-		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
-		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
-		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
-    $sql.=" ORDER BY gemeinde, strassenname, strasse";
+    $sql.= $this->build_temporal_filter(array('lke'));
+    $sql.= $this->build_temporal_filter_fachdatenverbindung(array('lke'));
+    $sql.= " GROUP BY lke.gemeinde, lke.bezeichnung ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
-    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    $i = 0;
-    while ($rs=pg_fetch_assoc($queryret[1])) {
-			$Liste['Gemeinde'][]=$rs['gemeinde'];
-			$Liste['StrID'][]=$rs['strasse'];
-			$Liste['Gemarkung'][]=$rs['gemkgname'];
-			$Liste['gemkgschl'][]=$rs['gemkgschl'];
-			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
-			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
-				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
-			}
-			else{
-				$Liste['Name'][]=$rs['strassenname'];
-			}
-      $i++;
+    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $queryret = $this->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($queryret[1])) {
+			$Liste['Gemeinde'][] = $rs['gemeinde'];
+			$Liste['StrID'][] = $rs['strasse'];
+			$Liste['Name'][] = $rs['strassenname'];
     }
     return $Liste;
   }
