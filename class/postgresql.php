@@ -1417,7 +1417,11 @@ FROM
 		else {
 			$kreis = substr($GemeindeSchl, 3, 2);
 			$gemeinde = substr($GemeindeSchl, 5, 3);
-			$adressfilter = "(l.gemeinde, l.lage, l.kreis) = ('" . $gemeinde . "', '" . $StrassenSchl . "', '" . $kreis . "')";
+			$strassen = explode(', ', $StrassenSchl);
+			foreach($strassen as $strasse){
+				$adr[] = "('" . $gemeinde . "', '" . $strasse . "', '" . $kreis . "')";
+			}
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis) IN (" . implode(', ', $adr) . ")";
 		}
   	$sql = "
 			SELECT 
@@ -2489,50 +2493,65 @@ FROM
     return $ret;
   }
   
-  function getMERfromGebaeude($Gemeinde, $Strasse, $Hausnr, $epsgcode) {
+	function getMERfromGebaeude($Gemeinde, $Strasse, $Hausnr, $epsgcode) {
+		if ($Hausnr != '') {
+			$hausnummern = explode(', ', $Hausnr);
+			foreach($hausnummern as $hausnummer){
+				$hnr = explode('-', $hausnummer);
+				$kreis = substr($hnr[0], 3, 2);
+				$gemeinde = substr($hnr[0], 5, 3);
+				$lage = $hnr[1];
+				$nummer = strtolower($hnr[2]);
+				$expr[] = "('" . $gemeinde . "', '" . $lage . "', '" . $nummer . "', '" . $kreis . "')";
+			}
+			$filter = " (lmh.gemeinde, lmh.lage, lmh.hausnummer, lmh.kreis) IN (" . implode(', ', $expr) . ")";
+		}
+		else {
+			$strassen = explode(', ', $Strasse);
+			$kreis = substr($Gemeinde, 3, 2);
+			$gemeinde = substr($Gemeinde, 5, 3);
+			foreach($strassen as $lage){
+				$expr[] = "('" . $gemeinde . "', '" . $lage . "', '" . $kreis . "')";
+			}
+			$filter = " (lmh.gemeinde, lmh.lage, lmh.kreis) IN (" . implode(', ', $expr) . ")";
+		}
     $sql ="
-			SELECT 
-				min(st_xmin(env)) AS minx, 
-				max(st_xmax(env)) AS maxx,
-				min(st_ymin(env)) AS miny, 
-				max(st_ymax(env)) AS maxy
-			FROM 
-				alkis.ax_lagebezeichnungmithausnummer lmh 
-				JOIN alkis.ax_gebaeude g ON g.zeigtauf @> array[lmh.gml_id],
-				st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env";
-    if ($Hausnr != '') {
-      $row = array();
-      $Hausnr = explode(', ', $Hausnr);                                                                 // jetzt ist $Hausnr ein Array aus 1..n Hausnummern in der Form '13073070-21721-2'
-      foreach($Hausnr as $key) {
-        $hnr = explode('-', $key);                                                                      // $hnr ist ein Array aus $hnr[0] = '13073070', $hnr[1] = '21721', $hnr[2] = '2'
-        $row[] = "('" . substr($hnr[0], -3) . "', '" . $hnr[1] . "', '" . strtolower($hnr[2]) . "')";   // fügt dem Array $row die Zeichenkette ('070', '21721', '2') als Key hinzu
-      }
-      $sql.=" WHERE (lmh.gemeinde, lmh.lage, trim(lower(lmh.hausnummer))) IN (" . implode(', ', $row) . ")";
-    }
-    else {
-      $sql.=" WHERE lmh.gemeinde = '" . substr($Gemeinde, -3) . "'";
-      if ($Strasse != '') {
-        $sql.=" AND lmh.lage = '" . $Strasse . "'";
-      }
-    }
-    $sql.= $this->build_temporal_filter(array('g', 'lmh'));
-    #echo $sql;
-    $ret = $this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $ret[1] = 'Fehler beim Abfragen des umschliessenden Rechtecks um die Geb&auml;ude.<br>' . $ret[1];
-    }
-    else {
-      $rs = pg_fetch_assoc($ret[1]);
-      if ($rs['minx'] == 0) {
-        $ret[0] = 1;
-        $ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
-      }
-      else {
-        $ret[1] = $rs;
-      }
-    }
-    return $ret;
-  }
+			SELECT
+			  min(st_xmin(env)) AS minx, 
+			  max(st_xmax(env)) AS maxx,
+			  min(st_ymin(env)) AS miny, 
+			  max(st_ymax(env)) AS maxy
+			FROM
+			  alkis.ax_gebaeude g,
+			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env
+			WHERE
+			  g.zeigtauf && ARRAY (
+			  SELECT
+			    gml_id
+			  FROM
+			    alkis.ax_lagebezeichnungmithausnummer lmh
+			  WHERE
+			   " . $filter . "
+			   " . $this->build_temporal_filter(array('lmh')) . "
+			  )
+			 " . $this->build_temporal_filter(array('g'));
+		#echo $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1] = 'Fehler beim Abfragen des umschliessenden Rechtecks um die Geb&auml;ude.<br>' . $ret[1];
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+			if ($rs['minx'] == 0) {
+				$ret[0] = 1;
+				$ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
+			}
+			else {
+				$ret[1] = $rs;
+			}
+		}
+		return $ret;
+	}
 
 
 ##################################################

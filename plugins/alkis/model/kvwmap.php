@@ -261,28 +261,35 @@
 			}
 	    # zu 3)
 			$epsg = EPSGCODE_ALKIS;
-			$datastring ="the_geom from (select g.gml_id as oid, wkb_geometry as the_geom FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = any(g.zeigtauf)";
-			$datastring.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-			$datastring.=" AND l.lage = lpad(s.lage,5,'0')";
-			$datastring.=" WHERE gem.gemeinde = l.gemeinde";
-			if ($Hausnr!='') {
-				$Hausnr = str_replace(", ", ",", $Hausnr);
-				$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||l.hausnummer IN ('" . $Hausnr."')";
+			$datastring = "the_geom from (
+												select 
+													g.gml_id as oid, 
+													wkb_geometry as the_geom 
+												FROM 
+													alkis.ax_gebaeude g
+												WHERE	
+													g.zeigtauf && ARRAY (
+														SELECT
+															gml_id
+														FROM
+															alkis.ax_lagebezeichnungmithausnummer l 
+														WHERE 
+															true ";
+			if ($Hausnr != '') {
+				$datastring.=" AND concat_ws('-', l.land || l.regierungsbezirk || l.kreis || l.gemeinde, l.lage, l.hausnummer) IN ('" . str_replace(", ", "', '", $Hausnr) . "')";
 			}
 			else{
-				$datastring.=" AND gem.schluesselgesamt = '" . $Gemeinde."'";
-				if ($Strasse!='') {
-					$datastring.=" AND l.lage='" . $Strasse."'";
+				$kreis = substr($Gemeinde, 3, 2);
+				$gemeinde = substr($Gemeinde, 5, 3);
+				if ($Strasse != '') {
+					$datastring .= " AND l.kreis = '" . $kreis . "' AND l.gemeinde = '" . $gemeinde . "' AND l.lage IN ('" . str_replace(", ", "', '", $Strasse) . "')";
 				}
 			}
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN g.endet IS NULL ELSE g.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= g.endet::text or g.endet IS NULL) END";
-			$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN gem.endet IS NULL ELSE gem.beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= gem.endet::text or gem.endet IS NULL) END";
+			$datastring.= ")" . $GUI->build_temporal_filter(array('g'));
 	    $datastring.=") as foo using unique oid using srid=" . $epsg;
-	    $legendentext ="Geb&auml;ude<br>";
+	    $legendentext ="Gebäude";
 	    if ($Hausnr!='') {
-	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
+	      $legendentext.="<br>HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
 	    else{
 				$ret = $GUI->pgdatabase->getStrNameByID($Gemeinde,$Strasse);
