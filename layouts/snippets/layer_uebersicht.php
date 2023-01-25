@@ -69,7 +69,7 @@
 					</td>
 					<td valign="top" class="metadatenlink-column">
 						<div style="width: 200px">
-							' . htmlentities($GUI->layers['metalink'][$i]) . '
+							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . $GUI->layers['metalink'][$i] . '</a>
 						</div>
 					</td>					
 					<td class="dataowner_name-column">
