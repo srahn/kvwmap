@@ -58,7 +58,7 @@
 						' . $GUI->layers['default_drawingorder'][$i] . '
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
-						<div style="width: 400px">
+						<div style="width: 200px">
 							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
 						</div>
 					</td>
@@ -67,6 +67,11 @@
 							' . htmlentities($GUI->layers['Kurzbeschreibung'][$i]) . '
 						</div>
 					</td>
+					<td valign="top" class="metadatenlink-column">
+						<div style="width: 200px">
+							' . htmlentities($GUI->layers['metalink'][$i]) . '
+						</div>
+					</td>					
 					<td class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
 							' . $GUI->layers['dataowner_name'][$i] . '
@@ -106,7 +111,13 @@
 		width: 100%
 	}
 
-	.id-column, .default_drawingorder-column {
+<? if (!$this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
+	.id-column {
+		display: none;
+	}
+<? } ?>
+
+	.default_drawingorder-column {
 		display: none;
 	}
 	
@@ -130,8 +141,9 @@
 	}
 
 	#column_options_div {
+		position: absolute;
 		display: none;
-		float: right;
+		right: 2px;
 		margin-right: 30px;
 		margin-top: -20px;
 		text-align: left;
@@ -148,12 +160,13 @@
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="$('#column_options_div').toggle()"></i>
 			<div id="column_options_div">
 				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
-				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();"> ID<br>
+				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();" checked> ID<br>
 				<? } ?>
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
+				<input type="checkbox" onclick="$('.metadatenlink-column').toggle(); $('#column_options_div').toggle();" checked> Metadatenlink<br>
 				<input type="checkbox" onclick="$('.dataowner_name-column').toggle(); $('#column_options_div').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
@@ -177,6 +190,7 @@
 						</select>
 					</th>
 					<th style="border-right:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
+					<th style="border-right:1px solid #C3C7C3" class="metadatenlink-column">Metadatenlink</th>
 					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
 				foreach ($this->groups as $group) {
