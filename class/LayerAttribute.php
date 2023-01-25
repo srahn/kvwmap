@@ -50,5 +50,12 @@ class LayerAttribute extends MyObject {
 		}
 		return false;
 	}
+
+	function get_generic_select($layer, $attr) {
+		return array(
+			'select' => $layer->get('schema') . '.' . $layer->get('maintable') . '.' . $attr['att_name'],
+			'from' => ''
+		);
+	}
 }
 ?>
