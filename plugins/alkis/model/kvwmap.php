@@ -234,7 +234,7 @@
 		}
   };
 
-	$GUI->zoomToALKGebaeude = function($Gemeinde,$Strasse,$StrName,$Hausnr,$border) use ($GUI){
+	$GUI->zoomToALKGebaeude = function($Gemeinde,$Strasse,$Hausnr,$border) use ($GUI){
     # 2006-01-31 pk
     # 1. Funktion ermittelt das umschließende Rechteck der mit $Gemeinde,$Strasse und $Hausnr übergebenen
     # Gebaeude aus der postgis Datenbank mit Rand entsprechend dem Faktor $border
@@ -269,7 +269,7 @@
 			if ($Hausnr!='') {
 				$Hausnr = str_replace(", ", ",", $Hausnr);
 				$Hausnr = strtolower(str_replace(",", "','", $Hausnr));
-				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('" . $Hausnr."')";
+				$datastring.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||l.hausnummer IN ('" . $Hausnr."')";
 			}
 			else{
 				$datastring.=" AND gem.schluesselgesamt = '" . $Gemeinde."'";
@@ -285,7 +285,8 @@
 	      $legendentext.="HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
 	    else{
-	    	$legendentext.=$StrName;
+				$ret = $GUI->pgdatabase->getStrNameByID($Gemeinde,$Strasse);
+	    	$legendentext .= $ret[1];
 	    }
 
 	    $dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
@@ -452,13 +453,6 @@
     if ($GemID!='-1') {
       $Adresse=new adresse($GemID,'','',$GUI->pgdatabase);
       $StrID=$GUI->formvars['StrID'];
-      $StrName=$GUI->formvars['StrName'];
-      if($StrName!='') {
-        $StrID=$Adresse->getStrIDfromName($GemID,$StrName);
-      }
-    	else{
-        $StrName=$Adresse->getStrNamefromID($GemID,$StrID);
-      }
       $Adresse->StrassenSchl=$StrID;
       $HausID=$GUI->formvars['selHausID'];
       $HausNr=$GUI->formvars['HausNr'];
@@ -471,7 +465,7 @@
       $Adresse->HausNr=$HausID;
       # $GUI->searchInExtent=$GUI->formvars['searchInExtent'];
       # Wenn keine Strasse angegeben ist zoom auf die ganze Gemeinde
-      if ($StrID<'1') {
+      if ($StrID == '0') {
         $GUI->loadMap('DataBase');
         $GUI->zoomToALKGemeinde($GemID,10);
         $currenttime=date('Y-m-d H:i:s',time());
@@ -483,7 +477,7 @@
         # StrassenID ist angegeben
         $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($GUI->formvars['ALK_Suche'] == 1){
-	        $ret = $GUI->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
+	        $ret = $GUI->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
 	        if($ret[0]){
 	        	$GUI->zoomToALKFlurst($FlurstKennz,100);
 	        }
@@ -503,7 +497,7 @@
 	        }
 	        else {
 	          # Karte laden, auf die Gebaeude zoomen, Karte Zeichnen und speichern für späteren gebrauch
-	          $GUI->zoomToALKGebaeude($GemID,$StrID,$StrName,$HausID,100);
+	          $GUI->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
 	          $currenttime=date('Y-m-d H:i:s',time());
 	          $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 	          $GUI->drawMap();
