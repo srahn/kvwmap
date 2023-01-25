@@ -531,7 +531,7 @@ FROM
 		}
 		else{
 			foreach($tablenames as $tablename){
-				$filter .= ' AND tsrange(' . $tablename . '.beginnt, ' . $tablename . '.endet) @> COALESCE(NULLIF(\'' . $timestamp . '\', \'\')::timestamp, localtimestamp) ';
+				$filter .= " AND tsrange(" . $tablename . ".beginnt, " . $tablename . ".endet) @> '" . $timestamp . "'::timestamp ";
 			}
 		}
 		return $filter;

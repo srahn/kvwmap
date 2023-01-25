@@ -273,7 +273,7 @@ class data_import_export {
 	}
 
 	function rename_reserved_attribute_names($schema, $table) {
-		$reserved_words = array('desc', 'number', 'end');
+		$reserved_words = array('desc', 'number', 'end', 'inner');
 		foreach ($reserved_words as $word) {
 			$sql .= "
 				SELECT rename_if_exists('" . $schema . "', '" . $table . "', '" . $word . "');";
