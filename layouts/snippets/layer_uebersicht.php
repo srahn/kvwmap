@@ -58,7 +58,7 @@
 						' . $GUI->layers['default_drawingorder'][$i] . '
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
-						<div style="width: 200px">
+						<div style="width: 300px">
 							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
 						</div>
 					</td>
@@ -68,7 +68,7 @@
 						</div>
 					</td>
 					<td valign="top" class="metadatenlink-column">
-						<div style="width: 200px;text-align: center">
+						<div style="width: 150px;text-align: center">
 							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . ($GUI->layers['metalink'][$i]? 'Metadaten' : '') . '</a>
 						</div>
 					</td>					
@@ -162,7 +162,7 @@
 				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
 				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();" checked> ID<br>
 				<? } ?>
-				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
+				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Thema<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
@@ -176,7 +176,7 @@
 			<table width="100%" border="0" style="border:2px solid #C3C7C3"cellspacing="0" cellpadding="3">
 				<tr>
 					<th style="border-right:1px solid #C3C7C3" class="id-column">ID</th>
-					<th style="border-right:1px solid #C3C7C3" class="layer-column">Layer</th>
+					<th style="border-right:1px solid #C3C7C3" class="layer-column">Thema</th>
 					<th style="border-right:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3" class="wms_keywordlist-column">
 						Stichworte&nbsp;
