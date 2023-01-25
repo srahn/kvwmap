@@ -1228,7 +1228,7 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				wfs_geom, write_mapserver_templates, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -2134,9 +2134,18 @@ class pgdatabase {
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = "
+			SET client_min_messages='log';
+			SET log_min_messages='fatal';
+			SET debug_print_parse=true;" . 
+			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
-
+		$sql = "
+			SET debug_print_parse = false;
+			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';";
+		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		if ($ret['success']) {
 			$query_plan = $error_list[0];

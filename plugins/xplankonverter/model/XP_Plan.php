@@ -19,7 +19,14 @@ class XP_Plan extends PgObject {
 		$this->select = $select;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
+		$this->identifiers = array(
+			array(
+				'column' => 'gml_id',
+				'type' => 'character varying'
+			)
+		);
 		$this->debug->show('Objekt XP_Plan created with planart: ' . $this->planart . ' tableName: ' . $this->tableName, false);
+		$this->geom_column = 'raeumlichergeltungsbereich';
 	}
 
 	public static	function find_by_id($gui, $by, $id, $planart) {
@@ -36,6 +43,37 @@ class XP_Plan extends PgObject {
 
 	function get_anzeige_name() {
 		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+	}
+
+	/**
+		Return names of layer that have content from the plan
+	*/
+	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
+		$layers_with_content = array();
+		foreach ($xplan_layers AS $xplan_layer) {
+			$sql = "
+				SELECT
+					'" . $xplan_layer['Name'] . "',
+					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+				FROM
+					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
+				WHERE
+					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
+			";
+			#echo '<br>' . $sql;
+			$ret = $this->database->execSQL($sql, 4, 0);
+			$content = pg_fetch_array($ret[1]);
+			if (
+				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
+			) {
+				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
+			}
+		}
+		return $layers_with_content;
 	}
 
 	/*
@@ -64,9 +102,9 @@ class XP_Plan extends PgObject {
 	function get_planart_table() {
 		switch ($this->planart) {
 			case ('BP-Plan') : { $table_name = 'enum_bp_planart'; $value_attribute = 'wert'; $name_attribute = 'abkuerzung'; } break;
-			case ('FP-Plan') : { $table_name = 'enum_fp_planart'; $value_attribute= 'wert'; $name_attribute = 'abkuerzung'; } break;
-			case ('SO-Plan') : { $table_name = 'so_planart'; $value_attribute= 'id'; $name_attribute = 'value'; } break;
-			case ('RP-Plan') : { $table_name = 'enum_rp_art'; $value_attribute= 'wert'; $name_attribute = 'beschreibung'; } break;
+			case ('FP-Plan') : { $table_name = 'enum_fp_planart'; $value_attribute = 'wert'; $name_attribute = 'abkuerzung'; } break;
+			case ('SO-Plan') : { $table_name = 'so_planart'; $value_attribute = 'id'; $name_attribute = 'value'; } break;
+			case ('RP-Plan') : { $table_name = 'enum_rp_art'; $value_attribute = 'wert'; $name_attribute = 'beschreibung'; } break;
 		}
 		return array(
 			'table_name' => $table_name,

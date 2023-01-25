@@ -1331,7 +1331,9 @@ echo '			</table>
 										}
 									}
 									else{		# Punktlayer
-										if($style->size > 14)$style->set('size', 14);
+										if($style->size > 14 OR $style->size == -1){
+											$style->set('size', 14);
+										}
 										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
@@ -1639,6 +1641,7 @@ echo '			</table>
 			- nurAufgeklappteLayer
 			- nurFremdeLayer
 			- nurNameLike
+			- class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
 	*/
   function loadMap($loadMapSource) {
 		$this->group_has_active_layers = array();
@@ -1818,14 +1821,14 @@ echo '			</table>
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
 					$map->set('debug', MS_DEBUG_LEVEL);
 				};
-        $map->imagecolor->setRGB(255,255,255);
-        $map->maxsize = 4096;
-        $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
+				$map->imagecolor->setRGB(255,255,255);
+				$map->maxsize = 4096;
+				$map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
 
-				$bb=$this->Stelle->MaxGeorefExt;
+				$bb = $this->Stelle->MaxGeorefExt;
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
-				if($this->user->rolle->oGeorefExt->minx==='') {
+				if ($this->user->rolle->oGeorefExt->minx==='') {
 				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
@@ -1841,85 +1844,46 @@ echo '			</table>
 					if (value_of($this->formvars, 'go') != 'OWS') {
 						$map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 					}
-					else{
+					else {
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
 
-        # OWS Metadaten
-
-        if($this->Stelle->ows_title != ''){
-          $map->setMetaData("ows_title",$this->Stelle->ows_title);}
-        else{
-          $map->setMetaData("ows_title",OWS_TITLE);
-        }
-        if($this->Stelle->ows_abstract != ''){
-          $map->setMetaData("ows_abstract", $this->Stelle->ows_abstract);}
-        else{
-          $map->setMetaData("ows_abstract", OWS_ABSTRACT);
-        }
-        if($this->Stelle->wms_accessconstraints != ''){
-          $map->setMetaData("ows_accessconstraints",$this->Stelle->wms_accessconstraints);}
-        else{
-          $map->setMetaData("ows_accessconstraints",OWS_ACCESSCONSTRAINTS);
-        }
-        if($this->Stelle->ows_contactperson != ''){
-          $map->setMetaData("ows_contactperson",$this->Stelle->ows_contactperson);}
-        else{
-          $map->setMetaData("ows_contactperson",OWS_CONTACTPERSON);
-        }
-        if($this->Stelle->ows_contactorganization != ''){
-          $map->setMetaData("ows_contactorganization",$this->Stelle->ows_contactorganization);}
-        else{
-          $map->setMetaData("ows_contactorganization",OWS_CONTACTORGANIZATION);
-        }
-        if($this->Stelle->ows_contactelectronicmailaddress != ''){
-          $map->setMetaData("ows_contactelectronicmailaddress",$this->Stelle->ows_contactelectronicmailaddress);}
-        else{
-          $map->setMetaData("ows_contactelectronicmailaddress",OWS_CONTACTELECTRONICMAILADDRESS);
-        }
-        if($this->Stelle->ows_contactposition != ''){
-          $map->setMetaData("ows_contactposition",$this->Stelle->ows_contactposition);}
-        else{
-          $map->setMetaData("ows_contactposition",OWS_CONTACTPOSITION);
-        }
-
+				# OWS Metadaten
+				$map->setMetaData("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
+				$map->setMetaData("ows_abstract", $this->Stelle->ows_abstract ?: OWS_ABSTRACT);
+				$map->setMetaData("ows_accessconstraints", $this->Stelle->wms_accessconstraints ?: OWS_ACCESSCONSTRAINTS);
+				$map->setMetaData("ows_contactorganization", $this->Stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+				$map->setMetaData("ows_contactperson", $this->Stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+				$map->setMetaData("ows_contactposition", $this->Stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+				$map->setMetaData("ows_contactelectronicmailaddress", $this->Stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+				$map->setMetaData("ows_contactvoicetelephone", $this->Stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+				$map->setMetaData("ows_contactfacsimiletelephone", $this->Stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+				$map->setMetaData("ows_stateorprovince", $this->Stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+				$map->setMetaData("ows_address", $this->Stelle->ows_contactaddress ?: OWS_ADDRESS);
+				$map->setMetaData("ows_postcode", $this->Stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+				$map->setMetaData("ows_city", $this->Stelle->ows_contactcity ?: OWS_CITY);
+				$map->setMetaData("ows_country", OWS_COUNTRY);
+				$map->setMetaData("ows_addresstype", 'postal');
+				$map->setMetaData("ows_fees", $this->Stelle->ows_fees ?: OWS_FEES);
 				$map->setMetaData("ows_encoding", 'UTF-8');
 				$map->setMetaData("ows_keywordlist", OWS_KEYWORDLIST);
-				$map->setMetaData("ows_contactvoicetelephone", OWS_CONTACTVOICETELEPHONE);
-				$map->setMetaData("ows_contactfacsimiletelephone", OWS_CONTACTFACSIMILETELEPHONE);
-				$map->setMetaData("ows_addresstype", 'postal');
-				$map->setMetaData("ows_address", OWS_ADDRESS);
-				$map->setMetaData("ows_city", OWS_CITY);
-				$map->setMetaData("ows_stateorprovince", OWS_STATEORPROVINCE);
-				$map->setMetaData("ows_postcode", OWS_POSTCODE);
-				$map->setMetaData("ows_country", OWS_COUNTRY);
 				$map->setMetaData("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
 				$map->setMetaData("ows_hoursofservice", OWS_HOURSOFSERVICE);
 				$map->setMetaData("ows_role", OWS_ROLE);
-
-        if($this->Stelle->ows_fees != ''){
-          $map->setMetaData("ows_fees",$this->Stelle->ows_fees);}
-        else{
-          $map->setMetaData("ows_fees",OWS_FEES);
-        }
-        if($this->Stelle->ows_srs != ''){
-          $map->setMetaData("ows_srs",$this->Stelle->ows_srs);}
-        else{
-          $map->setMetaData("ows_srs",OWS_SRS);
-        }
+				$map->setMetaData("ows_srs", $this->Stelle->ows_srs ?: OWS_SRS);
 				if (value_of($_REQUEST, 'onlineresource') != '') {
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
 					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
 				}
-        $map->setMetaData("ows_onlineresource", $ows_onlineresource);
+				$map->setMetaData("ows_onlineresource", $ows_onlineresource);
 				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 
-        $map->setMetaData("wms_extent",$bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+				$map->setMetaData("wms_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				// enable service types
-        $map->setMetaData("ows_enable_request", '*');
+				$map->setMetaData("ows_enable_request", '*');
 
         ///------------------------------////
 
@@ -1932,7 +1896,7 @@ echo '			</table>
         # Webobject
         $map->web->set('imagepath', IMAGEPATH);
         $map->web->set('imageurl', IMAGEURL);
-        $map->web->set('log', LOGPATH.'mapserver.log');
+        $map->web->set('log', LOGPATH . 'mapserver.log');
         $map->setMetaData('wms_feature_info_mime_type',  'text/html');
         //$map->web->set('ERRORFILE', LOGPATH.'mapserver_error.log');
 
@@ -1998,7 +1962,7 @@ echo '			</table>
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
-        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
         $rollenlayer = $mapDB->read_RollenLayer();
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
@@ -2014,12 +1978,13 @@ echo '			</table>
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if(value_of($layerset['list'][$i], 'requires') != ''){
+					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
-					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
+						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$this->loadlayer($map, $layerset['list'][$i]);
           }
@@ -2040,11 +2005,13 @@ echo '			</table>
   }
 
 	function loadlayer($map, $layerset) {
+		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
+		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
+		$layer->setMetaData('wms_name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
 		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
-		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		if ($layerset['wms_keywordlist']) {
 			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
@@ -2077,8 +2044,6 @@ echo '			</table>
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
 		$layer->set('group',$layerset['Gruppenname']);
-
-		$layer->set('name', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name']));
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -2909,6 +2874,28 @@ echo '			</table>
 		}
   }
 
+	function get_web_header_template($title) {
+		$html = "<!-- MapServer Template -->
+<html lang=\"de\">
+  <head>
+    <title>" . $title . "</title>
+    <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">
+  </head>
+";
+		return $html;
+	}
+
+	function save_web_header_template() {
+		$template_dir = WMS_MAPFILE_PATH . 'templates/';
+		if (!is_dir($template_dir)) {
+			mkdir($template_dir, 0770, true);
+		}
+
+		$fp = fopen($template_dir . 'header.html', "w");
+		fwrite($fp, $this->get_web_header_template($this->Stelle->ows_title ?: OWS_TITLE));
+		fclose($fp);
+	}
+
   # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
   function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
@@ -3191,6 +3178,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$results = ($this->notification->delete())[0];
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();
@@ -3273,7 +3261,7 @@ echo '			</table>
 						include($guifile);
 					}
 				}
-				if($this->alert != ''){
+				if ($this->alert != '') {
 					echo '<script type="text/javascript">alert("'.$this->alert.'");</script>';			# manchmal machen alert-Ausgaben über die allgemeinde Funktioen showAlert Probleme, deswegen am besten erst hier am Ende ausgeben
 				}
 				if (!empty(GUI::$messages)) {
@@ -3282,10 +3270,10 @@ echo '			</table>
       } break;
 			case 'map_ajax' : {
 				$this->debug->write("Include <b>".LAYOUTPATH."snippets/map_ajax.php</b> in kvwmap.php function output()",4);
-				include (LAYOUTPATH.'snippets/map_ajax.php');
+				include (LAYOUTPATH . 'snippets/map_ajax.php');
 			} break;
 			case 'pdf' : {
-				$this->formvars['file']=1;
+				$this->formvars['file'] = 1;
 				if ($this->formvars['file']) {
 					header("Content-type: application/pdf");
 					header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
@@ -3301,7 +3289,12 @@ echo '			</table>
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
-					$this->formatter = new formatter($this->qlayersetParamStrip(), $this->formvars['format'], $this->formvars['content_type'], $this->formvars['callback']);
+					$this->formatter = new formatter(
+						($this->formvars['format'] == 'json_result' ? $this->data : $this->qlayersetParamStrip()),
+						$this->formvars['format'],
+						$this->formvars['content_type'],
+						$this->formvars['callback']
+					);
 					echo utf8_encode($this->formatter->output());
 				}
 			}
@@ -8371,6 +8364,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$mapDB->save_attributes($this->formvars['selected_layer_id'], $attributes);
 			}
 
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+			if ($layer->get('write_mapserver_templates')) {
+				$layer->write_mapserver_templates($mapDB, 'Formular');
+			}
+
 			# Klassen übernehmen (aber als neue Klassen anlegen)
 			if ($this->formvars['old_id'] != ''){
 				$classes = $mapDB->read_Classes($this->formvars['old_id']);
@@ -8421,6 +8420,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$formvars['selected_layer_id'],
 							$formvars['sync']
 						);
+					}
+					include_once(CLASSPATH . 'Layer.php');
+					$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+					if ($layer->get('write_mapserver_templates')) {
+						$layer->write_mapserver_templates($mapDB);
+					}
+					else {
+						$layer->remove_mapserver_templates();
 					}
 				}
 				if ($formvars['pfad'] == '' OR $attributes != NULL){
@@ -8537,8 +8544,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function LayerLoeschen($delete_maintable = false){
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteLayer($this->formvars['selected_layer_id'], $delete_maintable);
+
 		# auch die Klassen löschen
 		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){
@@ -8579,6 +8587,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->titel='Layerdaten';
 		$this->main='layerdaten.php';
 		$this->output();
+	}
+
+	function get_generic_layer_data_sql() {
+		if ($this->formvars['selected_layer_id'] == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+			);
+		}
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		if ($layer->get('Layer_ID') == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Layer mit id: ' . $this->formvars['selected_layer_id'] . ' nicht gefunden.'
+			);
+		}
+		$zusatz = array(
+			array(
+				'select' => 'xplankonverter.konvertierungen.bezeichnung AS planname',
+				'from' => 'JOIN xplankonverter.konvertierungen ON ' . $layer->get('schema') . '.' . $layer->get('maintable') . '.konvertierung_id = xplankonverter.konvertierungen.id'
+			)
+		);
+		return $layer->get_generic_data_sql($zusatz);
 	}
 
 	function Layergruppen_Anzeigen() {
@@ -9823,7 +9855,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -11487,13 +11519,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 								$file_number++;
 							}
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11501,12 +11533,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id = NULL) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $chosen_layer_id = NULL) {
 		sanitize($filename, 'text');
 		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('chosen_layer_id' => $chosen_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -13140,7 +13172,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$ret = $this->user->checkUserDaten($this->formvars);
 		if ($ret[0]) {
 			# Fehler bei der Formulareingabe
-			$this->Meldung = $ret[1];
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
 		}
 		else {
 			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
@@ -14169,7 +14201,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$_FILES[$fieldnames[0]] = $_FILES['uploadfile'];
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['tablename'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
+					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['table_name'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
 					$this->formvars[$fieldname] = $this->qlayerset[0]['shape'][0][$attributes['name'][$i]];
 					$fieldnames[] = $fieldname;
 				}
@@ -17420,7 +17452,7 @@ class db_mapObj{
 			);
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
-				$select = str_replace($database->schema.'.', '', $select);
+				$select = str_replace($database->schema . '.', '', $select);
 			}
 			$ret = $database->getFieldsfromSelect($select);
 			if ($ret[0]) {
@@ -17985,7 +18017,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
@@ -18200,6 +18232,10 @@ class db_mapObj{
 	function deleteLayer($id, $delete_maintable = false) {
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find_by_id($this->GUI, $id);
+
+		if ($layer->get('write_mapserver_templates')) {
+			$layer->remove_mapserver_templates($mapDB);
+		}
 
 		if (
 			$delete_maintable AND
@@ -18551,7 +18587,8 @@ class db_mapObj{
 			array(
 				'drawingorder',
 				'sync',
-				'listed'
+				'listed',
+				'write_mapserver_templates'
 			) AS $key
 		) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
@@ -18727,6 +18764,7 @@ class db_mapObj{
 					`wms_auth_username`,
 					`wms_auth_password`,
 					`wfs_geom`,
+					`write_mapserver_templates`,
 					`selectiontype`,
 					`querymap`,
 					`processing`,
@@ -18802,6 +18840,7 @@ class db_mapObj{
 					" . quote($formvars['wms_auth_username']) . ",
 					" . quote($formvars['wms_auth_password']) . ",
 					" . quote($formvars['wfs_geom']) . ",
+					" . quote(($formvars['write_mapserver_templates'] == '' ? '0' : $formvars['write_mapserver_templates']), 'text') . ",
 					" . quote($formvars['selectiontype']) . ", -- selectiontype
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
@@ -19477,7 +19516,9 @@ class db_mapObj{
 				l.Gruppe,
 				l.Datentyp,
 				l.connectiontype,
+				l.metalink,
 				l.kurzbeschreibung,
+				l.wms_keywordlist,
 				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
@@ -19506,6 +19547,8 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
+			'metalink' => array(),
+			'wms_keywordlist' => array(),
 			'datasource' => array(),
 			'dataowner_name' => array(),
 			'dataowner_email' => array(),
@@ -19526,6 +19569,8 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['metalink'][] = $rs['metalink'];
+			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];
@@ -20036,39 +20081,40 @@ class db_mapObj{
 		return $this->db->mysqli->insert_id;
 	}
 
-  function delete_Class($class_id){
-    $sql = "
-			DELETE 
-				c, rc 
+	function delete_Class($class_id) {
+		$sql = "
+			DELETE
+				c, rc
 			FROM
-				classes c JOIN 
+				classes c LEFT JOIN
 				u_rolle2used_class rc ON c.Class_ID = rc.class_id
 			WHERE 
-				c.Class_ID = " . $class_id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+				c.Class_ID = " . $class_id . "
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__; return 0; }
 
-    # Einträge in u_styles2classes und evtl. die Styles mitlöschen
-    $styles = $this->read_Styles($class_id);
-    for($i = 0; $i < count($styles); $i++){
-    	$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
-      $other_classes = $this->get_classes2style($styles[$i]['style_id']);
-      if($other_classes == NULL){
-      	$this->delete_Style($styles[$i]['style_id']);
-      }
-    }
-    # Einträge in u_labels2classes und evtl. die Labels mitlöschen
-    $labels = $this->read_Label($class_id);
-    for($i = 0; $i < count($labels); $i++){
-    	$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
-    	$other_classes = $this->get_classes2label($labels[$i]['label_id']);
-    	if($other_classes == NULL){
-      	$this->delete_Label($labels[$i]['label_id']);
-    	}
-    }
-  }
+		# Einträge in u_styles2classes und evtl. die Styles mitlöschen
+		$styles = $this->read_Styles($class_id);
+		for ($i = 0; $i < count($styles); $i++){
+			$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
+			$other_classes = $this->get_classes2style($styles[$i]['style_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Style($styles[$i]['style_id']);
+			}
+		}
+		# Einträge in u_labels2classes und evtl. die Labels mitlöschen
+		$labels = $this->read_Label($class_id);
+		for ($i = 0; $i < count($labels); $i++){
+			$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
+			$other_classes = $this->get_classes2label($labels[$i]['label_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Label($labels[$i]['label_id']);
+			}
+		}
+	}
 
 	function update_Class($attrib) {
 		global $supportedLanguages;

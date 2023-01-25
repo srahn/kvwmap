@@ -142,7 +142,6 @@ define('CASE_COMPRESS', false);
 #											- zoomToMaxLayerExtent() reinkopieren																								#
 #											- getlayerdatabase() reinkopieren																										#
 #											- read_layer_attributes() reinkopieren																							#
-#											- check_oid() reinkopieren																													#
 #											- getFilter() reinkopieren																													#
 #											- setFullExtent() reinkopieren																											#
 #											- setPrevMapExtent()																																#
@@ -613,6 +612,16 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			case 'get_generic_layer_data_sql' : {
+				if ($GUI->user->id != 2) {
+					$GUI->checkCaseAllowed($go);
+				}
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql();
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result));
+			} break;
+
 			case 'exportWMC' :{
 				$GUI->exportWMC();
 			} break;
@@ -625,7 +634,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Externer_Druck_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1106,7 +1115,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['selected_layer_id']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['chosen_layer_id']);
 			} break;
 
 			case 'Daten_Export' : {

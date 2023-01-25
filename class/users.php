@@ -1278,7 +1278,7 @@ class user {
 		return $ret;
 	}
 
-	function loginname_exists($login) {
+	function loginname_exists($login, $id = NULL) {
 		$Meldung='';
 		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
 		$sql ="
@@ -1289,6 +1289,10 @@ class user {
 			WHERE
 				login_name = '" . $login . "'
 		";
+		if ($id != NULL) {
+			$sql.= "
+				AND ID != " . $id;
+		}
 		$this->database->execSQL($sql,4, 0);
 		if (!$this->database->success) {
 			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
@@ -1317,8 +1321,8 @@ class user {
 		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
 		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
-		elseif ($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
-			$ret = $this->loginname_exists($userdaten['loginname']);
+		else {
+			$ret=$this->loginname_exists($userdaten['loginname'], $userdaten['id']);
 			if ($ret[1] == 1) {
 				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
