@@ -19233,6 +19233,7 @@ class db_mapObj{
 				l.Gruppe,
 				l.Datentyp,
 				l.connectiontype,
+				l.metalink,
 				l.kurzbeschreibung,
 				l.wms_keywordlist,
 				l.datasource,
