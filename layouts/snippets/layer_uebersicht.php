@@ -68,8 +68,8 @@
 						</div>
 					</td>
 					<td valign="top" class="metadatenlink-column">
-						<div style="width: 200px">
-							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . $GUI->layers['metalink'][$i] . '</a>
+						<div style="width: 200px;text-align: center">
+							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . ($GUI->layers['metalink'][$i]? 'Metadaten' : '') . '</a>
 						</div>
 					</td>					
 					<td class="dataowner_name-column">
