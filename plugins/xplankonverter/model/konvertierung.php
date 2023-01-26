@@ -1075,7 +1075,9 @@ class Konvertierung extends PgObject {
 		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get($this->identifier));
 
 		# Lösche vorhandene Datenobjekte der Konvertierung
-		foreach($this->get_class_names() AS $class_name) {
+		# Überspringe leere Class-Names bei fehlerhaften Regeln
+		$class_names = array_filter($this->get_class_names(), 'strlen');
+		foreach($class_names AS $class_name) {
 			# Lösche Relationen
 			$sql = "
 				DELETE FROM
