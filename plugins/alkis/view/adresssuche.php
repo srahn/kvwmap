@@ -46,7 +46,7 @@
 	flex-flow: row nowrap;
 }
 .form_formular-input-selector {
-	<?	if($this->FormObject["selectedHausNr"]->html != ''){ ?>margin: 0px 0px 250px 0px;<? } ?>
+	<?	if($this->FormObject["selectedHausNr"]->html != ''){ ?>margin: 0px 0px 280px 0px;<? } ?>
 }
 .ads_suche_form span {
 	text-align: left;

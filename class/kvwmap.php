@@ -3178,6 +3178,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$results = ($this->notification->delete())[0];
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();
@@ -8588,6 +8589,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->output();
 	}
 
+	function get_generic_layer_data_sql() {
+		if ($this->formvars['selected_layer_id'] == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+			);
+		}
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		if ($layer->get('Layer_ID') == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Layer mit id: ' . $this->formvars['selected_layer_id'] . ' nicht gefunden.'
+			);
+		}
+		$zusatz = array(
+			array(
+				'select' => 'xplankonverter.konvertierungen.bezeichnung AS planname',
+				'from' => 'JOIN xplankonverter.konvertierungen ON ' . $layer->get('schema') . '.' . $layer->get('maintable') . '.konvertierung_id = xplankonverter.konvertierungen.id'
+			)
+		);
+		return $layer->get_generic_data_sql($zusatz);
+	}
+
 	function Layergruppen_Anzeigen() {
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppen = LayerGroup::find(
@@ -9830,7 +9855,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -11494,13 +11519,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 								$file_number++;
 							}
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11508,12 +11533,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id = NULL) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $chosen_layer_id = NULL) {
 		sanitize($filename, 'text');
 		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('chosen_layer_id' => $chosen_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -13147,7 +13172,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$ret = $this->user->checkUserDaten($this->formvars);
 		if ($ret[0]) {
 			# Fehler bei der Formulareingabe
-			$this->Meldung = $ret[1];
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
 		}
 		else {
 			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
@@ -14176,7 +14201,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$_FILES[$fieldnames[0]] = $_FILES['uploadfile'];
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['tablename'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
+					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['table_name'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
 					$this->formvars[$fieldname] = $this->qlayerset[0]['shape'][0][$attributes['name'][$i]];
 					$fieldnames[] = $fieldname;
 				}
@@ -19491,6 +19516,7 @@ class db_mapObj{
 				l.Gruppe,
 				l.Datentyp,
 				l.connectiontype,
+				l.metalink,
 				l.kurzbeschreibung,
 				l.wms_keywordlist,
 				l.datasource,
@@ -19521,6 +19547,7 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
+			'metalink' => array(),
 			'wms_keywordlist' => array(),
 			'datasource' => array(),
 			'dataowner_name' => array(),
@@ -19542,6 +19569,7 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['metalink'][] = $rs['metalink'];
 			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
@@ -20053,39 +20081,40 @@ class db_mapObj{
 		return $this->db->mysqli->insert_id;
 	}
 
-  function delete_Class($class_id){
-    $sql = "
-			DELETE 
-				c, rc 
+	function delete_Class($class_id) {
+		$sql = "
+			DELETE
+				c, rc
 			FROM
-				classes c JOIN 
+				classes c LEFT JOIN
 				u_rolle2used_class rc ON c.Class_ID = rc.class_id
 			WHERE 
-				c.Class_ID = " . $class_id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+				c.Class_ID = " . $class_id . "
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__; return 0; }
 
-    # Einträge in u_styles2classes und evtl. die Styles mitlöschen
-    $styles = $this->read_Styles($class_id);
-    for($i = 0; $i < count($styles); $i++){
-    	$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
-      $other_classes = $this->get_classes2style($styles[$i]['style_id']);
-      if($other_classes == NULL){
-      	$this->delete_Style($styles[$i]['style_id']);
-      }
-    }
-    # Einträge in u_labels2classes und evtl. die Labels mitlöschen
-    $labels = $this->read_Label($class_id);
-    for($i = 0; $i < count($labels); $i++){
-    	$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
-    	$other_classes = $this->get_classes2label($labels[$i]['label_id']);
-    	if($other_classes == NULL){
-      	$this->delete_Label($labels[$i]['label_id']);
-    	}
-    }
-  }
+		# Einträge in u_styles2classes und evtl. die Styles mitlöschen
+		$styles = $this->read_Styles($class_id);
+		for ($i = 0; $i < count($styles); $i++){
+			$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
+			$other_classes = $this->get_classes2style($styles[$i]['style_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Style($styles[$i]['style_id']);
+			}
+		}
+		# Einträge in u_labels2classes und evtl. die Labels mitlöschen
+		$labels = $this->read_Label($class_id);
+		for ($i = 0; $i < count($labels); $i++){
+			$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
+			$other_classes = $this->get_classes2label($labels[$i]['label_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Label($labels[$i]['label_id']);
+			}
+		}
+	}
 
 	function update_Class($attrib) {
 		global $supportedLanguages;

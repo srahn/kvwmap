@@ -9,6 +9,7 @@
 		}
 	}
 	$this->keywords = array_unique($this->keywords);
+	sort($this->keywords);
 	
 	$this->outputGroup = function($group, $indent = 0) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
@@ -33,7 +34,7 @@
 					<td bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett id-column">
 						<div style="margin-left: ' . $indent . 'px;"><a href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $group['id'] . '</a></div>
 					</td>
-					<td colspan="4" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
+					<td colspan="5" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
 							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $group['Gruppenname'] . '
 						</div>
@@ -41,15 +42,13 @@
 				</tr>
 			';			
 		}
-		if ($output_layers != '' OR $output_groups) {
-			return ['output' => $output.$output_groups.$output_layers, 'keywords' => $group_keywords];
-		}
+		return ['output' => $output.$output_groups.$output_layers, 'keywords' => $group_keywords];
 	};
 
 	$this->outputLayer = function($i, $indent = 0) use ($GUI) {
-		$keywords = explode(',', $GUI->layers['wms_keywordlist'][$i]);
+		$keywords = explode(',', str_replace(' ', '_', $GUI->layers['wms_keywordlist'][$i]));
 		$output = '
-				<tr class="layer_tr ' . str_replace(',', ' ', $GUI->layers['wms_keywordlist'][$i]) . '">
+				<tr class="layer_tr ' . implode(' ', $keywords) . '">
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="id-column">
 						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
@@ -60,7 +59,7 @@
 						' . $GUI->layers['default_drawingorder'][$i] . '
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
-						<div style="width: 400px">
+						<div style="width: 300px">
 							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
 						</div>
 					</td>
@@ -69,6 +68,11 @@
 							' . htmlentities($GUI->layers['Kurzbeschreibung'][$i]) . '
 						</div>
 					</td>
+					<td valign="top" class="metadatenlink-column">
+						<div style="width: 150px;text-align: center">
+							<a href="' . $GUI->layers['metalink'][$i] . '" target="_blank">' . ($GUI->layers['metalink'][$i]? 'Metadaten' : '') . '</a>
+						</div>
+					</td>					
 					<td class="dataowner_name-column">
 						<div style="width: 200px" valign="top">
 							' . $GUI->layers['dataowner_name'][$i] . '
@@ -108,7 +112,13 @@
 		width: 100%
 	}
 
-	.id-column, .default_drawingorder-column {
+<? if (!$this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
+	.id-column {
+		display: none;
+	}
+<? } ?>
+
+	.default_drawingorder-column {
 		display: none;
 	}
 	
@@ -132,8 +142,9 @@
 	}
 
 	#column_options_div {
+		position: absolute;
 		display: none;
-		float: right;
+		right: 2px;
 		margin-right: 30px;
 		margin-top: -20px;
 		text-align: left;
@@ -149,11 +160,14 @@
 			<h2><?php echo $this->titel; ?></h2>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="$('#column_options_div').toggle()"></i>
 			<div id="column_options_div">
-				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();"> ID<br>
-				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Layer<br>
+				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>
+				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();" checked> ID<br>
+				<? } ?>
+				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Thema<br>
 				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
+				<input type="checkbox" onclick="$('.metadatenlink-column').toggle(); $('#column_options_div').toggle();" checked> Metadatenlink<br>
 				<input type="checkbox" onclick="$('.dataowner_name-column').toggle(); $('#column_options_div').toggle();" checked> <? echo $strDataOwnerName; ?>
 			</div>
 		</td>
@@ -163,7 +177,7 @@
 			<table width="100%" border="0" style="border:2px solid #C3C7C3"cellspacing="0" cellpadding="3">
 				<tr>
 					<th style="border-right:1px solid #C3C7C3" class="id-column">ID</th>
-					<th style="border-right:1px solid #C3C7C3" class="layer-column">Layer</th>
+					<th style="border-right:1px solid #C3C7C3" class="layer-column">Thema</th>
 					<th style="border-right:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3" class="wms_keywordlist-column">
 						Stichworte&nbsp;
@@ -171,12 +185,13 @@
 							<option value="">alle</option>
 							<?
 								foreach($this->keywords as $keyword){
-									echo '<option value="' . $keyword . '">' . $keyword . '</option>';
+									echo '<option value="' . str_replace(' ', '_', $keyword) . '">' . $keyword . '</option>';
 								}
 							?>
 						</select>
 					</th>
 					<th style="border-right:1px solid #C3C7C3" class="kurzbeschreibung-column">Kurzbeschreibung</th>
+					<th style="border-right:1px solid #C3C7C3" class="metadatenlink-column">Metadatenlink</th>
 					<th class="dataowner_name-column"><? echo $strDataOwnerName; ?></th>
 				</tr><?
 				foreach ($this->groups as $group) {

@@ -16,11 +16,9 @@
 
 	<div title="<?php echo $this->strSettings; ?>">
 		<i class="fa fa-user header-button" aria-hidden="true" onclick="
-		if ($('#user_options').is(':visible')) {
 			$('#user_options').toggle();
 			$('#sperr_div').toggle();
-		}
-	"></i>
+		"></i>
 		<div id="user_options" class="user-options">
 			<div class="user-options-header">
 				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>
@@ -60,7 +58,7 @@
 			function delete_user2notification(notification_id) {
 				let formData = new FormData();
 				formData.append('go', 'delete_user2notification');
-				formData.append('notification_box_id', notification_id);
+				formData.append('notification_id', notification_id);
 				formData.append('csrf_token', '<? echo $_SESSION['csrf_token']; ?>')
 				let response = fetch('index.php', {
 				  method: 'POST',
