@@ -856,7 +856,7 @@ function go_switch_xplankonverter($go) {
 					$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
 				}
 			}
-
+			$GUI->output();
 
 		} break;
 
