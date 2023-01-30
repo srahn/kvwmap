@@ -1304,97 +1304,71 @@ FROM
 				$sql = "
 					SELECT 
 						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						1=1" . 
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
-						($FlstID != ''? " AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')" : '') .
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" . 
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurstueckskennzeichen";
 			}break;
 			case 'historisch' : {
 				$sql = "
-					SELECT distinct 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+					SELECT 
+						flurstueckskennzeichen,
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_flurstueck
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
-						AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) 
-						AND (NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) OR zeigtaufneuesflurstueck IS NULL) 
-						AND ax_flurstueck.endet IS NOT NULL 
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
+					GROUP BY 
+						flurstueckskennzeichen
+					HAVING 
+						bool_and(endet IS NOT NULL)
 					UNION 
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						hf.flurstueckskennzeichen,
+						ltrim(substring(hf.flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(hf.flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
 					ORDER BY 
-						flurstkennz";
+						flurstueckskennzeichen;";
 			}break;
 			case 'beides' : {
 				$sql = "
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						flurstueckskennzeichen,
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						1=1" . 
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
-						($FlstID != ''? " AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')" : '') .
-						$this->build_temporal_filter(array('ax_flurstueck')) . "
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
 					UNION
-					SELECT distinct 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
-					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
-					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
-						AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) 
-						AND (NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) OR zeigtaufneuesflurstueck IS NULL) 
-						AND ax_flurstueck.endet IS NOT NULL 
-					UNION 
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						hf.flurstueckskennzeichen,
+						ltrim(substring(hf.flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(hf.flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
 					ORDER BY 
-						flurstkennz";
+						flurstueckskennzeichen";
 			}
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_assoc($queryret[1])) {
-      $Liste['FlstID'][]=$rs['flurstkennz'];
+      $Liste['FlstID'][]=$rs['flurstueckskennzeichen'];
       $FlstNr=intval($rs['zaehler']);
       if ($rs['nenner']!='') { $FlstNr.="/".intval($rs['nenner']); }
       $Liste['FlstNr'][]=$FlstNr;
@@ -2259,91 +2233,72 @@ FROM
 			case 'aktuell' : {	
 				$sql = "
 					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID 
 					FROM 
 						alkis.ax_flurstueck 
 					WHERE 
-						1=1 " .
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
-						flurnummer";
+						FlurID";
 			}break;
 			case 'historisch' : {
 				// die Fluren aller historischen Flurstücke abfragen
 				$sql = "
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+					SELECT 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_flurstueck
 					WHERE 
-						1=1 AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' 
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'
+					GROUP BY 
+						flurstueckskennzeichen
+					HAVING 
+						bool_and(endet IS NOT NULL)
 					UNION 
 					SELECT 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						ax_flurstueck.endet is NOT NULL AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' AND
-						flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) AND
-						NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . "%'
 					ORDER BY 
-						flurnummer";
+						FlurID;";						
 			}break;
 			case 'beides' : {
 				$sql = "
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
-					FROM 
-						alkis.ax_flurstueck 
-					WHERE 
-						1=1 " .
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
-						$this->build_temporal_filter(array('ax_flurstueck')) . "
-					UNION
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
-					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
-					WHERE 
-						1=1 AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' 
-					UNION 
 					SELECT 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_flurstueck
 					WHERE 
-						ax_flurstueck.endet is NOT NULL AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' AND
-						flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) AND
-						NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) 
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+					UNION
+					SELECT 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
+					FROM 
+						alkis.ax_historischesflurstueckohneraumbezug hf
+					WHERE 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . "%'
 					ORDER BY 
-						flurnummer";
+						FlurID";
 			}
 		}
     #echo $sql;
