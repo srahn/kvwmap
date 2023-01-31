@@ -1295,7 +1295,7 @@ FROM
 			case 'aktuell' : {
 				$sql = "
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
+						flurstueckskennzeichen, 
 						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
 						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
