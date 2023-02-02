@@ -3,18 +3,7 @@ BEGIN;
 /*
  *  die auskomentierten Zeilen sind die alten Definitionen (nur für alle Fälle)
  */
-DROP INDEX IF EXISTS alkis.ax_flurstueck_kennz;
---CREATE INDEX ax_flurstueck_kennz ON alkis.ax_flurstueck USING btree (flurstueckskennzeichen, beginnt DESC);
-CREATE INDEX ax_flurstueck_kennz ON alkis.ax_flurstueck USING btree (flurstueckskennzeichen text_pattern_ops, endet DESC, beginnt DESC);
 
-CREATE INDEX ax_historischesflurstueckohneraumbezug_kennz ON alkis.ax_historischesflurstueckohneraumbezug USING btree (flurstueckskennzeichen text_pattern_ops, endet DESC, beginnt DESC);
-
-CREATE INDEX ax_historischesflurstueckohneraumbezug_lgfzn ON alkis.ax_historischesflurstueckohneraumbezug USING btree (land, gemarkungsnummer, flurnummer, zaehler, nenner);
-
-ALTER TABLE alkis.n_nutzung DROP CONSTRAINT IF EXISTS n_nutzung_pk;
-
---CREATE UNIQUE INDEX n_nutzung_pk ON alkis.n_nutzung USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX n_nutzung_pk ON alkis.n_nutzung USING btree (gml_id, endet DESC, beginnt DESC);
 
 DROP INDEX IF EXISTS alkis.aa_aktivitaet_endet;
 --CREATE INDEX aa_aktivitaet_endet ON alkis.aa_aktivitaet USING btree (endet);
@@ -23,14 +12,6 @@ CREATE INDEX aa_aktivitaet_endet ON alkis.aa_aktivitaet USING btree (endet DESC,
 DROP INDEX IF EXISTS alkis.aa_aktivitaet_gml;
 --CREATE UNIQUE INDEX aa_aktivitaet_gml ON alkis.aa_aktivitaet USING btree (gml_id, beginnt);
 CREATE UNIQUE INDEX aa_aktivitaet_gml ON alkis.aa_aktivitaet USING btree (gml_id, endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.aa_antrag_endet;
---CREATE INDEX aa_antrag_endet ON alkis.aa_antrag USING btree (endet);
-CREATE INDEX aa_antrag_endet ON alkis.aa_antrag USING btree (endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.aa_antrag_gml;
---CREATE UNIQUE INDEX aa_antrag_gml ON alkis.aa_antrag USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX aa_antrag_gml ON alkis.aa_antrag USING btree (gml_id, endet DESC, beginnt DESC);
 
 DROP INDEX IF EXISTS alkis.aa_antragsgebiet_endet;
 --CREATE INDEX aa_antragsgebiet_endet ON alkis.aa_antragsgebiet USING btree (endet);
@@ -480,14 +461,6 @@ DROP INDEX IF EXISTS alkis.ax_denkmalschutzrecht_gml;
 --CREATE UNIQUE INDEX ax_denkmalschutzrecht_gml ON alkis.ax_denkmalschutzrecht USING btree (gml_id, beginnt);
 CREATE UNIQUE INDEX ax_denkmalschutzrecht_gml ON alkis.ax_denkmalschutzrecht USING btree (gml_id, endet DESC, beginnt DESC);
 
-DROP INDEX IF EXISTS alkis.ax_dienststelle_endet;
---CREATE INDEX ax_dienststelle_endet ON alkis.ax_dienststelle USING btree (endet);
-CREATE INDEX ax_dienststelle_endet ON alkis.ax_dienststelle USING btree (endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.ax_dienststelle_gml;
---CREATE UNIQUE INDEX ax_dienststelle_gml ON alkis.ax_dienststelle USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX ax_dienststelle_gml ON alkis.ax_dienststelle USING btree (gml_id, endet DESC, beginnt DESC);
-
 DROP INDEX IF EXISTS alkis.ax_duene_endet;
 --CREATE INDEX ax_duene_endet ON alkis.ax_duene USING btree (endet);
 CREATE INDEX ax_duene_endet ON alkis.ax_duene USING btree (endet DESC, beginnt DESC);
@@ -599,10 +572,6 @@ CREATE INDEX ax_flugverkehrsanlage_endet ON alkis.ax_flugverkehrsanlage USING bt
 DROP INDEX IF EXISTS alkis.ax_flugverkehrsanlage_gml;
 --CREATE UNIQUE INDEX ax_flugverkehrsanlage_gml ON alkis.ax_flugverkehrsanlage USING btree (gml_id, beginnt);
 CREATE UNIQUE INDEX ax_flugverkehrsanlage_gml ON alkis.ax_flugverkehrsanlage USING btree (gml_id, endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.ax_flurstueck_gml;
---CREATE UNIQUE INDEX ax_flurstueck_gml ON alkis.ax_flurstueck USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX ax_flurstueck_gml ON alkis.ax_flurstueck USING btree (gml_id, endet DESC, beginnt DESC);
 
 DROP INDEX IF EXISTS alkis.ax_forstrecht_endet;
 --CREATE INDEX ax_forstrecht_endet ON alkis.ax_forstrecht USING btree (endet);
@@ -716,14 +685,6 @@ DROP INDEX IF EXISTS alkis.ax_gelaendekante_gml;
 --CREATE UNIQUE INDEX ax_gelaendekante_gml ON alkis.ax_gelaendekante USING btree (gml_id, beginnt);
 CREATE UNIQUE INDEX ax_gelaendekante_gml ON alkis.ax_gelaendekante USING btree (gml_id, endet DESC, beginnt DESC);
 
-DROP INDEX IF EXISTS alkis.ax_gemarkung_endet;
---CREATE INDEX ax_gemarkung_endet ON alkis.ax_gemarkung USING btree (endet);
-CREATE INDEX ax_gemarkung_endet ON alkis.ax_gemarkung USING btree (endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.ax_gemarkung_gml;
---CREATE UNIQUE INDEX ax_gemarkung_gml ON alkis.ax_gemarkung USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX ax_gemarkung_gml ON alkis.ax_gemarkung USING btree (gml_id, endet DESC, beginnt DESC);
-
 DROP INDEX IF EXISTS alkis.ax_gemarkungsteilflur_endet;
 --CREATE INDEX ax_gemarkungsteilflur_endet ON alkis.ax_gemarkungsteilflur USING btree (endet);
 CREATE INDEX ax_gemarkungsteilflur_endet ON alkis.ax_gemarkungsteilflur USING btree (endet DESC, beginnt DESC);
@@ -731,14 +692,6 @@ CREATE INDEX ax_gemarkungsteilflur_endet ON alkis.ax_gemarkungsteilflur USING bt
 DROP INDEX IF EXISTS alkis.ax_gemarkungsteilflur_gml;
 --CREATE UNIQUE INDEX ax_gemarkungsteilflur_gml ON alkis.ax_gemarkungsteilflur USING btree (gml_id, beginnt);
 CREATE UNIQUE INDEX ax_gemarkungsteilflur_gml ON alkis.ax_gemarkungsteilflur USING btree (gml_id, endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.ax_gemeinde_endet;
---CREATE INDEX ax_gemeinde_endet ON alkis.ax_gemeinde USING btree (endet);
-CREATE INDEX ax_gemeinde_endet ON alkis.ax_gemeinde USING btree (endet DESC, beginnt DESC);
-
-DROP INDEX IF EXISTS alkis.ax_gemeinde_gml;
---CREATE UNIQUE INDEX ax_gemeinde_gml ON alkis.ax_gemeinde USING btree (gml_id, beginnt);
-CREATE UNIQUE INDEX ax_gemeinde_gml ON alkis.ax_gemeinde USING btree (gml_id, endet DESC, beginnt DESC);
 
 DROP INDEX IF EXISTS alkis.ax_gemeindeteil_endet;
 --CREATE INDEX ax_gemeindeteil_endet ON alkis.ax_gemeindeteil USING btree (endet);
@@ -809,3 +762,64 @@ DROP INDEX IF EXISTS alkis.ax_gleis_endet;
 CREATE INDEX ax_gleis_endet ON alkis.ax_gleis USING btree (endet DESC, beginnt DESC);
 
 COMMIT;
+
+BEGIN;
+
+DROP INDEX IF EXISTS alkis.ax_flurstueck_kennz;
+--CREATE INDEX ax_flurstueck_kennz ON alkis.ax_flurstueck USING btree (flurstueckskennzeichen, beginnt DESC);
+CREATE INDEX ax_flurstueck_kennz ON alkis.ax_flurstueck USING btree (flurstueckskennzeichen text_pattern_ops, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_flurstueck_gml;
+--CREATE UNIQUE INDEX ax_flurstueck_gml ON alkis.ax_flurstueck USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX ax_flurstueck_gml ON alkis.ax_flurstueck USING btree (gml_id, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_historischesflurstueckohneraumbezug_kennz;
+CREATE INDEX ax_historischesflurstueckohneraumbezug_kennz ON alkis.ax_historischesflurstueckohneraumbezug USING btree (flurstueckskennzeichen text_pattern_ops, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_historischesflurstueckohneraumbezug_lgfzn;
+CREATE INDEX ax_historischesflurstueckohneraumbezug_lgfzn ON alkis.ax_historischesflurstueckohneraumbezug USING btree (land, gemarkungsnummer, flurnummer, zaehler, nenner);
+
+ALTER TABLE alkis.n_nutzung DROP CONSTRAINT IF EXISTS n_nutzung_pk;
+
+DROP INDEX IF EXISTS alkis.n_nutzung_pk;
+--CREATE UNIQUE INDEX n_nutzung_pk ON alkis.n_nutzung USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX n_nutzung_pk ON alkis.n_nutzung USING btree (gml_id, endet DESC, beginnt DESC);
+
+COMMIT;
+
+BEGIN;
+
+DROP INDEX IF EXISTS alkis.ax_gemarkung_endet;
+--CREATE INDEX ax_gemarkung_endet ON alkis.ax_gemarkung USING btree (endet);
+CREATE INDEX ax_gemarkung_endet ON alkis.ax_gemarkung USING btree (endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_gemarkung_gml;
+--CREATE UNIQUE INDEX ax_gemarkung_gml ON alkis.ax_gemarkung USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX ax_gemarkung_gml ON alkis.ax_gemarkung USING btree (gml_id, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_gemeinde_endet;
+--CREATE INDEX ax_gemeinde_endet ON alkis.ax_gemeinde USING btree (endet);
+CREATE INDEX ax_gemeinde_endet ON alkis.ax_gemeinde USING btree (endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_gemeinde_gml;
+--CREATE UNIQUE INDEX ax_gemeinde_gml ON alkis.ax_gemeinde USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX ax_gemeinde_gml ON alkis.ax_gemeinde USING btree (gml_id, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_dienststelle_endet;
+--CREATE INDEX ax_dienststelle_endet ON alkis.ax_dienststelle USING btree (endet);
+CREATE INDEX ax_dienststelle_endet ON alkis.ax_dienststelle USING btree (endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.ax_dienststelle_gml;
+--CREATE UNIQUE INDEX ax_dienststelle_gml ON alkis.ax_dienststelle USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX ax_dienststelle_gml ON alkis.ax_dienststelle USING btree (gml_id, endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.aa_antrag_endet;
+--CREATE INDEX aa_antrag_endet ON alkis.aa_antrag USING btree (endet);
+CREATE INDEX aa_antrag_endet ON alkis.aa_antrag USING btree (endet DESC, beginnt DESC);
+
+DROP INDEX IF EXISTS alkis.aa_antrag_gml;
+--CREATE UNIQUE INDEX aa_antrag_gml ON alkis.aa_antrag USING btree (gml_id, beginnt);
+CREATE UNIQUE INDEX aa_antrag_gml ON alkis.aa_antrag USING btree (gml_id, endet DESC, beginnt DESC);
+
+COMMIT;
+
