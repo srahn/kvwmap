@@ -2090,9 +2090,6 @@ echo '			</table>
 		else{
 			$layer->set('status', 1);
 		}
-		if (MS_DEBUG_LEVEL > 0) {
-			$layer->set('debug', 5);
-		};
 
 		# fremde Layer werden auf Verbindung getestet
 		if ($layerset['aktivStatus'] != 0 AND $layerset['connectiontype'] == 6) {
