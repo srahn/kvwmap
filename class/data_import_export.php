@@ -161,6 +161,7 @@ class data_import_export {
 		if ($custom_table['datatype'] == 3){ # Raster
 			$this->formvars['Data'] = $custom_table['data'];
 			$this->formvars['transparency'] = 100;
+			$this->formvars['connectiontype'] = 0;
 		}
 		else {
 			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique ' . $unique_column . ' using srid=' . $epsg;
