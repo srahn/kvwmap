@@ -13,9 +13,12 @@
 		if (['int2', 'int4', 'int8', 'float4', 'float8', 'numeric'].indexOf(datatype) != -1) {
 			if (type == 'Zahl') {
 				grouping = true;
+				input.value = input.value.replace(/\.$/, ',');								// Punkt hinten durch Komma ersetzen
+			}
+			else {
+				input.value = input.value.replace(/\./, ',');									// Punkt irgendwo durch Komma ersetzen
 			}
 			input.value = input.value.replace(/[^(0-9| |\.|,|\-)]/g, '');		// Buchstaben raus
-			input.value = input.value.replace(/\.$/, ',');									// Punkt hinten durch Komma ersetzen
 			val = input.value;
 			
 			if (['int2', 'int4', 'int8'].indexOf(datatype) != -1) {
