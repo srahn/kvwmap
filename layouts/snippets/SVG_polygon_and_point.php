@@ -56,6 +56,7 @@ if($this->user->rolle->gps){
 	$svg .= $gps_functions;
 }
 $svg .= $SVGvars_coordscript;
+$svg .= $SVGvars_querytooltipscript;
 $svg .= $SVGvars_tooltipscript;
 $svg .= ']]></script>';
 
