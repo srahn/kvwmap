@@ -1800,6 +1800,19 @@ thead.gle th {
  text-align:left;
 }
 
+#gle_column_options_div {
+	position: absolute;
+	right: 2px;
+	margin-right: 35px;
+	text-align: left;
+	border: 1px solid gray;
+	padding: 4px;
+	background-color: white;
+	border-radius: 4px;
+	z-index: 1000;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+}
+
 .gle_tabs{
 	display: flex;
 	margin: 2px 0 -11px 0;
