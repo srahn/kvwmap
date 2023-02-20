@@ -1821,19 +1821,30 @@ thead.gle th {
 }
 
 .gle_tabs > div{
-	padding: 0 5px 0 5px;
+	padding: 0 5px 0 8px;
 	cursor: pointer;
 	border: 1px solid #bbb;
 	border-left: none;
 	background-color: #fff;
 	color: #aaa;
 	white-space: nowrap;
+	border-radius: 0 5px 0 0;
+	margin-left: -4px;
+}
+
+.gle_tabs > div:first-child {
+	padding: 0 5px 0 5px;
+	margin-left: 0;
 }
 
 .gle_tabs > div.active_tab{
 	border-bottom: 1px dashed #bbb;
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 	color: black;
+}
+
+.gle_tabs > div:hover{
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
 .gle-attribute-name {
