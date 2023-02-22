@@ -419,9 +419,10 @@ class data_import_export {
 						GROUP BY
 							line_id
 					) t
-					WHERE ogc_fid = t.line_id;
-					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename) . "
-				";
+					WHERE ogc_fid = t.line_id;					
+					SELECT convert_column_names('" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "');
+					" . $this->rename_reserved_attribute_names(CUSTOM_SHAPE_SCHEMA, $tablename);
+					
 				$ret = $pgdatabase->execSQL($sql,4, 0);
 				$custom_table['datatype'] = 1;
 				$custom_table['tablename'] = $tablename;
