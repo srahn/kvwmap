@@ -93,7 +93,7 @@ if ($doit == true) { ?>
 			</table><?
 		}
 		$table_id = rand(0, 100000); ?>
-		<div style="display: flex"> 
+		<div style="display: flex; justify-content: end;"> 
 			<? echo $layer['paging']; ?>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
 			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">	<? 
