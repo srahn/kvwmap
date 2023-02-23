@@ -1281,6 +1281,7 @@ class data_import_export {
 					$selection[$this->attributes['name'][$i]] = 1;
 					$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
 					$selected_attr_types[] = $this->attributes['type'][$i];
+					$selected_attr_length[] = $this->attributes['length'][$i];
 				}
 				if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
 					$selection[$this->attributes['name'][$i]] = 1;
@@ -1380,7 +1381,7 @@ class data_import_export {
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
-					if (in_array($selected_attr_types[$s], array('text', 'varchar'))) {
+					if (in_array($selected_attr_types[$s], array('text', 'varchar')) AND ($selected_attr_length[$s] == '' OR $selected_attr_length[$s] > 254)) {
 						$selected_attributes[$s] = $selected_attributes[$s] . '::varchar(254)';
 					}
 				}
