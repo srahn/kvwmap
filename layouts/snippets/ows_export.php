@@ -1,6 +1,6 @@
 <?
 	include(LAYOUTPATH . 'languages/ows_export_' . $this->user->rolle->language . '.php');
-	include(CLASSPATH . 'FormObject.php');
+	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" width="100%">
 	<tr align="center">
@@ -11,7 +11,7 @@
 	</tr>
 	<tr>
 		<td align="right" width="50%"><?php echo $strNameOfMapFile; ?></td>
-		<td align="left" width="50%"><input name="mapfile_name" type="text" id="mapfile_name" value="<?php echo ($this->formvars['mapfile_name'] != '' ? $this->formvars['mapfile_name'] : 'wms_test.map'); ?>" maxlength="50" style="width: 100%"></td>
+		<td align="left" width="50%"><input name="mapfile_name" type="text" id="mapfile_name" value="<?php echo (value_of($this->formvars, 'mapfile_name') ?: MAPFILENAME ?: 'wms_test.map'); ?>" maxlength="50" style="width: 100%"></td>
 	</tr>
 	<tr>
 		<td align="right">
@@ -75,31 +75,31 @@
 	<tr>
 		<td align="right"><?php echo $strContactPerson; ?></td>
 		<td align="left">
-			<input name="ows_contactperson" type="text" id="ows_contactperson" value="<? echo (value_of($this->formvars, 'ows_contactperson') ?: $this->Stelle->ows_contentperson ?: OWS_CONTACTPERSON); ?>" maxlength="50" style="width: 100%">
+			<input name="ows_contactperson" type="text" id="ows_contactperson" value="<? echo (value_of($this->formvars, 'ows_contactperson') ?: $this->Stelle->ows_contactperson ?: $this->Stelle->ows_contentperson ?: OWS_CONTACTPERSON); ?>" maxlength="50" style="width: 100%">
 		</td>
 	</tr>
 	<tr>
 		<td align="right"><?php echo $strContactPosition; ?></td>
 		<td align="left">
-			<input name="ows_contactposition" type="text" id="ows_contactposition" value="<? echo (value_of($this->formvars, 'ows_contactposition') ?: $this->Stelle->ows_contentposition ?: OWS_CONTACTPOSITION); ?>" maxlength="50" style="width: 100%">
+			<input name="ows_contactposition" type="text" id="ows_contactposition" value="<? echo (value_of($this->formvars, 'ows_contactposition') ?: $this->Stelle->ows_contactposition ?: $this->Stelle->ows_contentposition ?: OWS_CONTACTPOSITION); ?>" maxlength="50" style="width: 100%">
 		</td>
 	</tr>
 	<tr>
 		<td align="right"><?php echo $strOrganisation; ?></td>
 		<td align="left">
-			<input name="ows_contactorganization" type="text" id="ows_contactorganization" value="<? echo (value_of($this->formvars, 'ows_contactorganization') ?: $this->Stelle->ows_contentorganization ?: OWS_CONTACTORGANIZATION); ?>" maxlength="50" style="width: 100%">
+			<input name="ows_contactorganization" type="text" id="ows_contactorganization" value="<? echo (value_of($this->formvars, 'ows_contactorganization') ?: $this->Stelle->ows_contactorganization ?: $this->Stelle->ows_contentorganization ?: OWS_CONTACTORGANIZATION); ?>" maxlength="50" style="width: 100%">
 		</td>
 	</tr>
 	<tr>
 		<td align="right"><?php echo $strEMail; ?></td>
 		<td align="left">
-			<input name="ows_contactelectronicmailaddress" type="text" value="<? echo (value_of($this->formvars, 'ows_contactelectronicmailaddress') ?: $this->Stelle->ows_contentelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS); ?>" maxlength="150" style="width: 100%">
+			<input name="ows_contactelectronicmailaddress" type="text" value="<? echo (value_of($this->formvars, 'ows_contactelectronicmailaddress') ?: $this->Stelle->ows_contactelectronicmailaddress ?: $this->Stelle->ows_contentelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS); ?>" maxlength="150" style="width: 100%">
 		</td>
 	</tr>
 	<tr>
 		<td align="right"><? echo $strAttributeFilter; ?></td>
 		<td align="left"><div style="width: 400px">
-			<input type="text" name="filter_attribute_name" value="<? echo $this->formvars['filter_attribute_name']; ?>"/> <?
+			<input type="text" name="filter_attribute_name" value="<? echo (value_of($this->formvars, 'filter_attribute_name') ?: 'stelle_id'); ?>"/> <?
 			echo FormObject::createSelectField(
 				'filter_attribute_operator',
 				array('=', '!=', '<', '>', 'LIKE', 'NOT LIKE', 'IN', 'NOT IN'),
@@ -112,7 +112,7 @@
 				'',
 				''
 			); ?> 
-			<input type="text" name="filter_attribute_value" value="<? echo $this->formvars['filter_attribute_value']; ?>"/>
+			<input type="text" name="filter_attribute_value" value="<? echo (value_of($this->formvars, 'filter_attribute_value') ?: $this->Stelle->id); ?>"/>
 			<span id="debug_t" data-tooltip="<?php echo $strAttributeFilterHilfe; ?>" onclick="message([{'type': 'info', 'msg': this.getAttribute('data-tooltip')}])"></span>
 		</div>
 		</td>

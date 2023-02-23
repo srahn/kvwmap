@@ -57,6 +57,7 @@ class PgObject {
 		);
 		$this->show = false;
 		$this->attribute_types = array();
+		$this->geom_column = 'geom';
 	}
 
 	public static	function postgis_version($gui) {
@@ -87,6 +88,11 @@ class PgObject {
 
 	function get_id_condition($ids) {
 		$parts = array();
+		if (func_num_args() == 0) {
+			$ids = array(
+				$this->identifier => $this->get($this->identifier)
+			);
+		}
 		foreach ($this->identifiers AS $key => $identifier) {
 			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
 		}
@@ -139,6 +145,24 @@ class PgObject {
 			$result[] = clone $this;
 		}
 		return $result;
+	}
+
+	function get_extent() {
+		$sql = "
+			SELECT
+				ST_XMin(" . $this->geom_column . ") AS minx,
+				ST_YMin(" . $this->geom_column . ") AS miny,
+				ST_XMax(" . $this->geom_column . ") AS maxx,
+				ST_YMax(" . $this->geom_column . ") AS maxy
+			FROM
+				" . $this->schema . '.' . $this->tableName . "
+			WHERE
+				" . $this->get_id_condition(array($this->get($this->identifier))) . "
+		";
+		$this->debug->show('get_extent sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$extent = pg_fetch_assoc($query);
+		return $extent;
 	}
 
 	function delete_by($attribute, $value) {

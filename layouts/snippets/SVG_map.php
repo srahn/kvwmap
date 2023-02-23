@@ -1586,6 +1586,7 @@ function selectPoint(evt) {
 
 // ----------------------------box aufziehen---------------------------------
 function startPoint(evt) {
+	if (dragging) return;
   dragging  = true;
   var alle = pathx.length;
   for(var i = 0; i < alle; ++i){

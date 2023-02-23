@@ -1,3 +1,25 @@
+<script>
+
+	function toggleColumn(checkbox, layer_id, attribute_name){
+		var head = document.getElementById('column_' + layer_id + '_' + attribute_name);
+		var group = head.classList[0].split('_')[1];
+		if (document.getElementById(group)) {
+			if (checkbox.checked) {
+				document.getElementById(group).colSpan += 1;
+			}
+			else {
+				document.getElementById(group).colSpan -= 1;
+			}
+		}
+		head.classList.toggle('hidden');
+		tds = document.querySelectorAll('.value_' + layer_id + '_' + attribute_name);
+		[].forEach.call(tds, function (td){
+			td.classList.toggle('hidden');
+		});
+	}
+	
+</script>
+
 <?
 include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 $checkbox_names = '';
@@ -70,8 +92,16 @@ if ($doit == true) { ?>
 				</tr>
 			</table><?
 		}
-		$table_id = rand(0, 100000);
-		echo $layer['paging']; ?>
+		$table_id = rand(0, 100000); ?>
+		<div style="display: flex"> 
+			<? echo $layer['paging']; ?>
+			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
+			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">	<? 
+				for ($j = 0; $j < count($layer['attributes']['name']); $j++) { ?>
+					<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+				}	?>
+			</div>
+		</div>
 		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
@@ -121,7 +151,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td id="column'.$j.'" class="group_'.$groupname.'"';
+											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="group_'.$groupname.'"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){

@@ -162,7 +162,6 @@ class GUI {
 		for($i = 0; $i < @count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
 
@@ -1558,7 +1557,9 @@ class GUI {
 										}
 									}
 									else{		# Punktlayer
-										if($style->size > 14)$style->set('size', 14);
+										if($style->size > 14 OR $style->size == -1){
+											$style->set('size', 14);
+										}
 										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
@@ -2135,6 +2136,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -2293,7 +2295,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -2361,12 +2363,15 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
+    return $ret[1];
+  }
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
@@ -2388,9 +2393,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
-			//if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			//};
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
@@ -2934,6 +2936,7 @@ class db_mapObj {
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
       $Layer[] = $rs;
     }
     return $Layer;

@@ -260,7 +260,9 @@ class MyObject {
 		}
 		$rs = mysqli_fetch_assoc($result);
 		foreach ($types as $name => $type) {
-			settype($rs[$name], $type);
+			if (gettype($rs[$name]) != 'NULL') {
+				settype($rs[$name], $type);
+			}
 		}
 		return $rs;
 	}
@@ -324,11 +326,11 @@ class MyObject {
 
 	function setKeysFromFormvars($formvars) {
 		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
-		$this->data = array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable())));
+		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
 	}
 
 	function getColumnsFromTable() {
-		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
+		$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
 		$this->columns = array();
 		$sql = "
 			SHOW COLUMNS
@@ -428,6 +430,10 @@ class MyObject {
 		$this->data[$attribute] = $value;
 	}
 
+	function print() {
+		echo '<br>data: ' . print_r($this->data, true);
+	}
+
 	function create($data = array()) {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
 
@@ -476,7 +482,8 @@ class MyObject {
 		else {
 			$results[] = array(
 				'success' => false,
-				'msg' => $this->database->errormessage
+				'msg' => $this->database->errormessage,
+				'err_msg' => $this->database->errormessage
 			);
 		}
 
@@ -551,13 +558,12 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}
 
 	function delete() {
-		#echo '<br>Class MyObject Method delete';
 		$sql = "
 			DELETE
 			FROM
@@ -567,7 +573,12 @@ class MyObject {
 		";
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);
-		return $result;
+		$err_msg = $this->database->errormessage;
+		$results[] = array(
+			'success' => ($err_msg == ''),
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+		);
+		return $results;
 	}
 
 	function reset_auto_increment() {
@@ -586,7 +597,7 @@ class MyObject {
 		}
 
 		$messages = array();
-		foreach($results AS $result) {
+		foreach ($results AS $key => $result) {
 			if (!empty($result)) {
 				$messages[] = $result;
 			}
@@ -595,39 +606,55 @@ class MyObject {
 	}
 
 	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
-		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . $option, MyObject::$write_debug);
+		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . print_r($option, true), MyObject::$write_debug);
 		switch ($condition) {
 
-			case 'presence' :
-				$result = $this->validate_presence($key, $msg);
-				break;
-
-			case 'pending_value' :
-				$result = $this->validate_pending_value($key, $option, $msg);
-				break;
-
-			case 'not_null' :
-				$result = $this->validate_not_null($key, $msg);
-				break;
-
-			case 'presence_one_of' :
-				$result = $this->validate_presence_one_of($key, $msg);
-				break;
-
-			case 'validate_value_is_one_off' :
-				$result = $this->validate_value_is_one_off($key, $option, $msg);
+			case 'date' :
+				$result = $this->validate_date($key, $msg);
 				break;
 
 			case 'format' :
 				$result = $this->validate_format($key, $msg, $option);
 				break;
 
+			case 'greater_or_equal' :
+				$result = $this->validate_greater_or_equal($key, $msg, $option);
+				break;
+
+			case 'not_null' :
+				$result = $this->validate_not_null($key, $msg);
+				break;
+
+			case 'pending_value' :
+				$result = $this->validate_pending_value($key, $option, $msg);
+				break;
+
+			case 'presence' :
+				$result = $this->validate_presence($key, $msg);
+				break;
+
+			case 'presence_one_of' :
+				$result = $this->validate_presence_one_of($key, $msg);
+				break;
+
 			case 'unique' :
 				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key, $msg, $option, $on));
 				break;
+
+			case 'validate_value_is_one_off' :
+				$result = $this->validate_value_is_one_off($key, $option, $msg);
+				break;
 		}
 		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
-		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
+		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result, 'attribute' => $key, 'condition' => $condition, 'option' => $option));
+	}
+
+	function validate_greater_or_equal($key, $msg, $option) {
+		$this->debug->show('MyObject validate if ' . $key . ' = ' . $this->get($key) . ' is grater than ' . $option['other_key'] . '=' . $this->data[$option['other_key']], MyObject::$write_debug);
+		if ($this->get($key) >= $this->get($option['other_key'])) {
+			return '';
+		}
+		return $msg;
 	}
 
 	function validate_presence($key, $msg = '') {
@@ -707,7 +734,17 @@ class MyObject {
 		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
 	}
 
-	function validate_date($key, $format) {
+	function validate_date($key, $msg) {
+		if ($this->get('key') != '') {
+			$date_arr = explode('-', $this->get($key));
+			if (!checkdate($date_arr[1], $date_arr[2], $date_arr[0])) {
+				return $msg;
+			}
+		}
+		return '';
+	}
+
+	function validate_date_format($key, $format) {
 		$invalid_msg = array();
 		DateTime::createFromFormat($format, $this->get($key));
 		$last_errors = DateTime::getLastErrors();

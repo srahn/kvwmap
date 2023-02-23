@@ -780,7 +780,7 @@ class user {
 	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
+		if ($login_name != '') array_push($where, "login_name = '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
@@ -809,12 +809,14 @@ class user {
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
+		$this->password_expired = $rs['password_expired'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
+		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
@@ -996,7 +998,7 @@ class user {
 		}
 
 		if ($login_name != '') {
-			$where[] = 'login_name LIKE "' . $login_name . '"';
+			$where[] = 'login_name = "' . $login_name . '"';
 		}
 
 		if ($order != '') {
@@ -1112,7 +1114,7 @@ class user {
 		$this->debug->write("<p>file:users.php class:user->updateTokens - Speichern des Tokens.<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-	}	
+	}
 
 	function setOptions($stelle_id, $formvars) {
 		$nImageWidth = '';
@@ -1142,7 +1144,6 @@ class user {
 		$newExtent['minx']=$newMinPoint[0]; $newExtent['miny']=$newMinPoint[1];
 		$newExtent['maxx']=$newMaxPoint[0]; $newExtent['maxy']=$newMaxPoint[1];
 		$formvars['language']=$formvars['language'];
-
 		# Eintragen der neuen Einstellungen für die Rolle
 		if ($formvars['gui'] != '' AND $formvars['mapsize'] != '') {
 			$sql = "
@@ -1180,6 +1181,7 @@ class user {
 					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
 					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
 					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
+					" . (value_of($formvars, 'font_size_factor') != '' ? ", `font_size_factor` = " . $formvars['font_size_factor'] : '') . "
 					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
 					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
 					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
@@ -1277,7 +1279,7 @@ class user {
 		return $ret;
 	}
 
-	function loginname_exists($login) {
+	function loginname_exists($login, $id = NULL) {
 		$Meldung='';
 		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
 		$sql ="
@@ -1288,6 +1290,10 @@ class user {
 			WHERE
 				login_name = '" . $login . "'
 		";
+		if ($id != NULL) {
+			$sql.= "
+				AND ID != " . $id;
+		}
 		$this->database->execSQL($sql,4, 0);
 		if (!$this->database->success) {
 			$ret[1].='<br>Die Abfrage konnte nicht ausgeführt werden.'.$ret[1];
@@ -1316,8 +1322,8 @@ class user {
 		if ($userdaten['nachname'] == '') { $Meldung .= '<br>Nachname fehlt.'; }
 		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
-		elseif ($userdaten['go_plus'] == 'Als neuen Nutzer eintragen'){
-			$ret = $this->loginname_exists($userdaten['loginname']);
+		else {
+			$ret=$this->loginname_exists($userdaten['loginname'], $userdaten['id']);
 			if ($ret[1] == 1) {
 				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
@@ -1350,7 +1356,8 @@ class user {
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
 		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
-		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
+		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
+		$sql.=',password_expired = false';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
 		}
@@ -1418,13 +1425,13 @@ class user {
 	}
 
 	function Aendern($userdaten) {
+		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
-			$password_column = ", `password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
-			$password_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
-		}
-		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
-		if ($userdaten['password_setting_time']) {
-			$password_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
+			$password_columns = ",
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "'),
+				`password_setting_time` = CURRENT_TIMESTAMP(),
+				`password_expired` = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
+			";
 		}
 
 		$sql = "
@@ -1444,9 +1451,9 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . 
-				$password_column .
-				$password_setting_time_column . "
+				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
+				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
+				$password_columns . "
 			WHERE
 				`ID`= " . $userdaten['selected_user_id'] . "
 		";
@@ -1476,17 +1483,19 @@ class user {
 	}	
 
 	/**
-	 * Aktualisiert das Passwort und setzt ein neuen Zeitstempel
-	 *
-	 * Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
-	 *
-	 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-	 *
-	 * @param string password Einzutragendes Password als Text
-	 * @return array liefert zweidimensionales Array zurück,
-	 *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-	 *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
-	 * @see    NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
+		Aktualisiert das Passwort und setzt ein neuen Zeitstempel
+	
+		Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
+		Zusätzlich wird das flag password_expired auf true gesetzt, damit der Nutzer auch zur Eingabe eines neuen Passwortes
+		aufgefordert wird wenn in der Stelle das Passwortalter nicht geprüft wird.
+
+		Reihenfolge: Übersichtssatz - Kommentar - Tags.
+	
+		@param string password Einzutragendes Password als Text
+		@return array liefert zweidimensionales Array zurück,
+									Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+									Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+		@see NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
 	 */
 	function setNewPassword($password) {
 		$password_setting_time = date('Y-m-d H:i:s', time());
@@ -1495,7 +1504,8 @@ class user {
 				user
 			SET
 				`password` = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
-				`password_setting_time` = '" . $password_setting_time . "'
+				`password_setting_time` = '" . $password_setting_time . "',
+				`password_expired` = false
 			WHERE
 				`ID` = " . $this->id . "
 		";
@@ -1506,6 +1516,7 @@ class user {
 		}
 		else {
 			$this->password_setting_time = $password_setting_time;
+			$this->password_expired = false;
 		}
 		return $ret;
 	}

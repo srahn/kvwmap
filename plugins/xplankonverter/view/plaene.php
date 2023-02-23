@@ -621,6 +621,13 @@
 		return output;
 	}
 
+	function konvertierungWirksamkeitsdatumSorter(fieldA, fieldB, rowA, rowB) {
+		const dateA = fieldA.split(".").reverse().join("");
+		const dateB = fieldB.split(".").reverse().join("");
+		console.log('A: ' + dateA + ' > B: ' + dateB);
+		return dateA > dateB ? 1 : -1;
+	}
+
 </script>
 <h2><?php echo htmlspecialchars($this->title); ?></h2><?php
 if ($this->Stelle->id > 200) { ?>
@@ -722,7 +729,15 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control="select"
 						data-filter-control-placeholder="Filtern nach"
 					>Status</th><?php
-				}
+				} ?>
+				<th
+					data-field="wirksamkeitsdatum"
+					data-sortable="true"
+					data-visible="true"
+					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					class="col-md-2"
+					data-filter-control="input"
+				>Wirksamkeit</th><?
 				/*
 				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 					<th

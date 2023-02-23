@@ -7,11 +7,11 @@
 	var Formdata = new FormData();
 	Formdata.append('go', 'Daten_Import_Upload');
 	Formdata.append('after_import_action', '<? echo $this->after_import_action; ?>');
-	Formdata.append('selected_layer_id', '<? echo $this->formvars["selected_layer_id"]; ?>');
+	Formdata.append('chosen_layer_id', '<? echo $this->formvars["chosen_layer_id"]; ?>');
 	
 	function restartProcessing(uploadId, filenumber, filename){
 		ahah('index.php?go=Daten_Import_Process', 
-					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value+'&after_import_action=<? echo $this->after_import_action; ?>', 
+					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value+'&after_import_action=<? echo $this->after_import_action; ?>&chosen_layer_id=<? echo $this->formvars["chosen_layer_id"]; ?>', 
 					[document.getElementById('progress'+uploadId).querySelector('.serverResponse #serverResponse'+filenumber)], 
 					['sethtml']
 				);

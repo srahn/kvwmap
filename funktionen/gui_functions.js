@@ -237,7 +237,7 @@ function rgbToHex(r, g, b) {
   return "#" + componentToHex(r_) + componentToHex(g_) + componentToHex(b_);
 }
 
-function Bestaetigung(link,text) {
+function Bestaetigung(link, text) {
 	Check = confirm(text);
 	if (Check == true) {
 		window.location.href = link;
@@ -363,18 +363,20 @@ function stopwaiting() {
 }
 
 function getBrowserSize(){
-	if(typeof(window.innerWidth) == 'number'){
+	if (typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
 		height = window.innerHeight;
-	}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+	} else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
 		width = document.documentElement.clientWidth;
 		height = document.documentElement.clientHeight;
-	}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+	} else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
 		width = document.body.clientWidth;
 		height = document.body.clientHeight;
 	}
-	root.document.GUI.browserwidth.value = width;
-	root.document.GUI.browserheight.value = height;
+  if (root.document.GUI) {
+    root.document.GUI.browserwidth.value = width;
+	  root.document.GUI.browserheight.value = height;
+  }
 }
 
 function resizemap2window(){
@@ -1570,3 +1572,23 @@ format_duration = function (sec_num) {
 	if (parts.length == 3) return parts[0] + ', ' + parts[1] + ' und ' + parts[2]
 }
 
+function show_validation_error(validation_error) {
+	const attribute = validation_error.attribute;
+	const formElem = $('#' + validation_error.attribute);
+	const errElemId = validation_error.attribute + '_error_messages';
+	if ($('#' + errElemId).length == 0) {
+		formElem.after('<div id="' + errElemId + '"></div>');
+		formElem.change((evt) => {
+			errElem.remove();
+			formElem.unbind('change');
+			formElem.removeClass('message-box-error');
+			if ($('.message-box-error').length == 0) {
+				$('#form-submit-button').show();
+			}
+		});
+	}
+	const errElem = $('#' + errElemId);
+	formElem.addClass('message-box-error');
+	errElem.append('<div class="red">' + validation_error.msg + '</div>');
+	$('#form-submit-button').hide();
+}

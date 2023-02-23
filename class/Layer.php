@@ -9,9 +9,9 @@ class Layer extends MyObject {
 		$this->identifier = 'Layer_ID';
 	}
 
-	public static	function find($gui, $where) {
+	public static	function find($gui, $where, $order = '') {
 		$layer = new Layer($gui);
-		return $layer->find_where($where);
+		return $layer->find_where($where, $order);
 	}
 
 	public static	function find_by_id($gui, $id) {
@@ -49,7 +49,7 @@ class Layer extends MyObject {
 	*/
 	public static function find_by_duplicate_from_layer_id($database, $duplicate_from_layer_id) {
 		$duplicate_layer_ids = array();
-		$sql =  "
+		$sql =	"
 			SELECT
 				`Layer_ID`
 			FROM
@@ -61,7 +61,7 @@ class Layer extends MyObject {
 		# letzte Where Bedinung, damit keine Entlosschleifen entstehen beim Aufruf von update_layer falls
 		# Layer_ID fälschlicherweise identisch sein sollte mit duplicate_layer_id was nicht passieren sollte
 		# wenn das Layerformular genutzt wurde.
-		#echo  MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
+		#echo	MyObject::$write_debug ? 'Layer find_by_duplicate_from_layer_id sql:<br> ' . $sql : '';
 		$ret = $database->execSQL($sql, 4, 1, true);
 		if (!$ret['success']) {
 			$database->gui->add_message('error', $ret[1]);
@@ -288,7 +288,7 @@ class Layer extends MyObject {
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
 					'selected_layer_id' => (int)$this->get('Layer_ID'),
-					'export_format' =>  'GeoJSON',
+					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
 					'epsg' => 4326,
@@ -321,7 +321,7 @@ class Layer extends MyObject {
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
 					'selected_layer_id' => (int)$this->get('Layer_ID'),
-					'export_format' =>  'GeoJSON',
+					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
 					'epsg' => 4326,
@@ -340,7 +340,7 @@ class Layer extends MyObject {
 					'go' => 'Daten_Export_Exportieren',
 					'Stelle_ID' => (int)$stelle_id,
 					'selected_layer_id' => (int)$this->get('Layer_ID'),
-					'export_format' =>  'GeoJSON',
+					'export_format' =>	'GeoJSON',
 					'browserwidth' => 800,
 					'browserheight' => 600,
 					'epsg' => 4326,
@@ -419,5 +419,308 @@ class Layer extends MyObject {
 		}
 		return $layerdef;
 	}
+
+	function get_name() {
+		return $this->get('Name' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : ''));
+	}
+
+	function write_mapserver_templates($ansicht = 'Tabelle') {
+		$layer_id = $this->get($this->identifier);
+		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
+		$all_data_attributes = $mapDB->getDataAttributes($layerdb, $layer_id, false);
+		#if ($this->gui->user->id == 3) echo '<br>pk all_data_attributes: ' . print_r($all_data_attributes, true);
+		$data_attributes = array_filter(
+			array_slice($all_data_attributes, 0, -2),
+			function($data_attribute) {
+				return $data_attribute['type'] != 'geometry';
+			}
+		);
+		#if ($this->gui->user->id == 3) echo '<p>pk data_attributes: ' . print_r($data_attributes, true);
+
+		$query_attributes = $mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
+		#if ($this->gui->user->id == 3) echo '<p>pk query_attributes: ' . print_r($query_attributes, true);
+
+		$query_attribute_aliases = array();
+		for ($i = 0; $i < count($query_attributes['name']); $i++) {
+			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
+		}
+		#if ($this->gui->user->id == 3) echo '<p>pk query_attribute_aliases: ' . print_r($query_attribute_aliases, true);
+
+		$data_attribute_names = array_map(
+			function($data_attribute) use ($query_attribute_aliases) {
+				$data_attribute_name = $data_attribute['name'];
+				$data_attribute_alias = (
+					(
+						array_key_exists(
+							$data_attribute_name,
+							$query_attribute_aliases
+						) AND
+						$query_attribute_aliases[$data_attribute_name] != $data_attribute_name
+					) ? $query_attribute_aliases[$data_attribute_name] : '');
+				return array(
+					'name' => $data_attribute_name,
+					'alias' => $data_attribute_alias ?: $data_attribute_name
+				);
+			},
+			$data_attributes
+		);
+		#if ($this->gui->user->id == 3) echo '<p>pk data_attribute_names: ' . print_r($data_attribute_names, true);
+
+		if (count($data_attribute_names) > 0) {
+			$template_dir = WMS_MAPFILE_PATH . 'templates/';
+			if (!is_dir($template_dir)) {
+				mkdir($template_dir, 0770, true);
+			}
+
+			$fp = fopen($template_dir . $this->get_name() . '_head.html', "w");
+			#if ($this->gui->user->id == 3) echo "Schreibe Datei " . $template_dir . $this->get_name() . '_head.html';
+			fwrite($fp, $this->get_wms_template_header($this->get_name(), $data_attribute_names, $ansicht));
+			fclose($fp);
+
+			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");
+			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html';
+			fwrite($fp, $this->get_wms_template_body($data_attribute_names, $ansicht));
+			fclose($fp);
+		}
+	}
+
+	function remove_mapserver_templates() {
+		$template_dir = WMS_MAPFILE_PATH . 'templates/';
+		foreach(array('head', 'body') AS $postfix) {
+			if (file_exists($template_dir . $this->get_name() .'_' . $postfix . '.html')) {
+				unlink($template_dir . $this->get_name() .'_' . $postfix . '.html');
+			}
+		}
+	}
+
+	function get_wms_template_header($layer_name, $attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->";
+		$html .= "
+<style>
+		body {
+				font-family: helvetica;
+		}
+		td {
+			border: 1px solid #cccccc;
+			padding: 5px;
+		}
+		th {
+			background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+			border: 1px solid #cccccc;
+			padding: 5px;
+		}
+</style>
+<h2>" . $layer_name . "</h2>";
+		if ($ansicht == 'Tabelle') {
+			$html .= "
+<table>
+	<tr>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+		<th>
+			" . $attribute['alias'] . "
+		</th>";
+			}
+			$html .= "
+	</tr>";
+		}
+		return $html;
+	}
+
+	function get_wms_template_body($attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->";
+		if ($ansicht == 'Tabelle') {
+			$html .= "
+	<tr>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+		<th>
+			[item name=" . $attribute['name'] . " escape=none]
+		</th>";
+			}
+			$html .= "
+	</tr>";
+		}
+		else {
+			$html .= "
+<table>";
+			foreach ($attributes AS $attribute) {
+				$html .= "
+	<tr>
+		<th align=\"left\">" . $attribute['alias'] . "</th>
+		<td>[item name=" . $attribute['name'] . " escape=none]</td>
+	</tr>";
+			}
+			$html .= "
+</table>";
+		}
+		return $html;
+	}
+
+	/**
+		Liefert an Hand des schema und maintable ein data-Statement wie es vom MapServer genutzt wird mit den dazugehörigen Attributen der Datentypen, Aufzählungen, CodeListen mit oder ohne Array.
+		Hier ein Beispiel für die Attriubte noch ohne Aufspreizung auf Unterattribute von Typen, Arrays etc.
+		position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.rp_gewaesser.bedeutsamkeit, xplan_gml.rp_gewaesser.created_at, xplan_gml.rp_gewaesser.ebene, xplan_gml.rp_gewaesser.flaechenschluss, xplan_gml.rp_gewaesser.gebietstyp, xplan_gml.rp_gewaesser.gehoertzubereich, xplan_gml.rp_gewaesser.gesetzlichegrundlage, xplan_gml.rp_gewaesser.gewaessertyp, xplan_gml.rp_gewaesser.gid, xplan_gml.rp_gewaesser.gliederung1, xplan_gml.rp_gewaesser.gliederung2, xplan_gml.rp_gewaesser.gml_id, xplan_gml.rp_gewaesser.hatgenerattribut, xplan_gml.rp_gewaesser.hoehenangabe, xplan_gml.rp_gewaesser.imverbund, xplan_gml.rp_gewaesser.informell, xplan_gml.rp_gewaesser.istausgleichsgebiet, xplan_gml.rp_gewaesser.istzweckbindung, xplan_gml.rp_gewaesser.konkretisierung, xplan_gml.rp_gewaesser.konvertierung_id, xplan_gml.rp_gewaesser.kuestenmeer, xplan_gml.rp_gewaesser.position, xplan_gml.rp_gewaesser.rechtscharakter, xplan_gml.rp_gewaesser.rechtsstand, xplan_gml.rp_gewaesser.rechtsverbindlich, xplan_gml.rp_gewaesser.refbegruendunginhalt, xplan_gml.rp_gewaesser.reftextinhalt, xplan_gml.rp_gewaesser.text, xplan_gml.rp_gewaesser.textschluessel, xplan_gml.rp_gewaesser.textschluesselbegruendung, xplan_gml.rp_gewaesser.updated_at, xplan_gml.rp_gewaesser.user_id, xplan_gml.rp_gewaesser.uuid, xplan_gml.rp_gewaesser.wirddargestelltdurch from xplan_gml.rp_gewaesser JOIN xplankonverter.konvertierungen ON xplan_gml.rp_gewaesser.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
+	Die Abfrage der Attribute mit Hilfe von xplan_uml sieht so aus. Die Abfragen der Typen abhängig machen ob es ein uml-schema gibt oder nicht. Kann auch alkis_uml sein. evtl von Plugin abhängig machen.
+SELECT
+  attr.table_name,
+  attr.att_name,
+  at.typname,
+  at.typcategory,
+  attr.is_array,
+  st.name
+FROM
+  (
+    SELECT
+        c.relname table_name,
+        a.attname att_name,
+        CASE WHEN t.typcategory = 'A' THEN te.oid ELSE t.oid END typid,
+        t.typcategory = 'A' is_array
+      FROM
+        pg_catalog.pg_class c JOIN
+        pg_catalog.pg_type ct ON c.reltype = ct.oid JOIN
+        pg_catalog.pg_namespace cn ON c.relnamespace = cn.oid JOIN
+        pg_catalog.pg_attribute a ON c.oid = a.attrelid JOIN
+        pg_catalog.pg_type t ON a.atttypid = t.oid JOIN
+        pg_catalog.pg_namespace tn ON t.typnamespace = tn.oid LEFT JOIN
+        pg_catalog.pg_type te ON t.typelem = te.oid
+      WHERE
+        cn.nspname LIKE 'xplan_gml' AND
+        c.relname LIKE 'fp_gemeinbedarf' AND
+        a.attnum > 0 AND
+        NOT a.attisdropped
+      ORDER BY c.relname, a.attname
+   ) attr JOIN
+   pg_type at ON attr.typid = at.oid LEFT JOIN
+   xplan_uml.uml_classes uc ON at.typname = LOWER(uc.name) LEFT JOIN
+   xplan_uml.stereotypes st ON uc.stereotype_id = st.xmi_id
+ORDER BY
+  attr.table_name,
+  attr.att_name
+LIMIT 100
+	*/
+	function get_generic_data_sql($attributes = array()) {
+		include_once(CLASSPATH . 'Enumeration.php');
+		include_once(CLASSPATH . 'DataType.php');
+		include_once(CLASSPATH . 'CodeList.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+		$msg = 'get_generic_data_sql';
+		$sql = "
+			SELECT
+				attr.table_schema,
+				attr.table_name,
+				attr.att_name,
+				at.typname,
+				at.typcategory,
+				attr.is_array,
+				atc.relname AS dtd_table_name
+			FROM
+				(
+					SELECT
+						cn.nspname table_schema,
+						c.relname table_name,
+						a.attname att_name,
+						CASE WHEN t.typcategory = 'A' THEN te.oid ELSE t.oid END typid,
+						t.typcategory = 'A' is_array
+					FROM
+						pg_catalog.pg_class c JOIN
+						pg_catalog.pg_type ct ON c.reltype = ct.oid JOIN
+						pg_catalog.pg_namespace cn ON c.relnamespace = cn.oid JOIN
+						pg_catalog.pg_attribute a ON c.oid = a.attrelid JOIN
+						pg_catalog.pg_type t ON a.atttypid = t.oid JOIN
+						pg_catalog.pg_namespace tn ON t.typnamespace = tn.oid LEFT JOIN
+						pg_catalog.pg_type te ON t.typelem = te.oid
+					WHERE
+						a.attnum > 0 AND
+						NOT a.attisdropped
+				) attr JOIN
+				pg_type at ON attr.typid = at.oid LEFT JOIN
+				pg_class atc ON at.typrelid = atc.oid
+			WHERE
+				attr.table_schema LIKE '" . $this->get('schema') . "' AND
+				attr.table_name LIKE '" . $this->get('maintable') . "'
+			ORDER BY
+				attr.table_name,
+				attr.att_name
+		";
+		#echo 'SQL zur Abfrage der Attribute: ' . $sql;
+		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage der Tabellenattribute. Fehler: ' . $ret['msg']
+			);
+		}
+
+		while ($attr = pg_fetch_assoc($ret['query'])) {
+			switch($this->get_attribute_type($attr)) {
+				case 'Enumeration' : {
+					$formatter_objekt = new Enumeration($this->gui);
+				} break;
+				case 'Enumeration with table' : {
+					$formatter_objekt = new Enumeration($this->gui, 'enum_' . $attr['typname']);
+				} break;
+				case 'CodeList' : {
+					$formatter_objekt = new CodeList($this->gui);
+				} break;
+				case 'DataType' : {
+					$formatter_objekt = new DataType($this->gui);
+				} break;
+				default : {
+					$formatter_objekt = new LayerAttribute($this->gui);
+				}
+			}
+			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
+			$attributes[] = $formatter_objekt->get_generic_select($this, $attr);
+		}
+		# ToDo find unique $id_attribute, $geom_attribute und $layer_epsg um vollständiges sql für data zu erzeugen
+		# ) AS foo using unique $id_attribute using srid = $layer_epsg
+		$geom_attriubte = "position";
+		$id_attribute = "gml_id";
+		$layer_epsg = "25832";
+		# ToDo füge noch Zusätze ein, die über array(select, from) an get_generic_data_sql übergeben werden.
+		$data_sql = $geom_attriubte . " (select " . implode(", ", array_map(function($a) { return $a['select']; }, $attributes)) . " from " . $this->get('schema') . "." . $this->get('maintable') . " " . implode("", array_map(function($a) { return $a['from']; }, $attributes)) . ") as foo using unique " . $id_attribute . " using srid=" . $layer_epsg;
+
+		return array(
+			'success' => true,
+			'msg' => $msg,
+			'data_sql' => $data_sql
+		);
+	}
+
+	function enum_table_exists($table_name) {
+		return false;
+	}
+
+	function codelist_table_exists($table_name) {
+		return false;
+	}
+
+	function datatype_table_exists($table_name) {
+		return false;
+	}
+		
+	function get_attribute_type($def) {
+		if ($def['typcategory'] == 'E') {
+			if ($this->enum_table_exists($def['typname'])) {
+				#extent select to query wert and beschreibung
+				return 'Enumeration with table';
+			}
+			return 'Enumeration';
+		}
+		if ($def['dtd_table_name'] != '') {
+			if ($this->codelist_table_exists($def['typname'])) {
+				return 'CodeList';
+			}
+			if ($this->datatype_table_exists($def['typname'])) {
+				return 'DataType';
+			}
+		}
+		return 'normal';
+	}
+
 }
 ?>

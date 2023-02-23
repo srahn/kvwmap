@@ -231,7 +231,7 @@ class GUI {
     $this->Stelle->getName();
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
-	
+
 	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){
 		include_once(CLASSPATH.'FormObject.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
@@ -249,7 +249,8 @@ class GUI {
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id)));
+			$this->params_layer = $mapDB->get_layer_params_layer(NULL, $layer_id);
+			$selectable_layer_params = implode(', ', array_keys($this->params_layer));
 			$rolle = $this->user->rolle;
 		}
 		$params = $rolle->get_layer_params($selectable_layer_params, $this->pgdatabase);
@@ -448,7 +449,7 @@ class GUI {
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 							if ($this->user->layer_data_import_allowed) {
-								echo '<li><a href="index.php?go=Daten_Import&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 							}
 						}
 						if ($layer[0]['Class'][0]['Name'] != '') {
@@ -1153,6 +1154,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -1226,7 +1228,7 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				wfs_geom, write_mapserver_templates, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -1928,7 +1930,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -2001,8 +2003,11 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
@@ -2129,9 +2134,18 @@ class pgdatabase {
 			return false;
 		};
 		set_error_handler($myErrorHandler);
-		$sql = 'SET client_min_messages=\'log\';SET debug_print_parse=true;'.$select." LIMIT 0;";		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		$sql = "
+			SET client_min_messages='log';
+			SET log_min_messages='fatal';
+			SET debug_print_parse=true;" . 
+			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
-
+		$sql = "
+			SET debug_print_parse = false;
+			SET client_min_messages = 'NOTICE';
+			SET log_min_messages='error';";
+		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
@@ -2268,9 +2282,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
-			//if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			//};
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
