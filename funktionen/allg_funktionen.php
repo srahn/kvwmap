@@ -2427,7 +2427,7 @@ function get_max_file_size() {
 	@return Array
 */
 function put_value_first($array, $value) {
-	$key = array_search($val, $array);
+	$key = array_search($value, $array);
 	if ($key !== false) {
 		unset($array[$key]);
 	}

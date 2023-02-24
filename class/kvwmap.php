@@ -12286,7 +12286,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
 					}
 				}
-				if ($Stelle->default_user_id !== '') {
+				if ($Stelle->default_user_id != '') {
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
