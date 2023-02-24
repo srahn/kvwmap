@@ -260,7 +260,7 @@ function scrolltop(){
 								?>
 							</div>
 							<div style="position: absolute; top: 0px; z-index: 1">
-								<svg xmlns="http://www.w3.org/2000/svg" width="595" height="842">
+								<svg xmlns="http://www.w3.org/2000/svg" width="<? echo $this->ddl->selectedlayout[0]['width']; ?>" height="<? echo $this->ddl->selectedlayout[0]['height']; ?>">
 									<style type="text/css"><![CDATA[
 										.line{
 											stroke: steelblue;
@@ -274,7 +274,7 @@ function scrolltop(){
 										}
 
 									]]></style>
-									<g transform="translate(0, 842) scale(1, -1)">
+									<g transform="translate(0, <? echo $this->ddl->selectedlayout[0]['height']; ?>) scale(1, -1)">
 								<?
 									if($this->lines){
 										$this->lines = array_values($this->lines);
