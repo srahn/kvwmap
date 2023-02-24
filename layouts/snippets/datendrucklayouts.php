@@ -93,6 +93,7 @@ function image_coords(event){
 	document.getElementById('coords').style.visibility='';
 	var offset = 0;
 	var pointer_div = document.getElementById("preview_div");
+	var height = parseInt(pointer_div.style.height);
 	if(window.ActiveXObject){		//for IE
 		pos_x = window.event.offsetX;
 		pos_y = window.event.offsetY;
@@ -108,13 +109,13 @@ function image_coords(event){
 		pos_x = event.pageX - left;
 		pos_y = event.pageY - top;
 	}
-	if(pos_y > 700){
+	if(pos_y > height - 140){
 		offset = 130;
 	}
 	document.getElementById("coords").style.left = pos_x+7;
 	document.getElementById("coords").style.top = pos_y-offset;
 	document.getElementById("posx").value = pos_x;
-	document.getElementById("posy").value = 842-pos_y;
+	document.getElementById("posy").value = height - pos_y;
 }
 
 
