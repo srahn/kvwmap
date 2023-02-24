@@ -340,7 +340,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"] input[type="float"] {
+input[type="text"], input[type="float"] {
 
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
