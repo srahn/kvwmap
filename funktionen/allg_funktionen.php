@@ -819,7 +819,7 @@ function password_erstellungs_hinweis($language) {
 	include_once(LAYOUTPATH . 'languages/allg_funktionen_' . $language . '.php');
 	$condition = array();
 	$msg = '';
-	if (substr(PASSWORD_CHECK, 0, 1) == '1') {
+	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
 		$msg = $strPasswordCheck0;
 	}
 	else {
