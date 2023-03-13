@@ -1398,6 +1398,7 @@ class db_mapObj {
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if($layer_id != NULL){
+			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
 			$sql .= " 
 			AND l.Layer_ID NOT IN (
 					SELECT 
@@ -1408,6 +1409,7 @@ class db_mapObj {
 						a.layer_id = " . $layer_id . " AND 
 						a.form_element_type = 'SubformEmbeddedPK'
 			) 
+			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
 			GROUP BY 
 				p.id
       HAVING 
