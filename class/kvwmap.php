@@ -9135,8 +9135,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 
 				$layerset[0]['sql'] = $sql;
-
-				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				if ($this->user->id == 1) {
+					#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				}
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -14759,8 +14760,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
 				) AND
 				(
-					($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR
-					$this->last_query != ''
+					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
+					($this->last_query[$layerset[$i]['Layer_ID']] != '')
 				)
 			) {
 				# Dieser Layer soll abgefragt werden

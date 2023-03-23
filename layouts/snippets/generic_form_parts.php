@@ -634,7 +634,7 @@
 						else {
 							$datapart .= '<div>';
 							$datapart .= 'Oooops!<p>';
-							$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+							$datapart .= 'Die Datei ' . $value . ' wurde nicht auf dem Server gefunden.';
 							if ($layer['document_url'] == '') {
 								$datapart .= '<br>Der originale Name der Datei war ' . $preview['original_name'];
 							}
