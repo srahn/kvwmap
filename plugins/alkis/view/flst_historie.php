@@ -16,10 +16,9 @@
 				
 		max_depth = 0;
 		
-		var svg = d3.select("#hierarchy_0").append("svg")
+		var svg = d3.select("#svg_hierarchy")
 				.attr("width", width)
-				.attr("height", height)
-				.attr("id", 'svg_hierarchy');
+				.attr("height", height);
 				
 		force = d3.layout.force()
 				.gravity(1.3)
@@ -134,60 +133,23 @@
 			link.classList.remove('highlighted');
 		});
 	}
+	
+function drucken(){
+	var svg = document.getElementById("svg_hierarchy");
+	try{
+  	var serializer = new XMLSerializer();
+  	document.GUI.svg_string.value = serializer.serializeToString(svg);
+	}
+	catch(e){
+		document.GUI.svg_string.value = printNode(svg);
+	}
+  document.GUI.go.value = 'Flurstueckshistorie_drucken';
+	document.GUI.target = '_blank';
+	document.GUI.submit();
+	document.GUI.target = '';
+}
 
 </script>
-
-<style>
-
-.fh-hierarchy svg{
-	border: 1px solid #ccc;
-	box-shadow: 0px 4px 7px 0px rgba(0,0,0,0.45);
-	background: white;
-}
-
-.fh-link {
-	stroke: #ddd;
-	stroke-width: 2px;
-}
-
-.fh-link.highlighted{
-	stroke: #6e80b5;
-	stroke-width: 4px;
-}
-
-.fh-node text {
-	font: 12px SourceSansPro1;
-}
-
-.fh-node.requested text{
-	font: 12px SourceSansPro3;
-}
-
-.fh-node text:hover {
-	font-weight: bold;
-}
-
-.fh-node circle{
-	fill: #b2eaa6;
-	stroke: #74c476;
-	stroke-width: 3px;
-	cursor: pointer;
-}
-
-.fh-node circle:hover{
-	stroke-width: 5px;
-}
-
-.fh-node circle.hist {
-	fill: #ddd;
-	stroke: #bbb;
-}
-
-.fh-node.requested circle {
-	stroke: #e00;
-}
-
-</style>
 
 <br>
 <h1>Historie des Flurstücks <? echo formatFlurstkennzALK($this->formvars['flurstueckskennzeichen']); ?></h1>
@@ -213,7 +175,66 @@ foreach ($this->flst_historie as $flst) {
 		
 ?>
   
-<div id="hierarchy_0" class="fh-hierarchy"></div>
+<div id="hierarchy_0" class="fh-hierarchy">
+	<svg id="svg_hierarchy">
+		<style>
+
+			.fh-hierarchy svg{
+				border: 1px solid #ccc;
+				box-shadow: 0px 4px 7px 0px rgba(0,0,0,0.45);
+				background: white;
+			}
+
+			.fh-link {
+				stroke: #ddd;
+				stroke-width: 2px;
+			}
+
+			.fh-link.highlighted{
+				stroke: #6e80b5;
+				stroke-width: 4px;
+			}
+
+			.fh-node text {
+				font: 12px SourceSansPro1;
+			}
+
+			.fh-node.requested text{
+				font: 12px SourceSansPro3;
+			}
+
+			.fh-node text:hover {
+				font-weight: bold;
+			}
+
+			circle{
+				fill: #b2eaa6;
+				stroke: #74c476;
+				stroke-width: 3px;
+				cursor: pointer;
+			}
+
+			.fh-node circle:hover{
+				stroke-width: 5px;
+			}
+
+			circle.hist {
+				fill: #ddd;
+				stroke: #bbb;
+			}
+
+			.fh-node.requested circle {
+				stroke: #e00;
+			}
+
+		</style>
+	</svg>
+</div>
+<br>
+<input type="button" onclick="drucken();" value="Drucken">
+<br><br>
+<input type="hidden" name="svg_string" value="">
+<input type="hidden" name="go" value="">
 
 <script type="text/javascript">
 
