@@ -395,12 +395,20 @@ if ($anzNamen>0) {
 						<div class="float_right"><input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" tabindex="2"></div>
 					</div>
 				</div>
-				<div><div class="form_formular-aic">
-					<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
-					<span><?php echo $strExactSearch; ?></span>
-					<span data-tooltip="Name/Firma und Vorname:
+				<div>
+					<div class="form_formular-aic">
+						<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
+						<span><?php echo $strExactSearch; ?></span>
+						<span data-tooltip="Name/Firma und Vorname:
 Suche genau nach der Eingabe"></span>
-				</div></div>
+					</div>
+					<br>
+					<div class="form_formular-aic">
+						<input style="cursor: pointer;" type="checkbox" name="alleiniger_eigentuemer" value="1" tabindex="3" <? if($this->formvars['alleiniger_eigentuemer']) echo 'checked'; ?>>
+						<span>alleiniger Eigentümer</span>
+						<span data-tooltip="Die Person ist der einzige Eigentümer des Flurstücks."></span>
+					</div>
+				</div>				
 			</div>
 			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName3; ?></div>

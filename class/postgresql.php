@@ -1860,16 +1860,34 @@ FROM
 		$order = $formvars['order'];
 		if($order == '')$order = 'nachnameoderfirma, vorname';
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.gml_id, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
-		$sql.= "FROM alkis.ax_person p ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
-		$sql.= " WHERE 1=1 ";
+    $sql = "
+			set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;
+			SELECT distinct 
+				p.gml_id, 
+				p.nachnameoderfirma, 
+				p.vorname, 
+				p.namensbestandteil, 
+				p.akademischergrad, 
+				p.geburtsname, 
+				p.geburtsdatum, 
+				array_to_string(p.hat, ',') as hat, 
+				anschrift.strasse, 
+				anschrift.hausnummer, 
+				anschrift.postleitzahlpostzustellung, 
+				anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, 
+				anschrift.bestimmungsland, 
+				g.buchungsblattnummermitbuchstabenerweiterung as blatt, 
+				b.schluesselgesamt as bezirk
+			FROM 
+				alkis.ax_person p 
+				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] -- da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
+				LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id 
+				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
+				LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+				LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) 
+			WHERE 1=1 ";
     if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
@@ -1912,6 +1930,20 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		if ($formvars['alleiniger_eigentuemer']) {
+			$sql.= "
+				AND NOT EXISTS (
+					SELECT
+					FROM 
+						alkis.ax_buchungsstelle s2 
+						JOIN alkis.ax_buchungsblatt g2 ON s2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
+					WHERE 
+						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
+				)";
+		}
     $sql .= " ORDER BY ". $order;
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";
