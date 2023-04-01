@@ -1592,3 +1592,19 @@ function show_validation_error(validation_error) {
 	errElem.append('<div class="red">' + validation_error.msg + '</div>');
 	$('#form-submit-button').hide();
 }
+
+/**
+	Split text by delimiter and add text line by line with delay and delimiter in between to element.
+	@param text String The text that shall be added to the element with this delay function.
+  @param element jquery Element object where the text has to be append.
+	@param delay integer Delay in milliseconds between adding one line after the other
+	@param prefix String Text in front of each line
+  @param delimiter String Text to delimit the lines of text
+*/
+function add_text_with_delay(text, element, delay = 3000, prefix = '', delimiter = '<br>') {
+	text.split(delimiter).forEach(
+		(line, i) => {
+			setTimeout((i, prefix, delimiter) => { element.append(prefix + line + delimiter) }, i * delay, i, prefix, delimiter);
+		}
+	)
+}

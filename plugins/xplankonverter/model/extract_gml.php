@@ -15,16 +15,18 @@ class Gml_extractor {
 	}
 
 	/**
-		ToDo:
-		Die Funktion zum Importieren der XPlanGML-Datei in das gmlas Schema und die Belegung der formvars auftrennen in import_gml_to_db() und extract_to_form, damit man auch einlesen kann ohne die Forms zu füllen
-		Dann die Übernahme der Daten aus dem import Schema nach konvertierung und xplan_gml ausführen (create_plaene_from_gmlas) und Kennzeichnung als neue Version einer Zusammenzeichnung
-		was geht durch das Attribut zusammenzeichnung Typ boolean der Klasse xp_plan und dem Attribut veroeffentlichungsdatum der Tabelle xplankonverter.konvertierungen
-		Also migration für neues Attribut zusammenzeichnung boolean in Klasse xp_plan.
-		migration 2022-10-18_18-01-17_add_zusammenzeichnung_to_xp_plan.sql schon angelegt.
+		Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
 	*/
 	function import_gml_to_db() {
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			return array(
+				'succes' => false,
+				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
+			);
+		}
+		$this->input_epsg  = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
@@ -47,6 +49,10 @@ class Gml_extractor {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
+		return array(
+			'success' => true,
+			'msg' => 'gmlas_output: ' . $gmlas_output
+		);
 	}
 
 	function extract_to_form($classname) {
@@ -143,7 +149,15 @@ class Gml_extractor {
 			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
 		*/
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			$GUI->add_message('warning', $result['msg']);
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
+			exit;
+		}
+		$this->input_epsg = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
@@ -279,7 +293,7 @@ class Gml_extractor {
 
 		# echo $matched_epsg_str[1] . '<br>';
 
-		if(isset($matched_epsg_str[1])) {
+		if (isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
 			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
@@ -287,18 +301,21 @@ class Gml_extractor {
 				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
 				$epsg = $matched_epsg;
 			}
+			return array(
+				'success' => true,
+				'epsg' => $epsg
+			);
 		}
 		else {
 			$msg  = 'Konnte das SRS des XPlan-Envelope nicht innerhalb von Doppelten oder einfachen Anführungszeichen finden'; 
 			$msg .= 'Bitte stellen Sie sicher, das ein Envelope-Element nach XPlan-Konformitaetsbedingung 2.1.3.1 vorhanden ist, z.B. wie folgt:<br>';
 			$msg .= '<pre>' . htmlentities('<gml:boundedBy><gml:Envelope srsName="EPSG:25833">...</gml:Envelope></gml:boundedBy>') . '</pre>...<br>';
 			$msg .= 'Ein Fallback SRS mit EPSG ' . $this->fallback_epsg . ' wird benutzt.<br>';
-			$GUI->add_message('warning', $msg);
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
 		}
-		// fallback value
-		return $epsg;
 	}
 	/* 
 	* parses current xplan-version from file
@@ -630,7 +647,7 @@ class Gml_extractor {
 				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart AS sonstplanart,
 				gmlas.gruenordnungsplan AS gruenordnungsplan,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				array_to_jsonARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
 				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,
@@ -1121,8 +1138,8 @@ class Gml_extractor {
 		$sql .= ";";
 		# echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		$result = pg_fetch_assoc($ret[1]);
-		return $result;
+		#$result = pg_fetch_assoc($ret[1]);
+		return $ret;
 	}
 	
 		/* string ends with 
@@ -2121,12 +2138,10 @@ class Gml_extractor {
 	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
-		
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
 
 		$classes = $this->get_possible_classes_for_regeln($this->gmlas_schema);
-		
 		# Loop over relevant bereiche -> classes -> geom
 		$bereich_index = 0;
 		foreach($bereiche_ids as $bereich_gml_id) {
@@ -2419,7 +2434,7 @@ class Gml_extractor {
 		$sql .= $konvertierung_id . " AS konvertierung_id, ";
 		$sql .= $stelle_id . " AS stelle_id, ";
 		$sql .= "'" . $bereich_gml_id . "' AS bereich_gml_id ";
-
+		#echo 'INSERT regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 	}
 
@@ -2454,7 +2469,8 @@ class Gml_extractor {
 				i.table_name NOT LIKE '%\_textabschnitt'
 			ORDER BY
 				i.table_name;
-			";
+		";
+		#echo 'Abfrage der Classes for regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$classes = pg_fetch_all_columns($ret[1]);
 		return $classes;

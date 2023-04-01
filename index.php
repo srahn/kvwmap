@@ -38,7 +38,7 @@ function CustomErrorHandler($errno, $errstr, $errfile, $errline){
 	return true;
 }
 
-set_error_handler("CustomErrorHandler");
+#set_error_handler("CustomErrorHandler");
 
 if (!file_exists('credentials.php') OR !file_exists('config.php')) {
 	echo '<h1>kvwmap-Server</h1>Die Anwendung kvwmap ist noch nicht fertig eingerichtet.<br>Dazu kann das Script <a href="install.php">install.php</a> verwendet werden.';
@@ -251,6 +251,15 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
+			
+			case 'write_mapserver_templates' : {
+				include_once(CLASSPATH . 'Layer.php');
+				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
+				foreach ($layers as $layer) {
+					echo $layer->get('Name') . '<br>';
+					$layer->write_mapserver_templates('Formular');
+				}
+			}break;			
 			
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);

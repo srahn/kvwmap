@@ -76,7 +76,7 @@ class pgdatabase {
 	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open($connection_id = 0) {
+  function open($connection_id = 0, $flag = NULL) {
 		if ($connection_id == 0) {
 			# get credentials from object variables
 			#echo '<br>connection_id ist 0, hole von object credentials';
@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
+		$this->dbConn = pg_connect($connection_string, $flag);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));

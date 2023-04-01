@@ -2017,7 +2017,7 @@ echo '			</table>
 		}
 		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
 		$layer->setMetaData('ows_title', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name'])); # required
-		$layer->setMetaData('wms_group_title',$layerset['Gruppenname']);
+		$layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
 		$layer->setMetaData('wms_queryable',$layerset['queryable']);
 		$layer->setMetaData('wms_format',$layerset['wms_format']);
 		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
@@ -2038,12 +2038,12 @@ echo '			</table>
 		$layer->setMetaData('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->setMetaData("gml_featureid", "ogc_fid");
+		$layer->setMetaData("gml_featureid", $layerset['oid']);
 		$layer->setMetaData("gml_include_items", "all");
 		$layer->setMetaData('wms_abstract', $layerset['kurzbeschreibung']);
 		$layer->set('dump', 0);
 		$layer->set('type',$layerset['Datentyp']);
-		$layer->set('group',$layerset['Gruppenname']);
+		$layer->set('group', umlaute_umwandeln($layerset['Gruppenname']));
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -7000,6 +7000,8 @@ echo '			</table>
 			$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
 			$this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
 
+			# errorhandler required for credits and grid
+			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 			# copyright-layer aus dem Mapfile
 			@$creditslayer = $this->map->getLayerByName('credits');
 			if($creditslayer != false){
@@ -9126,7 +9128,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 				$layerset[0]['sql'] = $sql;
 
-				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit; exit;
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -9772,6 +9774,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# das Listen-DIV neu geladen werden (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
+		}
+		else {
+			$this->data = array(
+				'success' => $this->success,
+				'msg' => 'Datensatz erfolgreich gelöscht'
+			);
+			$this->output();
 		}
 
 		return $this->success;
@@ -16644,6 +16653,7 @@ class db_mapObj{
 
 		$sql = "
 			SELECT DISTINCT
+				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, rl.`rollenfilter`,
 				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
 				l.Layer_ID," .
@@ -20055,7 +20065,7 @@ class db_mapObj{
 			DELETE 
 				c, rc 
 			FROM
-				classes c JOIN 
+				classes c LEFT JOIN
 				u_rolle2used_class rc ON c.Class_ID = rc.class_id
 			WHERE 
 				c.Class_ID = " . $class_id;
