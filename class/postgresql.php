@@ -608,7 +608,7 @@ FROM
 	}
 
 	function get_table_alias_names($query_plan){
-		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
+		$table_info = explode(":alias {ALIAS", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
@@ -621,40 +621,24 @@ FROM
 
 	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
-		$error_reporting = error_reporting();
-		error_reporting(E_NOTICE);
-		ini_set("pgsql.log_notice", '1');
-		ini_set("pgsql.ignore_notice", '0');
-		ini_set("display_errors", '0');
-		$error_list = array();
-		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
-			if(strpos($error_message, "\n      :resno") !== false){
-				$error_list[] = $error_message;
-			}
-			return false;
-		};
-		set_error_handler($myErrorHandler);
-		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
+		# den Queryplan abfragen um an Infos zur Query zu kommen
 		$sql = "
-			SET client_min_messages='log';
-			SET log_min_messages='fatal';
-			SET debug_print_parse=true;" . 
+			CREATE TEMPORARY VIEW _temp AS " . 
 			$select . " LIMIT 0;";
-		$ret = $this->execSQL($sql, 4, 0);
-		$sql = "
-			SET debug_print_parse = false;
-			SET client_min_messages = 'NOTICE';
-			SET log_min_messages='error';";
 		$this->execSQL($sql, 4, 0);
-		error_reporting($error_reporting);
-		ini_set("display_errors", '1');
+		$sql = "
+			SELECT ev_action FROM pg_rewrite WHERE rulename='_RETURN' AND ev_class='_temp'::regclass;";
+		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret['success']) {
-			$query_plan = $error_list[0];
+			$rs = pg_fetch_row($ret[1]);
+			$query_plan = $rs[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
-			$field_plan_info = explode("\n      :resno", $query_plan);
+			$field_plan_info = explode(":resno", $query_plan);
 			if ($pseudo_realnames) {
 				$select_attr = attributes_from_select($select);
 			}
+			$sql = $select . " LIMIT 0;";
+			$ret = $this->execSQL($sql, 4, 0);
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
