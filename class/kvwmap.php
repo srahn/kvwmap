@@ -2551,13 +2551,8 @@ echo '			</table>
 				if(value_of($layerset, 'labelangleitem') != ''){
 					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
 				}
-				if($dbLabel['autoangle']==1) {
-					if(MAPSERVERVERSION >= 600){
-						$label->set('anglemode', MS_AUTO);
-					}
-					else{
-						$label->autoangle = $dbLabel['autoangle'];
-					}
+				if($dbLabel['anglemode'] != NULL) {
+					$label->set('anglemode', $dbLabel['anglemode']);
 				}
 				if ($dbLabel['buffer']!='') {
 					$label->buffer = $dbLabel['buffer'];
@@ -4604,6 +4599,26 @@ echo '			</table>
             <td class="px13">
 							'.key($this->labeldaten).'</td><td>';
 							switch(key($this->labeldaten)){
+								case 'anglemode' : {
+									echo FormObject::createSelectField(
+											'label_'.key($this->labeldaten),
+											array(
+												array('value' => NULL, 'output' => ''),
+												array('value' => MS_AUTO, 'output' => 'AUTO'),
+												array('value' => MS_AUTO2, 'output' => 'AUTO2'),
+												array('value' => MS_FOLLOW, 'output' => 'FOLLOW'),
+											),
+											$this->labeldaten[key($this->labeldaten)],
+											1,
+											"width: 87px",
+											"",
+											"",
+											"",
+											'labelFormField',
+											""
+										);
+								}break;								
+								
 								case 'position' : {
 									echo FormObject::createSelectField(
 											'label_'.key($this->labeldaten),
@@ -12271,7 +12286,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
 					}
 				}
-				if ($Stelle->default_user_id !== '') {
+				if ($Stelle->default_user_id != '') {
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
@@ -14773,8 +14788,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
 				) AND
 				(
-					($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR
-					$this->last_query != ''
+					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
+					($this->last_query[$layerset[$i]['Layer_ID']] != '')					
 				)
 			) {
 				# Dieser Layer soll abgefragt werden
@@ -18119,7 +18134,7 @@ class db_mapObj{
 					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
 				}
 
-				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`autoangle`,`buffer`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
+				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`anglemode`,`buffer`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
 				for ($k = 0; $k < @count($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
@@ -19642,7 +19657,7 @@ class db_mapObj{
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if ($layer_id != NULL) {
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer dabei ignorieren
+			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
 			$sql .= " 
 			AND l.Layer_ID NOT IN (
 					SELECT 
@@ -19653,6 +19668,7 @@ class db_mapObj{
 						a.layer_id = " . $layer_id . " AND 
 						a.form_element_type = 'SubformEmbeddedPK'
 			) 
+			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
 			GROUP BY 
 				p.id
       HAVING 
@@ -19998,7 +20014,7 @@ class db_mapObj{
 	}
 
 	function copyLabel($label_id){
-		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
+		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -20449,8 +20465,8 @@ class db_mapObj{
     if($formvars["label_offsetx"] != ''){$sql.="offsetx = '" . $formvars["label_offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["label_offsety"] != ''){$sql.="offsety = '" . $formvars["label_offsety"]."',";}else{$sql.="offsety = NULL,";}
     if($formvars["label_angle"] != ''){$sql.="angle = '" . $formvars["label_angle"]."',";}else{$sql.="angle = NULL,";}
-    if($formvars["label_autoangle"]){$sql.="autoangle = '" . $formvars["label_autoangle"]."',";}else $sql.="autoangle = NULL,";
-    if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}
+    if($formvars["label_anglemode"]){$sql.="anglemode = '" . $formvars["label_anglemode"]."',";}else $sql.="anglemode = NULL,";
+    if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}else $sql.="buffer = NULL,";
     if($formvars["label_minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["label_minfeaturesize"]."',";}
     if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}
     if($formvars["label_partials"] != ''){$sql.="partials = '" . $formvars["label_partials"]."',";}else{$sql.="partials = NULL,";}
@@ -20495,7 +20511,7 @@ class db_mapObj{
 	    if($label['offsetx']){$sql.= "offsetx = '" . $label['offsetx']."', ";}
 	    if($label['offsety']){$sql.= "offsety = '" . $label['offsety']."', ";}
 	    if($label['angle']){$sql.= "angle = '" . $label['angle']."', ";}
-	    if($label['autoangle']){$sql.= "autoangle = '" . $label['autoangle']."', ";}
+	    if($label['anglemode']){$sql.= "anglemode = '" . $label['anglemode']."', ";}
 	    if($label['buffer']){$sql.= "buffer = '" . $label['buffer']."', ";}
 	    if($label['minfeaturesize']){$sql.= "minfeaturesize = '" . $label['minfeaturesize']."', ";}
 	    if($label['maxfeaturesize']){$sql.= "maxfeaturesize = '" . $label['maxfeaturesize']."', ";}
@@ -20524,7 +20540,7 @@ class db_mapObj{
 	    if($label->offsetx){$sql.= "offsetx = '" . $label->offsetx."', ";}
 	    if($label->offsety){$sql.= "offsety = '" . $label->offsety."', ";}
 	    if($label->angle){$sql.= "angle = '" . $label->angle."', ";}
-	    if($label->autoangle){$sql.= "autoangle = '" . $label->autoangle."', ";}
+	    if($label->anglemode){$sql.= "anglemode = '" . $label->anglemode."', ";}
 	    if($label->buffer){$sql.= "buffer = '" . $label->buffer."', ";}
 	    if($label->minfeaturesize){$sql.= "minfeaturesize = '" . $label->minfeaturesize."', ";}
 	    if($label->maxfeaturesize){$sql.= "maxfeaturesize = '" . $label->maxfeaturesize."', ";}

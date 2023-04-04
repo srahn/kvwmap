@@ -818,7 +818,7 @@ function password_erstellungs_hinweis($language) {
 	include_once(LAYOUTPATH . 'languages/allg_funktionen_' . $language . '.php');
 	$condition = array();
 	$msg = '';
-	if (substr(PASSWORD_CHECK, 0, 1) == '1') {
+	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
 		$msg = $strPasswordCheck0;
 	}
 	else {
@@ -2427,7 +2427,7 @@ function get_max_file_size() {
 	@return Array
 */
 function put_value_first($array, $value) {
-	$key = array_search($val, $array);
+	$key = array_search($value, $array);
 	if ($key !== false) {
 		unset($array[$key]);
 	}

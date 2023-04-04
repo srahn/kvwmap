@@ -11,7 +11,7 @@ if (isset($argv)) {
 	}
 }
 
-# Error Handling for Fatal-Errors
+# Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
@@ -26,16 +26,23 @@ register_shutdown_function(function () {
 });
 
 # Error-Handling
-function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	http_response_code(500);
-	include_once('layouts/snippets/general_error_page.php');
-	/* Don't execute PHP internal error handler */
-	return true;
+// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	// global $errors;
+	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		// return;
+	// }
+	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	// http_response_code(500);
+	// include_once('layouts/snippets/general_error_page.php');
+	// /* Don't execute PHP internal error handler */
+	// return true;
+// }
+
+function CustomErrorHandler($severity, $message, $filename, $lineno) {
+		if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+			return;
+		}
+    throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 set_error_handler("CustomErrorHandler");
