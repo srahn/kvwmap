@@ -2,6 +2,13 @@
 	global $supportedLanguages;
 	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
 ?>
+
+<style>
+	#search_div {
+		display: none;
+	}
+</style>
+
 <div style="
 	width: 100%;
 	height: 100%;
