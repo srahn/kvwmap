@@ -112,6 +112,7 @@ class pgdatabase {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
 		include_once(CLASSPATH . 'Connection.php');
 		$conn = Connection::find_by_id($this->gui, $connection_id);
+		$this->host = $conn->get('host');
 		return array(
 			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
 			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
