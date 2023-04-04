@@ -30,8 +30,8 @@
 		}
 	}
 </script>
-<div id="search_div">
-	<input id="geo_name_search_field" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeydown="keydown(event);" onkeyup="wait();">
+<div id="search_div" style="display: none">
+	<input id="geo_name_search_field" style="width: 100%" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeydown="keydown(event);" onkeyup="wait();">
 </div>
 <div id="geo_name_search_result_div">
 </div>
