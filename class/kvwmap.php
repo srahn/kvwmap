@@ -18775,7 +18775,7 @@ class db_mapObj{
 					`order` = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
 					`name` = '" . $attributes['name'][$i] . "', " .
 					$alias_rows . "
-					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`form_element_type` = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
 					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
 					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
 					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
