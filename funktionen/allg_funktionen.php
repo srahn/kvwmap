@@ -306,6 +306,11 @@ function compare_orders($a, $b){
   else return 0;
 }
 
+function compare_orders2($a, $b){
+	if($a['order'] > $b['order'])return 1;
+	else return 0;
+}
+
 function compare_groups($a, $b){
   if($a->group > $b->group)return 1;
   else return 0;
