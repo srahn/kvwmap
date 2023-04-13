@@ -1471,13 +1471,8 @@ class GUI {
 				if($layerset['labelangleitem']!=''){
 					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
 				}
-				if($dbLabel['autoangle']==1) {
-					if(MAPSERVERVERSION >= 600){
-						$label->set('anglemode', MS_AUTO);
-					}
-					else{
-						$label->autoangle = $dbLabel['autoangle'];
-					}
+				if($dbLabel['anglemode'] != NULL) {
+					$label->set('anglemode', $dbLabel['anglemode']);
 				}
 				if ($dbLabel['buffer']!='') {
 					$label->buffer = $dbLabel['buffer'];
@@ -3539,9 +3534,6 @@ class db_mapObj{
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
-			foreach ($attributes['all_table_names'] as $tablename) {
-				$attributes['oids'][] = $layerdb->check_oid($tablename);   # testen ob Tabelle oid hat
-			}
 		}
 		else {
 			$attributes['all_table_names'] = array();

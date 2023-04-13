@@ -112,5 +112,5 @@
 	$strWMSName = "WMS-name";
 	$strWMSServerVersion = "WMS-serverversion*";
 	$strWriteMapserverTemplates = "Write MapServer Templates";
-	$strWriteMapserverTemplatesHelp = "If option is selected, a related MapServer header and footer file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The path of the template directory is defined in constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. Files with the same layer name gets the same template files. As the layer name will be used the name wich is valid for choosen language in the moment the layer is saved.";
+	$strWriteMapserverTemplatesHelp = "If this option is selected, a related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";
 ?>

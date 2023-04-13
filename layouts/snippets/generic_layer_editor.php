@@ -1,3 +1,25 @@
+<script>
+
+	function toggleColumn(checkbox, layer_id, attribute_name){
+		var head = document.getElementById('column_' + layer_id + '_' + attribute_name);
+		var group = head.classList[0].split('_')[1];
+		if (document.getElementById(group)) {
+			if (checkbox.checked) {
+				document.getElementById(group).colSpan += 1;
+			}
+			else {
+				document.getElementById(group).colSpan -= 1;
+			}
+		}
+		head.classList.toggle('hidden');
+		tds = document.querySelectorAll('.value_' + layer_id + '_' + attribute_name);
+		[].forEach.call(tds, function (td){
+			td.classList.toggle('hidden');
+		});
+	}
+	
+</script>
+
 <?
 include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
 $checkbox_names = '';
@@ -70,8 +92,16 @@ if ($doit == true) { ?>
 				</tr>
 			</table><?
 		}
-		$table_id = rand(0, 100000);
-		echo $layer['paging']; ?>
+		$table_id = rand(0, 100000); ?>
+		<div style="display: flex; justify-content: end;"> 
+			<? echo $layer['paging']; ?>
+			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
+			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">	<? 
+				for ($j = 0; $j < count($layer['attributes']['name']); $j++) { ?>
+					<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+				}	?>
+			</div>
+		</div>
 		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
@@ -121,7 +151,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td id="column'.$j.'" class="group_'.$groupname.'"';
+											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="group_'.$groupname.'"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
@@ -150,7 +180,7 @@ if ($doit == true) { ?>
 												echo '<td align="right"><a href="javascript:;" title="(TT.MM.JJJJ)"><img src="'.GRAPHICSPATH.'calendarsheet.png" border="0"></a><div id="calendar"><input type="hidden" id=calendar_'.$layer['attributes']['name'][$j].'_'.$k.'"></div></td>';
 											}
 											echo '</td>';
-											echo '<td><div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
+											echo '<td><div onmousedown="resizestart(document.getElementById(\'column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="transform: translate(8px); float: right; right: 0px; height: 20px; width: 6px; cursor: e-resize;"></div></td>';
 											echo '</tr></table>';
 											echo '</td>';
 										}
@@ -212,7 +242,7 @@ if ($doit == true) { ?>
 									echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}
 								echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
-								echo '<div onmousedown="resizestart(document.getElementById(\'column'.$j.'\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
+								echo '<div onmousedown="resizestart(document.getElementById(\'column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
 								echo '</td>';
 								if($layer['attributes']['privileg'][$j] >= '0'){
 									$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
