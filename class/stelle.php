@@ -1190,8 +1190,6 @@ class stelle {
 
 	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
-		$this->database->close();
-		$this->database->open(MYSQLI_CLIENT_FOUND_ROWS);		# wichtig, damit affected_rows das richtige liefert
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$insert = "(
