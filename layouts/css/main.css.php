@@ -516,7 +516,7 @@ span[data-tooltip]:hover::after {
 }
 
 .listen-tr:hover {
-	background-color: #DAE4EC;
+	background-color: #c5d6e3;
 }
 
 .listen-tr td:last-child .fa {
