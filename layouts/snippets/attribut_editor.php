@@ -160,6 +160,16 @@
 <!--
 var attributes = new Array(<? echo (@count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
+function takeover_attributes(){
+	if (document.getElementById('for_attributes_selected_layer_id').value == '') {
+		message('Bitte wählen Sie einen Layer aus, für den die Attribute übernommen werden sollen.');
+	}
+	else {
+		document.GUI.go.value = 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen';
+		document.GUI.submit();
+	}
+}
+
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
 	else document.getElementById('visibility_form_'+attributename).style.display = 'none';
@@ -571,7 +581,7 @@ function alias_replace(name){
 						'',
 						$strPleaseSelect
 					); ?>
-					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="submit" name="go_plus" value="Attributeinstellungen für ausgewählten Layer übernehmen">
+					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="button" onclick="takeover_attributes();" value="Attributeinstellungen für ausgewählten Layer übernehmen">
 					<span style="margin-left: 10px;">
 					<i
 						id="show_attributes_for_other_layer_button"
