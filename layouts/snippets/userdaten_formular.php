@@ -225,8 +225,8 @@
 				if ($this->formvars['selected_user_id'] > 0) { ?>
 					<div class="udf_eingabe-time">
 						<span><? echo $strLastModPassword;?>:&nbsp;<? echo date('d.m.Y', $passwordSettingUnixTime); ?></span><?
-						if ($this->Stelle->checkPasswordAge) {
-							$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge); ?>
+						if ($this->user_stelle->checkPasswordAge) {
+							$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->user_stelle->allowedPasswordAge); ?>
 							<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
 								if ($allowedPasswordAgeRemainDays < 0) {
 									echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
