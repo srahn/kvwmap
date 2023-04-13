@@ -9160,9 +9160,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							FROM
 								(" . $sql . ") as foo
 						";
-						$ret=$layerdb->execSQL($sql_count,4, 0);
-						if(!$ret[0]){
-							$rs=pg_fetch_array($ret[1]);
+						$ret = $layerdb->execSQL($sql_count,4, 0);
+						if (!$ret[0]) {
+							$rs = pg_fetch_array($ret[1]);
 							$layerset[0]['count'] = $rs[0];
 						}
 					}
@@ -9186,17 +9186,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 				# last_search speichern
-				if ($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
+				if ($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == '') {
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
+				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == '') {
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
-
 					# Querymaps erzeugen
 					if (
 						value_of($this->formvars, 'format') != 'json' AND
@@ -9208,11 +9207,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						)
 					) {
 						$layerset[0]['attributes'] = $attributes;
-						for($k = 0; $k < count($layerset[0]['shape']); $k++){
+						for ($k = 0; $k < count($layerset[0]['shape']); $k++){
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
-
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 					if(is_array(value_of($this->formvars, 'attributenames'))){
 						$attributenames = array_values($this->formvars['attributenames']);
@@ -9286,6 +9284,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->qlayerset[0]=$layerset[0];
 		$i = 0;
 		$this->search = true;
+
 		if (value_of($this->formvars, 'no_output')) {
 			# nichts weiter machen
 		}
