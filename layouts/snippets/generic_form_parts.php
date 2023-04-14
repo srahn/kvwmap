@@ -546,6 +546,7 @@
 				}break;
 
 				case 'SubFormEmbeddedPK' : {
+					$subform_request = true;
 					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
 					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 						if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
@@ -556,7 +557,9 @@
 						else {
 							$key = $subkey = $attributes['subform_pkeys'][$j][$p];
 						}
-						if($dataset[$key] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						if ($dataset[$key] == '') {
+							$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						}
 						$reloadParams .= '&value_'.$subkey.'='.$dataset[$key];
 						$reloadParams .= '&operator_'.$subkey.'==';
 						$reloadParams .= '&attributenames['.$p.']='.$subkey;
@@ -580,8 +583,7 @@
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
-					if($gui->new_entry != true){
-						$subform_request = true;
+					if($gui->new_entry != true AND $subform_request){
 						$datapart .= '
 							<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 						';
@@ -632,7 +634,7 @@
 						else {
 							$datapart .= '<div>';
 							$datapart .= 'Oooops!<p>';
-							$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+							$datapart .= 'Die Datei ' . $value . ' wurde nicht auf dem Server gefunden.';
 							if ($layer['document_url'] == '') {
 								$datapart .= '<br>Der originale Name der Datei war ' . $preview['original_name'];
 							}
