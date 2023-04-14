@@ -1029,6 +1029,7 @@ a.menuered:hover {
 	box-sizing:border-box;
 	padding-left: 17;
 	padding-right: 3px;
+	position: absolute;
 }
 
 .menue-auf .menue_before {
@@ -1043,16 +1044,18 @@ a.menuered:hover {
 
 .obermenue {
 	cursor: pointer;
-
 	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: black;
 	font-family: SourceSansPro2;
 	height: 17px;
 }
 
+.obermenue > span {
+	margin-left: 23px;
+}
+
 .hauptmenue {
 	cursor: pointer;
-
 	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: #a82e2e;
 	font-family: SourceSansPro2;
