@@ -2246,8 +2246,7 @@ class rolle {
 						time_id = '" . $time . "',
 						format = '" . $format . "',
 						log_number = '" . $log_number[$i] . "',
-						wz = '" . $wz . "',
-						numpages = " . $pagecount;
+						wz = '" . $wz . "'";
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {
