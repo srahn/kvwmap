@@ -38,7 +38,7 @@ class LENRIS {
 				VALUES (
 					" . $client_id . ",
 					'" . $time . "',
-					'" . $error . "'
+					'" . pg_escape_string($error) . "'
 				);";
 			$ret = $this->database2->execSQL($sql, 4, 0);
 		}
@@ -57,7 +57,7 @@ class LENRIS {
 			VALUES (
 				" . $client_id . ",
 				'" . $time . "',
-				'" . $msg . "'
+				'" . pg_escape_string($msg) . "'
 			)";
 		$ret = $this->database->execSQL($sql, 4, 0);
 	}
@@ -402,7 +402,7 @@ class LENRIS {
 					" . $geom . ", 
 					" . ($n['fortfuehrung'] ?: 'NULL') . ", 
 					'" . $n['rissnummer'] . "', 
-					" . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
+					" . ($n['bemerkungen'] ? "'" . pg_escape_string($n['bemerkungen']) . "'" : 'NULL') . ",
 					" . ($n['bearbeiter'] ? "'" . $n['bearbeiter'] . "'" : 'NULL') . ", 
 					" . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
 					" . ($n['erstellungszeit'] ? "'" . $n['erstellungszeit'] . "'" : 'NULL') . ", 

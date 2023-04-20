@@ -112,6 +112,7 @@ class pgdatabase {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
 		include_once(CLASSPATH . 'Connection.php');
 		$conn = Connection::find_by_id($this->gui, $connection_id);
+		$this->host = $conn->get('host');
 		return array(
 			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
 			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
@@ -637,14 +638,14 @@ FROM
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$sql = "
 			SET client_min_messages='log';
-			SET log_min_messages='fatal';
+			" . ($this->host == 'pgsql'? "SET log_min_messages='fatal';" : "") . "
 			SET debug_print_parse=true;" . 
 			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
 		$sql = "
 			SET debug_print_parse = false;
 			SET client_min_messages = 'NOTICE';
-			SET log_min_messages='error';";
+			" . ($this->host == 'pgsql'? "SET log_min_messages='error';" : "");
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');

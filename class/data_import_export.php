@@ -73,11 +73,19 @@ class data_import_export {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $database, $schema, $table, $epsg, $adjustments);
 				$epsg = $custom_tables[0]['epsg'];
 			} break;
+			case 'gpkg' : {
+				$this->unique_column = 'ogc_fid';
+				$custom_tables = $this->import_custom_file($filename, $user, $database, $schema, $table, $epsg, false, $adjustments);
+			} break;			
 			case 'kml' : case 'kmz' : {
 				$epsg = 4326;
 				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_kml($filename, $user, $database, $schema, $table, $epsg, $adjustments);
+				$custom_tables = $this->import_custom_file($filename, $user, $database, $schema, $table, $epsg, false, $adjustments);
 			} break;
+			case 'dxf' : {
+				$this->unique_column = 'ogc_fid';
+				$custom_tables = $this->import_custom_file($filename, $user, $database, $schema, $table, $epsg, true, $adjustments);
+			} break;			
 			case 'gpx' : {
 				$epsg = 4326;
 				$this->unique_column = 'ogc_fid';
@@ -89,20 +97,13 @@ class data_import_export {
 			} break;
 			case 'uko' : {
 				$custom_tables = $this->import_custom_uko($filename, $pgdatabase, $epsg);
-				$epsg = $custom_tables[0]['epsg'];
-			} break;
-			case 'dxf' : {
-				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_dxf($filename, $user, $database, $schema, $table, $epsg, $adjustments);
 			} break;
 			case 'json' : case 'geojson' : {
 				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_geojson($filename, $pgdatabase, $epsg);
-				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'geotif' : case 'tiff' : case 'tif' : {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
-				$epsg = $custom_tables[0]['epsg'];
 			} break;
 			case 'point' : {
 				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
@@ -123,7 +124,7 @@ class data_import_export {
 							$user,
 							basename($filename) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
 							$custom_table,
-							$epsg,
+							$epsg ?: $custom_table['epsg'],
 							$this->unique_column
 						);
 					}
@@ -356,11 +357,14 @@ class data_import_export {
 			return $custom_table;
 		}
 	}
-
-	function import_custom_kml($filename, $user, $database, $schema, $table, $epsg, $adjustments){
-		if (file_exists($filename)) {
-			# tracks
-			$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $pgdatabase, NULL);
+	
+	function import_custom_file($filename, $user, $database, $schema, $table, $epsg, $ask_epsg, $adjustments){
+		if(file_exists($filename)){
+			if($epsg == NULL AND $ask_epsg){
+				$this->ask_epsg = true;		# EPSG-Code nachfragen
+				return;
+			}
+			$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, NULL, NULL, NULL, 'UTF-8');
 			if ($ret !== 0) {
 				$custom_table['error'] = $ret;
 				return array($custom_table);
@@ -368,23 +372,25 @@ class data_import_export {
 			else {
 				if ($adjustments) {
 					$sql = $this->rename_reserved_attribute_names($schema, $table);
-				}
-				$sql .= "
+				}				
+				$sql = "
 					SELECT
-						geometrytype(the_geom),
+						replace(geometrytype(the_geom), 'MULTI', '') as geometrytype,
+						max(st_srid(the_geom)) as epsg,
 						count(*)
 					FROM
 						" . $schema . "." . $table . "
-					GROUP BY geometrytype(the_geom)
+					GROUP BY replace(geometrytype(the_geom), 'MULTI', '')
 				";
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
-					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
-					while($result = pg_fetch_assoc($ret[1])){
-						if($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL){
+					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+					while ($result = pg_fetch_assoc($ret[1])){
+						if ($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL) {
 							$custom_table['datatype'] = $geom_types[$result['geometrytype']];
 							$custom_table['tablename'] = $table;
-							$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
+							$custom_table['where'] = " AND replace(geometrytype(the_geom), 'MULTI', '') = '".$result['geometrytype']."'";
+							$custom_table['epsg'] = $result['epsg'];
 							$custom_tables[] = $custom_table;
 						}
 					}
@@ -392,7 +398,7 @@ class data_import_export {
 				}
 			}
 		}
-	}
+	}	
 
 	function import_custom_gpx($filename, $pgdatabase, $epsg){
 		if(file_exists($filename)){
@@ -527,43 +533,6 @@ class data_import_export {
 				$custom_table['tablename'] = $tablename;
 				$custom_table['labelitem'] = 'label';
 				return array($custom_table);
-			}
-		}
-	}
-
-	function import_custom_dxf($filename, $user, $database, $schema, $table, $epsg, $adjustments){
-		if(file_exists($filename)){
-			if($epsg == NULL){
-				$this->ask_epsg = true;		# EPSG-Code nachfragen
-				return;
-			}
-			$ret = $this->ogr2ogr_import($schema, $table, $epsg, $filename, $database, NULL, NULL, NULL, 'UTF-8');
-			if ($ret !== 0) {
-				$custom_table['error'] = $ret;
-				return array($custom_table);
-			}
-			else {
-				$sql = "
-					SELECT
-						geometrytype(the_geom),
-						count(*)
-					FROM
-						" . CUSTOM_SHAPE_SCHEMA . "." . $tablename . "
-					GROUP BY geometrytype(the_geom)
-				";
-				$ret = $database->execSQL($sql,4, 0);
-				if (!$ret[0]) {
-					$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'MULTILINESTRING' => 1, 'POLYGON' => 2, 'MULTIPOLYGON' => 2);
-					while ($result = pg_fetch_assoc($ret[1])){
-						if ($result['count'] > 0 AND $geom_types[$result['geometrytype']] !== NULL) {
-							$custom_table['datatype'] = $geom_types[$result['geometrytype']];
-							$custom_table['tablename'] = $tablename;
-							$custom_table['where'] = " AND geometrytype(the_geom) = '".$result['geometrytype']."'";
-							$custom_tables[] = $custom_table;
-						}
-					}
-					return $custom_tables;
-				}
 			}
 		}
 	}
@@ -976,7 +945,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ' -a_srs EPSG:' . $epsg;
+		$command .= ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -1423,6 +1392,11 @@ class data_import_export {
 							fclose($fp);
 						}
 						$zip = true;
+					} break;
+
+					case 'GeoPackage' : {
+						$exportfile = $exportfile.'.gpkg';
+						$err = $this->ogr2ogr_export($sql, 'GPKG', $exportfile, $layerdb);
 					} break;
 
 					case 'DXF' : {

@@ -405,6 +405,7 @@ class GUI {
 	}
 
 	function getLayerOptions() {
+		global $admin_stellen;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -8426,6 +8427,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						),
 						$this->formvars['sync']
 					);
+					
+					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL);
+					for ($i = 0; $i < count($attributes)-2; $i++) {
+						$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
+					}
+					unset($attributes['the_geom']);
+					unset($attributes['the_geom_id']);
+					usort($attributes, 'compare_orders2');
 					$mapDB->save_postgis_attributes($formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
@@ -9164,8 +9173,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 
 				$layerset[0]['sql'] = $sql;
-
-				#echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit; exit;
+				/*
+				if ($this->user->id == 1) {
+					echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				}
+				*/
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -9188,9 +9200,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							FROM
 								(" . $sql . ") as foo
 						";
-						$ret=$layerdb->execSQL($sql_count,4, 0);
-						if(!$ret[0]){
-							$rs=pg_fetch_array($ret[1]);
+						$ret = $layerdb->execSQL($sql_count,4, 0);
+						if (!$ret[0]) {
+							$rs = pg_fetch_array($ret[1]);
 							$layerset[0]['count'] = $rs[0];
 						}
 					}
@@ -9214,17 +9226,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 				# last_search speichern
-				if ($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == ''){
+				if ($this->formvars['no_last_search'] == '' AND $this->last_query == '' AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'subform_link') == '') {
 					$this->formvars['search_name'] = '<last_search>';
 					$this->user->rolle->delete_search($this->formvars['search_name']);		# das muss hier stehen bleiben, denn in save_search wird mit der Layer-ID gelöscht
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == ''){
+				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == '') {
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
-
 					# Querymaps erzeugen
 					if (
 						value_of($this->formvars, 'format') != 'json' AND
@@ -9236,11 +9247,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						)
 					) {
 						$layerset[0]['attributes'] = $attributes;
-						for($k = 0; $k < count($layerset[0]['shape']); $k++){
+						for ($k = 0; $k < count($layerset[0]['shape']); $k++){
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
-
 					# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
 					if(is_array(value_of($this->formvars, 'attributenames'))){
 						$attributenames = array_values($this->formvars['attributenames']);
@@ -9314,6 +9324,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->qlayerset[0]=$layerset[0];
 		$i = 0;
 		$this->search = true;
+
 		if (value_of($this->formvars, 'no_output')) {
 			# nichts weiter machen
 		}
@@ -14798,7 +14809,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				) AND
 				(
 					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
-					($this->last_query[$layerset[$i]['Layer_ID']] != '')					
+					($this->last_query[$layerset[$i]['Layer_ID']] != '')
 				)
 			) {
 				# Dieser Layer soll abgefragt werden
@@ -17882,6 +17893,9 @@ class db_mapObj{
 			if($attributes[$i]['saveable'] == '')$attributes[$i]['saveable'] = 0;
 			if($attributes[$i]['length'] == '')$attributes[$i]['length'] = 'NULL';
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
+			if (intval($attributes[$i]['order']) <= $attributes[$i-1]['order']) {
+				$attributes[$i]['order'] = $attributes[$i-1]['order'] + 1;
+			}
 			$sql = "
 				INSERT INTO
 					`layer_attributes`
@@ -17900,7 +17914,7 @@ class db_mapObj{
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
 					`default` = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					`order` = " . $i . "
+					`order` = " . $attributes[$i]['order'] . "
 				ON DUPLICATE KEY UPDATE
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] . "',
@@ -17914,12 +17928,11 @@ class db_mapObj{
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
 					`default` = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					`order` = `order` + ".$insert_count."
+					`order` = " . $attributes[$i]['order'] . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
 			$ret = $this->db->execSQL($sql);
-			if($this->db->mysqli->affected_rows == 1)$insert_count++;		# ein neues Attribut wurde per Insert eingefügt
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		}
 	}
@@ -19069,7 +19082,7 @@ class db_mapObj{
 					`order` = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
 					`name` = '" . $attributes['name'][$i] . "', " .
 					$alias_rows . "
-					`form_element_type` = '" . $formvars['form_element_' . $attributes['name'][$i]] . "',
+					`form_element_type` = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
 					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
 					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
 					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
