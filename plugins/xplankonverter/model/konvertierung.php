@@ -156,15 +156,22 @@ class Konvertierung extends PgObject {
 
 	public static function find_by_document($gui, $document) {
 		$parts = explode('_', APPLVERSION);
-		$dev = (trim(end($parts),'/') == 'dev' ? '_dev' : '');
+		if (trim(end($parts), '/') == 'dev') {
+			$xplankonverter_file_path = str_replace('/var/www/data/', '/var/www/data_dev/', XPLANKONVERTER_FILE_PATH);
+		}
+		else {
+			$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH;
+		}
 		$path = pathinfo($document);
 		$konvertierung = new Konvertierung($gui);
 		switch (strToLower($path['extension'])) {
 			case 'gml' :
 				$konvertierungen = $konvertierung->find_where('id = ' . explode('_', $path['filename'])[1] . ' AND veroeffentlicht');
-				if (count($konvertierungen) == 0) return false;
+				if (count($konvertierungen) == 0) {
+					return false;
+				}
 				$konvertierung = $konvertierungen[0];
-				$konvertierung->exportfile = '/var/www/data' . $dev . '/upload/xplankonverter/' . $konvertierung->get($this->identifier) . '/xplan_gml' . $document;
+				$konvertierung->exportfile = $xplankonverter_file_path . $konvertierung->get($this->identifier) . '/xplan_gml' . $document;
 				$konvertierung->contenttype = 'text/xml';
 				return $konvertierung;
 			case 'pdf' :
@@ -188,7 +195,7 @@ class Konvertierung extends PgObject {
 				$rows = $konvertierung->getSQLResults($sql)[0];
 				if (count($rows) == 0) return false;
 				$konvertierung->data = $rows[0];
-				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->exportfile = $xplankonverter_file_path . 'plaene' . $document;
 				$konvertierung->contenttype = 'application/pdf';
 				return $konvertierung;
 			case 'jpg' :
@@ -213,7 +220,7 @@ class Konvertierung extends PgObject {
 				$rows = $konvertierung->getSQLResults($sql)[0];
 				if (count($rows) == 0) return false;
 				$konvertierung->data = $rows[0];
-				$konvertierung->exportfile = '/var/www/data' . $dev . '/xplankonverter/plaene' . $document;
+				$konvertierung->exportfile = $xplankonverter_file_path . 'plaene' . $document;
 				$konvertierung->contenttype = 'image/jpg';
 				return $konvertierung;
 			default :
@@ -259,7 +266,7 @@ class Konvertierung extends PgObject {
 	}
 
 	function archiv_old_zusammenzeichnung() {
-		# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (/var/www/data/upload/xplankonverter/<konvertierung_id>/uploaded_xplan_gml/)
+		# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
 		$zip_path = XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $this->gui->Stelle->id . '/';
 		$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->plan->get($this->plan_attribut_aktualitaet)), 'Y-m-d') . '.zip';
 		if (!file_exists($zip_path)) {
