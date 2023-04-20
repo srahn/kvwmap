@@ -1,4 +1,5 @@
 <?php
+	# GUI-Fuctions for plugin/xplankonverter
 	/**
 	* Trigger für Konvertierungen
 	*/
@@ -359,7 +360,6 @@
 
 		$konvertierung = new Konvertierung($GUI); # Create empty Konvertierungsobjekt
 
-
 		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
@@ -508,5 +508,58 @@
 			'msg' => 'Update der Dienste erfolgreich.'
 		);
 		*/
+	};
+
+	/**
+		Erzeugt die Metadatendokumente des Geodatensatzes und der Dienste, die alle Pläne des xplan_gml-Schemas
+		der Planart $GUI->formvars['planart'] enthalten
+	*/
+	$GUI->xplankonverter_create_metadata_documents = function($md) use ($GUI) {
+		global $admin_stellen;
+		$current_time = time();
+		$pg_object = new PgObject($GUI, 'xplankonverter', 'plan_services');
+
+		$plan_object = new XP_Plan($GUI, $GUI->formvars['planart']);
+		$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung');
+		$plan_service = $pg_object->find_by('planart', $GUI->formvars['planart']);
+
+		if (! $plan_service) {
+			$plan_service->create(array(
+				'planart' => $GUI->formvars['planart'],
+				'metadata_dataset_uuid' => uuid(),
+				'metadata_viewservice_uuid' => uuid(),
+				'metadata_downloadservice_uuid' => uuid()
+			));
+		}
+
+		$admin_stelle = new stelle($admin_stellen[0], $GUI->Stelle->database);
+		$md->set('stellendaten', $admin_stelle->getstellendaten());
+		$md->set('uuids', array(
+			'metadata_dataset_uuid' => $plan_service->get('metadata_dataset_uuid'),
+			'metadata_viewservice_uuid' => $plan_service->get('metadata_viewservice_uuid'),
+			'metadata_downloadservice_uuid' => $plan_service->get('metadata_downloadservice_uuid')
+		));
+		$md->set('md_date', date('Y-m-d', $current_time));
+		$md->set('id_cite_title', $admin_stelle->ows_title);
+		$md->set('date_title', 'Datum');
+		$md->set('date_de', date('d.m.Y', $current_time));
+		$md->set('id_cite_date', date('Y-m-d', $current_time));
+		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
+		$md->set('extents', $plan_object->extents);
+		$md->set('service_layer_name', umlaute_umwandeln($admin_stelle->get('Bezeichnung')));
+		$md->set('onlineresource', URL . 'ows/fplaene?');
+		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
+		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $plan_object->tableName . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
+		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
+
+		$metaDataCreator = new MetaDataCreator($md);
+		return array(
+			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
+			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+		);
 	}
+
+
+
 ?>

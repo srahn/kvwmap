@@ -263,7 +263,7 @@ class Konvertierung extends PgObject {
 		$zip_path = XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $this->gui->Stelle->id . '/';
 		$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->plan->get($this->plan_attribut_aktualitaet)), 'Y-m-d') . '.zip';
 		if (!file_exists($zip_path)) {
-			mkdir($zip_path, 0777, true);
+			mkdir($zip_path, 0775, true);
 		}
 		$archive = new ZipArchive();
 		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
@@ -371,7 +371,7 @@ class Konvertierung extends PgObject {
 			if (!is_dir($path)) {
 				$this->debug->show('Create directory', Konvertierung::$write_debug);
 				$old = umask(0);
-				mkdir($path, 0777, true);
+				mkdir($path, 0775, true);
 				umask($old);
 			}
 		}
@@ -1250,7 +1250,9 @@ class Konvertierung extends PgObject {
 		Validierungsergebnis::delete_by_id($this->gui, 'konvertierung_id', $this->get($this->identifier));
 
 		# Lösche vorhandene Datenobjekte der Konvertierung
-		foreach($this->get_class_names() AS $class_name) {
+		# Überspringe leere Class-Names bei fehlerhaften Regeln
+		$class_names = array_filter($this->get_class_names(), 'strlen');
+		foreach($class_names AS $class_name) {
 			# Lösche Relationen
 			$sql = "
 				DELETE FROM
@@ -1384,10 +1386,11 @@ class Konvertierung extends PgObject {
 						'skipGeltungsbereich=false';
 
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
-		#echo '<br>Frage Validierung mit folgendem Befehl ab: ' . $cmd;
+		$this->debug->write("<br><b>Validierung der Datei : {$pathinfo['basename']} mit folgendem Befehl</b><br>{$cmd}", $debuglevel);
 		exec($cmd, $output, $result_code);
 		$result = $output[0];
-		#echo '<br>output: ' . $result;
+
+		$this->debug->write("<br><b>Output der Validierung</b><br>{$result}", $debuglevel);
 		if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
 			return array(
 				'success' => false,
@@ -1582,7 +1585,7 @@ class Konvertierung extends PgObject {
 		#echo '<p>SQL zum Löschen der Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Löschen der Topologie!');
 			return false;
 		}
 
@@ -1617,13 +1620,13 @@ class Konvertierung extends PgObject {
 				xplan_gml.bp_flaechenschlussobjekt
 			WHERE
 				flaechenschluss AND
-				ebene = 0 OR ebene IS NULL AND
+				(ebene = 0 OR ebene IS NULL) AND
 				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
 		$result = $this->database->execSQL($sql, 0, 3);
 		if (!$result['success']) {
-			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Toplogie!');
+			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
 			return false;
 		}
 
@@ -1797,6 +1800,52 @@ class Konvertierung extends PgObject {
 		return (pg_num_rows(pg_query($this->database->dbConn, $sql)) > 0);
 	}
 
+	/**
+		Erzeugt die Metadatendokumente für die Beschreibung
+		des Datensatzes des Plans der zu dieser Konvertierung gehört
+		sowie je einen zur Beschreibung des Darstellungs- und Downloaddienstes.
+		@params $md metadata Es können Metadatendokumente zu einem Plan einer einzelnen Konvertierung erstellt werden
+			oder zu dem Gesamtdatensatz und den Diensten aller Pläne in einem xplan_gml - Schema. Das hängt davon ab
+			welche Metadaten in $md übergeben werden.
+		@return array of strings Die die Dokumente enthalten
+	*/
+	function create_metadata_documents($md) {
+		$plan = $this->plan;
+		$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($this->gui, $this->get('planart'), $this->plan_class, $this->plan_attribut_aktualitaet);
+
+		# Setzen der Metadaten für die Metadatendokumente
+		if (count($zusammenzeichnungen['published']) == 0) {
+			# Noch keine Zusammenzeichnung vorhanden entnehme die uuids von der neuen Zusammenzeichnung
+			$md->set('uuids', $this->get_metadata_uuids());
+		}
+		else {
+			# Entnehme die uuids von der alten Zusammenzeichnung
+			$md->set('uuids', $zusammenzeichnungen['published'][0]->get_metadata_uuids());
+			$this->set_metadata_uuids($md->get('uuids'));
+		}
+
+		$md->set('stellendaten', $this->gui->Stelle->getstellendaten());
+		$md->set('md_date', en_date($plan->get($this->gui->plan_attribut_aktualitaet)));
+		$md->set('id_cite_title', $plan->get('name'));
+		$md->set('date_title', $this->gui->plan_attribut_aktualitaet);
+		$md->set('date_de', $plan->get($this->gui->plan_attribut_aktualitaet));
+		$md->set('id_cite_date', en_date($plan->get($this->gui->plan_attribut_aktualitaet)));
+		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
+		$md->set('extents', $plan->extents);
+		$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
+		$md->set('onlineresource', URL . '/ows/' . $this->gui->Stelle->id . '/fplan?');
+		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
+		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $md->get('service_layer_name') . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
+		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
+
+		$metaDataCreator = new MetaDataCreator($md);
+		return array(
+			'metaDataGeodatensatz' => $metaDataCreator->createMetadataGeodatensatz(),
+			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
+			'metaDataView' =>  $metaDataCreator->createMetaDataView()
+		);
+	}
+
 	function get_metadata_uuids() {
 		$uuids = array();
 		foreach (array('dataset', 'viewservice', 'downloadservice') AS $type) {
@@ -1822,6 +1871,33 @@ class Konvertierung extends PgObject {
 			$this->set($key, $value);
 		}
 		$this->update_attr($attributes);
+	}
+
+	function send_notification($msg) {
+		$from_name = 'XPlan-Server PlanDigital';
+		$from_email = 'info@testportal-plandigital.de';
+		$to_email = 'Petra.Wilken-Janssen@arl-we.niedersachsen.de';
+		$cc_email = null;
+		$reply_email = null;
+		$subject = 'Update in Plandigital';
+		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";
+		$message .= $msg . "\r\n";
+		$attachment = '';
+		$mode = 'sendEmail async';
+		$smtp_server = 'smtp.ionos.de';
+		$smtp_port = '587';
+		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
+			return array(
+				'success' => true,
+				'msg' => 'Benachrichtigung erfolgreich versendet.'
+			);
+		}
+		else {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Versenden der E-Mail zum Update der Zusammenzeichnung!'
+			);
+		}
 	}
 
 }

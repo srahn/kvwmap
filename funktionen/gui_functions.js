@@ -189,6 +189,38 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+function delete_user2notification(notification_id) {
+	let formData = new FormData();
+	formData.append('go', 'delete_user2notification');
+	formData.append('notification_id', notification_id);
+	formData.append('csrf_token', csrf_token);
+	let response = fetch('index.php', {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => response.text())
+	.then(text => {
+		try {
+			const data = JSON.parse(text);
+			if (data.success) {
+				$('#notification_box_' + notification_id).remove();
+				let num_notifications = $('#num_notification_div').html() - 1;
+				if (num_notifications == 0) {
+					$('#num_notification_div').hide();
+				}
+				else {
+					$('#num_notification_div').html(num_notifications);
+				}
+			}
+			else {
+				message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen Benachrichtigung für den Nutzer: ' + data.err_msg + ' ' + text}]);
+			}
+		} catch(err) {
+			message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
+		}
+	});
+}
+
 highlight_object = function(layer_id, oid){
 	root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 }

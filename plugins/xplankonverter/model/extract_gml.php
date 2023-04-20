@@ -2466,7 +2466,8 @@ class Gml_extractor {
 				) AND
 				i.table_name NOT LIKE '%\_plan' AND
 				i.table_name NOT LIKE '%\_bereich' AND
-				i.table_name NOT LIKE '%\_textabschnitt'
+				i.table_name NOT LIKE '%\_textabschnitt' AND
+				i.table_name != 'bp_dachgestaltung'
 			ORDER BY
 				i.table_name;
 		";

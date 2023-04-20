@@ -1,17 +1,11 @@
 <?php
 class MetaDataCreator {
 	
-	public function __construct($gui, $md, $uuids) {
-		$this->database = $gui->database;
+	public function __construct($md) {
 		$this->md = $md;
-		$this->stellendaten = $gui->Stelle->getstellendaten();
 
-		$this->metadata_dataset_uuid = $uuids['metadata_dataset_uuid'];
-		$this->metadata_viewservice_uuid = $uuids['metadata_viewservice_uuid'];
-		$this->metadata_downloadservice_uuid = $uuids['metadata_downloadservice_uuid'];
-
-		$this->wfsLink = $md->get('onlineresource') . 'Service=WFS&amp;Request=GetCapabilities';
-		$this->wmsLink = $md->get('onlineresource') . 'Service=WMS&amp;Request=GetCapabilities';
+		$this->wfs_link = $md->get('onlineresource') . 'Service=WFS&amp;Request=GetCapabilities';
+		$this->wms_link = $md->get('onlineresource') . 'Service=WMS&amp;Request=GetCapabilities';
 	}
 
 	function getReferenzSysteme() {
@@ -21,7 +15,7 @@ class MetaDataCreator {
 				<gmd:referenceSystemIdentifier>
 					<gmd:RS_Identifier>
 						<gmd:code>
-							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/25832\">EPSG 25832: ETRS89 / UTM Zone 32N</gmx:Anchor>
+							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/" . $this->md->get('stellendaten')['epsg_code'] . "\">EPSG " . $this->md->get('stellendaten')['epsg_code'] . ": ETRS89 / UTM Zone " . substr($this->md->get('stellendaten')['epsg_code'], -2) . "N</gmx:Anchor>
 						</gmd:code>
 					</gmd:RS_Identifier>
 				</gmd:referenceSystemIdentifier>
@@ -37,64 +31,74 @@ class MetaDataCreator {
 					</gmd:RS_Identifier>
 				</gmd:referenceSystemIdentifier>
 			</gmd:MD_ReferenceSystem>
+		</gmd:referenceSystemInfo>
+		<gmd:referenceSystemInfo>
+			<gmd:MD_ReferenceSystem>
+				<gmd:referenceSystemIdentifier>
+					<gmd:RS_Identifier>
+						<gmd:code>
+							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4326\">EPSG 4326: WGS84 geographic coordinates</gmx:Anchor>
+						</gmd:code>
+					</gmd:RS_Identifier>
+				</gmd:referenceSystemIdentifier>
+			</gmd:MD_ReferenceSystem>
 		</gmd:referenceSystemInfo>";
 		return $sb;
 	}
 
 	function getResponsibleParty($ows_var, $role) {
 		$sb = "
-			<gmd:CI_ResponsibleParty>
-				<gmd:individualName>
-					<gco:CharacterString>" . $this->stellendaten[$ows_var . 'person'] . "</gco:CharacterString>
-				</gmd:individualName>
-				<gmd:organisationName>
-					<gco:CharacterString>" . $this->stellendaten[$ows_var . 'organization'] . "</gco:CharacterString>
-				</gmd:organisationName>
-				<gmd:contactInfo>
-					<gmd:CI_Contact>
-						<gmd:phone>
-							<gmd:CI_Telephone>
-								<gmd:voice>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'voicephone'] . "</gco:CharacterString>
-								</gmd:voice>
-								<gmd:facsimile>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'facsimile'] . "</gco:CharacterString>
-								</gmd:facsimile>
-							</gmd:CI_Telephone>
-						</gmd:phone>
-						<gmd:address>
-							<gmd:CI_Address>
-								<gmd:deliveryPoint>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'address'] . "</gco:CharacterString>
-								</gmd:deliveryPoint>
-								<gmd:city>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'city'] . "</gco:CharacterString>
-								</gmd:city>
-								<gmd:postalCode>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'postalcode'] . "</gco:CharacterString>
-								</gmd:postalCode>
-								<gmd:country>
-									<gco:CharacterString>DEU</gco:CharacterString>
-								</gmd:country>
-								<gmd:electronicMailAddress>
-									<gco:CharacterString>" . $this->stellendaten[$ows_var . 'emailaddress'] . "</gco:CharacterString>
-								</gmd:electronicMailAddress>
-							</gmd:CI_Address>
-						</gmd:address>
-						<gmd:onlineResource>
-							<gmd:CI_OnlineResource>
-								<gmd:linkage>
-									<gmd:URL>" . URL . "</gmd:URL>
-								</gmd:linkage>
-							</gmd:CI_OnlineResource>
-						</gmd:onlineResource>
-					</gmd:CI_Contact>
-				</gmd:contactInfo>
-				<gmd:role>
-					<gmd:CI_RoleCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode\" codeListValue=\"" . $role . "\"/>
-				</gmd:role>
-			</gmd:CI_ResponsibleParty>
-		";
+					<gmd:CI_ResponsibleParty>
+						<gmd:individualName>
+							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'person'] . "</gco:CharacterString>
+						</gmd:individualName>
+						<gmd:organisationName>
+							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'organization'] . "</gco:CharacterString>
+						</gmd:organisationName>
+						<gmd:contactInfo>
+							<gmd:CI_Contact>
+								<gmd:phone>
+									<gmd:CI_Telephone>
+										<gmd:voice>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'voicephone'] . "</gco:CharacterString>
+										</gmd:voice>
+										<gmd:facsimile>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'facsimile'] . "</gco:CharacterString>
+										</gmd:facsimile>
+									</gmd:CI_Telephone>
+								</gmd:phone>
+								<gmd:address>
+									<gmd:CI_Address>
+										<gmd:deliveryPoint>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'address'] . "</gco:CharacterString>
+										</gmd:deliveryPoint>
+										<gmd:city>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'city'] . "</gco:CharacterString>
+										</gmd:city>
+										<gmd:postalCode>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'postalcode'] . "</gco:CharacterString>
+										</gmd:postalCode>
+										<gmd:country>
+											<gco:CharacterString>DEU</gco:CharacterString>
+										</gmd:country>
+										<gmd:electronicMailAddress>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'emailaddress'] . "</gco:CharacterString>
+										</gmd:electronicMailAddress>
+									</gmd:CI_Address>
+								</gmd:address>
+								<gmd:onlineResource>
+									<gmd:CI_OnlineResource>
+										<gmd:linkage>
+											<gmd:URL>" . URL . "</gmd:URL>
+										</gmd:linkage>
+									</gmd:CI_OnlineResource>
+								</gmd:onlineResource>
+							</gmd:CI_Contact>
+						</gmd:contactInfo>
+						<gmd:role>
+							<gmd:CI_RoleCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode\" codeListValue=\"" . $role . "\"/>
+						</gmd:role>
+					</gmd:CI_ResponsibleParty>";
 		return $sb;
 	}
 
@@ -102,7 +106,7 @@ class MetaDataCreator {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
 	<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
 	<gmd:fileIdentifier>
-		<gco:CharacterString>" . $this->metadata_downloadservice_uuid . "</gco:CharacterString>
+		<gco:CharacterString>" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
 	</gmd:fileIdentifier>
 	<gmd:language xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\">Deutsch</gmd:LanguageCode>
@@ -139,15 +143,13 @@ class MetaDataCreator {
 							</gmd:dateType>
 						</gmd:CI_Date>
 					</gmd:date>
-					<!--
 					<gmd:citedResponsibleParty>
 						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 					</gmd:citedResponsibleParty>
-					-->
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>" . $this->stellendaten['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Featuretyp pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung des Planes ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
+				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Featuretyp pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -161,7 +163,7 @@ class MetaDataCreator {
 			<gmd:graphicOverview>
 				<gmd:MD_BrowseGraphic>
 					<gmd:fileName>
-						<gco:CharacterString>" . $this->md->get('downloadservice_browsgraphic') . "</gco:CharacterString>
+						<gco:CharacterString>" . $this->md->get('downloadservice_browsegraphic') . "</gco:CharacterString>
 					</gmd:fileName>
 				</gmd:MD_BrowseGraphic>
 			</gmd:graphicOverview>
@@ -232,7 +234,7 @@ class MetaDataCreator {
 									 No conditions apply to access and use 
 								</gmx:Anchor>
 						   </gmd:otherConstraints>
-					  </gmd:MD_LegalConstraints>					
+					  </gmd:MD_LegalConstraints>
 				</gmd:resourceConstraints>	
 			<srv:serviceType>
 				<gco:LocalName>download</gco:LocalName>
@@ -242,16 +244,16 @@ class MetaDataCreator {
 					<gmd:geographicElement>
 						<gmd:EX_GeographicBoundingBox>
 							<gmd:westBoundLongitude>
-								<gco:Decimal>" . $this->md->get('extent')['minx'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
 							</gmd:westBoundLongitude>
 							<gmd:eastBoundLongitude>
-								<gco:Decimal>" . $this->md->get('extent')['miny'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
 							</gmd:eastBoundLongitude>
 							<gmd:southBoundLatitude>
-								<gco:Decimal>" . $this->md->get('extent')['maxx'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
 							</gmd:southBoundLatitude>
 							<gmd:northBoundLatitude>
-								<gco:Decimal>" . $this->md->get('extent')['maxy'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 							</gmd:northBoundLatitude>
 						</gmd:EX_GeographicBoundingBox>
 					</gmd:geographicElement>
@@ -271,13 +273,13 @@ class MetaDataCreator {
 					<srv:connectPoint>
 						<gmd:CI_OnlineResource>
 							<gmd:linkage>
-								<gmd:URL>" . $this->wfslink . "</gmd:URL>
+								<gmd:URL>" . $this->wfs_link . "</gmd:URL>
 							</gmd:linkage>
 						</gmd:CI_OnlineResource>
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->metadata_dataset_uuid . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->metadata_dataset_uuid . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
@@ -339,7 +341,7 @@ class MetaDataCreator {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
 		<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
 	<gmd:fileIdentifier>
-		<gco:CharacterString>" . $this->metadata_viewservice_uuid . "</gco:CharacterString>
+		<gco:CharacterString>" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
 	</gmd:fileIdentifier>
 	<gmd:language xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\">Deutsch</gmd:LanguageCode>
@@ -364,7 +366,7 @@ class MetaDataCreator {
 			<gmd:citation>
 				<gmd:CI_Citation>
 					<gmd:title>
-						<gco:CharacterString>" . $this->stellendaten['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das " . uffirst($this->md->get('date_title')) . " der letzten Änderung des Planes ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.</gco:CharacterString>
+						<gco:CharacterString>" . $this->md->get('stellendaten')['ows_title'] . "</gco:CharacterString>
 					</gmd:title>
 					<gmd:date>
 						<gmd:CI_Date>
@@ -382,7 +384,7 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>" . $this->stellendaten['ows_abstract'] . "</gco:CharacterString>
+				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -396,7 +398,7 @@ class MetaDataCreator {
 			<gmd:graphicOverview>
 				<gmd:MD_BrowseGraphic>
 					<gmd:fileName>
-						<gco:CharacterString>" . $this->md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $this->md->get('service_layer_name') . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $this->md->get('epsg') . "&amp;BBOX=" . implode(',', $this->md->get('extents')[$this->md->get('epsg')]) . "&amp;WIDTH=300&amp;HEIGHT=300</gco:CharacterString>
+						<gco:CharacterString>" . $this->md->get('viewservice_browsegraphic') . "</gco:CharacterString>
 					</gmd:fileName>
 				</gmd:MD_BrowseGraphic>
 			</gmd:graphicOverview>
@@ -477,16 +479,16 @@ class MetaDataCreator {
 					<gmd:geographicElement>
 						<gmd:EX_GeographicBoundingBox>
 							<gmd:westBoundLongitude>
-								<gco:Decimal>" . $this->md->get('extent')['minx'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
 							</gmd:westBoundLongitude>
 							<gmd:eastBoundLongitude>
-								<gco:Decimal>" . $this->md->get('extent')['miny'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
 							</gmd:eastBoundLongitude>
 							<gmd:southBoundLatitude>
-								<gco:Decimal>" . $this->md->get('extent')['maxx'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
 							</gmd:southBoundLatitude>
 							<gmd:northBoundLatitude>
-								<gco:Decimal>" . $this->md->get('extent')['maxy'] . "</gco:Decimal>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 							</gmd:northBoundLatitude>
 						</gmd:EX_GeographicBoundingBox>
 					</gmd:geographicElement>
@@ -506,13 +508,13 @@ class MetaDataCreator {
 					<srv:connectPoint>
 						<gmd:CI_OnlineResource>
 							<gmd:linkage>
-								<gmd:URL>" . $this->wmsLink . "</gmd:URL>
+								<gmd:URL>" . $this->wms_link . "</gmd:URL>
 							</gmd:linkage>
 						</gmd:CI_OnlineResource>
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->metadata_dataset_uuid . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->metadata_dataset_uuid . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
@@ -574,7 +576,7 @@ class MetaDataCreator {
 		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
 	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:igctx=\"https://www.ingrid-oss.eu/schemas/igctx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
 		<gmd:fileIdentifier>
-			<gco:CharacterString>" . $this->metadata_dataset_uuid . "</gco:CharacterString>
+			<gco:CharacterString>" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
 		</gmd:fileIdentifier>
 		<gmd:language>
 			<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\"/>
@@ -599,7 +601,7 @@ class MetaDataCreator {
 		</gmd:metadataStandardVersion>
 		" . $this->getReferenzSysteme() . "
 		<gmd:identificationInfo>
-			<gmd:MD_DataIdentification uuid=\"" . $this->metadata_dataset_uuid . "\">
+			<gmd:MD_DataIdentification uuid=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\">
 				<gmd:citation>
 					<gmd:CI_Citation>
 						<gmd:title>
@@ -619,7 +621,7 @@ class MetaDataCreator {
 							<gmd:MD_Identifier>
 								<gmd:code>
 									<gco:CharacterString>
-									https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->metadata_dataset_uuid . "/formatters/xml?approved=true</gco:CharacterString>
+									https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
@@ -650,7 +652,7 @@ class MetaDataCreator {
 				<gmd:graphicOverview>
 					<gmd:MD_BrowseGraphic>
 						<gmd:fileName>
-							<gco:CharacterString>" . $this->md->get('viewservice_browsgraphic') . "</gco:CharacterString>
+							<gco:CharacterString>" . $this->md->get('dataset_browsegraphic') . "</gco:CharacterString>
 						</gmd:fileName>
 					</gmd:MD_BrowseGraphic>
 				</gmd:graphicOverview>
@@ -730,16 +732,16 @@ class MetaDataCreator {
 								</gmd:extentTypeCode>
 								-->
 								<gmd:westBoundLongitude>
-									<gco:Decimal>" . $this->md->get('extent')['minx'] . "</gco:Decimal>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
 								</gmd:westBoundLongitude>
 								<gmd:eastBoundLongitude>
-									<gco:Decimal>" . $this->md->get('extent')['miny'] . "</gco:Decimal>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
 								</gmd:eastBoundLongitude>
 								<gmd:southBoundLatitude>
-									<gco:Decimal>" . $this->md->get('extent')['maxx'] . "</gco:Decimal>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
 								</gmd:southBoundLatitude>
 								<gmd:northBoundLatitude>
-									<gco:Decimal>" . $this->md->get('extent')['maxy'] . "</gco:Decimal>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 								</gmd:northBoundLatitude>
 							</gmd:EX_GeographicBoundingBox>
 						</gmd:geographicElement>
@@ -764,7 +766,7 @@ class MetaDataCreator {
 						<gmd:onLine>
 							<gmd:CI_OnlineResource>
 								<gmd:linkage>
-									<gmd:URL>" . $this->wmsLink . "</gmd:URL>
+									<gmd:URL>" . $this->wms_link . "</gmd:URL>
 								</gmd:linkage>
 								<gmd:name>
 									<gco:CharacterString>Dienst \"WMS Dienst\" (GetCapabilities)</gco:CharacterString>
@@ -781,7 +783,7 @@ class MetaDataCreator {
 						<gmd:onLine>
 							<gmd:CI_OnlineResource>
 								<gmd:linkage>
-									<gmd:URL>" . $this->wfsLink . "</gmd:URL>
+									<gmd:URL>" . $this->wfs_link . "</gmd:URL>
 								</gmd:linkage>
 								<gmd:name>
 									<gco:CharacterString>Dienst \"WFS Dienst \" (GetCapabilities)</gco:CharacterString>
@@ -879,7 +881,6 @@ class MetaDataCreator {
 			</gmd:DQ_DataQuality>
 		</gmd:dataQualityInfo>
 	</gmd:MD_Metadata>";
-	return $sb;
-		
-	}	
+		return $sb;
+	}
 }

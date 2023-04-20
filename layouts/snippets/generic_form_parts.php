@@ -365,25 +365,78 @@
 				} break;
 				
 				case 'Farbauswahl' : {
-					if ($gui->result_colors == '') {
-						$gui->result_colors = $gui->database->read_colors();
-					}
-					$datapart .= '
-						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
-						for($i = 0; $i < count($gui->result_colors); $i++){
-							$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
-							$datapart .= '<option ';
-							if ($value == $rgb){
-								$datapart .= ' selected';
-							}
-							$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
-															value="' . $rgb . '">
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-														</option>' . "\n";
+					$form_element_options = json_decode($attributes['options'][$j], JSON_OBJECT_AS_ARRAY);
+					if (
+						$attributes['options'][$j] != '' AND
+						json_last_error() === JSON_ERROR_NONE AND
+						is_array($form_element_options) AND
+						array_key_exists('type', $form_element_options) AND
+						$form_element_options['type'] == 'colorpicker'
+					) {
+						# Auswahl beliebiger Farben mit einem Colorpicker
+						$datapart .= '<input
+							type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
+							class="' . $field_class . '"
+							name="' . $fieldname . '"
+							id="' . $layer_id . '_' . $name . '_' . $k . '"
+							onchange="' . $onchange . '"
+							onkeyup="checknumbers(this, \'' . $attributes['type'][$j] . '\', \'' . $attributes['length'][$j] . '\', \'' . $attributes['decimal_length'][$j] . '\');"
+							title="' . $alias . '"
+							value="' . htmlspecialchars($value) . '"
+							style=" 
+								display: ' . ($attribute_privileg == '0' ? 'none' : 'block') . ';
+								width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
+								font-size: ' . $fontsize . 'px;
+							"
+							' . ($attribute_privileg == '0' ? ' readonly' : ' tabindex="1"') . '
+						>';
+
+						if ($attribute_privileg == '0') { // nur lesbares Attribut
+							$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
+							$datapart .= '<div style="
+									border-radius: 2px;
+									border: 1px solid gray;
+									display: inline-block;
+									padding: 4px;
+									background-color: #e9e9ed;
+							">
+								<div
+									class="readonly_text"
+									style="
+										padding: 0px;
+										text-align: center;
+										min-width: 55px;
+										width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
+										font-size: ' . $fontsize . 'px;
+										background-color: ' . $angezeigter_value . ';
+										border: 1px solid gray;
+									"
+								>' . ($angezeigter_value != '' ? $angezeigter_value : 'keine') . '</div>
+							</div>';
 						}
-					$datapart .= '</select>';
+					}
+					else {
+						# Auswahl vordefinierter Farben
+						if ($gui->result_colors == '') {
+							$gui->result_colors = $gui->database->read_colors();
+						}
+						$datapart .= '
+							<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+							for($i = 0; $i < count($gui->result_colors); $i++){
+								$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
+								$datapart .= '<option ';
+								if ($value == $rgb){
+									$datapart .= ' selected';
+								}
+								$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
+																value="' . $rgb . '">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+															</option>' . "\n";
+							}
+						$datapart .= '</select>';
+					}
 				} break;
-				
+
 				case 'Autovervollständigungsfeld' : {
 					if(is_array($attributes['enum_output'][$j][$k])){
 						$enum_output = $attributes['enum_output'][$j][$k][$e];		# Array-Typ, $e ist der Zähler der Array-Elemente

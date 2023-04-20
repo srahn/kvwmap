@@ -11,7 +11,7 @@ if (isset($argv)) {
 	}
 }
 
-# Error Handling for Fatal-Errors
+# Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
@@ -26,16 +26,23 @@ register_shutdown_function(function () {
 });
 
 # Error-Handling
-function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	http_response_code(500);
-	include_once('layouts/snippets/general_error_page.php');
-	/* Don't execute PHP internal error handler */
-	return true;
+// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	// global $errors;
+	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		// return;
+	// }
+	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	// http_response_code(500);
+	// include_once('layouts/snippets/general_error_page.php');
+	// /* Don't execute PHP internal error handler */
+	// return true;
+// }
+
+function CustomErrorHandler($severity, $message, $filename, $lineno) {
+		if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+			return;
+		}
+    throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 #set_error_handler("CustomErrorHandler");
@@ -621,6 +628,16 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			case 'get_generic_layer_data_sql' : {
+				if ($GUI->user->id != 2) {
+					$GUI->checkCaseAllowed($go);
+				}
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql();
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result));
+			} break;
+
 			case 'exportWMC' :{
 				$GUI->exportWMC();
 			} break;
@@ -633,7 +650,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Externer_Druck_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1114,7 +1131,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['selected_layer_id']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['chosen_layer_id']);
 			} break;
 
 			case 'Daten_Export' : {

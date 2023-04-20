@@ -340,7 +340,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"] input[type="float"] {
+input[type="text"], input[type="float"] {
 
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
@@ -1800,6 +1800,19 @@ thead.gle th {
  text-align:left;
 }
 
+#gle_column_options_div {
+	position: absolute;
+	right: 2px;
+	margin-right: 35px;
+	text-align: left;
+	border: 1px solid gray;
+	padding: 4px;
+	background-color: white;
+	border-radius: 4px;
+	z-index: 1000;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+}
+
 .gle_tabs{
 	display: flex;
 	margin: 2px 0 -11px 0;
@@ -1808,19 +1821,30 @@ thead.gle th {
 }
 
 .gle_tabs > div{
-	padding: 0 5px 0 5px;
+	padding: 0 5px 0 8px;
 	cursor: pointer;
 	border: 1px solid #bbb;
 	border-left: none;
 	background-color: #fff;
 	color: #aaa;
 	white-space: nowrap;
+	border-radius: 0 5px 0 0;
+	margin-left: -4px;
+}
+
+.gle_tabs > div:first-child {
+	padding: 0 5px 0 5px;
+	margin-left: 0;
 }
 
 .gle_tabs > div.active_tab{
 	border-bottom: 1px dashed #bbb;
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 	color: black;
+}
+
+.gle_tabs > div:hover{
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
 .gle-attribute-name {
@@ -1906,6 +1930,11 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	padding: 0 0 8px 0;
 }
 
+.subFormListItem > a{
+	display: flex;
+	align-items: center;
+}
+
 .subFormShowCount{
 	margin: 5px 5px 5px 8px;
 }
@@ -1922,7 +1951,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	height: 4px;
 	border-radius: 50%;
 	content: '';
-	margin: 8px 7px 0px 10px;
+	margin: 2px 7px 0px 10px;
 	background-color: #236dbf;
 	vertical-align: top;
 	display: inline-block;

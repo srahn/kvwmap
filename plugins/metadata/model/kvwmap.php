@@ -1,4 +1,5 @@
 <?php
+	# gui functions of plugins/metadata
 	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
 
 	function exceptions_error_handler($severity, $message, $filename, $lineno) {

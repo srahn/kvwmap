@@ -666,6 +666,7 @@
  	}
 
  	function mousewheelzoom(){
+		cleartooltip();
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		var g = document.getElementById("moveGroup");
 		zx = g.getCTM().inverse();
@@ -897,6 +898,7 @@
 
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
+		cleartooltip();
 	  if(top.document.GUI.stopnavigation.value == 0){
 		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
 			var g = document.getElementById("moveGroup");

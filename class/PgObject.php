@@ -159,21 +159,24 @@ class PgObject {
 		$this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
 		$this->extent['25832'] eg. contains the same extent in EPSG:25832
 	*/
-	function get_extent($ows_srs = '') {
+	function get_extent($ows_srs = '', $where = '') {
+		if ($where == '') {
+			$where = $this->get_id_condition(array($this->get($this->identifier)));
+		}
 		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
 		$extents = array();
 		$sql = "
 			SELECT
-				ST_XMin(" . $this->geom_column . ") AS minx,
-				ST_YMin(" . $this->geom_column . ") AS miny,
-				ST_XMax(" . $this->geom_column . ") AS maxx,
-				ST_YMax(" . $this->geom_column . ") AS maxy
+				ST_XMin(ST_EXTENT(" . $this->geom_column . ")) AS minx,
+				ST_YMin(ST_EXTENT(" . $this->geom_column . ")) AS miny,
+				ST_XMax(ST_EXTENT(" . $this->geom_column . ")) AS maxx,
+				ST_YMax(ST_EXTENT(" . $this->geom_column . ")) AS maxy
 			FROM
 				" . $this->schema . '.' . $this->tableName . "
 			WHERE
-				" . $this->get_id_condition(array($this->get($this->identifier))) . "
+				" . $where . "
 		";
-		#echo $sql;
+		#echo $sql; exit;
 		$this->debug->show('get_extent sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$this->extent = pg_fetch_assoc($query);
@@ -183,15 +186,16 @@ class PgObject {
 				$geom_column = 'ST_Transform(' . $this->geom_column . ', ' . $epsg_code . ')';
 				$sql = "
 					SELECT
-						ST_XMin(" . $geom_column . ") AS minx,
-						ST_YMin(" . $geom_column . ") AS miny,
-						ST_XMax(" . $geom_column . ") AS maxx,
-						ST_YMax(" . $geom_column . ") AS maxy
+						ST_XMin(ST_EXTENT(" . $geom_column . ")) AS minx,
+						ST_YMin(ST_EXTENT(" . $geom_column . ")) AS miny,
+						ST_XMax(ST_EXTENT(" . $geom_column . ")) AS maxx,
+						ST_YMax(ST_EXTENT(" . $geom_column . ")) AS maxy
 					FROM
 						" . $this->schema . '.' . $this->tableName . "
 					WHERE
-						" . $this->get_id_condition(array($this->get($this->identifier))) . "
+						" . $where . "
 				";
+				$sqls[] = $sql;
 				$this->debug->show('get_extent sql: ' . $sql, false);
 				$query = pg_query($this->database->dbConn, $sql);
 				$this->extents[$epsg_code] = pg_fetch_assoc($query);
@@ -295,8 +299,9 @@ class PgObject {
 	}
 
 	function create($data = '') {
-		if (!empty($data))
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$values = array_map(
 			function($value) {

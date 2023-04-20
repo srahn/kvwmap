@@ -2058,9 +2058,6 @@ echo '			</table>
 		else{
 			$layer->set('status', 1);
 		}
-		if (MS_DEBUG_LEVEL > 0) {
-			$layer->set('debug', 5);
-		};
 
 		# fremde Layer werden auf Verbindung getestet
 		if ($layerset['aktivStatus'] != 0 AND $layerset['connectiontype'] == 6) {
@@ -2554,13 +2551,8 @@ echo '			</table>
 				if(value_of($layerset, 'labelangleitem') != ''){
 					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
 				}
-				if($dbLabel['autoangle']==1) {
-					if(MAPSERVERVERSION >= 600){
-						$label->set('anglemode', MS_AUTO);
-					}
-					else{
-						$label->autoangle = $dbLabel['autoangle'];
-					}
+				if($dbLabel['anglemode'] != NULL) {
+					$label->set('anglemode', $dbLabel['anglemode']);
 				}
 				if ($dbLabel['buffer']!='') {
 					$label->buffer = $dbLabel['buffer'];
@@ -3178,6 +3170,7 @@ echo '			</table>
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
 		$this->notification = Notification::find_by_id($this, $this->formvars['id']);
+		echo '<br>habe notification mit id ' . $this->notification->get('id') . ' gefunden.'; exit;
 		$results = ($this->notification->delete())[0];
 		$formatter = new formatter($results, 'json', 'application/json');
 		echo $formatter->output();
@@ -4606,6 +4599,26 @@ echo '			</table>
             <td class="px13">
 							'.key($this->labeldaten).'</td><td>';
 							switch(key($this->labeldaten)){
+								case 'anglemode' : {
+									echo FormObject::createSelectField(
+											'label_'.key($this->labeldaten),
+											array(
+												array('value' => NULL, 'output' => ''),
+												array('value' => MS_AUTO, 'output' => 'AUTO'),
+												array('value' => MS_AUTO2, 'output' => 'AUTO2'),
+												array('value' => MS_FOLLOW, 'output' => 'FOLLOW'),
+											),
+											$this->labeldaten[key($this->labeldaten)],
+											1,
+											"width: 87px",
+											"",
+											"",
+											"",
+											'labelFormField',
+											""
+										);
+								}break;								
+								
 								case 'position' : {
 									echo FormObject::createSelectField(
 											'label_'.key($this->labeldaten),
@@ -8590,6 +8603,30 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->output();
 	}
 
+	function get_generic_layer_data_sql() {
+		if ($this->formvars['selected_layer_id'] == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+			);
+		}
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		if ($layer->get('Layer_ID') == 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Layer mit id: ' . $this->formvars['selected_layer_id'] . ' nicht gefunden.'
+			);
+		}
+		$zusatz = array(
+			array(
+				'select' => 'xplankonverter.konvertierungen.bezeichnung AS planname',
+				'from' => 'JOIN xplankonverter.konvertierungen ON ' . $layer->get('schema') . '.' . $layer->get('maintable') . '.konvertierung_id = xplankonverter.konvertierungen.id'
+			)
+		);
+		return $layer->get_generic_data_sql($zusatz);
+	}
+
 	function Layergruppen_Anzeigen() {
 		include_once(CLASSPATH . 'LayerGroup.php');
 		$this->layergruppen = LayerGroup::find(
@@ -9839,7 +9876,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
 			$document_attributes = array();
 			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['tablename'][$i] == $layer['maintable']){
+				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
 					$document_attributes[] = $attributes['name'][$i];
 				}
 			}
@@ -11503,13 +11540,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						foreach ($files as $file) {
 							$dateityp = strtolower(array_pop(explode('.', $file)));
 							if (!in_array($dateityp, array('dbf', 'shx'))) { // damit gezippte Shapes nur einmal bearbeitet werden
-								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+								$this->daten_import_process($this->formvars['upload_id'], $file_number, $file, NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 								$file_number++;
 							}
 						}
 					}
 					else {
-						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['selected_layer_id']);
+						$this->daten_import_process($this->formvars['upload_id'], $file_number, $_files['uploadfile']['name'], NULL, $this->formvars['after_import_action'], $this->formvars['chosen_layer_id']);
 					}
 					echo '█startNextUpload();';
 				}
@@ -11517,12 +11554,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
-	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $selected_layer_id = NULL) {
+	function daten_import_process($upload_id, $file_number, $filename, $epsg, $after_import_action, $chosen_layer_id = NULL) {
 		sanitize($filename, 'text');
 		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('selected_layer_id' => $selected_layer_id));
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('chosen_layer_id' => $chosen_layer_id));
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
@@ -12258,7 +12295,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						$document->add_frame2stelle($frames[$i], $neue_stelle_id); # Hinzufügen der Druckrahmen zur Stelle
 					}
 				}
-				if ($Stelle->default_user_id !== '') {
+				if ($Stelle->default_user_id != '') {
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
@@ -13048,6 +13085,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	function BenutzerdatenFormular() {
 		$this->titel = 'Benutzerdaten Editor';
 		$this->main = 'userdaten_formular.php';
+
 		# Abfragen der Benutzerdaten wenn eine user_id zur Änderung selektiert ist
 		if ($this->formvars['selected_user_id'] > 0) {
 			$this->userdaten = $this->user->getUserDaten($this->formvars['selected_user_id'], '', '', $this->Stelle->id, $this->user->id, true);
@@ -13057,6 +13095,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['loginname'] 									= $this->userdaten[0]['login_name'];
 			$this->formvars['Namenszusatz'] 							= $this->userdaten[0]['Namenszusatz'];
 			$this->formvars['password_setting_time'] 			= $this->userdaten[0]['password_setting_time'];
+			$this->formvars['password_expired'] 					= $this->userdaten[0]['password_expired'];
 			$this->formvars['start'] 											= $this->userdaten[0]['start'];
 			$this->formvars['stop'] 											= $this->userdaten[0]['stop'];
 			$this->formvars['ips']												= $this->userdaten[0]['ips'];
@@ -13156,7 +13195,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$ret = $this->user->checkUserDaten($this->formvars);
 		if ($ret[0]) {
 			# Fehler bei der Formulareingabe
-			$this->Meldung = $ret[1];
+			$this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
 		}
 		else {
 			$stellen = array_filter(explode(', ',$this->formvars['selstellen']));
@@ -14185,7 +14224,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 				$_FILES[$fieldnames[0]] = $_FILES['uploadfile'];
 				for ($i = 0; $i < count($attributes['name']); $i++) {
-					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['tablename'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
+					$fieldname = $belated_file->data['layer_id'] . ';' . $attributes['name'][$i] . ';' . $attributes['table_name'][$i] . ';' . $belated_file->data['dataset_id'] . ';' . $attributes['form_element_type'][$i] . ';1;' . $attributes['type'][$i] . ';1';
 					$this->formvars[$fieldname] = $this->qlayerset[0]['shape'][0][$attributes['name'][$i]];
 					$fieldnames[] = $fieldname;
 				}
@@ -14758,8 +14797,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
 				) AND
 				(
-					($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR
-					$this->last_query != ''
+					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
+					($this->last_query[$layerset[$i]['Layer_ID']] != '')					
 				)
 			) {
 				# Dieser Layer soll abgefragt werden
@@ -18105,7 +18144,7 @@ class db_mapObj{
 					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
 				}
 
-				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`autoangle`,`buffer`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
+				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`anglemode`,`buffer`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
 				for ($k = 0; $k < @count($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
@@ -18255,24 +18294,31 @@ class db_mapObj{
 	function deleteRollenLayer($id = NULL, $type = NULL) {
 		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
-			if ($rollenlayerset[$i]['Datentyp'] != 3 AND $rollenlayerset[$i]['Typ'] == 'import'){		# beim Import-Layern die Tabelle löschen
-				$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
-				$explosion = explode(' ', $explosion[1]);
-				$sql = "
-					SELECT
-						count(id)
-					FROM
-						rollenlayer
-					WHERE
-						Data like '%" . $explosion[0] . "%'
-				";
-				$this->db->execSQL($sql);
-				if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-				$rs = $this->db->result->fetch_array();
-				if ($rs[0] == 1) {		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
-					$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[0].';';
-					$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
-					$query = pg_query($sql);
+			if ($rollenlayerset[$i]['Typ'] == 'import') {
+				if ($rollenlayerset[$i]['Datentyp'] != 3 ){
+					# bei Postgis-Layern die Tabelle löschen
+					$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
+					$explosion = explode(' ', $explosion[1]);
+					$sql = "
+						SELECT
+							count(id)
+						FROM
+							rollenlayer
+						WHERE
+							Data like '%" . $explosion[0] . "%'
+					";
+					$this->db->execSQL($sql);
+					if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+					$rs = $this->db->result->fetch_array();
+					if ($rs[0] == 1) {		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
+						$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'.'.$explosion[0].';';
+						$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
+						$query = pg_query($sql);
+					}
+				}
+				else {
+					# bei Raster-Layern die Raster-Datei löschen
+					unlink(SHAPEPATH . $rollenlayerset[$i]['Data']);
 				}
 			}
 			$sql = "
@@ -19501,7 +19547,9 @@ class db_mapObj{
 				l.Gruppe,
 				l.Datentyp,
 				l.connectiontype,
+				l.metalink,
 				l.kurzbeschreibung,
+				l.wms_keywordlist,
 				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
@@ -19530,6 +19578,8 @@ class db_mapObj{
 			'Gruppe' => array(),
 			'GruppeID' => array(),
 			'Kurzbeschreibung' => array(),
+			'metalink' => array(),
+			'wms_keywordlist' => array(),
 			'datasource' => array(),
 			'dataowner_name' => array(),
 			'dataowner_email' => array(),
@@ -19550,6 +19600,8 @@ class db_mapObj{
 			$layer['Datentyp'][] = $rs['Datentyp'];
 			$layer['connectiontype'][] = $rs['connectiontype'];
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
+			$layer['metalink'][] = $rs['metalink'];
+			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
 			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];
@@ -19615,7 +19667,7 @@ class db_mapObj{
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if ($layer_id != NULL) {
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer dabei ignorieren
+			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
 			$sql .= " 
 			AND l.Layer_ID NOT IN (
 					SELECT 
@@ -19626,6 +19678,7 @@ class db_mapObj{
 						a.layer_id = " . $layer_id . " AND 
 						a.form_element_type = 'SubformEmbeddedPK'
 			) 
+			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
 			GROUP BY 
 				p.id
       HAVING 
@@ -19971,7 +20024,7 @@ class db_mapObj{
 	}
 
 	function copyLabel($label_id){
-		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,autoangle,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
+		$sql = "INSERT INTO labels (font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force) SELECT font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels WHERE Label_ID = " . $label_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyLabel - Kopieren eines Labels:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -20060,39 +20113,40 @@ class db_mapObj{
 		return $this->db->mysqli->insert_id;
 	}
 
-  function delete_Class($class_id){
-    $sql = "
-			DELETE 
-				c, rc 
+	function delete_Class($class_id) {
+		$sql = "
+			DELETE
+				c, rc
 			FROM
 				classes c LEFT JOIN
 				u_rolle2used_class rc ON c.Class_ID = rc.class_id
 			WHERE 
-				c.Class_ID = " . $class_id;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+				c.Class_ID = " . $class_id . "
+		";
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->delete_Class - Löschen einer Klasse:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__; return 0; }
 
-    # Einträge in u_styles2classes und evtl. die Styles mitlöschen
-    $styles = $this->read_Styles($class_id);
-    for($i = 0; $i < count($styles); $i++){
-    	$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
-      $other_classes = $this->get_classes2style($styles[$i]['style_id']);
-      if($other_classes == NULL){
-      	$this->delete_Style($styles[$i]['style_id']);
-      }
-    }
-    # Einträge in u_labels2classes und evtl. die Labels mitlöschen
-    $labels = $this->read_Label($class_id);
-    for($i = 0; $i < count($labels); $i++){
-    	$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
-    	$other_classes = $this->get_classes2label($labels[$i]['label_id']);
-    	if($other_classes == NULL){
-      	$this->delete_Label($labels[$i]['label_id']);
-    	}
-    }
-  }
+		# Einträge in u_styles2classes und evtl. die Styles mitlöschen
+		$styles = $this->read_Styles($class_id);
+		for ($i = 0; $i < count($styles); $i++){
+			$this->removeStyle2Class($class_id, $styles[$i]['style_id']);
+			$other_classes = $this->get_classes2style($styles[$i]['style_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Style($styles[$i]['style_id']);
+			}
+		}
+		# Einträge in u_labels2classes und evtl. die Labels mitlöschen
+		$labels = $this->read_Label($class_id);
+		for ($i = 0; $i < count($labels); $i++){
+			$this->removeLabel2Class($class_id, $labels[$i]['label_id']);
+			$other_classes = $this->get_classes2label($labels[$i]['label_id']);
+			if ($other_classes == NULL) {
+				$this->delete_Label($labels[$i]['label_id']);
+			}
+		}
+	}
 
 	function update_Class($attrib) {
 		global $supportedLanguages;
@@ -20421,8 +20475,8 @@ class db_mapObj{
     if($formvars["label_offsetx"] != ''){$sql.="offsetx = '" . $formvars["label_offsetx"]."',";}else{$sql.="offsetx = NULL,";}
     if($formvars["label_offsety"] != ''){$sql.="offsety = '" . $formvars["label_offsety"]."',";}else{$sql.="offsety = NULL,";}
     if($formvars["label_angle"] != ''){$sql.="angle = '" . $formvars["label_angle"]."',";}else{$sql.="angle = NULL,";}
-    if($formvars["label_autoangle"]){$sql.="autoangle = '" . $formvars["label_autoangle"]."',";}else $sql.="autoangle = NULL,";
-    if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}
+    if($formvars["label_anglemode"]){$sql.="anglemode = '" . $formvars["label_anglemode"]."',";}else $sql.="anglemode = NULL,";
+    if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}else $sql.="buffer = NULL,";
     if($formvars["label_minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["label_minfeaturesize"]."',";}
     if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}
     if($formvars["label_partials"] != ''){$sql.="partials = '" . $formvars["label_partials"]."',";}else{$sql.="partials = NULL,";}
@@ -20467,7 +20521,7 @@ class db_mapObj{
 	    if($label['offsetx']){$sql.= "offsetx = '" . $label['offsetx']."', ";}
 	    if($label['offsety']){$sql.= "offsety = '" . $label['offsety']."', ";}
 	    if($label['angle']){$sql.= "angle = '" . $label['angle']."', ";}
-	    if($label['autoangle']){$sql.= "autoangle = '" . $label['autoangle']."', ";}
+	    if($label['anglemode']){$sql.= "anglemode = '" . $label['anglemode']."', ";}
 	    if($label['buffer']){$sql.= "buffer = '" . $label['buffer']."', ";}
 	    if($label['minfeaturesize']){$sql.= "minfeaturesize = '" . $label['minfeaturesize']."', ";}
 	    if($label['maxfeaturesize']){$sql.= "maxfeaturesize = '" . $label['maxfeaturesize']."', ";}
@@ -20496,7 +20550,7 @@ class db_mapObj{
 	    if($label->offsetx){$sql.= "offsetx = '" . $label->offsetx."', ";}
 	    if($label->offsety){$sql.= "offsety = '" . $label->offsety."', ";}
 	    if($label->angle){$sql.= "angle = '" . $label->angle."', ";}
-	    if($label->autoangle){$sql.= "autoangle = '" . $label->autoangle."', ";}
+	    if($label->anglemode){$sql.= "anglemode = '" . $label->anglemode."', ";}
 	    if($label->buffer){$sql.= "buffer = '" . $label->buffer."', ";}
 	    if($label->minfeaturesize){$sql.= "minfeaturesize = '" . $label->minfeaturesize."', ";}
 	    if($label->maxfeaturesize){$sql.= "maxfeaturesize = '" . $label->maxfeaturesize."', ";}

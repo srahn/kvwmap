@@ -260,7 +260,9 @@ class MyObject {
 		}
 		$rs = mysqli_fetch_assoc($result);
 		foreach ($types as $name => $type) {
-			settype($rs[$name], $type);
+			if (gettype($rs[$name]) != 'NULL') {
+				settype($rs[$name], $type);
+			}
 		}
 		return $rs;
 	}

@@ -273,73 +273,57 @@ function go_switch_xplankonverter($go) {
 	global $GUI;
 	switch ($go) {
 
+		/**
+			Erzeugt die Metadatendokumente für einen einzelnen Plan oder für
+			den Geodatensatz, Darstellungs- und Downloaddienst, der alle Pläne enthält
+			je nach dem ob eine Konvertierung-ID übergeben wurde oder nicht
+		*/
 		case 'xplankonverter_create_metadata' : {
-			header('Content-Type: application/json');
-
-			$konvertierung_id = $GUI->formvars['konvertierung_id'];
-			if ($konvertierung_id == '') {
-				send_error('Fehler beim Erzeugen der Metadaten!<p>Es muss eine Konvertierung-ID angegeben werden!');
-				break;
-			}
-
-			if ($GUI->xplankonverter_is_case_forbidden()) {
-				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an."
-				);
-				break;
-			}
-
+			$creatorInfos = array();
+			$GUI->sanitize([
+				'konvertierung_id' => 'int',
+				'planart' => 'text'
+			]);
 			$md = new metadata($GUI);
-			$plan = $GUI->konvertierung->plan;
-			$md->set('md_date', en_date($plan->get($GUI->plan_attribut_aktualitaet)));
-			$md->set('id_cite_title', $plan->get('name'));
-			$md->set('date_title', $GUI->plan_attribut_aktualitaet);
-			$md->set('date_de', $plan->get($GUI->plan_attribut_aktualitaet));
-			$md->set('id_cite_date', en_date($plan->get($GUI->plan_attribut_aktualitaet)));
-			$md->set('stelle', $GUI->Stelle);
-			$md->set('version', $GUI->konvertierung->get_version_from_ns_uri(XPLAN_NS_URI));
-			$md->set('epsg', '25832');
-			$md->set('extent', $plan->extent);
-			$md->set('extents', $plan->extents);
-			$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
-			$md->set('onlineresource', URL . '/ows/' . $GUI->Stelle->id . '/fplan?');
-			$md->set('viewservice_browsgraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
-			$md->set('downloadservice_browsgraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
 
-			$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->konvertierung->get('planart'), $GUI->konvertierung->plan_class, $GUI->konvertierung->plan_attribut_aktualitaet);
-			if (count($zusammenzeichnungen['published']) == 0) {
-				# Noch keine Zusammenzeichnung vorhanden entnehme die uuids von der neuen Zusammenzeichnung
-				$uuids = $GUI->konvertierung->get_metadata_uuids();
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				if ($GUI->formvars['planart'] == 'Plan') {
+					send_error('Fehler beim Erzeugen der Metadaten!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.');
+					break;
+				}
+				# Erzeugt Metadatendokumente für alle Pläne im Schema xplan_gml
+				$metadata_documents = $GUI->xplankonverter_create_metadata_documents($md);
 			}
 			else {
-				# Entnehme die uuids von der alten Zusammenzeichnung
-				$uuids = $zusammenzeichnungen['published'][0]->get_metadata_uuids();
-				$GUI->konvertierung->set_metadata_uuids($uuids);
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an."
+					);
+					break;
+				}
+
+				# Erzeugt den Metadatendokumente für einen einzelnen Plan
+				$metadata_documents = $GUI->konvertierung->create_metadata_documents($md);
 			}
 
-			$metaDataCreator = new MetaDataCreator($GUI, $md, $uuids);
-
-			$creatorInfos = array();
-			$metaDataGeodatensatz = $metaDataCreator->createMetadataGeodatensatz();
-			$result = $GUI->metadata_upload_to_geonetwork($metaDataGeodatensatz);
+			$result = $GUI->metadata_upload_to_geonetwork($metadata_documents['metaDataGeodatensatz']);
 			if (! $result['success']) {
 				send_error($result['msg']);
 				break;
 			}
 			$creatorInfos['datensatz'] = $result['metadataInfos'][0];
 
-			$metaDataDownload = $metaDataCreator->createMetaDataDownload();
-			$result = $GUI->metadata_upload_to_geonetwork($metaDataDownload);
+			$result = $GUI->metadata_upload_to_geonetwork($metadata_documents['metaDataDownload']);
 			if (! $result['success']) {
 				send_error($result['msg']);
 				break;
 			}
 			$creatorInfos['download'] = $result['metadataInfos'][0];
 
-			$metaDataView = $metaDataCreator->createMetaDataView();
-			$result = $GUI->metadata_upload_to_geonetwork($metaDataView);
+			$result = $GUI->metadata_upload_to_geonetwork($metadata_documents['metaDataView']);
 			if (! $result['success']) {
 				send_error($result['msg']);
 				break;
@@ -916,15 +900,29 @@ function go_switch_xplankonverter($go) {
 					send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.');
 					break;
 				}
+
+				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
 				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers);
 				if (! $result['success']) {
 					$GUI->add_message('error', 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg']);
 				}
 				else {
 					$mapfile = $result['mapfile'];
+					$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
 					try {
+						if (!file_exists($path_parts['dirname'])) {
+							mkdir($path_parts['dirname'], 0775, true);
+						}
 						$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
 						$GUI->save_web_header_template();
+						if (!file_exists(INSTALLPATH . 'ows')) {
+							mkdir(INSTALLPATH . 'ows', 0775, true);
+						}
+						if (!file_exists(INSTALLPATH . 'ows/fplan')) {
+							file_put_contents(INSTALLPATH . 'ows/fplan', '#!/bin/sh
+						MAPSERV="/usr/lib/cgi-bin/mapserv"
+						MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/zusammenzeichnung.map" exec ${MAPSERV}');
+						}
 					} catch (Exception $ex) {
 						send_error("Fehler beim Speichern der Map-Datei für den Dienst. " . $ex);
 						break;
@@ -944,13 +942,30 @@ function go_switch_xplankonverter($go) {
 					);
 					break;
 				}
+
+				# Erzeugt den Geowebservice für einen einzelnen Plan
 				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers);
 				if (! $result['success']) {
 					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Zusammenzeichnung der Stelle enthält. ' . $result['msg']);
 					break;
 				}
 				$mapfile = $result['mapfile'];
+				$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
 				try {
+					if (!file_exists($path_parts['dirname'])) {
+						mkdir($path_parts['dirname'], 0770, true);
+					}
+					if (!file_exists(INSTALLPATH . 'ows/' . $GUI->Stelle->id)) {
+						mkdir(INSTALLPATH . 'ows/' . $GUI->Stelle->id, 0775, true);
+						#echo 'Verzeichnis ' . INSTALLPATH . 'ows/' . $GUI->Stelle->id . ' angelegt.'; exit;
+					}
+					$mapserver_wrapper = INSTALLPATH . 'ows/' . $GUI->Stelle->id . '/fplan';
+					if (!file_exists($mapserver_wrapper)) {
+						file_put_contents($mapserver_wrapper, '#!/bin/sh
+					MAPSERV="/usr/lib/cgi-bin/mapserv"
+					MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/' . $GUI->Stelle->id . '/zusammenzeichnung.map" exec ${MAPSERV}');
+						chmod($mapserver_wrapper, 0775);
+					}
 					$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
 					$GUI->save_web_header_template();
 				} catch (Exception $ex) {
@@ -1492,6 +1507,12 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
+			$result = $zusammenzeichnung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden");
+			if (!result['success']) {
+				send_error($result['msg']);
+				break;
+			}
+
 			$response = array(
 				'success' => true,
 				'msg' => 'Zusammenzeichnung erfolgreich ausgetauscht.'
@@ -1607,7 +1628,8 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_download_xplan_gml' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) {
-				echo 'Anwendungsfall nicht erlaubt!';
+				include_once('plugins/xplankonverter/view/xplankonverter_download_files_not_allowed.php');
+#				echo 'Anwendungsfall nicht erlaubt!';
 				return;
 			}
 			$filename = XPLANKONVERTER_FILE_PATH . $GUI->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $GUI->formvars['konvertierung_id'] . '.gml';

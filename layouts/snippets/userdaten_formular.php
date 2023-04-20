@@ -1,6 +1,5 @@
 <?
- # 2008-01-12 pkvvm
-  include(LAYOUTPATH . 'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -57,14 +56,13 @@
 		message('<span style="font-size: larger;"><? echo $strInvitationConfirmation1; ?></span><br><br><? echo $strInvitationConfirmation2; ?>.<br><span style="color: red"><? echo $strInvitationConfirmation3; ?>!</span>', 1000, 2000, '', '<? echo $strInvitationConfirmation4; ?>');
 		$('<input>').attr({
 			type: 'hidden',
-			name: 'password_setting_time',
-			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->user_stelle->allowedPasswordAge > 0 ? $this->user_stelle->allowedPasswordAge : 1))); ?>'
+			name: 'reset_password',
+			value: '1'
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
 		document.GUI.changepasswd.value = 1;
 	}
-	
 </script>
 
 <style>
@@ -224,17 +222,23 @@
 				$passwordSettingUnixTime = strtotime($this->formvars['password_setting_time']);
 				if ($this->formvars['selected_user_id'] > 0) { ?>
 					<div class="udf_eingabe-time">
-						<span><? echo $strLastModPassword;?>:&nbsp;<? echo date('d.m.Y', $passwordSettingUnixTime); ?></span><?
-						if ($this->Stelle->checkPasswordAge) {
-							$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge); ?>
-							<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
-								if ($allowedPasswordAgeRemainDays < 0) {
-									echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
-								} else {
-									echo $strPasswordValid;?>&nbsp;(<? echo $allowedPasswordAgeRemainDays; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
-								}
-							} ?>
-						</span>
+						<span><? echo $strLastModPassword; ?>:&nbsp;<? echo date('d.m.Y', $passwordSettingUnixTime); ?></span><?
+						if ($this->formvars['password_expired']) { ?>
+							<span style="color: #f21515"><? echo $strPasswordExpired; ?></span><?
+						}
+						else {
+							if ($this->Stelle->checkPasswordAge) {
+								$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge); ?>
+								<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
+									if ($allowedPasswordAgeRemainDays < 0) {
+										echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
+									}
+									else {
+										echo $strPasswordValid;?>&nbsp;(<? echo $allowedPasswordAgeRemainDays; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
+									} ?>
+								</span><?
+							}
+						} ?>
 					</div><?
 				} ?>
 				<div class="udf_eingabe-pw-input">
