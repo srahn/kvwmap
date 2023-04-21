@@ -1576,7 +1576,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_download_edited_shapes' : {
-			if ($GUI->xplankonverter_is_case_forbidden()) return;
+			if ($GUI->xplankonverter_is_case_forbidden()) {
+				return;
+			}
 
 			$GUI->konvertierung->create_edited_shapes();
 			if (!$GUI->konvertierung->download_files_exists('edited_shapes')) {
@@ -1610,13 +1612,16 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_download_xplan_shapes' : {
-			if ($GUI->xplankonverter_is_case_forbidden()) return;
+			if ($GUI->xplankonverter_is_case_forbidden()) {
+				return;
+			}
 
 			$GUI->konvertierung->create_xplan_shapes();
 
 			if (!$GUI->konvertierung->download_files_exists('xplan_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$GUI->plan_layer_id = $GUI->konvertierung->plan_layer_id;
+				$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 				$GUI->output();
 				return;
 			}

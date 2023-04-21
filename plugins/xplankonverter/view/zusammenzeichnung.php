@@ -350,7 +350,7 @@
 								$list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->plan->get('wirksamkeitsdatum')} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y');
 							}
 							else {
-								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID . "&value_id=" . $konvertierung->get_id() . "&operator_id==&csrf_token=" . $_SESSION['csrf_token'];
+								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID . "&value_konvertierung_id=" . $konvertierung->get_id() . "&operator_konvertierung_id==&csrf_token=" . $_SESSION['csrf_token'];
 								$list_text = "{$konvertierung->get('bezeichnung')} Upload vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y');
 							} ?>
 							<div id="failed_zusammenzeichnung_<? echo $konvertierung->get_id(); ?>" class="zusammenzeichnung-list-div">

@@ -302,7 +302,7 @@
 		$success = false;
 		if (!file_exists($tmp_dir)) {
 			try {
-				mkdir($tmp_dir, 0777, true);
+				mkdir($tmp_dir, 0775);
 			} catch (Exception $ex) {
 				return array(
 					'success' => false,
@@ -316,7 +316,7 @@
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Die hochgeladene Datei kann nicht als ' . $tmp_dir . $upload_file['name'] . ' kann auf dem Server gespeichert werden. ' . $ex
+				'msg' => 'Die hochgeladene Datei kann nicht als Datei ' . $tmp_dir . $upload_file['name'] . ' auf dem Server gespeichert werden. ' . $ex
 			);
 		}
 
@@ -494,8 +494,8 @@
 		Hochladen der neuen Metadatendokumente in das MIS.
 	*/
 	$GUI->xplankonverter_update_full_services = function() use ($GUI) {
-		# ToDo pk: this->xplankonverter_create_metadata so umstellen, dass man das wahlweise für einen einzelnen oder für den Dienst mit allen Plänen ausführen kann.
-		# und dann hier die Variante für den Landesdienst auf rufen oder sogar den case xplankonverter_update_full_services mit xplankonverter_create_metadata
+		# ToDo pk: this->xplankonverter_create_metadata_documents so umstellen, dass man das wahlweise für einen einzelnen oder für den Dienst mit allen Plänen ausführen kann.
+		# und dann hier die Variante für den Landesdienst auf rufen oder sogar den case xplankonverter_update_full_services mit xplankonverter_create_metadata_documents
 		# zusammenfassen, damit es da nur einen gibt mit unterschiedlichen Eingangswerten, z.B. ohne konvertierungs_id für Landesdienst ausführen sonst für Stellen.
 
 		return array(
@@ -520,7 +520,7 @@
 		$pg_object = new PgObject($GUI, 'xplankonverter', 'plan_services');
 
 		$plan_object = new XP_Plan($GUI, $GUI->formvars['planart']);
-		$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung');
+		$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
 		$plan_service = $pg_object->find_by('planart', $GUI->formvars['planart']);
 
 		if (! $plan_service) {

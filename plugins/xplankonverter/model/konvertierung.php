@@ -405,6 +405,7 @@ class Konvertierung extends PgObject {
 	*/
 	function files_exists($file_type) {
 		$result = false;
+
 		switch ($file_type) {
 			case 'uploaded_shape_files' : {
 				$result = $this->download_files_exists('uploaded_shapes');
@@ -532,18 +533,21 @@ class Konvertierung extends PgObject {
 
 	function create_xplan_shapes() {
 		$path = $this->get_file_path('xplan_shapes');
+		if (!file_exists($path)) {
+			mkdir($path, 0775);
+		}
 
 		// Delete existing shapes
 		$this->debug->show('Lösche xplan-konforme-shape-Dateien', Konvertierung::$write_debug);
 		$files = glob($path);
-		foreach ($files as $file){
-			if(is_file($file)) {
+		foreach ($files as $file) {
+			if (is_file($file)) {
 				unlink($file);
 			}
 		}
 		// Delete existing zip if exists
 		$zip_file = $this->get_file_path('') . 'xplan_shapes.zip';
-		if(file_exists($zip_file)) {
+		if (file_exists($zip_file)) {
 			unlink($zip_file);
 		}
 
@@ -626,6 +630,7 @@ class Konvertierung extends PgObject {
 								ST_GeometryType(position) = 'ST_MultiPolygon'
 						";
 						$this->debug->show('Objektabfrage sql: ' . $sql, Konvertierung::$write_debug);
+						echo $path . $class_name . '_poly.shp';
 						$export_class->ogr2ogr_export($sql_poly, '"ESRI Shapefile" -s_srs epsg:' . $src_srid . ' -t_srs epsg:' . $this->get('output_epsg') . ' -nlt MULTIPOLYGON', $path . $class_name . '_poly.shp', $this->database);
 					}
 				}
@@ -1880,10 +1885,28 @@ class Konvertierung extends PgObject {
 		$this->update_attr($attributes);
 	}
 
+	function get_arl_email() {
+		$sql = "
+			SELECT
+				ko.stelle_id,
+				email_arl
+			FROM
+				xplankonverter.konvertierungen ko JOIN
+				plandigital.stelle_to_arl sa ON ko.stelle_id = sa.stelle_id
+			WHERE
+				ko.id = " . $this->get_id() . "
+			LIMIT 1
+		";
+		#echo $sql;
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 0);
+		$rs = pg_fetch_assoc($ret[1]);
+		return $rs['email_arl'];
+	}
+
 	function send_notification($msg) {
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'info@testportal-plandigital.de';
-		$to_email = 'Petra.Wilken-Janssen@arl-we.niedersachsen.de';
+		$to_email = $this->get_arl_email();
 		$cc_email = null;
 		$reply_email = null;
 		$subject = 'Update in Plandigital';
