@@ -32,17 +32,6 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
-class GUI {
-	function __construct() {
-	}
-
-	function add_message($type, $msg) {
-		echo '<p>Fehlerart: ' . $type;
-		echo '<br>' . $msg;
-	}
-}
-$GUI = new GUI();
-
 output_header();
 
 if (!file_exists('config.php')) {

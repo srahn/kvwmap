@@ -4,6 +4,7 @@
 	XPlanGML-Dokument: https://bauleitplaene-mv.de/download_dev/xplan_97005.gml
 	XPlan PDF: https://bauleitplaene-mv.de/download_dev/130735351046_00000000_EBP_004_AP_001_0_R_G_000_5003.pdf
 	*/
+	/*
 	include('../../../credentials.php');
 	include('../../../config.php');
 	include('../../../class/mysql.php');
@@ -32,4 +33,5 @@
 	else {
 		echo 'Dokument nicht gefunden oder Zugriff nicht erlaubt!';
 	}
+	*/
 ?>

@@ -144,7 +144,7 @@
 						</tr>';
 					}
 				}
-				if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k]['the_geom']){
+				if($this->new_entry != true AND $this->formvars['printversion'] == '' AND $layer['shape'][$k][$columnname]){
  					if($layer['attributes']['group'][0] != ''){ ?>
 						<tr><td colspan="2"><table width="100%" class="tgle" border="2" cellpadding="0" cellspacing="0"><tbody class="gledata">
 					<? } ?>

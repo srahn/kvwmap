@@ -2594,6 +2594,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: green;
 }
 
+.yellow {
+	color: #c6b000;
+}
+
 .red {
 	color: red;
 }
