@@ -531,7 +531,7 @@ echo '</tbody></table></div>';
 				}
 			}
 			catch (Exception $e){
-				echo 'Exception abgefangen: ',  $e->getMessage(), "\n";
+				echo 'Fehler: ' . $e->getMessage(), "\n";
 			}
 		}
 ?>
