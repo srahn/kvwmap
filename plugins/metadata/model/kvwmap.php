@@ -1,4 +1,12 @@
 <?php
+	# gui functions of plugins/metadata
+	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
+
+	function exceptions_error_handler($severity, $message, $filename, $lineno) {
+	  throw new ErrorException($message, 0, $severity, $filename, $lineno);
+	}
+
+#	set_error_handler('exceptions_error_handler');
 
 	$GUI->metadatenSuchen = function() {
 		$GUI->metadata = new metadata($GUI);
@@ -7,7 +15,7 @@
 		$GUI->output();
 	};
 
-  $GUI->metadateneingabe = function() {
+  $GUI->metadateneingabe = function() use ($GUI) {
     $metadatensatz = new metadatensatz($GUI->formvars['oid'],$GUI->pgdatabase);
     if ($GUI->formvars['oid']!='') {
       # Es handelt sich um eine Änderung eines Datensatzes
@@ -85,4 +93,56 @@
     $GUI->drawMap();
     $GUI->output();
   };
+
+	$GUI->metadata_upload_to_geonetwork = function($data) use ($GUI) {
+		$success = false;
+		// echo "<br>saveData=truetruetrue send_metadata=\"${send_metadata}\"<br>";
+		try {
+			$geonetworkClient = new GeonetworkClient(
+				METADATA_CATALOG,
+				METADATA_CATALOGUSER,
+				METADATA_CATALOGPASS
+			);
+			$connectResult = $geonetworkClient->connect();
+			// echo "<textarea id=\"connectResult\" rows=\"10\" style=\"width:100%; background-color:white\"><" .
+			// 	print_r($connectResult, true) . "></textarea>";
+			#echo "<textarea id=\"connectResult\" rows=\"1\" style=\"width:100%; background-color:white\">angemeldet: " .
+				$connectResult->name . "</textarea>";
+	
+			// uuidProcessing = GENERATEUUID, NOTHING, OVERWRITE
+			$putMetaDataResult = $geonetworkClient->putMetaData($data, $uuidProcessing='OVERWRITE');
+	
+			#echo "<textarea id=\"put-result\" rows=\"10\" style=\"width:100%; background-color:white\"><" .
+			 # print_r($putMetaDataResult, true) . "></textarea>";
+
+			if ($putMetaDataResult->success) {
+				$success = true;
+				$msg = "war erfolgreich\nuuid:\t" . $putMetaDataResult->uuid;
+				$metadataInfos = $putMetaDataResult->metadataInfos;
+				$infos = array();
+				foreach ($metadataInfos as $metadataInfo) {
+					$infos[] = $metadataInfo[0];
+				}
+			} else {
+				$msg = "war nicht erfolgreich\nmessage:\t" . $putMetaDataResult->message . "\ndescription: " . $putMetaDataResult->description;
+			}
+			#echo "<textarea id=\"connectResult\" rows=\"10\" style=\"width:100%; background-color:white\">${msg}</textarea>";
+
+		} catch (Exception $e) {
+			$msg = 'Exception abgefangen: ' .  $e->getMessage() . "\n";
+			$msg .= $e->getTraceAsString();
+		}
+		try {
+			$geonetworkClient->close();
+		} catch (Exception $e) {
+			$msg = 'Exception abgefangen: ' . $e->getMessage() . "\n";
+			$msg .= $e->getTraceAsString();
+		}
+		$response = array(
+			'success' => $success,
+			'msg' => $msg,
+			'metadataInfos' => $infos
+		);
+		return $response;
+	}
 ?>

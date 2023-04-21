@@ -316,7 +316,7 @@ function alias_replace(name){
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 120); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < @count($this->attributes['type']); $i++){ ?>
-						<tr>
+						<tr class="listen-tr">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
 						  	<input type="text"
@@ -425,8 +425,8 @@ function alias_replace(name){
 									),
 									$this->attributes['arrangement'][$i],
 									1,
-									"outline: 1px solid lightgrey; border: none; width: 85px; height: 18px; background-color: " . $bgcolor,
-									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+									"outline: 1px solid lightgrey; border: none; width: 85px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 85px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 						  </td>
 
@@ -447,8 +447,8 @@ function alias_replace(name){
 									),
 									$this->attributes['labeling'][$i],
 									1,
-									"outline: 1px solid lightgrey; border: none; width: 88px; height: 18px; background-color: " . $bgcolor,
-									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+									"outline: 1px solid lightgrey; border: none; width: 88px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 							</td>
 							
