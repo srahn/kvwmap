@@ -51,6 +51,7 @@ ALTER TABLE `rollenlayer` ADD CONSTRAINT `rollenlayer_ibfk_1` FOREIGN KEY (`user
 ALTER TABLE `rolle_csv_attributes` DROP FOREIGN KEY `rolle_csv_attributes_ibfk_1`;
 ALTER TABLE `rolle_csv_attributes` ADD CONSTRAINT `rolle_csv_attributes_ibfk_1` FOREIGN KEY (`user_id`, `stelle_id`) REFERENCES `rolle`(`user_id`, `stelle_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+DELETE FROM `rolle_export_settings` WHERE concat(`stelle_id`, '_', `user_id`) NOT in (select concat(`stelle_id`, '_', `user_id`) from rolle);
 ALTER TABLE `rolle_export_settings` ADD CONSTRAINT `rolle_export_settings_ibfk_1` FOREIGN KEY (`user_id`, `stelle_id`) REFERENCES `rolle`(`user_id`, `stelle_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `rolle_last_query` DROP FOREIGN KEY `rolle_last_query_ibfk_1`;
