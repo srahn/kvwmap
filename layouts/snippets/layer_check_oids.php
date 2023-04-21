@@ -500,33 +500,38 @@ echo '</tbody></table></div>';
 			$credentials['dbname'] = $rs['datname'];
 			$database->set_object_credentials($credentials);
 			echo '<h3>' . $credentials['dbname'] . ':</h3>';
-			if ($database->open()) {
-				foreach ($db_check_sqls as $db_check_sql) {
-					$ret = @pg_query($database->dbConn, $db_check_sql['sql']);
-					if($ret == false){
-						echo @pg_last_error($database->dbConn);
-					}
-					else{
-						if ($rs = pg_fetch_all($ret)) {
-							echo '<h4>' . $db_check_sql['name'] . '</h4>';
-							echo '<table>';
-							foreach ($rs[0] as $key => $value) {
-									echo "<th>" . $key . "</th>";
-							}
-							foreach ($rs as $row) {
-								echo "<tr>";
-								foreach ($row as $cell) {
-									echo "<td>" . $cell . "</td>";
+			try {
+				if ($database->open()) {
+					foreach ($db_check_sqls as $db_check_sql) {
+						$ret = @pg_query($database->dbConn, $db_check_sql['sql']);
+						if($ret == false){
+							echo @pg_last_error($database->dbConn);
+						}
+						else{
+							if ($rs = pg_fetch_all($ret)) {
+								echo '<h4>' . $db_check_sql['name'] . '</h4>';
+								echo '<table>';
+								foreach ($rs[0] as $key => $value) {
+										echo "<th>" . $key . "</th>";
+								}
+								foreach ($rs as $row) {
+									echo "<tr>";
+									foreach ($row as $cell) {
+										echo "<td>" . $cell . "</td>";
+									} 
+									echo "</tr>";
 								} 
-								echo "</tr>";
-							} 
-							echo "</table>";
+								echo "</table>";
+							}
 						}
 					}
 				}
+				else {
+					echo 'Verbindung nicht möglich';
+				}
 			}
-			else {
-				echo 'Verbindung nicht möglich';
+			catch (Exception $e){
+				echo 'Exception abgefangen: ',  $e->getMessage(), "\n";
 			}
 		}
 ?>
