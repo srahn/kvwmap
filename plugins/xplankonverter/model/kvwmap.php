@@ -244,7 +244,7 @@
 		]);
 		$forbidden = false;
 		if ($GUI->formvars['konvertierung_id'] == '') {
-			#echo 'Diese Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			#echo 'Dieser Link kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
 			$forbidden = true;
 		}
 		else {
@@ -452,7 +452,7 @@
 
 		# Setze Metadaten
 		$bb = $GUI->Stelle->MaxGeorefExt;
-		$map->set('name', 'Flaechennutzungsplaene Niedersachsen');
+		$GUI->map->set('name', 'Flaechennutzungsplaene Niedersachsen');
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
     $GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
@@ -486,28 +486,6 @@
 			'success' => true,
 			'mapfile' => 'zusammenzeichnung.map'
 		);
-	};
-
-	/**
-		Aktualisierung der Map-Datei die alle Pläne veröffentlicht.
-		Schreiben der Metadatendokumente für View- und Downloaddienst sowie den Geodatensatz aller Pläne
-		Hochladen der neuen Metadatendokumente in das MIS.
-	*/
-	$GUI->xplankonverter_update_full_services = function() use ($GUI) {
-		# ToDo pk: this->xplankonverter_create_metadata_documents so umstellen, dass man das wahlweise für einen einzelnen oder für den Dienst mit allen Plänen ausführen kann.
-		# und dann hier die Variante für den Landesdienst auf rufen oder sogar den case xplankonverter_update_full_services mit xplankonverter_create_metadata_documents
-		# zusammenfassen, damit es da nur einen gibt mit unterschiedlichen Eingangswerten, z.B. ohne konvertierungs_id für Landesdienst ausführen sonst für Stellen.
-
-		return array(
-			'success' => false,
-			'mapfile' => 'function xplankonverter_update_full_service in kvwmap.php noch nicht fertig implementiert'
-		);
-		/*
-		return array(
-			'success' => true,
-			'msg' => 'Update der Dienste erfolgreich.'
-		);
-		*/
 	};
 
 	/**

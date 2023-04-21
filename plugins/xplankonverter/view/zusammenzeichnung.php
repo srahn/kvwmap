@@ -347,14 +347,14 @@
 						foreach ($this->zusammenzeichnungen['faulty'] AS $konvertierung) {
 							if ($konvertierung->plan) {
 								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_FP_PLAENE_LAYER_ID . "&value_plan_gml_id=" . $konvertierung->plan->get('gml_id') . "&operator_plan_gml_id==&csrf_token=" . $_SESSION['csrf_token'];
-								$list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->plan->get('wirksamkeitsdatum')} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y');
+								$list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->plan->get('wirksamkeitsdatum')} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
 							}
 							else {
 								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID . "&value_konvertierung_id=" . $konvertierung->get_id() . "&operator_konvertierung_id==&csrf_token=" . $_SESSION['csrf_token'];
-								$list_text = "{$konvertierung->get('bezeichnung')} Upload vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y');
+								$list_text = "Konvertierung: {$konvertierung->get_id()} Upload vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
 							} ?>
 							<div id="failed_zusammenzeichnung_<? echo $konvertierung->get_id(); ?>" class="zusammenzeichnung-list-div">
-								<a href="<? echo urlencode2($list_url); ?>"><i class="fa fa-list-alt" aria-hidden="true"></i><? echo $list_text; ?></a>
+								<a href="<? echo urlencode2($list_url); ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> <? echo $list_text; ?></a>
 								<a href="#" onclick="delete_zusammenzeichnung('<? echo $konvertierung->get_id(); ?>')"><i class="fa fa-lg fa-trash" style="float: right; margin-right: 5px"></i></a>
 							</div><?
 						} ?>

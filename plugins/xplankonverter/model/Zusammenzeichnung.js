@@ -51,15 +51,18 @@ class Zusammenzeichnung {
         Hochladen der Metadatendokumente in das Metainformationssystem des Portals.\
         '
       },
-      update_full_services: {
+      update_full_geoweb_service: {
         nr: 7,
         msg: 'Aktualisieren der Landesdienste',
-        description: 'Aktualisieren der Capabilities-Metadaten der Dienste in denen alle Pläne veröffentlicht werden.<br>\
-        Aktualisieren der Metadatendokumente über die Landesdienste und den Landesdatensatz.\
-        ',
+        description: 'Aktualisieren der Capabilities-Metadaten der Dienste in denen alle Pläne veröffentlicht werden.',
+      },
+      update_full_metadata: {
+        nr: 8,
+        msg: 'Aktualisieren der Metadatendokumente über die Landesdienste',
+        description: 'Aktualisieren der Capabilities-Metadaten des Dienstes und des Geodatensatzes in denen alle Pläne veröffentlicht werden.',
       },
       replace_zusammenzeichnung: {
-        nr: 8,
+        nr: 9,
         msg: 'Ersetzen der alten Zusammenzeichnung durch die neue',
         description: 'Archivierung der original hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
         Lösche die hochgeladenen Dateien der alten Zusammenzeichnung<br>\
@@ -67,14 +70,14 @@ class Zusammenzeichnung {
         '
       },
       reindex_gml_ids: {
-        nr: 9,
+        nr: 10,
         msg: 'Umbenennen der GML-ID\'s',
         description: 'Es existiert schon ein Plan mit der GML-ID der hochgeladenen Zusammenzeichnung.<br>\
         Deshalb wird eine neue Zusammenzeichnung mit geänderten GML-IDs angelegt.<br>\
         Der Importprozess wird mit der geänderten Zusammenzeichnung neu gestartet.'
       },
       import_reindexed_zusammenzeichnung: {
-        nr: 10,
+        nr: 11,
         msg: 'Importieren der neu indizierten GML-Datei in die Portaldatenbank',
         description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit mit den umbenannten GML-IDs.<br>\
         Es laufen die gleichen Teilschritte ab wie im Schritt Importieren der GML-Datei in die Portaldatenbank.'
@@ -376,7 +379,7 @@ class Zusammenzeichnung {
         console.log('Response create_metadata: %o', result);
         if (result.success) {
           this.confirm_step('create_metadata', 'ok');
-          this.update_full_services();
+          this.update_full_geoweb_service();
         }
         else {
           this.confirm_step('create_metadata', 'error');
@@ -398,33 +401,62 @@ class Zusammenzeichnung {
     })
   }
 
-  update_full_services = () => {
-    this.next_step('update_full_services');
-    //console.log('update_full_services konvertierung_id: ', this.id);
+  update_full_geoweb_service = () => {
+    this.next_step('update_full_geoweb_service');
+    //console.log('update_full_geoweb_service konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
       data: {
-        go: 'xplankonverter_update_full_services',
-        konvertierung_id: this.id,
+        go: 'xplankonverter_create_geoweb_service',
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
       },
       success: (result) => {
-        console.log('Response update_full_services: %o', result);
+        console.log('Response update_full_geoweb_service: %o', result);
         if (result.success) {
-          this.confirm_step('update_full_services', 'ok');
-          this.replace_zusammenzeichnung();
+          this.confirm_step('update_full_geoweb_service', 'ok');
+          this.update_full_metadata();
         }
         else {
-          this.confirm_step('update_full_servicesa', 'error');
+          this.confirm_step('update_full_geoweb_service', 'error');
           message([{ type: 'error', msg: 'Fehler beim Aktualisieren der Landesdienste.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('update_full_services', 'error');
+        this.confirm_step('update_full_geoweb_service', 'error');
         console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Landesdienste zu aktualisieren. Fehlerart: ' + errorThrown }]);
+      }
+    })
+  }
+
+  update_full_metadata = () => {
+    this.next_step('update_full_metadata');
+    //console.log('update_full_metadata konvertierung_id: ', this.id);
+    $.ajax({
+      url: 'index.php',
+      data: {
+        go: 'xplankonverter_create_metadata',
+        planart: this.planart,
+        mime_type: 'json',
+        format: 'json_result',
+      },
+      success: (result) => {
+        console.log('Response update_full_metadata: %o', result);
+        if (result.success) {
+          this.confirm_step('update_full_metadata', 'ok');
+          this.replace_zusammenzeichnung();
+        }
+        else {
+          this.confirm_step('update_full_metadata', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten über den Landesdienst in Zielversion.<br>' + result.msg }]);
+        }
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        this.confirm_step('update_full_metadata', 'error');
+        console.error(jqXHR);
+        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten des Landesdienstes zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
   }

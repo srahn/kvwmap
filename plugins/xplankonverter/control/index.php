@@ -64,7 +64,6 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_shapefile_loeschen
 * xplankonverter_shapefiles_index
 * xplankonverter_show_geltungsbereich_upload
-* xplankonverter_update_full_services
 * xplankonverter_upload_geltungsbereich
 * xplankonverter_upload_xplan_gml
 * xplankonverter_upload_zusammenzeichnung
@@ -885,10 +884,15 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-			Erzeugt eine Map-Datei im Verzeichnis der Stelle der Konvertierung mit XPlan-Layer der Konvertierung die Geometrie haben
-			und Template-Datein für GetFeatureInfo-Requests
+		Erzeugt die Map-Datei für die Dienste eines einzelnen Planes oder für
+		den Geodatensatz, Darstellungs- und Downloaddienst, der alle Pläne enthält
+		je nach dem ob eine Konvertierung-ID übergeben wurde oder nicht
 		*/
 		case 'xplankonverter_create_geoweb_service' : {
+			$GUI->data = array(
+				'success' => true,
+				'msg' => 'Landesdienst erfolgreich angelegt.'
+			);
 			$GUI->sanitize([
 				'konvertierung_id' => 'int'
 			]);
@@ -904,7 +908,12 @@ function go_switch_xplankonverter($go) {
 				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
 				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers);
 				if (! $result['success']) {
-					$GUI->add_message('error', 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg']);
+					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $msg
+					);
+					$GUI->add_message('error', $msg);
 				}
 				else {
 					$mapfile = $result['mapfile'];
@@ -924,8 +933,12 @@ function go_switch_xplankonverter($go) {
 						MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/zusammenzeichnung.map" exec ${MAPSERV}');
 						}
 					} catch (Exception $ex) {
-						send_error("Fehler beim Speichern der Map-Datei für den Dienst. " . $ex);
-						break;
+						$msg = 'Fehler beim Speichern der Map-Datei für den Dienst. ' . $ex;
+						$GUI->data = array(
+							'success' => false,
+							'msg' => $msg
+						);
+						$GUI->add_message('error', $msg);
 					}
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
@@ -1468,10 +1481,6 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$GUI->sanitize([
-				'konvertierung_id' => 'int'
-			]);
-
 			if ($GUI->xplankonverter_is_case_forbidden()) {
 				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
@@ -1494,23 +1503,31 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $zusammenzeichnungen['published'][0]->get('id'));
-			$result = $old_konvertierung->archiv_old_zusammenzeichnung();
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
-			}
+			try {
+/*				$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $zusammenzeichnungen['published'][0]->get('id'));
+				$result = $old_konvertierung->archiv_old_zusammenzeichnung();
+				if (!$result['success']) {
+					send_error($result['msg']);
+					break;
+				}
 
-			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true'));
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
+				$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true'));
+				if (!$result['success']) {
+					send_error($result['msg']);
+					break;
+				}
+*/
+				$result = $zusammenzeichnung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden");
+				if (!result['success']) {
+					send_error($result['msg']);
+					break;
+				}
 			}
-
-			$result = $zusammenzeichnung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden");
-			if (!result['success']) {
-				send_error($result['msg']);
-				break;
+			catch (Exception $err) {
+				return array(
+					'success' => false,
+					'msg' => print_r($err, true)
+				);
 			}
 
 			$response = array(
@@ -1738,38 +1755,6 @@ function go_switch_xplankonverter($go) {
 
 		case 'xplankonverter_show_geltungsbereich_upload' : {
 			include('plugins/xplankonverter/view/upload_geltungsbereich.php');
-		} break;
-
-		case 'xplankonverter_update_full_services' : {
-			header('Content-Type: application/json');
-
-			$konvertierung_id = $GUI->formvars['konvertierung_id'];
-			if ($konvertierung_id == '') {
-				send_error('Es muss eine Konvertierung-ID angegeben werden!');
-				break;
-			}
-
-			if ($GUI->xplankonverter_is_case_forbidden()) {
-				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an."
-				);
-				break;
-			}
-
-			$result = $GUI->xplankonverter_update_full_services();
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
-			}
-
-			$response = array(
-				'success' => true,
-				'msg' => 'Aktualisierung der Landesdienste erfolgreich.'
-			);
-			echo json_encode($response);
-			return;
 		} break;
 
 		case 'xplankonverter_upload_geltungsbereich' : {
