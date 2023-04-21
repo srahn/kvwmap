@@ -484,15 +484,27 @@ echo '</tbody></table></div>';
 <div id="db_check">
 	<h2>Datenbankobjekte die oids verwenden</h2>
 <?
-		include_once(CLASSPATH . 'Connection.php');
-		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
-		foreach ($this->connections as $connection) {
-			if ($this->layer_dbs[$connection->data['id']]->dbConn != false) {
-				echo '<h3>' . $connection->data['dbname'] . ':</h3>';
+		$credentials = $this->pgdatabase->get_object_credentials();
+		$sql = "
+			SELECT 
+				datname 
+			FROM 
+				pg_database
+			WHERE 
+				datistemplate = false AND 
+				datname != 'postgres';
+		";
+		$ret1 = $this->pgdatabase->execSQL($sql);
+		while($rs = pg_fetch_assoc($ret1[1])){		
+			$database = new pgdatabase();
+			$credentials['dbname'] = $rs['datname'];
+			$database->set_object_credentials($credentials);
+			echo '<h3>' . $credentials['dbname'] . ':</h3>';
+			if ($database->open()) {
 				foreach ($db_check_sqls as $db_check_sql) {
-					$ret = @pg_query($this->layer_dbs[$connection->data['id']]->dbConn, $db_check_sql['sql']);
+					$ret = @pg_query($database->dbConn, $db_check_sql['sql']);
 					if($ret == false){
-						echo @pg_last_error($this->layer_dbs[$layer['connection_id']]->dbConn);
+						echo @pg_last_error($database->dbConn);
 					}
 					else{
 						if ($rs = pg_fetch_all($ret)) {
@@ -512,6 +524,9 @@ echo '</tbody></table></div>';
 						}
 					}
 				}
+			}
+			else {
+				echo 'Verbindung nicht möglich';
 			}
 		}
 ?>
