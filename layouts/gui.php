@@ -42,23 +42,35 @@
 										</script>
 										<div id="hist_timestamp_form" style="display:none;">
 											<div style="display: flex">
-												<div>
-													<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
+												<div>													
 													<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp2', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp2" class="calendar" style="top:35px;left:150px"></div>
 													<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
 													<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
 												</div>
-												<div>
-													<input type="range" list="timestamps" style="width: 600px;">
-													<datalist id="timestamps" style="display: flex; justify-content: space-between; width: 600px;">
+												<div style="text-align: center; margin-left: 10px">
 													<?
-														for ($m = 12; $m >= 0; $m--) {
-															$ts = strtotime("-" . $m . " month", time());
-															echo '<option value="' . date("d.m.Y H:i:s", $ts) . '" label="' . date("d.m.", $ts) . '"></option>';
+														if (rolle::$hist_timestamp != '') {
+															$start = -6;
+															$ende = 6;
+															$ref = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
+														}
+														else {
+															$start = -12;
+															$ende = 0;
+															$ref = time();
+														}
+													?>
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" list="timestamps" autocomplete="off" value="0" style="width: 600px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
+													<datalist id="timestamps" style="display: flex; justify-content: space-between; width: 620px;">
+													<?
+														for ($m = $start; $m <= $ende; $m++) {
+															$ts = strtotime($m . " month", $ref);
+															echo '<option value="' . $m . '" label="' . date("d.m.", $ts) . '">' . date("d.m.", $ts) . '</option>';
 														}
 													?>
 													</datalist>
 												</div>
+												<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
 											</div>
 										</div>
 										<?php

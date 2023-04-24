@@ -1344,6 +1344,38 @@ a.menuered:hover {
 	z-index: 100000;
 }
 
+#hist_timestamp3{
+	-webkit-appearance: none;
+	box-shadow: 1px 1px 1px #000000;
+	background: #74A9D8;
+	border-radius: 1px;
+	border: 0px solid #010101;
+	height: 5px;
+	margin-bottom: 7px;
+}
+
+#hist_timestamp3::-moz-range-thumb {
+  box-shadow: 1px 1px 1px #000031;
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+}
+
+#hist_timestamp3::-webkit-slider-thumb {
+	-webkit-appearance: none;
+  box-shadow: 1px 1px 1px #000031;
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+	margin-top: -13px;
+}
+
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;

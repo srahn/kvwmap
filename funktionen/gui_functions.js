@@ -18,6 +18,7 @@ var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
 root.getlegend_requests = new Array();
+var current_date = new Date();
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -701,8 +702,19 @@ function formdata2urlstring(formdata){
 	}
 	return url;
 }
-	 
+
+function get_map(){
+	svgdoc = document.SVG.getSVGDocument();	
+	var mapimg = svgdoc.getElementById("mapimg");
+	let d = structuredClone(hist_timestamp);
+	d.setMonth(d.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
+	let ts = d.toLocaleString().replace(',', '');
+	document.GUI.hist_timestamp2.value = ts;
+	mapimg.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&current_date=' + current_date + '&hist_timestamp=' + ts);
+}
+
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
+	current_date = new Date();
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();	
 	// nix

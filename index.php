@@ -259,6 +259,14 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 			
+			case 'getMap' : {
+				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+				$GUI->loadMap('DataBase');
+				$GUI->drawMap(true);
+				$GUI->mime_type='image';
+				$GUI->output();
+			} break;			
+			
 			case 'write_mapserver_templates' : {
 				include_once(CLASSPATH . 'Layer.php');
 				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");

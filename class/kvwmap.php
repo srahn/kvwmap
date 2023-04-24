@@ -2969,6 +2969,10 @@ echo '			</table>
 			$this->image_map->saveImage(IMAGEPATH . $filename);
 			$this->img['hauptkarte'] = IMAGEURL . $filename;
 		}
+		if ($this->formvars['go'] == 'getMap'){
+			$this->outputfile = $filename;
+			return;
+		}
 		if ($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
 			$this->debug->write("Legende erzeugt", 4);
@@ -3279,6 +3283,11 @@ echo '			</table>
 					$this->pdf->ezStream();
 				}
 			} break;
+			case 'image' : {
+				header("Content-type: image/jpeg");
+				header("Cache-Control: max-age=31536000, immutable");
+				readfile(IMAGEPATH . $this->outputfile);
+			} break;			
 			default : {
 				if ($this->formvars['format'] != '') {
 					include('formatter.php');
