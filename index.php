@@ -39,10 +39,10 @@ register_shutdown_function(function () {
 // }
 
 function CustomErrorHandler($severity, $message, $filename, $lineno) {
-		if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-			return;
-		}
-    throw new ErrorException($message, 0, $severity, $filename, $lineno);
+	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
+		return;
+	}
+	throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 set_error_handler("CustomErrorHandler");
