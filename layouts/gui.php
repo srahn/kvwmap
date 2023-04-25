@@ -60,8 +60,8 @@
 															$ref = time();
 														}
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" list="timestamps" autocomplete="off" value="0" style="width: 600px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
-													<datalist id="timestamps" style="display: flex; justify-content: space-between; width: 620px;">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 600px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
+													<datalist style="display: flex; justify-content: space-between; width: 620px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
 															$ts = strtotime($m . " month", $ref);
