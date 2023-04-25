@@ -1346,27 +1346,29 @@ a.menuered:hover {
 
 #hist_timestamp3{
 	-webkit-appearance: none;
-	box-shadow: 1px 1px 1px #000000;
-	background: #74A9D8;
+	box-shadow: 0px -4px 0px #74A9D8;
 	border-radius: 1px;
 	border: 0px solid #010101;
-	height: 5px;
-	margin-bottom: 7px;
+	height: 7px;
+	margin: 8px 0 2px 0;
+	background: linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box, linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box;
+	background-size: 49.5px;
 }
 
 #hist_timestamp3::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000031;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
   border: 1px solid #00001E;
   height: 13px;
   width: 13px;
   border-radius: 15px;
   background: #FFFFFF;
   cursor: pointer;
+	transform: translate(0px, -5px);
 }
 
 #hist_timestamp3::-webkit-slider-thumb {
 	-webkit-appearance: none;
-  box-shadow: 1px 1px 1px #000031;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
   border: 1px solid #00001E;
   height: 13px;
   width: 13px;
