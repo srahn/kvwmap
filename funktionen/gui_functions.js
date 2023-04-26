@@ -712,9 +712,11 @@ function set_hist_timestamp() {
 	var mapimg3 = mapimg.cloneNode();
 	var mapimg4 = mapimg.cloneNode();
 	if (hist_timestamp != '') {
+		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
 	}
 	else {
+		var scroll = 6000;
 		new_hist_timestamp = new Date();
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
@@ -727,6 +729,7 @@ function set_hist_timestamp() {
 	document.GUI.hist_timestamp2.value = hist_timestamp;
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
+	document.getElementById('hist_range_div').scrollLeft = scroll;
 }
 
 function get_map(){

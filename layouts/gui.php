@@ -44,25 +44,25 @@
 													<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
 													<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
 												</div>
-												<div style="text-align: center; margin-left: 10px">
+												<div id="hist_range_div" style="text-align: center; margin-left: 10px; overflow-x: scroll; width: 600px">
 													<?
 														if (rolle::$hist_timestamp != '') {
-															$start = -6;
-															$ende = 6;
+															$start = -60;
+															$ende = 60;
 															$ref = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
 														}
 														else {
-															$start = -12;
+															$start = -120;
 															$ende = 0;
 															$ref = time();
 														}
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 600px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
-													<datalist style="display: flex; justify-content: space-between; width: 630px;">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
+													<datalist style="display: flex; justify-content: space-between; width: 6030px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
 															$ts = strtotime($m . " month", $ref);
-															echo '<option value="' . $m . '" label="' . date("d.m.", $ts) . '">' . date("d.m.", $ts) . '</option>';
+															echo '<option value="' . $m . '" label="' . date("m/y", $ts) . '">' . date("m/y", $ts) . '</option>';
 														}
 													?>
 													</datalist>

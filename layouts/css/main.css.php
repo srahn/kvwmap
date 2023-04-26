@@ -1352,7 +1352,7 @@ a.menuered:hover {
 	height: 7px;
 	margin: 8px 0 2px 0;
 	background: linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box, linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box;
-	background-size: 49.5px;
+	background-size: 49.95px;
 }
 
 #hist_timestamp3::-moz-range-thumb {
