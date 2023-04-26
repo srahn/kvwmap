@@ -36,9 +36,6 @@
 											window.name = 'root';
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
-											function set_hist_timestamp() {
-												$('#hist_timestamp_form').show();
-											}
 										</script>
 										<div id="hist_timestamp_form" style="display:none;">
 											<div style="display: flex">

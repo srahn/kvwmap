@@ -1960,6 +1960,8 @@ echo '			</table>
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
+				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
+				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
@@ -2945,7 +2947,7 @@ echo '			</table>
 	# Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap($img_urls = false) {
-		if (value_of($this->formvars, 'go') != 'navMap_ajax') {
+		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
@@ -3283,8 +3285,8 @@ echo '			</table>
 					$this->pdf->ezStream();
 				}
 			} break;
-			case 'image' : {
-				header("Content-type: image/jpeg");
+			case 'image/jpeg' : case 'image/png' : {
+				header("Content-type: " . $this->mime_type);
 				header("Cache-Control: max-age=31536000, immutable");
 				readfile(IMAGEPATH . $this->outputfile);
 			} break;			
@@ -16762,7 +16764,9 @@ class db_mapObj{
 				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
 				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
-				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . "
+				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
+				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
+				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . "
 			ORDER BY
 				drawingorder
 		";

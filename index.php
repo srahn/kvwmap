@@ -169,7 +169,7 @@ define('CASE_COMPRESS', false);
 ###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
+$spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
@@ -260,10 +260,13 @@ function go_switch($go, $exit = false) {
 			} break;
 			
 			case 'getMap' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
 				$GUI->loadMap('DataBase');
+				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
-				$GUI->mime_type='image';
+				$GUI->mime_type='image/' . $format;
 				$GUI->output();
 			} break;			
 			

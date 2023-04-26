@@ -9,7 +9,7 @@
 	var activatelayer = '<? echo $this->activatelayer; ?>';
 	var upload_only_file_metadata = <? echo intval($this->user->rolle->upload_only_file_metadata); ?>;
 	var csrf_token = '<? echo $_SESSION['csrf_token']; ?>';
-	var hist_timestamp = new Date("<? echo rolle::$hist_timestamp ?: date('Y-m-d H:i:s',time()); ?>");
+	var hist_timestamp = <?	echo (rolle::$hist_timestamp != ''? 'new Date("' . rolle::$hist_timestamp . '");' : "'';"); ?>
  
 <?
  	if($this->user->rolle->legendtype == 1){ # alphabetisch sortierte Legende
