@@ -11,7 +11,7 @@ if (isset($argv)) {
 	}
 }
 
-# Error Handling for Fatal-Errors
+# Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
@@ -26,16 +26,23 @@ register_shutdown_function(function () {
 });
 
 # Error-Handling
-function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	// global $errors;
+	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		// return;
+	// }
+	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	// http_response_code(500);
+	// include_once('layouts/snippets/general_error_page.php');
+	// /* Don't execute PHP internal error handler */
+	// return true;
+// }
+
+function CustomErrorHandler($severity, $message, $filename, $lineno) {
+	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	http_response_code(500);
-	include_once('layouts/snippets/general_error_page.php');
-	/* Don't execute PHP internal error handler */
-	return true;
+	throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 set_error_handler("CustomErrorHandler");
@@ -162,7 +169,7 @@ define('CASE_COMPRESS', false);
 ###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
+$spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
@@ -251,6 +258,26 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
+			
+			case 'getMap' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
+				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+				$GUI->loadMap('DataBase');
+				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$GUI->map->selectOutputFormat($format);
+				$GUI->drawMap(true);
+				$GUI->mime_type='image/' . $format;
+				$GUI->output();
+			} break;			
+			
+			case 'write_mapserver_templates' : {
+				include_once(CLASSPATH . 'Layer.php');
+				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
+				foreach ($layers as $layer) {
+					echo $layer->get('Name') . '<br>';
+					$layer->write_mapserver_templates('Formular');
+				}
+			}break;			
 			
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);

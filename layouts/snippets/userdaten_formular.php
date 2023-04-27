@@ -227,8 +227,8 @@
 							<span style="color: #f21515"><? echo $strPasswordExpired; ?></span><?
 						}
 						else {
-							if ($this->Stelle->checkPasswordAge) {
-								$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge); ?>
+							if ($this->user_stelle->checkPasswordAge) {
+								$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->user_stelle->allowedPasswordAge); ?>
 								<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
 									if ($allowedPasswordAgeRemainDays < 0) {
 										echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?

@@ -32,6 +32,7 @@ class XP_Plan extends PgObject {
 	public static	function find_by_id($gui, $by, $id, $planart) {
 		$xp_plan = new XP_Plan($gui, $planart);
 		$xp_plan->find_by($by, $id);
+		$xp_plan->get_extent();
 		return $xp_plan;
 	}
 
@@ -51,19 +52,42 @@ class XP_Plan extends PgObject {
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
+			#echo '<br>' . $xplan_layer['Name'];
+
+			switch (true) {
+				case (strpos($xplan_layer['Name'], '_bereich') !== false) : {
+					$geom_col = 'geltungsbereich';
+				} break;
+				case (strpos($xplan_layer['Name'], '_plan') !== false) : {
+					$geom_col = 'raeumlichergeltungsbereich';
+				} break;
+				case ($xplan_layer['Name'] == 'geltungsbereiche') : {
+					$geom_col = 'geom';
+				} break;
+				default : {
+					$geom_col = 'position';
+				}
+			}
 			$sql = "
 				SELECT
 					'" . $xplan_layer['Name'] . "',
-					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
-					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
-					count(CASE WHEN LOWER(ST_GeometryType(position)) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
 				FROM
 					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
 					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
 			";
-			#echo '<br>' . $sql;
-			$ret = $this->database->execSQL($sql, 4, 0);
+			#echo '<p>' . $sql;
+			set_error_handler(function($e) {
+				return true;
+			});
+			$ret = $this->database->execSQL($sql, 4, 0, true);
+			if (! $ret['success']) {
+				$ret['msg'] .= ' Aufgetreten in SQL: ' . $sql;
+				return $ret;
+			}
 			$content = pg_fetch_array($ret[1]);
 			if (
 				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
@@ -73,7 +97,10 @@ class XP_Plan extends PgObject {
 				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}
 		}
-		return $layers_with_content;
+		return array(
+			'success' => true,
+			'layers_with_content' => $layers_with_content
+		);
 	}
 
 	/*
@@ -130,7 +157,15 @@ class XP_Plan extends PgObject {
 		if (strpos($g, '{') !== false) {
 		  $g = json_decode(str_replace(array( '{', '}' ), array('[',']'), $g))[0];
 		}
-		return trim(explode(',',trim($g,'()'))[2]);
+		return trim(explode(',',trim($g,'()'))[2], '"');
+	}
+
+	function get_first_ags() {
+		$g = $this->get('gemeinde');
+		if (strpos($g, '{') !== false) {
+		  $g = json_decode(str_replace(array( '{', '}' ), array('[',']'), $g))[0];
+		}
+		return trim(explode(',',trim($g,'()'))[0], '"');
 	}
 
 	function get_center_coord() {

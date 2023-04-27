@@ -2,6 +2,13 @@
 	global $supportedLanguages;
 	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
 ?>
+
+<style>
+	#search_div {
+		display: none;
+	}
+</style>
+
 <div style="
 	width: 100%;
 	height: 100%;
@@ -54,39 +61,7 @@
 	</div>
 
 	<div title="Benachrichtigungen" style="float: right; display: block;">
-		<script>
-			function delete_user2notification(notification_id) {
-				let formData = new FormData();
-				formData.append('go', 'delete_user2notification');
-				formData.append('notification_id', notification_id);
-				formData.append('csrf_token', '<? echo $_SESSION['csrf_token']; ?>')
-				let response = fetch('index.php', {
-				  method: 'POST',
-				  body: formData
-				})
-				.then(response => response.text())
-				.then(text => {
-					try {
-						const data = JSON.parse(text);
-						if (data.success) {
-							$('#notification_box_' + notification_id).remove();
-							let num_notifications = $('#num_notification_div').html() - 1;
-							if (num_notifications == 0) {
-								$('#num_notification_div').hide();
-							}
-							else {
-								$('#num_notification_div').html(num_notifications);
-							}
-						}
-						else {
-							message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen Benachrichtigung für den Nutzer: ' + data.err_msg + ' ' + text}]);
-						}
-					} catch(err) {
-						message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
-					}
-				});
-			}
-		</script><?
+		<?
 		include_once(CLASSPATH . 'Notification.php');
 		$result = Notification::find_for_user($this); ?>
 		<a href="#" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {

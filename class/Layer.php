@@ -420,8 +420,8 @@ class Layer extends MyObject {
 		return $layerdef;
 	}
 
-	function get_name() {
-		return $this->get('Name' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : ''));
+	function get_name($name_col = 'Name') {
+		return $this->get($name_col . (($name_col == 'Name' AND $this->gui->user->rolle->language != 'german') ? '_' . $this->gui->user->rolle->language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -429,23 +429,20 @@ class Layer extends MyObject {
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
 		$all_data_attributes = $mapDB->getDataAttributes($layerdb, $layer_id, false);
-		#if ($this->gui->user->id == 3) echo '<br>pk all_data_attributes: ' . print_r($all_data_attributes, true);
+
 		$data_attributes = array_filter(
 			array_slice($all_data_attributes, 0, -2),
 			function($data_attribute) {
 				return $data_attribute['type'] != 'geometry';
 			}
 		);
-		#if ($this->gui->user->id == 3) echo '<p>pk data_attributes: ' . print_r($data_attributes, true);
 
 		$query_attributes = $mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
-		#if ($this->gui->user->id == 3) echo '<p>pk query_attributes: ' . print_r($query_attributes, true);
-
 		$query_attribute_aliases = array();
+
 		for ($i = 0; $i < count($query_attributes['name']); $i++) {
 			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
 		}
-		#if ($this->gui->user->id == 3) echo '<p>pk query_attribute_aliases: ' . print_r($query_attribute_aliases, true);
 
 		$data_attribute_names = array_map(
 			function($data_attribute) use ($query_attribute_aliases) {
@@ -465,7 +462,6 @@ class Layer extends MyObject {
 			},
 			$data_attributes
 		);
-		#if ($this->gui->user->id == 3) echo '<p>pk data_attribute_names: ' . print_r($data_attribute_names, true);
 
 		if (count($data_attribute_names) > 0) {
 			$template_dir = WMS_MAPFILE_PATH . 'templates/';
@@ -475,7 +471,7 @@ class Layer extends MyObject {
 
 			$fp = fopen($template_dir . $this->get_name() . '_head.html', "w");
 			#if ($this->gui->user->id == 3) echo "Schreibe Datei " . $template_dir . $this->get_name() . '_head.html';
-			fwrite($fp, $this->get_wms_template_header($this->get_name(), $data_attribute_names, $ansicht));
+			fwrite($fp, $this->get_wms_template_header($this->get_name('alias'), $data_attribute_names, $ansicht));
 			fclose($fp);
 
 			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");

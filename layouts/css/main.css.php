@@ -340,7 +340,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"] input[type="float"] {
+input[type="text"], input[type="float"] {
 
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
@@ -516,7 +516,7 @@ span[data-tooltip]:hover::after {
 }
 
 .listen-tr:hover {
-	background-color: #DAE4EC;
+	background-color: #c5d6e3;
 }
 
 .listen-tr td:last-child .fa {
@@ -1029,6 +1029,7 @@ a.menuered:hover {
 	box-sizing:border-box;
 	padding-left: 17;
 	padding-right: 3px;
+	position: absolute;
 }
 
 .menue-auf .menue_before {
@@ -1043,16 +1044,18 @@ a.menuered:hover {
 
 .obermenue {
 	cursor: pointer;
-
 	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: black;
 	font-family: SourceSansPro2;
 	height: 17px;
 }
 
+.obermenue > span {
+	margin-left: 23px;
+}
+
 .hauptmenue {
 	cursor: pointer;
-
 	font-size: <? echo $font_size_factor * 15; ?>px;
 	color: #a82e2e;
 	font-family: SourceSansPro2;
@@ -1339,6 +1342,40 @@ a.menuered:hover {
 	background-color: <? echo BG_MENUETOP; ?>;
 	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
 	z-index: 100000;
+}
+
+#hist_timestamp3{
+	-webkit-appearance: none;
+	box-shadow: 0px -4px 0px #74A9D8;
+	border-radius: 1px;
+	border: 0px solid #010101;
+	height: 7px;
+	margin: 8px 0 2px 0;
+	background: linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box, linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box;
+	background-size: 49.95px;
+}
+
+#hist_timestamp3::-moz-range-thumb {
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+	transform: translate(0px, -5px);
+}
+
+#hist_timestamp3::-webkit-slider-thumb {
+	-webkit-appearance: none;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+	margin-top: -13px;
 }
 
 #scale_bar {
@@ -2589,6 +2626,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .green {
 	color: green;
+}
+
+.yellow {
+	color: #c6b000;
 }
 
 .red {

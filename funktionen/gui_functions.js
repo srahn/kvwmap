@@ -18,6 +18,8 @@ var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
 root.getlegend_requests = new Array();
+var current_date = new Date().toLocaleString().replace(',', '');;
+var new_hist_timestamp;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -187,6 +189,38 @@ function ahahDone(url, targets, req, actions) {
 			//alert(target.value);
 		}
 	}
+}
+
+function delete_user2notification(notification_id) {
+	let formData = new FormData();
+	formData.append('go', 'delete_user2notification');
+	formData.append('notification_id', notification_id);
+	formData.append('csrf_token', csrf_token);
+	let response = fetch('index.php', {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => response.text())
+	.then(text => {
+		try {
+			const data = JSON.parse(text);
+			if (data.success) {
+				$('#notification_box_' + notification_id).remove();
+				let num_notifications = $('#num_notification_div').html() - 1;
+				if (num_notifications == 0) {
+					$('#num_notification_div').hide();
+				}
+				else {
+					$('#num_notification_div').html(num_notifications);
+				}
+			}
+			else {
+				message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen Benachrichtigung für den Nutzer: ' + data.err_msg + ' ' + text}]);
+			}
+		} catch(err) {
+			message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
+		}
+	});
 }
 
 highlight_object = function(layer_id, oid){
@@ -669,10 +703,52 @@ function formdata2urlstring(formdata){
 	}
 	return url;
 }
-	 
-function get_map_ajax(postdata, code2execute_before, code2execute_after){
-	top.startwaiting();
+
+function set_hist_timestamp() {
 	svgdoc = document.SVG.getSVGDocument();	
+	var mapimg = svgdoc.getElementById("mapimg");
+	var movegroup = svgdoc.getElementById("moveGroup");
+	var cartesian = svgdoc.getElementById("cartesian");
+	var mapimg3 = mapimg.cloneNode();
+	var mapimg4 = mapimg.cloneNode();
+	if (hist_timestamp != '') {
+		var scroll = 2720;
+		new_hist_timestamp = structuredClone(hist_timestamp);
+	}
+	else {
+		var scroll = 6000;
+		new_hist_timestamp = new Date();
+	}
+	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
+	mapimg3.setAttribute('id', 'mapimg3');
+	mapimg4.setAttribute('id', 'mapimg4');
+	movegroup.insertBefore(mapimg4, cartesian);
+	movegroup.insertBefore(mapimg3, mapimg4);
+	mapimg3.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	mapimg4.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	document.GUI.hist_timestamp2.value = hist_timestamp;
+	document.GUI.hist_timestamp3.value = 0;
+	$('#hist_timestamp_form').show();
+	document.getElementById('hist_range_div').scrollLeft = scroll;
+}
+
+function get_map(){
+	svgdoc = document.SVG.getSVGDocument();	
+	var mapimg4 = svgdoc.getElementById("mapimg4");
+	var nht = structuredClone(new_hist_timestamp);
+	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
+	let ts = nht.toLocaleString().replace(',', '');
+	document.GUI.hist_timestamp2.value = ts;
+	mapimg4.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+}
+
+function get_map_ajax(postdata, code2execute_before, code2execute_after){
+	current_date = new Date().toLocaleString().replace(',', '');
+	top.startwaiting();
+	svgdoc = document.SVG.getSVGDocument();
+	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg3")?.remove();
+	svgdoc.getElementById("mapimg4")?.remove();
 	// nix
 	var mapimg = svgdoc.getElementById("mapimg2");
 	var scalebar = document.getElementById("scalebar");
@@ -1591,4 +1667,20 @@ function show_validation_error(validation_error) {
 	formElem.addClass('message-box-error');
 	errElem.append('<div class="red">' + validation_error.msg + '</div>');
 	$('#form-submit-button').hide();
+}
+
+/**
+	Split text by delimiter and add text line by line with delay and delimiter in between to element.
+	@param text String The text that shall be added to the element with this delay function.
+  @param element jquery Element object where the text has to be append.
+	@param delay integer Delay in milliseconds between adding one line after the other
+	@param prefix String Text in front of each line
+  @param delimiter String Text to delimit the lines of text
+*/
+function add_text_with_delay(text, element, delay = 3000, prefix = '', delimiter = '<br>') {
+	text.split(delimiter).forEach(
+		(line, i) => {
+			setTimeout((i, prefix, delimiter) => { element.append(prefix + line + delimiter) }, i * delay, i, prefix, delimiter);
+		}
+	)
 }
