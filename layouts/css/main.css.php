@@ -2618,3 +2618,9 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: black;
 	margin-bottom: 5px;
 }
+
+.map-info-button {
+	color: #666;
+	margin-top: 8px;
+	font-size: 110%
+}

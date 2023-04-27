@@ -97,7 +97,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 				}"; ?>
 			)"
 		>
-			<i class="fa fa-info-circle" style="margin-top: 8px; color: #666; font-size: 110%"></i>
+			<i class="fa fa-info-circle map-info-button"></i>
 		</a>
 	</div>
 	<div id="scalebar_div" style="float: right; margin-top: 1px;">
