@@ -1344,6 +1344,13 @@ a.menuered:hover {
 	z-index: 100000;
 }
 
+#hist_range_div {
+	margin-left: 10px; 
+	overflow-x: scroll; 
+	width: 600px; 
+	padding-top: 1px;
+}
+
 #hist_timestamp3{
 	-webkit-appearance: none;
 	box-shadow: 0px -4px 0px #74A9D8;

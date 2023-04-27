@@ -47,7 +47,7 @@
 														<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
 													</div>
 												</div>
-												<div id="hist_range_div" style="text-align: center; margin-left: 10px; overflow-x: scroll; width: 600px">
+												<div id="hist_range_div">
 													<?
 														if (rolle::$hist_timestamp != '') {
 															$start = -60;
