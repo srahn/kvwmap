@@ -705,7 +705,9 @@ function formdata2urlstring(formdata){
 }
 
 function set_hist_timestamp() {
-	svgdoc = document.SVG.getSVGDocument();	
+	svgdoc = document.SVG.getSVGDocument();
+	svgdoc.getElementById("mapimg3")?.remove();
+	svgdoc.getElementById("mapimg4")?.remove();	
 	var mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
