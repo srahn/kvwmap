@@ -92,7 +92,7 @@ class data_import_export {
 				}
 			}
 			else {
-				if ($formvars['selected_layer_id'] == '') {
+				if ($formvars['chosen_layer_id'] == '') {
 					foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
 						$layer_id = -$this->create_rollenlayer(
 							$pgdatabase,
@@ -106,7 +106,7 @@ class data_import_export {
 					}
 				}
 				else {
-					$layer_id = $formvars['selected_layer_id'];
+					$layer_id = $formvars['chosen_layer_id'];
 				}
 				return $layer_id;
 			}
