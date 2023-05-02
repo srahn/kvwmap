@@ -17244,25 +17244,19 @@ class db_mapObj{
   }
 
   function saveAttributeFilter($formvars){
-    if(MYSQLVERSION > 410){
-      $sql = 'INSERT INTO u_attributfilter2used_layer SET';
-      $sql .= ' attributname = "'.$formvars['attributname'].'",';
-      $sql .= " attributvalue = '" . $formvars['attributvalue']."',";
-      $sql .= ' operator = "'.$formvars['operator'].'",';
-      $sql .= ' type = "'.$formvars['type'].'",';
-      $sql .= ' Stelle_ID = '.$formvars['stelle'].',';
-      $sql .= ' Layer_ID = '.$formvars['layer'];
-      $sql .= " ON DUPLICATE KEY UPDATE  attributvalue = '" . $formvars['attributvalue']."', operator = '" . $formvars['operator']."'";
-    }
-    else{
-      $sql = 'REPLACE INTO u_attributfilter2used_layer SET';
-      $sql .= ' attributname = "'.$formvars['attributname'].'",';
-      $sql .= " attributvalue = '" . $formvars['attributvalue']."',";
-      $sql .= ' operator = "'.$formvars['operator'].'",';
-      $sql .= ' type = "'.$formvars['type'].'",';
-      $sql .= ' Stelle_ID = '.$formvars['stelle'].',';
-      $sql .= ' Layer_ID = '.$formvars['layer'];
-    }
+		$sql = "
+			INSERT INTO 
+				u_attributfilter2used_layer 
+			SET
+				attributname = '" . $formvars['attributname'] . "',
+				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "',
+				operator = '" . $formvars['operator']. "',
+				type = '" . $formvars['type'] . "',
+				Stelle_ID = " . $formvars['stelle'] . ",
+				Layer_ID = " . $formvars['layer'] . "
+			ON DUPLICATE KEY UPDATE  
+				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "', 
+				operator = '" . $formvars['operator'] . "'";
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
