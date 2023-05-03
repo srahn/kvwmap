@@ -21,4 +21,5 @@
 	$strShowAttribute = 'anzeigen';
 	$strOmitAttributeValues = 'Werte nicht übernehmen';
 	$strYesWhen = 'ja, wenn';
+	$strDefault = 'Default';
 ?>
