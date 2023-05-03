@@ -1411,7 +1411,7 @@ class db_mapObj {
 		return $params;
 	}	
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
 		global $language;
 		$attributes = array();
 		$einschr = '';

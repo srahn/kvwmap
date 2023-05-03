@@ -449,7 +449,7 @@ function alias_replace(name){
 							
 							<td align="center" valign="top"><?
 								if($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
+									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
 								}
 								echo FormObject::createSelectField(
 									'mandatory_' . $this->attributes['name'][$i],
