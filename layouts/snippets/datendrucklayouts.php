@@ -15,7 +15,7 @@
 
 var counter = 0;
 var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
-var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"]); ?>'];
+var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"] ?: []); ?>'];
 
 function input_check_num(field){
 	field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
