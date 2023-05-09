@@ -8330,11 +8330,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	*/
 	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		for ($i = 0; $i < count($stellen_ids); $i++) {
-			if ($privileg == 'editable_only_in_this_stelle') {
-				$privileg = ($stellen_ids[$i] == $this->Stelle->id ? 'editable' : 'default');
-			}
 			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, $privileg);
+			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
 			$users = $stelle->getUser();
 			for ($j = 0; $j < @count($users['ID']); $j++) {
 				$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
@@ -18550,7 +18547,7 @@ class db_mapObj{
 					" . quote_or_null($formvars['labelmaxscale']) . ",
 					" . quote_or_null($formvars['labelminscale']) . ",
 					" . quote($formvars['labelrequires']) . ",
-					" . quote_or_null($formvars['postlabelcache']) . ",
+					" . ($formvars['postlabelcache'] == '' ? '0' :  $formvars['postlabelcache']) . ",
 					" . quote(trim($formvars['connection'])) . ", -- connection
 					" . quote_or_null($formvars['connection_id']) . ",
 					" . quote($formvars['printconnection']) . ",
@@ -18567,7 +18564,7 @@ class db_mapObj{
 					" . quote(($formvars['queryable'] == '' ? '0' : $formvars['queryable']), 'text') . ",
 					" . quote($formvars['use_geom'] == '' ? '1' : $formvars['use_geom']) . ",
 					" . quote_or_null($formvars['transparency']) . ",
-					" . quote_or_null($formvars['drawingorder']) . ",
+					" . ($formvars['drawingorder'] == '' ? '0' :  $formvars['drawingorder']) . ",
 					" . quote_or_null($formvars['legendorder']) . ",
 					" . quote_or_null($formvars['minscale']) . ",
 					" . quote_or_null($formvars['maxscale']) . ",
@@ -19830,7 +19827,7 @@ class db_mapObj{
 			DELETE
 				c, rc
 			FROM
-				classes c LEFT JOIN
+				classes c LEFT JOIN 
 				u_rolle2used_class rc ON c.Class_ID = rc.class_id
 			WHERE 
 				c.Class_ID = " . $class_id . "
