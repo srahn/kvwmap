@@ -14,6 +14,7 @@ ALTER TABLE `druckrahmen2stelle` ADD CONSTRAINT `druckrahmen2stelle_ibfk_1` FORE
 
 ALTER TABLE `invitations` ADD CONSTRAINT `invitations_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` NOT IN (SELECT `ID` FROM stelle);
 ALTER TABLE `layer_attributes2stelle` ADD CONSTRAINT `layer_attributes2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 delete from `stellen_hierarchie` where `parent_id` not in (select ID from stelle);
