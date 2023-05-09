@@ -1512,14 +1512,17 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_shared_layer' : {
-				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->LayerLoeschen(true); # Delete maintable too if possible
-				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
-				$GUI->loadMap('DataBase');
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->saveMap('');
-				$GUI->drawMap();
-				$GUI->output();
+				$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+				$layer = $mapdb->get_Layer($GUI->formvars['selected_layer_id'], false);
+				if ($GUI->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer['shared_from'] == $GUI->user->id) {
+					$GUI->LayerLoeschen(true); # Delete maintable too if possible
+					$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+					$GUI->loadMap('DataBase');
+					$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+					$GUI->saveMap('');
+					$GUI->drawMap();
+					$GUI->output();
+				}
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge' : {
