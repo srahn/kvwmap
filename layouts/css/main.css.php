@@ -1344,6 +1344,47 @@ a.menuered:hover {
 	z-index: 100000;
 }
 
+#hist_range_div {
+	margin-left: 10px; 
+	overflow-x: scroll; 
+	width: 600px; 
+	padding-top: 1px;
+}
+
+#hist_timestamp3{
+	-webkit-appearance: none;
+	box-shadow: 0px -4px 0px #74A9D8;
+	border-radius: 1px;
+	border: 0px solid #010101;
+	height: 7px;
+	margin: 8px 0 2px 0;
+	background: linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box, linear-gradient(90deg, #cccccc 1px, rgba(238, 238, 238, 0) 1px) repeat-x content-box;
+	background-size: 49.95px;
+}
+
+#hist_timestamp3::-moz-range-thumb {
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+	transform: translate(0px, -5px);
+}
+
+#hist_timestamp3::-webkit-slider-thumb {
+	-webkit-appearance: none;
+  box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.4);
+  border: 1px solid #00001E;
+  height: 13px;
+  width: 13px;
+  border-radius: 15px;
+  background: #FFFFFF;
+  cursor: pointer;
+	margin-top: -13px;
+}
+
 #scale_bar {
 	background: <? echo BG_MENUETOP; ?>;
 	border-top: 1px solid #aaaaaa;
@@ -2624,4 +2665,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #shareRollenlayerDiv {
 	color: black;
 	margin-bottom: 5px;
+}
+
+.map-info-button {
+	color: #666;
+	margin-top: 8px;
+	font-size: 110%
 }

@@ -373,6 +373,11 @@ function alias_replace(name){
 								} ?>
 								<textarea name="options_<?php echo $this->attributes['name'][$i]; ?>" style="height:22px; width:180px"><?php echo $this->attributes['options'][$i]; ?></textarea>
 						  </td>
+							
+						  <td align="left" valign="top">
+								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strDefault . '</div>'; ?>
+						  	<input name="default_<?php echo $this->attributes['name'][$i]; ?>" type="text" value="<?php echo htmlspecialchars($this->attributes['default'][$i]); ?>">
+						  </td>							
 
 						  <td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strAlias . '&nbsp;<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a></div>'; ?>
@@ -454,7 +459,7 @@ function alias_replace(name){
 							
 							<td align="center" valign="top"><?
 								if($i == 0) {
-									echo '<div class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
+									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
 								}
 								echo FormObject::createSelectField(
 									'mandatory_' . $this->attributes['name'][$i],

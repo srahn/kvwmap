@@ -5,7 +5,7 @@
 	$strAttributExplanations = 'Erläuterungen';
 	$strArrangement = 'Anordnung';
 	$strAttributeLabeling = 'Beschriftung';
-	$strAttributeAtSearch = 'Bei der<br>Suche';
+	$strAttributeAtSearch = 'Bei&nbsp;der<br>Suche';
 	$strForNewDataset = 'Für neuen<br>Datensatz';
 	$strAttributeVisible = 'sichtbar';
 	$strAttributeNotVisible = 'nicht sichtbar';
@@ -21,4 +21,5 @@
 	$strShowAttribute = 'anzeigen';
 	$strOmitAttributeValues = 'Werte nicht übernehmen';
 	$strYesWhen = 'ja, wenn';
+	$strDefault = 'Default';
 ?>

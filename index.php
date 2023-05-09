@@ -169,7 +169,7 @@ define('CASE_COMPRESS', false);
 ###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
+$spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
@@ -258,6 +258,17 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
+			
+			case 'getMap' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
+				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+				$GUI->loadMap('DataBase');
+				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$GUI->map->selectOutputFormat($format);
+				$GUI->drawMap(true);
+				$GUI->mime_type='image/' . $format;
+				$GUI->output();
+			} break;			
 			
 			case 'write_mapserver_templates' : {
 				include_once(CLASSPATH . 'Layer.php');
@@ -1501,14 +1512,17 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_shared_layer' : {
-				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->LayerLoeschen(true); # Delete maintable too if possible
-				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
-				$GUI->loadMap('DataBase');
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->saveMap('');
-				$GUI->drawMap();
-				$GUI->output();
+				$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+				$layer = $mapdb->get_Layer($GUI->formvars['selected_layer_id'], false);
+				if ($GUI->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer['shared_from'] == $GUI->user->id) {
+					$GUI->LayerLoeschen(true); # Delete maintable too if possible
+					$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+					$GUI->loadMap('DataBase');
+					$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+					$GUI->saveMap('');
+					$GUI->drawMap();
+					$GUI->output();
+				}
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge' : {
