@@ -1536,7 +1536,7 @@ class db_mapObj {
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if ($get_default)	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
