@@ -1097,13 +1097,11 @@ class flurstueck {
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
-						CASE
-							WHEN (nu.nutzungsartengruppe, nu.werteart1) IN ( (18, 4460), (31, 1010), (31, 1012), (31, 1013) )
-							THEN ARRAY[1000, 2000]
-							WHEN (nu.nutzungsartengruppe, nu.werteart1) = (31, 1020)
-							THEN ARRAY[3000, 4000]
-							ELSE ARRAY[1000, 2000, 3000, 4000]
-						END::int[] AS ableitung_emz,
+						--CASE
+						--	WHEN (nu.nutzungsartengruppe, nu.werteart1) IN ( (18, 4460), (31, 1010), (31, 1012), (31, 1013) )	THEN ARRAY[1000, 2000]
+						--	WHEN (nu.nutzungsartengruppe, nu.werteart1) = (31, 1020) THEN ARRAY[3000, 4000]
+						--	ELSE ARRAY[1000, 2000, 3000, 4000]
+						--END::int[] AS ableitung_emz,
 						i.intersection,
 						st_area(f.wkb_geometry) as flstflaeche,
 						amtlicheflaeche
@@ -1126,7 +1124,7 @@ class flurstueck {
 					alkis.ax_bodenschaetzung n,
 					ST_Area(ST_CollectionExtract(ST_Intersection(n.wkb_geometry, fnu.intersection), 3)) as a (flaeche)
 				WHERE 
-					n.kulturart = ANY(fnu.ableitung_emz) and 
+					--n.kulturart = ANY(fnu.ableitung_emz) and 
 					st_intersects(n.wkb_geometry, fnu.intersection) AND 
 					a.flaeche > 0.01 
 					" . $this->database->build_temporal_filter(array('n')) . " 
