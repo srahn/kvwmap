@@ -8892,7 +8892,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			case MS_POSTGIS : {
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = $layerset[0]['pfad'];
-
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 				$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
@@ -9241,22 +9240,28 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$this->user->rolle->save_search($attributes, $this->formvars);
 				}
 
-				if (value_of($layerset[0], 'count') != 0 AND value_of($this->formvars, 'embedded_subformPK') == '' AND value_of($this->formvars, 'embedded') == '' AND value_of($this->formvars, 'no_output') == '') {
+				if (
+					value_of($layerset[0], 'count') != 0 AND
+					value_of($this->formvars, 'embedded_subformPK') == '' AND
+					value_of($this->formvars, 'embedded') == '' AND
+					value_of($this->formvars, 'no_output') == ''
+				) {
 					# last_query speichern
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
+
 					# Querymaps erzeugen
 					if (
 						value_of($this->formvars, 'format') != 'json' AND
 						$layerset[0]['querymap'] == 1 AND
-						$attributes['privileg'][$attributes['the_geom']] >= '0'
-						AND (
+						$attributes['privileg'][$attributes['the_geom']] >= '0' AND
+						(
 							$layerset[0]['Datentyp'] == 1 OR
 							$layerset[0]['Datentyp'] == 2
 						)
 					) {
 						$layerset[0]['attributes'] = $attributes;
-						for ($k = 0; $k < count($layerset[0]['shape']); $k++){
+						for ($k = 0; $k < count($layerset[0]['shape']); $k++) {
 							$layerset[0]['querymaps'][$k] = $this->createQueryMap($layerset[0], $k);
 						}
 					}
