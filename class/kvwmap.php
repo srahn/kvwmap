@@ -8370,15 +8370,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		# layer_attributes löschen
 		$mapDB->delete_layer_attributes($this->formvars['selected_layer_id']);
-		$mapDB->delete_layer_attributes2stelle($this->formvars['selected_layer_id'], $this->Stelle->id);
 		# Filter löschen
-		$mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);
-
-		$layer[] = $this->formvars['selected_layer_id'];
-		$stelle[] = $this->Stelle->id;
-		$this->Stelle->deleteLayer($layer, $this->pgdatabase);
-		$this->user->rolle->deleteLayer('', $stelle, $layer);
-
+		$mapDB->delete_layer_filterattributes($this->formvars['selected_layer_id']);		# kann ab Version 3.5 weg da dann FK vorhanden
 	}
 
   function DatentypenAnzeigen() {
@@ -18820,13 +18813,6 @@ class db_mapObj{
   function delete_layer_attributes($layer_id){
     $sql = 'DELETE FROM layer_attributes WHERE layer_id = '.$layer_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_attributes:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-  }
-
-  function delete_layer_attributes2stelle($layer_id, $stelle_id){
-    $sql = 'DELETE FROM layer_attributes2stelle WHERE layer_id = '.$layer_id.' AND stelle_id = '.$stelle_id;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->delete_layer_attributes2stelle:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
   }
