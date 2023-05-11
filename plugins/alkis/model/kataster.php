@@ -131,11 +131,9 @@ class adresse {
     }
   }
 
-  function getStrassenListe($GemID,$GemkgID,$extent) {
-    # Funktion liefert eine Liste der Strassen innerhalb der GemID und ggf. des extent
-    $PolygonWKTString=rectObj2WKTPolygon($extent);
-    $StrassenListe=$this->database->getStrassenListe($GemID, $GemkgID, $PolygonWKTString);
-    # liefert Array mit Arrays mit StrID und Name zurück
+  function getStrassenListe($GemID,$GemkgID) {
+    # Funktion liefert eine Liste der Strassen innerhalb der GemID 
+    $StrassenListe=$this->database->getStrassenListe($GemID, $GemkgID);
     return $StrassenListe;
   }
   
@@ -144,7 +142,7 @@ class adresse {
     # Funktion liefert die Hausnummern zu einer GemID, StrID Kombination
     # und bei Bedarf auch im angegebenen extent zurück
     $PolygonWKTString=rectObj2WKTPolygon($extent);
-    $HausNrListe=$this->database->getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order);
+    $HausNrListe=$this->database->getHausNrListe($GemID,$StrID);
     # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array für die Listen zurück
     return $HausNrListe;
   }
@@ -997,8 +995,8 @@ class flurstueck {
 		$sql ="
 			SELECT 
 				amtlicheflaeche, 
-				round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
-				fl_geom, 
+				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
+				sum(fl_geom), 
 				flstflaeche, 
 				n.wert, 
 				objart, 
@@ -1058,7 +1056,9 @@ class flurstueck {
 				LEFT JOIN alkis.ax_wasserverhaeltnisse e3 ON e3.wert = n.wasserverhaeltnisse
 				LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
 				LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
-				LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]";
+				LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
+				GROUP BY amtlicheflaeche, flstflaeche, n.wert, objart, label
+			";
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return $ret; }
@@ -1088,7 +1088,13 @@ class flurstueck {
 	function getKlassifizierungAequivalenz() {
     $sql = "
 			SELECT 
-				amtlicheflaeche, round((fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, fl_geom, flstflaeche, n.wert, objart, ARRAY_TO_STRING(ARRAY[ split_part(split_part(k.beschreibung, '(', 2), ')', 1), split_part(split_part(b.beschreibung, '(', 2), ')', 1), split_part(split_part(z.beschreibung, '(', 2), ')', 1), split_part(split_part(e1.beschreibung, '(', 2), ')', 1), split_part(split_part(e2.beschreibung, '(', 2), ')', 1), split_part(split_part(s.beschreibung, '(', 2), ')', 1), n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label 
+				amtlicheflaeche, 
+				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
+				sum(fl_geom), 
+				flstflaeche, 
+				n.wert, 
+				objart, 
+				ARRAY_TO_STRING(ARRAY[ split_part(split_part(k.beschreibung, '(', 2), ')', 1), split_part(split_part(b.beschreibung, '(', 2), ')', 1), split_part(split_part(z.beschreibung, '(', 2), ')', 1), split_part(split_part(e1.beschreibung, '(', 2), ')', 1), split_part(split_part(e2.beschreibung, '(', 2), ')', 1), split_part(split_part(s.beschreibung, '(', 2), ')', 1), n.bodenzahlodergruenlandgrundzahl || '/' || n.wert], ' ') as label 
 			FROM (
 				SELECT 
 					amtlicheflaeche, 
@@ -1107,13 +1113,11 @@ class flurstueck {
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
-						CASE
-							WHEN (nu.nutzungsartengruppe, nu.werteart1) IN ( (18, 4460), (31, 1010), (31, 1012), (31, 1013) )
-							THEN ARRAY[1000, 2000]
-							WHEN (nu.nutzungsartengruppe, nu.werteart1) = (31, 1020)
-							THEN ARRAY[3000, 4000]
-							ELSE ARRAY[1000, 2000, 3000, 4000]
-						END::int[] AS ableitung_emz,
+						--CASE
+						--	WHEN (nu.nutzungsartengruppe, nu.werteart1) IN ( (18, 4460), (31, 1010), (31, 1012), (31, 1013) )	THEN ARRAY[1000, 2000]
+						--	WHEN (nu.nutzungsartengruppe, nu.werteart1) = (31, 1020) THEN ARRAY[3000, 4000]
+						--	ELSE ARRAY[1000, 2000, 3000, 4000]
+						--END::int[] AS ableitung_emz,
 						ST_CollectionExtract(i.intersection, 3) AS intersection,
 						st_area(f.wkb_geometry) as flstflaeche,
 						amtlicheflaeche
@@ -1136,7 +1140,7 @@ class flurstueck {
 					alkis.ax_bodenschaetzung n,
 					ST_Area(ST_CollectionExtract(ST_Intersection(n.wkb_geometry, fnu.intersection), 3)) as a (flaeche)
 				WHERE 
-					n.nutzungsart = ANY(fnu.ableitung_emz) and 
+					--n.nutzungsart = ANY(fnu.ableitung_emz) and 
 					st_intersects(n.wkb_geometry, fnu.intersection) AND 
 					a.flaeche > 0.01 
 					" . $this->database->build_temporal_filter(array('n')) . " 
@@ -1149,6 +1153,7 @@ class flurstueck {
 			LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
 			LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
 			LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
+			GROUP BY amtlicheflaeche, flstflaeche, n.wert, objart, label
 		";
 		#echo $sql;
     $ret=$this->database->execSQL($sql, 4, 0);

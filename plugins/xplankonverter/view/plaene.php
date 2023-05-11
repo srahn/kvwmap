@@ -1,6 +1,20 @@
 <?php
 	include('header.php');
 ?>
+<style>
+	#container_paint {
+		background-color: white;
+	}
+
+	.table-wrapper {
+		margin-top: -50px;
+	}
+
+	.bootstrap-table .fixed-table-toolbar .columns-right {
+	  margin-left: 3px;
+	  margin-right: 3px;
+	}
+</style>
 <script language="javascript" type="text/javascript">
 	$('#gui-table').css('width', '100%');
 	$(function () {
@@ -621,6 +635,13 @@
 		return output;
 	}
 
+	function konvertierungWirksamkeitsdatumSorter(fieldA, fieldB, rowA, rowB) {
+		const dateA = fieldA.split(".").reverse().join("");
+		const dateB = fieldB.split(".").reverse().join("");
+		console.log('A: ' + dateA + ' > B: ' + dateB);
+		return dateA > dateB ? 1 : -1;
+	}
+
 </script>
 <h2><?php echo htmlspecialchars($this->title); ?></h2><?php
 if ($this->Stelle->id > 200) { ?>
@@ -633,7 +654,7 @@ else { ?>
 		$('#sperr_div').toggle()
 	">Einstellungen</a>.<?
 }
-?><br>
+?>
 
 <!--div class="alert alert-success" style="white-space: pre-wrap" id="eventsResult">
 		Here is the result of event.
@@ -722,7 +743,15 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control="select"
 						data-filter-control-placeholder="Filtern nach"
 					>Status</th><?php
-				}
+				} ?>
+				<th
+					data-field="wirksamkeitsdatum"
+					data-sortable="true"
+					data-visible="true"
+					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					class="col-md-2"
+					data-filter-control="input"
+				>Wirksamkeit</th><?
 				/*
 				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 					<th

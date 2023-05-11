@@ -15,7 +15,7 @@
 
 var counter = 0;
 var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
-var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"]); ?>'];
+var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"] ?: []); ?>'];
 
 function input_check_num(field){
 	field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
@@ -93,6 +93,7 @@ function image_coords(event){
 	document.getElementById('coords').style.visibility='';
 	var offset = 0;
 	var pointer_div = document.getElementById("preview_div");
+	var height = parseInt(pointer_div.style.height);
 	if(window.ActiveXObject){		//for IE
 		pos_x = window.event.offsetX;
 		pos_y = window.event.offsetY;
@@ -108,13 +109,13 @@ function image_coords(event){
 		pos_x = event.pageX - left;
 		pos_y = event.pageY - top;
 	}
-	if(pos_y > 700){
+	if(pos_y > height - 140){
 		offset = 130;
 	}
 	document.getElementById("coords").style.left = pos_x+7;
 	document.getElementById("coords").style.top = pos_y-offset;
 	document.getElementById("posx").value = pos_x;
-	document.getElementById("posy").value = 842-pos_y;
+	document.getElementById("posy").value = height - pos_y;
 }
 
 
@@ -259,7 +260,7 @@ function scrolltop(){
 								?>
 							</div>
 							<div style="position: absolute; top: 0px; z-index: 1">
-								<svg xmlns="http://www.w3.org/2000/svg" width="595" height="842">
+								<svg xmlns="http://www.w3.org/2000/svg" width="<? echo $this->ddl->selectedlayout[0]['width']; ?>" height="<? echo $this->ddl->selectedlayout[0]['height']; ?>">
 									<style type="text/css"><![CDATA[
 										.line{
 											stroke: steelblue;
@@ -273,7 +274,7 @@ function scrolltop(){
 										}
 
 									]]></style>
-									<g transform="translate(0, 842) scale(1, -1)">
+									<g transform="translate(0, <? echo $this->ddl->selectedlayout[0]['height']; ?>) scale(1, -1)">
 								<?
 									if($this->lines){
 										$this->lines = array_values($this->lines);

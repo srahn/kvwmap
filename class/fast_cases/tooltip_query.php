@@ -133,6 +133,7 @@ function InchesPerUnit($unit, $center_y){
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);	
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -142,7 +143,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -1832,7 +1832,7 @@ class db_mapObj{
 		return $pfad;
 	}	
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
 		global $language;
 		$attributes = array();
 		$einschr = '';
@@ -1939,13 +1939,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+			else {
 				$attributes['default'][$i] = $rs['default'];
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
@@ -2099,41 +2099,56 @@ class db_mapObj{
             }
           }break;
 
-					case 'Autovervollständigungsfeld' : {
-            if($attributes['options'][$i] != ''){
-              if(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0];
-								if($query_result != NULL){
-									for($k = 0; $k < count($query_result); $k++){
-										$sql = $attributes['options'][$i];
+					case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' : {
+						if ($attributes['options'][$i] != '') {
+							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								$attributes['options'][$i] = $optionen[0];
+								if ($query_result != NULL) {
+									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
+										$options_sql = $attributes['options'][$i];
 										$value = $query_result[$k][$attributes['name'][$i]];
-										if($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))){			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
-											$sql = 'SELECT * FROM ('.$sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
-											$ret=$database->execSQL($sql,4,0);
-											if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-											$rs = pg_fetch_array($ret[1]);
-											$attributes['enum_output'][$i][$k] = $rs['output'];
+										if ($value != '' AND !in_array($attributes['operator'][$i], array('LIKE', 'NOT LIKE', 'IN'))) {			# falls eine LIKE-Suche oder eine IN-Suche durchgeführt wurde
+											$values = json_decode($value);
+											if (is_array($values)) {		# Array-Typ
+												foreach ($values as $value) {
+													$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+													$ret = $database->execSQL($sql, 4, 0);
+													if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+													$rs = pg_fetch_array($ret[1]);
+													$attributes['enum_output'][$i][$k][] = $rs['output'];
+												}
+											}
+											else {
+												$sql = 'SELECT * FROM ('.$options_sql.') as foo WHERE value = \''.pg_escape_string($value).'\'';
+												$ret = $database->execSQL($sql, 4, 0);
+												if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+												$rs = pg_fetch_array($ret[1]);
+												$attributes['enum_output'][$i][$k] = $rs['output'];
+											}
 										}
 									}
 								}
 								# weitere Optionen
-                if($optionen[1] != ''){
-                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-                  for($k = 0; $k < count($further_options); $k++){
-                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
-                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
-                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-                    }
-                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }
-                  }
-                }
-              }
-            }
-          }break;
+								if ($optionen[1] != '') {
+									$further_options = explode(' ', $optionen[1]);			# die weiteren Optionen exploden (opt1 opt2 opt3)
+									for($k = 0; $k < count($further_options); $k++) {
+										if (strpos($further_options[$k], 'layer_id') !== false) {		 #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
+											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+										}
+										elseif ($further_options[$k] == 'embedded') {			 # Subformular soll embedded angezeigt werden
+											$attributes['embedded'][$i] = true;
+										}
+										elseif ($further_options[$k] == 'anywhere') {			 # der eingegebene Text kann überall in den Auswahlmöglichkeiten vorkommen
+											$attributes['anywhere'][$i] = true;
+										}
+									}
+								}
+							}
+						}
+					} break;
 					
           case 'Radiobutton' : {
             if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann

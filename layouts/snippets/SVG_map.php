@@ -1586,6 +1586,7 @@ function selectPoint(evt) {
 
 // ----------------------------box aufziehen---------------------------------
 function startPoint(evt) {
+	if (dragging) return;
   dragging  = true;
   var alle = pathx.length;
   for(var i = 0; i < alle; ++i){
@@ -1747,7 +1748,7 @@ function highlightbyid(id){
 
 ]]></script>
 
-  <defs>
+  <defs id="defs">
 '.$SVGvars_defs.'	
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>

@@ -409,7 +409,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedfunctions" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < count($this->formvars['selfunctions']); $i++){
+											for($i=0; $i < @count($this->formvars['selfunctions']); $i++){
 													echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
 												 }
 											?>
@@ -581,7 +581,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							<tr valign="top">
 								<td>
 									<select name="selectedusers" size="6" multiple style="position: relative; width: 340px"><?
-										$seluseroptions[] = array('value' => '', 'output' => '-- Auswahl --');
 										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
 												'value'	=> $this->formvars['selusers']["ID"][$i],

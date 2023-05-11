@@ -2,21 +2,21 @@
 #####################################
 /* class_stelle
 * functions
-*	stelle($id, $database)
-* getsubmenues($id)
-* getName()
-* readDefaultValues()
-* checkClientIpIsOn()
-* Löschen()
-* deleteMenue(text)
-* deleteLayer($layer, $pgdatabase)
-* deleteDruckrahmen()
-* deleteStelleGemeinden()
-* deleteFunktionen()
-* getstellendaten()
-* NeueStelleAnlegen($stellendaten)
-* Aendern($stellendaten)
-* getStellen($order)
+*		stelle($id, $database)
+*		getsubmenues($id)
+*		getName()
+*		readDefaultValues()
+*		checkClientIpIsOn()
+*		Löschen()
+*		deleteMenue(text)
+*		deleteLayer($layer, $pgdatabase)
+*		deleteDruckrahmen()
+*		deleteStelleGemeinden()
+*		deleteFunktionen()
+*		getstellendaten()
+*		NeueStelleAnlegen($stellendaten)
+*		Aendern($stellendaten)
+*		getStellen($order)
 */
 class stelle {
 	var $id;
@@ -28,6 +28,7 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
+	var $data;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -39,7 +40,15 @@ class stelle {
 		$ret = $this->readDefaultValues();
 	}
 
-	function getsubmenues($id){
+	function get($attribute) {
+		return $this->data[$attribute];
+	}
+
+	function set($attribute, $value) {
+		$this->data[$attribute] = $value;
+	}
+
+	function getsubmenues($id) {
 		global $language;
 		$sql ='SELECT menue_id,';
 		if ($language != 'german') {
@@ -136,6 +145,8 @@ class stelle {
 				`ows_contactemailaddress`,
 				`ows_contactperson`,
 				`ows_contactposition`,
+				`ows_contactvoicephone`,
+				`ows_contactfacsimile`,
 				`ows_fees`,
 				`ows_srs`,
 				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
@@ -151,7 +162,8 @@ class stelle {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->Bezeichnung=$rs['Bezeichnung'];
+		$this->data = $rs;
+		$this->Bezeichnung = $rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
@@ -164,6 +176,8 @@ class stelle {
 		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
 		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
 		$this->ows_fees = $rs['ows_fees'];
 		$this->ows_srs = $rs['ows_srs'];
 		$this->check_client_ip = $rs['check_client_ip'];
@@ -341,6 +355,7 @@ class stelle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = $this->database->result->fetch_array();
+		$this->data = $rs;
 		return $rs;
 	}
 

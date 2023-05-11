@@ -257,7 +257,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -550,7 +550,7 @@ class ALKIS {
 							if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 							if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 							if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 							if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['lagebezeichnung']){
@@ -818,7 +818,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -1093,7 +1093,7 @@ class ALKIS {
       if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
       if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
       if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 			if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 			if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
       if($formvars['lagebezeichnung']){
@@ -1791,8 +1791,8 @@ class ALKIS {
 									$row = $row - 12;
 									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
-										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1823,8 +1823,8 @@ class ALKIS {
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
-										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1879,8 +1879,8 @@ class ALKIS {
 									$row = $row - 12;
 									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
-										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1911,8 +1911,8 @@ class ALKIS {
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
-										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -2106,8 +2106,8 @@ class ALKIS {
         if ($buchungen[0]['zusatz_eigentuemer'] != '') {
                 $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
                 while(strlen($zusatzeigentuemertext) > 60){
-                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
                   if($positionkomma>$positionleerzeichen){
                     $positiontrenner=$positionkomma;
                   }
@@ -2295,8 +2295,8 @@ class ALKIS {
 				if ($buchungen[0]['zusatz_eigentuemer'] != '') {
           $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
           while(strlen($zusatzeigentuemertext) > 60){
-            $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-            $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+            $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+            $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
             if($positionkomma>$positionleerzeichen){
               $positiontrenner=$positionkomma;
             }

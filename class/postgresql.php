@@ -76,7 +76,7 @@ class pgdatabase {
 	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open($connection_id = 0) {
+  function open($connection_id = 0, $flag = NULL) {
 		if ($connection_id == 0) {
 			# get credentials from object variables
 			#echo '<br>connection_id ist 0, hole von object credentials';
@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
+		$this->dbConn = pg_connect($connection_string, $flag);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
@@ -112,6 +112,7 @@ class pgdatabase {
 		#echo '<p>get_credentials with connection_id: ' . $connection_id;
 		include_once(CLASSPATH . 'Connection.php');
 		$conn = Connection::find_by_id($this->gui, $connection_id);
+		$this->host = $conn->get('host');
 		return array(
 			'host' => 		($conn->get('host')     != '' ? $conn->get('host')     : 'pgsql'),
 			'port' => 		($conn->get('port')     != '' ? $conn->get('port')     : '5432'),
@@ -531,7 +532,7 @@ FROM
 		}
 		else{
 			foreach($tablenames as $tablename){
-				$filter .= ' AND tsrange(' . $tablename . '.beginnt, ' . $tablename . '.endet) @> COALESCE(NULLIF(\'' . $timestamp . '\', \'\')::timestamp, localtimestamp) ';
+				$filter .= " AND tsrange(" . $tablename . ".beginnt, " . $tablename . ".endet) @> '" . $timestamp . "'::timestamp ";
 			}
 		}
 		return $filter;
@@ -637,12 +638,14 @@ FROM
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$sql = "
 			SET client_min_messages='log';
+			" . ($this->host == 'pgsql'? "SET log_min_messages='fatal';" : "") . "
 			SET debug_print_parse=true;" . 
 			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
 		$sql = "
+			SET debug_print_parse = false;
 			SET client_min_messages = 'NOTICE';
-			SET debug_print_parse = false;";
+			" . ($this->host == 'pgsql'? "SET log_min_messages='error';" : "");
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
@@ -751,13 +754,15 @@ FROM
 				# Geometrietyp
 				if ($fieldtype == 'geometry') {
 					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
-					$fields['the_geom'] = $fieldname;
-					$fields['the_geom_id'] = $i;
+					$field_the_geom = $fieldname;
+					$field_the_geom_id = $i;
 				}
 				if ($assoc) {
 					$fields_assoc[$fieldname] = $fields[$i];
 				}
 			}
+			$fields['the_geom'] = $field_the_geom;
+			$fields['the_geom_id'] = $field_the_geom_id;
 			$ret[1] = ($assoc ? $fields_assoc : $fields);
 		}
 		else {
@@ -846,7 +851,7 @@ FROM
         if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
         else $attr_info['length'] = $attr_info['character_maximum_length'];
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
+	      #if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
 	  		else $attr_info['default'] = '';
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
@@ -935,26 +940,32 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
-			$sql = "INSERT INTO datatype_attributes SET
-								datatype_id = ".$datatype_id.", 
-								name = '".$fields[$i]['name']."', 
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i." 
-							ON DUPLICATE KEY UPDATE
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i;
+			$sql = "
+				INSERT INTO
+					datatype_attributes
+				SET
+					datatype_id = " . $datatype_id . ",
+					name = '" . $fields[$i]['name'] . "',
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					form_element_type = '" . ($this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+				ON DUPLICATE KEY UPDATE
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+			";
+			#echo "<br>SQL zum Anlegen eines Datentypes: " . $sql;
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
@@ -1293,98 +1304,72 @@ FROM
 			case 'aktuell' : {
 				$sql = "
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						flurstueckskennzeichen, 
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						1=1" . 
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
-						($FlstID != ''? " AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')" : '') .
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" . 
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurstueckskennzeichen";
 			}break;
 			case 'historisch' : {
 				$sql = "
-					SELECT distinct 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+					SELECT 
+						flurstueckskennzeichen,
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_flurstueck
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
-						AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) 
-						AND (NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) OR zeigtaufneuesflurstueck IS NULL) 
-						AND ax_flurstueck.endet IS NOT NULL 
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
+					GROUP BY 
+						flurstueckskennzeichen
+					HAVING 
+						bool_and(endet IS NOT NULL)
 					UNION 
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						hf.flurstueckskennzeichen,
+						ltrim(substring(hf.flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(hf.flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
 					ORDER BY 
-						flurstkennz";
+						flurstueckskennzeichen;";
 			}break;
 			case 'beides' : {
 				$sql = "
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						flurstueckskennzeichen,
+						ltrim(substring(flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						1=1" . 
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer = " . $FlurID : '') .
-						($FlstID != ''? " AND zaehler || coalesce('/' || nenner, '') IN ('" . implode("','", $FlstID) . "')" : '') .
-						$this->build_temporal_filter(array('ax_flurstueck')) . "
+						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
 					UNION
-					SELECT distinct 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
-					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
-					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
-						AND flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) 
-						AND (NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) OR zeigtaufneuesflurstueck IS NULL) 
-						AND ax_flurstueck.endet IS NOT NULL 
-					UNION 
 					SELECT 
-						flurstueckskennzeichen as flurstkennz, 
-						zaehler, 
-						nenner 
+						hf.flurstueckskennzeichen,
+						ltrim(substring(hf.flurstueckskennzeichen, 10, 5), '0') AS zaehler,
+						ltrim(nullif(substring(hf.flurstueckskennzeichen, 15, 4), '____'), '0') AS nenner
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						1=1 
-						AND land||gemarkungsnummer = '" . $GemkgID . "' 
-						AND flurnummer = " . $FlurID . " 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'
 					ORDER BY 
-						flurstkennz";
+						flurstueckskennzeichen";
 			}
 		}
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_assoc($queryret[1])) {
-      $Liste['FlstID'][]=$rs['flurstkennz'];
+      $Liste['FlstID'][]=$rs['flurstueckskennzeichen'];
       $FlstNr=intval($rs['zaehler']);
       if ($rs['nenner']!='') { $FlstNr.="/".intval($rs['nenner']); }
       $Liste['FlstNr'][]=$FlstNr;
@@ -1402,34 +1387,54 @@ FROM
 	}
   
   function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
-  	$sql.=" SELECT f.flurstueckskennzeichen as flurstkennz";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_flurstueck as f";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = s.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage = s.lage)";
-    $sql.=" WHERE f.gemeindezugehoerigkeit_gemeinde = g.gemeinde AND g.gemeinde = s.gemeinde AND g.gemeinde = l.gemeinde";
-    if ($HausNr!='') {
-    	if($HausNr == 'ohne'){
-    		$HausNr = '';
-    	}
+		if ($HausNr != '') {
 			$adressen = explode(', ', $HausNr);
 			foreach($adressen as $adresse){
-				$adress = explode('-', $adresse);
-				$ors[] = " (
-					g.schluesselgesamt = '".$adress[0]."' 
-					AND l.lage = '".$adress[1]."' 
-					AND TRIM(LOWER(l.hausnummer)) = '".$adress[2]."'
-					)
-				";
+				$adress = explode('-', $adresse, 3);
+				$kreis = substr($adress[0], 3, 2);
+				$gemeinde = substr($adress[0], 5, 3);
+				$adr[] = "('" . $gemeinde . "', '" . $adress[1] . "', '" . $kreis . "', '" . $adress[2] . "')";
 			}
-			$sql.=" AND (".implode(' OR ', $ors).")";
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis, l.hausnummer) IN (" . implode(',', $adr) . ")";
     }
-    else{
-    	$sql.=" AND g.schluesselgesamt='".$GemeindeSchl."'";
-    	$sql.=" AND s.lage='".$StrassenSchl."'";
-    }
-		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 'lo', 's'));
-		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
+		else {
+			$kreis = substr($GemeindeSchl, 3, 2);
+			$gemeinde = substr($GemeindeSchl, 5, 3);
+			$strassen = explode(', ', $StrassenSchl);
+			foreach($strassen as $strasse){
+				$adr[] = "('" . $gemeinde . "', '" . $strasse . "', '" . $kreis . "')";
+			}
+			$adressfilter = "(l.gemeinde, l.lage, l.kreis) IN (" . implode(', ', $adr) . ")";
+		}
+  	$sql = "
+			SELECT 
+				f.flurstueckskennzeichen as flurstkennz
+			FROM  
+				alkis.ax_flurstueck as f
+			WHERE 
+				true " .
+				$this->build_temporal_filter(array('f')) . "
+				AND f.weistauf && ARRAY	( 
+																		SELECT 
+																			l.gml_id
+																		FROM 
+																			alkis.ax_lagebezeichnungmithausnummer l
+																		WHERE " .
+																			$adressfilter . 
+																			$this->build_temporal_filter(array('l')) . "
+																		)";
+		if ($HausNr == '') {
+			$sql .= "
+				OR f.zeigtauf && ARRAY	(
+																	SELECT 
+																		l.gml_id
+																	FROM 
+																		alkis.ax_lagebezeichnungohnehausnummer l
+                                  WHERE " . 
+																		$adressfilter . 
+																		$this->build_temporal_filter(array('l')) . "
+																)";
+		}
     #echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
@@ -1856,16 +1861,34 @@ FROM
 		$order = $formvars['order'];
 		if($order == '')$order = 'nachnameoderfirma, vorname';
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.gml_id, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
-		$sql.= "FROM alkis.ax_person p ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
-		$sql.= " WHERE 1=1 ";
+    $sql = "
+			set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;
+			SELECT distinct 
+				p.gml_id, 
+				p.nachnameoderfirma, 
+				p.vorname, 
+				p.namensbestandteil, 
+				p.akademischergrad, 
+				p.geburtsname, 
+				p.geburtsdatum, 
+				array_to_string(p.hat, ',') as hat, 
+				anschrift.strasse, 
+				anschrift.hausnummer, 
+				anschrift.postleitzahlpostzustellung, 
+				anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, 
+				anschrift.bestimmungsland, 
+				g.buchungsblattnummermitbuchstabenerweiterung as blatt, 
+				b.schluesselgesamt as bezirk
+			FROM 
+				alkis.ax_person p 
+				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] -- da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
+				LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id 
+				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
+				LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+				LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) 
+			WHERE 1=1 ";
     if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
@@ -1908,6 +1931,20 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		if ($formvars['alleiniger_eigentuemer']) {
+			$sql.= "
+				AND NOT EXISTS (
+					SELECT
+					FROM 
+						alkis.ax_buchungsstelle s2 
+						JOIN alkis.ax_buchungsblatt g2 ON s2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
+					WHERE 
+						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
+				)";
+		}
     $sql .= " ORDER BY ". $order;
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";
@@ -2143,75 +2180,82 @@ FROM
     return $bezirke;
   }
   
-  function getHausNrListe($GemID,$StrID,$HausNr,$PolygonWKTString,$order) {
-    # 2006-01-31
-    $order='ordernr, nrtext';
-    # Abfragen der Hausnummern
-    $sql ="SELECT id,nrtext, to_number(ordernr, '999999') as ordernr FROM (";
-    $sql.="SELECT DISTINCT CASE WHEN TRIM(nr)='' THEN 'ohne' ELSE id END AS id, CASE WHEN TRIM(nr)='' THEN 'ohne Nr' ELSE TRIM(nr) END AS nrtext";
-    $sql.=",(CASE WHEN TRIM(ordernr)='' THEN '0' ELSE SPLIT_PART(TRIM(ordernr),' ',1) END) as ordernr FROM (";
-    $sql.=" SELECT DISTINCT '".$GemID."-".$StrID."-'||TRIM(".HAUSNUMMER_TYPE."(l.hausnummer)) AS id, ".HAUSNUMMER_TYPE."(l.hausnummer) AS nr, l.hausnummer AS ordernr";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_lagebezeichnungmithausnummer l";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND l.lage = lpad(s.lage,5,'0')";
-    $sql.=" WHERE g.gemeinde = l.gemeinde";
-    if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt='".$GemID."'";
-    }
-    if ($StrID!='') {
-      $sql.=" AND l.lage='".$StrID."'";
-    }
-		$sql.= $this->build_temporal_filter(array('g', 'l', 's'));
-    $sql.=") AS foo ";
-    $sql.=") AS foofoo ORDER BY " . replace_semicolon($order);
+  function getHausNrListe($GemID, $StrID) {
+    $sql = "
+			SELECT 
+				concat_ws('-', lmh.land || lmh.regierungsbezirk || lmh.kreis || lmh.gemeinde, lmh.lage, lmh.hausnummer) AS id, 
+				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
+			FROM 
+				alkis.ax_lagebezeichnungmithausnummer lmh,
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
+			WHERE 
+				lmh.gemeinde = '" . substr($GemID, -3) . "'
+				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
+				AND lmh.kreis = '" . substr($GemID, 3, 2) . "'";
+    $sql.= $this->build_temporal_filter(array('lmh'));
+		$sql.= " 
+			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
+			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
-    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    while ($rs=pg_fetch_assoc($queryret[1])) {
-      $Liste['HausID'][]=$rs['id'];
-      $Liste['HausNr'][]=$rs['nrtext'];
+    $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $queryret = $this->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($queryret[1])) {
+      $Liste['HausID'][] = $rs['id'];
+      $Liste['HausNr'][] = $rs['nrtext'];
     }
     return $Liste;
   }
     
-  function getStrassenListe($GemID,$GemkgID,$PolygonWKTString) {		
+		
 	# Hier bitte nicht auf die Idee kommen, die Strassen ohne die Flurstücke abfragen zu können. 
 	# Die Flurstücke müssen miteinbezogen werden, weil wir ja auch über die Gemarkung auswählen wollen.	
-  	$sql ="set enable_seqscan = off;SELECT '000' AS gemeinde,'0' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
-    $sql.=" UNION";
-    $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
-    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON f.gemeindezugehoerigkeit_gemeinde = s.gemeinde AND l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
-		$sql.=" WHERE s.lage IS NOT NULL AND g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer ";
-    if ($GemID!='') {
-      $sql.=" AND g.schluesselgesamt='".$GemID."'";
+  function getStrassenListe($GemID, $GemkgID) {
+    $sql = "
+			SELECT 
+				'000'::varchar AS gemeinde, 
+				'0'::varchar AS strasse, 
+				'--Auswahl--'::varchar AS strassenname
+			UNION ALL
+				SELECT 
+					lke.gemeinde, 
+					string_agg(lke.lage, ', ') AS strasse, 
+					lke.bezeichnung AS strassenname
+				FROM 
+					alkis.ax_lagebezeichnungkatalogeintrag lke";
+    if ($GemID != '') {
+      $sql.= " 
+				WHERE lke.gemeinde = '" . substr($GemID, -3) . "' AND lke.kreis = '" . substr($GemID, 3, 2) . "'";
     }
-    if ($GemkgID!='') {
-      $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
+    elseif ($GemkgID != '') {
+      $sql.= " 
+					JOIN (
+						SELECT distinct 
+							lmh.kreis as lmh_kreis, 
+							lmh.gemeinde as lmh_gemeinde, 
+							lmh.lage as lmh_lage,
+              loh.kreis as loh_kreis, 
+							loh.gemeinde as loh_gemeinde, 
+							loh.lage as loh_lage
+						FROM 
+							alkis.ax_flurstueck f
+							LEFT JOIN alkis.ax_lagebezeichnungmithausnummer lmh ON lmh.gml_id = ANY(f.weistauf)
+							LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer loh ON loh.gml_id = ANY(f.zeigtauf)
+					WHERE 
+						f.land || f.gemarkungsnummer = '" . $GemkgID . "'" .
+						$this->build_temporal_filter(array('f', 'lmh', 'loh')) . "
+					) lb ON (lke.gemeinde, lke.lage, lke.kreis) IN ( (lb.lmh_gemeinde, lb.lmh_lage, lb.lmh_kreis),
+                                                           (lb.loh_gemeinde, lb.loh_lage, lb.loh_kreis) )";
     }
-		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
-		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
-		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
-    $sql.=" ORDER BY gemeinde, strassenname, strasse";
+    $sql.= $this->build_temporal_filter(array('lke'));
+    $sql.= $this->build_temporal_filter_fachdatenverbindung(array('lke'));
+    $sql.= " GROUP BY lke.gemeinde, lke.bezeichnung ORDER BY gemeinde, strassenname, strasse";
     #echo $sql;
-    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
-    $queryret=$this->execSQL($sql, 4, 0);
-    $i = 0;
-    while ($rs=pg_fetch_assoc($queryret[1])) {
-			$Liste['Gemeinde'][]=$rs['gemeinde'];
-			$Liste['StrID'][]=$rs['strasse'];
-			$Liste['Gemarkung'][]=$rs['gemkgname'];
-			$Liste['gemkgschl'][]=$rs['gemkgschl'];
-			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
-			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
-				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
-			}
-			else{
-				$Liste['Name'][]=$rs['strassenname'];
-			}
-      $i++;
+    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>" . $sql, 4);
+    $queryret = $this->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($queryret[1])) {
+			$Liste['Gemeinde'][] = $rs['gemeinde'];
+			$Liste['StrID'][] = $rs['strasse'];
+			$Liste['Name'][] = $rs['strassenname'];
     }
     return $Liste;
   }
@@ -2222,91 +2266,72 @@ FROM
 			case 'aktuell' : {	
 				$sql = "
 					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID 
 					FROM 
 						alkis.ax_flurstueck 
 					WHERE 
-						1=1 " .
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
-						flurnummer";
+						FlurID";
 			}break;
 			case 'historisch' : {
 				// die Fluren aller historischen Flurstücke abfragen
 				$sql = "
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+					SELECT 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
+						alkis.ax_flurstueck
 					WHERE 
-						1=1 AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' 
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'
+					GROUP BY 
+						flurstueckskennzeichen
+					HAVING 
+						bool_and(endet IS NOT NULL)
 					UNION 
 					SELECT 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_historischesflurstueckohneraumbezug hf
 					WHERE 
-						ax_flurstueck.endet is NOT NULL AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' AND
-						flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) AND
-						NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . "%'
 					ORDER BY 
-						flurnummer";
+						FlurID;";						
 			}break;
 			case 'beides' : {
 				$sql = "
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
-					FROM 
-						alkis.ax_flurstueck 
-					WHERE 
-						1=1 " .
-						($GemkgID > 0 ? " AND land||gemarkungsnummer = '" . $GemkgID . "'" : '') .
-						($FlurID != '' ? " AND flurnummer IN (" . implode(',', $FlurID) . ")" : '') .
-						$this->build_temporal_filter(array('ax_flurstueck')) . "
-					UNION
-					SELECT distinct 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
-					FROM 
-						alkis.ax_historischesflurstueckohneraumbezug 
-					WHERE 
-						1=1 AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' 
-					UNION 
 					SELECT 
-						flurnummer, 
-						lpad(flurnummer::text, 3, '0') AS FlurID, 
-						lpad(flurnummer::text, 3, '0') AS Name, 
-						land||gemarkungsnummer||flurnummer::text AS GemFlurID 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
 					FROM 
-						alkis.ax_flurstueck, 
-						alkis.ax_fortfuehrungsfall 
+						alkis.ax_flurstueck
 					WHERE 
-						ax_flurstueck.endet is NOT NULL AND 
-						land||gemarkungsnummer = '" . $GemkgID . "' AND
-						flurstueckskennzeichen = ANY(zeigtaufaltesflurstueck) AND
-						NOT flurstueckskennzeichen = ANY(zeigtaufneuesflurstueck) 
+						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+					UNION
+					SELECT 
+						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
+						substring(flurstueckskennzeichen, 7, 3) AS FlurID,
+						substring(flurstueckskennzeichen, 7, 3) AS Name,
+						substring(flurstueckskennzeichen, 1, 9) AS GemFlurID
+					FROM 
+						alkis.ax_historischesflurstueckohneraumbezug hf
+					WHERE 
+						hf.flurstueckskennzeichen LIKE '" . $GemkgID . "%'
 					ORDER BY 
-						flurnummer";
+						FlurID";
 			}
 		}
     #echo $sql;
@@ -2464,44 +2489,65 @@ FROM
     return $ret;
   }
   
-  function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
-    $this->debug->write("<br>postgres.php->database->getMERfromGebaeude, Abfrage des Maximalen umschlieï¿½enden Rechtecks um die Gebaeude",4);
-    $sql ="SELECT MIN(st_xmin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS minx,MAX(st_xmax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxx";
-    $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
-    $sql.=" FROM alkis.ax_gemeinde gem, alkis.ax_gebaeude g";
-    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(g.zeigtauf) "; 
-		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde";
-		$sql.=" AND l.lage = lpad(s.lage,5,'0')";
-		$sql.=" WHERE gem.gemeinde = l.gemeinde";
-    if ($Hausnr!='') {
-    	$Hausnr = str_replace(", ", ",", $Hausnr);
-    	$Hausnr = strtolower(str_replace(",", "','", $Hausnr));    	
-      $sql.=" AND gem.schluesselgesamt||'-'||l.lage||'-'||TRIM(LOWER(l.hausnummer)) IN ('".$Hausnr."')";
-    }
-    else{
-	    $sql.=" AND gem.schluesselgesamt = '".$Gemeinde."'";
-	    if ($Strasse!='') {
-	      $sql.=" AND l.lage='".$Strasse."'";
-	    }
-    }
-		$sql.= $this->build_temporal_filter(array('gem', 'g', 'l', 's'));
-    #echo $sql;
-    $ret=$this->execSQL($sql, 4, 0);
-    if ($ret[0]) {
-      $ret[1]='Fehler beim Abfragen des Umschliessenden Rechtecks um die Gebäude.<br>'.$ret[1];
-    }
-    else {
-      $rs=pg_fetch_assoc($ret[1]);
-      if ($rs['minx']==0) {
-        $ret[0]=1;
-        $ret[1]='Geb&auml;ude nicht in Postgres Datenbank '.$this->dbName.' vorhanden.';
-      }
-      else {
-        $ret[1]=$rs;
-      }
-    }
-    return $ret;
-  }
+	function getMERfromGebaeude($Gemeinde, $Strasse, $Hausnr, $epsgcode) {
+		if ($Hausnr != '') {
+			$hausnummern = explode(', ', $Hausnr);
+			foreach($hausnummern as $hausnummer){
+				$hnr = explode('-', $hausnummer);
+				$kreis = substr($hnr[0], 3, 2);
+				$gemeinde = substr($hnr[0], 5, 3);
+				$lage = $hnr[1];
+				$nummer = strtolower($hnr[2]);
+				$expr[] = "('" . $gemeinde . "', '" . $lage . "', '" . $nummer . "', '" . $kreis . "')";
+			}
+			$filter = " (lmh.gemeinde, lmh.lage, lmh.hausnummer, lmh.kreis) IN (" . implode(', ', $expr) . ")";
+		}
+		else {
+			$strassen = explode(', ', $Strasse);
+			$kreis = substr($Gemeinde, 3, 2);
+			$gemeinde = substr($Gemeinde, 5, 3);
+			foreach($strassen as $lage){
+				$expr[] = "('" . $gemeinde . "', '" . $lage . "', '" . $kreis . "')";
+			}
+			$filter = " (lmh.gemeinde, lmh.lage, lmh.kreis) IN (" . implode(', ', $expr) . ")";
+		}
+    $sql ="
+			SELECT
+			  min(st_xmin(env)) AS minx, 
+			  max(st_xmax(env)) AS maxx,
+			  min(st_ymin(env)) AS miny, 
+			  max(st_ymax(env)) AS maxy
+			FROM
+			  alkis.ax_gebaeude g,
+			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env
+			WHERE
+			  g.zeigtauf && ARRAY (
+			  SELECT
+			    gml_id
+			  FROM
+			    alkis.ax_lagebezeichnungmithausnummer lmh
+			  WHERE
+			   " . $filter . "
+			   " . $this->build_temporal_filter(array('lmh')) . "
+			  )
+			 " . $this->build_temporal_filter(array('g'));
+		#echo $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1] = 'Fehler beim Abfragen des umschliessenden Rechtecks um die Geb&auml;ude.<br>' . $ret[1];
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+			if ($rs['minx'] == 0) {
+				$ret[0] = 1;
+				$ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
+			}
+			else {
+				$ret[1] = $rs;
+			}
+		}
+		return $ret;
+	}
 
 
 ##################################################

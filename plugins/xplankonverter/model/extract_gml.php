@@ -15,16 +15,18 @@ class Gml_extractor {
 	}
 
 	/**
-		ToDo:
-		Die Funktion zum Importieren der XPlanGML-Datei in das gmlas Schema und die Belegung der formvars auftrennen in import_gml_to_db() und extract_to_form, damit man auch einlesen kann ohne die Forms zu füllen
-		Dann die Übernahme der Daten aus dem import Schema nach konvertierung und xplan_gml ausführen (create_plaene_from_gmlas) und Kennzeichnung als neue Version einer Zusammenzeichnung
-		was geht durch das Attribut zusammenzeichnung Typ boolean der Klasse xp_plan und dem Attribut veroeffentlichungsdatum der Tabelle xplankonverter.konvertierungen
-		Also migration für neues Attribut zusammenzeichnung boolean in Klasse xp_plan.
-		migration 2022-10-18_18-01-17_add_zusammenzeichnung_to_xp_plan.sql schon angelegt.
+		Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
 	*/
 	function import_gml_to_db() {
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			return array(
+				'succes' => false,
+				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
+			);
+		}
+		$this->input_epsg  = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
@@ -47,6 +49,10 @@ class Gml_extractor {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
+		return array(
+			'success' => true,
+			'msg' => 'gmlas_output: ' . $gmlas_output
+		);
 	}
 
 	function extract_to_form($classname) {
@@ -143,7 +149,15 @@ class Gml_extractor {
 			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
 		*/
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			$GUI->add_message('warning', $result['msg']);
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
+			exit;
+		}
+		$this->input_epsg = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
@@ -279,7 +293,7 @@ class Gml_extractor {
 
 		# echo $matched_epsg_str[1] . '<br>';
 
-		if(isset($matched_epsg_str[1])) {
+		if (isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
 			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
@@ -287,18 +301,21 @@ class Gml_extractor {
 				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
 				$epsg = $matched_epsg;
 			}
+			return array(
+				'success' => true,
+				'epsg' => $epsg
+			);
 		}
 		else {
 			$msg  = 'Konnte das SRS des XPlan-Envelope nicht innerhalb von Doppelten oder einfachen Anführungszeichen finden'; 
 			$msg .= 'Bitte stellen Sie sicher, das ein Envelope-Element nach XPlan-Konformitaetsbedingung 2.1.3.1 vorhanden ist, z.B. wie folgt:<br>';
 			$msg .= '<pre>' . htmlentities('<gml:boundedBy><gml:Envelope srsName="EPSG:25833">...</gml:Envelope></gml:boundedBy>') . '</pre>...<br>';
 			$msg .= 'Ein Fallback SRS mit EPSG ' . $this->fallback_epsg . ' wird benutzt.<br>';
-			$GUI->add_message('warning', $msg);
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
 		}
-		// fallback value
-		return $epsg;
 	}
 	/* 
 	* parses current xplan-version from file
@@ -627,7 +644,7 @@ class Gml_extractor {
 				to_char(gmlas.satzungsbeschlussdatum, 'DD.MM.YYYY') AS satzungsbeschlussdatum,
 				gmlas.veraenderungssperre AS veraenderungssperre,
 				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
-				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart) AS sonstplanart,
+				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart AS sonstplanart,
 				gmlas.gruenordnungsplan AS gruenordnungsplan,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
 				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
@@ -733,7 +750,7 @@ class Gml_extractor {
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
 				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				gmlas.verfahren::xplan_gml.fp_verfahren AS verfahren,
-				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.fp_sonstplanart) AS sonstplanart,
+				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.fp_sonstplanart AS sonstplanart,
 				gmlas.planart::xplan_gml.fp_planart AS planart,
 				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY') AS planbeschlussdatum,
 				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum
@@ -822,7 +839,7 @@ class Gml_extractor {
 				END AS externereferenz,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
 				to_json((gmlas.planart_codespace, gmlas.planart, NULL)::xplan_gml.so_planart) AS planart
-				/*array_to_json(ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[]) AS gemeinde*/
+				/*ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde*/
 			FROM
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
 				/*" . $this->gmlas_schema . ".so_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN*/
@@ -866,7 +883,7 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns an associative array to fill the bp_plan form
+	* Returns an associative array to fill the rp_plan form
 	*/
 	function fill_form_rp_plan($gml_id) {
 		$sql = "
@@ -912,7 +929,7 @@ class Gml_extractor {
 				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
 				to_char(gmlas.entwurfsbeschlussdatum, 'DD.MM.YYYY') AS entwurfsbeschlussdatum,
 				array_to_json(ARRAY[to_char(aled.value, 'DD.MM.YYYY')]::date[]) AS auslegungsenddatum,
-				to_json((gmlas.sonstplanart_codespace, gmlas.sonstplanart)::xplan_gml.rp_sonstplanart) AS sonstplanart,
+				(gmlas.sonstplanart_codespace, gmlas.sonstplanart)::xplan_gml.rp_sonstplanart AS sonstplanart,
 				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
 				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
@@ -1121,8 +1138,8 @@ class Gml_extractor {
 		$sql .= ";";
 		# echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		$result = pg_fetch_assoc($ret[1]);
-		return $result;
+		#$result = pg_fetch_assoc($ret[1]);
+		return $ret;
 	}
 	
 		/* string ends with 
@@ -2121,12 +2138,10 @@ class Gml_extractor {
 	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
-		
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
 
 		$classes = $this->get_possible_classes_for_regeln($this->gmlas_schema);
-		
 		# Loop over relevant bereiche -> classes -> geom
 		$bereich_index = 0;
 		foreach($bereiche_ids as $bereich_gml_id) {
@@ -2297,19 +2312,18 @@ class Gml_extractor {
 		return $sql;
 	}
 
-	/*
-	* Returns all attributes for a specific class in a specific schema in an array
+	/**
+		Returns all attributes for $class in $schema
+		that have not null values
 	*/
 	function get_attributes_with_values_for_class_in_schema($class, $schema) {
-		# This function selects all attributes that have values in a specific class and schema
 		$sql = "
 			SELECT
 				column_name
 			FROM
 				information_schema.columns
 			WHERE
-				table_schema = '" . $schema . "'
-			AND
+				table_schema = '" . $schema . "' AND
 				table_name = '" . $class . "'
 			ORDER BY ordinal_position;
 		";
@@ -2317,25 +2331,47 @@ class Gml_extractor {
 		$all_attributes = pg_fetch_all_columns($ret[1]);
 
 		# Returns an array of t or f values for all attributes for a class
-		$sql = "SELECT ";
-		foreach($all_attributes AS $a) {
-			$sql .= "EXISTS(SELECT " . $a;
-			$sql .= " FROM " . $schema . "." . $class;
-			$sql .= " WHERE " . $a . " IS NOT NULL) AS " . $a . ",";
-		}
-		if(substr($sql, -1, 1) == ",") {
-			$sql = substr($sql, 0, -1);
-		}
+		$sql = "
+			SELECT
+				" . implode(", ", array_map(
+					function($attribut) use ($schema, $class) {
+						return "EXISTS( SELECT " . $attribut . " FROM " . $schema . "." . $class . " WHERE " . $attribut . " IS NOT NULL ) AS " . $attribut;
+					},
+					$all_attributes
+				)) . "
+		";
+		#echo '<br>' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$attributes_exist = pg_fetch_array($ret[1]);
 
 		# Compares both arrays and writes all existing values in a new array
 		$attributes = [];
-		for($i = 0; $i < count($all_attributes); $i++) {
-			if($attributes_exist[$i] == 't') {
+		for ($i = 0; $i < count($all_attributes); $i++) {
+			if ($attributes_exist[$i] == 't') {
 				$attributes[] = $all_attributes[$i];
 			}
 		}
+		return $attributes;
+	}
+
+	/**
+		Returns all none geometry attributes for $class in $schema
+	*/
+	function get_none_geom_attributes_for_class_in_schema($class, $schema) {
+		$sql = "
+			SELECT
+				column_name
+			FROM
+				information_schema.columns
+			WHERE
+				table_schema = '" . $schema . "' AND
+				table_name = '" . $class . "' AND
+        udt_name NOT LIKE 'geometry'
+			ORDER BY ordinal_position;
+		";
+		#echo '<br>' . $sql;
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		$attributes = pg_fetch_all_columns($ret[1]);
 		return $attributes;
 	}
 
@@ -2398,7 +2434,7 @@ class Gml_extractor {
 		$sql .= $konvertierung_id . " AS konvertierung_id, ";
 		$sql .= $stelle_id . " AS stelle_id, ";
 		$sql .= "'" . $bereich_gml_id . "' AS bereich_gml_id ";
-
+		#echo 'INSERT regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 	}
 
@@ -2430,10 +2466,12 @@ class Gml_extractor {
 				) AND
 				i.table_name NOT LIKE '%\_plan' AND
 				i.table_name NOT LIKE '%\_bereich' AND
-				i.table_name NOT LIKE '%\_textabschnitt'
+				i.table_name NOT LIKE '%\_textabschnitt' AND
+				i.table_name != 'bp_dachgestaltung'
 			ORDER BY
 				i.table_name;
-			";
+		";
+		#echo 'Abfrage der Classes for regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$classes = pg_fetch_all_columns($ret[1]);
 		return $classes;

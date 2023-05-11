@@ -75,10 +75,12 @@ class spatial_processor {
 		";
 		
 		if(
-			NORMALIZE_AREA_THRESHOLD == 0 AND 
-			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
-			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
-			NORMALIZE_NULL_AREA == 0
+				(	NORMALIZE_AREA_THRESHOLD == 0 AND 
+					NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+					NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+					NORMALIZE_NULL_AREA == 0)
+				OR
+					strpos($geom_2, 'LINESTRING') !== false
 		){
 			$normalize = false;
 		}
@@ -130,10 +132,12 @@ class spatial_processor {
 		";
 		
 		if (
-			NORMALIZE_AREA_THRESHOLD == 0 AND 
-			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
-			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
-			NORMALIZE_NULL_AREA == 0
+				(	NORMALIZE_AREA_THRESHOLD == 0 AND 
+					NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+					NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+					NORMALIZE_NULL_AREA == 0)
+				OR
+					strpos($geom_2, 'LINESTRING') !== false
 		) {
 			$normalize = false;
 		}

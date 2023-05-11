@@ -1,0 +1,886 @@
+<?php
+class MetaDataCreator {
+	
+	public function __construct($md) {
+		$this->md = $md;
+
+		$this->wfs_link = $md->get('onlineresource') . 'Service=WFS&amp;Request=GetCapabilities';
+		$this->wms_link = $md->get('onlineresource') . 'Service=WMS&amp;Request=GetCapabilities';
+	}
+
+	function getReferenzSysteme() {
+		$sb = "
+		<gmd:referenceSystemInfo>
+			<gmd:MD_ReferenceSystem>
+				<gmd:referenceSystemIdentifier>
+					<gmd:RS_Identifier>
+						<gmd:code>
+							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/" . $this->md->get('stellendaten')['epsg_code'] . "\">EPSG " . $this->md->get('stellendaten')['epsg_code'] . ": ETRS89 / UTM Zone " . substr($this->md->get('stellendaten')['epsg_code'], -2) . "N</gmx:Anchor>
+						</gmd:code>
+					</gmd:RS_Identifier>
+				</gmd:referenceSystemIdentifier>
+			</gmd:MD_ReferenceSystem>
+		</gmd:referenceSystemInfo>
+		<gmd:referenceSystemInfo>
+			<gmd:MD_ReferenceSystem>
+				<gmd:referenceSystemIdentifier>
+					<gmd:RS_Identifier>
+						<gmd:code>
+							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4258\">EPSG 4258: ETRS89 / geographisch</gmx:Anchor>
+						</gmd:code>
+					</gmd:RS_Identifier>
+				</gmd:referenceSystemIdentifier>
+			</gmd:MD_ReferenceSystem>
+		</gmd:referenceSystemInfo>
+		<gmd:referenceSystemInfo>
+			<gmd:MD_ReferenceSystem>
+				<gmd:referenceSystemIdentifier>
+					<gmd:RS_Identifier>
+						<gmd:code>
+							<gmx:Anchor xlink:href=\"http://www.opengis.net/def/crs/EPSG/0/4326\">EPSG 4326: WGS84 geographic coordinates</gmx:Anchor>
+						</gmd:code>
+					</gmd:RS_Identifier>
+				</gmd:referenceSystemIdentifier>
+			</gmd:MD_ReferenceSystem>
+		</gmd:referenceSystemInfo>";
+		return $sb;
+	}
+
+	function getResponsibleParty($ows_var, $role) {
+		$sb = "
+					<gmd:CI_ResponsibleParty>
+						<gmd:individualName>
+							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'person'] . "</gco:CharacterString>
+						</gmd:individualName>
+						<gmd:organisationName>
+							<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'organization'] . "</gco:CharacterString>
+						</gmd:organisationName>
+						<gmd:contactInfo>
+							<gmd:CI_Contact>
+								<gmd:phone>
+									<gmd:CI_Telephone>
+										<gmd:voice>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'voicephone'] . "</gco:CharacterString>
+										</gmd:voice>
+										<gmd:facsimile>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'facsimile'] . "</gco:CharacterString>
+										</gmd:facsimile>
+									</gmd:CI_Telephone>
+								</gmd:phone>
+								<gmd:address>
+									<gmd:CI_Address>
+										<gmd:deliveryPoint>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'address'] . "</gco:CharacterString>
+										</gmd:deliveryPoint>
+										<gmd:city>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'city'] . "</gco:CharacterString>
+										</gmd:city>
+										<gmd:postalCode>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'postalcode'] . "</gco:CharacterString>
+										</gmd:postalCode>
+										<gmd:country>
+											<gco:CharacterString>DEU</gco:CharacterString>
+										</gmd:country>
+										<gmd:electronicMailAddress>
+											<gco:CharacterString>" . $this->md->get('stellendaten')[$ows_var . 'emailaddress'] . "</gco:CharacterString>
+										</gmd:electronicMailAddress>
+									</gmd:CI_Address>
+								</gmd:address>
+								<gmd:onlineResource>
+									<gmd:CI_OnlineResource>
+										<gmd:linkage>
+											<gmd:URL>" . URL . "</gmd:URL>
+										</gmd:linkage>
+									</gmd:CI_OnlineResource>
+								</gmd:onlineResource>
+							</gmd:CI_Contact>
+						</gmd:contactInfo>
+						<gmd:role>
+							<gmd:CI_RoleCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_RoleCode\" codeListValue=\"" . $role . "\"/>
+						</gmd:role>
+					</gmd:CI_ResponsibleParty>";
+		return $sb;
+	}
+
+	public function createMetaDataDownload() {
+		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+	<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+	<gmd:fileIdentifier>
+		<gco:CharacterString>" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "</gco:CharacterString>
+	</gmd:fileIdentifier>
+	<gmd:language xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\">Deutsch</gmd:LanguageCode>
+	</gmd:language>
+	<gmd:characterSet xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:MD_CharacterSetCode codeListValue=\"utf8\" codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\"/>
+	</gmd:characterSet>
+	<gmd:hierarchyLevel xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"service\"/>
+	</gmd:hierarchyLevel>
+	<gmd:hierarchyLevelName xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gco:CharacterString>Service</gco:CharacterString>
+	</gmd:hierarchyLevelName>
+	<gmd:contact xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+	</gmd:contact>
+	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gco:DateTime>" . $this->md->get('md_date') . "</gco:DateTime>
+	</gmd:dateStamp>
+	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<srv:SV_ServiceIdentification>
+			<gmd:citation>
+				<gmd:CI_Citation>
+					<gmd:title>
+						<gco:CharacterString>Downloaddienst " . $this->md->get('id_cite_title') . "</gco:CharacterString>
+					</gmd:title>
+					<gmd:date>
+						<gmd:CI_Date>
+							<gmd:date>
+								<gco:Date>" . $this->md->get('id_cite_date') . "</gco:Date>
+							</gmd:date>
+							<gmd:dateType>
+								<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+							</gmd:dateType>
+						</gmd:CI_Date>
+					</gmd:date>
+					<gmd:citedResponsibleParty>
+						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+					</gmd:citedResponsibleParty>
+				</gmd:CI_Citation>
+			</gmd:citation>
+			<gmd:abstract>
+				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Featuretyp pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
+			</gmd:abstract>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+			</gmd:pointOfContact>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			</gmd:pointOfContact>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_content', 'publisher') . "
+			</gmd:pointOfContact>
+			<gmd:graphicOverview>
+				<gmd:MD_BrowseGraphic>
+					<gmd:fileName>
+						<gco:CharacterString>" . $this->md->get('downloadservice_browsegraphic') . "</gco:CharacterString>
+					</gmd:fileName>
+				</gmd:MD_BrowseGraphic>
+			</gmd:graphicOverview>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>humanGeographicViewer</gco:CharacterString>
+					</gmd:keyword>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>Bodennutzung</gco:CharacterString>
+				    </gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+							</gmd:title>
+							<gmd:date gco:nilReason=\"unknown\">
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>landuse</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+				<gmd:resourceConstraints>
+					 <gmd:MD_LegalConstraints>
+						  <gmd:accessConstraints>
+							   <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\" />
+						  </gmd:accessConstraints>
+						  <gmd:otherConstraints>
+							   <gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">no limitations to public access</gmx:Anchor>
+						  </gmd:otherConstraints>
+					</gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>
+				<gmd:resourceConstraints>
+					<gmd:MD_LegalConstraints>
+						   <gmd:useConstraints>
+								<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+						   </gmd:useConstraints>
+						   <gmd:otherConstraints>
+								<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/ ConditionsApplyingToAccessAndUse/noConditionsApply\">
+									 No conditions apply to access and use 
+								</gmx:Anchor>
+						   </gmd:otherConstraints>
+					  </gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>	
+			<srv:serviceType>
+				<gco:LocalName>download</gco:LocalName>
+			</srv:serviceType>
+			<srv:extent>
+				<gmd:EX_Extent>
+					<gmd:geographicElement>
+						<gmd:EX_GeographicBoundingBox>
+							<gmd:westBoundLongitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
+							</gmd:westBoundLongitude>
+							<gmd:eastBoundLongitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
+							</gmd:eastBoundLongitude>
+							<gmd:southBoundLatitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
+							</gmd:southBoundLatitude>
+							<gmd:northBoundLatitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
+							</gmd:northBoundLatitude>
+						</gmd:EX_GeographicBoundingBox>
+					</gmd:geographicElement>
+				</gmd:EX_Extent>
+			</srv:extent>
+			<srv:couplingType>
+				<srv:SV_CouplingType codeList=\"http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#SV_CouplingType\" codeListValue=\"tight\"/>
+			</srv:couplingType>
+			<srv:containsOperations>
+				<srv:SV_OperationMetadata>
+					<srv:operationName>
+						<gco:CharacterString>GetCapabilities</gco:CharacterString>
+					</srv:operationName>
+					<srv:DCP>
+						<srv:DCPList codeList=\"http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList\" codeListValue=\"WebServices\"/>
+					</srv:DCP>
+					<srv:connectPoint>
+						<gmd:CI_OnlineResource>
+							<gmd:linkage>
+								<gmd:URL>" . $this->wfs_link . "</gmd:URL>
+							</gmd:linkage>
+						</gmd:CI_OnlineResource>
+					</srv:connectPoint>
+				</srv:SV_OperationMetadata>
+			</srv:containsOperations>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+		</srv:SV_ServiceIdentification>
+	</gmd:identificationInfo>
+	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
+		<gmd:DQ_DataQuality>
+			<gmd:scope>
+				<gmd:DQ_Scope>
+					<gmd:level>
+						<gmd:MD_ScopeCode
+						codeList=\"http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_ScopeCode\"
+						codeListValue=\"service\"/>
+					</gmd:level>
+					<gmd:levelDescription>
+							<gmd:MD_ScopeDescription>
+								<gmd:other>
+									<gco:CharacterString>service</gco:CharacterString>
+								</gmd:other>
+							</gmd:MD_ScopeDescription>
+					</gmd:levelDescription>
+				</gmd:DQ_Scope>
+			</gmd:scope>
+			<gmd:report>
+				<gmd:DQ_DomainConsistency>
+					<gmd:result>
+						<gmd:DQ_ConformanceResult>
+							<gmd:specification>
+								<gmd:CI_Citation>
+									<gmd:title>
+										<gco:CharacterString>D2.8.III.4 Data Specification on Land use - Draft Technical Guidelines</gco:CharacterString>
+									</gmd:title>
+									<gmd:date>
+										<gmd:CI_Date>
+											<gmd:date>
+												<gco:Date>2013-12-10</gco:Date>
+											</gmd:date>
+											<gmd:dateType>
+												<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+											</gmd:dateType>
+										</gmd:CI_Date>
+									</gmd:date>
+								</gmd:CI_Citation>
+							</gmd:specification>
+							<gmd:explanation>
+								<gco:CharacterString>Die Daten entsprechen derzeit noch nicht dem Datenmodell in der oben benannten Datenspezifikation zum Thema Bodennutzung.</gco:CharacterString>
+							</gmd:explanation>
+							<gmd:pass>
+								<gco:Boolean>false</gco:Boolean>
+							</gmd:pass>
+						</gmd:DQ_ConformanceResult>
+					</gmd:result>
+				</gmd:DQ_DomainConsistency>
+			</gmd:report>
+		</gmd:DQ_DataQuality>
+	</gmd:dataQualityInfo>
+</gmd:MD_Metadata>";
+		return $sb;
+	}
+
+	public function createMetaDataView() {
+		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+		<gmd:MD_Metadata xmlns:gml=\"http://www.opengis.net/gml\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+	<gmd:fileIdentifier>
+		<gco:CharacterString>" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "</gco:CharacterString>
+	</gmd:fileIdentifier>
+	<gmd:language xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\">Deutsch</gmd:LanguageCode>
+	</gmd:language>
+	<gmd:characterSet xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:MD_CharacterSetCode codeListValue=\"utf8\" codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\"/>
+	</gmd:characterSet>
+	<gmd:hierarchyLevel xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"service\"/>
+	</gmd:hierarchyLevel>
+	<gmd:hierarchyLevelName xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gco:CharacterString>Service</gco:CharacterString>
+	</gmd:hierarchyLevelName>
+	<gmd:contact>
+	" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+	</gmd:contact>
+	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<gco:DateTime>2023-02-15T14:44:53</gco:DateTime>
+	</gmd:dateStamp>
+	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
+		<srv:SV_ServiceIdentification>
+			<gmd:citation>
+				<gmd:CI_Citation>
+					<gmd:title>
+						<gco:CharacterString>" . $this->md->get('stellendaten')['ows_title'] . "</gco:CharacterString>
+					</gmd:title>
+					<gmd:date>
+						<gmd:CI_Date>
+							<gmd:date>
+								<gco:Date>" . $this->md->get('id_cite_date') . "</gco:Date>
+							</gmd:date>
+							<gmd:dateType>
+								<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+							</gmd:dateType>
+						</gmd:CI_Date>
+					</gmd:date>
+					<gmd:citedResponsibleParty>
+						" . $this->getResponsibleParty('ows_content', 'owner') . "
+					</gmd:citedResponsibleParty>
+				</gmd:CI_Citation>
+			</gmd:citation>
+			<gmd:abstract>
+				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.</gco:CharacterString>
+			</gmd:abstract>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+			</gmd:pointOfContact>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+			</gmd:pointOfContact>
+			<gmd:pointOfContact>
+				" . $this->getResponsibleParty('ows_content', 'publisher') . "
+			</gmd:pointOfContact>
+			<gmd:graphicOverview>
+				<gmd:MD_BrowseGraphic>
+					<gmd:fileName>
+						<gco:CharacterString>" . $this->md->get('viewservice_browsegraphic') . "</gco:CharacterString>
+					</gmd:fileName>
+				</gmd:MD_BrowseGraphic>
+			</gmd:graphicOverview>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>humanGeographicViewer</gco:CharacterString>
+					</gmd:keyword>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>Bodennutzung</gco:CharacterString>
+				    </gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+					<gmd:thesaurusName>
+						<gmd:CI_Citation>
+							<gmd:title>
+								<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+							</gmd:title>
+							<gmd:date gco:nilReason=\"unknown\">
+								<gmd:CI_Date>
+									<gmd:date>
+										<gco:Date>" . $this->md->get('id_cite_date') . "</gco:Date>
+									</gmd:date>
+									<gmd:dateType>
+										<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+									</gmd:dateType>
+								</gmd:CI_Date>
+							</gmd:date>
+						</gmd:CI_Citation>
+					</gmd:thesaurusName>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+			<gmd:descriptiveKeywords>
+				<gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>landuse</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:type>
+						<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+					</gmd:type>
+				</gmd:MD_Keywords>
+			</gmd:descriptiveKeywords>
+				<gmd:resourceConstraints>
+					 <gmd:MD_LegalConstraints>
+						  <gmd:accessConstraints>
+							   <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\" />
+						  </gmd:accessConstraints>
+						  <gmd:otherConstraints>
+							   <gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">no limitations to public access</gmx:Anchor>
+						  </gmd:otherConstraints>
+					</gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>
+				<gmd:resourceConstraints>
+					<gmd:MD_LegalConstraints>
+						   <gmd:useConstraints>
+								<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+						   </gmd:useConstraints>
+						   <gmd:otherConstraints>
+								<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/ ConditionsApplyingToAccessAndUse/noConditionsApply\">
+									 No conditions apply to access and use 
+								</gmx:Anchor>
+						   </gmd:otherConstraints>
+					  </gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>	
+			<srv:serviceType>
+				<gco:LocalName>download</gco:LocalName>
+			</srv:serviceType>
+			<srv:extent>
+				<gmd:EX_Extent>
+					<gmd:geographicElement>
+						<gmd:EX_GeographicBoundingBox>
+							<gmd:westBoundLongitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
+							</gmd:westBoundLongitude>
+							<gmd:eastBoundLongitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
+							</gmd:eastBoundLongitude>
+							<gmd:southBoundLatitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
+							</gmd:southBoundLatitude>
+							<gmd:northBoundLatitude>
+								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
+							</gmd:northBoundLatitude>
+						</gmd:EX_GeographicBoundingBox>
+					</gmd:geographicElement>
+				</gmd:EX_Extent>
+			</srv:extent>
+			<srv:couplingType>
+				<srv:SV_CouplingType codeList=\"http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#SV_CouplingType\" codeListValue=\"tight\"/>
+			</srv:couplingType>
+			<srv:containsOperations>
+				<srv:SV_OperationMetadata>
+					<srv:operationName>
+						<gco:CharacterString>GetCapabilities</gco:CharacterString>
+					</srv:operationName>
+					<srv:DCP>
+						<srv:DCPList codeList=\"http://www.isotc211.org/2005/iso19119/resources/Codelist/gmxCodelists.xml#DCPList\" codeListValue=\"WebServices\"/>
+					</srv:DCP>
+					<srv:connectPoint>
+						<gmd:CI_OnlineResource>
+							<gmd:linkage>
+								<gmd:URL>" . $this->wms_link . "</gmd:URL>
+							</gmd:linkage>
+						</gmd:CI_OnlineResource>
+					</srv:connectPoint>
+				</srv:SV_OperationMetadata>
+			</srv:containsOperations>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+		</srv:SV_ServiceIdentification>
+	</gmd:identificationInfo>
+	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
+		<gmd:DQ_DataQuality>
+			<gmd:scope>
+				<gmd:DQ_Scope>
+					<gmd:level>
+						<gmd:MD_ScopeCode 
+						codeList=\"http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_ScopeCode\"
+						codeListValue=\"service\"/>
+					</gmd:level>
+					<gmd:levelDescription>
+							<gmd:MD_ScopeDescription>
+								<gmd:other>
+									<gco:CharacterString>service</gco:CharacterString>
+								</gmd:other>
+							</gmd:MD_ScopeDescription>
+					</gmd:levelDescription>
+				</gmd:DQ_Scope>
+			</gmd:scope>
+			<gmd:report>
+				<gmd:DQ_DomainConsistency>
+					<gmd:result>
+						<gmd:DQ_ConformanceResult>
+							<gmd:specification>
+								<gmd:CI_Citation>
+									<gmd:title>
+										<gco:CharacterString>D2.8.III.4 Data Specification on Land use - Draft Technical Guidelines</gco:CharacterString>
+									</gmd:title>
+									<gmd:date>
+										<gmd:CI_Date>
+											<gmd:date>
+												<gco:Date>2013-12-10</gco:Date>
+											</gmd:date>
+											<gmd:dateType>
+												<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+											</gmd:dateType>
+										</gmd:CI_Date>
+									</gmd:date>
+								</gmd:CI_Citation>
+							</gmd:specification>
+							<gmd:explanation>
+								<gco:CharacterString>Die Daten entsprechen derzeit noch nicht dem Datenmodell in der oben benannten Datenspezifikation zum Thema Bodennutzung.</gco:CharacterString>
+							</gmd:explanation>
+							<gmd:pass>
+								<gco:Boolean>false</gco:Boolean>
+							</gmd:pass>
+						</gmd:DQ_ConformanceResult>
+					</gmd:result>
+				</gmd:DQ_DomainConsistency>
+			</gmd:report>
+		</gmd:DQ_DataQuality>
+	</gmd:dataQualityInfo>
+</gmd:MD_Metadata>";
+		return $sb;
+	}
+
+	public function createMetadataGeodatensatz() {
+		$sb = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>
+	<gmd:MD_Metadata xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xmlns:igctx=\"https://www.ingrid-oss.eu/schemas/igctx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd http://repository.gdi-de.org/schemas/geonetwork/2020-12-11/csw/2.0.2/profiles/apiso/1.0.1/apiso.xsd\">
+		<gmd:fileIdentifier>
+			<gco:CharacterString>" . $this->md->get('uuids')['metadata_dataset_uuid'] . "</gco:CharacterString>
+		</gmd:fileIdentifier>
+		<gmd:language>
+			<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\"/>
+		</gmd:language>
+		<gmd:characterSet>
+			<gmd:MD_CharacterSetCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\" codeListValue=\"utf8\"/>
+		</gmd:characterSet>
+		<gmd:hierarchyLevel>
+			<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\">dataset</gmd:MD_ScopeCode>
+		</gmd:hierarchyLevel>
+		<gmd:contact>
+		" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+		</gmd:contact>
+		<gmd:dateStamp>
+			<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
+		</gmd:dateStamp>
+		<gmd:metadataStandardName>
+			<gco:CharacterString>ISO19115</gco:CharacterString>
+		</gmd:metadataStandardName>
+		<gmd:metadataStandardVersion>
+			<gco:CharacterString>2003/Cor.1:2006</gco:CharacterString>
+		</gmd:metadataStandardVersion>
+		" . $this->getReferenzSysteme() . "
+		<gmd:identificationInfo>
+			<gmd:MD_DataIdentification uuid=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\">
+				<gmd:citation>
+					<gmd:CI_Citation>
+						<gmd:title>
+							<gco:CharacterString>Geodatensatz " . $this->md->get('id_cite_title') . "</gco:CharacterString>
+						</gmd:title>
+						<gmd:date>
+							<gmd:CI_Date>
+								<gmd:date>
+									<gco:DateTime>" . $this->md->get('id_cite_date') . "</gco:DateTime>
+								</gmd:date>
+								<gmd:dateType>
+									<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+								</gmd:dateType>
+							</gmd:CI_Date>
+						</gmd:date>
+						<gmd:identifier>
+							<gmd:MD_Identifier>
+								<gmd:code>
+									<gco:CharacterString>
+									https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
+								</gmd:code>
+							</gmd:MD_Identifier>
+						</gmd:identifier>
+					</gmd:CI_Citation>
+				</gmd:citation>
+				<gmd:abstract>
+					<gco:CharacterString>Geodatensatz des Plans " . $this->md->get('id_cite_title') . ". Es handelt sich um die Zusammenzeichnung von Planelementen mit Featuretypen pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
+				</gmd:abstract>
+				<gmd:pointOfContact>
+					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+				</gmd:pointOfContact>
+				<gmd:pointOfContact>
+					" . $this->getResponsibleParty('ows_distribution', 'distributor') . "
+				</gmd:pointOfContact>
+				<gmd:pointOfContact>
+					" . $this->getResponsibleParty('ows_content', 'publisher') . "
+				</gmd:pointOfContact>
+				<gmd:resourceMaintenance>
+					<gmd:MD_MaintenanceInformation>
+						<gmd:maintenanceAndUpdateFrequency>
+							<gmd:MD_MaintenanceFrequencyCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_MaintenanceFrequencyCode\" codeListValue=\"asNeeded\"/>
+						</gmd:maintenanceAndUpdateFrequency>
+						<gmd:updateScope>
+							<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\"/>
+						</gmd:updateScope>
+					</gmd:MD_MaintenanceInformation>
+				</gmd:resourceMaintenance>
+				<gmd:graphicOverview>
+					<gmd:MD_BrowseGraphic>
+						<gmd:fileName>
+							<gco:CharacterString>" . $this->md->get('dataset_browsegraphic') . "</gco:CharacterString>
+						</gmd:fileName>
+					</gmd:MD_BrowseGraphic>
+				</gmd:graphicOverview>
+				<gmd:descriptiveKeywords>
+					<gmd:MD_Keywords>
+						<gmd:keyword>
+							<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+						</gmd:keyword>
+					</gmd:MD_Keywords>
+				</gmd:descriptiveKeywords>
+				<gmd:descriptiveKeywords>
+					<gmd:MD_Keywords>
+						<gmd:keyword>
+							<gco:CharacterString>Bodennutzung</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:type>
+							<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
+						</gmd:type>
+						<gmd:thesaurusName>
+							<gmd:CI_Citation>
+								<gmd:title>
+									<gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+								</gmd:title>
+								<gmd:date>
+									<gmd:CI_Date>
+										<gmd:date>
+											<gco:Date>2008-06-01</gco:Date>
+										</gmd:date>
+										<gmd:dateType>
+											<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
+										</gmd:dateType>
+									</gmd:CI_Date>
+								</gmd:date>
+							</gmd:CI_Citation>
+						</gmd:thesaurusName>
+					</gmd:MD_Keywords>
+				</gmd:descriptiveKeywords>				
+				<gmd:resourceConstraints>
+					<gmd:MD_LegalConstraints>
+						<gmd:useConstraints>
+							<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+						</gmd:useConstraints>
+						<gmd:otherConstraints>
+							<gco:CharacterString>Datenlizenz Deutschland Namensnennung 2.0</gco:CharacterString>
+						</gmd:otherConstraints>
+						<gmd:otherConstraints>
+							<gco:CharacterString>{\"id\":\"dl-by-de/2.0\",\"name\":\"Datenlizenz Deutschland Namensnennung 2.0\",\"url\":\"https://www.govdata.de/dl-de/by-2-0\",\"quelle\":\"Freie und Hansestadt Hamburg, Landesbetrieb Geoinformation und Vermessung (LGV)\"}</gco:CharacterString>
+						</gmd:otherConstraints>
+					</gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>
+				<gmd:resourceConstraints>
+					<gmd:MD_LegalConstraints>
+						<gmd:accessConstraints>
+							<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\">otherRestrictions</gmd:MD_RestrictionCode>
+						</gmd:accessConstraints>
+						<gmd:otherConstraints>
+							<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">Es gelten keine Zugriffsbeschränkungen</gmx:Anchor>
+						</gmd:otherConstraints>
+					</gmd:MD_LegalConstraints>
+				</gmd:resourceConstraints>
+				<gmd:spatialRepresentationType>
+					<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"vector\"/>
+				</gmd:spatialRepresentationType>
+				<gmd:language>
+					<gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/\" codeListValue=\"ger\"/>
+				</gmd:language>
+				<gmd:characterSet>
+					<gmd:MD_CharacterSetCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_CharacterSetCode\" codeListValue=\"utf8\"/>
+				</gmd:characterSet>
+				<gmd:extent>
+					<gmd:EX_Extent>
+						<gmd:geographicElement>
+							<gmd:EX_GeographicBoundingBox>
+								<!--
+								<gmd:extentTypeCode>
+									<gco:Boolean>true</gco:Boolean>
+								</gmd:extentTypeCode>
+								-->
+								<gmd:westBoundLongitude>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
+								</gmd:westBoundLongitude>
+								<gmd:eastBoundLongitude>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['maxx'] . "</gco:Decimal>
+								</gmd:eastBoundLongitude>
+								<gmd:southBoundLatitude>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['miny'] . "</gco:Decimal>
+								</gmd:southBoundLatitude>
+								<gmd:northBoundLatitude>
+									<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
+								</gmd:northBoundLatitude>
+							</gmd:EX_GeographicBoundingBox>
+						</gmd:geographicElement>
+					</gmd:EX_Extent>
+				</gmd:extent>
+			</gmd:MD_DataIdentification>
+		</gmd:identificationInfo>
+		<gmd:distributionInfo>
+			<gmd:MD_Distribution>
+				<gmd:distributionFormat>
+					<gmd:MD_Format>
+						<gmd:name>
+							<gco:CharacterString>GML</gco:CharacterString>
+						</gmd:name>
+						<gmd:version>
+							<gco:CharacterString>3.2</gco:CharacterString>
+						</gmd:version>
+					</gmd:MD_Format>
+				</gmd:distributionFormat>
+				<gmd:transferOptions>
+					<gmd:MD_DigitalTransferOptions>
+						<gmd:onLine>
+							<gmd:CI_OnlineResource>
+								<gmd:linkage>
+									<gmd:URL>" . $this->wms_link . "</gmd:URL>
+								</gmd:linkage>
+								<gmd:name>
+									<gco:CharacterString>Dienst \"WMS Dienst\" (GetCapabilities)</gco:CharacterString>
+								</gmd:name>
+								<gmd:function>
+									<gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\">information</gmd:CI_OnLineFunctionCode>
+								</gmd:function>
+							</gmd:CI_OnlineResource>
+						</gmd:onLine>
+					</gmd:MD_DigitalTransferOptions>
+				</gmd:transferOptions>
+				<gmd:transferOptions>
+					<gmd:MD_DigitalTransferOptions>
+						<gmd:onLine>
+							<gmd:CI_OnlineResource>
+								<gmd:linkage>
+									<gmd:URL>" . $this->wfs_link . "</gmd:URL>
+								</gmd:linkage>
+								<gmd:name>
+									<gco:CharacterString>Dienst \"WFS Dienst \" (GetCapabilities)</gco:CharacterString>
+								</gmd:name>
+								<gmd:function>
+									<gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\">information</gmd:CI_OnLineFunctionCode>
+								</gmd:function>
+							</gmd:CI_OnlineResource>
+						</gmd:onLine>
+					</gmd:MD_DigitalTransferOptions>
+				</gmd:transferOptions>
+			</gmd:MD_Distribution>
+		</gmd:distributionInfo>
+		<gmd:dataQualityInfo>
+			<gmd:DQ_DataQuality>
+				<gmd:scope>
+					<gmd:DQ_Scope>
+						<gmd:level>
+							<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\"/>
+						</gmd:level>
+					</gmd:DQ_Scope>
+				</gmd:scope>
+				<!--
+				<gmd:report>
+					<gmd:DQ_CompletenessOmission>
+						<gmd:nameOfMeasure>
+							<gco:CharacterString>Rate of missing items</gco:CharacterString>
+						</gmd:nameOfMeasure>
+						<gmd:measureIdentification>
+							<gmd:MD_Identifier>
+								<gmd:code>
+									<gco:CharacterString>7</gco:CharacterString>
+								</gmd:code>
+							</gmd:MD_Identifier>
+						</gmd:measureIdentification>
+						<gmd:measureDescription>
+							<gco:CharacterString>completeness omission (rec_grade)</gco:CharacterString>
+						</gmd:measureDescription>
+						<gmd:result>
+							<gmd:DQ_QuantitativeResult>
+								<gmd:valueUnit>
+									<gml:UnitDefinition gml:id=\"unitDefinition_ID_fc746a8f-3554-40ce-af37-f3101c0dba74\">
+										<gml:identifier codeSpace=\"\"/>
+										<gml:name>percent</gml:name>
+										<gml:quantityType>completeness omission</gml:quantityType>
+										<gml:catalogSymbol>%</gml:catalogSymbol>
+									</gml:UnitDefinition>
+								</gmd:valueUnit>
+								<gmd:value>
+									<gco:Record>0.0</gco:Record>
+								</gmd:value>
+							</gmd:DQ_QuantitativeResult>
+						</gmd:result>
+					</gmd:DQ_CompletenessOmission>
+				</gmd:report>
+				-->
+				<gmd:report>
+					<gmd:DQ_DomainConsistency>
+						<gmd:result>
+							<gmd:DQ_ConformanceResult>
+								<gmd:specification>
+									<gmd:CI_Citation>
+										<gmd:title>
+											<gco:CharacterString>VERORDNUNG (EG) Nr. 1089/2010 DER KOMMISSION vom 23. November 2010 zur Durchführung der Richtlinie 2007/2/EG des Europäischen Parlaments und des Rates hinsichtlich der Interoperabilität von Geodatensätzen und -diensten</gco:CharacterString>
+										</gmd:title>
+										<gmd:date>
+											<gmd:CI_Date>
+												<gmd:date>
+													<gco:Date>2010-12-08</gco:Date>
+												</gmd:date>
+												<gmd:dateType>
+													<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
+												</gmd:dateType>
+											</gmd:CI_Date>
+										</gmd:date>
+									</gmd:CI_Citation>
+								</gmd:specification>
+								<gmd:explanation>
+									<gco:CharacterString>see the referenced specification</gco:CharacterString>
+								</gmd:explanation>
+								<gmd:pass>
+									<gco:Boolean>true</gco:Boolean>
+								</gmd:pass>
+							</gmd:DQ_ConformanceResult>
+						</gmd:result>
+					</gmd:DQ_DomainConsistency>
+				</gmd:report>
+				<gmd:lineage>
+					<gmd:LI_Lineage>
+						<gmd:statement>
+							<gco:CharacterString>INSPIRE Richtlinie Durchführungsbestimmungen Datenspezifikation</gco:CharacterString>
+						</gmd:statement>
+					</gmd:LI_Lineage>
+				</gmd:lineage>
+			</gmd:DQ_DataQuality>
+		</gmd:dataQualityInfo>
+	</gmd:MD_Metadata>";
+		return $sb;
+	}
+}

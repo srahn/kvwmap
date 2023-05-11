@@ -11,7 +11,7 @@
 	
 	function restartProcessing(uploadId, filenumber, filename){
 		ahah('index.php?go=Daten_Import_Process', 
-					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value+'&after_import_action=<? echo $this->after_import_action; ?>', 
+					'&upload_id='+uploadId+'&filenumber='+filenumber+'&filename='+filename+'&epsg='+document.getElementById('epsg'+filename).value+'&after_import_action=<? echo $this->after_import_action; ?>&chosen_layer_id=<? echo $this->formvars["chosen_layer_id"]; ?>', 
 					[document.getElementById('progress'+uploadId).querySelector('.serverResponse #serverResponse'+filenumber)], 
 					['sethtml']
 				);
@@ -26,7 +26,7 @@
     <td align="center" valign="top" style="height: 40px"><h2><?php echo $strTitle; ?></h2></td>
   </tr>
 	<tr> 
-    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?>Shape (*.dbf, *.shp, *.shx), GeoJSON, KML, KMZ, DXF, GPX, UKO, OVL, GeoTiff</td>
+    <td align="center" valign="top"><? echo $strSupportedFileTypes; ?><br>Shape (*.dbf, *.shp, *.shx), GeoPackage, GeoJSON, KML, KMZ, DXF, GPX, UKO, OVL, GeoTiff</td>
   </tr>
 	<tr>
 		<td>

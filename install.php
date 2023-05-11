@@ -32,17 +32,6 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
-class GUI {
-	function __construct() {
-	}
-
-	function add_message($type, $msg) {
-		echo '<p>Fehlerart: ' . $type;
-		echo '<br>' . $msg;
-	}
-}
-$GUI = new GUI();
-
 output_header();
 
 if (!file_exists('config.php')) {
@@ -352,7 +341,6 @@ function init_config() {
 	$installpath = dirname($rest) . '/';
 	$formvars = $_REQUEST;
 
-	define('PHPVERSION', '7329');
 	define('MYSQL_HOST', ($formvars['MYSQL_HOST'] != '' ? $formvars['MYSQL_HOST'] : 'mysql'));
 	define('MYSQL_USER', ($formvars['MYSQL_USER'] != '' ? $formvars['MYSQL_USER'] : 'kvwmap'));
 	define('MYSQL_PASSWORD', ($formvars['MYSQL_PASSWORD'] != '' ? $formvars['MYSQL_PASSWORD'] : (getenv('KVWMAP_INIT_PASSWORD') == '' ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'))));
@@ -383,6 +371,7 @@ function init_config() {
 	define('APPLVERSION', $applversion . '/');
 	define('WAPPENPATH', 'graphics/wappen/');
 	define('PHPVERSION', 739);
+	define('THIRDPARTY_PATH', '../3rdparty/');
 }
 
 function show_constants() { ?>
