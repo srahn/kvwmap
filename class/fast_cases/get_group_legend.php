@@ -1445,18 +1445,8 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if (value_of($layer, 'metalink') != ''){
-					if (substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						if (strpos($layer['metalink'], '?') === false) {
-							$layer['metalink'] .= '?';
-						}
-						else {
-							$layer['metalink'] .= '&';
-						}
-						$layer['metalink'] .= 'time='.time();
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				if(value_of($layer, 'metalink') != ''){
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
