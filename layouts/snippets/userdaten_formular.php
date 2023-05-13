@@ -319,8 +319,10 @@
 						<td>
 							<select name="selectedstellen" style="height: auto;" size="5" multiple>
 								<? 
-								for ($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
-									echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+								if(isset($this->formvars['selstellen']["Bezeichnung"])) {
+									for ($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+										echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+									}
 								}
 								?>
 							</select>
@@ -383,16 +385,18 @@
 			<div><? echo $strActiveLayers;?></div>
 			<div class="udf_eingabe-layers">
 				<table><?	
-					for ($i = 0; $i < count($this->active_layers); $i++) { ?>
-						<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
-							<td>
-								<? echo $this->active_layers[$i]['alias']; ?>
-							</td>
-							<td>
-								<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
-							</td>
-						</tr><?
-					} ?>
+					if(isset($this->active_layers)) {
+						for ($i = 0; $i < count($this->active_layers); $i++) { ?>
+							<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+								<td>
+									<? echo $this->active_layers[$i]['alias']; ?>
+								</td>
+								<td>
+									<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
+								</td>
+							</tr><?
+						}
+					}					?>
 				</table>
 			</div>
 		</div>

@@ -18,32 +18,38 @@ class Zusammenzeichnung {
         description: 'Die Zusammenzeichnung wird in die Postgres-Datenbank mit dem Programm ogr2ogr eingelesen.<br>\
         Danach wird geprüft ob es in der Datenbank schon einen Plan gibt mit der gleichen gml-id.<br>\
         Wenn ja, abbrechen und im nächsten Schritt die gml-ids in der Zusammenzeichnung ändern.<br>\
-        Wenn nicht, wird das temporär angelegte Schema umbenannt und die Datei mit den Geltungsbereichen eingelesen.<br>\
+        Wenn nicht, wird das temporär angelegte Schema umbenannt und der Plan und der Bereich angelegt sowie die Datei mit den Geltungsbereichen eingelesen.<br>\
         War das erfolgreich, werden die Geometrien in die Tabelle der Geltungsbereiche für die Konvertierung übernommen.'
       },
-      convert_zusammenzeichnung: {
+      create_plaene: {
         nr: 3,
+        msg: 'Anlegen der Pläne der Zusammenzeichnung',
+        description: 'Das im vorherigen Schritt temporär angelegte Importschema wird umbenannt und der Plan sowie der Bereich der Zusammenzeichnung angelegt.<br>\
+        Falls Einzelfassungen mit hochgeladen wurden werden die Geometrien der Änderungspläne in die Tabelle Geltungsbereiche übernommen.'
+      },
+      convert_zusammenzeichnung: {
+        nr: 4,
         msg: `Konvertierung der Plandaten in die Version ${this.xplan_version}`,
-        description: `Die eingelesene Zusammenzeichnung wird nun in die entsprechenden Tabellen für den Plan und die Fachobjekte übernommen.<br>\
+        description: `Die Fachdaten der eingelesenen Zusammenzeichnung werden nun in die entsprechenden Tabellen übernommen.<br>\
         Dabei erfolgt das mapping zwischen dem Import-Datenmodell von ogr2ogr in das XPlanung-Datenmodell des xplankonverters.<br>\
         Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.\
         `
       },
       gml_generieren: {
-        nr: 4,
+        nr: 5,
         msg: 'Erzeugen der GML-Datei in Version 5.4',
         description: `In diesem Schritt wird eine neue XPlan-GML Datei in der Version ${this.xplan_version} auf den Server geschrieben.<br>\
         Diese kann später vom Nutzer heruntergeladen werden.`
       },
       create_geoweb_service: {
-        nr: 5,
+        nr: 6,
         msg: 'Erzeugen des GeoWeb-Dienstes für den Plan',
         description: 'Erzeugen der Map-Datei für den WMS und WFS-Dienst der Stelle.<br>\
         Update der Service-Templates.\
         '
       },
       create_metadata: {
-        nr: 6,
+        nr: 7,
         msg: 'Anlegen der Metadatendokumente für den Geodatensatz und die Dienste',
         description: 'Erzeugen des Metadatendokumentes zur Beschreibung des Geodatensatzes.<br>\
         Erzeugen des Metadatendokumentes zur Beschreibung des WMS-Dienstes.<br>\
@@ -52,32 +58,32 @@ class Zusammenzeichnung {
         '
       },
       update_full_geoweb_service: {
-        nr: 7,
+        nr: 8,
         msg: 'Aktualisieren der Landesdienste',
         description: 'Aktualisieren der Capabilities-Metadaten der Dienste in denen alle Pläne veröffentlicht werden.',
       },
       update_full_metadata: {
-        nr: 8,
+        nr: 9,
         msg: 'Aktualisieren der Metadatendokumente über die Landesdienste',
         description: 'Aktualisieren der Capabilities-Metadaten des Dienstes und des Geodatensatzes in denen alle Pläne veröffentlicht werden.',
       },
       replace_zusammenzeichnung: {
-        nr: 9,
+        nr: 10,
         msg: 'Ersetzen der alten Zusammenzeichnung durch die neue',
         description: 'Archivierung der original hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
-        Lösche die hochgeladenen Dateien der alten Zusammenzeichnung<br>\
+        Lösche die hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
         Löschen der alten Zusammenzeichnung in der Datenbank.\
         '
       },
       reindex_gml_ids: {
-        nr: 10,
+        nr: 11,
         msg: 'Umbenennen der GML-ID\'s',
         description: 'Es existiert schon ein Plan mit der GML-ID der hochgeladenen Zusammenzeichnung.<br>\
         Deshalb wird eine neue Zusammenzeichnung mit geänderten GML-IDs angelegt.<br>\
         Der Importprozess wird mit der geänderten Zusammenzeichnung neu gestartet.'
       },
       import_reindexed_zusammenzeichnung: {
-        nr: 11,
+        nr: 12,
         msg: 'Importieren der neu indizierten GML-Datei in die Portaldatenbank',
         description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit mit den umbenannten GML-IDs.<br>\
         Es laufen die gleichen Teilschritte ab wie im Schritt Importieren der GML-Datei in die Portaldatenbank.'
@@ -101,6 +107,7 @@ class Zusammenzeichnung {
   }
 
   upload_zusammenzeichnung = (event) => {
+    event.preventDefault();
     const file_obj = event.dataTransfer.files[0];
     if (file_obj != undefined) {
       var form_data = new FormData();
@@ -109,6 +116,8 @@ class Zusammenzeichnung {
         form_data.append('konvertierung_id', this.id);
       }
       form_data.append('planart', this.planart);
+      form_data.append('format', 'json_result');
+      form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
@@ -121,7 +130,6 @@ class Zusammenzeichnung {
               this.confirm_step('upload_zusammenzeichnung', 'ok');
               this.id = response.konvertierung_id;
               $('#konvertierung_id_span').html(`Konvertierung ID: ${this.id}`).show();
-              console.log('upload_zusammenzeichnung konvertierung_id: ', this.id);
               this.import_zusammenzeichnung();
             }
             else {
@@ -132,7 +140,7 @@ class Zusammenzeichnung {
             if (event.target.responseText.indexOf('<input id="login_name"') > 0) {
               window.location = 'index.php';
             }
-            message([{ type: 'error', msg: 'Fehler beim Hochladen der Zusammenzeichnung!<p>' + err + ' ' + event.target.responseText }]);
+            message([{ type: 'error', msg: 'Fehler beim Hochladen der Zusammenzeichnung ' + this.id + ' !<p>' + err + ' ' + event.target.responseText }]);
           }
         }
         else {
@@ -183,7 +191,7 @@ class Zusammenzeichnung {
         //console.log('Response import_zusammenzeichnung: %o', result);
         if (result.success) {
           this.confirm_step('import_zusammenzeichnung', 'ok')
-          this.convert_zusammenzeichnung();
+          this.create_plaene();
         }
         else {
           if (result.msg.includes('Warnung')) {
@@ -195,14 +203,52 @@ class Zusammenzeichnung {
           else {
             this.confirm_step('import_zusammenzeichnung', 'error');
             console.error(result.msg);
-            message([{ type: 'error', msg: 'Fehler beim Import der Zusammenzeichnung.<br>' + result.msg }]);
+            message([{ type: 'error', msg: 'Fehler beim Import der Zusammenzeichnung!<br>' + result.msg }]);
           }
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_zusammenzeichnung', 'error');
-        console.error(jqXHR);
-        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown }]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+      }
+    })
+  }
+
+  create_plaene = () => {
+    this.next_step('create_plaene');
+    //console.log('create_plaene konvertierung_id: ', this.id);
+    $.ajax({
+      url: 'index.php',
+      data: {
+        go: 'xplankonverter_create_plaene',
+        konvertierung_id: this.id,
+        planart: this.planart,
+        mime_type: 'json',
+        format: 'json_result',
+      },
+      success: (result) => {
+        //console.log('Response create_plaene: %o', result);
+        if (result.success) {
+          this.confirm_step('create_plaene', 'ok')
+          this.convert_zusammenzeichnung();
+        }
+        else {
+          if (result.msg.includes('Warnung')) {
+            // Auch diese Warnung soll als ok dargestellt werden.
+            this.confirm_step('create_plaene', 'ok');
+            this.numSteps = this.numSteps + 2;
+            this.reindex_gml_ids();
+          }
+          else {
+            this.confirm_step('create_plaene', 'error');
+            console.error(result.msg);
+            message([{ type: 'error', msg: 'Fehler beim Anlegen der Pläne der Zusammenzeichnung!<br>' + result.msg }]);
+          }
+        }
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        this.confirm_step('create_plaene', 'error');
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
       }
     })
   }
@@ -214,6 +260,8 @@ class Zusammenzeichnung {
     formData.append('go', 'xplankonverter_reindex_gml_ids');
     formData.append('konvertierung_id', this.id);
     formData.append('planart', this.planart);
+    form_data.append('mime_type', 'json');
+    form_data.append('upload_file', file_obj);
     let response = fetch('index.php', {
       method: 'POST',
       body: formData
@@ -255,7 +303,7 @@ class Zusammenzeichnung {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
         if (result.success) {
           this.confirm_step('import_reindexed_zusammenzeichnung', 'ok')
-          this.convert_zusammenzeichnung();
+          this.create_plaene();
         }
         else {
             this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
@@ -265,7 +313,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die reindizierte Datei zu importieren! Fehlerart: ' + errorThrown }]);
       }
     })
@@ -291,12 +338,11 @@ class Zusammenzeichnung {
         }
         else {
           this.confirm_step('convert_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Konvertieren der Zusammenzeichnung.<br>' + result.msg }]);
+          message([{ type: 'error', msg: 'Fehler beim Konvertieren der Zusammenzeichnung ' + this.id + ' .<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('convert_zusammenzeichnung', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch den Zusammenzeichnung zu konvertieren! Fehlerart: ' + errorThrown }]);
       }
     })
@@ -326,7 +372,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('gml_generieren', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die GML-Datei in der Zielversion zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
@@ -357,7 +402,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('create_geoweb_service', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die GeoWeb-Dienste zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
@@ -388,7 +432,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('create_metadata', 'error');
-        console.error(jqXHR);
 /*
   Das ist die Meldung die in dem Step zurück kommt und deshalb einen parseerror auslößt.
      connecting: https:/mis.testportal-plandigital.de/geonetwork
@@ -425,7 +468,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('update_full_geoweb_service', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Landesdienste zu aktualisieren. Fehlerart: ' + errorThrown }]);
       }
     })
@@ -455,7 +497,6 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('update_full_metadata', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten des Landesdienstes zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
@@ -473,22 +514,29 @@ class Zusammenzeichnung {
         mime_type: 'json',
         format: 'json_result',
       },
-      success: (result) => {
+      success: (response) => {
         //console.log('Response replace_zusammenzeichnung: %o', result);
-        if (result.success) {
-          this.confirm_step('replace_zusammenzeichnung', 'ok');
-          $('#upload_zusammenzeichnung_finish_button').show();
+        try {
+          const result = JSON.parse(response);
+          if (result.success) {
+            this.confirm_step('replace_zusammenzeichnung', 'ok');
+            $('#upload_zusammenzeichnung_finish_button').show();
+          }
+          else {
+            this.confirm_step('replace_zusammenzeichnung', 'error');
+            message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>' + result.msg }]);
+          }
         }
-        else {
+        catch (err) {
           this.confirm_step('replace_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>' + result.msg }]);
+          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>Konnte Antwort vom Server nicht auswerten: ' + response + ' ' + err}]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('replace_zusammenzeichnung', 'error');
-        console.error(jqXHR);
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Vorgängerversion zu ersetzen. Fehlerart: ' + errorThrown }]);
-      }
+      },
+      dataType: "text"
     })
   }
 

@@ -10,10 +10,12 @@ ALTER TABLE u_funktion2stelle ENGINE=InnoDB;
 
 ALTER TABLE `ddl2stelle` ADD CONSTRAINT `ddl2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+delete from `druckrahmen2stelle` where `stelle_id` not in (select ID from stelle);
 ALTER TABLE `druckrahmen2stelle` ADD CONSTRAINT `druckrahmen2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 ALTER TABLE `invitations` ADD CONSTRAINT `invitations_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+delete from `layer_attributes2stelle` where `stelle_id` not in (select ID from stelle);
 ALTER TABLE `layer_attributes2stelle` ADD CONSTRAINT `layer_attributes2stelle_ibfk_1` FOREIGN KEY (`stelle_id`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 delete from `stellen_hierarchie` where `parent_id` not in (select ID from stelle);
@@ -27,6 +29,8 @@ ALTER TABLE `stelle_gemeinden` ADD CONSTRAINT `stelle_gemeinden_ibfk_1` FOREIGN 
 delete from `used_layer` where `Stelle_ID` not in (select ID from stelle);
 ALTER TABLE `used_layer` ADD CONSTRAINT `used_layer_ibfk_1` FOREIGN KEY (`Stelle_ID`) REFERENCES `stelle`(`ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
+
+DELETE FROM `u_attributfilter2used_layer` WHERE concat(`Stelle_ID`, '_', `Layer_ID`) NOT in (select concat(`Stelle_ID`, '_', `Layer_ID`) from used_layer);
 ALTER TABLE `u_attributfilter2used_layer` ADD CONSTRAINT `u_attributfilter2used_layer_ibfk_1` FOREIGN KEY (`Stelle_ID`, `Layer_ID`) REFERENCES `used_layer`(`Stelle_ID`, `Layer_ID`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 delete from `u_funktion2stelle` where stelle_id not in (select ID from stelle);

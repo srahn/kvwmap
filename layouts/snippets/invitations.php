@@ -3,7 +3,7 @@
 ?>
 <script>
 	function invitation_delete(id) {
-		Check = confirm('Einladung wirklick löschen?');
+		Check = confirm('Einladung wirklich löschen?');
 		if (Check == true) {
 			$.ajax({
 				url: 'index.php',

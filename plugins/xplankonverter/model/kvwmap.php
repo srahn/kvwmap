@@ -363,12 +363,17 @@
 		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
+      $msg = 'Zusammenzeichnung';
 		}
 
-		$result_einzelfassungen = $konvertierung->xplanvalidator($tmp_dir . 'Einzelfassungen.gml');
-		if (!$result_einzelfassungen['success']) {
-			return $result_einzelfassungen;
-		}
+		if (file_exists($tmp_dir . 'Einzelfassungen.gml')) {
+      $result_einzelfassungen = $konvertierung->xplanvalidator($tmp_dir . 'Einzelfassungen.gml');
+      if (!$result_einzelfassungen['success']) {
+        return $result_einzelfassungen;
+      }
+      $msg .= ' und Einzelfassung';
+    }
+    $msg .= ' valide.';
 
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
@@ -392,8 +397,9 @@
 		# Der Validierungsreport der Einzelfassungen wird nicht gespeichert, weil es nur einen pro Konvertierung geben kann und für die Einzelfassungen
 		# auch nichts weiter interessantes drin stehen dürfte, weil ja keine Fachdaten drin sind.
 		#$result = $konvertierung->save_validation_report('Einzelfassungen', $result_einzelfassungen['report']);
-
-		$msg = 'Zusammenzeichnung und Einzelfassungen sind valide.';
+    if (!$result['success']) {
+      return $result;
+    }
 
 		return array(
 			'success' => true,
@@ -446,7 +452,6 @@
 		$planartkuerzel = $GUI->formvars['planart'][0];
 
 		$GUI->ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
-
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
@@ -455,7 +460,8 @@
 		$GUI->map->set('name', 'Flaechennutzungsplaene Niedersachsen');
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
     $GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-		$GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
+    $GUI->map->setMetaData("ows_abstract", 'Zusammenzeichnungen und Geltungsbereiche der Flächennutzungspläne der Kommunen des Landes Niedersachsen. Letzte Aktualisierung: ' . date('d.m.Y'));
+    $GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
 		$GUI->map->setMetaData("ows_service_onlineresource", $GUI->ows_onlineresource);
 		$GUI->map->web->set('header', 'templates/header.html');
 
@@ -536,8 +542,45 @@
 			'metaDataDownload' => $metaDataCreator->createMetaDataDownload(),
 			'metaDataView' =>  $metaDataCreator->createMetaDataView()
 		);
+	};
+
+  $GUI->xplankonverter_remove_failed_konvertierungen = function() use ($GUI) {
+    $zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
+    foreach($zusammenzeichnungen['faulty'] AS $faulty_zusammenzeichnung) {
+      $faulty_zusammenzeichnung->destroy();
+    }
+    return array(
+      'success' => true,
+      'msg' => 'Fehlerhafte Konvertierungen gelöscht.'
+    );
+  };
+
+	# ToDo pk: Adresse to_email und cc_email von peter.korduan... auf richtige ändern und mit Betroffenen testen
+	$GUI->xplankonverter_send_notification = function($msg) use ($GUI) {
+		$from_name = 'XPlan-Server PlanDigital';
+		$from_email = 'info@testportal-plandigital.de';
+#		$to_email = 'petra.wilken-janssen@arl-we.niedersachsen.de';
+		$to_email = 'peter.korduan@gdi-service.de';
+#		$cc_email = 'peter.korduan@gdi-service.de';
+		$reply_email = null;
+		$subject = 'Fehler in Plandigital';
+		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";
+		$message .= $msg . "\r\n";
+		$attachment = '';
+		$mode = 'sendEmail async';
+		$smtp_server = 'smtp.ionos.de';
+		$smtp_port = '587';
+		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
+			return array(
+				'success' => true,
+				'msg' => 'Benachrichtigung versendet.'
+			);
+		}
+		else {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Versenden der E-Mail zum Update der Zusammenzeichnung!'
+			);
+		}
 	}
-
-
-
 ?>
