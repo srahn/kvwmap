@@ -257,7 +257,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -550,7 +550,7 @@ class ALKIS {
 							if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 							if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 							if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 							if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['lagebezeichnung']){
@@ -818,7 +818,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -1093,7 +1093,7 @@ class ALKIS {
       if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
       if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
       if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 			if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 			if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
       if($formvars['lagebezeichnung']){
