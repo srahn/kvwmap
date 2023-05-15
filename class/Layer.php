@@ -601,7 +601,7 @@ LIMIT 100
 		include_once(CLASSPATH . 'DataType.php');
 		include_once(CLASSPATH . 'CodeList.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
-		$msg = 'get_generic_data_sql';
+		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
 		$sql = "
 			SELECT
 				attr.table_schema,

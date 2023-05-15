@@ -64,7 +64,6 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_shapefile_loeschen
 * xplankonverter_shapefiles_index
 * xplankonverter_show_geltungsbereich_upload
-* xplankonverter_update_full_services
 * xplankonverter_upload_geltungsbereich
 * xplankonverter_upload_xplan_gml
 * xplankonverter_upload_zusammenzeichnung
@@ -211,11 +210,45 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $file;
 	}
 
-	function send_error($msg) {
+	function send_error($msg, $send_notification = true, $create_ticket = true) {
+		global $GUI;
+		$msg_zusatz = '';
+
+		if ($create_ticket) {
+			# Erzeuge ein neues Ticket der Kategorie Fehler mit Auftragsart Fehlerkorrektur.
+			$pgObj = new PgObject($GUI, 'feedback', 'tickets');
+			$ticket_id = $pgObj->create(array(
+				'titel' => 'Fehler beim Upload einer Zusammenzeichnung in Stelle ' . $GUI->Stelle->id,
+				'anfrage' => 'Beim Hochladen der Zusammenzeichnung ' . ($GUI->konvertierung ? $GUI->konvertierung->get('bezeichnung') : '') . ($GUI->konvertierung ? ' id: ' . $GUI->konvertierung->get_id() : '') . " ist ein Fehler aufgetreten.\n" . pg_escape_string($msg) . $msg_zusatz,
+				'kategorie_id' => 3, # Planuploadfehler
+				'status_id' => 1, # erstellt
+				'dringlichkeit' => 3, # dringlich
+				'created_at' => date('Y-m-d'), # current date
+				'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name, # angemeldeter Nutzer
+				'auftragsart_id' => 5, # Fehlerkorrektur
+				'verantwortlich_id' => 5, # Support GDI-Service
+				'stelle_id' => $GUI->Stelle->id
+			));
+
+			$ticket = $pgObj->find_by('id', $ticket_id);
+			$msg_zusatz .= "\n\nEs wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Sie werden über den Stand der Behebung informiert.";
+		}
+
+		if ($send_notification) {
+			# if konvertierung vorhanden
+			if ($GUI->konvertierung) {
+				$result = $GUI->konvertierung->send_notification('Beim Hochladen der Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . " ist ein Fehler aufgetreten.\n" . $msg . $msg_zusatz);
+			}
+			else {
+				$result = $GUI->xplankonverter_send_notification('Beim Anwendungsfall ' . $GUI->go . " ist ein Fehler aufgetreten.\n" . $msg . $msg_zusatz);
+			}
+			$msg_zusatz .= "\n\nDie Mitarbeiter des ARL und der Administrator des PlanDigital-Portals wurden darüber per E-Mail informiert.";
+		}
+
 		header('Content-Type: application/json');
 		echo json_encode(array(
 			'success' => false,
-			'msg' => $msg
+			'msg' => $msg . '<br>' . $result['msg']
 		));
 	}
 
@@ -830,15 +863,20 @@ function go_switch_xplankonverter($go) {
 					$GUI->output(); break;
 				}
 				else {
-					$GUI->konvertierung->reset_mapping();
-					$GUI->konvertierung->mapping();
-	#				$GUI->konvertierung->set_historie();
-					$GUI->konvertierung->set_status(
-						($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
-					);
-
-					# Validierungsergebnisse anzeigen.
-					$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+					try {
+						$GUI->konvertierung->reset_mapping();
+						$GUI->konvertierung->mapping();
+						#$GUI->konvertierung->set_historie();
+						$GUI->konvertierung->set_status(
+							($GUI->konvertierung->validierung_erfolgreich() ? 'Konvertierung abgeschlossen' : 'Konvertierung abgebrochen')
+						);
+						# Validierungsergebnisse anzeigen.
+						$GUI->main = '../../plugins/xplankonverter/view/validierungsergebnisse.php';
+					}
+					catch (Exception $e) {
+						send_error($e);
+						break;
+					}
 				}
 			}
 			if ($GUI->formvars['format'] === 'json_result') {
@@ -850,10 +888,8 @@ function go_switch_xplankonverter($go) {
 					);
 				}
 				else {
-					$response = array(
-						'success' => false,
-						'msg' => 'Die Validierung war nicht erfolgreich. Validierungsergebnisse <a href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + $GUI->formvars['konvertierung_id'] + '">anzeigen</a>'
-					);
+					send_error('Die Validierung war nicht erfolgreich. Validierungsergebnisse <a href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' . $GUI->formvars['konvertierung_id'] . '">anzeigen</a>');
+					break;
 				}
 				echo json_encode($response);
 			}
@@ -885,10 +921,15 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-			Erzeugt eine Map-Datei im Verzeichnis der Stelle der Konvertierung mit XPlan-Layer der Konvertierung die Geometrie haben
-			und Template-Datein für GetFeatureInfo-Requests
+		* Erzeugt die Map-Datei für die Dienste eines einzelnen Planes oder für
+		* den Geodatensatz, Darstellungs- und Downloaddienst, der alle Pläne enthält
+		* je nach dem ob eine Konvertierung-ID übergeben wurde oder nicht
 		*/
 		case 'xplankonverter_create_geoweb_service' : {
+			$GUI->data = array(
+				'success' => true,
+				'msg' => 'Landesdienst erfolgreich angelegt.'
+			);
 			$GUI->sanitize([
 				'konvertierung_id' => 'int'
 			]);
@@ -904,7 +945,12 @@ function go_switch_xplankonverter($go) {
 				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
 				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers);
 				if (! $result['success']) {
-					$GUI->add_message('error', 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg']);
+					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $msg
+					);
+					$GUI->add_message('error', $msg);
 				}
 				else {
 					$mapfile = $result['mapfile'];
@@ -924,8 +970,12 @@ function go_switch_xplankonverter($go) {
 						MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/zusammenzeichnung.map" exec ${MAPSERV}');
 						}
 					} catch (Exception $ex) {
-						send_error("Fehler beim Speichern der Map-Datei für den Dienst. " . $ex);
-						break;
+						$msg = 'Fehler beim Speichern der Map-Datei für den Dienst. ' . $ex;
+						$GUI->data = array(
+							'success' => false,
+							'msg' => $msg
+						);
+						$GUI->add_message('error', $msg);
 					}
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
@@ -1459,6 +1509,15 @@ function go_switch_xplankonverter($go) {
 			- Löschen der alten Zusammenzeichnung
 			- Kennzeichnung der neuen Zusammenzeichnung als nun aktuell
 		*/
+		# ToDo pk:
+		# - E-Mail Versand umstellen auf ARL
+		# + Prüfen ob die Landesdienst-Metadaten geupdated sind.
+		# + Prüfen ob die Metadaten geupdated sind
+		# + Metadatendokument mit in die Ältere Version zip-Datei packen.
+		# + Bei Erfolg fehlgeschlagene Upload-Versuche löschen.
+		# + xplan-gml Datei als Download Link in Metadaten über Geodatensatz mit einbauen
+		# + URL zu UVP Portal als Zugangsinfo mit in Metadaten einbauen und als Attribut in Geltungsbereiche Layer und Template
+		# + Video für Upload
 		case 'xplankonverter_replace_zusammenzeichnung' : {
 			header('Content-Type: application/json');
 
@@ -1467,10 +1526,6 @@ function go_switch_xplankonverter($go) {
 				send_error('Fehler beim Erzeugen der Metadaten!<p>Es muss eine Konvertierung-ID angegeben werden!');
 				break;
 			}
-
-			$GUI->sanitize([
-				'konvertierung_id' => 'int'
-			]);
 
 			if ($GUI->xplankonverter_is_case_forbidden()) {
 				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
@@ -1482,9 +1537,13 @@ function go_switch_xplankonverter($go) {
 			}
 
 			$new_konvertierung = $GUI->konvertierung;
+			$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen(
+				$GUI,
+				$GUI->konvertierung->get('planart'),
+				$GUI->konvertierung->plan_class,
+				$GUI->konvertierung->plan_attribut_aktualitaet
+			);
 
-			# ToDo pk: Die published Zusammenzeichnung über das Attribut veroeffentlicht suchen.
-			$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->konvertierung->get('planart'), $GUI->konvertierung->plan_class, $GUI->konvertierung->plan_attribut_aktualitaet);
 			if (count($zusammenzeichnungen['published']) == 0) {
 				$response = array(
 					'success' => true,
@@ -1501,21 +1560,37 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true'));
+			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->plan->get($new_konvertierung->plan_attribut_aktualitaet) . "'"));
 			if (!$result['success']) {
 				send_error($result['msg']);
 				break;
 			}
 
-			$result = $zusammenzeichnung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden");
-			if (!result['success']) {
+      $result = $GUI->xplankonverter_remove_failed_konvertierungen();
+      if (!$result['success']) {
+        send_error($result['msg']);
+        break;
+      }
+
+			/*
+			Sehr geehrte Damen und Herren,
+
+auf der Plattform PlanDigital sind heute Daten (Zip-Datei) zum FNP <  Gemei=
+ndename > hochgeladen worden.
+
+
+Mit freundlichem Gru=DF
+GDI-Service Rostock
+*/
+			$result = $new_konvertierung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden.\n\nDiese E-Mail ist vom Portal https://testportal-plandigital.de/kvwmap versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan\n\nIhr Team von PlanDigital");
+			if (!$result['success']) {
 				send_error($result['msg']);
 				break;
 			}
 
 			$response = array(
 				'success' => true,
-				'msg' => 'Zusammenzeichnung erfolgreich ausgetauscht.'
+				'msg' => 'Zusammenzeichnung erfolgreich ausgetauscht und ' . $result['msg']
 			);
 			echo json_encode($response);
 		} break;
@@ -1539,7 +1614,12 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_download_uploaded_xplan_gml' : {
-			if ($GUI->xplankonverter_is_case_forbidden()) return;
+      if ($GUI->formvars['konvertierung_id'] == '') {
+        send_error('Sie müssen eine Konvertierung-ID iim Parameter konvertierueng_id angeben!');
+        return;
+      }
+      $GUI->sanitize(array('konvertierung_id' => 'int'));
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
 
 			if (!$GUI->konvertierung->download_files_exists('uploaded_xplan_gml')) {
 				$GUI->add_message('warning', 'Die Dateien sind nicht auf dem Server oder an der falschen Stelle.');
@@ -1576,7 +1656,9 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_download_edited_shapes' : {
-			if ($GUI->xplankonverter_is_case_forbidden()) return;
+			if ($GUI->xplankonverter_is_case_forbidden()) {
+				return;
+			}
 
 			$GUI->konvertierung->create_edited_shapes();
 			if (!$GUI->konvertierung->download_files_exists('edited_shapes')) {
@@ -1610,13 +1692,16 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_download_xplan_shapes' : {
-			if ($GUI->xplankonverter_is_case_forbidden()) return;
+			if ($GUI->xplankonverter_is_case_forbidden()) {
+				return;
+			}
 
 			$GUI->konvertierung->create_xplan_shapes();
 
 			if (!$GUI->konvertierung->download_files_exists('xplan_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				$GUI->plan_layer_id = $GUI->konvertierung->plan_layer_id;
+				$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 				$GUI->output();
 				return;
 			}
@@ -1735,38 +1820,6 @@ function go_switch_xplankonverter($go) {
 			include('plugins/xplankonverter/view/upload_geltungsbereich.php');
 		} break;
 
-		case 'xplankonverter_update_full_services' : {
-			header('Content-Type: application/json');
-
-			$konvertierung_id = $GUI->formvars['konvertierung_id'];
-			if ($konvertierung_id == '') {
-				send_error('Es muss eine Konvertierung-ID angegeben werden!');
-				break;
-			}
-
-			if ($GUI->xplankonverter_is_case_forbidden()) {
-				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
-					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
-					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
-					Melden Sie sich mit einem anderen Benutzer an."
-				);
-				break;
-			}
-
-			$result = $GUI->xplankonverter_update_full_services();
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
-			}
-
-			$response = array(
-				'success' => true,
-				'msg' => 'Aktualisierung der Landesdienste erfolgreich.'
-			);
-			echo json_encode($response);
-			return;
-		} break;
-
 		case 'xplankonverter_upload_geltungsbereich' : {
 			$upload_file = $_FILES['shape_file'];
 			$zip_file = IMAGEPATH . $upload_file['name'];
@@ -1806,25 +1859,25 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-			Schritt 1:	In xplankonverter_upload_xplan_gml wird view upload_xplan_gml ausgeliefert. Der enthält ein Formular zum hochladen der gml oder zip Datei.
-			Schritt 2:	Der Ajax-Aufruf im Formular ruft nochmal den case xplankonverter_upload_xplan_gml auf, aber dieses mal mit einem upload_file
-									Das wird in XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() zwischengespeichert und wenn es ein Zip-File ist
-									im Unterverzeichnis zip/ ausgepackt und die externen referenzen in das document_path des Layers mit random_number als Postfix verschoben.
-									Die Namen der gml und referenz-Dateien werden per json an das upload_xplan_gml Formular zurückgeliefert und dort angezeigt.
-									Dort klickt der Anwender auf den Button zum Übernehmen der Daten in das Plan-Formular
-			Schritt 3:	Der View upload_xplan_gml ruft den case xplankonverter_extract_gml_to_form auf mit dem gml_file und der random_number als parameter.
-									Darin wird die Methode extract_gml_class der Klasse gml_extractor ausgeführt, die folgendes macht:
-									- GML-Datei in das gmlastmp Schema schreiben mit ogr2ogr_gmlas
-									- Hier wurde der Sonderfall eingeführt wenn in dem XPlanGML mehrere Pläne sind.
-										- In dem Fall wird dem Nutzer nicht das eine Formular mit den Daten des ersten Plans angezeigt, sondern eine Auswahl gestellt:
-											- Ersten Plan in das Formular übernehmen weiter mit Schritt 4
-											- Alle Pläne aus dem XPlanGML-Dokument automatisch in den XPlankonverter aufnehmen => Anzeige der Pläne der Stelle
-										- Wenn es nur ein Plan ist oder nur der erste Plan genommen werden soll formularvariablen mit dem was in GML-Datei steht belegen
-											außer bei externereferenz. Da wird die document_url + doc_file + random_number eingetragen und Vorschaubilder erzeugt.
-			Schritt 4:	Speichern des Formulars. Dabei wird der Plandatensatz angelegt und der Trigger handle_xp_plan ausgeführt in dem:
-									- der temporäre Schemaname xplan_gmlas_tmp_$konvertierung_id in xplan_gmlas_$konvertierung_id umbenannt wird
-									- Bereiche und Regeln erzeugt werden
-									- Verschieben der xplan_gml-Datei von 'tmp/' . session_id() nach $konvertierung_id . '/uploaded_xplan_gml/'
+		*	Schritt 1:	In xplankonverter_upload_xplan_gml wird view upload_xplan_gml ausgeliefert. Der enthält ein Formular zum hochladen der gml oder zip Datei.
+		*	Schritt 2:	Der Ajax-Aufruf im Formular ruft nochmal den case xplankonverter_upload_xplan_gml auf, aber dieses mal mit einem upload_file
+		*							Das wird in XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() zwischengespeichert und wenn es ein Zip-File ist
+		*							im Unterverzeichnis zip/ ausgepackt und die externen referenzen in das document_path des Layers mit random_number als Postfix verschoben.
+		*							Die Namen der gml und referenz-Dateien werden per json an das upload_xplan_gml Formular zurückgeliefert und dort angezeigt.
+		*							Dort klickt der Anwender auf den Button zum Übernehmen der Daten in das Plan-Formular
+		*	Schritt 3:	Der View upload_xplan_gml ruft den case xplankonverter_extract_gml_to_form auf mit dem gml_file und der random_number als parameter.
+		*							Darin wird die Methode extract_gml_class der Klasse gml_extractor ausgeführt, die folgendes macht:
+		*							- GML-Datei in das gmlastmp Schema schreiben mit ogr2ogr_gmlas
+		*							- Hier wurde der Sonderfall eingeführt wenn in dem XPlanGML mehrere Pläne sind.
+		*								- In dem Fall wird dem Nutzer nicht das eine Formular mit den Daten des ersten Plans angezeigt, sondern eine Auswahl gestellt:
+		*									- Ersten Plan in das Formular übernehmen weiter mit Schritt 4
+		*									- Alle Pläne aus dem XPlanGML-Dokument automatisch in den XPlankonverter aufnehmen => Anzeige der Pläne der Stelle
+		*								- Wenn es nur ein Plan ist oder nur der erste Plan genommen werden soll formularvariablen mit dem was in GML-Datei steht belegen
+		*									außer bei externereferenz. Da wird die document_url + doc_file + random_number eingetragen und Vorschaubilder erzeugt.
+		*	Schritt 4:	Speichern des Formulars. Dabei wird der Plandatensatz angelegt und der Trigger handle_xp_plan ausgeführt in dem:
+		*							- der temporäre Schemaname xplan_gmlas_tmp_$konvertierung_id in xplan_gmlas_$konvertierung_id umbenannt wird
+		*							- Bereiche und Regeln erzeugt werden
+		*							- Verschieben der xplan_gml-Datei von 'tmp/' . session_id() nach $konvertierung_id . '/uploaded_xplan_gml/'
 		*/
 		case 'xplankonverter_upload_xplan_gml' : {
 			$GUI->check_csrf_token();
@@ -1843,7 +1896,7 @@ function go_switch_xplankonverter($go) {
 				$upload_file = $_FILES['gml_file'];
 				if ($upload_file['name'] != '') {
 					# TODO check $_FILES['userfile']['size'] == eg less than 100 MB else abort and message that the file has to be converted piecemail or by an administrator
-					# Die Dateien kommer erstmal nach tmp, weil es ja noch keine Konvertierungs Id gibt (zumindest nicht beim neu Anlegen von Plänen)
+					# Die Dateien kommen erstmal nach tmp, weil es noch keine Konvertierung-ID gibt (zumindest nicht beim neu Anlegen von Plänen)
 					$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
 					if (!is_dir($upload_dir)) {
 						mkdir($upload_dir, 0777, true);
@@ -1945,7 +1998,7 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-			Upload einer Zusammenzeichnung und Abarbeitung der Schritte der Validierung, Plananlegen, Konvertierung und XPlanGML-Erzeugen
+		*	Upload einer Zusammenzeichnung und Abarbeitung der Schritte der Validierung, Plananlegen, Konvertierung und XPlanGML-Erzeugen
 		*/
 
 		case 'xplankonverter_upload_zusammenzeichnung' : {
@@ -1956,7 +2009,7 @@ function go_switch_xplankonverter($go) {
 
 			$result = $GUI->xplankonverter_validate_uploaded_zusammenzeichnungen($upload_file, $tmp_dir);
 			if (! $result['success']) {
-				send_error('Fehler beim Hochladen der Zusammenzeichnung!<p>' . $result['msg']);
+				send_error('Fehler beim Hochladen der Zusammenzeichnung!<p>' . $result['msg'], false, false);
 				if (strpos($tmp_dir, XPLANKONVERTER_FILE_PATH . 'tmp/zusammenzeichnung_') !== false AND file_exists($tmp_dir)) {
 					exec('rm -R ' . $tmp_dir);
 				}
@@ -1968,7 +2021,7 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-		* Importiert die Zusammenzeichnung und die Geltungsbereiche von konvertierung_id in die Datenbank
+		* Importiert die Zusammenzeichnung und falls vorhanden die Geltungsbereiche von konvertierung_id in die Datenbank
 		* es muss formvar konvertierung_id angegeben sein
 		* mit formvar xplan_gml_path = 'reindeded_xplan_gml wird die Zusammenzeichnung mit den geänderten gml_id's eingelesen
 		* Beispiel:
@@ -1986,6 +2039,7 @@ function go_switch_xplankonverter($go) {
 				send_error('Fehler beim Importieren der Zusammenzeichnung!<p>Keine Konvertierung-ID angegeben.');
 				break;
 			}
+
 			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
 			if ($GUI->konvertierung->get('id') == '') {
 				send_error("Die Konvertierung mit id: ${konvertierung_id} konnte in der Datenbank nicht gefunden werden.");
@@ -2005,27 +2059,67 @@ function go_switch_xplankonverter($go) {
 			$file_zusammenzeichnung = $GUI->konvertierung->get_file_path($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml' ? 'reindexed_xplan_gml' : 'uploaded_xplan_gml') . 'Zusammenzeichnung.gml';
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_zusammenzeichnung, 'xplan_gmlas_tmp_' . $GUI->user->id);
 
-			$result = $gml_extractor->import_gml_to_db();
+			$import_result = $gml_extractor->import_gml_to_db();
 
-			if (! $result['success']) {
+			if (! $import_result['success']) {
 				$GUI->konvertierung->set('error_id', 1);
 				$GUI->konvertierung->update();
-				$response = array(
-					'success' => false,
-					'msg' => 'Fehler beim Einlesen der Datei in die Datenbank mit ogr2ogr_gmlas. Fehler: ' . $result['msg']
-				);
-				echo json_encode($response);
+				send_error('Fehler beim Einlesen der Datei in die Datenbank mit ogr2ogr_gmlas. Fehler: ' . $import_result['msg']);
+				break;
+			}
+
+			$result = $GUI->konvertierung->get_num_gmlas_tmp_plaene();
+			if (!$result['success']) {
+				send_error($result['msg']);
+				break;
+			}
+
+			if ($result['num_plaene'] == 0) {
+				send_error('Fehler beim Einlesen der Datei in die Datenbank. Es wurden keine Pläne importiert. Importbefehl: ' . $import_result['url']);
 				break;
 			}
 
 			if ($GUI->konvertierung->plan_exists('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class)) {
-				$response = array(
-					'success' => false,
-					'msg' => 'Warnung: Der Plan in der hochgeladene Datei ' . $file_zusammenzeichnung . ' enthält eine gml_id, die schon im System vorhanden ist.'
-				);
-				echo json_encode($response);
 				$GUI->konvertierung->set('error_id', 2);
 				$GUI->konvertierung->update();
+				send_error('Warnung: Der Plan in der hochgeladene Datei ' . $file_zusammenzeichnung . ' enthält eine gml_id, die schon im System vorhanden ist.');
+				break;
+			}
+
+			$response = array(
+				'success' => true,
+				'msg' => 'Import der Zusammenzeichnung erfolgreich abgeschlossen.',
+				'konvertierung_id' => $konvertierung_id
+			);
+
+			echo json_encode($response);
+		} break;
+
+		case 'xplankonverter_create_plaene' : {
+			header('Content-Type: application/json');
+			$success = false;
+			$msg = [];
+
+			$konvertierung_id = $GUI->formvars['konvertierung_id'];
+
+			# Prüfen ob konvertierung_id angegeben wurde und der upload in der Stelle erlaubt ist
+			if ($konvertierung_id == '') {
+				send_error('Fehler beim Erzeugen der Pläne der Zusammenzeichnung!<p>Keine Konvertierung-ID angegeben.');
+				break;
+			}
+
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+			if ($GUI->konvertierung->get('id') == '') {
+				send_error("Die Konvertierung mit id: ${konvertierung_id} konnte in der Datenbank nicht gefunden werden.");
+				break;
+			}
+
+			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an."
+				);
 				break;
 			}
 
@@ -2035,62 +2129,68 @@ function go_switch_xplankonverter($go) {
 #			}
 
 			# Anlegen von Plan und Bereich der Zusammenzeichnung
-			$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $konvertierung_id);
+			$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $konvertierung_id, true);
 			if (! $result['success']) {
-				$response = array(
-					'success' => false,
-					'msg' => 'Fehler beim Anlegen des Planes in der Datenbank. Fehler: ' . $result['msg']
-				);
-				echo json_encode($response);
 				$GUI->konvertierung->set('error_id', 3);
 				$GUI->konvertierung->update();
+        send_error('Fehler beim Anlegen des Planes in der Datenbank. Fehler: ' . $result['msg']);
+				break;
+			}
+
+			$GUI->konvertierung->get_plan();
+			if ($GUI->konvertierung->plan === false) {
+				$GUI->konvertierung->set('error_id', 3);
+				$GUI->konvertierung->update();
+				send_error('Nach dem Einlesen des Planes mit GMLAS konnte dieser nicht gefunden werden. ' . $import_result['msg']);
+				break;
+			}
+
+			if ($GUI->konvertierung->plan->get($GUI->plan_attribut_aktualitaet) == '') {
+				$GUI->konvertierung->set('error_id', 6);
+				$GUI->konvertierung->update();
+				send_error('Der Plan hat kein Wirksamkeitsdatum. Das muss im XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden.');
 				break;
 			}
 
 			# Setze den Plan für das Konvertierungsobjekt
-			$GUI->konvertierung->get_plan();
+      # Die Konvertierung hat hier noch gar keinen Plan.
+			#$GUI->konvertierung->get_plan();
 
 			# Übername der Plandaten in permanentes Schema xplan_gmlas_$konvertierung_id
 			$result = $GUI->konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
 			if (! $result['success']) {
-				$response = array(
-					'success' => false,
-					'msg' => 'Fehler beim Umbennen des Import-Schemas xplan_gmlas_tmp_' . $GUI->user->id . ' nach xplan_gmlas_' . $konvertierung_id . ' Fehler: ' . $result['msg']
-				);
-				echo json_encode($response);
 				$GUI->konvertierung->set('error_id', 4);
 				$GUI->konvertierung->update();
+        send_error('Fehler beim Umbennen des Import-Schemas xplan_gmlas_tmp_' . $GUI->user->id . ' nach xplan_gmlas_' . $konvertierung_id . ' Fehler: ' . $result['msg']);
 				break;
 			}
 
+			$gml_extractor = new Gml_extractor($GUI->pgdatabase, '', 'xplan_gmlas_tmp_' . $GUI->user->id);
 			$gml_extractor->gmlas_schema = 'xplan_gmlas_' . $GUI->konvertierung->get_id();
 			$GUI->konvertierung->insert_textabschnitte($gml_extractor);
 			$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $GUI->Stelle->id);
+      $msg = 'Zusammenzeichnung';
 
-
-			# Importiert die Datei der zuletzt hochgeladenen Geltungsbereiche
 			$file_geltungsbereiche = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . 'Einzelfassungen.gml';
-			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_zusammenzeichnung, 'xplan_gmlas_tmp_' . $GUI->user->id);
-			$result = $gml_extractor->import_gml_to_db();
+      if (file_exists($file_geltungsbereiche)) {
+  			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_geltungsbereiche, 'xplan_gmlas_tmp_' . $GUI->user->id);
+  			$result = $gml_extractor->import_gml_to_db();
 
-			# Übernahme der Geltungsbereiche in die Zieltabelle
-			$result = $GUI->konvertierung->insert_geltungsbereiche($gml_extractor);
-			if (! $result['success']) {
-				$response = array(
-					'success' => false,
-					'msg' => 'Fehler beim Einlesen der Geltungsbereiche der Einzelfassungen. Fehler: ' . $result['msg'] . ' sql: ' . $result['sql']
-				);
-				echo json_encode($response);
-				$GUI->konvertierung->set('error_id', 5);
-				$GUI->konvertierung->update();
-				break;
-			}
+	  		# Übernahme der Geltungsbereiche in die Zieltabelle
+		  	$result = $GUI->konvertierung->insert_geltungsbereiche($gml_extractor);
+        if (! $result['success']) {
+          $GUI->konvertierung->set('error_id', 5);
+          $GUI->konvertierung->update();
+          send_error('Fehler beim Einlesen der Geltungsbereiche der Einzelfassungen. Fehler: ' . $result['msg'] . ' sql: ' . $result['sql']);
+          break;
+        }
+        $msg .= ' und Geltungsbereiche';
+      }
 
 			$response = array(
 				'success' => true,
-				'msg' => 'Einlesen der Zusammenzeichnung und Geltungsbereiche erfolgreich abgeschlossen.',
-				'konvertierung_id' => $konvertierung_id,
-				'plan_gml_id' => $GUI->konvertierung->plan->get_id()
+				'msg' => 'Einlesen der ' . $msg . ' erfolgreich abgeschlossen.',
+				'konvertierung_id' => $konvertierung_id
 			);
 
 			echo json_encode($response);

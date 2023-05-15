@@ -6,7 +6,36 @@ class MetaDataCreator {
 
 		$this->wfs_link = $md->get('onlineresource') . 'Service=WFS&amp;Request=GetCapabilities';
 		$this->wms_link = $md->get('onlineresource') . 'Service=WMS&amp;Request=GetCapabilities';
-	}
+
+    $this->download_transfer_option = $this->get_transfer_option('download');
+    $this->search_transfer_option = $this->get_transfer_option('search');
+  }
+
+  function get_transfer_option($online_function_code) {
+    if (array_key_exists($online_function_code . '_url', $this->md->data) AND $this->md->get($online_function_code . '_url') != '') {
+      return "
+    <gmd:transferOptions>
+      <gmd:MD_DigitalTransferOptions>
+        <gmd:onLine>
+          <gmd:CI_OnlineResource>
+            <gmd:linkage>
+              <gmd:URL>" . $this->md->get($online_function_code . '_url') . "</gmd:URL>
+            </gmd:linkage>
+            <gmd:name>
+              <gco:CharacterString>" . $this->md->get($online_function_code . '_name') . "</gco:CharacterString>
+            </gmd:name>
+            <gmd:function>
+              <gmd:CI_OnLineFunctionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_OnLineFunctionCode\" codeListValue=\"information\">" . $online_function_code . "</gmd:CI_OnLineFunctionCode>
+            </gmd:function>
+          </gmd:CI_OnlineResource>
+        </gmd:onLine>
+      </gmd:MD_DigitalTransferOptions>
+    </gmd:transferOptions>";
+    }
+    else {
+      return '';
+    }
+  }
 
 	function getReferenzSysteme() {
 		$sb = "
@@ -149,7 +178,7 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Featuretyp pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
+				<gco:CharacterString>Downloaddienst (WFS)" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -279,7 +308,7 @@ class MetaDataCreator {
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
@@ -384,7 +413,7 @@ class MetaDataCreator {
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>" . $this->md->get('stellendaten')['ows_abstract'] . " Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.</gco:CharacterString>
+				<gco:CharacterString>Darstellungsdienst (WMS)" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -514,7 +543,7 @@ class MetaDataCreator {
 					</srv:connectPoint>
 				</srv:SV_OperationMetadata>
 			</srv:containsOperations>
-			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
+			<srv:operatesOn uuidref=\"" . $this->md->get('uuids')['metadata_dataset_uuid'] . "\" xlink:href=\"" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true\"/>
 		</srv:SV_ServiceIdentification>
 	</gmd:identificationInfo>
 	<gmd:dataQualityInfo xmlns:geonet=\"http://www.fao.org/geonetwork\">
@@ -621,14 +650,14 @@ class MetaDataCreator {
 							<gmd:MD_Identifier>
 								<gmd:code>
 									<gco:CharacterString>
-									https://mis.testportal-plandigital.de/geonetwork/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
+									" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
 					</gmd:CI_Citation>
 				</gmd:citation>
 				<gmd:abstract>
-					<gco:CharacterString>Geodatensatz des Plans " . $this->md->get('id_cite_title') . ". Es handelt sich um die Zusammenzeichnung von Planelementen mit Featuretypen pro XPlanung-Klasse. Das " . ucfirst($this->md->get('date_title')) . " der letzten Änderung ist der " . $this->md->get('date_de') . ". Die Umringe der Änderungspläne sind im FeatureType Geltungsbereiche zusammengefasst.</gco:CharacterString>
+					<gco:CharacterString>Geodatensatz " . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 				</gmd:abstract>
 				<gmd:pointOfContact>
 					" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -760,8 +789,10 @@ class MetaDataCreator {
 							<gco:CharacterString>3.2</gco:CharacterString>
 						</gmd:version>
 					</gmd:MD_Format>
-				</gmd:distributionFormat>
-				<gmd:transferOptions>
+				</gmd:distributionFormat>" .
+        $this->download_transfer_option .
+        $this->search_transfer_option . "
+        <gmd:transferOptions>
 					<gmd:MD_DigitalTransferOptions>
 						<gmd:onLine>
 							<gmd:CI_OnlineResource>
