@@ -410,6 +410,7 @@ FROM
 			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
+        $ret['sql'] = $sql;
 				# erzeuge eine Fehlermeldung;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
@@ -422,11 +423,13 @@ FROM
 				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
 					# Parse als JSON String;
 					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
-					if (array_key_exists('msg_type', $error_obj)) {
-						$ret['type'] = $error_obj['msg_type'];
-					}
-					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
-						$ret['msg'] = $error_obj['msg'];
+					if ($error_obj) {
+						if (array_key_exists('msg_type', $error_obj)) {
+							$ret['type'] = $error_obj['msg_type'];
+						}
+						if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+							$ret['msg'] = $error_obj['msg'];
+						}
 					}
 				}
 				else {

@@ -15,7 +15,7 @@ class Gml_extractor {
 	}
 
 	/**
-		Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
+	* Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
 	*/
 	function import_gml_to_db() {
 		global $GUI;
@@ -26,16 +26,21 @@ class Gml_extractor {
 				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
 			);
 		}
-		$this->input_epsg  = $result['epsg'];
+		$this->input_epsg = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
+
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
 		$this->build_basic_tables();
-		$gmlas_output = $this->ogr2ogr_gmlas();
-		if ($gmlas_output == "Nothing returned from ogr2ogr curl request") {
-			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
-			return;
+		$result = $this->ogr2ogr_gmlas();
+		if (!$result['success']) {
+			if ($GUI->formvars['format'] != 'json_result') {
+				echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
+			}
+			return $result;
 		}
+			#ToDo pk: Hier prüfen ob mindestens ein Plan und ein dazugehöriger Bereich angelegt wurden.
+			
 		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
 
 		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
@@ -51,7 +56,8 @@ class Gml_extractor {
 		}
 		return array(
 			'success' => true,
-			'msg' => 'gmlas_output: ' . $gmlas_output
+			'msg' => 'ogr2ogr_gmlas output: ' . $result['msg'],
+			'url' => $result['url']
 		);
 	}
 
@@ -105,7 +111,7 @@ class Gml_extractor {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
-						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
 				}
@@ -230,7 +236,7 @@ class Gml_extractor {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
-						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
 				}
@@ -496,9 +502,9 @@ class Gml_extractor {
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
 		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
-		
+#		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES');
+
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
-		#echo 'url: ' . $url . '<br><br>';
 
 		$ch = curl_init();
 		#$url = curl_escape($ch, $url);
@@ -507,9 +513,14 @@ class Gml_extractor {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$output = curl_exec($ch);
 		curl_close($ch);
-		
-		#echo empty($output) ? "Nothing returned from ogr2ogr curl request" : $output;
-		return $output;
+
+		$success = strpos($output, 'ERROR') === false;
+		$result = json_decode($output);
+		return array(
+			'success' => $success,
+			'msg' => ($success ? $result->stdout : $result->err . $result->stderr),
+			'url' => str_replace($this->pgdatabase->get_credentials($this->pgdatabase->connection_id)['password'], 'secret', $url)
+		);
 	}
 
 	/*
@@ -2366,7 +2377,7 @@ class Gml_extractor {
 			WHERE
 				table_schema = '" . $schema . "' AND
 				table_name = '" . $class . "' AND
-        udt_name NOT LIKE 'geometry'
+				udt_name NOT LIKE 'geometry'
 			ORDER BY ordinal_position;
 		";
 		#echo '<br>' . $sql;

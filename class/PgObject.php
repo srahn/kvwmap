@@ -127,10 +127,11 @@ class PgObject {
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
 	*/
-	function find_where($where, $order = NULL, $select = '*') {
+	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
 		$select = (empty($select) ? $this->select : $select);
 		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
@@ -139,6 +140,7 @@ class PgObject {
 			WHERE
 				" . $where . "
 			" . $order . "
+			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -309,18 +311,56 @@ class PgObject {
 			},
 			$this->getValues()
 		);
-
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
 				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
-				"'" . implode("', '", $values) . "'
+				"'" . implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				) . "'
 			)
 			RETURNING
 				" . $this->identifier . ";
 		";
+		/*
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				$1
+			)
+			VALUES (
+				'$2'
+			)
+			RETURNING
+				$3
+		";
+		*/
 		$this->debug->show('Create new dataset with sql: ' . $sql, false);
+		#echo 'SQL zum Eintragen des Datensatzes: ' . $sql; exit;
+		/*
+		$query = pg_query_params(
+			$this->database->dbConn, $sql,
+			array(
+				implode(", ", $this->getKeys()),
+				implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				),
+				$this->identifier
+			)
+		);
+		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -389,7 +429,7 @@ class PgObject {
 	}
 
 	function update_attr($attributes) {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
