@@ -4479,7 +4479,7 @@ echo '			</table>
 									echo FormObject::createSelectField(
 										'style_linecap',
 										array(
-											array('value' => 'butt', 'output' => 'abgefacht'),
+											array('value' => 'butt', 'output' => 'abgeflacht'),
 											array('value' => 'round', 'output' => 'rund'),
 											array('value' => 'square', 'output' => 'eckig'),
 											array('value' => 'triangle', 'output' => 'dreieckig')
