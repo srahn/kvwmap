@@ -20,8 +20,22 @@ register_shutdown_function(function () {
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
-		http_response_code(500);
-		include_once('layouts/snippets/general_error_page.php');
+    if (
+        (array_key_exists('format', $_REQUEST) AND in_array(strtolower($_REQUEST['format']), array('json', 'json_result'))) OR
+        (array_key_exists('mime_type', $_REQUEST) AND strtolower($_REQUEST['mime_type']) == 'json') OR
+        (array_key_exists('content_type', $_REQUEST) AND strtolower($_REQUEST['content_type']) == 'application/json')
+    ) {
+      header('Content-Type: application/json');
+			$response = array(
+				'success' => false,
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+			);
+			echo json_encode($response);
+    }
+    else {
+  		http_response_code(500);
+	  	include_once('layouts/snippets/general_error_page.php');
+    }
 	}
 });
 
@@ -640,7 +654,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'get_generic_layer_data_sql' : {
-				if ($GUI->user->id != 2) {
+				if ($GUI->user->id != 3) {
 					$GUI->checkCaseAllowed($go);
 				}
 				$GUI->sanitize(['selected_layer_id' => 'int']);

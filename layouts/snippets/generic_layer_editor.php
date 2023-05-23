@@ -2,14 +2,27 @@
 
 	function toggleColumn(checkbox, layer_id, attribute_name){
 		var head = document.getElementById('column_' + layer_id + '_' + attribute_name);
-		var group = head.classList[0].split('_')[1];
+		var group = head.classList[1].split('_')[1];
 		if (document.getElementById(group)) {
 			if (checkbox.checked) {
-				document.getElementById(group).colSpan += 1;
+				document.getElementById(group).dataset.colspan = parseInt(document.getElementById(group).dataset.colspan) + 1;
+				if (document.getElementById(group).dataset.colspan == 1) {
+					var gap_elements = document.querySelectorAll('.gap_' + group);
+					[].forEach.call(gap_elements, function (gap_element){
+						gap_element.colSpan = 1;		// Leerspalte zwischen den Gruppen verkleinern
+					});
+				}
 			}
 			else {
-				document.getElementById(group).colSpan -= 1;
+				document.getElementById(group).dataset.colspan -= 1;
+				if (document.getElementById(group).dataset.colspan == 0) {
+					var gap_elements = document.querySelectorAll('.gap_' + group);
+					[].forEach.call(gap_elements, function (gap_element){
+						gap_element.colSpan = 2;		// Leerspalte zwischen den Gruppen verbreitern
+					});
+				}
 			}
+			document.getElementById(group).colSpan = document.getElementById(group).dataset.colspan;		// weil colSpan nicht 0 sein kann
 		}
 		head.classList.toggle('hidden');
 		tds = document.querySelectorAll('.value_' + layer_id + '_' + attribute_name);
@@ -17,6 +30,49 @@
 			td.classList.toggle('hidden');
 		});
 	}
+	
+	function toggleAll(checkbox, layer_id){
+		var heads = document.querySelectorAll('.column_head_' + layer_id);
+		[].forEach.call(heads, function (head){
+			var group = head.classList[1].split('_')[1];
+			if (checkbox.checked) {
+				head.classList.remove('hidden');
+				if (document.getElementById(group)) {
+					document.getElementById(group).dataset.colspan = parseInt(document.getElementById(group).dataset.colspan) + 1;
+					var gap_elements = document.querySelectorAll('.gap_' + group);
+					[].forEach.call(gap_elements, function (gap_element){
+						gap_element.colSpan = 1;		// Leerspalte zwischen den Gruppen verkleinern
+					});
+				}
+			}
+			else {
+				head.classList.add('hidden');
+				if (document.getElementById(group)) {
+					document.getElementById(group).dataset.colspan -= 1;
+					var gap_elements = document.querySelectorAll('.gap_' + group);
+					[].forEach.call(gap_elements, function (gap_element){
+						gap_element.colSpan = 2;		// Leerspalte zwischen den Gruppen verbreitern
+					});
+				}
+			}
+			document.getElementById(group).colSpan = document.getElementById(group).dataset.colspan;		// weil colSpan nicht 0 sein kann
+		});
+		
+		var tds = document.querySelectorAll('.gle_attribute_value');
+		[].forEach.call(tds, function (td){
+			if (checkbox.checked) {
+				td.classList.remove('hidden');
+			}
+			else {
+				td.classList.add('hidden');
+			}
+		});
+		
+		var checkboxes = document.querySelectorAll('#gle_column_options_div input');
+		[].forEach.call(checkboxes, function (cb){
+			cb.checked = checkbox.checked;
+		});
+	}	
 	
 </script>
 
@@ -96,8 +152,9 @@ if ($doit == true) { ?>
 		<div style="display: flex; justify-content: end;"> 
 			<? echo $layer['paging']; ?>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
-			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">	<? 
-				for ($j = 0; $j < count($layer['attributes']['name']); $j++) { ?>
+			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
+				<input type="checkbox" onclick="toggleAll(this, <? echo $layer['Layer_ID']; ?>, 'alle');" checked> --alle--<br>
+<? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) { ?>					
 					<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
 				}	?>
 			</div>
@@ -121,7 +178,7 @@ if ($doit == true) { ?>
 										$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
 										if($collapsed)echo '1';
 										else echo $colspan;
-										echo '" data-colspan="'.$colspan.'">';
+										echo '" data-colspan="'.$colspan.'" data-origcolspan="'.$colspan.'">';
 										echo '&nbsp;<a href="javascript:void(0);" onclick="toggleGroup(\''.$groupname.'\')"><img id="img_'.$groupname.'" border="0" src="graphics/'.($collapsed ? 'plus' : 'minus').'.gif"></a>&nbsp;<span>'.$explosion[0].'</span></td><td style="border:none;background: url('.BG_IMAGE.');"></td>';
 										$colspan = 0;
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
@@ -151,7 +208,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="group_'.$groupname.'"';
+											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){

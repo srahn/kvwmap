@@ -1358,6 +1358,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setRollenLayerAutoDelete($formvars){
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				id = -1*" . $formvars['layer_options_open'] . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {

@@ -2155,11 +2155,12 @@ function err_msg($file, $line, $msg, $find = '') {
 	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
+# ToDo: Prüfen ob die Ausgabe $msg nicht mit htmlspecialchars($msg) erfolgen muss
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
-		htmlspecialchars($msg) . "
+		$msg . "
 		<div style=\"text-align: center\">
 			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
 		</div>

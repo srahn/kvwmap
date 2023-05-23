@@ -34,18 +34,31 @@
 				<i class="fa fa-tasks options-button"></i><? echo $this->inWorkingGroup; ?>:
 			</div><?php
 			$this->user->Stellen = $this->user->getStellen(0);
-			foreach (array_keys($this->user->Stellen['ID']) AS $id) { ?>
-				<div
-					class="user-option"
-					style="margin-left: 0px" <?
-					if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
-						onclick="window.location.href='index.php?browserwidth=' + $('input[name=browserwidth]').val() + '&browserheight=' + $('input[name=browserheight]').val() + '&Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" <?
+			if (count($this->user->Stellen['ID']) > 21) { ?>
+				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value" style="margin: 0px 3px 0px 6px"><?
+					foreach (array_keys($this->user->Stellen['ID']) AS $id) {
+						echo '
+							<option value="' . $this->user->Stellen['ID'][$id] . '"' . ($this->user->Stellen['ID'][$id] == $this->user->stelle_id ? ' selected' : '') . '>' .
+								$this->user->Stellen['Bezeichnung'][$id] . '
+							</option>
+						';
 					} ?>
-				><? echo $this->user->Stellen['Bezeichnung'][$id];
-				if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
-					?> <i class="fa fa-check" aria-hidden="true" style="color: #9b2434; margin: 0px 0px 0px 7px"></i><?
-				} ?>
-				</div><?
+				</select><?
+			}
+			else {
+				foreach (array_keys($this->user->Stellen['ID']) AS $id) { ?>
+					<div
+						class="user-option"
+						style="margin-left: 0px" <?
+						if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
+							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>'" <?
+						} ?>
+					><? echo $this->user->Stellen['Bezeichnung'][$id];
+					if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
+						?> <i class="fa fa-check" aria-hidden="true" style="color: #9b2434; margin: 0px 0px 0px 7px"></i><?
+					} ?>
+					</div><?
+				}
 			} ?>
 			<div class="options-devider"></div>
 			<div

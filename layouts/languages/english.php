@@ -94,4 +94,5 @@
 	$this->strVersion = 'Version';
 	$this->strComment = 'Comment';
 	$this->strDataImport = 'Data Import';
+	$this->strAutoDelete = 'auto delete';
 ?>

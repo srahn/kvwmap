@@ -36,9 +36,9 @@ class XP_Plan extends PgObject {
 		return $xp_plan;
 	}
 
-	public static	function find_where_by_planart($gui, $planart, $where, $order = '') {
+	public static	function find_where_by_planart($gui, $planart, $where, $order = '', $select = '*', $limit = '') {
 		$plan = new XP_Plan($gui, $planart);
-		$plaene = $plan->find_where($where, $order);
+		$plaene = $plan->find_where($where, $order, $select, $limit);
 		return $plaene;
 	}
 
@@ -59,6 +59,9 @@ class XP_Plan extends PgObject {
 					$geom_col = 'geltungsbereich';
 				} break;
 				case (strpos($xplan_layer['Name'], '_plan') !== false) : {
+					$geom_col = 'raeumlichergeltungsbereich';
+				} break;
+				case ($xplan_layer['Name'] == 'zusammenzeichnungen') : {
 					$geom_col = 'raeumlichergeltungsbereich';
 				} break;
 				case ($xplan_layer['Name'] == 'geltungsbereiche') : {

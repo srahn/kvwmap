@@ -20,6 +20,7 @@ root.open_subform_requests = 0;
 root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
+var loc = window.location.href.toString().split('index.php')[0];
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -726,9 +727,8 @@ function set_hist_timestamp() {
 	mapimg4.setAttribute('id', 'mapimg4');
 	movegroup.insertBefore(mapimg4, cartesian);
 	movegroup.insertBefore(mapimg3, mapimg4);
-	mapimg3.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
-	mapimg4.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
-	document.GUI.hist_timestamp2.value = hist_timestamp;
+	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
@@ -741,7 +741,7 @@ function get_map(){
 	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
 	let ts = nht.toLocaleString().replace(',', '');
 	document.GUI.hist_timestamp2.value = ts;
-	mapimg4.setAttribute("href", 'https://dev.gdi-service.de/kvwmap_dev/index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
 }
 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
