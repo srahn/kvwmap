@@ -76,7 +76,11 @@ class data_import_export {
 			case 'gpkg' : {
 				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_file($filename, $user, $database, $schema, $table, $epsg, false, $adjustments);
-			} break;			
+			} break;
+			case 'xml' : {
+				$this->unique_column = 'ogc_fid';
+				$custom_tables = $this->import_custom_file($filename, $user, $database, $schema, $table, $epsg, true, $adjustments);
+			} break;				
 			case 'kml' : case 'kmz' : {
 				$epsg = 4326;
 				$this->unique_column = 'ogc_fid';
