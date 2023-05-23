@@ -57,6 +57,9 @@ class PgObject {
 		);
 		$this->show = false;
 		$this->attribute_types = array();
+		$this->geom_column = 'geom';
+		$this->extent = array();
+		$this->extents = array();
 	}
 
 	public static	function postgis_version($gui) {
@@ -87,6 +90,11 @@ class PgObject {
 
 	function get_id_condition($ids) {
 		$parts = array();
+		if (func_num_args() == 0) {
+			$ids = array(
+				$this->identifier => $this->get($this->identifier)
+			);
+		}
 		foreach ($this->identifiers AS $key => $identifier) {
 			$parts[] = "\"{$identifier['column']}\" = '{$ids[$key]}'"; 
 		}
@@ -119,10 +127,11 @@ class PgObject {
 	* Search for an record in the database by the given where clause
 	* @ return an array with all found object
 	*/
-	function find_where($where, $order = NULL, $select = '*') {
+	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
 		$select = (empty($select) ? $this->select : $select);
 		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
+		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
 		$sql = "
 			SELECT
 				" . $select . "
@@ -131,6 +140,7 @@ class PgObject {
 			WHERE
 				" . $where . "
 			" . $order . "
+			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
@@ -139,6 +149,61 @@ class PgObject {
 			$result[] = clone $this;
 		}
 		return $result;
+	}
+
+	/**
+		Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
+		additional it query and set the extents in epsg given in $ows_srs string
+		@params string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+		e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
+		with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
+		@return array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
+		$this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
+		$this->extent['25832'] eg. contains the same extent in EPSG:25832
+	*/
+	function get_extent($ows_srs = '', $where = '') {
+		if ($where == '') {
+			$where = $this->get_id_condition(array($this->get($this->identifier)));
+		}
+		$epsg_codes = explode(' ', trim(preg_replace('~[EPSGepsg: ]+~', ' ', $ows_srs)));
+		$extents = array();
+		$sql = "
+			SELECT
+				ST_XMin(ST_EXTENT(" . $this->geom_column . ")) AS minx,
+				ST_YMin(ST_EXTENT(" . $this->geom_column . ")) AS miny,
+				ST_XMax(ST_EXTENT(" . $this->geom_column . ")) AS maxx,
+				ST_YMax(ST_EXTENT(" . $this->geom_column . ")) AS maxy
+			FROM
+				" . $this->schema . '.' . $this->tableName . "
+			WHERE
+				" . $where . "
+		";
+		#echo $sql; exit;
+		$this->debug->show('get_extent sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$this->extent = pg_fetch_assoc($query);
+
+		foreach ($epsg_codes AS $epsg_code) {
+			if ($epsg_code != '') {
+				$geom_column = 'ST_Transform(' . $this->geom_column . ', ' . $epsg_code . ')';
+				$sql = "
+					SELECT
+						ST_XMin(ST_EXTENT(" . $geom_column . ")) AS minx,
+						ST_YMin(ST_EXTENT(" . $geom_column . ")) AS miny,
+						ST_XMax(ST_EXTENT(" . $geom_column . ")) AS maxx,
+						ST_YMax(ST_EXTENT(" . $geom_column . ")) AS maxy
+					FROM
+						" . $this->schema . '.' . $this->tableName . "
+					WHERE
+						" . $where . "
+				";
+				$sqls[] = $sql;
+				$this->debug->show('get_extent sql: ' . $sql, false);
+				$query = pg_query($this->database->dbConn, $sql);
+				$this->extents[$epsg_code] = pg_fetch_assoc($query);
+			}
+		}
+		return $this->extent;
 	}
 
 	function delete_by($attribute, $value) {
@@ -236,8 +301,9 @@ class PgObject {
 	}
 
 	function create($data = '') {
-		if (!empty($data))
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$values = array_map(
 			function($value) {
@@ -245,18 +311,56 @@ class PgObject {
 			},
 			$this->getValues()
 		);
-
 		$sql = "
 			INSERT INTO " . $this->qualifiedTableName . " (
 				" . implode(', ', $this->getKeys()) . "
 			)
 			VALUES (" .
-				"'" . implode("', '", $values) . "'
+				"'" . implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				) . "'
 			)
 			RETURNING
 				" . $this->identifier . ";
 		";
+		/*
+		$sql = "
+			INSERT INTO " . $this->qualifiedTableName . " (
+				$1
+			)
+			VALUES (
+				'$2'
+			)
+			RETURNING
+				$3
+		";
+		*/
 		$this->debug->show('Create new dataset with sql: ' . $sql, false);
+		#echo 'SQL zum Eintragen des Datensatzes: ' . $sql; exit;
+		/*
+		$query = pg_query_params(
+			$this->database->dbConn, $sql,
+			array(
+				implode(", ", $this->getKeys()),
+				implode(
+					"', '",
+					array_map(
+						function($value) {
+							return pg_escape_string($value);
+						},
+						$values
+					)
+				),
+				$this->identifier
+			)
+		);
+		*/
 		$query = pg_query($this->database->dbConn, $sql);
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
@@ -325,7 +429,7 @@ class PgObject {
 	}
 
 	function update_attr($attributes) {
-		$quote = ($this->identifier_type == 'text') ? "'" : "";
+		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
 				\"" . $this->schema . "\".\"" . $this->tableName . "\"
@@ -334,8 +438,21 @@ class PgObject {
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
+		#echo $sql; exit;
 		$this->debug->show('update sql: ' . $sql, false);
-		$query = pg_query($this->database->dbConn, $sql);
+		try {
+			pg_query($this->database->dbConn, $sql);
+			return array(
+				'success' => true,
+				'msg' => 'Attributes erfolgreich geupdated'
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage ' . $sql . ': ' .  $e->getMessage()
+			);
+		}
 	}
 
 	function delete() {

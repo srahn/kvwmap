@@ -13,7 +13,7 @@ class LENRIS {
     $this->database = $database;
 		$this->database2 = clone $database;		// zweites Datenbankobjekt um unabhängig von der Transaktion etwas in die Datenbank zu schreiben
 		#$this->database2->close();
-		$this->database2->open();
+		$this->database2->open(0, PGSQL_CONNECT_FORCE_NEW);
 		$this->clients = $this->get_client_information();
 		$this->dokumentart_mapping = $this->get_dokumentart_mapping();
 		$this->vermessungsstellen_mapping = $this->get_vermessungsstellen_mapping();

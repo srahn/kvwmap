@@ -1748,7 +1748,7 @@ function highlightbyid(id){
 
 ]]></script>
 
-  <defs>
+  <defs id="defs">
 '.$SVGvars_defs.'	
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
@@ -1758,7 +1758,7 @@ function highlightbyid(id){
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
 			<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
-      <polyline points="" id="polyline" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
+      <polyline points="" id="polyline" marker-start="url(#measure_start)" marker-end="url(#measure_end)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
       <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">
 			</g>';

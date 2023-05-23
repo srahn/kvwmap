@@ -115,7 +115,9 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				wfs_geom,
+				write_mapserver_templates,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -444,6 +446,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -1355,6 +1358,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setRollenLayerAutoDelete($formvars){
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				id = -1*" . $formvars['layer_options_open'] . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
@@ -1445,6 +1463,23 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setBuffer($formvars) {
+		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					id = -1* " . $formvars['layer_options_open'] . "
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
@@ -1596,15 +1631,16 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
 					`redline_font_size`,
 					`redline_font_weight`
-				) 
-				SELECT ".
-					$user_id.", ".
-					$stelle_id.",
+				)
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
 					`nImageWidth`, `nImageHeight`,
 					`auto_map_resize`,
 					`minx`, `miny`, `maxx`, `maxy`,
@@ -1641,6 +1677,7 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
@@ -1649,8 +1686,8 @@ class rolle {
 				FROM
 					`rolle`
 				WHERE
-					`user_id` = ".$default_user_id." AND
-					`stelle_id` = ".$stelle_id."
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $stelle_id . "
 			";
 		}
 		else {
@@ -1668,10 +1705,10 @@ class rolle {
 				FROM
 					stelle
 				WHERE
-					ID = ".$stelle_id."
+					ID = " . $stelle_id . "
 			";
 		}
-		#echo '<br>'.$sql;
+		#debug_write('Rolle eintragen', $sql, 1);
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {

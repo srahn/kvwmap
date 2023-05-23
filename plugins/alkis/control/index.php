@@ -3,6 +3,11 @@
 function go_switch_alkis($go){
 	global $GUI;
 	switch($go){
+
+		case "Flurstueckshistorie_drucken" : {
+			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			$GUI->flurstueckshistorie_drucken();
+		} break;
 		
 		case "Flurstueckshistorie" : {
 			$GUI->sanitize(['flurstueckskennzeichen' => 'text']);

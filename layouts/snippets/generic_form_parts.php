@@ -110,7 +110,7 @@
 		$alias = $attributes['alias'][$j];															# der Aliasname des Attributs
 		$value = $dataset[$name];																				# der Wert des Attributs
 		$tablename = $attributes['table_name'][$name];									# der Tabellenname des Attributs
-		$oid = $dataset[$tablename.'_oid'];															# die oid des Datensatzes
+		$oid = $dataset[$layer['maintable'] . '_oid'];									# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
 
 		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j];
@@ -365,25 +365,78 @@
 				} break;
 				
 				case 'Farbauswahl' : {
-					if ($gui->result_colors == '') {
-						$gui->result_colors = $gui->database->read_colors();
-					}
-					$datapart .= '
-						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
-						for($i = 0; $i < count($gui->result_colors); $i++){
-							$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
-							$datapart .= '<option ';
-							if ($value == $rgb){
-								$datapart .= ' selected';
-							}
-							$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
-															value="' . $rgb . '">
-															&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-														</option>' . "\n";
+					$form_element_options = json_decode($attributes['options'][$j], JSON_OBJECT_AS_ARRAY);
+					if (
+						$attributes['options'][$j] != '' AND
+						json_last_error() === JSON_ERROR_NONE AND
+						is_array($form_element_options) AND
+						array_key_exists('type', $form_element_options) AND
+						$form_element_options['type'] == 'colorpicker'
+					) {
+						# Auswahl beliebiger Farben mit einem Colorpicker
+						$datapart .= '<input
+							type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
+							class="' . $field_class . '"
+							name="' . $fieldname . '"
+							id="' . $layer_id . '_' . $name . '_' . $k . '"
+							onchange="' . $onchange . '"
+							onkeyup="checknumbers(this, \'' . $attributes['type'][$j] . '\', \'' . $attributes['length'][$j] . '\', \'' . $attributes['decimal_length'][$j] . '\');"
+							title="' . $alias . '"
+							value="' . htmlspecialchars($value) . '"
+							style=" 
+								display: ' . ($attribute_privileg == '0' ? 'none' : 'block') . ';
+								width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
+								font-size: ' . $fontsize . 'px;
+							"
+							' . ($attribute_privileg == '0' ? ' readonly' : ' tabindex="1"') . '
+						>';
+
+						if ($attribute_privileg == '0') { // nur lesbares Attribut
+							$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
+							$datapart .= '<div style="
+									border-radius: 2px;
+									border: 1px solid gray;
+									display: inline-block;
+									padding: 4px;
+									background-color: #e9e9ed;
+							">
+								<div
+									class="readonly_text"
+									style="
+										padding: 0px;
+										text-align: center;
+										min-width: 55px;
+										width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
+										font-size: ' . $fontsize . 'px;
+										background-color: ' . $angezeigter_value . ';
+										border: 1px solid gray;
+									"
+								>' . ($angezeigter_value != '' ? $angezeigter_value : 'keine') . '</div>
+							</div>';
 						}
-					$datapart .= '</select>';
+					}
+					else {
+						# Auswahl vordefinierter Farben
+						if ($gui->result_colors == '') {
+							$gui->result_colors = $gui->database->read_colors();
+						}
+						$datapart .= '
+							<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';
+							for($i = 0; $i < count($gui->result_colors); $i++){
+								$rgb = $gui->result_colors[$i]['red'] . ' ' . $gui->result_colors[$i]['green'] . ' ' . $gui->result_colors[$i]['blue'];
+								$datapart .= '<option ';
+								if ($value == $rgb){
+									$datapart .= ' selected';
+								}
+								$datapart .= '	style="width: 80px; background-color: rgb(' . $rgb . ')"
+																value="' . $rgb . '">
+																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+															</option>' . "\n";
+							}
+						$datapart .= '</select>';
+					}
 				} break;
-				
+
 				case 'Autovervollständigungsfeld' : {
 					if(is_array($attributes['enum_output'][$j][$k])){
 						$enum_output = $attributes['enum_output'][$j][$k][$e];		# Array-Typ, $e ist der Zähler der Array-Elemente
@@ -546,6 +599,7 @@
 				}break;
 
 				case 'SubFormEmbeddedPK' : {
+					$subform_request = true;
 					$reloadParams= '&selected_layer_id='.$attributes['subform_layer_id'][$j];
 					for($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++){
 						if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
@@ -556,7 +610,9 @@
 						else {
 							$key = $subkey = $attributes['subform_pkeys'][$j][$p];
 						}
-						if($dataset[$key] == '')$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						if ($dataset[$key] == '') {
+							$subform_request = false;		// eines der Verknüpfungsattribute ist leer -> keinen Subform-Request machen
+						}
 						$reloadParams .= '&value_'.$subkey.'='.$dataset[$key];
 						$reloadParams .= '&operator_'.$subkey.'==';
 						$reloadParams .= '&attributenames['.$p.']='.$subkey;
@@ -580,8 +636,7 @@
 					$reloadParams .= '&attribute_privileg='.$attribute_privileg;
 					
 					$datapart .= '<div id="'.$layer_id.'_'.$name.'_'.$k.'" data-reload_params="'.$reloadParams.'" style="margin-top: 3px">';
-					if($gui->new_entry != true){
-						$subform_request = true;
+					if($gui->new_entry != true AND $subform_request){
 						$datapart .= '
 							<img src="' . GRAPHICSPATH . 'leer.gif" onload="reload_subform_list(this.parentElement);">
 						';
@@ -632,7 +687,7 @@
 						else {
 							$datapart .= '<div>';
 							$datapart .= 'Oooops!<p>';
-							$datapart .= 'Die Datei ' . $dateipfad . ' wurde nicht auf dem Server gefunden.';
+							$datapart .= 'Die Datei ' . $value . ' wurde nicht auf dem Server gefunden.';
 							if ($layer['document_url'] == '') {
 								$datapart .= '<br>Der originale Name der Datei war ' . $preview['original_name'];
 							}

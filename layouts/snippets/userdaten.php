@@ -1,6 +1,6 @@
 <?php
-	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php');
 	include(LAYOUTPATH.'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php');
 	
 	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
 	
@@ -12,14 +12,30 @@
 		0
 	);
  ?>
+<script type="text/javascript">
+	function toggle_archived_users() {
+		var display = 'none';
+		if (document.GUI.archived.checked) {
+			var display = '';
+		}
+		var archived_users = document.querySelectorAll('.archived');
+		[].forEach.call(archived_users, function (archived_user){
+			archived_user.style.display = display;
+		});
+	}
+</script>
+ 
 <a name="oben"></a>
 <table width="1300" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td><h2><?php echo $strTitle; ?></h2></td>
+    <td valign="bottom" style="height: 30px;"><h2><?php echo $strTitle; ?></h2></td>
+	</tr>
+	<tr>
+		<td style="float: right; margin-right: 50px"><input type="checkbox" onclick="toggle_archived_users();" id="archived" name="archived"> archivierte Nutzer anzeigen</td>
   </tr>
   <? if($this->formvars['order']=="Name") { ?>
   <tr height="50px" valign="bottom">
-    <td>
+    <td colspan="2">
     <? $umlaute=array("Ä","Ö","Ü");
        for ($i=0;$i<count($this->userdaten);$i++) {
          if(!in_array(strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1)),$umlaute) AND strtolower(mb_substr($this->userdaten[$i]['Name'],0,1)) != $first) {
@@ -31,7 +47,7 @@
   </tr>
   <? } ?>
   <tr>
-    <td>
+    <td colspan="2">
 			<div class="userdaten-topdiv">
 				<table width="100%" border="0" cellspacing="0" cellpadding="2">
 					<tr>
@@ -94,7 +110,7 @@
 								</tr><?
 							}
 						} ?>
-						<tr class="listen-tr">
+						<tr class="listen-tr <? if ($this->userdaten[$i]['archived']) {echo ' archived" style="display: none';} ?>">
 							<td>&nbsp;</td>
 							<td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
 							<td>
@@ -118,7 +134,11 @@
 									} ?>
 								</td><?
 							} ?>
-							<td><a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['Name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a></td>
+							<td>
+								<? if (!$this->userdaten[$i]['archived']) { ?>
+								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['Name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
+								<? } ?>
+							</td>
 						</tr><?
 					} ?>
 				</table>

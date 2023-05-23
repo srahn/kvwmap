@@ -264,7 +264,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvsrs['passwort']);
+							unset($GUI->fromvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
@@ -453,7 +453,6 @@ if (is_logged_in()) {
 else {
 	$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 }
-
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
 if ($show_login_form) {
 	$GUI->debug->write('Zeige Login-Form', 4, $GUI->echo);
@@ -532,23 +531,10 @@ else {
 		# Löschen der Rollenfilter
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
-		if(DELETE_ROLLENLAYER == 'true'){
-			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
-	    for($i = 0; $i < count($rollenlayerset); $i++){
-	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-	      # auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						if($class['Style'] != ''){
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
-							}
-						}
-					}
-				}
-	    }
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
+		for($i = 0; $i < count($rollenlayerset); $i++){
+			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}
 		# Zurücksetzen des histtimestamps
 		if ($GUI->user->rolle->hist_timestamp_de != '') {
@@ -676,13 +662,8 @@ function get_permission_in_stelle($GUI) {
 	if (is_user_member_in_stelle($GUI->Stelle->id, $GUI->user->Stellen['ID'])) {
 		$GUI->debug->write('Nutzer gehört zur Stelle ' . $GUI->Stelle->id, 4, $GUI->echo);
 
-		if (is_password_expired($GUI->user, $GUI->Stelle)) {
-			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
-			$allowed = false;
-			$reason = 'password expired';
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
-		}
-		else {
+		$expiration_info = is_password_expired($GUI->user, $GUI->Stelle);
+		if ($expiration_info === 'not_expired') {
 			$GUI->debug->write('Passwort ist nicht abgelaufen.', 4, $GUI->echo);
 
 			if (CHECK_CLIENT_IP) {
@@ -699,6 +680,24 @@ function get_permission_in_stelle($GUI) {
 					}
 				}
 			}
+		}
+		else  {
+			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
+			$allowed = false;
+			$reason = 'password expired';
+			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
+			switch ($expiration_info) {
+				case 'password_age_expired' : {
+					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
+				} break;
+				case 'password_age_expired' : {
+					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
+				} break;
+				default : {
+					$errmsg .= 'abgelaufen.';
+				}
+			}
+			$errmsg .= ' Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
 		}
 	}
 	else {
@@ -728,13 +727,17 @@ function is_new_password_valid($msg) {
 }
 
 function is_password_expired($user, $stelle) {
-	$abgelaufen = false;
+	if ($user->password_expired) {
+		return 'password_expired';
+	}
 	if ($stelle->checkPasswordAge) {
 		$remainingDays = checkPasswordAge($user->password_setting_time, $stelle->allowedPasswordAge);
 		#echo '<br>Passwort setting time: ' . $user->password_setting_time . ' erlaubt iin Monat: ' . $stelle->allowedPasswordAge . ' Verbleibende Tage: ' . $remainingDays;
-		return ($remainingDays <= 0);
+		if ($remainingDays <= 0) {
+			return 'password_age_expired';
+		}
 	}
-	return $abgelaufen;
+	return 'not_expired';
 }
 
 function is_registration($formvars) {

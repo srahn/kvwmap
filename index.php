@@ -11,7 +11,7 @@ if (isset($argv)) {
 	}
 }
 
-# Error Handling for Fatal-Errors
+# Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
@@ -20,22 +20,43 @@ register_shutdown_function(function () {
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
-		http_response_code(500);
-		include_once('layouts/snippets/general_error_page.php');
+    if (
+        (array_key_exists('format', $_REQUEST) AND in_array(strtolower($_REQUEST['format']), array('json', 'json_result'))) OR
+        (array_key_exists('mime_type', $_REQUEST) AND strtolower($_REQUEST['mime_type']) == 'json') OR
+        (array_key_exists('content_type', $_REQUEST) AND strtolower($_REQUEST['content_type']) == 'application/json')
+    ) {
+      header('Content-Type: application/json');
+			$response = array(
+				'success' => false,
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+			);
+			echo json_encode($response);
+    }
+    else {
+  		http_response_code(500);
+	  	include_once('layouts/snippets/general_error_page.php');
+    }
 	}
 });
 
 # Error-Handling
-function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
+	// global $errors;
+	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+		// return;
+	// }
+	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
+	// http_response_code(500);
+	// include_once('layouts/snippets/general_error_page.php');
+	// /* Don't execute PHP internal error handler */
+	// return true;
+// }
+
+function CustomErrorHandler($severity, $message, $filename, $lineno) {
+	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	http_response_code(500);
-	include_once('layouts/snippets/general_error_page.php');
-	/* Don't execute PHP internal error handler */
-	return true;
+	throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 set_error_handler("CustomErrorHandler");
@@ -162,7 +183,7 @@ define('CASE_COMPRESS', false);
 ###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
+$spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
@@ -251,6 +272,26 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
+			
+			case 'getMap' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
+				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+				$GUI->loadMap('DataBase');
+				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$GUI->map->selectOutputFormat($format);
+				$GUI->drawMap(true);
+				$GUI->mime_type='image/' . $format;
+				$GUI->output();
+			} break;			
+			
+			case 'write_mapserver_templates' : {
+				include_once(CLASSPATH . 'Layer.php');
+				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
+				foreach ($layers as $layer) {
+					echo $layer->get('Name') . '<br>';
+					$layer->write_mapserver_templates('Formular');
+				}
+			}break;			
 			
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
@@ -612,6 +653,16 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			case 'get_generic_layer_data_sql' : {
+				if ($GUI->user->id != 3) {
+					$GUI->checkCaseAllowed($go);
+				}
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql();
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result));
+			} break;
+
 			case 'exportWMC' :{
 				$GUI->exportWMC();
 			} break;
@@ -624,7 +675,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Externer_Druck_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1105,7 +1156,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Import_Process' : {
-				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['selected_layer_id']);
+				$GUI->daten_import_process($GUI->formvars['upload_id'], $GUI->formvars['filenumber'], $GUI->formvars['filename'], $GUI->formvars['epsg'], $GUI->formvars['after_import_action'], $GUI->formvars['chosen_layer_id']);
 			} break;
 
 			case 'Daten_Export' : {
@@ -1868,6 +1919,62 @@ function go_switch($go, $exit = false) {
 				$GUI->saveMap('');
 				$GUI->drawMap();
 				$GUI->output();
+			} break;
+
+			/**
+				Query for all notifications and show it in a list
+			*/
+			case 'notifications_anzeigen' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->notifications_anzeigen();
+			} break;
+
+			/**
+				Show notifications form to create or update notification
+			*/
+			case 'notification_formular' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['id' => 'int']);
+				$GUI->notification_formular();
+			} break;
+
+			/**
+				create or update a user notification
+			*/
+			case 'put_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize([
+					'id' => 'int',
+					'notification' => 'text',
+					'veroeffentlichungsdatum' => 'date',
+					'ablaufdatum' => 'date',
+					'stellen_filter' => 'text'
+				]);
+				$GUI->put_notification();
+			} break;
+
+			/**
+				delete the notification for user
+			*/
+			case 'delete_user2notification' : {
+				$GUI->sanitize(['notification_id' => 'int']);
+				$GUI->delete_user2notification();
+			} break;
+
+			/**
+				delete a notification
+			*/
+			case 'delete_notification' : {
+				$GUI->checkCaseAllowed('notifications_anzeigen');
+				$GUI->sanitize(['notification_id' => 'int']);
+				$GUI->delete_notification();
+			} break;
+
+			/**
+				query notifications that has to be shown for the current user
+			*/
+			case 'get_user_notifications' : {
+				$GUI->get_user_notifications();
 			} break;
 
 			default : {

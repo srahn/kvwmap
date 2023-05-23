@@ -76,7 +76,7 @@ class pgdatabase {
 	* @param integer, $connection_id The id of the connection defined in mysql connections table, if 0 default connection will be used
 	* @return boolean, True if success or set an error message in $this->err_msg and return false when fail to find the credentials or open the connection
 	*/
-  function open($connection_id = 0) {
+  function open($connection_id = 0, $flag = NULL) {
 		if ($connection_id == 0) {
 			# get credentials from object variables
 			#echo '<br>connection_id ist 0, hole von object credentials';
@@ -88,7 +88,7 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string, PGSQL_CONNECT_FORCE_NEW);
+		$this->dbConn = pg_connect($connection_string, $flag);
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
@@ -410,6 +410,7 @@ FROM
 			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
+        $ret['sql'] = $sql;
 				# erzeuge eine Fehlermeldung;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
@@ -422,11 +423,13 @@ FROM
 				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
 					# Parse als JSON String;
 					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
-					if (array_key_exists('msg_type', $error_obj)) {
-						$ret['type'] = $error_obj['msg_type'];
-					}
-					if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
-						$ret['msg'] = $error_obj['msg'];
+					if ($error_obj) {
+						if (array_key_exists('msg_type', $error_obj)) {
+							$ret['type'] = $error_obj['msg_type'];
+						}
+						if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+							$ret['msg'] = $error_obj['msg'];
+						}
 					}
 				}
 				else {
@@ -754,13 +757,15 @@ FROM
 				# Geometrietyp
 				if ($fieldtype == 'geometry') {
 					$fields[$i]['geomtype'] = $this->get_geom_type($schemaname, $fields[$i]['real_name'], $tablename);
-					$fields['the_geom'] = $fieldname;
-					$fields['the_geom_id'] = $i;
+					$field_the_geom = $fieldname;
+					$field_the_geom_id = $i;
 				}
 				if ($assoc) {
 					$fields_assoc[$fieldname] = $fields[$i];
 				}
 			}
+			$fields['the_geom'] = $field_the_geom;
+			$fields['the_geom_id'] = $field_the_geom_id;
 			$ret[1] = ($assoc ? $fields_assoc : $fields);
 		}
 		else {
@@ -938,26 +943,32 @@ FROM
 			if($fields[$i]['nullable'] == '')$fields[$i]['nullable'] = 'NULL';
 			if($fields[$i]['length'] == '')$fields[$i]['length'] = 'NULL';
 			if($fields[$i]['decimal_length'] == '')$fields[$i]['decimal_length'] = 'NULL';
-			$sql = "INSERT INTO datatype_attributes SET
-								datatype_id = ".$datatype_id.", 
-								name = '".$fields[$i]['name']."', 
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i." 
-							ON DUPLICATE KEY UPDATE
-								real_name = '".$fields[$i]['real_name']."', 
-								type = '".$fields[$i]['type']."', 
-								constraints = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['constraints'])."', 
-								nullable = ".$fields[$i]['nullable'].", 
-								length = ".$fields[$i]['length'].", 
-								decimal_length = ".$fields[$i]['decimal_length'].", 
-								`default` = '".$this->gui->database->mysqli->real_escape_string($fields[$i]['default'])."', 
-								`order` = ".$i;
+			$sql = "
+				INSERT INTO
+					datatype_attributes
+				SET
+					datatype_id = " . $datatype_id . ",
+					name = '" . $fields[$i]['name'] . "',
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					form_element_type = '" . ($this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) != '' ? 'Auswahlfeld' : 'Text') . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+				ON DUPLICATE KEY UPDATE
+					real_name = '" . $fields[$i]['real_name'] . "',
+					type = '" . $fields[$i]['type'] . "',
+					constraints = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['constraints']) . "',
+					nullable = " . $fields[$i]['nullable'] . ",
+					length = " . $fields[$i]['length'] . ",
+					decimal_length = " . $fields[$i]['decimal_length'] . ",
+					`default` = '" . $this->gui->database->mysqli->real_escape_string($fields[$i]['default']) . "',
+					`order` = " . $i . "
+			";
+			#echo "<br>SQL zum Anlegen eines Datentypes: " . $sql;
 			$ret1 = $this->gui->database->execSQL($sql, 4, 1);
 			if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		}
@@ -1853,16 +1864,34 @@ FROM
 		$order = $formvars['order'];
 		if($order == '')$order = 'nachnameoderfirma, vorname';
 			
-    $sql = "set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;SELECT distinct p.gml_id, p.nachnameoderfirma, p.vorname, p.namensbestandteil, p.akademischergrad, p.geburtsname, p.geburtsdatum, array_to_string(p.hat, ',') as hat, anschrift.strasse, anschrift.hausnummer, anschrift.postleitzahlpostzustellung, anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, anschrift.bestimmungsland, g.buchungsblattnummermitbuchstabenerweiterung as blatt, b.schluesselgesamt as bezirk ";
-		$sql.= "FROM alkis.ax_person p ";
-		$sql.= "LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] ";		# da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
-		$sql.= "LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.= "LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-		$sql.= "LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) ";
-		$sql.= " WHERE 1=1 ";
+    $sql = "
+			set enable_seqscan = off;set enable_mergejoin = off;set enable_hashjoin = off;
+			SELECT distinct 
+				p.gml_id, 
+				p.nachnameoderfirma, 
+				p.vorname, 
+				p.namensbestandteil, 
+				p.akademischergrad, 
+				p.geburtsname, 
+				p.geburtsdatum, 
+				array_to_string(p.hat, ',') as hat, 
+				anschrift.strasse, 
+				anschrift.hausnummer, 
+				anschrift.postleitzahlpostzustellung, 
+				anschrift.ort_post, 'OT '||anschrift.ortsteil as ortsteil, 
+				anschrift.bestimmungsland, 
+				g.buchungsblattnummermitbuchstabenerweiterung as blatt, 
+				b.schluesselgesamt as bezirk
+			FROM 
+				alkis.ax_person p 
+				LEFT JOIN alkis.ax_anschrift anschrift ON anschrift.gml_id = p.hat[1] -- da die meisten Eigentümer nur eine Anschrift haben, diese gleiche in dieser Abfrage mit abfragen
+				LEFT JOIN alkis.ax_namensnummer n ON n.benennt = p.gml_id 
+				LEFT JOIN alkis.ax_eigentuemerart_namensnummer w ON w.wert = n.eigentuemerart 
+				LEFT JOIN alkis.ax_buchungsblatt g ON n.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+				LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR f.istgebucht = ANY(s.an) 
+			WHERE 1=1 ";
     if($n1 != '%%' AND $n1 != '')$sql.=" AND lower(nachnameoderfirma) LIKE lower('".$n1."') ";
 		if($n2 != '%%' AND $n2 != '')$sql.=" AND lower(vorname) LIKE lower('".$n2."') ";
 		if($n3 != '%%')$sql.=" AND lower(geburtsname) LIKE lower('".$n3."') ";
@@ -1905,6 +1934,20 @@ FROM
 			$sql.=")";
 		}
 		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		if ($formvars['alleiniger_eigentuemer']) {
+			$sql.= "
+				AND NOT EXISTS (
+					SELECT
+					FROM 
+						alkis.ax_buchungsstelle s2 
+						JOIN alkis.ax_buchungsblatt g2 ON s2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
+						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
+					WHERE 
+						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
+				)";
+		}
     $sql .= " ORDER BY ". $order;
     if ($limitStart!='' OR $limitAnzahl != '') {
       $sql .= " LIMIT ";

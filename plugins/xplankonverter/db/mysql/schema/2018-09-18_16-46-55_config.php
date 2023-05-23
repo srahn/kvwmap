@@ -5,7 +5,7 @@ $constants = array (
   array (
     'name' => 'XPLANKONVERTER_FILE_PATH',
     'value' => 'xplankonverter/',
-    'prefix' => 'UPLOADPATH',
+    'prefix' => 'SHAPEPATH',
     'type' => 'string',
     'description' => '',
     'group' => 'Plugins/xplankonverter',

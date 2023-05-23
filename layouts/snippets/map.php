@@ -56,14 +56,10 @@ function clearMeasurement(){
 
 function showMapImage(){
 	svgdoc = document.SVG.getSVGDocument();	
-	var svg = svgdoc.getElementById("moveGroup");
-	try{
-  	var serializer = new XMLSerializer();
-  	document.GUI.svg_string.value = serializer.serializeToString(svg);
-	}
-	catch(e){
-		document.GUI.svg_string.value = printNode(svg);
-	}
+	var movegroup = svgdoc.getElementById("moveGroup");
+	var defs = svgdoc.getElementById("defs");
+  var serializer = new XMLSerializer();
+  document.GUI.svg_string.value = serializer.serializeToString(defs) + serializer.serializeToString(movegroup);
 	save_go = document.GUI.go.value;
   document.GUI.go.value = 'showMapImage';
 	document.GUI.target = '_blank';

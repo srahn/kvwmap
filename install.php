@@ -33,15 +33,14 @@ $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
 class GUI {
-	function __construct() {
+	function __construct($main, $style, $mime_type) {
 	}
 
 	function add_message($type, $msg) {
-		echo '<p>Fehlerart: ' . $type;
+		echo '<p>Meldung: ' . $type;
 		echo '<br>' . $msg;
 	}
 }
-$GUI = new GUI();
 
 output_header();
 

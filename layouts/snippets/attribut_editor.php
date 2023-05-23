@@ -160,6 +160,16 @@
 <!--
 var attributes = new Array(<? echo (@count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
+function takeover_attributes(){
+	if (document.getElementById('for_attributes_selected_layer_id').value == '') {
+		message('Bitte wählen Sie einen Layer aus, für den die Attribute übernommen werden sollen.');
+	}
+	else {
+		document.GUI.go.value = 'Attributeditor_Attributeinstellungen für ausgewählten Layer übernehmen';
+		document.GUI.submit();
+	}
+}
+
 function update_visibility_form(visibility, attributename){
 	if(visibility == 2)document.getElementById('visibility_form_'+attributename).style.display = '';
 	else document.getElementById('visibility_form_'+attributename).style.display = 'none';
@@ -306,7 +316,7 @@ function alias_replace(name){
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 120); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
 					for ($i = 0; $i < @count($this->attributes['type']); $i++){ ?>
-						<tr>
+						<tr class="listen-tr">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
 						  	<input type="text"
@@ -420,8 +430,8 @@ function alias_replace(name){
 									),
 									$this->attributes['arrangement'][$i],
 									1,
-									"outline: 1px solid lightgrey; border: none; width: 85px; height: 18px; background-color: " . $bgcolor,
-									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+									"outline: 1px solid lightgrey; border: none; width: 85px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 85px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 						  </td>
 
@@ -442,8 +452,8 @@ function alias_replace(name){
 									),
 									$this->attributes['labeling'][$i],
 									1,
-									"outline: 1px solid lightgrey; border: none; width: 88px; height: 18px; background-color: " . $bgcolor,
-									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 59px; height: 18px;' + this.options[this.selectedIndex].getAttribute('style'));"
+									"outline: 1px solid lightgrey; border: none; width: 88px; background-color: " . $bgcolor,
+									"this.setAttribute('style', 'outline: 1px solid lightgrey; border: none; width: 88px;' + this.options[this.selectedIndex].getAttribute('style'));"
 								); ?>
 							</td>
 							
@@ -576,7 +586,7 @@ function alias_replace(name){
 						'',
 						$strPleaseSelect
 					); ?>
-					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="submit" name="go_plus" value="Attributeinstellungen für ausgewählten Layer übernehmen">
+					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="button" onclick="takeover_attributes();" value="Attributeinstellungen für ausgewählten Layer übernehmen">
 					<span style="margin-left: 10px;">
 					<i
 						id="show_attributes_for_other_layer_button"

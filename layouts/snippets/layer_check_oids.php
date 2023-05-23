@@ -147,7 +147,7 @@ function get_oid_alternative($layer) {
 				a.attrelid = '" . $layer['maintable'] . "'::regclass and 
 				attnum > 0 and 
 				attisdropped is false and 
-				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
+				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique OR atttypid::regtype = 'uuid'::regtype)
 		";
 		$ret = @pg_query($GUI->layer_dbs[$layer['connection_id']]->dbConn, $sql);
 		if($ret == false){

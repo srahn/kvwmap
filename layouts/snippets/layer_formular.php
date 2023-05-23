@@ -658,7 +658,14 @@
 								<input name="wfs_geom" type="text" value="<?php echo $this->formvars['wfs_geom']; ?>" size="50" maxlength="100">
 						</td>
 					</tr>
-				</table>				
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWriteMapserverTemplates; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<input name="write_mapserver_templates" type="checkbox" value="1"<? echo ($this->formvars['write_mapserver_templates'] ? ' checked' : ''); ?>>&nbsp;
+							<span data-tooltip="<?php echo $strWriteMapserverTemplatesHelp; ?>"></span>
+						</td>
+					</tr>
+				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">

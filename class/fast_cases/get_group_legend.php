@@ -25,6 +25,7 @@ function compare_legendorder($a, $b){
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -34,7 +35,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	return $str;
+}
+
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
 	return $str;
 }
 
@@ -1287,7 +1296,7 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'Suchergebnis' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
@@ -1454,7 +1463,7 @@ class GUI {
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -2099,6 +2108,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -2661,6 +2671,11 @@ class db_mapObj {
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
+			$rs['alias_link'] = replace_params_link(
+				$rs['alias'],
+				rolle::$layer_params,
+				$rs['Layer_ID']
+			);				
 			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -2893,6 +2908,7 @@ class db_mapObj {
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
       $Layer[] = $rs;
     }
     return $Layer;

@@ -27,6 +27,7 @@
   $this->strCreate = "Create";
 	$this->strSend = "Send";
 	$this->strSearch = "Search";
+	$this->strAddToOwnQueries = "Add to own queries";
 	$this->strEnter = "Apply";
 	$this->strConnect = "Connect";
 	$this->strReset = "Reset";
@@ -70,6 +71,7 @@
 	$this->strLayerParameters = "Layer Parameter";
 	$this->strColor = "Draw Color";
 	$this->strHatching = "Hatching";
+	$this->strBuffer = "Buffer";
 	$this->strShareRollenlayer = "Share Layer";
 	$this->strShareRollenLayerLong = "Share this layer for other user in this WebGIS";
 	$this->strLayerSharedFrom = "This Layer was shared by user";
@@ -92,4 +94,5 @@
 	$this->strVersion = 'Version';
 	$this->strComment = 'Comment';
 	$this->strDataImport = 'Data Import';
+	$this->strAutoDelete = 'auto delete';
 ?>

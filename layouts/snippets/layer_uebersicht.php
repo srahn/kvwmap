@@ -11,20 +11,20 @@
 	$this->keywords = array_unique($this->keywords);
 	sort($this->keywords);
 	
-	$this->outputGroup = function($group, $indent = 0) use ($GUI) {
+	$this->outputGroup = function($group, $indent = 0, $prefix = '') use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
 		$anzahl_layer = @count($group_layer_ids);
 		$group_keywords = [];
 		if ($anzahl_layer > 0 OR $group['untergruppen'] != '') {
 			if ($group['untergruppen'] != '') {
 				foreach ($group['untergruppen'] as $untergruppe) {
-					$subgroup = $GUI->outputGroup($GUI->groups[$untergruppe], $indent + 10);
+					$subgroup = $GUI->outputGroup($GUI->groups[$untergruppe], $indent + 15, $prefix . ' ' . $group['Gruppenname'] . ' / ');
 					$output_groups .= $subgroup['output'];
 					$group_keywords = array_merge($group_keywords, $subgroup['keywords']);
 				}
 			}
 			for ($i = 0; $i < $anzahl_layer; $i++) {
-				$layer = $GUI->outputLayer($group_layer_ids[$i], $indent + 10);
+				$layer = $GUI->outputLayer($group_layer_ids[$i], $indent + 15);
 				$output_layers .= $layer['output'];
 				$group_keywords = array_merge($group_keywords, $layer['keywords']);
 			}
@@ -36,7 +36,7 @@
 					</td>
 					<td colspan="5" bgcolor="' . BG_GLEATTRIBUTE . '" class="px17 fett"">
 						<div style="margin-left: ' . $indent . 'px;" class="layer-column">
-							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $group['Gruppenname'] . '
+							' . ($indent > 0 ? '<img src="graphics/pfeil_unten-rechts.gif">' : '') . ' ' . $prefix . ' ' . $group['Gruppenname'] . '
 						</div>
 					</td>
 				</tr>

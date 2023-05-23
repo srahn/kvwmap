@@ -98,6 +98,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -107,7 +108,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -552,7 +552,7 @@ class GUI {
 			foreach ($processings as $processing) {
 				$layer->setProcessing($processing);
 			}
-		}
+		}	
 
 		if ($layerset['postlabelcache'] != 0) {
 			$layer->set('postlabelcache',$layerset['postlabelcache']);
@@ -592,6 +592,14 @@ class GUI {
 				}				
 				$layer->set('data', $layerset['Data']);
 			}
+			
+			if (value_of($layerset, 'buffer') != 0) {
+				$geom = explode(' ', $layer->data)[0];
+				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
+				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data;
+				$layer->set('type', 2);
+			}			
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
@@ -1228,6 +1236,10 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->set('maxscaledenom', $dbStyle['maxscale']);
 				}
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+					$dbStyle['symbolname'] = NULL;
+					$dbStyle['symbol'] = NULL;
+				}				
 				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
 					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
 				}
@@ -1414,6 +1426,9 @@ class GUI {
 				if (MAPSERVERVERSION < 700 ) {
 					$label->type = 'truetype';
 				}
+				if ($dbLabel['text'] != '') {
+					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
+				}
 				$label->font = $dbLabel['font'];
 				$RGB=explode(" ",$dbLabel['color']);
 				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -1470,6 +1485,12 @@ class GUI {
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				if ($dbLabel['maxscale'] != '') {
+					$label->set('maxscaledenom', $dbLabel['maxscale']);
+				}
+				if ($dbLabel['minscale'] != '') {
+					$label->set('minscaledenom', $dbLabel['minscale']);
+				}				
 				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
 				if($this->map_factor != ''){
 					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
@@ -1759,7 +1780,9 @@ class GUI {
 	}
 
   function drawMap() {
-		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
+		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
+			set_error_handler("MapserverErrorHandler");
+		}
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
@@ -2621,7 +2644,7 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				wfs_geom, write_mapserver_templates, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
@@ -2823,6 +2846,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -3869,6 +3893,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
+				l.`buffer`,				
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,

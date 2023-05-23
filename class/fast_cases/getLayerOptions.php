@@ -42,6 +42,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -51,7 +52,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
@@ -231,9 +231,10 @@ class GUI {
     $this->Stelle->getName();
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
-	
+
 	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){
 		include_once(CLASSPATH.'FormObject.php');
+		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($layer_id == NULL){
 			if($stelle_id == NULL){			# Parameter der aktuellen Stelle abfragen
 				$stelle = $this->Stelle;
@@ -244,11 +245,12 @@ class GUI {
 				$rolle = new rolle($this->user->id, $stelle_id, $this->database);
 				$rolle->readSettings();
 			}
+			$this->params_layer = $mapDB->get_layer_params_layer();
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id)));
+			$this->params_layer = $mapDB->get_layer_params_layer(NULL, $layer_id);
+			$selectable_layer_params = implode(', ', array_keys($this->params_layer));
 			$rolle = $this->user->rolle;
 		}
 		$params = $rolle->get_layer_params($selectable_layer_params, $this->pgdatabase);
@@ -261,7 +263,7 @@ class GUI {
 					echo '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
-								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">'.$this->strLayerParameters.'</span></td>
+								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">&nbsp;'.$this->strLayerParameters.'</span></td>
 							</tr>
 							<tr>
 								<td class="rollenwahl-option-data">
@@ -271,7 +273,9 @@ class GUI {
 										echo '
 										<tr id="layer_parameter_'.$param['key'].'_tr">
 											<td valign="top" class="rollenwahl-option-header">
-												<span>'.$param['alias'].':</span>
+												<span>' . $param['alias'] .
+												 ((@count($this->params_layer[$param['id']]) == 1)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
+												</span>
 											</td>
 											<td>
 												'.FormObject::createSelectField(
@@ -397,6 +401,13 @@ class GUI {
 									</div>
 								</div><?
 							}
+							if ($layer[0]['Typ'] == 'search') {
+								echo '
+								<li>
+									<span>' . $this->strAutoDelete.': </span>
+									<input type="checkbox" value="1" name="layer_options_autodelete" ' . ($layer[0]['autodelete'] == '1' ? 'checked' : '').' style="vertical-align: bottom;">
+								</li>';
+							}
 						}
 						else {
 							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) { echo '
@@ -440,6 +451,9 @@ class GUI {
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
 						}
+						if ($this->formvars['layer_id'] > 0 AND $layer[0]['connectiontype'] == MS_POSTGIS) {
+							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
+						}						
 						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
 							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 							if ($this->user->layer_data_import_allowed) {
@@ -543,13 +557,23 @@ class GUI {
 										<input type="checkbox" value="hatch" name="layer_options_hatching" ' . ($layer[0]['Class'][0]['Style'][0]['symbolname'] == 'hatch' ? 'checked' : '').'>
 									</td>
 								</tr>';
+								
+							echo '
+								<tr>
+									<td>
+										<span>' . $this->strBuffer.': </span>
+									</td>
+									<td>
+										<input type="input" style="width: 60px" value="' . $layer[0]['buffer'] . '" name="layer_options_buffer"> m
+									</td>
+								</tr>';
 						}
 						echo '<tr>
 										<td>
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -1138,6 +1162,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -1211,7 +1236,7 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				wfs_geom, write_mapserver_templates, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				sync,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
