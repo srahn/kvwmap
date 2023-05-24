@@ -4194,6 +4194,7 @@ echo '			</table>
 	}
 
   function showMapImage(){
+		include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php');
   	$this->loadMap('DataBase');
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
@@ -4249,10 +4250,22 @@ echo '			</table>
 							bodys.removeChild(imgs);
 						}
 					</script>
+					<style>
+						table {
+							margin: auto;
+						}
+						td {
+							padding: 4px;
+						}
+					</style>
 				</head>
 				<body style=\"text-align:center\">
 					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
 					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
+					<div>
+						<h3>" . $strShowCopyrightHeader . "</h3>
+						" . $this->get_copyrights() . "
+					</div>
 				</body>
 			</html>
 			";
@@ -13618,14 +13631,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				d.id";
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		echo '<table>';
+		$output = '<table>';
 		while ($rs = $this->database->result->fetch_assoc()){
-      echo '<tr>
+      $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
 							<td>' . $rs['beschreibung'] . '</td>
 						</tr>';
     }
-		echo '</table>';
+		$output .= '</table>';
+		return $output;
 	}
 
   function LayerUebersicht() {

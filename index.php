@@ -1841,7 +1841,7 @@ function go_switch($go, $exit = false) {
 			} break;
 			
 			case "get_copyrights" : {
-				$GUI->get_copyrights();
+				echo $GUI->get_copyrights();
 			} break;
 
 			case "tooltip_query" : {
