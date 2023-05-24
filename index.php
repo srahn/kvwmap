@@ -1735,24 +1735,44 @@ function go_switch($go, $exit = false) {
 				header('location: index.php');
 			} break;
 
+			case 'datasources_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_anzeigen();
+			} break;
+
+			case 'datasources_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_create();
+			} break;
+
+			case 'datasources_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_update();
+			} break;
+
+			case 'datasources_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_delete();
+			} break;
+
 			case 'connections_anzeigen' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
 				$GUI->connections_anzeigen();
 			} break;
 
-			case 'connection_create' : {
+			case 'connections_create' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_create();
+				$GUI->connections_create();
 			} break;
 
-			case 'connection_update' : {
+			case 'connections_update' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_update();
+				$GUI->connections_update();
 			} break;
 
-			case 'connection_delete' : {
+			case 'connections_delete' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_delete();
+				$GUI->connections_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {
@@ -1818,6 +1838,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->saveMap('');
 				$GUI->output();
+			} break;
+			
+			case "get_copyrights" : {
+				$GUI->get_copyrights();
 			} break;
 
 			case "tooltip_query" : {
