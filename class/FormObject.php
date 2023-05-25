@@ -101,7 +101,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
-		$selected = ($option['value'] == $value ? ' selected' : '');
+		$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
 		$options_html[] = "
 			<option ".$onclick." ".$option_style." ".$option_class." 
 				value=\"{$option['value']}\"{$selected}" .

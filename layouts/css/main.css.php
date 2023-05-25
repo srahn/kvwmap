@@ -2613,6 +2613,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .scrolltable_header{
 	position: absolute;
 	top: 5px;
+	padding-left: 5px;
 }
 
 .toggle_fa_off i{
