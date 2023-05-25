@@ -2262,6 +2262,49 @@ FROM
     }
     return $Liste;
   }
+	
+  function getStrassenListe_not_unique($GemID,$GemkgID) {		
+	# diese Funktion wird verwendet, wenn die Strassennamen pro Gemeinde nicht eindeutig sind
+	# gleiche Straßennamen werden dann einzeln und mit Gemarkungsnamen in Klammern dahinter gelistet
+  	$sql ="set enable_seqscan = off;SELECT '000' AS gemeinde,'0' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
+    $sql.=" UNION";
+    $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
+    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON f.gemeindezugehoerigkeit_gemeinde = s.gemeinde AND l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
+		$sql.=" WHERE s.lage IS NOT NULL AND g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer ";
+    if ($GemID!='') {
+      $sql.=" AND g.schluesselgesamt='".$GemID."'";
+    }
+    if ($GemkgID!='') {
+      $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
+    }
+		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
+		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
+    $sql.=" ORDER BY gemeinde, strassenname, strasse";
+    #echo $sql;
+    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
+    $queryret=$this->execSQL($sql, 4, 0);
+    $i = 0;
+    while ($rs=pg_fetch_assoc($queryret[1])) {
+			$Liste['Gemeinde'][]=$rs['gemeinde'];
+			$Liste['StrID'][]=$rs['strasse'];
+			$Liste['Gemarkung'][]=$rs['gemkgname'];
+			$Liste['gemkgschl'][]=$rs['gemkgschl'];
+			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
+			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
+				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
+				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
+			}
+			else{
+				$Liste['Name'][]=$rs['strassenname'];
+			}
+      $i++;
+    }
+    return $Liste;
+  }	
         
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $history_mode = 'aktuell'){
 		# ax_gemarkungsteilflur kann nicht verwendet werden, da dies eine Katalogtabelle ist und Objekte in diesen nicht beendet werden

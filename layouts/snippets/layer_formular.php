@@ -680,7 +680,24 @@
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
-							<textarea name="datasource" cols="33" rows="2"><? echo $this->formvars['datasource'] ?></textarea>
+							<div id="datasource_div">
+					<? 		include_once(CLASSPATH . 'DataSource.php');
+								$datasources = DataSource::find($this);
+								echo FormObject::createSelectField(
+									'datasource',
+									array_map(
+										function($datasource) {
+											return array(
+												'value' => $datasource->get('id'),
+												'output' => $datasource->get('name') ?: $datasource->get('beschreibung')
+											);
+										},
+										$datasources
+									),
+									$this->formvars['datasource']
+								); ?>
+								<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+							</div>
 						</td>
 					</tr>
 

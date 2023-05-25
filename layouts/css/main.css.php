@@ -129,6 +129,19 @@ body {
 	margin: auto;
 }
 
+#copyrights_div table td {
+	vertical-align: top;
+	padding: 4px;
+}
+
+#copyrights_div table td:first-of-type {
+	max-width: 300px;
+}
+
+#copyrights_div table td:nth-of-type(2) {
+	max-width: 500px;
+}
+
 .notification-box {
 	margin-bottom: 5px;
 	padding: 5px;
@@ -1778,7 +1791,7 @@ a:hover .preview_image{
 
 	font-size: <? echo $font_size_factor * 17; ?>px;
 	font-family: SourceSansPro2;
-	margin: -300px 0 0 -100px;
+	margin: -300px 0 0 -220px;
 	padding: 10px;
 	text-align: center;
 	line-height: 20px;
@@ -1811,7 +1824,6 @@ a:hover .preview_image{
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 480px;
 	text-align: left;
 }
 
@@ -2601,6 +2613,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .scrolltable_header{
 	position: absolute;
 	top: 5px;
+	padding-left: 5px;
 }
 
 .toggle_fa_off i{

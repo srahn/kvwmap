@@ -4194,6 +4194,7 @@ echo '			</table>
 	}
 
   function showMapImage(){
+		include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php');
   	$this->loadMap('DataBase');
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
@@ -4249,10 +4250,22 @@ echo '			</table>
 							bodys.removeChild(imgs);
 						}
 					</script>
+					<style>
+						table {
+							margin: auto;
+						}
+						td {
+							padding: 4px;
+						}
+					</style>
 				</head>
 				<body style=\"text-align:center\">
 					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
 					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
+					<div>
+						<h3>" . $strShowCopyrightHeader . "</h3>
+						" . $this->get_copyrights() . "
+					</div>
 				</body>
 			</html>
 			";
@@ -9862,7 +9875,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				FROM
 					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
 				WHERE
-					" . $layer['oid'] . " = " . quote($oid);
+					" . $layer['oid'] . " = '" . $oid . "'";
 			#echo '<br>Sql before delete: ' . $sql_old; #pk
 			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
 			if ($ret['success']) {
@@ -9923,7 +9936,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				DELETE FROM
 					" . pg_quote($layer['maintable']) . "
 				WHERE
-					" . pg_quote($layer['oid']) . " = " . quote($oid) . "
+					" . pg_quote($layer['oid']) . " = '" . $oid . "'
 			";
 			$oids[] = $element[3];
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
@@ -13308,16 +13321,57 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function connections_anzeigen() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
-		$this->main = 'connections.php';
+		$this->myobjects = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->main = 'myobject.php';
 		$this->output();
 	}
-
-	function connection_create() {
+	
+	function connections_create() {
 		include_once(CLASSPATH . 'Connection.php');
-		$this->connection = new Connection($this);
-		$this->connection->data = formvars_strip($this->formvars, $this->connection->getKeys(), 'keep');
-		$results = $this->connection->validate();
+		$this->myobject = new Connection($this);
+		$this->myobject_create();
+	}
+	
+	function connections_update() {
+		include_once(CLASSPATH . 'Connection.php');
+		$this->myobject = new Connection($this);
+		$this->myobject_update();
+	}
+	
+	function connections_delete() {
+		include_once(CLASSPATH . 'Connection.php');
+		$this->myobject = new Connection($this);
+		$this->myobject_delete();
+	}
+	
+	function datasources_anzeigen() {
+		include_once(CLASSPATH . 'DataSource.php');
+		$this->myobjects = DataSource::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->main = 'myobject.php';
+		$this->output();
+	}
+	
+	function datasources_create() {
+		include_once(CLASSPATH . 'DataSource.php');
+		$this->myobject = new DataSource($this);
+		$this->myobject_create();
+	}
+	
+	function datasources_update() {
+		include_once(CLASSPATH . 'DataSource.php');
+		$this->myobject = new DataSource($this);
+		$this->myobject_update();
+	}
+	
+	function datasources_delete() {
+		include_once(CLASSPATH . 'DataSource.php');
+		$this->myobject = new DataSource($this);
+		$this->myobject_delete();
+	}	
+	
+	function myobject_create() {
+		$this->myobject->data = formvars_strip($this->formvars, $this->myobject->getKeys(), 'keep');
+		$results = $this->myobject->validate();
 		if (count($results) > 0) {
 			$result = array(
 				'success' => false,
@@ -13333,7 +13387,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 		}
 		else {
-			$results = $this->connection->create();
+			$results = $this->myobject->create();
 			$result = $results[0];
 		}
 		# return success and id of created connection or error and error msg in json format
@@ -13341,9 +13395,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->formvars['format'] = 'json';
 		$this->qlayerset[0]['shape'] = array($result);
 		$this->output();
-	}
-
-	function connection_update() {
+	}		
+	
+	function myobject_update() {
 		if ($this->formvars['id'] == '') {
 			$result = array(
 				'success' => false,
@@ -13351,17 +13405,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 		}
 		else {
-			include_once(CLASSPATH . 'Connection.php');
-			$this->connection = Connection::find_by_id($this, $this->formvars['id']);
-			if ($this->connection->get('id') != $this->formvars['id']) {
+			$this->myobject->find_by('id', $this->formvars['id']);
+			if ($this->myobject->get('id') != $this->formvars['id']) {
 				$result = array(
 					'success' => false,
-					'err_msg' => 'Der Datensatz mit der ID: '. $this->formcars['id'] . ' kann nicht aktualisiert werden, weil er in der Datenbank nicht existiert.'
+					'err_msg' => 'Der Datensatz mit der ID: '. $this->formvars['id'] . ' kann nicht aktualisiert werden, weil er in der Datenbank nicht existiert.'
 				);
 			}
 			else {
-				$this->connection->data = formvars_strip($this->formvars, $this->connection->getKeys(), 'keep');
-				$results = $this->connection->validate();
+				$this->myobject->data = formvars_strip($this->formvars, $this->myobject->getKeys(), 'keep');
+				$results = $this->myobject->validate();
 				if (count($results) > 0) {
 					$result = array(
 						'success' => false,
@@ -13377,17 +13430,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					);
 				}
 				else {
-					$results = $this->connection->update($data);
+					$results = $this->myobject->update($this->myobject->data);
 					if ($results[0]['success']) {
 						$result = array(
 							'success' => true,
-							'msg' => 'Der Datensatz mit der ID: ' . $this->connection->get('id') . ' konnte erfolgreich aktualisiert werden.'
+							'msg' => 'Der Datensatz mit der ID: ' . $this->myobject->get('id') . ' konnte erfolgreich aktualisiert werden.'
 						);
 					}
 					else {
 						$result = array(
 							'success' => false,
-							'err_msg' => 'Fehler beim Aktualisieren des Datensatzes mit der ID: ' . $this->connection->get('id') . ' Meldung: ' . $results[0]['err_msg']
+							'err_msg' => 'Fehler beim Aktualisieren des Datensatzes mit der ID: ' . $this->myobject->get('id') . ' Meldung: ' . $results[0]['err_msg']
 						);
 					}
 
@@ -13401,7 +13454,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->output();
 	}
 
-	function connection_delete() {
+	function myobject_delete() {
 		if ($this->formvars['id'] == '') {
 			$result = array(
 				'success' => false,
@@ -13409,16 +13462,15 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 		}
 		else {
-			include_once(CLASSPATH . 'Connection.php');
-			$this->connection = Connection::find_by_id($this, $this->formvars['id']);
-			if ($this->connection->get('id') != $this->formvars['id']) {
+			$this->myobject->find_by('id', $this->formvars['id']);
+			if ($this->myobject->get('id') != $this->formvars['id']) {
 				$result = array(
 					'success' => false,
 					'err_msg' => 'Der Datensatz mit der ID: '. $this->formvars['id'] . ' kann nicht gelöscht werden, weil er in der Datenbank nicht existiert.'
 				);
 			}
 			else {
-				$result = $this->connection->delete();
+				$result = $this->myobject->delete();
 				if (!$result) {
 					$result = array(
 						'success' => false,
@@ -13431,19 +13483,19 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						case (-1) : {
 							$result = array(
 								'success' => false,
-								'err_msg' => 'Fehler beim Löschen des Datensatzes mit der ID: ' . $this->connection->get('id')
+								'err_msg' => 'Fehler beim Löschen des Datensatzes mit der ID: ' . $this->myobject->get('id')
 							);
 						} break;
 						case (0) : {
 							$result = array(
 								'success' => false,
-								'err_msg' => 'Achtung! Es wurde kein Datensatz gelöscht. Der Datensatz mit der ID: ' . $this->connection->get('id') . ' ist nicht mehr vorhanden.'
+								'err_msg' => 'Achtung! Es wurde kein Datensatz gelöscht. Der Datensatz mit der ID: ' . $this->myobject->get('id') . ' ist nicht mehr vorhanden.'
 							);
 						} break;
 						case (1) : {
 							$result = array(
 								'success' => true,
-								'msg' => 'Datensatz mit der ID: ' . $this->connection->get('id') . ' erfolgreich gelöscht.'
+								'msg' => 'Datensatz mit der ID: ' . $this->myobject->get('id') . ' erfolgreich gelöscht.'
 							);
 						} break;
 						default : {
@@ -13562,6 +13614,32 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->crontab_lines = $crontab_lines;
 		$this->main = 'crontab.php';
 		$this->output();
+	}
+	
+	function get_copyrights(){
+		$sql = "
+			SELECT 
+				GROUP_CONCAT(l.Name SEPARATOR ', ') as layer, 
+				d.beschreibung
+			FROM 
+				`datasources` as d
+				JOIN layer as l ON l.datasource = d.id
+				JOIN u_rolle2used_layer r ON r.layer_id = l.Layer_ID AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
+			WHERE
+				r.aktivStatus != '0'
+			GROUP BY
+				d.id";
+		$ret = $this->database->execSQL($sql, 4, 1);
+		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+		$output = '<table>';
+		while ($rs = $this->database->result->fetch_assoc()){
+      $output .= '<tr>
+							<td>' . $rs['layer'] . '</td>
+							<td>' . $rs['beschreibung'] . '</td>
+						</tr>';
+    }
+		$output .= '</table>';
+		return $output;
 	}
 
   function LayerUebersicht() {
@@ -21032,9 +21110,9 @@ class Document {
       $sql .= ", `scalesize` = '" . $formvars['scalesize']."'";
 			$sql .= ", `scalebarposx` = '" . $formvars['scalebarposx']."'";
       $sql .= ", `scalebarposy` = '" . $formvars['scalebarposy']."'";
-      $sql .= ", `oscaleposx` = '" . $formvars['oscaleposx']."'";
-      $sql .= ", `oscaleposy` = '" . $formvars['oscaleposy']."'";
-      $sql .= ", `oscalesize` = '" . $formvars['oscalesize']."'";
+      $sql .= ", `oscaleposx` = " . ($formvars['oscaleposx'] ?: 'NULL');
+      $sql .= ", `oscaleposy` = " . ($formvars['oscaleposy'] ?: 'NULL');
+      $sql .= ", `oscalesize` = " . ($formvars['oscalesize'] ?: 'NULL');
 			$sql .= ", `lageposx` = '" . $formvars['lageposx']."'";
       $sql .= ", `lageposy` = '" . $formvars['lageposy']."'";
       $sql .= ", `lagesize` = '" . $formvars['lagesize']."'";
