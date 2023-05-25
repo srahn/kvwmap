@@ -132,8 +132,13 @@ class adresse {
   }
 
   function getStrassenListe($GemID,$GemkgID) {
-    # Funktion liefert eine Liste der Strassen innerhalb der GemID 
-    $StrassenListe=$this->database->getStrassenListe($GemID, $GemkgID);
+    # Funktion liefert eine Liste der Strassen innerhalb der GemID
+		if (STRASSENNAMEN_EINDEUTIG) {
+			$StrassenListe = $this->database->getStrassenListe($GemID, $GemkgID);
+		}
+		else {
+			$StrassenListe = $this->database->getStrassenListe_not_unique($GemID, $GemkgID);
+		}
     return $StrassenListe;
   }
   
