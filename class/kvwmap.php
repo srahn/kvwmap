@@ -21110,9 +21110,9 @@ class Document {
       $sql .= ", `scalesize` = '" . $formvars['scalesize']."'";
 			$sql .= ", `scalebarposx` = '" . $formvars['scalebarposx']."'";
       $sql .= ", `scalebarposy` = '" . $formvars['scalebarposy']."'";
-      $sql .= ", `oscaleposx` = '" . $formvars['oscaleposx']."'";
-      $sql .= ", `oscaleposy` = '" . $formvars['oscaleposy']."'";
-      $sql .= ", `oscalesize` = '" . $formvars['oscalesize']."'";
+      $sql .= ", `oscaleposx` = " . ($formvars['oscaleposx'] ?: 'NULL');
+      $sql .= ", `oscaleposy` = " . ($formvars['oscaleposy'] ?: 'NULL');
+      $sql .= ", `oscalesize` = " . ($formvars['oscalesize'] ?: 'NULL');
 			$sql .= ", `lageposx` = '" . $formvars['lageposx']."'";
       $sql .= ", `lageposy` = '" . $formvars['lageposy']."'";
       $sql .= ", `lagesize` = '" . $formvars['lagesize']."'";
