@@ -18980,7 +18980,7 @@ class db_mapObj{
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
 					" . quote($formvars['kurzbeschreibung']) . ",
-					" . quote($formvars['datasource']) . ",
+					" . quote_or_null($formvars['datasource']) . ",
 					" . quote($formvars['dataowner_name']) . ",
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
