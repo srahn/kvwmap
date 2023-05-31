@@ -180,11 +180,21 @@ class GUI {
 	}
 
 	function login() {
-		$this->expect = array('login_name', 'passwort', 'mobile');
-		if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
-			$this->expect[] = 'go';
+		if ($this->formvars['format'] == 'json') {
+			$this->mime_type = 'application/json';
+			$this->formvars['content_type'] = 'application/json';
+			$this->qlayerset[0]['shape'] = array(
+				'success' => false,
+				'msg' => 'Login erforderlich'
+			);
 		}
-		$this->gui = LOGIN;
+		else {
+			$this->expect = array('login_name', 'passwort', 'mobile');
+			if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
+				$this->expect[] = 'go';
+			}
+			$this->gui = LOGIN;
+		}
 		$this->output();
 	}
 
@@ -18321,7 +18331,7 @@ class db_mapObj{
 		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Typ'] == 'import') {
-				if ($rollenlayerset[$i]['Datentyp'] != 3 ){
+				if ($rollenlayerset[$i]['connectiontype'] == 6 ){
 					# bei Postgis-Layern die Tabelle löschen
 					$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
 					$explosion = explode(' ', $explosion[1]);
@@ -18342,7 +18352,7 @@ class db_mapObj{
 						$query = pg_query($sql);
 					}
 				}
-				else {
+				elseif ($rollenlayerset[$i]['connectiontype'] == 0) {
 					# bei Raster-Layern die Raster-Datei löschen
 					unlink(SHAPEPATH . $rollenlayerset[$i]['Data']);
 				}
