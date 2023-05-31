@@ -18321,7 +18321,7 @@ class db_mapObj{
 		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Typ'] == 'import') {
-				if ($rollenlayerset[$i]['Datentyp'] != 3 ){
+				if ($rollenlayerset[$i]['connectiontype'] == 6 ){
 					# bei Postgis-Layern die Tabelle löschen
 					$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
 					$explosion = explode(' ', $explosion[1]);
@@ -18342,7 +18342,7 @@ class db_mapObj{
 						$query = pg_query($sql);
 					}
 				}
-				else {
+				elseif ($rollenlayerset[$i]['connectiontype'] == 0) {
 					# bei Raster-Layern die Raster-Datei löschen
 					unlink(SHAPEPATH . $rollenlayerset[$i]['Data']);
 				}
