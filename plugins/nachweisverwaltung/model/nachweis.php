@@ -1189,7 +1189,7 @@ class Nachweis {
 								$sql.=" AND REGEXP_REPLACE(COALESCE(".$n.".stammnr, ''), '[^0-9]+' ,'', 'g') = '".$stammnr."'";
 							}
 							else{
-								$sql.=" AND lower(".$n.".stammnr)='".mb_strtolower($stammnr)."'";
+								$sql.=" AND lower(".$n.".stammnr) like '".mb_strtolower($stammnr)."'";
 							}
 						}
           }
