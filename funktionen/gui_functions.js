@@ -714,6 +714,7 @@ function set_hist_timestamp() {
 	var cartesian = svgdoc.getElementById("cartesian");
 	var mapimg3 = mapimg.cloneNode();
 	var mapimg4 = mapimg.cloneNode();
+	var mapimg0 = mapimg.cloneNode();
 	if (hist_timestamp != '') {
 		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
@@ -725,6 +726,9 @@ function set_hist_timestamp() {
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	mapimg3.setAttribute('id', 'mapimg3');
 	mapimg4.setAttribute('id', 'mapimg4');
+	mapimg0.setAttribute('id', 'mapimg0');
+	mapimg0.setAttribute('onload', 'top.pass_preloaded_img()');
+	movegroup.insertBefore(mapimg0, mapimg);
 	movegroup.insertBefore(mapimg4, cartesian);
 	movegroup.insertBefore(mapimg3, mapimg4);
 	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
@@ -734,14 +738,19 @@ function set_hist_timestamp() {
 	document.getElementById('hist_range_div').scrollLeft = scroll;
 }
 
+function pass_preloaded_img(){
+	svgdoc = document.SVG.getSVGDocument();
+	svgdoc.getElementById("mapimg4").setAttribute('href', svgdoc.getElementById("mapimg0").getAttribute('href'));
+}
+
 function get_map(){
 	svgdoc = document.SVG.getSVGDocument();	
-	var mapimg4 = svgdoc.getElementById("mapimg4");
+	var mapimg0 = svgdoc.getElementById("mapimg0");
 	var nht = structuredClone(new_hist_timestamp);
 	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
 	let ts = nht.toLocaleString().replace(',', '');
 	document.GUI.hist_timestamp2.value = ts;
-	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	mapimg0.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
 }
 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
