@@ -21,6 +21,8 @@ root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
+var mapimg3, mapimg4;
+var compare_clipping = false;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -708,15 +710,31 @@ function formdata2urlstring(formdata){
 	return url;
 }
 
-function set_hist_timestamp() {
+function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();	
 	var mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
-	var mapimg3 = mapimg.cloneNode();
-	var mapimg4 = mapimg.cloneNode();
+	mapimg3 = mapimg.cloneNode();
+	mapimg4 = mapimg.cloneNode();
+	mapimg3.setAttribute('id', 'mapimg3');
+	mapimg4.setAttribute('id', 'mapimg4');
+	movegroup.insertBefore(mapimg4, cartesian);
+	movegroup.insertBefore(mapimg3, mapimg4);
+}
+
+function compare_view_for_layer(layer_id){
+	compare_clipping = true;
+	add_split_mapimgs();
+	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&not_layer_id=' + layer_id + '&current_date=' + current_date);
+	//mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_layer_id=' + layer_id + '&current_date=' + current_date);
+	mapimg4.setAttribute("clip-path", 'url(#compare_clipper)');
+}
+
+function set_hist_timestamp() {
+	add_split_mapimgs();
 	if (hist_timestamp != '') {
 		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
@@ -726,10 +744,6 @@ function set_hist_timestamp() {
 		new_hist_timestamp = new Date();
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
-	mapimg3.setAttribute('id', 'mapimg3');
-	mapimg4.setAttribute('id', 'mapimg4');
-	movegroup.insertBefore(mapimg4, cartesian);
-	movegroup.insertBefore(mapimg3, mapimg4);
 	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
 	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
