@@ -95,4 +95,5 @@
 	$this->strComment = 'Comment';
 	$this->strDataImport = 'Data Import';
 	$this->strAutoDelete = 'auto delete';
+	$this->strCompareView = 'Comparison View';
 ?>

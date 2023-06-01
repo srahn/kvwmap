@@ -961,6 +961,7 @@
 			var nachweise = new Array();\n";
 			
 		for($i = 0; $i < count($GUI->nachweis->Dokumente); $i++){
+			$GUI->nachweis->Dokumente[$i]['bearbeitungshinweis'] = 'mailto:' . $GUI->nachweis->Dokumente[$i]['email'] . '?subject=Bearbeitungshinweis zum Nachweis ' . $GUI->nachweis->Dokumente[$i]['client_nachweis_id'];
 			$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($GUI->nachweis->Dokumente[$i])))))));
 			$html.= "			nachweise.push(JSON.parse('".$json."'));\n";
 		}	
@@ -980,6 +981,7 @@
 			columns['geprueft'] = 'geprüft';
 			columns['format'] = 'Format';
 			columns['dokument_path'] = 'Dokument';
+			columns['bearbeitungshinweis'] = 'Bearbeitungshinweis';
 			
 			var filters = new Array();
 			
@@ -1007,6 +1009,7 @@
 						for(var key in columns){
 							var value = arr[i][key];
 							var td = _td_.cloneNode(false);
+							options = null;
 							if(key == 'dokument_path' && value != null){
 								path_parts = value.split('/');
 								filename = path_parts[path_parts.length-1];
@@ -1020,14 +1023,23 @@
 								a.innerHTML = filename;
 								cellcontent = a;
 							}
-							else cellcontent = document.createTextNode(value || '');
+							else if(key == 'bearbeitungshinweis' && value != null) {
+								a = document.createElement('a');
+								a.target = '_blank';
+								a.href = value;
+								a.innerHTML = 'Hinweis senden';
+								cellcontent = a;
+							}
+							else {
+								cellcontent = document.createTextNode(value || '');
+								options = document.createElement('input');
+								options.className='options';
+								options.type='button';
+								options.setAttribute('onclick', \"showFilterForm(this.parentNode, '\"+key+\"', '\"+value+\"')\");
+								options.value= '\u25BD';	// 2630
+							}
 							td.appendChild(cellcontent);
-							options = document.createElement('input');
-							options.className='options';
-							options.type='button';
-							options.setAttribute('onclick', \"showFilterForm(this.parentNode, '\"+key+\"', '\"+value+\"')\");
-							options.value= '\u25BD';	// 2630
-							td.appendChild(options);
+							if (options != null)td.appendChild(options);
 							tr.appendChild(td);
 						}
 						table.appendChild(tr);

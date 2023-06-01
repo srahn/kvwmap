@@ -560,6 +560,7 @@ class GUI {
 								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 							}
 						}
+						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
 								echo '<li><a href="javascript:void();" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
@@ -1971,6 +1972,9 @@ echo '			</table>
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
 				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
 				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
+				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
+				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
+				
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
@@ -2319,7 +2323,7 @@ echo '			</table>
       	$klasse->set('status', MS_OFF);
       }
       $klasse -> set('template', value_of($layerset, 'template'));
-      $klasse -> setexpression($classset[$j]['Expression']);
+			$klasse -> setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
 				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -16850,7 +16854,9 @@ class db_mapObj{
 				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
 				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
-				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . "
+				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
+				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') . 
+				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
@@ -18399,7 +18405,7 @@ class db_mapObj{
 		$rollenlayerset = $this->read_RollenLayer($id, $type);
 		for ($i = 0; $i < count($rollenlayerset); $i++){
 			if ($rollenlayerset[$i]['Typ'] == 'import') {
-				if ($rollenlayerset[$i]['Datentyp'] != 3 ){
+				if ($rollenlayerset[$i]['connectiontype'] == 6 ){
 					# bei Postgis-Layern die Tabelle löschen
 					$explosion = explode(CUSTOM_SHAPE_SCHEMA.'.', $rollenlayerset[$i]['Data']);
 					$explosion = explode(' ', $explosion[1]);
@@ -18420,7 +18426,7 @@ class db_mapObj{
 						$query = pg_query($sql);
 					}
 				}
-				else {
+				elseif ($rollenlayerset[$i]['connectiontype'] == 0) {
 					# bei Raster-Layern die Raster-Datei löschen
 					unlink(SHAPEPATH . $rollenlayerset[$i]['Data']);
 				}
@@ -18980,7 +18986,7 @@ class db_mapObj{
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
 					" . quote($formvars['kurzbeschreibung']) . ",
-					" . quote($formvars['datasource']) . ",
+					" . quote_or_null($formvars['datasource']) . ",
 					" . quote($formvars['dataowner_name']) . ",
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",

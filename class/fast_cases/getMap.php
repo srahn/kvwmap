@@ -489,6 +489,9 @@ class GUI {
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
 				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
 				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
+				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
+				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
+				
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
@@ -2201,7 +2204,9 @@ class db_mapObj {
 				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
 				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
-				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . "
+				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
+				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') . 
+				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
@@ -2448,7 +2453,9 @@ class db_mapObj {
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
+				($this->nurLayerID ? " AND l.id = " . -($this->nurLayerID) : '') . 
+				($this->nichtLayerID ? " AND l.id != " . -($this->nichtLayerID) : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
