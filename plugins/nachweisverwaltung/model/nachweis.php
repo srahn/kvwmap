@@ -42,6 +42,8 @@ class Nachweis {
     
   function __construct($database, $client_epsg) {
     global $debug;
+		global $kvwmap_plugins;
+		$this->lenris_plugin = in_array('lenris', $kvwmap_plugins);
     $this->debug=$debug;
     $this->database=$database;
     $this->client_epsg=$client_epsg;
@@ -1067,12 +1069,25 @@ class Nachweis {
       } break;
 
       case "multibleIDs" : {
-				$sql ="SELECT distinct n.*,st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,v.name AS vermst, h.id as hauptart, lower(h.abkuerzung) as hauptart_abk, n.art AS unterart, d.art AS unterart_name, h.art as art_name"; 
-				$sql.=" FROM nachweisverwaltung.n_nachweise AS n";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
-				$sql.=" LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart";
-        $sql.=" WHERE true ";
+				$sql = "
+					SELECT distinct " .
+						($this->lenris_plugin? 'cn.client_nachweis_id, c.email, ' : "n.id as client_nachweis_id, '" . NACHWEISE_EMAIL . "' as email, ") . "
+						n.*,
+						st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,
+						v.name AS vermst, 
+						h.id as hauptart, 
+						lower(h.abkuerzung) as hauptart_abk, 
+						n.art AS unterart, 
+						d.art AS unterart_name, 
+						h.art as art_name
+					FROM 
+						nachweisverwaltung.n_nachweise AS n " .
+						($this->lenris_plugin? 'JOIN lenris.client_nachweise cn ON cn.nachweis_id = n.id	JOIN lenris.clients c ON c.client_id = cn.client_id' : '') . "
+						LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id 
+						LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id 
+						LEFT JOIN nachweisverwaltung.n_hauptdokumentarten h ON h.id = d.hauptart
+					WHERE 
+						true ";
 				if($gueltigkeit != NULL)$sql.=" AND gueltigkeit = ".$gueltigkeit." AND ";
 				if($geprueft != NULL)$sql.=" AND geprueft = ".$geprueft;
         if ($idselected[0]!=0) {
