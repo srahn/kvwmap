@@ -1290,7 +1290,7 @@ a.menuered:hover {
 
 #header{
 	height: <? echo ($size['header']['height'] - 2); ?>px;
-	border: 1px solid; 
+	border: 1px solid;
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
