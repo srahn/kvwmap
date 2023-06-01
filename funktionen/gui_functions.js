@@ -21,7 +21,7 @@ root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
-var mapimg3, mapimg4;
+var mapimg0, mapimg3, mapimg4;
 var compare_clipping = false;
 
 window.onbeforeunload = function(){
@@ -713,7 +713,8 @@ function formdata2urlstring(formdata){
 function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
-	svgdoc.getElementById("mapimg4")?.remove();
+	svgdoc.getElementById("mapimg4")?.remove();	
+	svgdoc.getElementById("mapimg0")?.remove();
 	var mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
@@ -756,8 +757,7 @@ function set_hist_timestamp() {
 }
 
 function pass_preloaded_img(){
-	svgdoc = document.SVG.getSVGDocument();
-	svgdoc.getElementById("mapimg4").setAttribute('href', svgdoc.getElementById("mapimg0").getAttribute('href'));
+	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
 }
 
 function get_map(){
