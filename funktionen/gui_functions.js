@@ -21,6 +21,7 @@ root.getlegend_requests = new Array();
 var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
+var mapimg0, mapimg3, mapimg4;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -709,12 +710,13 @@ function set_hist_timestamp() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();	
+	svgdoc.getElementById("mapimg0")?.remove();
 	var mapimg = svgdoc.getElementById("mapimg");
 	var movegroup = svgdoc.getElementById("moveGroup");
 	var cartesian = svgdoc.getElementById("cartesian");
-	var mapimg3 = mapimg.cloneNode();
-	var mapimg4 = mapimg.cloneNode();
-	var mapimg0 = mapimg.cloneNode();
+	mapimg3 = mapimg.cloneNode();
+	mapimg4 = mapimg.cloneNode();
+	mapimg0 = mapimg.cloneNode();
 	if (hist_timestamp != '') {
 		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
@@ -739,8 +741,7 @@ function set_hist_timestamp() {
 }
 
 function pass_preloaded_img(){
-	svgdoc = document.SVG.getSVGDocument();
-	svgdoc.getElementById("mapimg4").setAttribute('href', svgdoc.getElementById("mapimg0").getAttribute('href'));
+	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
 }
 
 function get_map(){
