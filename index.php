@@ -276,7 +276,7 @@ function go_switch($go, $exit = false) {
 			case 'getMap' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if ($GUI->formvars['hist_timestamp'] != '') {
-					rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+					rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $GUI->formvars['hist_timestamp'])->format('Y-m-d H:i:s');
 				}
 				$GUI->loadMap('DataBase');
 				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
