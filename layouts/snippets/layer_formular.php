@@ -881,7 +881,7 @@
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strrequires; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 						$group_layer_options = array();
-						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+						foreach (($this->grouplayers['ID'] ?: []) AS $index => $grouplayer_id) {
 							$group_layer_options[] = array(
 								'value' => $grouplayer_id,
 								'output' => $this->grouplayers['Bezeichnung'][$index]
@@ -918,7 +918,7 @@
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
