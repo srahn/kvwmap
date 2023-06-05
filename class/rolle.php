@@ -238,6 +238,28 @@ class rolle {
     }
     return $ret;
   }
+	
+  function read_disabled_class_expressions() {
+		$sql = "
+			SELECT 
+				cl.Layer_ID,
+				cl.Class_ID,
+				cl.Expression
+			FROM 
+				classes as cl
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID 
+			WHERE 
+				r2uc.status = 0 AND 
+				r2uc.user_id = " . $this->user_id . "	AND 
+				r2uc.stelle_id = " . $this->stelle_id . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->database->execSQL($sql);
+    while ($row = $this->database->result->fetch_assoc()) {
+  		$result[$row['Layer_ID']][] = $row;
+		}
+		return $result ?: [];
+  }	
 
   function getGroups($GroupName) {
 		global $language;

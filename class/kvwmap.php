@@ -14894,7 +14894,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layerset)-1;
-		$map = (MAPSERVERVERSION < 600) ? ms_newMapObj('') : new mapObj('');
+		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions();
+		$map = new mapObj('');
 		$map->set('shapepath', SHAPEPATH);
 		for ($i = 0; $i < $anzLayer; $i++) {
 			$sql_order = '';
@@ -15162,6 +15163,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
+							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
+							if (array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
+								foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
+									$disabled_class_filter[] = '(' . mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) . ')';
+								}
+								$filter .= " AND NOT (" . implode(' OR ', $disabled_class_filter) . ")";
+							}							
 							if($this->formvars['CMD'] == 'touchquery'){
 								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
 									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
