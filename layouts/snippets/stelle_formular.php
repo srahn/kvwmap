@@ -364,7 +364,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 											<select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width: 340px">
 											<?
-											for($i=0; $i < count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+											for($i=0; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
 												echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
 											}
 											?>
@@ -449,7 +449,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedframes" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < count($this->formvars['selframes']); $i++){
+											for($i=0; $i < @count($this->formvars['selframes']); $i++){
 													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
 												 }
 											?>
@@ -489,7 +489,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedlayouts" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < count($this->formvars['sellayouts']); $i++){
+											for($i=0; $i < @count($this->formvars['sellayouts']); $i++){
 													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
 												 }
 											?>
@@ -517,7 +517,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
 									<th class="fetter" align="right">
-									<? if(count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
+									<? if(@count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
 										<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 									<?}?>
 									<?php echo $strLayer; ?></th>
@@ -533,7 +533,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
-											for($i=0; $i < count($this->formvars['sellayer']["Bezeichnung"]); $i++){
+											for($i=0; $i < @count($this->formvars['sellayer']["Bezeichnung"]); $i++){
 													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
@@ -581,7 +581,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							<tr valign="top">
 								<td>
 									<select name="selectedusers" size="6" multiple style="position: relative; width: 340px"><?
-										for ($i = 0; $i < count($this->formvars['selusers']["Bezeichnung"]); $i++) {
+										for ($i = 0; $i < @count($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
 												'value'	=> $this->formvars['selusers']["ID"][$i],
 												'output' => $this->formvars['selusers']["Bezeichnung"][$i]
@@ -1100,7 +1100,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<?php echo $strDefaultUserID; ?>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3"><?php
-						echo FormObject::createSelectField('default_user_id', $seluseroptions, $this->formvars['default_user_id'], 1, 'width: auto'); ?>
+						echo FormObject::createSelectField('default_user_id', $seluseroptions ?: [], $this->formvars['default_user_id'], 1, 'width: auto'); ?>
 					</td>
 				</tr>
 
@@ -1221,7 +1221,7 @@ if ($this->formvars['go'] != 'Dienstmetadaten') { ?>
 
 	<input
 		name="sellayer"
-		value="<?php echo implode(', ', $this->formvars['sellayer']['ID']); ?>"
+		value="<?php echo implode(', ', $this->formvars['sellayer']['ID'] ?: []); ?>"
 		type="hidden"
 	>
 
