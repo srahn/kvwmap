@@ -96,4 +96,5 @@
 	$this->strDataImport = 'Data Import';
 	$this->strAutoDelete = 'auto delete';
 	$this->strCompareView = 'Comparison View';
+	$this->strAutoClassify = 'classify by';
 ?>

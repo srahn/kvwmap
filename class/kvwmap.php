@@ -583,6 +583,23 @@ class GUI {
 						}
 						echo '</ul>
 						<table class="ul_table">';
+						if ($this->formvars['layer_id'] < 0) {
+							echo '<tr>
+												<td>
+													<span>' . $this->strAutoClassify . ':</span>
+												</td>
+												<td>
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+														<option value=""> - </option>';
+														for ($i = 0; $i < count($attributes)-2; $i++){
+															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
+																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$attributes[$i]['name']] ?: $attributes[$i]['name']).'</option>';
+															}
+														}
+									echo 	 '</select>
+												</td>
+											</tr>';
+						}						
 						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if ($layer[0]['connectiontype'] == 6) {
 							if ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '') {
@@ -5553,6 +5570,35 @@ echo '			</table>
 			$this->PolygonEditor();
 		}
 	}
+	
+	function create_auto_classes_for_rollenlayer(){
+		$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->formvars['selected_layer_id'] = $this->formvars['layer_options_open'];
+		$auto_class_attribute = $this->formvars['klass_'.$this->formvars['selected_layer_id']];
+		$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
+		$this->GenerischeSuche_Suchen();
+		$result= $this->qlayerset[0]['shape'];
+		$attributes = $this->qlayerset[0]['attributes'];
+		# alte Klassen löschen
+		$this->classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
+		for($i = 0; $i < count($this->classes); $i++){
+			$dbmap->delete_Class($this->classes[$i]['Class_ID']);
+		}
+		for ($i = 0; $i < count($result); $i++) {
+			foreach ($result[$i] As $key => $value) {
+				if ($auto_class_attribute === $key) {
+					$classes[$value] = $value;
+				}
+			}
+		}
+		$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['Datentyp'], $this->database);
+		$this->loadMap('DataBase');
+    $this->saveMap('');
+    $currenttime=date('Y-m-d H:i:s',time());
+    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    $this->drawMap();
+    $this->output();
+	}
 
 	function zoomto_selected_datasets(){
     $dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -5704,12 +5750,13 @@ echo '			</table>
 		$this->formvars['Gruppe'] = $groupid;
 		$this->formvars['Typ'] = 'search';
 		$this->formvars['Data'] = $datastring;
+		$this->formvars['query'] = $select;
 		$this->formvars['Datentyp'] = $layerset[0]['Datentyp'];
 		$this->formvars['connectiontype'] = 6;
 		if ($layerset[0]['labelitem'] != 'Cluster_FeatureCount') {
 			$this->formvars['labelitem'] = $layerset[0]['labelitem'];
 		}
-		$this->formvars['classitem'] = $layerset[0]['classitem'];
+		#$this->formvars['classitem'] = $layerset[0]['classitem'];
 		$this->formvars['connection_id'] = $layerdb->connection_id;
 		$this->formvars['epsg_code'] = $layerset[0]['epsg_code'];
 		if ($layerset[0]['Datentyp'] == MS_LAYER_POLYGON) {
@@ -18617,7 +18664,8 @@ class db_mapObj{
       $style['outlinecolorgreen'] = 0;
       $style['outlinecolorblue'] = 0;
      	$style['size'] = 3;
-     	if($datatype < 2){
+			$style['width'] = 2;
+     	if($datatype == MS_LAYER_POINT){
       	$style['symbolname'] = 'circle';
       	if($datatype == 0){
       		$style['size'] = 13;

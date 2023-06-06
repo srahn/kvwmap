@@ -39,19 +39,6 @@ register_shutdown_function(function () {
 	}
 });
 
-# Error-Handling
-// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	// global $errors;
-	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		// return;
-	// }
-	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	// http_response_code(500);
-	// include_once('layouts/snippets/general_error_page.php');
-	// /* Don't execute PHP internal error handler */
-	// return true;
-// }
-
 function CustomErrorHandler($severity, $message, $filename, $lineno) {
 	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
@@ -689,6 +676,11 @@ function go_switch($go, $exit = false) {
 			case 'zoomto_dataset' : {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
+			}break;
+			
+			case 'create_auto_classes_for_rollenlayer' : {
+				$GUI->sanitize(['layer_options_open' => 'int']);
+				$GUI->create_auto_classes_for_rollenlayer();
 			}break;
 
 			# PointEditor
