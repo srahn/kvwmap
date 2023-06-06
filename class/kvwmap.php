@@ -559,6 +559,9 @@ class GUI {
 							if ($this->user->layer_data_import_allowed) {
 								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 							}
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
+							}							
 						}
 						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
 						if ($layer[0]['Class'][0]['Name'] != '') {
