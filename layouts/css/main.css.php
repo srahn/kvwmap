@@ -2591,7 +2591,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .attribute-editor-table td {
-	padding-right: 2px
+	padding-right: 2px;
 }
 
 #neuer_datensatz_button {
@@ -2599,6 +2599,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
+}
+
+.scrolltable {
+	position: relative;
 }
 
 .scrolltable thead, .scrolltable tbody {
@@ -2612,7 +2616,13 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .scrolltable_header{
 	position: absolute;
-	top: 5px;
+	top: -30px;
+	padding-left: 5px;
+}
+
+.scrolltable_footer{
+	position: absolute;
+	bottom: -30px;
 	padding-left: 5px;
 }
 
