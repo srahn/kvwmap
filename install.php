@@ -41,7 +41,7 @@ class GUI {
 		echo '<br>' . $msg;
 	}
 }
-$GUI = new GUI();
+$GUI = new GUI(NULL, NULL, NULL);
 
 output_header();
 
