@@ -11686,16 +11686,40 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 		else {
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$this->layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$this->rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['rollenlayer_id'], NULL);
 			if (!empty($this->rollenlayer)) {
 				$this->pgdatabase->schema = ($this->rollenlayer[0]['Typ'] == 'import'? CUSTOM_SHAPE_SCHEMA : 'public');
 				$this->rollenlayer_attributes = $mapDB->load_attributes($this->pgdatabase, $this->rollenlayer[0]['query']);
-				$this->layer_attributes = $mapDB->load_attributes($layerdb, $this->layer[0]['pfad']);
+				$this->layer_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, true, false, false);
 			}
 		}
 		$this->main = 'import_rollenlayer_into_layer.php';
-		$this->output();
+	}
+	
+	function import_rollenlayer_into_layer_importieren(){
+		$this->import_rollenlayer_into_layer();
+		$sql = "
+			INSERT INTO 
+				" . $this->layer[0]['maintable'] . "
+				(" . implode(', ', $this->formvars['layer_attributes']) . ")
+			SELECT 
+				" . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . "
+			FROM
+				" . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+		$ret = $this->layerdb->execSQL($sql,4, 0);
+		if (!$ret[0]){
+			$this->add_message('info', 'Import erfolgreich');
+			$this->neuLaden();
+			$this->saveMap('');
+			$currenttime=date('Y-m-d H:i:s',time());
+			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+			$this->main='map.php';
+			$this->drawMap();
+		}
+		else {
+			$this->add_message('error', 'Import fehlgeschlagen!');
+		}
 	}
 
 	function daten_export() {

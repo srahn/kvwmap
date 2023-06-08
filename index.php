@@ -1143,7 +1143,13 @@ function go_switch($go, $exit = false) {
 			
 			case 'import_rollenlayer_into_layer' : {
 				$GUI->import_rollenlayer_into_layer();
+				$GUI->output();
 			} break;
+			
+			case 'import_rollenlayer_into_layer_importieren' : {
+				$GUI->import_rollenlayer_into_layer_importieren();
+				$GUI->output();
+			} break;			
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();

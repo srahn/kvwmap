@@ -3,7 +3,7 @@
 <!--
 
 	function update_inputs(layer, name){
-		if (document.getElementsByName('check_' + layer + '_' +name)[0]?.checked == true){
+		if (document.getElementById('check_' + layer + '_' +name)?.checked == true){
 		}
 		else{
 			var dragobject = document.getElementById(layer + '_row_' + name);
@@ -23,7 +23,7 @@
 
 <table border="0" cellpadding="5" cellspacing="3" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 
-    <td colspan="3"><h2><?php echo $strTitle; ?></h2></td>
+    <td colspan="5"><h2>Daten-Import</h2></td>
   </tr>
   <tr>
   	<td>&nbsp;</td>
@@ -33,17 +33,17 @@
 				<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 				for ($i = 0; $i < count($this->rollenlayer_attributes) - 2; $i++) { ?>
 					<div id="rollenlayer_row_<? echo $this->rollenlayer_attributes[$i]['name'] ?>" class="dragObject" draggable="true" onmouseup="update_inputs('rollenlayer', '<? echo $this->rollenlayer_attributes[$i]['name']; ?>');" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-						<input name="rollenlayer_<? echo $this->rollenlayer_attributes[$i]['name']; ?>" style="pointer-events: none; border: none" type="text" value="<? echo $this->rollenlayer_attributes[$i]['name']; ?>" readonly size="25">
+						<input name="rollenlayer_attributes[]" id="rollenlayer_<? echo $this->rollenlayer_attributes[$i]['name']; ?>" style="pointer-events: none; border: none" type="text" value="<? echo $this->rollenlayer_attributes[$i]['name']; ?>" readonly size="25">
 					</div>
 					<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 				} ?>
   		</div>
   	</td>
-		<td valign="top" align="center" style="padding: 10px">
+		<td valign="top" align="center" style="padding: 13px">
 			<div class="fett" style="padding: 5px">&nbsp;</div> <?
-			for ($i = 0; $i < count($this->layer_attributes) - 2; $i++) {
-				if ($this->layer_attributes[$i]['saveable']) {
-					echo '<div style="height: 30px; margin: 3 0 0 15; display: flow-root;">==>&nbsp;&nbsp;&nbsp;&nbsp;</div>';
+			for ($i = 0; $i < count($this->layer_attributes['name']); $i++) {
+				if ($this->layer_attributes['saveable'][$i]) {
+					echo '<div style="height: 29px; margin: 3 0 0 15; display: flow-root;">==>&nbsp;&nbsp;&nbsp;&nbsp;</div>';
 				}
 			} ?>
 		</td>
@@ -51,11 +51,11 @@
 			<div class="fett" style="padding: 5px"><? echo $this->layer[0]['Name'] ?></div>
   		<div border="0" id="layer_table" style="position: relative">
 				<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
-				for ($i = 0; $i < count($this->layer_attributes) - 2; $i++) {
-					if ($this->layer_attributes[$i]['saveable']) { ?>
-						<div id="layer_row_<? echo $this->layer_attributes[$i]['name'] ?>" class="dragObject" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-							<input name="check_layer_<? echo $this->layer_attributes[$i]['name'] ?>" type="checkbox" onclick="update_inputs('layer', '<? echo $this->layer_attributes[$i]['name']; ?>');" checked>
-							<input name="layer_<? echo $this->layer_attributes[$i]['name']; ?>" style="pointer-events: none; border: none;" type="text" value="<? echo $this->layer_attributes[$i]['name']; ?>" readonly size="25">
+				for ($i = 0; $i < count($this->layer_attributes['name']); $i++) {
+					if ($this->layer_attributes['saveable'][$i]) { ?>
+						<div id="layer_row_<? echo $this->layer_attributes['name'][$i] ?>" class="dragObject" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+							<input name="layer_attributes[]" id="check_layer_<? echo $this->layer_attributes['name'][$i] ?>" type="checkbox" value="<? echo $this->layer_attributes['real_name'][$this->layer_attributes['name'][$i]]; ?>" onclick="update_inputs('layer', '<? echo $this->layer_attributes['name'][$i]; ?>');" checked>
+							<input style="pointer-events: none; border: none;" type="text" value="<? echo $this->layer_attributes['alias'][$i] ?: $this->layer_attributes['name'][$i]; ?>" readonly size="25">
 						</div>
 						<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 					}
