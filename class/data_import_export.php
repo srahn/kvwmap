@@ -778,8 +778,7 @@ class data_import_export {
 				$table = $this->formvars['schema_name'] . "." . $this->formvars['table_name'];
 				$sql = "
 					SELECT
-						count(*),
-						max(geometrytype(the_geom)) AS geometrytype
+						count(*)
 					FROM
 						" . $table . ";
 				";
@@ -794,7 +793,7 @@ class data_import_export {
 					$alert .= ' Die Tabelle enthält jetzt ' . $rs['count'] . ' Datensätze.';
 					$result = array(
 						'success' => true,
-						'datatype' => geometrytype_to_datatype($rs['geometrytype'])
+						'datatype' => geometrytype_to_datatype($geom_type)
 					);
 					showAlert($alert);
 				}
@@ -954,7 +953,7 @@ class data_import_export {
 			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0 OR $result->stderr != '') {
+			if ($ret != 0) {
 				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
 			}
 		}
