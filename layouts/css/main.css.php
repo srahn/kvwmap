@@ -1467,7 +1467,7 @@ a.menuered:hover {
 	position: relative;
 }
 
-.drawingOrderFormDropZone{
+.dropZone{
 	position: relative;
 	z-index: 1000;
 	margin: 0;
@@ -1475,39 +1475,39 @@ a.menuered:hover {
 	width: 100%;
 }
 
-.drawingOrderFormDropZone.ready{
+.dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 24px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.drawingOrderFormDropZone.over{
+.dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.drawingOrderFormLayer{
+.dragObject{
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
 	margin: 3 0 0 15;
 	padding: 2 2 2 3;
-	height: 16px;
+	height: 23px;
 	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
 }
 
-.drawingOrderFormLayer:hover{
+.dragObject:hover{
 	background-color: #fcfcfc;
 }
 
-.drawingOrderFormLayer.dragging{
+.dragObject.dragging{
 	box-shadow: 3px 3px 6px #aaa;
 }
 
-.drawingOrderFormLayer.picked{
+.dragObject.picked{
 	visibility: hidden;
 	height: 0px;
 	margin: 0 0 0 0;
@@ -1516,7 +1516,7 @@ a.menuered:hover {
 	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
 }
 
-.drawingOrderFormLayer.over{
+.dragObject.over{
 	border: 1px dashed #000;
 }
 

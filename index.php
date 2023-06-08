@@ -1140,6 +1140,10 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('SHP_Import');
 				$GUI->shp_import_speichern();
 			} break;
+			
+			case 'import_rollenlayer_into_layer' : {
+				$GUI->import_rollenlayer_into_layer();
+			} break;
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();

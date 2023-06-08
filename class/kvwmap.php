@@ -397,10 +397,10 @@ class GUI {
 		$mapDB->nurAktiveLayer = true;
 		$layerset = $mapDB->read_Layer(0, $this->Stelle->useLayerAliases, NULL);		# class_load_level: 0 = keine Klassen laden
 		$layer = array_reverse($layerset['list']);
-		echo '<div class="drawingOrderFormDropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
+		echo '<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
 		for($i = 0; $i < count($layer); $i++){
-			echo '<div class="drawingOrderFormLayer" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)"><span>'.$layer[$i]['alias'].'</span><input name="active_layers[]" type="hidden" value="'.$layer[$i]['Layer_ID'].'"></div>';
-			echo '<div class="drawingOrderFormDropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
+			echo '<div class="dragObject" style="height: 16px;" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)"><span>'.$layer[$i]['alias'].'</span><input name="active_layers[]" type="hidden" value="'.$layer[$i]['Layer_ID'].'"></div>';
+			echo '<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
 		}
 	}
 
@@ -11623,6 +11623,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
 					$file_number = 1;
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
+					if ($this->formvars['chosen_layer_id'] != NULL) {
+						$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+						if (!$this->user->layer_data_import_allowed OR $layerset[0]['privileg'] == 0) {
+							echo 'Der Daten-Import in diesen Layer ist nicht erlaubt.';
+							return;
+						}
+						$this->formvars['after_import_action'] = 'import_into_layer';
+					}
 					if ($dateityp == 'zip') {
 						$files = unzip($nachDatei, false, false, true);
 						foreach ($files as $file) {
@@ -11647,11 +11655,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		include_once (CLASSPATH . 'data_import_export.php');
 		$this->data_import_export = new data_import_export();
 		$user_upload_folder = UPLOADPATH . $this->user->id . '/';
-		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, array('chosen_layer_id' => $chosen_layer_id));
+		$layer_id = $this->data_import_export->process_import_file($upload_id, $file_number, $user_upload_folder . $filename, $this->Stelle, $this->user, $this->pgdatabase, $epsg, NULL, NULL);
 		$filetype = array_pop(explode('.', $filename));
 		if ($layer_id != NULL) {
 			#echo $filename . ' importiert mit layer_id: ' . $layer_id;
 			switch ($after_import_action) {
+				case 'import_into_layer' : {
+					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
+						echo "<script type=\"javascript\">location = 'index.php?go=import_rollenlayer_into_layer&rollenlayer_id=" . $layer_id . "&layer_id=" . $chosen_layer_id . "';</script>";
+					}
+				} break;
+				
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
 						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
@@ -11663,6 +11677,25 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 		}
+	}
+	
+	function import_rollenlayer_into_layer(){
+		$this->layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		if (!$this->user->layer_data_import_allowed OR $this->layer[0]['privileg'] == 0) {
+			$this->add_message('error', 'Der Daten-Import in diesen Layer ist nicht erlaubt.');
+		}
+		else {
+			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$this->rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['rollenlayer_id'], NULL);
+			if (!empty($this->rollenlayer)) {
+				$this->pgdatabase->schema = ($this->rollenlayer[0]['Typ'] == 'import'? CUSTOM_SHAPE_SCHEMA : 'public');
+				$this->rollenlayer_attributes = $mapDB->load_attributes($this->pgdatabase, $this->rollenlayer[0]['query']);
+				$this->layer_attributes = $mapDB->load_attributes($layerdb, $this->layer[0]['pfad']);
+			}
+		}
+		$this->main = 'import_rollenlayer_into_layer.php';
+		$this->output();
 	}
 
 	function daten_export() {
