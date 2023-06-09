@@ -2,7 +2,7 @@
 <script type="text/javascript">
 <!--
 
-	function update_inputs(layer, name){
+	function deselect_attribute(layer, name){
 		if (document.getElementById('check_' + layer + '_' +name)?.checked == true){
 		}
 		else{
@@ -32,7 +32,7 @@
   		<div id="rollenlayer_table" style="position: relative">
 				<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 				for ($i = 0; $i < count($this->rollenlayer_attributes) - 2; $i++) { ?>
-					<div id="rollenlayer_row_<? echo $this->rollenlayer_attributes[$i]['name'] ?>" class="dragObject" draggable="true" onmouseup="update_inputs('rollenlayer', '<? echo $this->rollenlayer_attributes[$i]['name']; ?>');" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+					<div id="rollenlayer_row_<? echo $this->rollenlayer_attributes[$i]['name'] ?>" class="dragObject" draggable="true" onmouseup="deselect_attribute('rollenlayer', '<? echo $this->rollenlayer_attributes[$i]['name']; ?>');" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
 						<input name="rollenlayer_attributes[]" id="rollenlayer_<? echo $this->rollenlayer_attributes[$i]['name']; ?>" style="pointer-events: none; border: none" type="text" value="<? echo $this->rollenlayer_attributes[$i]['name']; ?>" readonly size="25">
 					</div>
 					<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
@@ -54,7 +54,7 @@
 				for ($i = 0; $i < count($this->layer_attributes['name']); $i++) {
 					if ($this->layer_attributes['saveable'][$i]) { ?>
 						<div id="layer_row_<? echo $this->layer_attributes['name'][$i] ?>" class="dragObject" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-							<input name="layer_attributes[]" id="check_layer_<? echo $this->layer_attributes['name'][$i] ?>" type="checkbox" value="<? echo $this->layer_attributes['real_name'][$this->layer_attributes['name'][$i]]; ?>" onclick="update_inputs('layer', '<? echo $this->layer_attributes['name'][$i]; ?>');" checked>
+							<input name="layer_attributes[]" id="check_layer_<? echo $this->layer_attributes['name'][$i] ?>" type="checkbox" value="<? echo $this->layer_attributes['real_name'][$this->layer_attributes['name'][$i]]; ?>" onclick="deselect_attribute('layer', '<? echo $this->layer_attributes['name'][$i]; ?>');" checked>
 							<input style="pointer-events: none; border: none;" type="text" value="<? echo $this->layer_attributes['alias'][$i] ?: $this->layer_attributes['name'][$i]; ?>" readonly size="25">
 						</div>
 						<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
@@ -78,6 +78,7 @@
 <input type="hidden" name="go" value="import_rollenlayer_into_layer">
 <input type="hidden" name="rollenlayer_id" value="<? echo $this->formvars['rollenlayer_id']; ?>">
 <input type="hidden" name="layer_id" value="<? echo $this->formvars['layer_id']; ?>">
+<input type="hidden" name="remove_rollenlayer" value="1">
 <input type="hidden" name="go_plus" value="">
 
 

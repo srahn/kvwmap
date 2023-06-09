@@ -11662,7 +11662,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			switch ($after_import_action) {
 				case 'import_into_layer' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
-						echo "<script type=\"javascript\">location = 'index.php?go=import_rollenlayer_into_layer&rollenlayer_id=" . $layer_id . "&layer_id=" . $chosen_layer_id . "';</script>";
+						echo "<script type=\"javascript\">location = 'index.php?go=import_rollenlayer_into_layer&rollenlayer_id=" . -$layer_id . "&layer_id=" . $chosen_layer_id . "';</script>";
 					}
 				} break;
 				
@@ -11685,13 +11685,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->add_message('error', 'Der Daten-Import in diesen Layer ist nicht erlaubt.');
 		}
 		else {
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$this->layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$this->rollenlayer = $mapDB->read_RollenLayer(-$this->formvars['rollenlayer_id'], NULL);
+			$this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+			$this->layerdb = $this->mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+			$this->rollenlayer = $this->mapDB->read_RollenLayer($this->formvars['rollenlayer_id'], NULL);
 			if (!empty($this->rollenlayer)) {
 				$this->pgdatabase->schema = ($this->rollenlayer[0]['Typ'] == 'import'? CUSTOM_SHAPE_SCHEMA : 'public');
-				$this->rollenlayer_attributes = $mapDB->load_attributes($this->pgdatabase, $this->rollenlayer[0]['query']);
-				$this->layer_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, true, false, false);
+				$this->rollenlayer_attributes = $this->mapDB->load_attributes($this->pgdatabase, $this->rollenlayer[0]['query']);
+				$this->layer_attributes = $this->mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, true, false, false);
 			}
 		}
 		$this->main = 'import_rollenlayer_into_layer.php';
@@ -11699,6 +11699,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	
 	function import_rollenlayer_into_layer_importieren(){
 		$this->import_rollenlayer_into_layer();
+		foreach ($this->formvars['rollenlayer_attributes'] as &$attribute) {
+			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
+				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
+			}
+		}
 		$sql = "
 			INSERT INTO 
 				" . $this->layer[0]['maintable'] . "
@@ -11709,6 +11714,9 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				" . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
+			if ($this->formvars['remove_rollenlayer']) {
+				$this->mapDB->deleteRollenlayer($this->formvars['rollenlayer_id']);
+			}
 			$this->add_message('info', 'Import erfolgreich');
 			$this->neuLaden();
 			$this->saveMap('');
