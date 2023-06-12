@@ -804,12 +804,14 @@ class user {
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
+		$this->organisation = $rs['organisation'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
+		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
@@ -1482,6 +1484,23 @@ class user {
 		}
 		return $ret;
 	}	
+	
+	function set_userdata_checking_time() {
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`userdata_checking_time` = CURRENT_TIMESTAMP
+			WHERE
+				`ID`= " . $this->id . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1].='<br>Fehler beim Eintragen von userdata_checking_time.<br>'.$ret[1];
+		}
+		return $ret;
+	}		
 
 	/**
 		Aktualisiert das Passwort und setzt ein neuen Zeitstempel
