@@ -524,9 +524,10 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		CREATE ROLE
 			" . $pgsqlKvwmapDb->user . "
 		WITH
-			SUPERUSER
 			LOGIN
-			PASSWORD '" . $pgsqlKvwmapDb->passwd . "'
+			PASSWORD '" . $pgsqlKvwmapDb->passwd . "';
+			
+		GRANT SET ON PARAMETER log_min_messages TO " . $pgsqlKvwmapDb->user . ";
 	";
 	$pgsqlPostgresDb->execSQL($sql, 0, 1); ?>
 	
