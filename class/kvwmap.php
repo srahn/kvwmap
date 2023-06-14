@@ -17801,7 +17801,7 @@ class db_mapObj{
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 										}
-										elseif ($further_options[$k] == 'embedded') {
+										elseif (trim($further_options[$k]) == 'embedded') {
 											# Subformular soll embedded angezeigt werden
 											$attributes['embedded'][$i] = true;
 										}
