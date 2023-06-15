@@ -427,8 +427,8 @@ class MyObject {
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
 	}
-
-	function print() {
+	
+	function print_data() {
 		echo '<br>data: ' . print_r($this->data, true);
 	}
 

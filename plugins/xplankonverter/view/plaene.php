@@ -513,7 +513,7 @@
 	function konvertierungVeroeffentlichungsdatumFormatter(value, row) {
 		var symbol = {};
 		var today = new Date();
-		var veroeffentlichungsdatum = row.veroeffentlichungsdatum === null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
+		var veroeffentlichungsdatum = row.veroeffentlichungsdatum == null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
 
 		//console.log('today: ', today);
 		//console.log('veroeff: ', new Date(veroeffentlichungsdatum));
