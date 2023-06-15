@@ -217,6 +217,18 @@ function install() {
 		$mysqlKvwmapDb->open();
 		$pgsqlKvwmapDb->open(); ?>
 
+		Erzeuge die PostGIS Erweiterung in der kvwmapsp Datenbank falls noch nicht vorhanden.<br><?php
+		$sql = "
+			CREATE EXTENSION IF NOT EXISTS postgis
+		";
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
+		Entferne Superuser Recht<br>		<?php
+		$sql = "
+			ALTER USER " . $pgsqlKvwmapDb->user . " WITH NOSUPERUSER;
+		";
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
 		Ergänze bzw. korrigiere EPSG-Codes für MV<br><?php
 		$sql = "
 			UPDATE
@@ -519,6 +531,7 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		CREATE ROLE
 			" . $pgsqlKvwmapDb->user . "
 		WITH
+			SUPERUSER
 			LOGIN
 			PASSWORD '" . $pgsqlKvwmapDb->passwd . "';
 			
@@ -540,18 +553,7 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		return false;
 	}
 	else { ?>
-		Anlegen der Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?> erfolgreich.<br>
-		
-		Erzeuge die PostGIS Erweiterung in der kvwmapsp Datenbank.<br><?php
-		$sql = "
-			CREATE EXTENSION IF NOT EXISTS postgis
-		";
-		$query = pg_query($pgsqlPostgresDb->dbConn, $sql);
-		if ($query==0) {
-			$err_msg = "Fehler bei SQL Anweisung:<br>" . $sql . "<br>" . pg_result_error($query);
-			echo "<br><b>" . $err_msg . "</b>";
-			return false;
-		}
+		Anlegen der Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?> erfolgreich.<br><?php
 		return true;
 	}
 }
