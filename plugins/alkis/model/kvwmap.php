@@ -1,5 +1,51 @@
 <?
 
+	$GUI->flurstueckshistorie_drucken = function() use ($GUI){
+  	$randomnumber = rand(0, 1000000);
+  	$svgfile  = $randomnumber.'.svg';
+  	$jpgfile = $randomnumber.'.jpg';
+  	$fpsvg = fopen(IMAGEPATH.$svgfile, 'w');
+		fputs($fpsvg, $GUI->formvars['svg_string']);
+  	fclose($fpsvg);
+  	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
+  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
+
+    if(function_exists('imagecreatefromjpeg')){
+    	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
+      ob_end_clean();
+      ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
+    }
+		echo "
+			<html>
+				<head>
+					<title>Flurstückshistorie</title>
+					<script type=\"text/javascript\">
+						function copyImageById(Id){
+							var imgs = document.createElement('img');
+							imgs.src = document.getElementById(Id).src;
+							var bodys = document.body;
+							bodys.appendChild(imgs);
+							if(document.createRange){
+								var myrange = document.createRange();
+								myrange.setStartBefore(imgs);
+								myrange.setEndAfter(imgs);
+								myrange.selectNode(imgs);
+							}
+							var sel = window.getSelection();
+							sel.addRange(myrange);
+							var successful = document.execCommand('copy');
+							bodys.removeChild(imgs);
+						}
+					</script>
+				</head>
+				<body style=\"text-align:center\">
+					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
+					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
+				</body>
+			</html>
+			";
+  };
+
 	$GUI->flurstueckshistorie = function() use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		$flst = new flurstueck($GUI->formvars['flurstueckskennzeichen'], $GUI->pgdatabase);

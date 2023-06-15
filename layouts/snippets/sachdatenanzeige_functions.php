@@ -257,7 +257,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			[].forEach.call(gap_elements, function (gap_element){
 				gap_element.colSpan=1;		// Leerspalte zwischen den Gruppen verkleinern
 			});
-			group.colSpan=group.dataset.colspan;
+			group.colSpan=group.dataset.origcolspan;
 			img.src='graphics/minus.gif';
 		}
 	}
@@ -693,7 +693,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 					return;
 				}
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);

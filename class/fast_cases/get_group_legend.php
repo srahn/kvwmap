@@ -25,6 +25,7 @@ function compare_legendorder($a, $b){
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -34,7 +35,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -1112,14 +1112,9 @@ class GUI {
           if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
             $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
           }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-	          	$klasse->label->set('anglemode', MS_AUTO);
-	          }
-	          else{
-	          	$klasse->label->set('autoangle',$dbLabel['autoangle']);
-            }
-          }
+					if($dbLabel['anglemode'] != NULL) {
+						$label->set('anglemode', $dbLabel['anglemode']);
+					}
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
           }
@@ -1215,19 +1210,6 @@ class GUI {
 							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
 							$style->set('width', $dbLabel['buffer']);
 						}
-          }
-
-          $label->angle = $dbLabel['angle'];
-          if($layerset['labelangleitem']!=''){
-            $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-            	$label->set('anglemode', MS_AUTO);
-            }
-            else{
-            	$label->autoangle = $dbLabel['autoangle'];
-            }
           }
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];
@@ -1472,18 +1454,8 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if (value_of($layer, 'metalink') != ''){
-					if (substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						if (strpos($layer['metalink'], '?') === false) {
-							$layer['metalink'] .= '?';
-						}
-						else {
-							$layer['metalink'] .= '&';
-						}
-						$layer['metalink'] .= 'time='.time();
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				if(value_of($layer, 'metalink') != ''){
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
@@ -2128,6 +2100,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];

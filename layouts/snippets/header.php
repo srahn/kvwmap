@@ -2,6 +2,13 @@
 	global $supportedLanguages;
 	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
 ?>
+
+<style>
+	#search_div {
+		display: none;
+	}
+</style>
+
 <div style="
 	width: 100%;
 	height: 100%;
@@ -21,24 +28,38 @@
 		"></i>
 		<div id="user_options" class="user-options">
 			<div class="user-options-header">
-				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>
+				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>&nbsp;
+				<span data-tooltip="<? echo $this->user->Vorname . ' ' . $this->user->Name . '&#xa;' . $this->user->organisation . '&#xa' . $this->user->email . '&#xa;Tel.: ' . $this->user->phon . '&#xa;'; ?>"></span>
 			</div>
 			<div class="user-options-section-header">
 				<i class="fa fa-tasks options-button"></i><? echo $this->inWorkingGroup; ?>:
 			</div><?php
 			$this->user->Stellen = $this->user->getStellen(0);
-			foreach (array_keys($this->user->Stellen['ID']) AS $id) { ?>
-				<div
-					class="user-option"
-					style="margin-left: 0px" <?
-					if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
-						onclick="window.location.href='index.php?browserwidth=' + $('input[name=browserwidth]').val() + '&browserheight=' + $('input[name=browserheight]').val() + '&Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" <?
+			if (count($this->user->Stellen['ID']) > 21) { ?>
+				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value" style="margin: 0px 3px 0px 6px"><?
+					foreach (array_keys($this->user->Stellen['ID']) AS $id) {
+						echo '
+							<option value="' . $this->user->Stellen['ID'][$id] . '"' . ($this->user->Stellen['ID'][$id] == $this->user->stelle_id ? ' selected' : '') . '>' .
+								$this->user->Stellen['Bezeichnung'][$id] . '
+							</option>
+						';
 					} ?>
-				><? echo $this->user->Stellen['Bezeichnung'][$id];
-				if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
-					?> <i class="fa fa-check" aria-hidden="true" style="color: #9b2434; margin: 0px 0px 0px 7px"></i><?
-				} ?>
-				</div><?
+				</select><?
+			}
+			else {
+				foreach (array_keys($this->user->Stellen['ID']) AS $id) { ?>
+					<div
+						class="user-option"
+						style="margin-left: 0px" <?
+						if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
+							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>'" <?
+						} ?>
+					><? echo $this->user->Stellen['Bezeichnung'][$id];
+					if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
+						?> <i class="fa fa-check" aria-hidden="true" style="color: #9b2434; margin: 0px 0px 0px 7px"></i><?
+					} ?>
+					</div><?
+				}
 			} ?>
 			<div class="options-devider"></div>
 			<div
@@ -54,43 +75,11 @@
 	</div>
 
 	<div title="Benachrichtigungen" style="float: right; display: block;">
-		<script>
-			function delete_user2notification(notification_id) {
-				let formData = new FormData();
-				formData.append('go', 'delete_user2notification');
-				formData.append('notification_id', notification_id);
-				formData.append('csrf_token', '<? echo $_SESSION['csrf_token']; ?>')
-				let response = fetch('index.php', {
-				  method: 'POST',
-				  body: formData
-				})
-				.then(response => response.text())
-				.then(text => {
-					try {
-						const data = JSON.parse(text);
-						if (data.success) {
-							$('#notification_box_' + notification_id).remove();
-							let num_notifications = $('#num_notification_div').html() - 1;
-							if (num_notifications == 0) {
-								$('#num_notification_div').hide();
-							}
-							else {
-								$('#num_notification_div').html(num_notifications);
-							}
-						}
-						else {
-							message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen Benachrichtigung für den Nutzer: ' + data.err_msg + ' ' + text}]);
-						}
-					} catch(err) {
-						message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
-					}
-				});
-			}
-		</script><?
+		<?
 		include_once(CLASSPATH . 'Notification.php');
 		$result = Notification::find_for_user($this); ?>
 		<a href="#" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {
-			<? if (count($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
+			<? if (@count($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
 			<i class="fa fa-bell" aria-hidden="true" style="
 				font-size: 150%;
 				padding: 5px 0px 4px 0;

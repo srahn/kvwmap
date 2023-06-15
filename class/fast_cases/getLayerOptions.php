@@ -42,6 +42,7 @@ function sql_err_msg($title, $sql, $msg, $div_id) {
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -51,7 +52,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
@@ -305,6 +305,7 @@ class GUI {
 	}
 
 	function getLayerOptions() {
+		global $admin_stellen;
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if ($this->formvars['layer_id'] > 0) {
 			$layer = $this->user->rolle->getLayer($this->formvars['layer_id']);
@@ -400,6 +401,13 @@ class GUI {
 									</div>
 								</div><?
 							}
+							if ($layer[0]['Typ'] == 'search') {
+								echo '
+								<li>
+									<span>' . $this->strAutoDelete.': </span>
+									<input type="checkbox" value="1" name="layer_options_autodelete" ' . ($layer[0]['autodelete'] == '1' ? 'checked' : '').' style="vertical-align: bottom;">
+								</li>';
+							}
 						}
 						else {
 							if ($this->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer[0]['shared_from'] == $this->user->id) { echo '
@@ -438,7 +446,7 @@ class GUI {
 							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
 						}
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
-							echo '<li><a href="javascript:void();" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
+							echo '<li><a href="javascript:void(0);" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
@@ -451,10 +459,14 @@ class GUI {
 							if ($this->user->layer_data_import_allowed) {
 								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 							}
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
+							}
 						}
+						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
-								echo '<li><a href="javascript:void();" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
+								echo '<li><a href="javascript:void(0);" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
 								if($layer[0]['showclasses'])echo $this->HideClasses;
 								else echo $this->DisplayClasses;
 								echo '</a></li>';
@@ -474,6 +486,24 @@ class GUI {
 						}
 						echo '</ul>
 						<table class="ul_table">';
+						if ($this->formvars['layer_id'] < 0) {
+							echo '<tr>
+												<td>
+													<span>' . $this->strAutoClassify . ':</span>
+												</td>
+												<td>
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+														<option value=""> - </option>';
+														for ($i = 0; $i < count($attributes)-2; $i++){
+															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
+															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
+																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
+															}
+														}
+									echo 	 '</select>
+												</td>
+											</tr>';
+						}
 						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if ($layer[0]['connectiontype'] == 6) {
 							if ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '') {
@@ -489,6 +519,7 @@ class GUI {
 															echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.($query_attributes['alias'][$layer[0]['original_labelitem']] != ''? $query_attributes['alias'][$layer[0]['original_labelitem']] : $layer[0]['original_labelitem']).'</option>';
 														}
 														for($i = 0; $i < count($attributes)-2; $i++){
+															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
 															if(
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
 																		OR 
@@ -501,7 +532,7 @@ class GUI {
 																	AND 
 																	$attributes['the_geom'] != $attributes[$i]['name']		# Attribut ist nicht das Geometrieattribut
 																) {
-																	echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.($query_attributes['alias'][$attributes[$i]['name']] != ''? $query_attributes['alias'][$attributes[$i]['name']] : $attributes[$i]['name']).'</option>';
+																	echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
 																}
 														}
 									echo 	 '</select>
@@ -565,7 +596,7 @@ class GUI {
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 30px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -1146,6 +1177,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -1398,6 +1430,7 @@ class db_mapObj {
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if($layer_id != NULL){
+			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
 			$sql .= " 
 			AND l.Layer_ID NOT IN (
 					SELECT 
@@ -1408,6 +1441,7 @@ class db_mapObj {
 						a.layer_id = " . $layer_id . " AND 
 						a.form_element_type = 'SubformEmbeddedPK'
 			) 
+			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
 			GROUP BY 
 				p.id
       HAVING 
@@ -1426,7 +1460,7 @@ class db_mapObj {
 		return $params;
 	}	
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
 		global $language;
 		$attributes = array();
 		$einschr = '';
@@ -1533,13 +1567,13 @@ class db_mapObj {
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+			else {
 				$attributes['default'][$i] = $rs['default'];
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
@@ -1549,7 +1583,6 @@ class db_mapObj {
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];
@@ -2119,7 +2152,7 @@ class pgdatabase {
 		}
 	}		
 
-	function getFieldsfromSelect($select, $assoc = false) {
+	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
 		error_reporting(E_NOTICE);
@@ -2137,33 +2170,36 @@ class pgdatabase {
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
 		$sql = "
 			SET client_min_messages='log';
-			SET log_min_messages='fatal';
+			" . ($this->host == 'pgsql'? "SET log_min_messages='fatal';" : "") . "
 			SET debug_print_parse=true;" . 
 			$select . " LIMIT 0;";
 		$ret = $this->execSQL($sql, 4, 0);
 		$sql = "
 			SET debug_print_parse = false;
 			SET client_min_messages = 'NOTICE';
-			SET log_min_messages='error';";
+			" . ($this->host == 'pgsql'? "SET log_min_messages='error';" : "");
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
+		ini_set("display_errors", '1');
 		if ($ret['success']) {
 			$query_plan = $error_list[0];
 			$table_alias_names = $this->get_table_alias_names($query_plan);
 			$field_plan_info = explode("\n      :resno", $query_plan);
-			
+			if ($pseudo_realnames) {
+				$select_attr = attributes_from_select($select);
+			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
+				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');				
 				
 				# Tabellen-oid des Attributs
-				$table_oid = pg_field_table($ret[1], $i, true);
+				$table_oid = pg_field_table($ret[1], $i, true);			
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
-				if ($table_oid > 0){					
+				if ($table_oid > 0) {
 					# Tabellenname des Attributs
 					$fields[$i]['table_name'] = $tablename = pg_field_table($ret[1], $i);
 					if ($tablename != NULL) {
@@ -2174,13 +2210,20 @@ class pgdatabase {
 					$fields[$i]['table_alias_name'] = $table_alias_names[$table_oid];
 
 					# Schemaname der Tabelle des Attributs
-					$schemaname = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					if($schema_names[$table_oid] == NULL){
+						$schema_names[$table_oid] = $this->pg_field_schema($table_oid);		# der Schemaname kann hiermit aus der Query ermittelt werden; evtl. in layer_attributes speichern?	
+					}
+					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					$attr_info = $this->get_attribute_information($schemaname, $tablename, $col_num);
-					if($attr_info[0]['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
+					
+					if(!is_array($attribute_infos[$schemaname][$tablename])){
+						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
+					}
+					$attr_info = $attribute_infos[$schemaname][$tablename][$col_num];
+					if($attr_info['relkind'] == 'v'){		# wenn View, dann Attributinformationen aus View-Definition holen
 						if($view_defintion_attributes[$tablename] == NULL) {
-							$ret2 = $this->getFieldsfromSelect(substr($attr_info[0]['view_definition'], 0, -1), true);
+							$ret2 = $this->getFieldsfromSelect(substr($attr_info['view_definition'], 0, -1), true);
 							if ($ret2['success']) {
 								$view_defintion_attributes[$tablename] = $ret2[1];
 							}
@@ -2190,33 +2233,35 @@ class pgdatabase {
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info[0]['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info[0]['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
 					}
 					# realer Name der Spalte in der Tabelle
-					$fields[$i]['real_name'] = $attr_info[0]['name'];
-					$fieldtype = $attr_info[0]['type_name'];
-					$fields[$i]['nullable'] = $attr_info[0]['nullable']; 
-					$fields[$i]['length'] = $attr_info[0]['length'];
-					$fields[$i]['decimal_length'] = $attr_info[0]['decimal_length'];
-					$fields[$i]['default'] = $attr_info[0]['default'];
-					if($attr_info[0]['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info[0]['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info[0]['type'], $attr_info[0]['type_schema']);
+					$fields[$i]['real_name'] = $attr_info['name'];
+					$fieldtype = $attr_info['type_name'];
+					$fields[$i]['nullable'] = $attr_info['nullable']; 
+					$fields[$i]['length'] = $attr_info['length'];
+					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
+					$fields[$i]['default'] = $attr_info['default'];
+					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
+					if($attr_info['type_type'] == 'c'){		# custom datatype
+						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
 						$fieldtype = $prefix.$datatype_id; 
 					}
-					if($attr_info[0]['type_type'] == 'e'){		# enum
+					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
-						$constraintstring = $this->getEnumElements($attr_info[0]['type'], $attr_info[0]['type_schema']);
+						$constraintstring = $this->getEnumElements($attr_info['type'], $attr_info['type_schema']);
 					}
-					if($attr_info[0]['indisunique'] == 't')$constraintstring = 'UNIQUE';
-					if($attr_info[0]['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
-					$constraints = $this->pg_table_constraints($tablename);		# todo
+					if($attr_info['indisunique'] == 't')$constraintstring = 'UNIQUE';
+					if($attr_info['indisprimary'] == 't')$constraintstring = 'PRIMARY KEY';
+					if(!is_array($constraints[$table_oid])){
+						$constraints[$table_oid] = $this->pg_table_constraints($table_oid);
+					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints); $j++){
-							if(strpos($constraints[$j], '('.$fieldname.')')){
-								$options = explode("'", $constraints[$j]);
+						for($j = 0; $j < @count($constraints[$table_oid]); $j++){
+							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
+								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
 									if($k%2 == 1){
 										if($k > 1){
@@ -2234,6 +2279,7 @@ class pgdatabase {
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
 					$fields[$i]['saveable'] = 0;
+					$fields[$i]['real_name'] = $this->gui->database->mysqli->real_escape_string($select_attr[$fields[$i]['name']]['base_expr']);
 				}
 				$fields[$i]['type'] = $fieldtype;
 
@@ -2400,7 +2446,9 @@ class pgdatabase {
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			$table_alias_names[$table_oid] = $table_alias;
+			if($table_oid AND $table_alias != 'unnamed_join'){
+				$table_alias_names[$table_oid] = $table_alias;
+			}
 		}
 		return $table_alias_names;
 	}

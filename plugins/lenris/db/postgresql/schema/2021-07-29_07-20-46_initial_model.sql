@@ -17,6 +17,7 @@ CREATE TABLE clients
 	sync_time time,
 	status integer NOT NULL DEFAULT 0,
 	doc_download boolean,
+	kurzform character varying(6),
   CONSTRAINT pk_clients_id PRIMARY KEY (client_id)
 );
 

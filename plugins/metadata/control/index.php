@@ -1,8 +1,9 @@
 <?php
-
+include_once(CLASSPATH . 'FormObject.php');
 include_once(PLUGINS . 'metadata/model/kvwmap.php');
 include_once(PLUGINS . 'metadata/model/metadaten.php');
-include_once(CLASSPATH.'FormObject.php');
+include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
+include_once(PLUGINS . 'metadata/model/MetaDataCreator.php');
 
 function go_switch_metadata($go){
 	global $GUI;

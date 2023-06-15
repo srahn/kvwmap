@@ -147,7 +147,7 @@ function get_oid_alternative($layer) {
 				a.attrelid = '" . $layer['maintable'] . "'::regclass and 
 				attnum > 0 and 
 				attisdropped is false and 
-				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
+				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique OR atttypid::regtype = 'uuid'::regtype)
 		";
 		$ret = @pg_query($GUI->layer_dbs[$layer['connection_id']]->dbConn, $sql);
 		if($ret == false){
@@ -484,34 +484,54 @@ echo '</tbody></table></div>';
 <div id="db_check">
 	<h2>Datenbankobjekte die oids verwenden</h2>
 <?
-		include_once(CLASSPATH . 'Connection.php');
-		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
-		foreach ($this->connections as $connection) {
-			if ($this->layer_dbs[$connection->data['id']]->dbConn != false) {
-				echo '<h3>' . $connection->data['dbname'] . ':</h3>';
-				foreach ($db_check_sqls as $db_check_sql) {
-					$ret = @pg_query($this->layer_dbs[$connection->data['id']]->dbConn, $db_check_sql['sql']);
-					if($ret == false){
-						echo @pg_last_error($this->layer_dbs[$layer['connection_id']]->dbConn);
-					}
-					else{
-						if ($rs = pg_fetch_all($ret)) {
-							echo '<h4>' . $db_check_sql['name'] . '</h4>';
-							echo '<table>';
-							foreach ($rs[0] as $key => $value) {
-									echo "<th>" . $key . "</th>";
-							}
-							foreach ($rs as $row) {
-								echo "<tr>";
-								foreach ($row as $cell) {
-									echo "<td>" . $cell . "</td>";
+		$credentials = $this->pgdatabase->get_object_credentials();
+		$sql = "
+			SELECT 
+				datname 
+			FROM 
+				pg_database
+			WHERE 
+				datistemplate = false AND 
+				datname != 'postgres';
+		";
+		$ret1 = $this->pgdatabase->execSQL($sql);
+		while($rs = pg_fetch_assoc($ret1[1])){		
+			$database = new pgdatabase();
+			$credentials['dbname'] = $rs['datname'];
+			$database->set_object_credentials($credentials);
+			echo '<h3>' . $credentials['dbname'] . ':</h3>';
+			try {
+				if ($database->open()) {
+					foreach ($db_check_sqls as $db_check_sql) {
+						$ret = @pg_query($database->dbConn, $db_check_sql['sql']);
+						if($ret == false){
+							echo @pg_last_error($database->dbConn);
+						}
+						else{
+							if ($rs = pg_fetch_all($ret)) {
+								echo '<h4>' . $db_check_sql['name'] . '</h4>';
+								echo '<table>';
+								foreach ($rs[0] as $key => $value) {
+										echo "<th>" . $key . "</th>";
+								}
+								foreach ($rs as $row) {
+									echo "<tr>";
+									foreach ($row as $cell) {
+										echo "<td>" . $cell . "</td>";
+									} 
+									echo "</tr>";
 								} 
-								echo "</tr>";
-							} 
-							echo "</table>";
+								echo "</table>";
+							}
 						}
 					}
 				}
+				else {
+					echo 'Verbindung nicht möglich';
+				}
+			}
+			catch (Exception $e){
+				echo 'Fehler: ' . $e->getMessage(), "\n";
 			}
 		}
 ?>

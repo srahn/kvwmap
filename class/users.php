@@ -780,7 +780,7 @@ class user {
 	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name LIKE '" . $this->database->mysqli->real_escape_string($login_name) . "'");
+		if ($login_name != '') array_push($where, "login_name = '" . $this->database->mysqli->real_escape_string($login_name) . "'");
 		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
@@ -804,11 +804,14 @@ class user {
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
+		$this->organisation = $rs['organisation'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
+		$this->password_expired = $rs['password_expired'];
+		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
@@ -1183,6 +1186,7 @@ class user {
 					" . (value_of($formvars, 'font_size_factor') != '' ? ", `font_size_factor` = " . $formvars['font_size_factor'] : '') . "
 					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
 					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
+					, dataset_operations_position = '" . $formvars['dataset_operations_position'] . "'
 					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
 					, upload_only_file_metadata = " . quote_or_null($formvars['upload_only_file_metadata']) . "
 			";
@@ -1355,7 +1359,8 @@ class user {
 		$sql.=',login_name="'.$userdaten['loginname'].'"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
 		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
-		$sql.=',password_setting_time=CURRENT_TIMESTAMP()';
+		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
+		$sql.=',password_expired = false';
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
 		}
@@ -1423,13 +1428,13 @@ class user {
 	}
 
 	function Aendern($userdaten) {
+		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
-			$password_column = ", `password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "')";
-			$password_setting_time_column = ", `password_setting_time` = CURRENT_TIMESTAMP()";
-		}
-		# Wurde ein password_setting_time explizit mitgeschickt, wird dieses eingetragen statt current_timestamp
-		if ($userdaten['password_setting_time']) {
-			$password_setting_time_column = ", `password_setting_time` = '" . $userdaten['password_setting_time'] . "'";
+			$password_columns = ",
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "'),
+				`password_setting_time` = CURRENT_TIMESTAMP(),
+				`password_expired` = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
+			";
 		}
 
 		$sql = "
@@ -1450,9 +1455,8 @@ class user {
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
 				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
-				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) . 
-				$password_column .
-				$password_setting_time_column . "
+				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
+				$password_columns . "
 			WHERE
 				`ID`= " . $userdaten['selected_user_id'] . "
 		";
@@ -1480,19 +1484,38 @@ class user {
 		}
 		return $ret;
 	}	
+	
+	function set_userdata_checking_time() {
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`userdata_checking_time` = CURRENT_TIMESTAMP
+			WHERE
+				`ID`= " . $this->id . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1].='<br>Fehler beim Eintragen von userdata_checking_time.<br>'.$ret[1];
+		}
+		return $ret;
+	}		
 
 	/**
-	 * Aktualisiert das Passwort und setzt ein neuen Zeitstempel
-	 *
-	 * Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
-	 *
-	 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
-	 *
-	 * @param string password Einzutragendes Password als Text
-	 * @return array liefert zweidimensionales Array zurück,
-	 *                 Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
-	 *                 Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
-	 * @see    NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
+		Aktualisiert das Passwort und setzt ein neuen Zeitstempel
+	
+		Diese Funktion trägt für den Benutzer in diesem Objekt ein neues Passwort ein und setzt als Datum das aktuelle Datum.
+		Zusätzlich wird das flag password_expired auf true gesetzt, damit der Nutzer auch zur Eingabe eines neuen Passwortes
+		aufgefordert wird wenn in der Stelle das Passwortalter nicht geprüft wird.
+
+		Reihenfolge: Übersichtssatz - Kommentar - Tags.
+	
+		@param string password Einzutragendes Password als Text
+		@return array liefert zweidimensionales Array zurück,
+									Wenn array[0]=0 enthält array[1] die query_id der Abfrage mit der das Resultset ausgewertet werden kann.
+									Wenn array[0]=1 liegt ein Fehler vor und array[1] enthält eine Fehlermeldung.
+		@see NeuAnlegen(), Aendern(), Loeschen(), $user, $rolle, $stelle
 	 */
 	function setNewPassword($password) {
 		$password_setting_time = date('Y-m-d H:i:s', time());
@@ -1501,7 +1524,8 @@ class user {
 				user
 			SET
 				`password` = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
-				`password_setting_time` = '" . $password_setting_time . "'
+				`password_setting_time` = '" . $password_setting_time . "',
+				`password_expired` = false
 			WHERE
 				`ID` = " . $this->id . "
 		";
@@ -1512,6 +1536,7 @@ class user {
 		}
 		else {
 			$this->password_setting_time = $password_setting_time;
+			$this->password_expired = false;
 		}
 		return $ret;
 	}

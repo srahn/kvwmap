@@ -93,4 +93,8 @@
 	$this->strVersion = 'Version';
 	$this->strComment = 'Kommentar';
 	$this->strDataImport = 'Daten-Import';
+	$this->strDataExport = 'Daten-Export';
+	$this->strAutoDelete = 'automatisch löschen';
+	$this->strCompareView = 'Vergleichsansicht';
+	$this->strAutoClassify = 'klassifizieren nach';
 ?>

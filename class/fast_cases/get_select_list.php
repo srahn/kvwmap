@@ -630,6 +630,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -866,7 +867,6 @@ class db_mapObj{
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]]= $rs['alias'];
 			$attributes['alias_low-german'][$i]= $rs['alias_low-german'];
 			$attributes['alias_english'][$i]= $rs['alias_english'];
 			$attributes['alias_polish'][$i]= $rs['alias_polish'];
@@ -893,7 +893,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
 		global $language;
 		$attributes = array();
 		$einschr = '';
@@ -1000,13 +1000,13 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if (substr($rs['default'], 0, 6) == 'SELECT'){					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL($rs['default'], 4, 0);
+			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
 			}
-			else {															# das sind die alten Defaultwerte ohne 'SELECT ' davor, ab Version 1.13 haben Defaultwerte immer ein SELECT, wenn man den Layer in dieser Version einmal gespeichert hat
+			else {
 				$attributes['default'][$i] = $rs['default'];
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
@@ -1016,7 +1016,6 @@ class db_mapObj{
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];

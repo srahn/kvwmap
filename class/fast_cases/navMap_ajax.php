@@ -98,6 +98,7 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -107,7 +108,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	return $str;
 }
 
@@ -1211,7 +1211,7 @@ class GUI {
       	$klasse->set('status', MS_OFF);
       }
       $klasse -> set('template', $layerset['template']);
-      $klasse -> setexpression($classset[$j]['Expression']);
+      $klasse -> setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
         $klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -1471,13 +1471,8 @@ class GUI {
 				if($layerset['labelangleitem']!=''){
 					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
 				}
-				if($dbLabel['autoangle']==1) {
-					if(MAPSERVERVERSION >= 600){
-						$label->set('anglemode', MS_AUTO);
-					}
-					else{
-						$label->autoangle = $dbLabel['autoangle'];
-					}
+				if($dbLabel['anglemode'] != NULL) {
+					$label->set('anglemode', $dbLabel['anglemode']);
 				}
 				if ($dbLabel['buffer']!='') {
 					$label->buffer = $dbLabel['buffer'];
@@ -1785,7 +1780,9 @@ class GUI {
 	}
 
   function drawMap() {
-		if($this->formvars['go'] != 'navMap_ajax')set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
+		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
+			set_error_handler("MapserverErrorHandler");
+		}
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
@@ -2841,6 +2838,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -3506,7 +3504,6 @@ class db_mapObj{
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];

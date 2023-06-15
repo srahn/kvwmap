@@ -305,6 +305,11 @@ function compare_orders($a, $b){
   else return 0;
 }
 
+function compare_orders2($a, $b){
+	if($a['order'] > $b['order'])return 1;
+	else return 0;
+}
+
 function compare_groups($a, $b){
   if($a->group > $b->group)return 1;
   else return 0;
@@ -486,7 +491,7 @@ function buildsvgpolygonfromwkt($wkt){
 function transformCoordsSVG($path){
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
   $svgcoords = explode(' ',$path);
-  $anzahl = count($svgcoords);
+	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
     if($svgcoords[$i] == 'M'){
     	$newsvgcoords[] = 'M';
@@ -818,7 +823,7 @@ function password_erstellungs_hinweis($language) {
 	include_once(LAYOUTPATH . 'languages/allg_funktionen_' . $language . '.php');
 	$condition = array();
 	$msg = '';
-	if (substr(PASSWORD_CHECK, 0, 1) == '1') {
+	if (substr(PASSWORD_CHECK, 0, 1) == '0') {
 		$msg = $strPasswordCheck0;
 	}
 	else {
@@ -1075,6 +1080,31 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	return $entries;
 }
 
+/**
+	function check if file is a valid zip file. It check if
+	- file exists and is readable
+	- file extension is zip
+	- file has correct header
+	@param $file The path and filename of the file to be tested
+	@return true If it is a zip file else false
+*/
+function is_zip_file($file) {
+	//check is valid file or not and readable
+	if (is_readable($file) == false) {
+		return false;
+	}
+	//check file extension match with .zip or not
+	if (pathinfo($file, PATHINFO_EXTENSION ) != 'zip') {
+		return false;
+	}
+	$fileHeader = "\x50\x4b\x03\x04";
+	$data = file_get_contents($file);
+	if (strpos($data, $fileHeader) === false) {
+		return false;
+	}
+	return true;
+}
+
 function html_umlaute($string){
 	$string = str_replace('ä', '&auml;', $string);
 	$string = str_replace('ü', '&uuml;', $string);
@@ -1308,31 +1338,30 @@ function read_colors($database){
 }
 
 function delete_files($target, $exceptions, $output){
-	if(is_dir($target)){
-	   $sourcedir = opendir($target);
-	   while(false !== ($filename = readdir($sourcedir)))
-	   {
-	       if(!in_array($filename, $exceptions))
-	       {
-	           if($output)
-	           { echo "Processing: ".$target."/".$filename."<br>"; }
-	           if(is_dir($target."/".$filename))
-	           {
-	               // recurse subdirectory; call of function recursive
-	               delete_files($target."/".$filename, $exceptions,0);
-	           }
-	           else if(is_file($target."/".$filename))
-	           {
-	               // unlink file
-	               unlink($target."/".$filename);
-	           }
-	       }
-	   }
-	   closedir($sourcedir);
-	   if(rmdir($target))
-	   { return true; }
-	   else
-	   { return false; }
+	if (is_dir($target)) {
+		$sourcedir = opendir($target);
+		while (false !== ($filename = readdir($sourcedir))) {
+			if (!in_array($filename, $exceptions)) {
+				if ($output) {
+					echo "Processing: " . $target . "/" . $filename . "<br>";
+				}
+				if (is_dir($target . "/" . $filename)) {
+					// recurse subdirectory; call of function recursive
+					delete_files($target . "/" . $filename, $exceptions, 0);
+				}
+				else if(is_file($target . "/" . $filename)) {
+					// unlink file
+					unlink($target . "/" . $filename);
+				}
+			}
+		}
+		closedir($sourcedir);
+		if (rmdir($target)) {
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 }
 
@@ -1831,6 +1860,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -1842,7 +1872,6 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
@@ -1982,10 +2011,11 @@ function output_select($form_field_name, $data, $selected_value = null, $onchang
 	return $html;
 }
 
-/*
-* Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
+/**
+* Die Funktion liefert das erste Wort, welches nach $word in $str gefunden wird.
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
+* Wenn das Wort nicht vorkommt, wird false zurückgeben.
 */
 function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last = false) {
 	if ($last) {
@@ -1999,6 +2029,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 		$parts = explode($delim2, trim($str_from_word_pos, $delim1));
 		return trim($parts[0]);
 	}
+	return '';
 }
 
 function geometrytype_to_datatype($geometrytype) {
@@ -2124,11 +2155,12 @@ function err_msg($file, $line, $msg, $find = '') {
 	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
+# ToDo: Prüfen ob die Ausgabe $msg nicht mit htmlspecialchars($msg) erfolgen muss
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
 		$title . "<br>" .
-		htmlspecialchars($msg) . "
+		$msg . "
 		<div style=\"text-align: center\">
 			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
 		</div>
@@ -2427,11 +2459,19 @@ function get_max_file_size() {
 	@return Array
 */
 function put_value_first($array, $value) {
-	$key = array_search($val, $array);
+	$key = array_search($value, $array);
 	if ($key !== false) {
 		unset($array[$key]);
 	}
 	array_unshift($array, $value);
 	return $array;
+}
+
+/**
+	Convert German date format 25.12.2020
+	to English date format 2022-12-25
+*/
+function en_date($date_de) {	
+	return date('Y-m-d', strtotime($date_de));
 }
 ?>

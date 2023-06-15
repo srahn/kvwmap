@@ -78,6 +78,11 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 		</div>
 	</div>
+	<div id="map_copyrights_div" style="float: right; margin-right: 5px; height: 30px;">
+		<a href="javascript:void();" title="<? echo $strShowCopyrightsTitle; ?>" onclick="showCopyrights('<? echo $strShowCopyrightHeader; ?>')">
+			<i class="fa fa-copyright fa-solid map-copyright-button" style="margin-top: 7px; font-size: 18px;"></i>
+		</a>
+	</div>	
 	<div id="map_info_div" style="float: right; margin-right: 5px; height: 30px;">
 		<a
 			href="#"
@@ -97,7 +102,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 				}"; ?>
 			)"
 		>
-			<i class="fa fa-info-circle" style="margin-top: 8px; color: #666; font-size: 110%"></i>
+			<i class="fa fa-info-circle map-info-button"></i>
 		</a>
 	</div>
 	<div id="scalebar_div" style="float: right; margin-top: 1px;">
