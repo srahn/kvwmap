@@ -9171,7 +9171,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					if (value_of($this->formvars, 'operator_' . $layerset[0]['maintable'] . '_oid') == '') {
 						$this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] = '=';
 					}
-					if (value_of($this->formvars, 'value_'.$layerset[0]['maintable'] . '_oid')) {
+					if (value_of($this->formvars, 'value_'.$layerset[0]['maintable'] . '_oid') != '') {
 						$sql_where .= ' AND '.pg_quote($layerset[0]['maintable'].'_oid') . ' ' . $this->formvars['operator_' . $layerset[0]['maintable'] . '_oid'] . ' ';
 						if ($this->formvars['operator_'.$layerset[0]['maintable'].'_oid'] != 'IN') {
 							$sql_where .= quote($this->formvars['value_' . $layerset[0]['maintable'] . '_oid'], $attributes['type'][$attributes['indizes'][$layerset[0]['oid']]]);
