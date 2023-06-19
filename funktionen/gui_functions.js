@@ -1256,11 +1256,11 @@ function toggleDrawingOrderForm(){
 var dragSrcEl = null;
 
 function handleDragStart(e){
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	dragSrcEl = e.target;
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
     dropzone.classList.add('ready');
   });
-	dragSrcEl = e.target;
   if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
 	dragSrcEl.classList.add('dragging');
 	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
@@ -1297,7 +1297,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });
