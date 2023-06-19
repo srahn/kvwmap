@@ -8,7 +8,7 @@
 		setTimeout(function(){if (keypressed == random) {startQuery();}}, 500);
 	}
 	
-	function keydown(event){
+	function keydown_geo_name_search(event){
 		if (event.keyCode == 13) {
 			// bei Return zum ersten Treffer zoomen
 			var links = document.querySelectorAll('#geo_name_search_result_div a');
@@ -31,7 +31,7 @@
 	}
 </script>
 <div id="search_div">
-	<input id="geo_name_search_field" style="width: 100%" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeydown="keydown(event);" onkeyup="wait();">
+	<input id="geo_name_search_field" style="width: 100%" readonly onfocus="this.removeAttribute('readonly');" type="text" name="geo_name_query" autocomplete="off" onkeydown="keydown_geo_name_search(event);" onkeyup="wait();">
 </div>
 <div id="geo_name_search_result_div">
 </div>
