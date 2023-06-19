@@ -56,7 +56,7 @@ class User2Notification extends MyObject {
 		return $result;
 	}
 
-	public static function create_user2notifications($gui, $notification_id) {
+	public static function create_user2notifications($gui, $notification_id, $user_id = NULL) {
 		$user2notification = new User2Notification($gui);
 		$sql = "
 			INSERT INTO user2notifications (user_id, notification_id)
@@ -67,6 +67,7 @@ class User2Notification extends MyObject {
 				rolle r
 			WHERE
 				true
+				" . ($user_id != NULL ? ' AND user_id = ' . $user_id : '') . "
 		";
 		$user2notification->gui->database->execSQL($sql);
 		if ($user2notification->gui->database->success) {
