@@ -3958,7 +3958,7 @@ echo '			</table>
 					$sql = "
 						UPDATE " . pg_quote($layerset[0]['maintable']) . "
 						SET " . $update_columns[$u] . " = '" . $update_values[$i][$u] . "'
-						WHERE ".$layerset[0]['oid']." IN (" . implode(',', $new_oids) . ")
+						WHERE ".$layerset[0]['oid']." IN ('" . implode("', '", $new_oids) . "')
 					";
 					#echo '<p>SQL zum Update der Attribute, die sich unterscheiden sollen: ' . $sql;
 					$ret = $layerdb->execSQL($sql,4, 0);
