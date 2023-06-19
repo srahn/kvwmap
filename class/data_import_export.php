@@ -980,7 +980,7 @@ class data_import_export {
 	}
 	
 	function ogrinfo($importfile) {
-		$command = ' -q "' . $importfile . '"';;
+		$command = ' -q -nogeomtype "' . $importfile . '"';;
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
