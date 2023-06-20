@@ -478,7 +478,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 		
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 		#echo 'url: ' . $url . '<br><br>';
@@ -630,7 +630,7 @@ class Gml_extractor {
 				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.bp_sonstplanart AS sonstplanart,
 				gmlas.gruenordnungsplan AS gruenordnungsplan,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				array_to_jsonARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
+				array_to_json(ARRAY[to_char(alsd.value, 'DD.MM.YYYY')]::date[]) AS auslegungsstartdatum,
 				array_to_json(ARRAY[to_char(tbsd.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsstartdatum,
 				to_char(gmlas.aenderungenbisdatum, 'DD.MM.YYYY') AS aenderungenbisdatum,
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,
@@ -2451,7 +2451,8 @@ class Gml_extractor {
 				) AND
 				i.table_name NOT LIKE '%\_plan' AND
 				i.table_name NOT LIKE '%\_bereich' AND
-				i.table_name NOT LIKE '%\_textabschnitt'
+				i.table_name NOT LIKE '%\_textabschnitt' AND
+				i.table_name != 'bp_dachgestaltung'
 			ORDER BY
 				i.table_name;
 			";
