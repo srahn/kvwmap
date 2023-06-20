@@ -264,7 +264,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvsrs['passwort']);
+							unset($GUI->fromvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
@@ -531,8 +531,8 @@ else {
 		# Löschen der Rollenfilter
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
-		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
-		for($i = 0; $i < count($rollenlayerset); $i++){
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
+		for($i = 0; $i < @count($rollenlayerset); $i++){
 			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}

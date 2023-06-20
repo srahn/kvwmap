@@ -346,7 +346,7 @@ class Atom{
 
 		$xml .= '<link title="' . $dataset_entry_title_link . '" rel="alternate" href="' . URL . 'download' . $dev . '/xplan_' . $konvertierung_id . '.gml" hreflang="de" length="' . filesize(SHAPEPATH . 'upload/xplankonverter/' . $konvertierung_id . '/xplan_gml/xplan_' . $konvertierung_id . '.gml') . '" bbox="' . $dataset_bbox . '" type="application/gml+xml"/>';
 		foreach (explode('|', $extref_referenznamen) AS $extref_referenzname) {
-			$xml .= '<link title="Plandokument mit externer Referenz" rel="alternate" href="' . URL . 'download' . $dev . '/' . $extref_referenznamen . '" hreflang="de" length="' . (file_exists(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) ? filesize(SHAPEPATH . 'xplankonverter/plaene/' . $extref_referenzname) : '0') . '" bbox="' . $dataset_bbox . '" type="application/pdf"/>';
+			$xml .= '<link title="Plandokument mit externer Referenz" rel="alternate" href="' . URL . 'download' . $dev . '/' . $extref_referenznamen . '" hreflang="de" length="' . (file_exists(XPLANKONVERTER_FILE_PATH . 'plaene/' . $extref_referenzname) ? filesize(XPLANKONVERTER_FILE_PATH .'plaene/' . $extref_referenzname) : '0') . '" bbox="' . $dataset_bbox . '" type="application/pdf"/>';
 		}
 		$xml .= '<rights>' . $dataset_entry_rights . '</rights>';
 		$xml .= '<summary>' . $dataset_entry_summary . '</summary>';

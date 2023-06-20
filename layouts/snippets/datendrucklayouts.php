@@ -15,7 +15,7 @@
 
 var counter = 0;
 var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
-var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"]); ?>'];
+var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"] ?: []); ?>'];
 
 function input_check_num(field){
 	field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
@@ -287,8 +287,10 @@ function scrolltop(){
 									if($this->rectangles){
 										$this->rectangles = array_values($this->rectangles);
 										$rectangles = $this->rectangles[$this->formvars['page']];
-										for($l = 0; $l < count($rectangles); $l++){
-											echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
+										if (is_array($rectangles)) {
+											for ($l = 0; $l < count($rectangles); $l++){
+												echo '<rect id="rect_'.$rectangles[$l]['id'].'" x="'.$rectangles[$l]['x1'].'" y="'.$rectangles[$l]['y1'].'" width="'.$rectangles[$l]['x2'].'" height="'.$rectangles[$l]['y2'].'" class="line" onmouseenter="highlight_rect('.$rectangles[$l]['id'].')" onmouseleave="de_highlight_rect('.$rectangles[$l]['id'].')" onclick="jump_to_rect('.$rectangles[$l]['id'].')"/>';
+											}
 										}
 									}
 								?>

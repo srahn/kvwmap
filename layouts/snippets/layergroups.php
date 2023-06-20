@@ -10,7 +10,7 @@
 ?>
 <script>
 	function group_delete(id) {
-	  Check = confirm('Gruppe wirklick löschen?');
+	  Check = confirm('Gruppe wirklich löschen?');
 	  if (Check == true) {
 			$.ajax({
 				url: 'index.php',

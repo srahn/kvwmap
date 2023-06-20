@@ -804,12 +804,14 @@ class user {
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
+		$this->organisation = $rs['organisation'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
+		$this->userdata_checking_time = $rs['userdata_checking_time'];
 		$this->agreement_accepted = $rs['agreement_accepted'];
 		$this->start = $rs['start'];
 		$this->stop = $rs['stop'];
@@ -1184,6 +1186,7 @@ class user {
 					" . (value_of($formvars, 'font_size_factor') != '' ? ", `font_size_factor` = " . $formvars['font_size_factor'] : '') . "
 					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
 					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
+					, dataset_operations_position = '" . $formvars['dataset_operations_position'] . "'
 					, immer_weiter_erfassen = " . quote_or_null($formvars['immer_weiter_erfassen']) . "
 					, upload_only_file_metadata = " . quote_or_null($formvars['upload_only_file_metadata']) . "
 			";
@@ -1481,6 +1484,23 @@ class user {
 		}
 		return $ret;
 	}	
+	
+	function set_userdata_checking_time() {
+		$sql = "
+			UPDATE
+				`user`
+			SET
+				`userdata_checking_time` = CURRENT_TIMESTAMP
+			WHERE
+				`ID`= " . $this->id . "
+		";
+		#echo 'SQL: ' . $sql;
+		$ret = $this->database->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			$ret[1].='<br>Fehler beim Eintragen von userdata_checking_time.<br>'.$ret[1];
+		}
+		return $ret;
+	}		
 
 	/**
 		Aktualisiert das Passwort und setzt ein neuen Zeitstempel

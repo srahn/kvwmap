@@ -633,6 +633,20 @@ if ($this->Fehlermeldung!='') {
 								</tr>
 								<tr>
 									<td class="rollenwahl-option-header">
+										<? echo $strDatasetOperationsPosition; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<select name="dataset_operations_position">
+											<option value="unten"<? if ($this->user->rolle->dataset_operations_position == 'unten') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionUnten; ?></option>
+											<option value="oben"<? if ($this->user->rolle->dataset_operations_position == 'oben') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionOben; ?></option>
+											<!-- Bis jetzt nur drüber und drunter weil nicht klar ist wie sich das auswirken soll wenn oben und unten angegeben wäre.
+												option value="beide"<? if ($this->user->rolle->dataset_operations_position == 'beide') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionBeide; ?></option//-->
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintDatasetOperationsPosition; ?>"></span>
+									</td>
+								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
 										<? echo $strAlwaysCreateNext; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
@@ -674,7 +688,7 @@ if ($this->Fehlermeldung!='') {
 										<input name="tooltipquery" type="checkbox" value="1" <? if($this->user->rolle->tooltipquery == '1'){echo 'checked="true"';} ?> >&nbsp;
 										<span data-tooltip="<? echo $strHintTooltipQuery; ?>"></span>
 									</td>
-								</tr>		
+								</tr>
 								<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 									<td class="rollenwahl-option-header">
 										<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>

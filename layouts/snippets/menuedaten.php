@@ -7,7 +7,7 @@
 ?>
 <script>
 	function menuedaten_delete(id) {
-	  Check = confirm('Menüpunkt wirklick löschen?');
+	  Check = confirm('Menüpunkt wirklich löschen?');
 	  if (Check == true) {
 			$.ajax({
 				url: 'index.php',

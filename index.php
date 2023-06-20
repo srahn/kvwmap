@@ -11,7 +11,7 @@ if (isset($argv)) {
 	}
 }
 
-# Error Handling for Fatal-Errors
+# Error Handling for Exceptions
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
@@ -20,22 +20,30 @@ register_shutdown_function(function () {
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
-		http_response_code(500);
-		include_once('layouts/snippets/general_error_page.php');
+    if (
+        (array_key_exists('format', $_REQUEST) AND in_array(strtolower($_REQUEST['format']), array('json', 'json_result'))) OR
+        (array_key_exists('mime_type', $_REQUEST) AND strtolower($_REQUEST['mime_type']) == 'json') OR
+        (array_key_exists('content_type', $_REQUEST) AND strtolower($_REQUEST['content_type']) == 'application/json')
+    ) {
+      header('Content-Type: application/json');
+			$response = array(
+				'success' => false,
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+			);
+			echo json_encode($response);
+    }
+    else {
+  		http_response_code(500);
+	  	include_once('layouts/snippets/general_error_page.php');
+    }
 	}
 });
 
-# Error-Handling
-function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
+function CustomErrorHandler($severity, $message, $filename, $lineno) {
+	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
 	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	http_response_code(500);
-	include_once('layouts/snippets/general_error_page.php');
-	/* Don't execute PHP internal error handler */
-	return true;
+	throw new ErrorException($message, 0, $severity, $filename, $lineno);
 }
 
 set_error_handler("CustomErrorHandler");
@@ -162,7 +170,7 @@ define('CASE_COMPRESS', false);
 ###########################################################################################################
 
 $non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
-$spatial_cases = array('navMap_ajax', 'tooltip_query', 'get_group_legend');
+$spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
 
@@ -251,6 +259,28 @@ function go_switch($go, $exit = false) {
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
+			
+			case 'getMap' : {
+				$GUI->formvars['nurAufgeklappteLayer'] = true;
+				if ($GUI->formvars['hist_timestamp'] != '') {
+					rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $GUI->formvars['hist_timestamp'])->format('Y-m-d H:i:s');
+				}
+				$GUI->loadMap('DataBase');
+				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
+				$GUI->map->selectOutputFormat($format);
+				$GUI->drawMap(true);
+				$GUI->mime_type='image/' . $format;
+				$GUI->output();
+			} break;			
+			
+			case 'write_mapserver_templates' : {
+				include_once(CLASSPATH . 'Layer.php');
+				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
+				foreach ($layers as $layer) {
+					echo $layer->get('Name') . '<br>';
+					$layer->write_mapserver_templates('Formular');
+				}
+			}break;			
 			
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
@@ -613,7 +643,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'get_generic_layer_data_sql' : {
-				if ($GUI->user->id != 2) {
+				if ($GUI->user->id != 3) {
 					$GUI->checkCaseAllowed($go);
 				}
 				$GUI->sanitize(['selected_layer_id' => 'int']);
@@ -646,6 +676,11 @@ function go_switch($go, $exit = false) {
 			case 'zoomto_dataset' : {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
+			}break;
+			
+			case 'create_auto_classes_for_rollenlayer' : {
+				$GUI->sanitize(['layer_options_open' => 'int']);
+				$GUI->create_auto_classes_for_rollenlayer();
 			}break;
 
 			# PointEditor
@@ -1105,6 +1140,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('SHP_Import');
 				$GUI->shp_import_speichern();
 			} break;
+			
+			case 'import_rollenlayer_into_layer' : {
+				$GUI->import_rollenlayer_into_layer();
+				$GUI->output();
+			} break;
+			
+			case 'import_rollenlayer_into_layer_importieren' : {
+				$GUI->import_rollenlayer_into_layer_importieren();
+				$GUI->output();
+			} break;			
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();
@@ -1485,14 +1530,17 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'delete_shared_layer' : {
-				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->LayerLoeschen(true); # Delete maintable too if possible
-				$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
-				$GUI->loadMap('DataBase');
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->saveMap('');
-				$GUI->drawMap();
-				$GUI->output();
+				$mapdb = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
+				$layer = $mapdb->get_Layer($GUI->formvars['selected_layer_id'], false);
+				if ($GUI->Stelle->isMenueAllowed('Layer_Anzeigen') OR $layer['shared_from'] == $GUI->user->id) {
+					$GUI->LayerLoeschen(true); # Delete maintable too if possible
+					$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
+					$GUI->loadMap('DataBase');
+					$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+					$GUI->saveMap('');
+					$GUI->drawMap();
+					$GUI->output();
+				}
 			} break;
 
 			case 'Layer2Stelle_Reihenfolge' : {
@@ -1691,24 +1739,44 @@ function go_switch($go, $exit = false) {
 				header('location: index.php');
 			} break;
 
+			case 'datasources_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_anzeigen();
+			} break;
+
+			case 'datasources_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_create();
+			} break;
+
+			case 'datasources_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_update();
+			} break;
+
+			case 'datasources_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_delete();
+			} break;
+
 			case 'connections_anzeigen' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
 				$GUI->connections_anzeigen();
 			} break;
 
-			case 'connection_create' : {
+			case 'connections_create' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_create();
+				$GUI->connections_create();
 			} break;
 
-			case 'connection_update' : {
+			case 'connections_update' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_update();
+				$GUI->connections_update();
 			} break;
 
-			case 'connection_delete' : {
+			case 'connections_delete' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_delete();
+				$GUI->connections_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {
@@ -1774,6 +1842,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->saveMap('');
 				$GUI->output();
+			} break;
+			
+			case "get_copyrights" : {
+				echo $GUI->get_copyrights();
 			} break;
 
 			case "tooltip_query" : {

@@ -15,25 +15,32 @@ class Gml_extractor {
 	}
 
 	/**
-		ToDo:
-		Die Funktion zum Importieren der XPlanGML-Datei in das gmlas Schema und die Belegung der formvars auftrennen in import_gml_to_db() und extract_to_form, damit man auch einlesen kann ohne die Forms zu füllen
-		Dann die Übernahme der Daten aus dem import Schema nach konvertierung und xplan_gml ausführen (create_plaene_from_gmlas) und Kennzeichnung als neue Version einer Zusammenzeichnung
-		was geht durch das Attribut zusammenzeichnung Typ boolean der Klasse xp_plan und dem Attribut veroeffentlichungsdatum der Tabelle xplankonverter.konvertierungen
-		Also migration für neues Attribut zusammenzeichnung boolean in Klasse xp_plan.
-		migration 2022-10-18_18-01-17_add_zusammenzeichnung_to_xp_plan.sql schon angelegt.
+	* Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
 	*/
 	function import_gml_to_db() {
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			return array(
+				'succes' => false,
+				'msg' => 'Import der GML in die Datenbank mit ogr2ogr_gmlas fehlgeschlagen Fehler: ' . $result['msg']
+			);
+		}
+		$this->input_epsg = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
+
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
 		$this->build_basic_tables();
-		$gmlas_output = $this->ogr2ogr_gmlas();
-		if ($gmlas_output == "Nothing returned from ogr2ogr curl request") {
-			echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
-			return;
+		$result = $this->ogr2ogr_gmlas();
+		if (!$result['success']) {
+			if ($GUI->formvars['format'] != 'json_result') {
+				echo 'Laden der Daten mit GML-AS fehlgeschlagen. Bitte kontaktieren Sie Ihren Administrator!';
+			}
+			return $result;
 		}
+			#ToDo pk: Hier prüfen ob mindestens ein Plan und ein dazugehöriger Bereich angelegt wurden.
+			
 		# $tables = $this->get_all_tables_in_schema($this->gmlas_schema);
 
 		# Revert the geom of GML to database specific winding order of vertices (CW/RHR IN DB and Shape, CCW/LHR in GML)
@@ -47,6 +54,11 @@ class Gml_extractor {
 				$this->revert_vertex_order_for_table_with_geom_column_in_schema($fachobjekt_table_and_geometry['table_name'],$fachobjekt_table_and_geometry['column_name'],$this->gmlas_schema);
 			}
 		}
+		return array(
+			'success' => true,
+			'msg' => 'ogr2ogr_gmlas output: ' . $result['msg'],
+			'url' => $result['url']
+		);
 	}
 
 	function extract_to_form($classname) {
@@ -99,7 +111,7 @@ class Gml_extractor {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
-						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
 				}
@@ -143,7 +155,15 @@ class Gml_extractor {
 			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
 		*/
 		global $GUI;
-		$this->input_epsg = $this->get_source_srid();
+		
+		$result = $this->get_source_srid();
+		if (! $result['success']) {
+			$GUI->add_message('warning', $result['msg']);
+			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
+			$GUI->output();
+			exit;
+		}
+		$this->input_epsg = $result['epsg'];
 		$this->xsd_location = '/var/www/html/modell/xsd/' . $this->get_xsd_version() . '/XPlanung-Operationen.xsd';
 		# TODO should the target EPSG be stelle or rolle specific?
 		$this->epsg = $GUI->Stelle->epsg_code;
@@ -216,7 +236,7 @@ class Gml_extractor {
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
-						$referenz->referenzurl =  $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
+						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
 				}
@@ -279,7 +299,7 @@ class Gml_extractor {
 
 		# echo $matched_epsg_str[1] . '<br>';
 
-		if(isset($matched_epsg_str[1])) {
+		if (isset($matched_epsg_str[1])) {
 			// e.g. for EPSG:25832
 			$epsg_elements_array = explode(':',$matched_epsg_str[1]);
 			$matched_epsg = array_values(array_slice($epsg_elements_array, -1))[0];
@@ -287,18 +307,21 @@ class Gml_extractor {
 				# TODO should still be checked if it is a valid EPSG within the konverter or POSTGIS limit, e.g. through a check against the POSTGIS EPSG info
 				$epsg = $matched_epsg;
 			}
+			return array(
+				'success' => true,
+				'epsg' => $epsg
+			);
 		}
 		else {
 			$msg  = 'Konnte das SRS des XPlan-Envelope nicht innerhalb von Doppelten oder einfachen Anführungszeichen finden'; 
 			$msg .= 'Bitte stellen Sie sicher, das ein Envelope-Element nach XPlan-Konformitaetsbedingung 2.1.3.1 vorhanden ist, z.B. wie folgt:<br>';
 			$msg .= '<pre>' . htmlentities('<gml:boundedBy><gml:Envelope srsName="EPSG:25833">...</gml:Envelope></gml:boundedBy>') . '</pre>...<br>';
 			$msg .= 'Ein Fallback SRS mit EPSG ' . $this->fallback_epsg . ' wird benutzt.<br>';
-			$GUI->add_message('warning', $msg);
-			$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
-			$GUI->output();
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
 		}
-		// fallback value
-		return $epsg;
 	}
 	/* 
 	* parses current xplan-version from file
@@ -479,9 +502,8 @@ class Gml_extractor {
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
 		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
-		
+
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
-		#echo 'url: ' . $url . '<br><br>';
 
 		$ch = curl_init();
 		#$url = curl_escape($ch, $url);
@@ -490,9 +512,14 @@ class Gml_extractor {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		$output = curl_exec($ch);
 		curl_close($ch);
-		
-		#echo empty($output) ? "Nothing returned from ogr2ogr curl request" : $output;
-		return $output;
+
+		$success = strpos($output, 'ERROR') === false;
+		$result = json_decode($output);
+		return array(
+			'success' => $success,
+			'msg' => ($success ? $result->stdout : $result->err . $result->stderr),
+			'url' => str_replace($this->pgdatabase->get_credentials($this->pgdatabase->connection_id)['password'], 'secret', $url)
+		);
 	}
 
 	/*
@@ -1121,8 +1148,8 @@ class Gml_extractor {
 		$sql .= ";";
 		# echo $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		$result = pg_fetch_assoc($ret[1]);
-		return $result;
+		#$result = pg_fetch_assoc($ret[1]);
+		return $ret;
 	}
 	
 		/* string ends with 
@@ -2121,12 +2148,10 @@ class Gml_extractor {
 	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
-		
 		# TODO Check for each regel if bereich = bereich, and enter it accordingly in rule
 		#$bereich_gml_id = 'd48608a2-6f3c-11e8-8ca0-1f2b7a47118e'; #Placeholder
 
 		$classes = $this->get_possible_classes_for_regeln($this->gmlas_schema);
-		
 		# Loop over relevant bereiche -> classes -> geom
 		$bereich_index = 0;
 		foreach($bereiche_ids as $bereich_gml_id) {
@@ -2351,7 +2376,7 @@ class Gml_extractor {
 			WHERE
 				table_schema = '" . $schema . "' AND
 				table_name = '" . $class . "' AND
-        udt_name NOT LIKE 'geometry'
+				udt_name NOT LIKE 'geometry'
 			ORDER BY ordinal_position;
 		";
 		#echo '<br>' . $sql;
@@ -2419,7 +2444,7 @@ class Gml_extractor {
 		$sql .= $konvertierung_id . " AS konvertierung_id, ";
 		$sql .= $stelle_id . " AS stelle_id, ";
 		$sql .= "'" . $bereich_gml_id . "' AS bereich_gml_id ";
-
+		#echo 'INSERT regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 	}
 
@@ -2455,7 +2480,8 @@ class Gml_extractor {
 				i.table_name != 'bp_dachgestaltung'
 			ORDER BY
 				i.table_name;
-			";
+		";
+		#echo 'Abfrage der Classes for regeln: ' . $sql;
 		$ret = $this->pgdatabase->execSQL($sql,4, 0);
 		$classes = pg_fetch_all_columns($ret[1]);
 		return $classes;

@@ -257,7 +257,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			[].forEach.call(gap_elements, function (gap_element){
 				gap_element.colSpan=1;		// Leerspalte zwischen den Gruppen verkleinern
 			});
-			group.colSpan=group.dataset.colspan;
+			group.colSpan=group.dataset.origcolspan;
 			img.src='graphics/minus.gif';
 		}
 	}
