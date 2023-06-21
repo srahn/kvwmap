@@ -81,28 +81,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-	
-	function toggle_image_select(id) {
-		var image_select = document.getElementById('image_select_' + id);
-    if (image_select.classList.contains('active')) {
-        image_select.classList.remove('active');
-     } else {
-			 image_select.classList.add('active');
-     }
-	}
-	
-	function image_select(option) {
-		var image_select = option.closest('.image-select');
-		var field = image_select.querySelector('input');
-		field.value = option.dataset.value;
-		image_select.querySelector('.placeholder img').src = option.querySelector('img').src;
-		image_select.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
-		if (field.onchange) {
-			field.onchange();
-		}
-		toggle_image_select(field.id);
-	}
-	
+		
 	toggle_group = function(id){
 		var group = document.getElementById('group'+id);
 		var group_img = document.getElementById('group_img'+id);
