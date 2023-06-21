@@ -416,7 +416,7 @@ class GUI {
 		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
+			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id']);
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
@@ -1705,12 +1705,12 @@ echo '			</table>
 
         # layer
         if (is_array($this->formvars['layer'])) {
-          $layerset=array_values($this->formvars['layer']);
+          $layerset = array_values($this->formvars['layer']);
         }
         else {
-          $layerset=array();
+          $layerset = array();
         }
-        for ($i=0; $i<count($layerset); $i++) {
+        for ($i = 0; $i < count($layerset); $i++) {
 				  if (MAPSERVERVERSION < 600) {
             $layer = ms_newLayerObj($map);
           }
@@ -1872,6 +1872,7 @@ echo '			</table>
 				$map->setMetaData("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
 				$map->setMetaData("ows_hoursofservice", OWS_HOURSOFSERVICE);
 				$map->setMetaData("ows_role", OWS_ROLE);
+
 				$map->setMetaData("ows_srs", $this->Stelle->ows_srs ?: OWS_SRS);
 				if (value_of($_REQUEST, 'onlineresource') != '') {
 					$ows_onlineresource = $_REQUEST['onlineresource'];
@@ -8491,7 +8492,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			}
 		}
 
-		if (!$duplicate) {
+		if ($this->formvars['stellenzuweisung'] == 1 AND !$duplicate) {
       # Stellenzuweisung
   		$stellen = $this->addLayersToStellen(
         array($formvars['selected_layer_id']),
@@ -8545,17 +8546,20 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	*/
 	function addLayersToStellen($layer_ids, $stellen_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		for ($i = 0; $i < count($stellen_ids); $i++) {
-			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
-			$users = $stelle->getUser();
-			for ($j = 0; $j < @count($users['ID']); $j++) {
-				$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
-				$this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
+			if (!isset($this->already_assigned_stellen[$stellen_ids[$i]])) {
+				$stelle = new stelle($stellen_ids[$i], $this->database);
+				$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
+				$users = $stelle->getUser();
+				for ($j = 0; $j < @count($users['ID']); $j++) {
+					$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+					$this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
+				}
+				$stelle->updateLayerParams();
+				$this->already_assigned_stellen[$stellen_ids[$i]] = true;
+				# Kindstellen
+				$children = $stelle->getChildren($stellen_ids[$i], " ORDER BY Bezeichnung", 'only_ids', false);
+				$stellen_ids = array_merge($stellen_ids, $this->addLayersToStellen($layer_ids, $children, $filter, $assign_default_values));
 			}
-			$stelle->updateLayerParams();
-			# Kindstellen
-			$children = $stelle->getChildren($stellen_ids[$i], " ORDER BY Bezeichnung", 'only_ids', false);
-			$stellen_ids = array_merge($stellen_ids, $this->addLayersToStellen($layer_ids, $children, $filter, $assign_default_values));
 		}
 		return $stellen_ids;
 	}
@@ -8609,33 +8613,42 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['order'] = 'Name';
 		}
 		$this->layerdaten = $mapDB->getall_Layer($this->formvars['order'], false, $this->user->id, $this->Stelle->id);
-		$this->titel='Layerdaten';
-		$this->main='layerdaten.php';
+		$this->titel = 'Layerdaten';
+		$this->main = 'layerdaten.php';
 		$this->output();
 	}
 
-	function get_generic_layer_data_sql() {
-		if ($this->formvars['selected_layer_id'] == '') {
+  /**
+   * https://testportal-plandigital.de/kvwmap/index.php?go=get_generic_layer_data_sql&selected_layer_id=71&csrf_token=75c599ad3ff8bbc8f90245a456af9d01
+   * Wird zur Zeit nur in xplankonverter verwendet
+   * ToDo: Muss noch umgestrickt werden dass das generisch geht, bzw. ein extra xplankonverter case draus machen, der diese methode erweitert.
+   */
+	function get_generic_layer_data_sql($selected_layer_id) {
+		if ($selected_layer_id == '') {
 			return array(
-				'success' => false,
-				'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+				'generic_layer_data_sql' => array(
+						'success' => false,
+						'msg' => 'Der Parameter selected_layer_id wurde nicht angegeben.'
+				),
+				'layer' => null
 			);
 		}
 		include_once(CLASSPATH . 'Layer.php');
-		$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		$layer = Layer::find_by_id($this, $selected_layer_id);
 		if ($layer->get('Layer_ID') == 0) {
 			return array(
-				'success' => false,
-				'msg' => 'Layer mit id: ' . $this->formvars['selected_layer_id'] . ' nicht gefunden.'
+				'generic_layer_data_sql' => array(
+					'success' => false,
+					'msg' => 'Layer mit id: ' . $selected_layer_id . ' nicht gefunden.'
+				),
+				'layer' => $layer
 			);
 		}
-		$zusatz = array(
-			array(
-				'select' => 'xplankonverter.konvertierungen.bezeichnung AS planname',
-				'from' => 'JOIN xplankonverter.konvertierungen ON ' . $layer->get('schema') . '.' . $layer->get('maintable') . '.konvertierung_id = xplankonverter.konvertierungen.id'
-			)
-		);
-		return $layer->get_generic_data_sql($zusatz);
+
+		return array(
+      'generic_layer_data_sql' => $layer->get_generic_data_sql(),
+      'layer' => $layer
+    );
 	}
 
 	function Layergruppen_Anzeigen() {
@@ -12564,11 +12577,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
       if ($this->formvars['selected_layers'] != '') {
         $this->selected_layers = explode(', ', $this->formvars['selected_layers']);
         $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
+        $this->attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[0], array('if_empty_use_query' => true));
         $poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[0]);
         for ($i = 1; $i < count($this->selected_layers); $i++) {
           $layerdb = $this->mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
+          $attributes = $this->mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], array('if_empty_use_query' => true));
           $this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
           $next_poly_id = $this->mapDB->getPolygonID($this->formvars['stelle'],$this->selected_layers[$i]);
           if($poly_id != $next_poly_id){
@@ -12652,10 +12665,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
       $layerdb = $mapDB->getlayerdatabase($this->selected_layers[0], $this->Stelle->pgdbhost);
-      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0], true);
+      $this->attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[0],  array('if_empty_use_query' => true));
 			for($i = 1; $i < count($this->selected_layers); $i++){
 				$layerdb = $mapDB->getlayerdatabase($this->selected_layers[$i], $this->Stelle->pgdbhost);
-				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i], true);
+				$attributes = $mapDB->getDataAttributes($layerdb, $this->selected_layers[$i],  array('if_empty_use_query' => true));
 				$this->attributes = array_values(array_uintersect($this->attributes, $attributes, "compare_names"));
 			}
 			for($i = 0; $i < count($this->attributes); $i++){
@@ -16503,19 +16516,23 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 	
-	function checkClassCompletenessAll(){
-		$this->main = 'classCompletenessCheck.php';
+	function check_class_completenesses($layerdaten = array()) {
+		$this->main = 'class_completeness_check.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
+    if (count($layerdaten) == 0) {
+  		$layerdaten = $mapDB->get_layers_of_type(MS_POSTGIS, NULL);
+    }
 		for ($i = 0; $i < count($layerdaten['ID']); $i++) {
-			$this->classCompletenessResult .= '<a target="_blank" href="index.php?go=Layereditor&selected_layer_id=' . $layerdaten['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Layer ' . $layerdaten['Bezeichnung'][$i] . '</a><br>';
+			$this->class_completeness_result .= '<a target="_blank" href="index.php?go=Layereditor&selected_layer_id=' . $layerdaten['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">Layer: ' . layer_name_with_alias($layerdaten['Bezeichnung'][$i], $layerdaten['alias'][$i], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
 			$this->formvars['layer_id'] = $layerdaten['ID'][$i];
-			$this->classCompletenessResult .= $this->checkClassCompleteness();
+			$result = $this->check_class_completeness();
+			$this->class_completeness_result .= $result['html'];
 		}
 		$this->output();
 	}
 	
-	function checkClassCompleteness(){
+	function check_class_completeness() {
+    $html = '';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id']) {
 			$expressions = [];
@@ -16531,18 +16548,33 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				}
 			}
 			if (empty($expressions)) {
-				$result .= 'Keine Expressions vorhanden.<br><br>';
+				$html .= '<div style="background: lightgray; padding: 2px">Keine Expressions vorhanden.</div><br>';
+				return array(
+					'success' => true,
+					'msg' => $html,
+					'html' => $html,
+					'num_unclassified' => 0
+				);
 			}
 			else {
 				foreach ($expressions as $classification => $exps) {
-					$sql = 'SELECT * FROM (' . $select . ') as foo WHERE NOT (' . implode(' OR ', $exps) . ')';
+					$sql = "
+						SELECT
+							*
+						FROM
+							(
+								" . $select . "
+							) AS foo
+						WHERE
+							NOT (" . implode(" OR ", $exps) . ")
+					";
 					$this->debug->write("<p>file:kvwmap class:db_mapObj->getClassFromObject - Lesen einer Klasse eines Objektes:<br>" . $sql,4);
 					$ret = $layerdb->execSQL($sql, 4, 0);
 					if ($ret['success']) {
-						$count = pg_num_rows($ret[1]);
-						$result .= '<div style="background: ' . ($count == 0 ? 'lightgreen' : '#fd907d') . '">Klassifizierung ' . $classification;
-						if ($count == 0) {
-							$result .= ' vollständig.</div><br><br>';
+						$num_unclassified = pg_num_rows($ret[1]);
+						$html .= '<div style="background: ' . ($num_unclassified == 0 ? 'lightgreen' : '#fd907d') . '; padding: 2px">Klassifizierung ' . $classification;
+						if ($num_unclassified == 0) {
+							$html .= ' vollständig.</div>';
 						}
 						else {
 							while ($rs = pg_fetch_assoc($ret[1])) {
@@ -16551,23 +16583,35 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									$this->show_attribute[$this->formvars['show_attribute']][$rs[$this->formvars['show_attribute']]] = 1;
 								}
 							}
-							$result .= ' unvollständig. Es gibt ' . $count.' Objekte, die keiner Expression entsprechen.</div>';
-							$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
-							$result .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a>';
+							$html .= ' unvollständig. Es gibt ' . $num_unclassified.' Objekte, die keiner Expression entsprechen.</div>';
+							$html .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
+							$html .= '<a href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' .$this->layerdaten['Layer_ID']. '&value_' . $this->layerdaten['maintable'] . '_oid=(' . implode(',', $ids) . ')&operator_' . $this->layerdaten['maintable'] . '_oid=IN\', true)"> -> Objekte anzeigen</a>';
 							foreach ($this->show_attribute as $attributename => $values) {
-								$result .= '<br>' . $attributename . ': '. implode(', ', array_keys($values));
+								$html .= '<br>' . $attributename . ': '. implode(', ', array_keys($values));
 							}
-							$result .= '<br><br>';
+							$html .= '<br>';
 						}
 					}
 					else {
-						$result .= '<div style="background: #fd907d">' . $ret[1] . '</div>';
-						$result .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br><br>';
+						$html .= '<div style="background: #fd907d">' . $ret[1] . '</div>';
+						$html .= '<a href="javascript:void(0);" onclick="this.nextElementSibling.style.display = \'\'"> ->SQL </a><textarea style="display: none">' . $sql . '</textarea><br>';
 					}
 				}
 			}
+			$html .= '<br>';
 		}
-		return $result;
+		else {
+			return array(
+				'success' => false,
+				'msg' => 'Keine Konvertierung ID angegeben!'
+			);
+		}
+		return array(
+      'success' => $ret['success'],
+			'msg' => $ret['msg'],
+      'html' => $html,
+      'num_unclassified' => $num_unclassified
+    );
 	}
 	
 } # end of class GUI
@@ -17472,22 +17516,40 @@ class db_mapObj{
 						NULL,
 						1000
 					);
-  }
+	}
 
-	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
+	function getDataAttributes($database, $layer_id, $options = array()) {
+		$default_options = array(
+			'if_empty_use_query' => false,
+			'use_generic_data_sql' => false
+		);
+		$options = array_merge($default_options, $options);
 		global $language;
-		$data = $this->getData($layer_id);
-		if ($data != '') {
-			$data = replace_params(
-				$data,
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$language,
-				NULL,
-				1000
+		$layerObj = Layer::find_by_id($this->GUI, $layer_id);
+		if ($options['use_generic_data_sql']) {
+			$options = array(
+				'attributes' => array(
+					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
+					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
+					'where' => array('k.stelle_id = ' . $this->GUI->user->rolle->stelle_id)
+				),
+				'geom_attribute' => 'position',
+				'geom_type_filter' => true
 			);
+			$result = $layerObj->get_generic_data_sql($options);
+			if ($result['success']) {
+				$data = $result['data_sql'];
+			}
+			else {
+				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+				return $result;
+			}
+		}
+		else {
+			$data = str_replace('$scale', '1000', $this->getData($layer_id));
+		}
+
+		if ($data != '') {
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
@@ -17498,7 +17560,7 @@ class db_mapObj{
 			}
 			return $ret[1];
 		}
-		elseif ($ifEmptyUseQuery){
+		elseif ($options['if_empty_use_query']) {
 			$path = replace_params(
 				$this->getPath($layer_id),
 				rolle::$layer_params,
@@ -18623,8 +18685,9 @@ class db_mapObj{
 				'sizeunits',
 				'connection_id',
 				'max_query_rows',
-				'shared_from'
-			) AS $key
+				'shared_from',
+				'write_mapserver_templates'
+				) AS $key
 		) {
 			$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 		}
@@ -18634,8 +18697,7 @@ class db_mapObj{
 			array(
 				'drawingorder',
 				'sync',
-				'listed',
-				'write_mapserver_templates'
+				'listed'
 			) AS $key
 		) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";

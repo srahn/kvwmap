@@ -334,7 +334,7 @@ class Gml_extractor {
 		$lines = file($this->gml_location);
 		$matched_ns_str;
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'XPlanAuszug') === false) {
+			if (strpos($line, 'xplan=') === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
