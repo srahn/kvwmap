@@ -212,7 +212,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		return $file;
 	}
 
-	function send_error($msg, $send_notification = true, $create_ticket = true) {
+	function send_error($msg, $send_notification = XPLANKONVERTER_SEND_NOTIFICATION, $create_ticket = XPLANKONVERTER_CREATE_TICKET) {
 		global $GUI;
 		$msg_zusatz = '';
 
