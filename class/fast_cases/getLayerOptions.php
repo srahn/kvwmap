@@ -269,30 +269,35 @@ class GUI {
 								<td class="rollenwahl-option-data">
 									<table>';
 				}
-									foreach($params AS $param) {
-										echo '
-										<tr id="layer_parameter_'.$param['key'].'_tr">
-											<td valign="top" class="rollenwahl-option-header">
-												<span>' . $param['alias'] .
-												 ((@count($this->params_layer[$param['id']]) == 1)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
-												</span>
-											</td>
-											<td>
-												'.FormObject::createSelectField(
-													'options_layer_parameter_' . $param['key'],		# name
-													$param['options'],										# options
-													rolle::$layer_params[$param['key']],	# value
-													1,																		# size
-													'width: 110px',												# style
-													'onLayerParameterChanged(this);',			# onchange
-													'layer_parameter_' . $param['key'],		# id
-													'',																		# multiple
-													'',																		# class
-													''																		# firstoption
-												).'
-											</td>
-										</tr>';
-									}
+				foreach($params AS $param) {
+					echo '
+					<tr id="layer_parameter_'.$param['key'].'_tr">
+						<td valign="top" class="rollenwahl-option-header">
+							<span>' . $param['alias'] .
+							 ((@count($this->params_layer[$param['id']]) == 1 AND $layer_id == NULL)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
+							</span>
+						</td>
+						<td>
+							'.FormObject::createCustomSelectField(
+								'options_layer_parameter_' . $param['key'],										# name
+								$param['options'],																						# options
+								rolle::$layer_params[$param['key']],													# value
+								1,																														# size
+								'',																														# style
+								'',																														# onchange
+								'layer_parameter_' . $param['key'],														# id
+								'',																														# multiple
+								'',																														# class
+								'',																														# firstoption
+								'', 																													# option_style
+								'', 																													# option_class
+								'',																														# onclick
+								"if (mapimg3 == undefined) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
+								"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+							).'
+						</td>
+					</tr>';
+				}
 				if($layer_id == NULL){
 					echo'	</table>
 							</td>
