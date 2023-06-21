@@ -39,19 +39,6 @@ register_shutdown_function(function () {
 	}
 });
 
-# Error-Handling
-// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	// global $errors;
-	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		// return;
-	// }
-	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	// http_response_code(500);
-	// include_once('layouts/snippets/general_error_page.php');
-	// /* Don't execute PHP internal error handler */
-	// return true;
-// }
-
 function CustomErrorHandler($severity, $message, $filename, $lineno) {
 	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
@@ -275,9 +262,11 @@ function go_switch($go, $exit = false) {
 			
 			case 'getMap' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
-				rolle::$hist_timestamp = $GUI->formvars['hist_timestamp'];
+				if ($GUI->formvars['hist_timestamp'] != '') {
+					rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $GUI->formvars['hist_timestamp'])->format('Y-m-d H:i:s');
+				}
 				$GUI->loadMap('DataBase');
-				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
 				$GUI->mime_type='image/' . $format;
@@ -712,6 +701,11 @@ function go_switch($go, $exit = false) {
 			case 'zoomto_dataset' : {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
+			}break;
+			
+			case 'create_auto_classes_for_rollenlayer' : {
+				$GUI->sanitize(['layer_options_open' => 'int']);
+				$GUI->create_auto_classes_for_rollenlayer();
 			}break;
 
 			# PointEditor
@@ -1171,6 +1165,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('SHP_Import');
 				$GUI->shp_import_speichern();
 			} break;
+			
+			case 'import_rollenlayer_into_layer' : {
+				$GUI->import_rollenlayer_into_layer();
+				$GUI->output();
+			} break;
+			
+			case 'import_rollenlayer_into_layer_importieren' : {
+				$GUI->import_rollenlayer_into_layer_importieren();
+				$GUI->output();
+			} break;			
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();
@@ -1760,24 +1764,44 @@ function go_switch($go, $exit = false) {
 				header('location: index.php');
 			} break;
 
+			case 'datasources_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_anzeigen();
+			} break;
+
+			case 'datasources_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_create();
+			} break;
+
+			case 'datasources_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_update();
+			} break;
+
+			case 'datasources_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_delete();
+			} break;
+
 			case 'connections_anzeigen' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
 				$GUI->connections_anzeigen();
 			} break;
 
-			case 'connection_create' : {
+			case 'connections_create' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_create();
+				$GUI->connections_create();
 			} break;
 
-			case 'connection_update' : {
+			case 'connections_update' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_update();
+				$GUI->connections_update();
 			} break;
 
-			case 'connection_delete' : {
+			case 'connections_delete' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_delete();
+				$GUI->connections_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {
@@ -1843,6 +1867,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->saveMap('');
 				$GUI->output();
+			} break;
+			
+			case "get_copyrights" : {
+				echo $GUI->get_copyrights();
 			} break;
 
 			case "tooltip_query" : {

@@ -721,7 +721,24 @@
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
-							<textarea name="datasource" cols="33" rows="2"><? echo $this->formvars['datasource'] ?></textarea>
+							<div id="datasource_div">
+					<? 		include_once(CLASSPATH . 'DataSource.php');
+								$datasources = DataSource::find($this);
+								echo FormObject::createSelectField(
+									'datasource',
+									array_map(
+										function($datasource) {
+											return array(
+												'value' => $datasource->get('id'),
+												'output' => $datasource->get('name') ?: $datasource->get('beschreibung')
+											);
+										},
+										$datasources
+									),
+									$this->formvars['datasource']
+								); ?>
+								<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+							</div>
 						</td>
 					</tr>
 
@@ -922,7 +939,7 @@
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strrequires; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 						$group_layer_options = array();
-						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+						foreach (($this->grouplayers['ID'] ?: []) AS $index => $grouplayer_id) {
 							$group_layer_options[] = array(
 								'value' => $grouplayer_id,
 								'output' => $this->grouplayers['Bezeichnung'][$index]
@@ -959,7 +976,7 @@
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>

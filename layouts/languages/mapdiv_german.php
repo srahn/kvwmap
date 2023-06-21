@@ -6,4 +6,6 @@
 	$strMapExtent = 'Ausdehnung';
 	$strMapSize = 'Bildgröße';
 	$strPixelSize = 'Pixelgröße';
+	$strShowCopyrightsTitle = 'Zeige Urheberrechte an';
+	$strShowCopyrightHeader = 'Urheberrechte';
 ?>

@@ -531,8 +531,8 @@ else {
 		# Löschen der Rollenfilter
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
-		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
-		for($i = 0; $i < count($rollenlayerset); $i++){
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
+		for($i = 0; $i < @count($rollenlayerset); $i++){
 			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}

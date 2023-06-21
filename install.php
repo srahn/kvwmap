@@ -32,6 +32,17 @@ error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
 $debug; $log_mysql; $log_postgres;
 define('KVWMAP_INIT_PASSWORD', (getenv('KVWMAP_INIT_PASSWORD') == '') ? 'KvwMapPW1' : getenv('KVWMAP_INIT_PASSWORD'));
 
+class GUI {
+	function __construct($main, $style, $mime_type) {
+	}
+
+	function add_message($type, $msg) {
+		echo '<p>Meldung: ' . $type;
+		echo '<br>' . $msg;
+	}
+}
+$GUI = new GUI(NULL, NULL, NULL);
+
 output_header();
 
 if (!file_exists('config.php')) {
@@ -211,6 +222,13 @@ function install() {
 			CREATE EXTENSION IF NOT EXISTS postgis
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
+		Entferne Superuser Recht<br>		<?php
+		$sql = "
+			ALTER USER " . $pgsqlKvwmapDb->user . " WITH NOSUPERUSER;
+		";
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
 		Ergänze bzw. korrigiere EPSG-Codes für MV<br><?php
 		$sql = "
 			UPDATE
@@ -515,7 +533,9 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		WITH
 			SUPERUSER
 			LOGIN
-			PASSWORD '" . $pgsqlKvwmapDb->passwd . "'
+			PASSWORD '" . $pgsqlKvwmapDb->passwd . "';
+			
+		GRANT SET ON PARAMETER log_min_messages TO " . $pgsqlKvwmapDb->user . ";
 	";
 	$pgsqlPostgresDb->execSQL($sql, 0, 1); ?>
 	

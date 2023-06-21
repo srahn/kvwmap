@@ -4,8 +4,8 @@ BEGIN;
   ALTER TABLE IF EXISTS gebietseinheiten.gemeindeverbaende
     DROP CONSTRAINT kreis_fkey;
 
-  ALTER TABLE gebietseinheiten.kreise ALTER COLUMN krs_schl TYPE character(5) using LEFT(krs_schl, 5);
-  ALTER TABLE gebietseinheiten.gemeindeverbaende ALTER COLUMN krs_schl TYPE character(5) using LEFT(krs_schl, 5);
+  ALTER TABLE gebietseinheiten.kreise ALTER COLUMN krs_schl TYPE character(5) using LEFT(krs_schl::text, 5);
+  ALTER TABLE gebietseinheiten.gemeindeverbaende ALTER COLUMN krs_schl TYPE character(5) using LEFT(krs_schl::text, 5);
 
   ALTER TABLE IF EXISTS gebietseinheiten.gemeindeverbaende
     ADD CONSTRAINT kreis_fkey FOREIGN KEY (krs_schl)

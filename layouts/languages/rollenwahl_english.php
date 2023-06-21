@@ -86,4 +86,9 @@
 	$strRedlineFontFamily = "Font family";
 	$strRedlineFontSize = "Font size";
 	$strRedlineFontWeight = "Font weight";
-?>  
+	$strDatasetOperationsPosition = 'Location of dataset functions';
+	$strDatasetOperationsPositionUnten = 'below datasets';
+	$strDatasetOperationsPositionOben = 'above datasets';
+	$strDatasetOperationsPositionBeide = 'above and below datasets';
+	$strHintDatasetOperationsPosition = 'Define where the function for selected datasets shall be located. Below or above the datasets.';
+?>

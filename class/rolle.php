@@ -238,6 +238,28 @@ class rolle {
     }
     return $ret;
   }
+	
+  function read_disabled_class_expressions() {
+		$sql = "
+			SELECT 
+				cl.Layer_ID,
+				cl.Class_ID,
+				cl.Expression
+			FROM 
+				classes as cl
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID 
+			WHERE 
+				r2uc.status = 0 AND 
+				r2uc.user_id = " . $this->user_id . "	AND 
+				r2uc.stelle_id = " . $this->stelle_id . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->database->execSQL($sql);
+    while ($row = $this->database->result->fetch_assoc()) {
+  		$result[$row['Layer_ID']][] = $row;
+		}
+		return $result ?: [];
+  }	
 
   function getGroups($GroupName) {
 		global $language;
@@ -438,6 +460,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -1358,6 +1381,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setRollenLayerAutoDelete($formvars){
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				id = -1*" . $formvars['layer_options_open'] . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
@@ -1441,7 +1479,7 @@ class rolle {
 				styles 
 			SET 
 				color = "'.$formvars['layer_options_color'].'",
-				' . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = NULL, width = NULL, angle = NULL, ') . '
+				' . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = 8, width = NULL, angle = NULL, ') . '
 				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
 			WHERE 
 				Style_ID = '.$style_id;
@@ -1609,6 +1647,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`dataset_operations_position`,
 					`immer_weiter_erfassen`,
 					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
@@ -1655,6 +1694,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`dataset_operations_position`,
 					`immer_weiter_erfassen`,
 					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
