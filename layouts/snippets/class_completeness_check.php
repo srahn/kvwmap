@@ -3,6 +3,6 @@
     <td align="center" colspan="4"><h2>Überprüfung der Klassen auf Vollständigkeit</h2></td>
 	</tr>
 	<tr>
-		<td><? echo $this->classCompletenessResult; ?></td>
+		<td><? echo $this->class_completeness_result; ?></td>
 	</tr>
 </table>

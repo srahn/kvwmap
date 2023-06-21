@@ -117,8 +117,8 @@ input {
 }
 
 body {	
-	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
-	BACKGROUND:white;
+	/*font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;*/
+	BACKGROUND: white;
 	margin:0px;
 
 	font-size: <? echo $font_size_factor * 15; ?>px;
@@ -2657,6 +2657,18 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .green {
 	color: green;
+}
+
+.orange {
+	color: orange;
+}
+
+.blue {
+	color: blue;
+}
+
+.white {
+	color: white;
 }
 
 .yellow {

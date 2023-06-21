@@ -645,14 +645,39 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			/**
+			 * Erzeugt für Layer mit selected_layer_id aus dessen maintable ein
+			 * Data-Statement, welches im Layereditor angezeigt wird.
+			 */
 			case 'get_generic_layer_data_sql' : {
-				if ($GUI->user->id != 3) {
-					$GUI->checkCaseAllowed($go);
-				}
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql($GUI->formvars['selected_layer_id']);
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
+			} break;
+
+			/**
+			 * Dieser Anwendungsfall ist nicht im Layereditor eingebunden.
+			 * Er wird für den Layer mit der selected_layer_id aus dessen 
+			 * maintable ein neues Data-Statement abgeleitet und dem Attribut Data
+			 * zugeordnet. Kann für automatische Erstellung von Data verwendet werden.
+			 */
+			case 'set_generic_layer_data_sql' : {
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$result = $GUI->get_generic_layer_data_sql();
+				if ($result['generic_layer_data_sql']['success']) {
+					$result['layer']->update(
+						array(
+							'Data' => $result['generic_layer_data_sql']['data_sql']
+						),
+						false
+					);
+					$result['generic_layer_data_sql']['msg'] .= ' wurde erfolgreich für den Layer mit ID ' . $result['layer']->get($result['layer']->identifier) . ' eingetragen.';
+				}
 				header('Content-Type: application/json; charset=utf-8');
-				echo utf8_decode(json_encode($result));
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
 			} break;
 
 			case 'exportWMC' :{
@@ -1462,7 +1487,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompletenessAll' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->checkClassCompletenessAll();
+				$GUI->check_class_completenesses();
 			} break;
 
 			case 'Attributeditor' : {

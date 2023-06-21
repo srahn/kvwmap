@@ -2474,4 +2474,25 @@ function put_value_first($array, $value) {
 function en_date($date_de) {	
 	return date('Y-m-d', strtotime($date_de));
 }
+
+function layer_name_with_alias($name, $alias, $options = array()) {
+	$default_options = array(
+		'alias_first' => false,
+		'delimiter' => ' ',
+		'brace_type' => 'sharp'
+	);
+	$brace = array(
+		'sharp' => array('[', ']'),
+		'round' => array('(', ')'),
+		'curly' => array('{', '}'),
+		'no' => array('', '')
+	);
+	$options = array_merge($default_options, $options);
+	if ($options['alias_first']) {
+		return $alias . $options['delimiter'] . $brace[$options['brace_type']][0] . $name . $brace[$options['brace_type']][1];
+	}
+	else {
+		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
+	}
+}
 ?>

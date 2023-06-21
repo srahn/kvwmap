@@ -53,8 +53,7 @@ class LayerAttribute extends MyObject {
 
 	function get_generic_select($layer, $attr) {
 		return array(
-			'select' => $layer->get('schema') . '.' . $layer->get('maintable') . '.' . $attr['att_name'],
-			'from' => ''
+			'select' => $layer->get_table_alias() . '.' . $attr['att_name']
 		);
 	}
 }
