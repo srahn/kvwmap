@@ -776,6 +776,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();
 	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg0")?.remove();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();
 	// nix

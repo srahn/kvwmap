@@ -16699,17 +16699,37 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 												</span>
 											</td>
 											<td>
-												'.FormObject::createSelectField(
-													'options_layer_parameter_' . $param['key'],		# name
-													$param['options'],										# options
-													rolle::$layer_params[$param['key']],	# value
-													1,																		# size
-													'width: 110px',												# style
-													'onLayerParameterChanged(this);',			# onchange
-													'layer_parameter_' . $param['key'],		# id
-													'',																		# multiple
-													'',																		# class
-													''																		# firstoption
+												'.($layer_id == NULL ?
+													FormObject::createSelectField(
+														'options_layer_parameter_' . $param['key'],		# name
+														$param['options'],										# options
+														rolle::$layer_params[$param['key']],	# value
+														1,																		# size
+														'width: 110px',												# style
+														'onLayerParameterChanged(this);',			# onchange
+														'layer_parameter_' . $param['key'],		# id
+														'',																		# multiple
+														'',																		# class
+														''																		# firstoption
+													)
+													:
+													FormObject::createCustomSelectField(
+														'options_layer_parameter_' . $param['key'],										# name
+														$param['options'],																						# options
+														rolle::$layer_params[$param['key']],													# value
+														1,																														# size
+														'',																														# style
+														'',																														# onchange
+														'layer_parameter_' . $param['key'],														# id
+														'',																														# multiple
+														'',																														# class
+														'',																														# firstoption
+														'', 																													# option_style
+														'', 																													# option_class
+														'',																														# onclick
+														"if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
+														"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+													)
 												).'
 											</td>
 										</tr>';
