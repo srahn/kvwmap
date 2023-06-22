@@ -1,6 +1,6 @@
 <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? include(WWWROOT . APPLVERSION . 'funktionen/gui_defs.php'); ?>
-<script type="text/javascript" src="funktionen/gui_functions.js?v=94"></script>
+<script type="text/javascript" src="funktionen/gui_functions.js?v=96"></script>
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript" src="funktionen/keyfunctions.js"></script>
 <script type="text/javascript" src="<? echo JQUERY_PATH; ?>jquery.min.js"></script><?

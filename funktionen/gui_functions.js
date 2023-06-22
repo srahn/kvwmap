@@ -932,25 +932,18 @@ function custom_select_keydown(evt){
 
 function custom_select_hover(option) {
 	var custom_select_div = option.closest('.custom-select');
+	option.scrollIntoView({behavior: "smooth", block: "nearest"});
 	custom_select_div.querySelector('li.selected').classList.remove('selected');
 	option.classList.add('selected');
 }
 
-function custom_select_select(option) {
-	var custom_select_div = option.closest('.custom-select');
-	var field = custom_select_div.querySelector('input');
+function custom_select_click(option) {
 	custom_select_hover(option);
 	field.value = option.dataset.value;
 	if (custom_select_div.querySelector('.placeholder img')) {
 		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
 	}
 	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
-}
-
-function custom_select_click(option) {
-	custom_select_select(option);
-	var custom_select_div = option.closest('.custom-select');
-	var field = custom_select_div.querySelector('input');	
 	if (field.onchange) {
 		field.onchange();
 	}
