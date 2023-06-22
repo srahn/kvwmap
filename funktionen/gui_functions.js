@@ -922,11 +922,16 @@ function custom_select_register_keydown(){
 
 function custom_select_keydown(evt){
 	var selected_option = document.querySelector('.custom-select.active li.selected');
-	if (evt.keyCode == 38) {
-		selected_option.previousElementSibling.onmouseenter();
-	}
-	if (evt.keyCode == 40) {
-		selected_option.nextElementSibling.onmouseenter();
+	switch (evt.keyCode) {
+		case 38 : {
+			selected_option.previousElementSibling.onmouseenter();
+		}break;
+		case 40 : {
+			selected_option.nextElementSibling.onmouseenter();
+		}break;
+		case 13 : {
+			selected_option.onclick();
+		}break;
 	}
 }
 
@@ -938,6 +943,8 @@ function custom_select_hover(option) {
 }
 
 function custom_select_click(option) {
+	var custom_select_div = option.closest('.custom-select');
+	var field = custom_select_div.querySelector('input');
 	custom_select_hover(option);
 	field.value = option.dataset.value;
 	if (custom_select_div.querySelector('.placeholder img')) {
