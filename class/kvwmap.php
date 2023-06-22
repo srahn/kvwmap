@@ -3839,6 +3839,7 @@ echo '			</table>
 			if (
 				!(
 						in_array($rs['column_name'], $update_columns) OR
+						$rs['column_name'] == $layerset[0]['oid'] OR
 						(
 							$table->is_part_of_primary_keys($rs['column_name']) AND
 							!$table->has_other_constraint_column($rs['column_name'], $update_columns)
