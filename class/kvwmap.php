@@ -15198,7 +15198,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 								$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 							}
 							if ($layerset[$i]['maintable'] != '' AND $layerset[$i]['oid'] != '') {
-								$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['maintable']]).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($layerset[$i]['maintable'] . '_oid').', ' . $pfad;
+								$pfad = pg_quote($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['maintable']] ?: $layerset[$i]['maintable']).'.'.$layerset[$i]['oid'].' AS ' . pg_quote($layerset[$i]['maintable'] . '_oid').', ' . $pfad;
 							}
 							if ($distinct == true) {
 								$pfad = 'DISTINCT ' . $pfad;

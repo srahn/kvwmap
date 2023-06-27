@@ -170,7 +170,7 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach(array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
