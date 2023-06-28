@@ -282,7 +282,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 						value = 'null';
 					}
 					else {
-						if (value.substring(0,1) != '{') {
+						if (['{', '['].indexOf(value.substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
 							value = '"' + value + '"';
 						}
 					}
