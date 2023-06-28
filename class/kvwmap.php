@@ -14669,7 +14669,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
 			if ($json != '') {
-				$result = ($json == 'NULL' ? '' : $quote . $json . $quote);
+				$result = ($json == 'NULL' ? '' : $json);
 			}
 			else {
 				$result = $json;
