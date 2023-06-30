@@ -27,6 +27,7 @@ class Konvertierung extends PgObject {
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
 	static $write_debug = false;
+	static $art = '';
 
 	function __construct($gui) {
 		parent::__construct($gui, Konvertierung::$schema, Konvertierung::$tableName);
@@ -70,6 +71,25 @@ class Konvertierung extends PgObject {
 			if (in_array($layer->name, $layernames_with_content)) {
 				$layer->set('header', '../templates/' . $layer->name . '_head.html');
 				$layer->set('template', '../templates/' . $layer->name . '_body.html');
+				# Set Data sql for layer
+				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
+				$options = array(
+					'attributes' => array(
+						'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
+						'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
+						'where' => array('k.stelle_id = ' . $gui->user->rolle->stelle_id)
+					),
+					'geom_attribute' => 'position',
+					'geom_type_filter' => true
+				);
+				$result = $layerObj->get_generic_data_sql($options);
+				if ($result['success']) {
+					$layer->set('data', $result['data_sql']);
+				}
+				else {
+					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+					return $result;
+				}
 			}
 			else {
 				$gui->map->removeLayer($i);
@@ -224,9 +244,14 @@ class Konvertierung extends PgObject {
 		}
 	}
 
+	/**
+	 * Fragt die Zusammenzeichnungen der Stelle und Planart ab und teilt sie ein in 
+	 * entwurf (draft), veröffentlicht (pubished), archiviert (archived) und fehlerhaft (faulty)
+	 */
 	public static function find_zusammenzeichnungen($gui, $planart, $plan_class, $plan_attribut_aktualitaet) {
 		$zusammenzeichnungen = array(
 			'published' => array(),
+			'draft' => array(),
 			'archived' => array(),
 			'faulty' => array()
 		);
@@ -246,17 +271,32 @@ class Konvertierung extends PgObject {
 				k.planart = '" . $planart . "'
 			ORDER BY p." . $plan_attribut_aktualitaet . " DESC
 		";
-		#echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
+		if ($gui->user->id == 3) {
+			# echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
+		}
+
 		$konvertierung->debug->show('find_zusammenzeichnungen sql: ' . $sql, false);
 		$query = pg_query($konvertierung->database->dbConn, $sql);
 		while ($konvertierung->data = pg_fetch_assoc($query)) {
-			$konvertierung->plan = null;
+			$konvertierung->plan = false;
 			$konvertierung->get_plan();
-			$zusammenzeichnungen[($konvertierung->get('veroeffentlicht') == 't' ? 'published' : 'faulty')][] = clone $konvertierung;
+			if ($konvertierung->get('veroeffentlicht') == 't') {
+				$konvertierung->art = 'published';
+			}
+			elseif ($konvertierung->get('error_id') AND $konvertierung->get('error_id') > 0) {
+				$konvertierung->art = 'faulty';
+			}
+			else {
+				$konvertierung->art = 'draft';
+			}
+			$zusammenzeichnungen[$konvertierung->art][] = clone $konvertierung;
 		}
 		if (file_exists(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id)) {
 			$zusammenzeichnungen['archived'] = glob(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id . '/Zusammenzeichnung_*');
 			rsort($zusammenzeichnungen['archived'],  SORT_STRING);
+		}
+		if ($gui->user->id == 3) {
+			#echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $zusammenzeichnungen), true); exit;
 		}
 		return $zusammenzeichnungen;
 	}
@@ -767,7 +807,12 @@ class Konvertierung extends PgObject {
 		return $regeln;
 	}
 
+	/**
+	 * Return plan of konvertierung, query first from database if not already asigned to plan attribute 
+	 * return false if not found, else plan
+	 */
 	function get_plan() {
+		#echo 'Frage Plan für Konvertierung ' . $this->get($this->identifier) . ' ab.';
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
@@ -1439,7 +1484,7 @@ class Konvertierung extends PgObject {
 						'name=' . $pathinfo['basename'] . '&' .
 						'skipSemantisch=false' . '&' .
 						'skipGeometrisch=false' . '&' .
-						'skipFlaechenschluss=false' . '&' .
+						'skipFlaechenschluss=true' . '&' .
 						'skipGeltungsbereich=false';
 
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
@@ -1964,13 +2009,11 @@ class Konvertierung extends PgObject {
 		return $rs['email_arl'];
 	}
 
-	# ToDo pk: Adresse to_email und cc_email von peter.korduan... auf richtige ändern und mit Betroffenen testen
 	function send_notification($msg) {
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'info@testportal-plandigital.de';
-#		$to_email = $this->get_arl_email();
-		$to_email = 'peter.korduan@gdi-service.de';
-		$cc_email = null;
+		$to_email = $this->get_arl_email();
+		$cc_email = 'peter.korduan@gdi-service.de';
 		$reply_email = null;
 		$subject = 'Update in Plandigital';
 		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";
@@ -1982,7 +2025,7 @@ class Konvertierung extends PgObject {
 		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
 			return array(
 				'success' => true,
-				'msg' => 'Benachrichtigung versendet.'
+				'msg' => 'Benachrichtigung an den Systemadministrator versendet. Nach Behebung des Fehlers erhalten Sie eine Mitteilung per E-Mail'
 			);
 		}
 		else {

@@ -66,9 +66,9 @@ class Notification extends MyObject {
 		);
 	}
 
-	function create_with_users() {
+	function create_with_users($user_id = NULL) {
 		$results = $this->create();
-		array_merge($results, User2Notification::create_user2notifications($this->gui, $this->get($this->identifier)));
+		array_merge($results, User2Notification::create_user2notifications($this->gui, $this->get($this->identifier), $user_id));
 		return $results;
 	}
 

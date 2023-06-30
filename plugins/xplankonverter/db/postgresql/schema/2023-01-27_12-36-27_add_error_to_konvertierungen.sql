@@ -14,7 +14,7 @@ BEGIN;
     (2, 'GML-ID-Fehler', 'Die GML-ID der Zusammenzeichnung wird schon von einem anderen Plan verwendet'),
     (3, 'Plananlagefehler', 'Fehler beim Anlegen des Plan und Bereichsobjektes'),
     (4, 'Schemarenamefehler', 'Fehler beim Umbenennen des Import-Schemas xplan_gmlas_tmp_user_id'),
-    (5, 'Geltungsbereicheeinlesefehler', 'Fehler beim Einlesen der Geltungsbereiche der Einzelfassungen');
+    (5, 'Geltungsbereicheeinlesefehler', 'Fehler beim Einlesen der Geltungsbereiche der Änderungspläne');
 
   ALTER TABLE xplankonverter.konvertierungen ADD COLUMN IF NOT EXISTS error_id integer;
 

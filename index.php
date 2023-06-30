@@ -39,19 +39,6 @@ register_shutdown_function(function () {
 	}
 });
 
-# Error-Handling
-// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	// global $errors;
-	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		// return;
-	// }
-	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	// http_response_code(500);
-	// include_once('layouts/snippets/general_error_page.php');
-	// /* Don't execute PHP internal error handler */
-	// return true;
-// }
-
 function CustomErrorHandler($severity, $message, $filename, $lineno) {
 	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
@@ -278,8 +265,11 @@ function go_switch($go, $exit = false) {
 				if ($GUI->formvars['hist_timestamp'] != '') {
 					rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $GUI->formvars['hist_timestamp'])->format('Y-m-d H:i:s');
 				}
+				if ($GUI->formvars['layer_params'] != '') {
+					rolle::$layer_params = array_merge(rolle::$layer_params, $GUI->formvars['layer_params']);
+				}
 				$GUI->loadMap('DataBase');
-				$format = (($GUI->formvars['only_postgis_layer'] OR $GUI->formvars['only_layer_id']) ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
 				$GUI->mime_type='image/' . $format;
@@ -601,6 +591,38 @@ function go_switch($go, $exit = false) {
 
 			# Style speichern
 			case 'save_style' : {
+				$GUI->sanitize([
+					'style_id' => 'int',
+					'style_symbol' => 'int',
+					'symbolname' => 'text',
+					'style_size' => 'text',
+					'style_color' => 'text',
+					'style_backgroundcolor' => 'text',
+					'style_outlinecolor' => 'text',
+					'style_colorrange' => 'text',
+					'style_datarange' => 'text',
+					'style_rangeitem' => 'text',
+					'style_minsize' => 'text',
+					'style_maxsize' => 'text',
+					'style_minscale' => 'int',
+					'style_maxscale' => 'int',
+					'style_angle' => 'text',
+					'style_angleitem' => 'text',
+					'style_width' => 'text',
+					'style_minwidth' => 'int',
+					'style_maxwidth' => 'int',
+					'style_offsetx' => 'int',
+					'style_offsety' => 'int',
+					'style_polaroffset' => 'text',
+					'style_pattern' => 'text',
+					'style_geomtransform' => 'text',
+					'style_gap' => 'int',
+					'style_initialgap' => 'float',
+					'style_opacity' => 'int',
+					'style_linecap' => 'text',
+					'style_linejoin' => 'text',			
+					'style_linejoinmaxsize' => 'int'
+				]);
 				$GUI->save_style();
 			} break;
 
@@ -655,14 +677,39 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			/**
+			 * Erzeugt für Layer mit selected_layer_id aus dessen maintable ein
+			 * Data-Statement, welches im Layereditor angezeigt wird.
+			 */
 			case 'get_generic_layer_data_sql' : {
-				if ($GUI->user->id != 3) {
-					$GUI->checkCaseAllowed($go);
-				}
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql($GUI->formvars['selected_layer_id']);
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
+			} break;
+
+			/**
+			 * Dieser Anwendungsfall ist nicht im Layereditor eingebunden.
+			 * Er wird für den Layer mit der selected_layer_id aus dessen 
+			 * maintable ein neues Data-Statement abgeleitet und dem Attribut Data
+			 * zugeordnet. Kann für automatische Erstellung von Data verwendet werden.
+			 */
+			case 'set_generic_layer_data_sql' : {
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$result = $GUI->get_generic_layer_data_sql();
+				if ($result['generic_layer_data_sql']['success']) {
+					$result['layer']->update(
+						array(
+							'Data' => $result['generic_layer_data_sql']['data_sql']
+						),
+						false
+					);
+					$result['generic_layer_data_sql']['msg'] .= ' wurde erfolgreich für den Layer mit ID ' . $result['layer']->get($result['layer']->identifier) . ' eingetragen.';
+				}
 				header('Content-Type: application/json; charset=utf-8');
-				echo utf8_decode(json_encode($result));
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
 			} break;
 
 			case 'exportWMC' :{
@@ -689,6 +736,11 @@ function go_switch($go, $exit = false) {
 			case 'zoomto_dataset' : {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
+			}break;
+			
+			case 'create_auto_classes_for_rollenlayer' : {
+				$GUI->sanitize(['layer_options_open' => 'int']);
+				$GUI->create_auto_classes_for_rollenlayer();
 			}break;
 
 			# PointEditor
@@ -1148,6 +1200,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('SHP_Import');
 				$GUI->shp_import_speichern();
 			} break;
+			
+			case 'import_rollenlayer_into_layer' : {
+				$GUI->import_rollenlayer_into_layer();
+				$GUI->output();
+			} break;
+			
+			case 'import_rollenlayer_into_layer_importieren' : {
+				$GUI->import_rollenlayer_into_layer_importieren();
+				$GUI->output();
+			} break;			
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();
@@ -1508,7 +1570,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompletenessAll' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->checkClassCompletenessAll();
+				$GUI->check_class_completenesses();
 			} break;
 
 			case 'Attributeditor' : {
