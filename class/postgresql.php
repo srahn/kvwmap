@@ -854,8 +854,6 @@ FROM
         if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
         else $attr_info['length'] = $attr_info['character_maximum_length'];
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      #if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
-	  		else $attr_info['default'] = '';
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
