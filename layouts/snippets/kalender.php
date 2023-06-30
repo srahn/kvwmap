@@ -1,6 +1,6 @@
 <?php 
-    $m = (!$m) ? date("m",mktime()) : "$m";
-    $y = (!$y) ? date("Y",mktime()) : "$y";
+    $m = (!$m) ? date("m", time()) : "$m";
+    $y = (!$y) ? date("Y", time()) : "$y";
 
 	if ($REQUEST_METHOD == "POST") 
     {

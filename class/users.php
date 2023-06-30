@@ -713,6 +713,12 @@ class user {
 		) {
 			return true;
 		}
+		elseif (
+			$case == 'chart_speichern' AND
+			$this->funktion == 'admin'
+		) {
+			return true;
+		}
 		else {
 			return false;
 		}
@@ -1204,6 +1210,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
 			if (value_of($formvars, 'freetext')) { $buttons .= 'freetext,';}

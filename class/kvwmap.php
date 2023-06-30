@@ -2025,7 +2025,7 @@ echo '			</table>
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
-		$layer->setMetaData('wms_name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
+		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
@@ -8906,6 +8906,20 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$ret['success'] = false;
 			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
 		}
+		if (
+			! (
+				$this->formvars['without_diagramms'] OR
+				in_array($this->formvars['format'], array('json', 'json_result')) OR
+				$this->formvars['mime_type'] == 'json'
+			)
+		) {
+			$layerset[0]['charts'] = array();
+		}
+		else {
+			include_once(CLASSPATH . 'LayerChart.php');
+			$layerset[0]['chats'] = LayerChart::find('`layer_id` = ' . $this->formvars['selected_layer_id']);
+			echo 'l: ' . print_r($layerset[0]['charts'], true); exit;
+		}
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		switch ($layerset[0]['connectiontype']) {
 			case MS_POSTGIS : {
@@ -9354,7 +9368,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}   # Ende switch connectiontype
 
 		$layerset[0]['attributes'] = $attributes;
-		$this->qlayerset[0]=$layerset[0];
+		$this->qlayerset[0] = $layerset[0];
 		$i = 0;
 		$this->search = true;
 
@@ -11145,6 +11159,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
 	}
 
+	function chart_erzeugen() {
+		include_once(CLASSPATH . 'LayerChart.php');
+		$chart = new LayerChart($this);
+		$result = $chart->create(array_intersect_key($this->formvars, array('id', 'layer_id', 'title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name')));
+		return $result;
+	}
+
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
@@ -11166,53 +11187,53 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
-    $sql = $newpath;
-    if($this->formvars['all'] != 'true'){
-	    for($i = 0; $i < count($checkbox_names); $i++){
-	      if($this->formvars[$checkbox_names[$i]] == 'on'){
-	        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-	        $oids .= $element[3].', ';
-	      }
-	    }
-	    $sql .= " AND " . $element[1].".oid IN (" . $oids.'0)';
-    }
-    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
-    	$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$this->formvars['chosen_layer_id']]);
-    }
-    #echo $sql.'<br><br>';
-    $this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
-    $ret = $layerdb->execSQL($sql,4, 1);
-    if (!$ret[0]) {
-      while ($rs=pg_fetch_array($ret[1])) {
-        $result[] = $rs;
-        if($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] > $maximum){
-        	$maximum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        }
-        if($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] < $minimum){
-        	$minimum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        }
-        $summe += $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        $maxlabelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $rs[$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]]);
-        if($maxlabelwidth < $maxlabelbox[2] - $maxlabelbox[0]){
-    			$maxlabelwidth = $maxlabelbox[2] - $maxlabelbox[0];
-        }
-      }
-    }
-    # defining colors
-    $colors['white'] =			 Array(255, 255, 255);
-    $colors['yellowLight'] = Array(255, 255, 200);
+		$sql = $newpath;
+		if ($this->formvars['all'] != 'true') {
+			for ($i = 0; $i < count($checkbox_names); $i++) {
+				if ($this->formvars[$checkbox_names[$i]] == 'on') {
+					$element = explode(';', $checkbox_names[$i]); # check;table_alias;table;oid
+					$oids .= $element[3] . ', ';
+				}
+			}
+			$sql .= " AND " . $element[1] . "." . $layerset[0]['oid'] . " IN (" . $oids . '0)';
+		}
+		if ($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
+			$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby' . $this->formvars['chosen_layer_id']]);
+		}
+		#echo $sql.'<br><br>';
+		$this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
+		$ret = $layerdb->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			while ($rs=pg_fetch_array($ret[1])) {
+				$result[] = $rs;
+				if ($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] > $maximum){
+					$maximum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				}
+				if ($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] < $minimum){
+					$minimum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				}
+				$summe += $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				$maxlabelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $rs[$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]]);
+				if ($maxlabelwidth < $maxlabelbox[2] - $maxlabelbox[0]){
+					$maxlabelwidth = $maxlabelbox[2] - $maxlabelbox[0];
+				}
+			}
+		}
+		# defining colors
+		$colors['white'] =			 Array(255, 255, 255);
+		$colors['yellowLight'] = Array(255, 255, 200);
 		$colors['red'] =				 Array(255,  50,  50);
 		$colors['blue'] =				 Array( 80,  80, 255);
-    $colors['black'] =  		 Array(  0,   0,   0);
+		$colors['black'] =  		 Array(  0,   0,   0);
 
-    $result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
-    for($i = 0; $i < count($result_colors); $i++){
-    	$piecolors[] = Array($result_colors[$i]['red'], $result_colors[$i]['green'], $result_colors[$i]['blue']);
-    }
+		$result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
+		for ($i = 0; $i < count($result_colors); $i++){
+			$piecolors[] = Array($result_colors[$i]['red'], $result_colors[$i]['green'], $result_colors[$i]['blue']);
+		}
 
     switch($this->formvars['charttype_'.$this->formvars['chosen_layer_id']]){
     	case 'bar' : {
-     	  $image = imagecreatetruecolor(2380, 60*count($result)+170);
+     	  $image = imagecreatetruecolor(2380, 60 * count($result)+170);
 		    $chartColors = allocateImageColors($image, $colors);
 
         $backGroundColor = $chartColors['yellowLight'];
@@ -14882,7 +14903,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars['qLayer'.$layer_id] = 1;
+				$this->formvars['qLayer' . $layer_id] = 1;
 			}
 		}
 		if (is_string($rect)){
@@ -14902,8 +14923,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$layerset[$i]['queryable'] AND
 				$layerset[$i]['status']  == '' AND 
 				(
-					value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR
-					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
+					value_of($this->formvars, 'qLayer' . $layerset[$i]['Layer_ID']) == '1' OR
+					value_of($this->formvars, 'qLayer' . $layerset[$i]['requires']) == '1'
 				) AND
 				(
 					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
@@ -14913,6 +14934,17 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				# Dieser Layer soll abgefragt werden
 				if (value_of($this->formvars, 'anzahl') == '') {
 					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
+				}
+				if (
+						$this->formvars['without_diagramms'] OR
+						in_array($this->formvars['format'], array('json', 'json_result')) OR
+						$this->formvars['mime_type'] == 'json'
+				) {
+					$layerset[$i]['charts'] = array();
+				}
+				else {
+					include_once(CLASSPATH . 'LayerChart.php');
+					$layerset[$i]['charts'] = LayerChart::find($this, '`layer_id` = ' . $layerset[$i]['Layer_ID']);
 				}
 				switch ($layerset[$i]['connectiontype']) {
 					case MS_SHAPEFILE : { # Shape File Layer (1)
