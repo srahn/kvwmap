@@ -601,6 +601,38 @@ function go_switch($go, $exit = false) {
 
 			# Style speichern
 			case 'save_style' : {
+				$GUI->sanitize([
+					'style_id' => 'int',
+					'style_symbol' => 'int',
+					'symbolname' => 'text',
+					'style_size' => 'text',
+					'style_color' => 'text',
+					'style_backgroundcolor' => 'text',
+					'style_outlinecolor' => 'text',
+					'style_colorrange' => 'text',
+					'style_datarange' => 'text',
+					'style_rangeitem' => 'text',
+					'style_minsize' => 'text',
+					'style_maxsize' => 'text',
+					'style_minscale' => 'int',
+					'style_maxscale' => 'int',
+					'style_angle' => 'text',
+					'style_angleitem' => 'text',
+					'style_width' => 'text',
+					'style_minwidth' => 'int',
+					'style_maxwidth' => 'int',
+					'style_offsetx' => 'int',
+					'style_offsety' => 'int',
+					'style_polaroffset' => 'text',
+					'style_pattern' => 'text',
+					'style_geomtransform' => 'text',
+					'style_gap' => 'int',
+					'style_initialgap' => 'float',
+					'style_opacity' => 'int',
+					'style_linecap' => 'text',
+					'style_linejoin' => 'text',			
+					'style_linejoinmaxsize' => 'int'
+				]);
 				$GUI->save_style();
 			} break;
 
