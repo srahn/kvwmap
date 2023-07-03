@@ -1529,12 +1529,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
-					include_once(CLASSPATH . 'Layer.php');
-					$GUI->save_layers_attributes($GUI->formvars);
-				}
-				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
-					$GUI->Datentypattribute_speichern();
+				if ($GUI->formvars['selected_layer_id'] != '') {
+					if ($GUI->formvars['selected_datatype_id'] == '') {
+						include_once(CLASSPATH . 'Layer.php');
+						$GUI->save_layers_attributes($GUI->formvars);
+					}
+					else {
+						$GUI->Datentypattribute_speichern();
+					}
 				}
 				$GUI->Attributeditor();
 			} break;
