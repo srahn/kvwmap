@@ -182,8 +182,6 @@ function submitLayerSelector() {
 }
 
 function submitDatatypeSelector() {
-	var element = document.getElementById('selected_layer_id');
-	    element.value = '<?php echo $strPleaseSelect; ?>';
 	document.GUI.submit();
 }  
 
@@ -263,7 +261,7 @@ function alias_replace(name){
     	?>
       </select>
 		</td>
-		<? if($this->formvars['selected_layer_id'] == '' AND count($this->datatypes) > 0){ ?>
+		<? if($this->formvars['selected_layer_id'] != '' AND $this->formvars['selected_datatype_id'] != ''){ ?>
     <td style="padding-left: 40px">
 			<span class="px17 fetter"><? echo $strDatatype;?>:</span>
       <select id="selected_datatype_id" style="width:250px" size="1"  name="selected_datatype_id" onchange="submitDatatypeSelector();" <?php if(count($this->datatypes)==0){ echo 'disabled';}?>>
@@ -340,7 +338,7 @@ function alias_replace(name){
 								<? if($i == 0)echo '<div class="fett scrolltable_header">' . $strFormularElement . '</div>';
 								$type = ltrim($this->attributes['type'][$i], '_');
 								if(is_numeric($type)){ ?>
-									<a href="index.php?go=Attributeditor&selected_datatype_id=<?php echo $type; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
+									<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&selected_datatype_id=<?php echo $type; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->attributes['typename'][$i]; ?></a><?php
 								}
 								else {
 									echo '<select style="width:130px" name="form_element_' . $this->attributes['name'][$i] . '">';
@@ -570,38 +568,43 @@ function alias_replace(name){
 		</td>
   </tr>
 	<?
-		if(count($this->attributes) > 0 AND ($this->layer['editable'] OR $this->formvars['selected_datatype_id'])){ ?>
+		if (count($this->attributes) > 0 AND $this->layer['editable']) { ?>
 			<tr>
-				<td align="center" style="height: 50px">
-					<input id="attribut_editor_save" type="submit" name="go_plus" value="speichern"><?
-					echo FormObject::createSelectField(
-						'for_attributes_selected_layer_id',
-						$layer_options,
-						'',
-						1,
-						'display: none;',
-						'',
-						'',
-						'',
-						'',
-						$strPleaseSelect
-					); ?>
-					<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="button" onclick="takeover_attributes();" value="Attributeinstellungen für ausgewählten Layer übernehmen">
-					<span style="margin-left: 10px;">
-					<i
-						id="show_attributes_for_other_layer_button"
-						title="Magische Funktion um die Attributeinstellungen auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
-						class="fa fa-magic"
-						aria-hidden="true"
-						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
-					></i>
-					<i
-						id="close_attributes_for_other_layer_button"
-						title="Den Spuk wieder schließen."
-						style="display: none;" class="fa fa-times"
-						aria-hidden="true"
-						onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
-					></i>
+				<td align="center" style="height: 50px"><?
+					if ($this->formvars['selected_datatype_id'] == '') {
+						echo FormObject::createSelectField(
+							'for_attributes_selected_layer_id',
+							$layer_options,
+							'',
+							1,
+							'display: none;',
+							'',
+							'',
+							'',
+							'',
+							$strPleaseSelect
+						); ?>
+						<input id="attributes_for_other_layer_button" style="display: none; margin-left: 10px" type="button" onclick="takeover_attributes();" value="Attributeinstellungen für ausgewählten Layer übernehmen">
+						<span style="margin-left: 10px;">
+						<i
+							id="show_attributes_for_other_layer_button"
+							title="Magische Funktion um die Attributeinstellungen auf gleich benannte Attribute eines anderen Layers zu übertragen. Vorgenommene Änderungen müssen vorher gespeichert werden!"
+							class="fa fa-magic"
+							aria-hidden="true"
+							onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+						></i>
+						<i
+							id="close_attributes_for_other_layer_button"
+							title="Den Spuk wieder schließen."
+							style="display: none;" class="fa fa-times"
+							aria-hidden="true"
+							onclick="$('#attributes_for_other_layer_button, #for_attributes_selected_layer_id, #attribut_editor_save, #show_attributes_for_other_layer_button, #close_attributes_for_other_layer_button').toggle();"
+						></i> <?
+					}
+					else {	?>
+						<input type="checkbox" value="1" name="for_all_layers"> für alle Layer übernehmen<br><br>
+<?				}			?>
+					<input id="attribut_editor_save" type="submit" name="go_plus" value="speichern">
 				</td>
 			</tr><?php
 		}	
