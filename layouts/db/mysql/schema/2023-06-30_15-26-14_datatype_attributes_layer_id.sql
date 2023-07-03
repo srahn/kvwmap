@@ -1,6 +1,6 @@
 BEGIN;
 
-ALTER TABLE `datatype_attributes` DROP CONSTRAINT `datatype_attributes_ibfk_1`;
+ALTER TABLE `datatype_attributes` DROP FOREIGN KEY `datatype_attributes_ibfk_1`;
 
 ALTER TABLE `datatype_attributes` ADD `layer_id` INT(11) NULL FIRST;
 
