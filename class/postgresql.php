@@ -714,10 +714,14 @@ FROM
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
 					$fields[$i]['default'] = $attr_info['default'];
-					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
-						$fieldtype = $prefix.$datatype_id; 
+					$fields[$i]['type_type'] = $attr_info['type_type'];
+					$fields[$i]['type_schema'] = $attr_info['type_schema'];
+					$fields[$i]['is_array'] = $attr_info['is_array'];
+					if ($attr_info['is_array'] == 't') {
+						$prefix = '_'; 
+					}
+					else {
+						$prefix = '';
 					}
 					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
@@ -860,9 +864,9 @@ FROM
 		return $attributes;
 	}
      	
-	function writeCustomType($typname, $schema) {
+	function writeCustomType($layer_id, $typname, $schema) {
 		$datatype_id = $this->getDatatypeId($typname, $schema, $this->connection_id);
-		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		$this->writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema);
 		return $datatype_id;
 	}
 	
@@ -916,7 +920,7 @@ FROM
 		return $result['enum_string'];
 	}
 	
-	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
@@ -928,7 +932,7 @@ FROM
 			$fields[$i]['default'] = $attr_info[$i]['default'];					
 			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
-				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$sub_datatype_id = $this->writeCustomType($layer_id, $attr_info[$i]['type'], $attr_info[$i]['type_schema']);
 				$fieldtype = $prefix.$sub_datatype_id; 
 			}
 			$constraintstring = '';
@@ -945,6 +949,7 @@ FROM
 				INSERT INTO
 					datatype_attributes
 				SET
+					layer_id = " . $layer_id . ",
 					datatype_id = " . $datatype_id . ",
 					name = '" . $fields[$i]['name'] . "',
 					real_name = '" . $fields[$i]['real_name'] . "',
