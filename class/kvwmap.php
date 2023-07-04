@@ -5087,7 +5087,7 @@ echo '			</table>
 				$layerdb = $mapDB->getlayerdatabase($layer['Layer_ID'], $this->Stelle->pgdbhost);
 				$attributes = $mapDB->load_attributes($layerdb, $layer['pfad']);
 
-				$mapDB->save_postgis_attributes($layer['Layer_ID'], $attributes, '', '');
+				$mapDB->save_postgis_attributes($layerdb, $layer['Layer_ID'], $attributes, '', '');
 				$mapDB->delete_old_attributes($layer['Layer_ID'], $attributes);
 			}
 		}
@@ -8382,7 +8382,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					),
 					$this->formvars['sync']
 				);
-				$mapDB->save_postgis_attributes($this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
+				$mapDB->save_postgis_attributes($layerdb, $this->formvars['selected_layer_id'], $attributes, $this->formvars['maintable'], $this->formvars['schema']);
 				$mapDB->delete_old_attributes($this->formvars['selected_layer_id'], $attributes);
 				#---------- Speichern der Layerattribute -------------------
 			}
@@ -8398,7 +8398,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
 				$wfs->describe_featuretype_request();
 				$attributes = $wfs->get_attributes();
-				$mapDB->save_attributes($this->formvars['selected_layer_id'], $attributes);
+				$mapDB->save_attributes(NULL, $this->formvars['selected_layer_id'], $attributes);
 			}
 
 			include_once(CLASSPATH . 'Layer.php');
@@ -8458,7 +8458,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					unset($attributes['the_geom']);
 					unset($attributes['the_geom_id']);
 					usort($attributes, 'compare_orders2');
-					$mapDB->save_postgis_attributes($formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
+					$mapDB->save_postgis_attributes($layerdb, $formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
 						$this->mobile_prepare_layer_sync(
@@ -8496,7 +8496,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
 			$wfs->describe_featuretype_request();
 			$attributes = $wfs->get_attributes();
-			$mapDB->save_attributes($formvars['selected_layer_id'], $attributes);
+			$mapDB->save_attributes(NULL, $formvars['selected_layer_id'], $attributes);
 			if($attributes != NULL){
 				$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);
 			}
@@ -17900,7 +17900,7 @@ class db_mapObj{
 		return $attributes;
 	}
 
-	function save_attributes($layer_id, $attributes){
+	function save_attributes($pgdatabase, $layer_id, $attributes){
 		$insert_count = 0;
 		for ($i = 0; $i < @count($attributes); $i++) {
 			if($attributes[$i] == NULL)continue;
@@ -17910,6 +17910,10 @@ class db_mapObj{
 			if($attributes[$i]['decimal_length'] == '')$attributes[$i]['decimal_length'] = 'NULL';
 			if (intval($attributes[$i]['order']) <= $attributes[$i-1]['order']) {
 				$attributes[$i]['order'] = $attributes[$i-1]['order'] + 1;
+			}
+			if ($attributes[$i]['type_type'] == 'c'){		# custom datatype
+				$datatype_id = $pgdatabase->writeCustomType($layer_id, ltrim($attributes[$i]['type'], '_'), $attributes[$i]['type_schema']);
+				$attributes[$i]['type'] = ($attributes[$i]['is_array'] == 't'? '_' : '') . $datatype_id; 
 			}
 			$sql = "
 				INSERT INTO
@@ -17952,8 +17956,8 @@ class db_mapObj{
 		}
 	}
 
-	function save_postgis_attributes($layer_id, $attributes, $maintable, $schema){
-		$this->save_attributes($layer_id, $attributes);
+	function save_postgis_attributes($pgdatabase, $layer_id, $attributes, $maintable, $schema){
+		$this->save_attributes($pgdatabase, $layer_id, $attributes);
 
 		if($maintable == ''){
 			$maintable = $attributes[0]['table_name'];
