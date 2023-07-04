@@ -8,7 +8,7 @@ ALTER TABLE `datatype_attributes`
   DROP PRIMARY KEY;
 
 INSERT INTO `datatype_attributes`
-SELECT 
+SELECT DISTINCT 
 	la.layer_id, 
 	dta.`datatype_id`, 
 	dta.`name`, 
@@ -45,7 +45,7 @@ SELECT
 	dta.`labeling`
 FROM
 	`layer_attributes` la JOIN
-	`datatypes` dt ON substr(la.type, 2) REGEXP '^[0-9]+$' AND substr(la.type, 2) = dt.id JOIN 
+	`datatypes` dt ON TRIM(LEADING '_' FROM la.type ) REGEXP '^[0-9]+$' AND TRIM(LEADING '_' FROM la.type ) = dt.id JOIN 
 	`datatype_attributes` dta ON dta.datatype_id = dt.id;
 
 DELETE FROM 
