@@ -2193,7 +2193,7 @@ FROM
 				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
 			FROM 
 				alkis.ax_lagebezeichnungmithausnummer lmh,
-				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1~\\2', 'g'), '(\D+)(\d+)', '\\1~\\2', 'g'), '~'), '') AS r
 			WHERE 
 				lmh.gemeinde = '" . substr($GemID, -3) . "'
 				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
@@ -2201,7 +2201,7 @@ FROM
     $sql.= $this->build_temporal_filter(array('lmh'));
 		$sql.= " 
 			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
-			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
+			ORDER BY r[1]::int, trim(r[2]) NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
     $queryret = $this->execSQL($sql, 4, 0);
