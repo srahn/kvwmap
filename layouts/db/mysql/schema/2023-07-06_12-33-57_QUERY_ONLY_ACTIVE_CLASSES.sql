@@ -12,7 +12,7 @@ BEGIN;
 	) VALUES (
 		'QUERY_ONLY_ACTIVE_CLASSES',
 		'',
-		true,
+		'true',
 		'Wenn aktiviert, dann werden bei der Kartenabfrage nur aktive Klassen berücksichtigt.',
 		'boolean',
 		'Administration',
