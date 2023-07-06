@@ -161,7 +161,7 @@ Eingabeformate:
 					</td>
 					<td>
 						<select size="12" style="width: 100px;" multiple="true" name="Blatt" tabindex="3">
-						<? for($i = 0; $i < count($this->blattliste['blatt']); $i++){ ?>
+						<? for($i = 0; $i < @count($this->blattliste['blatt']); $i++){ ?>
 							<option <?if($this->formvars['Blatt'] == $this->blattliste['blatt'][$i]){ echo "selected"; } ?> 
 								value="<? echo $this->formvars['Bezirk'].'-'.$this->blattliste['blatt'][$i]; ?>"><? echo ltrim($this->blattliste['blatt'][$i], '0'); ?>
 							</option>
