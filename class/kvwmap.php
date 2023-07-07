@@ -2334,20 +2334,22 @@ echo '			</table>
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass=@count($classset);
+    $anzClass = @count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
       if ($classset[$j]['Name']!='') {
         $klasse -> set('name',$classset[$j]['Name']);
       }
-      if($classset[$j]['Status']=='1'){
+      if ($classset[$j]['Status']=='1'){
       	$klasse->set('status', MS_ON);
       }
-      else{
+      else {
       	$klasse->set('status', MS_OFF);
       }
-      $klasse -> set('template', value_of($layerset, 'template'));
-			$klasse -> setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
+			if (value_of($layerset, 'template') != '') {
+				$klasse->set('template', value_of($layerset, 'template'));
+			}
+			$klasse->setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
 				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -2917,6 +2919,13 @@ echo '			</table>
 		return $html;
 	}
 
+	function get_web_footer_template() {
+		$html = "
+</html>
+";
+		return $html;
+	}
+
 	function save_web_header_template() {
 		$template_dir = WMS_MAPFILE_PATH . 'templates/';
 		if (!is_dir($template_dir)) {
@@ -2925,6 +2934,17 @@ echo '			</table>
 
 		$fp = fopen($template_dir . 'header.html', "w");
 		fwrite($fp, $this->get_web_header_template($this->Stelle->ows_title ?: OWS_TITLE));
+		fclose($fp);
+	}
+
+	function save_web_footer_template() {
+		$template_dir = WMS_MAPFILE_PATH . 'templates/';
+		if (!is_dir($template_dir)) {
+			mkdir($template_dir, 0770, true);
+		}
+
+		$fp = fopen($template_dir . 'footer.html', "w");
+		fwrite($fp, $this->get_web_footer_template());
 		fclose($fp);
 	}
 
@@ -8486,6 +8506,48 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
+	/**
+	 * This function write the mapfile, templates and a wrapper file for the current map object
+	 * If stelle_id is set, the location is in a subdirectory of OWS_ONLINE_RESOURCE.
+	 */
+	function write_mapfile($mapfile, $stelle_id = '') {
+		$stelle_id = ($stelle_id != '' ? $stelle_id . '/' : '');
+		$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
+		try {
+			# Schreibe MapFile-Templates
+			$this->save_web_header_template();
+			$this->save_web_footer_template();
+
+			# Schreibe MapFile
+			if (!file_exists($path_parts['dirname'])) {
+				mkdir($path_parts['dirname'], 0775, true);
+			}
+			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
+
+			# Schreibe MapFile-Wrapper
+			$wrapper_path = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE) . $stelle_id;
+			if (!file_exists($wrapper_path)) {
+				mkdir($wrapper_path, 0775, true);
+			}
+			$wrapper_file = $wrapper_path . MAPFILENAME;
+			if (!file_exists($wrapper_file)) {
+				file_put_contents($wrapper_file, '#!/bin/sh
+MAPSERV="/usr/lib/cgi-bin/mapserv"
+MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
+				chmod($wrapper_file, 0775);
+			}
+		} catch (Exception $ex) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . $mapfile . ', der Templates oder des Wrappers ' . $wrapper_file . ' für den Dienst in Funktion write_mapfile. ' . $ex
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'MapDatei, Templates und Wrapper erfolgreich geschrieben.'
+		);
+	}
+
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
   * duplicate all layer that have it in duplicate_from_layer_id
@@ -8518,7 +8580,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						),
 						$this->formvars['sync']
 					);
-					
+					$geom_column = $attributes['the_geom'];
 					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false);
 					for ($i = 0; $i < count($attributes)-2; $i++) {
 						$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
@@ -8544,6 +8606,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						$layer->remove_mapserver_templates();
 					}
+					$layer->update(array('geom_column' => $geom_column));
 				}
 				if ($formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);

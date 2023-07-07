@@ -242,7 +242,7 @@ class Validierung extends PgObject {
 					'validierung_id' => $this->get('id'),
 					'status' => 'Warnung',
 					'regel_id' => $regel_id,
-					'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' hat keine Geometrie.'
+					'msg' => 'Objekt mit gid: ' . $row['gid'] . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' hat keine Geometrie.'
 				)
 			);
 			// gid may not appear in gmlas-data, therefore optional
@@ -358,7 +358,7 @@ class Validierung extends PgObject {
 						'validierung_id' => $this->get('id'),
 						'status' => 'Fehler',
 						'regel_id' => $regel->get('id'),
-						'msg' => 'Regel: ' . $regel->get('name') . '. Geometrie: ' . $row['geom_text'] . ' im Objekt mit gid: ' . $row['gid'] . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
+						'msg' => 'Regel: ' . $regel->get('name') . '. Geometrie: ' . $row['geom_text'] . ' im Objekt mit gid: ' . $row['gid'] . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
 					)
 				);
 				if($row['gid'] != '') {
@@ -515,7 +515,7 @@ class Validierung extends PgObject {
 							'validierung_id' => $this->get('id'),
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
-							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid: ' . $row['gid']). ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit' . ($sourcetype == 'gmlas' ? '' : ' gid: ' . $row['gid']). ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches des Planes.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					if($row['gid'] != '') {
@@ -668,7 +668,7 @@ class Validierung extends PgObject {
 							'validierung_id' => $this->get('id'),
 							'status' => ($row['distance'] > 100 ? 'Fehler' : 'Warnung'),
 							'regel_id' => $regel->get('id'),
-							'msg' => 'Objekt mit gid: ' . $row['gid']. ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
+							'msg' => 'Objekt mit gid: ' . $row['gid'] . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' ist außerhalb des räumlichen Geltungsbereiches seines Planbereiches.' . ($row['distance'] > 100 ? ' Das Objekt ist mehr als 100 km entfernt.' : '')
 						)
 					);
 					if($row['gid'] != '') {

@@ -10,7 +10,7 @@ class DataType extends MyObject {
 
 	function get_generic_select($layer, $attr) {
 		return array(
-			'select' => $layer->get_table_alias() . "." . $attr['att_name'], ", gdi_datatype_json_to_text(to_json(" . $layer->get_table_alias() . "." . $attr['att_name'] . "), " . ($attr['is_array'] == 't' ? "true" : "false") . ") AS " . $attr['att_name'] . "_dt"
+			'select' => $layer->get_table_alias() . "." . $attr['att_name'] . ", gdi_datatype_json_to_text(to_json(" . $layer->get_table_alias() . "." . $attr['att_name'] . "), " . ($attr['is_array'] == 't' ? "true" : "false") . ") AS " . $attr['att_name'] . "_dt"
 		);
 	}
 }

@@ -272,19 +272,29 @@ function go_switch($go, $exit = false) {
 				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
-				$GUI->mime_type='image/' . $format;
+				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
-			} break;			
-			
+			} break;
+
 			case 'write_mapserver_templates' : {
+				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');
-				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
-				foreach ($layers as $layer) {
-					echo $layer->get('Name') . '<br>';
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
+			case 'write_mapserver_templates_Erzeugen' : {
+				$GUI->checkCaseAllowed('write_mapserver_templates');
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				foreach ($GUI->layers as $layer) {
 					$layer->write_mapserver_templates('Formular');
 				}
-			}break;			
-			
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
 				$GUI->saveDrawmode();

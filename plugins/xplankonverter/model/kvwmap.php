@@ -282,7 +282,8 @@
 					'alias' => $layer->get('alias'),
 					'Datentyp' =>$layer->get('Datentyp'),
 					'schema' => $layer->get('schema'),
-					'maintable' => $layer->get('maintable')
+					'maintable' => $layer->get('maintable'),
+					'geom_column' => $layer->get('geom_column')
 				);
 			},
 			$layers
@@ -456,7 +457,7 @@
 		$planartAbk = substr($GUI->formvars['planart'], 0, 2);
 		$planartkuerzel = $GUI->formvars['planart'][0];
 
-		$GUI->ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
+		$GUI->ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . MAPFILENAME . '/';
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
@@ -471,6 +472,7 @@
 		$GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
 		$GUI->map->setMetaData("ows_service_onlineresource", $GUI->ows_onlineresource);
 		$GUI->map->web->set('header', 'templates/header.html');
+		$GUI->map->web->set('footer', 'templates/footer.html');
 
 		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
 		$result = $xp_plan->get_layers_with_content($xplan_layers);
@@ -516,7 +518,7 @@
 		}
 		return array(
 			'success' => true,
-			'mapfile' => 'zusammenzeichnung.map'
+			'mapfile' => MAPFILENAME . '.map'
 		);
 	};
 
