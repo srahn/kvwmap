@@ -28,7 +28,8 @@
 		"></i>
 		<div id="user_options" class="user-options">
 			<div class="user-options-header">
-				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>
+				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>&nbsp;
+				<span data-tooltip="<? echo $this->user->Vorname . ' ' . $this->user->Name . '&#xa;' . $this->user->organisation . '&#xa' . $this->user->email . '&#xa;Tel.: ' . $this->user->phon . '&#xa;'; ?>"></span>
 			</div>
 			<div class="user-options-section-header">
 				<i class="fa fa-tasks options-button"></i><? echo $this->inWorkingGroup; ?>:

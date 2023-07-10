@@ -1458,7 +1458,7 @@ class stelle {
 										ul.Layer_ID = l.Layer_ID AND
 										locate(
 											concat('$', p.key),
-											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 										) > 0
 									UNION
 									SELECT

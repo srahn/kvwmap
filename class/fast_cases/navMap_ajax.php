@@ -518,16 +518,7 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection', 
-				replace_params(
-					$layerset['connection'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
-			);
+			$layer->set('connection', $layerset['connection']);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -596,7 +587,8 @@ class GUI {
 			if (value_of($layerset, 'buffer') != 0) {
 				$geom = explode(' ', $layer->data)[0];
 				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
-				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
+				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
 				$layer->data;
 				$layer->set('type', 2);
 			}			
@@ -898,17 +890,7 @@ class GUI {
 
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
-					$layer->set(
-						'connection',
-						replace_params(
-							$layerset[$i][connection],
-							rolle::$layer_params,
-							$this->user->id,
-							$this->Stelle->id,
-							rolle::$hist_timestamp,
-							$this->user->rolle->language
-						)
-					);
+					$layer->set('connection',	$layerset[$i][connection]);
 					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
@@ -3474,7 +3456,7 @@ class db_mapObj{
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
@@ -3695,7 +3677,7 @@ class db_mapObj{
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,

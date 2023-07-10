@@ -1256,7 +1256,7 @@
 				break;
 			}
 		}
-		$datapart .= '<div class="image-select" id="image_select_' . $layer_id . '_' . $name . '_' . $k . '">';
+		$datapart .= '<div class="custom-select" id="custom_select_' . $layer_id . '_' . $name . '_' . $k . '">';
 		if ($privileg == '0') {
 			$datapart .= '
 				<div class="placeholder" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
@@ -1279,7 +1279,7 @@
 							 id="' . $layer_id . '_' . $name . '_' . $k . '" 
 							 name="' . $fieldname . '"
 							 value="' . $value . '">
-				<div class="placeholder editable" onclick="toggle_image_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
+				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
 					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
 					<span>' . $auswahlfeld_output . '</span>
 				</div>
@@ -1287,7 +1287,7 @@
 					<ul class="dropdown" id="dropdown">';
 			for($e = 0; $e < @count($enum_value); $e++){
 				$datapart .= '
-						<li class="item" data-value="' . $enum_value[$e] . '" onclick="image_select(this)">
+						<li class="item" data-value="' . $enum_value[$e] . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
 							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum_image[$e])) . '">
 							<span>' . $enum_output[$e] . '</span>
 						</li>';

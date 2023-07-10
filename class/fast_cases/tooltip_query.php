@@ -1924,7 +1924,7 @@ class db_mapObj{
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];

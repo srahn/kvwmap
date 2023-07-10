@@ -42,9 +42,9 @@ var styleMap = {
   "Fehler"      : "danger",
   "Information" : "info"
 }
-function validierungsergebnisseRowStyle(row, index){
+function validierungsergebnisseRowStyle(row, index) {
   return {
-    classes: styleMap[row.ergebnis_status]
+    classes: 'xplankonverter-' + styleMap[row.ergebnis_status]
   };
 }
 function validierungsergebnisseRowAttribs(row, index){
@@ -66,13 +66,25 @@ function validierungsergebnisseRowAttribs(row, index){
 <script src="https://unpkg.com/bootstrap-table@1.18.3/dist/extensions/export/bootstrap-table-export.min.js"></script>
 
 <style>
-#toolbar {
-  margin: 0;
-}
-.btn-group > .btn:first-child {
-	margin-left: 0px;
-	height: 32px;
-}
+	#toolbar {
+		margin: 0;
+	}
+	.btn-group > .btn:first-child {
+		margin-left: 0px;
+		height: 32px;
+	}
+	.xplankonverter-success {
+		background-color: lightgreen;
+	}
+	.xplankonverter-info {
+		background-color: lightyellow;
+	}
+	.xplankonverter-warning {
+		background-color: lightsalmon;
+	}
+	.xplankonverter-danger {
+		background-color: rgb(255, 118, 118);
+	}
 </style>
 
 <div id="toolbar" class="select">

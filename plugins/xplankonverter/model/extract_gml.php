@@ -334,7 +334,7 @@ class Gml_extractor {
 		$lines = file($this->gml_location);
 		$matched_ns_str;
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'XPlanAuszug') === false) {
+			if (strpos($line, 'xplan=') === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
@@ -501,8 +501,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
-#		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES');
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 
