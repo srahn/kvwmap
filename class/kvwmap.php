@@ -16871,7 +16871,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -16882,7 +16882,13 @@ class db_mapObj{
 				l.dataowner_tel,
 				l.uptodateness,
 				l.updatecycle,
-				g.id, " . $group_column . ", g.obergruppe, g.order
+				g.id,
+				" . $group_column . ",
+				g.obergruppe,
+				g.order
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				u_rolle2used_layer AS rl,
 				used_layer AS ul,
@@ -16913,9 +16919,12 @@ class db_mapObj{
 				drawingorder
 		";
 		#echo '<br>SQL zur Abfrage der Layer: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>",4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		if (!$this->db->success) { 
+			echo err_msg($this->script_name, __LINE__, $sql); 
+			return 0;
+		} exit;
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
@@ -18203,7 +18212,11 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `sync` FROM layer WHERE Layer_ID=' . $layer_ids[$i]
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`
+				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
+				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
+				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
+				FROM layer WHERE Layer_ID=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
 			$last_layer_id = '@last_layer_id'.$layer_ids[$i];
@@ -18777,14 +18790,19 @@ class db_mapObj{
 		}
 
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
-		foreach(
-			array(
-				'drawingorder',
-				'sync',
-				'listed',
-				'write_mapserver_templates'
-			) AS $key
-		) {
+		$zero_if_empty_attributes = array(
+			'drawingorder',
+			'sync',
+			'listed',
+			'write_mapserver_templates'
+		);
+		if ($this->GUI->plugin_loaded('mobile')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('sync', 'cluster_option')
+			);
+		}
+		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
@@ -18822,45 +18840,51 @@ class db_mapObj{
 		# weil classification schon belegt ist von den Classes
 		$attribute_sets[] = "`classification` = '" . $formvars['layer_classification'] . "'";
 		# the rest where column names equal to the field names in layer editor form
-		foreach(
-			array(
-				'Datentyp',
-				'pfad',
-				'maintable',
-				'oid',
-				'identifier_text',
-				'Data',
-				'schema',
-				'document_url',
-				'ddl_attribute',
-				'tileindex',
-				'tileitem',
-				'labelangleitem',
-				'labelitem',
-				'labelrequires',
-				'printconnection',
-				'connectiontype',
-				'classitem',
-				'styleitem',
-				'tolerance',
-				'toleranceunits',
-				'epsg_code',
-				'ows_srs',
-				'wms_name',
-				'wms_keywordlist',
-				'wms_server_version',
-				'wms_format',
-				'wms_connectiontimeout',
-				'wms_auth_username',
-				'wms_auth_password',
-				'wfs_geom',
-				'selectiontype',
-				'querymap',
-				'processing',
-				'status',
-				'trigger_function'
-			) AS $key
-		) {
+
+		$column_equal_field_attributes = array(
+			'Datentyp',
+			'pfad',
+			'maintable',
+			'oid',
+			'identifier_text',
+			'Data',
+			'schema',
+			'document_url',
+			'ddl_attribute',
+			'tileindex',
+			'tileitem',
+			'labelangleitem',
+			'labelitem',
+			'labelrequires',
+			'printconnection',
+			'connectiontype',
+			'classitem',
+			'styleitem',
+			'tolerance',
+			'toleranceunits',
+			'epsg_code',
+			'ows_srs',
+			'wms_name',
+			'wms_keywordlist',
+			'wms_server_version',
+			'wms_format',
+			'wms_connectiontimeout',
+			'wms_auth_username',
+			'wms_auth_password',
+			'wfs_geom',
+			'selectiontype',
+			'querymap',
+			'processing',
+			'status',
+			'trigger_function'
+		);
+		if ($this->GUI->plugin_loaded('portal')) {
+			$column_equal_field_attributes = array_merge(
+				$column_equal_field_attributes,
+				array('vector_tile_url')
+			);
+		}
+		foreach($column_equal_field_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
 		}
 
@@ -18902,6 +18926,7 @@ class db_mapObj{
 					$names .= quote($formvars['Name_' . $language]) . ", ";
 				}
 			}
+
 			$sql = "
 				INSERT INTO layer (
 					" . ($formvars['id'] != '' ? "`Layer_ID`," : '') . "
@@ -18972,14 +18997,17 @@ class db_mapObj{
 					`metalink`,
 					`status`,
 					`trigger_function`,
-					`sync`,
 					`listed`,
 					`duplicate_from_layer_id`,
 					`duplicate_criterion`,
 					`shared_from`,
 					`version`,
 					`comment`
-				) VALUES (
+					" . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . "
+				)
+				VALUES (
 					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
 					" . quote_or_null($formvars['Name']) . ",
 					" . $names . "
@@ -19048,13 +19076,15 @@ class db_mapObj{
 					" . quote($formvars['metalink']) . ",
 					" . quote($formvars['status']) . ",
 					" . quote($formvars['trigger_function']) . ",
-					" . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
 					" . quote_or_null($formvars['duplicate_from_layer_id']) . ",
 					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
 					" . quote_or_null($formvars['comment']) . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote($formvars['vector_tile_url']) : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ", " . quote(($formvars['cluster_option'] == '' ? '0' : $formvars['cluster_option']), 'text') : '') . "
 				)
 			";
     }
@@ -19088,10 +19118,13 @@ class db_mapObj{
 					`wms_format`,
 					`wms_connectiontimeout`,
 					`trigger_function`,
-					`sync`,
 					`version`,
 					`comment`
-				) VALUES (
+					" . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . "
+				)
+				VALUES (
 					'" . $layer->name . "',
 					" . quote($layer->type) . ",
 					'" . $layer->group . "',
@@ -19116,9 +19149,11 @@ class db_mapObj{
 					'',
 					60,
 					'" . $layer->trigger_function . "',
-					" . quote($layer->sync) . ",
 					'" . $layer->version . "',
 					'" . $layer->comment . "'
+					" . ($this->GUI->plugin_loaded('mobile') ? ', ' . quote($layer->sync) : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ', ' . quote($layer->vector_tile_url) : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ', ' . quote($layer->cluster_option) : '') . "
 				)
 			";
 		}
@@ -19713,8 +19748,10 @@ class db_mapObj{
 				l.updatecycle,
 				l.drawingorder,
 				l.alias,
-				l.sync,
 				l.shared_from
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				layer l LEFT JOIN
 				u_groups g ON l.Gruppe = g.id" .
@@ -19744,9 +19781,15 @@ class db_mapObj{
 			'alias' => array(),
 			'default_drawingorder' => array(),
 			'layers_of_group' => array(),
-			'sync' => array(),
 			'shared_from' => array()
 		);
+		if ($this->GUI->plugin_loaded('mobile')) {
+			$layer['sync'] = array();
+			$layer['vector_tile_url'] = array();
+		}
+		if ($this->GUI->plugin_loaded('portal')) {
+			$layer['cluster_option'] = array();
+		}
 		while ($rs = $ret['result']->fetch_array()) {
 			$layer['ID'][] = $rs['Layer_ID'];
 			$layer['Bezeichnung'][] = $rs['Name'];
@@ -19766,8 +19809,14 @@ class db_mapObj{
 			$layer['alias'][] = $rs['alias'];
 			$layer['default_drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
-			$layer['sync'][] = $rs['sync'];
 			$layer['shared_from'][] = $rs['shared_from'];
+			if ($this->GUI->plugin_loaded('mobile')) {
+				$layer['sync'][] = $rs['sync'];
+				$layer['vector_tile_url'] = $rs['vector_tile_url'];
+			}
+			if ($this->GUI->plugin_loaded('portal')) {
+				$layer['cluster_option'][] = $rs['cluster_option'];
+			}
 			$i++;
 		}
 
@@ -19968,8 +20017,8 @@ class db_mapObj{
     return $layer;
   }
 
-  function get_Layer($id, $replace_params = true) {
-    $sql = "
+	function get_Layer($id, $replace_params = true) {
+		$sql = "
 			SELECT
 				*
 			FROM
@@ -19995,8 +20044,8 @@ class db_mapObj{
 				);
 			}
 		}
-    return $layer;
-  }
+		return $layer;
+	}
 
 	function set_default_layer_privileges($formvars, $attributes){
 		for ($i = 0; $i < count($attributes['type']); $i++) {
