@@ -18925,10 +18925,8 @@ class db_mapObj{
 		}
 
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
-<<<<<<< HEAD
 		$zero_if_empty_attributes = array(
 			'drawingorder',
-			'sync',
 			'listed',
 			'write_mapserver_templates'
 		);
@@ -18939,15 +18937,6 @@ class db_mapObj{
 			);
 		}
 		foreach ($zero_if_empty_attributes AS $key) {
-=======
-		foreach(
-			array(
-				'drawingorder',
-				'sync',
-				'listed'
-			) AS $key
-		) {
->>>>>>> d1157d060f3f7caaaa089fdc9e15a9f6dda32c2f
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
