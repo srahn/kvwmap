@@ -13,8 +13,9 @@
 	$strRead="read";
 	$strEdit="edit";
 	$strUseDefaultPrivileges="use default privileges";
-	$strAssignDefaultPrivileges="assign default privileges to all tasks";
+	$strAssignDefaultPrivileges="assign default privileges to all usergroups";
 	$strToTaskAssignment="to task assignment";
 	$strUseParentPrivileges="use parent privileges";
+	$strUseForAllStellen = 'set for all usergroups';
 	
 ?>  

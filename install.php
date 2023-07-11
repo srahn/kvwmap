@@ -41,6 +41,7 @@ class GUI {
 		echo '<br>' . $msg;
 	}
 }
+$GUI = new GUI(NULL, NULL, NULL);
 
 output_header();
 
@@ -221,6 +222,13 @@ function install() {
 			CREATE EXTENSION IF NOT EXISTS postgis
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
+		Entferne Superuser Recht<br>		<?php
+		$sql = "
+			ALTER USER " . $pgsqlKvwmapDb->user . " WITH NOSUPERUSER;
+		";
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
 		Ergänze bzw. korrigiere EPSG-Codes für MV<br><?php
 		$sql = "
 			UPDATE
@@ -525,7 +533,9 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		WITH
 			SUPERUSER
 			LOGIN
-			PASSWORD '" . $pgsqlKvwmapDb->passwd . "'
+			PASSWORD '" . $pgsqlKvwmapDb->passwd . "';
+			
+		GRANT SET ON PARAMETER log_min_messages TO " . $pgsqlKvwmapDb->user . ";
 	";
 	$pgsqlPostgresDb->execSQL($sql, 0, 1); ?>
 	

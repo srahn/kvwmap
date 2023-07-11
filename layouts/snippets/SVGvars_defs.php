@@ -152,6 +152,10 @@ $SVGvars_defs = '
 			<line x1="0" y1="0" x2="20" y2="10" stroke="black" stroke-width="1.5" />
 			<line x1="0" y1="20" x2="20" y2="10" stroke="black" stroke-width="1.5" />
     </marker>
+		
+		<clipPath id="compare_clipper">
+      <rect id="compare_clipper_rect" x="0" y="0" width="' . $this->user->rolle->nImageWidth . '" height="' . $this->user->rolle->nImageHeight . '" />
+    </clipPath>
 ';
 
 	$ret=$this->user->rolle->getConsume($this->user->rolle->newtime);

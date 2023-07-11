@@ -714,10 +714,14 @@ FROM
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
 					$fields[$i]['default'] = $attr_info['default'];
-					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
-						$fieldtype = $prefix.$datatype_id; 
+					$fields[$i]['type_type'] = $attr_info['type_type'];
+					$fields[$i]['type_schema'] = $attr_info['type_schema'];
+					$fields[$i]['is_array'] = $attr_info['is_array'];
+					if ($attr_info['is_array'] == 't') {
+						$prefix = '_'; 
+					}
+					else {
+						$prefix = '';
 					}
 					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
@@ -854,17 +858,15 @@ FROM
         if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
         else $attr_info['length'] = $attr_info['character_maximum_length'];
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      #if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
-	  		else $attr_info['default'] = '';
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
 		return $attributes;
 	}
      	
-	function writeCustomType($typname, $schema) {
+	function writeCustomType($layer_id, $typname, $schema) {
 		$datatype_id = $this->getDatatypeId($typname, $schema, $this->connection_id);
-		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		$this->writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema);
 		return $datatype_id;
 	}
 	
@@ -918,7 +920,7 @@ FROM
 		return $result['enum_string'];
 	}
 	
-	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
@@ -930,7 +932,7 @@ FROM
 			$fields[$i]['default'] = $attr_info[$i]['default'];					
 			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
-				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$sub_datatype_id = $this->writeCustomType($layer_id, $attr_info[$i]['type'], $attr_info[$i]['type_schema']);
 				$fieldtype = $prefix.$sub_datatype_id; 
 			}
 			$constraintstring = '';
@@ -947,6 +949,7 @@ FROM
 				INSERT INTO
 					datatype_attributes
 				SET
+					layer_id = " . $layer_id . ",
 					datatype_id = " . $datatype_id . ",
 					name = '" . $fields[$i]['name'] . "',
 					real_name = '" . $fields[$i]['real_name'] . "',
@@ -2190,7 +2193,7 @@ FROM
 				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
 			FROM 
 				alkis.ax_lagebezeichnungmithausnummer lmh,
-				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1~\\2', 'g'), '(\D+)(\d+)', '\\1~\\2', 'g'), '~'), '') AS r
 			WHERE 
 				lmh.gemeinde = '" . substr($GemID, -3) . "'
 				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
@@ -2198,7 +2201,7 @@ FROM
     $sql.= $this->build_temporal_filter(array('lmh'));
 		$sql.= " 
 			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
-			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
+			ORDER BY r[1]::int, trim(r[2]) NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
     $queryret = $this->execSQL($sql, 4, 0);
@@ -2262,6 +2265,49 @@ FROM
     }
     return $Liste;
   }
+	
+  function getStrassenListe_not_unique($GemID,$GemkgID) {		
+	# diese Funktion wird verwendet, wenn die Strassennamen pro Gemeinde nicht eindeutig sind
+	# gleiche Straßennamen werden dann einzeln und mit Gemarkungsnamen in Klammern dahinter gelistet
+  	$sql ="set enable_seqscan = off;SELECT '000' AS gemeinde,'0' AS strasse,'--Auswahl--' AS strassenname, '' as gemkgname";
+    $sql.=" UNION";
+    $sql.=" SELECT DISTINCT g.gemeinde, s.lage as strasse, s.bezeichnung as strassenname, array_to_string(array_agg(distinct gem.bezeichnung), ', ') as gemkgname";
+    $sql.=" FROM alkis.ax_gemeinde as g, alkis.ax_gemarkung as gem, alkis.ax_flurstueck as f";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(f.weistauf)";
+		$sql.=" LEFT JOIN alkis.ax_lagebezeichnungohnehausnummer lo ON lo.gml_id = ANY(f.zeigtauf)";
+    $sql.=" LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON f.gemeindezugehoerigkeit_gemeinde = s.gemeinde AND l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = l.lage OR (lo.kreis=s.kreis AND lo.gemeinde=s.gemeinde AND lo.lage=s.lage)";
+		$sql.=" WHERE s.lage IS NOT NULL AND g.gemeinde = f.gemeindezugehoerigkeit_gemeinde AND g.kreis=f.gemeindezugehoerigkeit_kreis AND f.gemarkungsnummer = gem.gemarkungsnummer ";
+    if ($GemID!='') {
+      $sql.=" AND g.schluesselgesamt='".$GemID."'";
+    }
+    if ($GemkgID!='') {
+      $sql.=" AND f.land||f.gemarkungsnummer='".$GemkgID."'";
+    }
+		$sql.= $this->build_temporal_filter(array('g', 'gem', 'f', 'l', 'lo', 's'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('s'));
+		$sql.=" GROUP BY g.gemeinde, s.bezeichnung, s.lage";
+    $sql.=" ORDER BY gemeinde, strassenname, strasse";
+    #echo $sql;
+    $this->debug->write("<p>postgres getStrassenListe Abfragen der Strassendaten:<br>".$sql,4);
+    $queryret=$this->execSQL($sql, 4, 0);
+    $i = 0;
+    while ($rs=pg_fetch_assoc($queryret[1])) {
+			$Liste['Gemeinde'][]=$rs['gemeinde'];
+			$Liste['StrID'][]=$rs['strasse'];
+			$Liste['Gemarkung'][]=$rs['gemkgname'];
+			$Liste['gemkgschl'][]=$rs['gemkgschl'];
+			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
+			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
+				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
+				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
+			}
+			else{
+				$Liste['Name'][]=$rs['strassenname'];
+			}
+      $i++;
+    }
+    return $Liste;
+  }	
         
   function getFlurenListeByGemkgIDByFlurID($GemkgID,$FlurID, $history_mode = 'aktuell'){
 		# ax_gemarkungsteilflur kann nicht verwendet werden, da dies eine Katalogtabelle ist und Objekte in diesen nicht beendet werden

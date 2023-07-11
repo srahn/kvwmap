@@ -218,7 +218,7 @@ switch ($this->formvars['action']) {
 	}break;
 	case 'set_new_data' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
-			if ($this->formvars['check_' . $layer_id] AND strpos($this->formvars['new_data_' . $layer_id], 'using ') !== false) {
+			if ($this->formvars['check_' . $layer_id] AND strpos(strtolower($this->formvars['new_data_' . $layer_id]), 'using ') !== false) {
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$select = $mapDB->getSelectFromData($this->formvars['new_data_' . $layer_id]);
 				$from = substr($select, strrpos(strtolower($select), 'from') + 5);
@@ -328,7 +328,7 @@ $result = $this->database->execSQL($query);
 	}	
 	.scrolltable_header {
     position: absolute;
-    top: 5px;
+    top: -25px;
     height: 31px;
     border-left: 1px solid #555;
     padding: 5px 0 0 5px;
