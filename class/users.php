@@ -1007,7 +1007,7 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
+				u.*, (select nullif(max(r.last_time_id), '0000-00-00 00:00:00') from rolle r where u.ID = r.user_id ) as last_timestamp
 			FROM
 				user u " .
 				$more_from .
