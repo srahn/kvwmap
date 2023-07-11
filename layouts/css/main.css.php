@@ -1891,6 +1891,32 @@ thead.gle th {
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
+.gle_arrayelement_table {
+	width: 100%;
+	margin: 10px 0;
+}
+
+.gle_datatype_table {
+	width: 100%;
+	table-layout: auto;
+	border: 1px solid #bbb;
+	border-bottom: none;
+	border-collapse: collapse;
+	border-left: 3px solid #555;
+}
+
+.gle_datatype_table td.gle_attribute_name {
+	width: 10%;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value, .gle_attribute_name {
+	border: 1px solid #bbb;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;
