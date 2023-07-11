@@ -228,7 +228,7 @@ switch ($this->formvars['action']) {
 					if ($table_part[1] == ''){
 						$table_part[1] = $table_part[0];
 					}
-					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
+					if (trim($table_part[1]) == $this->formvars['maintable_' . $layer_id]) {
 						$sql = "
 							UPDATE
 								layer
