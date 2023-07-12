@@ -8,6 +8,7 @@ class Layer extends MyObject {
 		$this->stelle_id = $gui->stelle->id;
 		$this->identifier = 'Layer_ID';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
+		$this->geom_column = 'geom';
 	}
 
 	public static	function find($gui, $where, $order = '') {
@@ -681,6 +682,7 @@ class Layer extends MyObject {
 			}
 			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
 			$sql = $formatter_objekt->get_generic_select($this, $attr);
+			#echo '<br>attr: ' . $attr['att_name'] . ' type: ' . $this->get_attribute_type($attr) . ' sql: ' . $sql['select'];
 			foreach(array('select', 'from', 'where') AS $key) {
 				if (array_key_exists($key, $sql) AND $sql[$key] != '') {
 					$attributes[$key][] = $sql[$key];

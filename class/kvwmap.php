@@ -1787,17 +1787,7 @@ echo '			</table>
 
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
-					$layer->set(
-						'connection',
-						replace_params(
-							$layerset[$i][connection],
-							rolle::$layer_params,
-							$this->user->id,
-							$this->Stelle->id,
-							rolle::$hist_timestamp,
-							$this->user->rolle->language
-						)
-					);
+					$layer->set('connection',	$layerset[$i][connection]);
 					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
@@ -1839,6 +1829,7 @@ echo '			</table>
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
@@ -2026,10 +2017,13 @@ echo '			</table>
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 						$this->loadlayer($map, $layerset['list'][$i]);
-          }
-        }
+					}
+				}
 				$this->layerset = $layerset;
-        $this->map=$map;
+				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
+					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+				}
+				$this->map = $map;
 				$this->reference_map = $reference_map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;
@@ -2037,12 +2031,24 @@ echo '			</table>
 				else {
 					$this->map_scaledenom = $map->scale;
 				}
-        $this->mapDB=$mapDB;
-      } break; # end of lade Karte von Datenbank
-    } # end of switch loadMapSource
-    return 1;
-  }
+				$this->mapDB = $mapDB;
+			} break; # end of lade Karte von Datenbank
+		} # end of switch loadMapSource
+		return 1;
+	}
 
+	/**
+	 * Return a drawing order with default layers to top
+	 */
+	function get_default_layers_top_drawing_order($num_layers, $num_default_layers) {
+		$drawing_order = range($num_default_layers, $num_layers - 1);
+		foreach(range(0, $num_default_layers - 1) AS $order) {
+			$drawing_order[] = $order;
+		}
+		return $drawing_order;
+	}
+
+	
 	function loadlayer($map, $layerset) {
 		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
@@ -2161,16 +2167,7 @@ echo '			</table>
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection',
-				replace_params(
-					$layerset['connection'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
-			);
+			$layer->set('connection', $layerset['connection']);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -2334,20 +2331,22 @@ echo '			</table>
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass=@count($classset);
+    $anzClass = @count($classset);
     for ($j=0;$j<$anzClass;$j++) {
       $klasse = ms_newClassObj($layer);
       if ($classset[$j]['Name']!='') {
         $klasse -> set('name',$classset[$j]['Name']);
       }
-      if($classset[$j]['Status']=='1'){
+      if ($classset[$j]['Status']=='1'){
       	$klasse->set('status', MS_ON);
       }
-      else{
+      else {
       	$klasse->set('status', MS_OFF);
       }
-      $klasse -> set('template', value_of($layerset, 'template'));
-			$klasse -> setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
+			if (value_of($layerset, 'template') != '') {
+				$klasse->set('template', value_of($layerset, 'template'));
+			}
+			$klasse->setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
 				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -2917,6 +2916,13 @@ echo '			</table>
 		return $html;
 	}
 
+	function get_web_footer_template() {
+		$html = "
+</html>
+";
+		return $html;
+	}
+
 	function save_web_header_template() {
 		$template_dir = WMS_MAPFILE_PATH . 'templates/';
 		if (!is_dir($template_dir)) {
@@ -2925,6 +2931,17 @@ echo '			</table>
 
 		$fp = fopen($template_dir . 'header.html', "w");
 		fwrite($fp, $this->get_web_header_template($this->Stelle->ows_title ?: OWS_TITLE));
+		fclose($fp);
+	}
+
+	function save_web_footer_template() {
+		$template_dir = WMS_MAPFILE_PATH . 'templates/';
+		if (!is_dir($template_dir)) {
+			mkdir($template_dir, 0770, true);
+		}
+
+		$fp = fopen($template_dir . 'footer.html', "w");
+		fwrite($fp, $this->get_web_footer_template());
 		fclose($fp);
 	}
 
@@ -8487,6 +8504,48 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		}
   }
 
+	/**
+	 * This function write the mapfile, templates and a wrapper file for the current map object
+	 * If stelle_id is set, the location is in a subdirectory of OWS_ONLINE_RESOURCE.
+	 */
+	function write_mapfile($mapfile, $stelle_id = '') {
+		$stelle_id = ($stelle_id != '' ? $stelle_id . '/' : '');
+		$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
+		try {
+			# Schreibe MapFile-Templates
+			$this->save_web_header_template();
+			$this->save_web_footer_template();
+
+			# Schreibe MapFile
+			if (!file_exists($path_parts['dirname'])) {
+				mkdir($path_parts['dirname'], 0775, true);
+			}
+			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
+
+			# Schreibe MapFile-Wrapper
+			$wrapper_path = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE) . $stelle_id;
+			if (!file_exists($wrapper_path)) {
+				mkdir($wrapper_path, 0775, true);
+			}
+			$wrapper_file = $wrapper_path . MAPFILENAME;
+			if (!file_exists($wrapper_file)) {
+				file_put_contents($wrapper_file, '#!/bin/sh
+MAPSERV="/usr/lib/cgi-bin/mapserv"
+MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
+				chmod($wrapper_file, 0775);
+			}
+		} catch (Exception $ex) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . $mapfile . ', der Templates oder des Wrappers ' . $wrapper_file . ' für den Dienst in Funktion write_mapfile. ' . $ex
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'MapDatei, Templates und Wrapper erfolgreich geschrieben.'
+		);
+	}
+
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
   * duplicate all layer that have it in duplicate_from_layer_id
@@ -8519,7 +8578,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						),
 						$this->formvars['sync']
 					);
-					
+					$geom_column = $attributes['the_geom'];
 					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false);
 					for ($i = 0; $i < count($attributes)-2; $i++) {
 						$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
@@ -8545,6 +8604,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					else {
 						$layer->remove_mapserver_templates();
 					}
+					$layer->update(array('geom_column' => $geom_column));
 				}
 				if ($formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);
@@ -16946,7 +17006,7 @@ class db_mapObj{
 		$Layer = array();
 		while ($rs = $ret['result']->fetch_array()) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -17069,7 +17129,7 @@ class db_mapObj{
 				rolle::$layer_params,
 				$rs['Layer_ID']
 			);			
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -19972,7 +20032,7 @@ class db_mapObj{
 			WHERE
 				locate(
 					concat('$', p.key),
-					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
 		if ($param_id != NULL) {

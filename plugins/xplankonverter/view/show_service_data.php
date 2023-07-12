@@ -11,7 +11,7 @@
 	}
 </style>
 <div class="text-left">
-	Die Map-Datei für den WMS und WFS des Dienstes der die Zusammenzeichnungen der F-Pläne von Niedersachsen ausgibt wurde aktualisiert.<br>
+	Die Map-Datei für den WMS und WFS des Dienstes, der alle X-Pläne dieses Portals ausgibt, wurde aktualisiert.<br>
 	Die Dienstadresse für WMS und WFS lautet: <? echo $this->ows_onlineresource; ?><br>
 	Und hier die Capabilities für <a target="_blank" href="<? echo $this->ows_onlineresource; ?>?Service=WMS&Request=GetCapabilities&Version=1.3.0">WMS</a> und <a target="_blank" href="<? echo $this->ows_onlineresource; ?>?Service=WFS&Request=GetCapabilities&Version=1.0.0">WFS</a> zum Anzeigen.
 </div>
