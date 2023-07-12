@@ -1987,12 +1987,12 @@ echo '			</table>
 				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
 				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
 				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
-				
+
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
         $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
-        $rollenlayer = $mapDB->read_RollenLayer();
+				$rollenlayer = $mapDB->read_RollenLayer();
         $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
         $layerset['anzLayer'] = count($layerset['list']);
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
@@ -17036,7 +17036,7 @@ class db_mapObj{
 		if (!$this->db->success) { 
 			echo err_msg($this->script_name, __LINE__, $sql); 
 			return 0;
-		} exit;
+		}
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();

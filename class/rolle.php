@@ -143,9 +143,9 @@ class rolle {
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer 
 				" . $privilegfk . "
-				" . ($GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
