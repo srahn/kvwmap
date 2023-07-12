@@ -324,6 +324,7 @@ class GUI {
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
@@ -513,7 +514,10 @@ class GUI {
           }
         }
 				$this->layerset = $layerset;
-        $this->map=$map;
+				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
+					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+				}
+				$this->map = $map;
 				$this->reference_map = $reference_map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;
@@ -526,6 +530,17 @@ class GUI {
     } # end of switch loadMapSource
     return 1;
   }
+
+		/**
+	 * Return a drawing order with default layers to top
+	 */
+	function get_default_layers_top_drawing_order($num_layers, $num_default_layers) {
+		$drawing_order = range($num_default_layers, $num_layers - 1);
+		foreach(range(0, $num_default_layers - 1) AS $order) {
+			$drawing_order[] = $order;
+		}
+		return $drawing_order;
+	}
 
 	function list_subgroups($groupid){
 		$subgroups = '';

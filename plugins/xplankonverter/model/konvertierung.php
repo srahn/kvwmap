@@ -40,7 +40,7 @@ class Konvertierung extends PgObject {
 	function create_geoweb_service($xplan_layers) {
 		$gui = $this->gui;
 		$planartkuerzel = $this->plan->planartAbk[0];
-		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $planartkuerzel . 'plan/';
+		$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . $this->get('stelle_id') . '/' . MAPFILENAME . '/';
 
 		$gui->class_load_level = 2;
 		$gui->loadMap('DataBase');
@@ -53,6 +53,7 @@ class Konvertierung extends PgObject {
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$gui->map->web->set('header', '../templates/header.html');
+		$gui->map->web->set('footer', '../templates/footer.html');
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
 		# Und setze bei den anderen die Templates
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
@@ -98,7 +99,7 @@ class Konvertierung extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'mapfile' => $this->get('stelle_id') . '/zusammenzeichnung.map'
+			'mapfile' => $this->get('stelle_id') . '/' . MAPFILENAME. '.map'
 		);
 	}
 

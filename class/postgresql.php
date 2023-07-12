@@ -520,7 +520,7 @@ FROM
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
-				#header('error: true');	// damit ajax-Requests das auch mitkriegen
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
 		return $ret;

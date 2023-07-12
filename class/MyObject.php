@@ -170,7 +170,7 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY " .$q.implode($q.', '.$q, $orders).$q.($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
+			($order != '' ? " ORDER BY " . $q . implode($q . ', ' . $q, $orders) . $q . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
