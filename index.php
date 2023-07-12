@@ -1229,7 +1229,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
 				$GUI->sanitize([
 					'selected_layer_id' => 'int',
 					'layer_name' => 'text',
@@ -2012,7 +2012,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Query for all notifications and show it in a list
+			*	Query for all notifications and show it in a list
 			*/
 			case 'notifications_anzeigen' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2020,7 +2020,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Show notifications form to create or update notification
+			*	Show notifications form to create or update notification
 			*/
 			case 'notification_formular' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2029,7 +2029,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				create or update a user notification
+			*	create or update a user notification
 			*/
 			case 'put_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2044,7 +2044,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete the notification for user
+			*	delete the notification for user
 			*/
 			case 'delete_user2notification' : {
 				$GUI->sanitize(['notification_id' => 'int']);
@@ -2052,7 +2052,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete a notification
+			*	delete a notification
 			*/
 			case 'delete_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2061,7 +2061,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				query notifications that has to be shown for the current user
+			*	query notifications that has to be shown for the current user
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();
