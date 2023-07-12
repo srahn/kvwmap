@@ -776,6 +776,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();
 	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg0")?.remove();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();
 	// nix
@@ -921,21 +922,27 @@ function custom_select_register_keydown(){
 
 function custom_select_keydown(evt){
 	var selected_option = document.querySelector('.custom-select.active li.selected');
-	if (evt.keyCode == 38) {
-		selected_option.previousElementSibling.onmouseenter();
-	}
-	if (evt.keyCode == 40) {
-		selected_option.nextElementSibling.onmouseenter();
+	switch (evt.keyCode) {
+		case 38 : {
+			selected_option.previousElementSibling.onmouseenter();
+		}break;
+		case 40 : {
+			selected_option.nextElementSibling.onmouseenter();
+		}break;
+		case 13 : {
+			selected_option.onclick();
+		}break;
 	}
 }
 
 function custom_select_hover(option) {
 	var custom_select_div = option.closest('.custom-select');
+	option.scrollIntoView({behavior: "smooth", block: "nearest"});
 	custom_select_div.querySelector('li.selected').classList.remove('selected');
 	option.classList.add('selected');
 }
 
-function custom_select_select(option) {
+function custom_select_click(option) {
 	var custom_select_div = option.closest('.custom-select');
 	var field = custom_select_div.querySelector('input');
 	custom_select_hover(option);
@@ -944,12 +951,6 @@ function custom_select_select(option) {
 		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
 	}
 	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
-}
-
-function custom_select_click(option) {
-	custom_select_select(option);
-	var custom_select_div = option.closest('.custom-select');
-	var field = custom_select_div.querySelector('input');	
 	if (field.onchange) {
 		field.onchange();
 	}

@@ -262,39 +262,41 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		values = new Array();
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
-			value = elements[i].value;
-			name = elements[i].name;
-			type = elements[i].type;
-			if(name.slice(-4) != '_alt'){
-				if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
-					if (value != '') {
-						value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
-					}
-					else {
-						old_file_path = document.getElementsByName(name+'_alt');
-						if (old_file_path[0] != undefined) {
-							value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
-						}
-					}
-				}
-				if (!is_array) { // Datentyp
-					if (value == '') {
-						value = 'null';
-					}
-					else {
-						if (value.substring(0,1) != '{') {
-							value = '"' + value + '"';
-						}
-					}
-					id_parts = elements[i].id.split('_');
-					if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
-					else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
-					values.push('"' + attribute_name + '":' + value);
-				}
-				else {
-					if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+			if (elements[i].classList[0] == id)	{
+				value = elements[i].value;
+				name = elements[i].name;
+				type = elements[i].type;
+				if(name.slice(-4) != '_alt'){
+					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
-							values.push(value);
+							value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+						}
+						else {
+							old_file_path = document.getElementsByName(name+'_alt');
+							if (old_file_path[0] != undefined) {
+								value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
+							}
+						}
+					}
+					if (!is_array) { // Datentyp
+						if (value == '') {
+							value = 'null';
+						}
+						else {
+							if (['{', '['].indexOf(value.substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
+								value = '"' + value + '"';
+							}
+						}
+						id_parts = elements[i].id.split('_');
+						if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
+						else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
+						values.push('"' + attribute_name + '":' + value);
+					}
+					else {
+						if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+							if (value != '') {
+								values.push(value);
+							}
 						}
 					}
 				}

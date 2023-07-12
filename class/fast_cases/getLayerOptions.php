@@ -278,22 +278,37 @@ class GUI {
 							</span>
 						</td>
 						<td>
-							'.FormObject::createCustomSelectField(
-								'options_layer_parameter_' . $param['key'],										# name
-								$param['options'],																						# options
-								rolle::$layer_params[$param['key']],													# value
-								1,																														# size
-								'',																														# style
-								'',																														# onchange
-								'layer_parameter_' . $param['key'],														# id
-								'',																														# multiple
-								'',																														# class
-								'',																														# firstoption
-								'', 																													# option_style
-								'', 																													# option_class
-								'',																														# onclick
-								"if (mapimg3 == undefined) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
-								"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+							'.($layer_id == NULL ?
+								FormObject::createSelectField(
+									'options_layer_parameter_' . $param['key'],		# name
+									$param['options'],										# options
+									rolle::$layer_params[$param['key']],	# value
+									1,																		# size
+									'width: 110px',												# style
+									'onLayerParameterChanged(this);',			# onchange
+									'layer_parameter_' . $param['key'],		# id
+									'',																		# multiple
+									'',																		# class
+									''																		# firstoption
+								)
+								:
+								FormObject::createCustomSelectField(
+									'options_layer_parameter_' . $param['key'],										# name
+									$param['options'],																						# options
+									rolle::$layer_params[$param['key']],													# value
+									1,																														# size
+									'',																														# style
+									'',																														# onchange
+									'layer_parameter_' . $param['key'],														# id
+									'',																														# multiple
+									'',																														# class
+									'',																														# firstoption
+									'', 																													# option_style
+									'', 																													# option_class
+									'',																														# onclick
+									"if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
+									"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+								)
 							).'
 						</td>
 					</tr>';
@@ -1428,7 +1443,7 @@ class db_mapObj {
 			WHERE
 				locate(
 					concat('$', p.key),
-					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
 		if($param_id != NULL){
@@ -1558,7 +1573,7 @@ class db_mapObj {
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];

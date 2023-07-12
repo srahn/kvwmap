@@ -17,6 +17,11 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
+		if (!empty(GUI::$messages)) {
+			foreach(GUI::$messages as $message) {
+				$errors[] = $message['msg'];
+			}
+		}
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
@@ -601,6 +606,38 @@ function go_switch($go, $exit = false) {
 
 			# Style speichern
 			case 'save_style' : {
+				$GUI->sanitize([
+					'style_id' => 'int',
+					'style_symbol' => 'int',
+					'symbolname' => 'text',
+					'style_size' => 'text',
+					'style_color' => 'text',
+					'style_backgroundcolor' => 'text',
+					'style_outlinecolor' => 'text',
+					'style_colorrange' => 'text',
+					'style_datarange' => 'text',
+					'style_rangeitem' => 'text',
+					'style_minsize' => 'text',
+					'style_maxsize' => 'text',
+					'style_minscale' => 'int',
+					'style_maxscale' => 'int',
+					'style_angle' => 'text',
+					'style_angleitem' => 'text',
+					'style_width' => 'text',
+					'style_minwidth' => 'int',
+					'style_maxwidth' => 'int',
+					'style_offsetx' => 'int',
+					'style_offsety' => 'int',
+					'style_polaroffset' => 'text',
+					'style_pattern' => 'text',
+					'style_geomtransform' => 'text',
+					'style_gap' => 'int',
+					'style_initialgap' => 'float',
+					'style_opacity' => 'int',
+					'style_linecap' => 'text',
+					'style_linejoin' => 'text',			
+					'style_linejoinmaxsize' => 'int'
+				]);
 				$GUI->save_style();
 			} break;
 
@@ -1507,12 +1544,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
-					include_once(CLASSPATH . 'Layer.php');
-					$GUI->save_layers_attributes($GUI->formvars);
-				}
-				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
-					$GUI->Datentypattribute_speichern();
+				if ($GUI->formvars['selected_layer_id'] != '') {
+					if ($GUI->formvars['selected_datatype_id'] == '') {
+						include_once(CLASSPATH . 'Layer.php');
+						$GUI->save_layers_attributes($GUI->formvars);
+					}
+					else {
+						$GUI->Datentypattribute_speichern();
+					}
 				}
 				$GUI->Attributeditor();
 			} break;

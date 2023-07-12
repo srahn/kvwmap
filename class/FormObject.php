@@ -141,7 +141,13 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
-		$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
+		if (strval($option['value']) === strval($value)) {
+			$selected = ' selected';
+			$output = $option['output'];
+		}
+		else {
+			$selected = '';
+		}
 		$options_html[] = "
 			<li onclick=\"custom_select_click(this)\" onmouseenter=\"custom_select_hover(this);" . $option_onmouseenter . "\" " . $option_style . " class=\"" . $option_class . $selected . "\" 
 				data-value=\"" . $option['value'] . "\"" .
@@ -157,7 +163,7 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 		<div class="custom-select" id="custom_select_' . $id . '">
 			<input type="hidden" ' . $onchange . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
 			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.' ' . $style . '>
-				<span>' . $value . '</span>
+				<span>' . $output . '</span>
 			</div>
 			<div style="position:relative">
 				<ul class="dropdown" id="dropdown">
