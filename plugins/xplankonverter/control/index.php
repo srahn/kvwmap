@@ -1050,29 +1050,10 @@ function go_switch_xplankonverter($go) {
 					$GUI->add_message('error', $msg);
 				}
 				else {
-					$mapfile = $result['mapfile'];
-					$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
-					try {
-						if (!file_exists($path_parts['dirname'])) {
-							mkdir($path_parts['dirname'], 0775, true);
-						}
-						$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
-						$GUI->save_web_header_template();
-						if (!file_exists(INSTALLPATH . 'ows')) {
-							mkdir(INSTALLPATH . 'ows', 0775, true);
-						}
-						if (!file_exists(INSTALLPATH . 'ows/fplan')) {
-							file_put_contents(INSTALLPATH . 'ows/fplan', '#!/bin/sh
-						MAPSERV="/usr/lib/cgi-bin/mapserv"
-						MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/zusammenzeichnung.map" exec ${MAPSERV}');
-						}
-					} catch (Exception $ex) {
-						$msg = 'Fehler beim Speichern der Map-Datei für den Dienst. ' . $ex;
-						$GUI->data = array(
-							'success' => false,
-							'msg' => $msg
-						);
-						$GUI->add_message('error', $msg);
+					$result = $GUI->write_mapfile($result['mapfile']);
+					if (!$result['success']) {
+						$GUI->data = $result;
+						$this->add_message('error', $result['msg']);
 					}
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
@@ -1093,30 +1074,12 @@ function go_switch_xplankonverter($go) {
 				# Erzeugt den Geowebservice für einen einzelnen Plan
 				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers);
 				if (! $result['success']) {
-					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Zusammenzeichnung der Stelle enthält. ' . $result['msg']);
+					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
 					break;
 				}
-				$mapfile = $result['mapfile'];
-				$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
-				try {
-					if (!file_exists($path_parts['dirname'])) {
-						mkdir($path_parts['dirname'], 0770, true);
-					}
-					if (!file_exists(INSTALLPATH . 'ows/' . $GUI->Stelle->id)) {
-						mkdir(INSTALLPATH . 'ows/' . $GUI->Stelle->id, 0775, true);
-						#echo 'Verzeichnis ' . INSTALLPATH . 'ows/' . $GUI->Stelle->id . ' angelegt.'; exit;
-					}
-					$mapserver_wrapper = INSTALLPATH . 'ows/' . $GUI->Stelle->id . '/fplan';
-					if (!file_exists($mapserver_wrapper)) {
-						file_put_contents($mapserver_wrapper, '#!/bin/sh
-					MAPSERV="/usr/lib/cgi-bin/mapserv"
-					MS_MAPFILE="/var/www/data/mapfiles/dienste/xplanung/' . $GUI->Stelle->id . '/zusammenzeichnung.map" exec ${MAPSERV}');
-						chmod($mapserver_wrapper, 0775);
-					}
-					$GUI->saveMap(WMS_MAPFILE_PATH . $mapfile);
-					$GUI->save_web_header_template();
-				} catch (Exception $ex) {
-					send_error("Fehler beim speichern der Map-Datei in create_geoweb_service. " . $ex);
+				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id);
+				if (!$result['success']) {
+					send_error($result['msg']);
 					break;
 				}
 			}

@@ -52,31 +52,14 @@ class XP_Plan extends PgObject {
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
-			#echo '<br>' . $xplan_layer['Name'];
+			#echo '<br>' . $xplan_layer['Name'] . ' ' . $xplan_layer['geom_column'];
 
-			switch (true) {
-				case (strpos($xplan_layer['Name'], '_bereich') !== false) : {
-					$geom_col = 'geltungsbereich';
-				} break;
-				case (strpos($xplan_layer['Name'], '_plan') !== false) : {
-					$geom_col = 'raeumlichergeltungsbereich';
-				} break;
-				case ($xplan_layer['Name'] == 'zusammenzeichnungen') : {
-					$geom_col = 'raeumlichergeltungsbereich';
-				} break;
-				case ($xplan_layer['Name'] == 'geltungsbereiche') : {
-					$geom_col = 'geom';
-				} break;
-				default : {
-					$geom_col = 'position';
-				}
-			}
 			$sql = "
 				SELECT
 					'" . $xplan_layer['Name'] . "',
-					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $geom_col . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
 				FROM
 					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
