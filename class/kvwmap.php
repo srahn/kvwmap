@@ -8871,7 +8871,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitations = Invitation::find(
 			$this,
 			(in_array($this->Stelle->id, $admin_stellen) ? 'true' : 'inviter_id = ' . $this->user->id),
-			($this->formvars['order'] == '' ? 'email' : '')
+			$this->formvars['order'] ?: 'email'
 		);
 
 		$this->main = 'invitations.php';
