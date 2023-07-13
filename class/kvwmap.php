@@ -4580,7 +4580,7 @@ echo '			</table>
 										"ohne"
 									);
 								} break;
-								case 'size' : case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : { ?>
+								case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : { ?>
 									<input
 										class="styleFormField"
 										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
@@ -4592,7 +4592,7 @@ echo '			</table>
 										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
 									><?
 								} break;
-								case 'width' : case 'minwidth' : case 'maxwidth' : { ?>
+								case 'minwidth' : case 'maxwidth' : { ?>
 									<input
 										class="styleFormField"
 										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
