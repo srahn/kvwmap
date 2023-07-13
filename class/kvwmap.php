@@ -8729,7 +8729,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->invitations = Invitation::find(
 			$this,
 			(in_array($this->Stelle->id, $admin_stellen) ? 'true' : 'inviter_id = ' . $this->user->id),
-			($this->formvars['order'] == '' ? 'email' : '')
+			$this->formvars['order'] ?: 'email'
 		);
 
 		$this->main = 'invitations.php';
