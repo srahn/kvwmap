@@ -25,13 +25,20 @@
 											9 => 'WFS'];
 	
 	$first = $nextfirst = '';
-	$has_sync_layer = array_reduce(
-		$this->layerdaten['sync'],
-		function($has_sync, $layerdaten) {
-			return $has_sync OR $layerdaten;
-		},
-		0
-	);
+	$has_sync_layer = false;
+	if (
+		array_key_exists('sync', $this->layerdaten) AND
+		is_array($this->layerdaten['sync']) AND
+		count($this->layerdaten['sync']) > 0
+	) {
+		$has_sync_layer = array_reduce(
+			$this->layerdaten['sync'],
+			function($has_sync, $layerdaten) {
+				return $has_sync OR $layerdaten;
+			},
+			0
+		);
+	}
 	$has_shared_layer = array_reduce(
 		$this->layerdaten['shared_from'],
 		function($has_shared, $layerdaten) {
