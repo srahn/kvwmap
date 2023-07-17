@@ -2265,7 +2265,7 @@ class Gml_extractor {
 				# single ' escaped later
 				$norm_1 = "norm_table_" . $i;
 				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon" or $n_a == "reftextinhalt") {
-						$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
+					$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
 					$gml_attributes[] = $n_a;
 				}
 				if($n_a == "detailliertezweckbestimmung" or $n_a == "zweckbestimmung") {
@@ -2296,7 +2296,8 @@ class Gml_extractor {
 						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
 						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
 						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
-						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . " ELSE NULL END AS " . $n_a . ",";
+						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . '[]';
+						$select_sql .= " ELSE NULL END AS " . $n_a . ",";
 						$gml_attributes[] = $n_a;
 					}
 				}

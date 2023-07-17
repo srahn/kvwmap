@@ -49,7 +49,9 @@ class Konvertierung extends PgObject {
 		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
-		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
+		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft' . $this->plan->get($this->plan_attribut_aktualitaet));
+		# Hier die Variante wo die Bezeichnung des Datums aus dem Attributnamen der Aktualität entnommen wird:
+		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$gui->map->web->set('header', '../templates/header.html');
@@ -283,7 +285,12 @@ class Konvertierung extends PgObject {
 			if ($konvertierung->get('veroeffentlicht') == 't') {
 				$konvertierung->art = 'published';
 			}
-			elseif ($konvertierung->get('error_id') AND $konvertierung->get('error_id') > 0) {
+			elseif (
+				$konvertierung->plan === false OR
+				(
+					$konvertierung->get('error_id') AND
+					$konvertierung->get('error_id') > 0)
+				) {
 				$konvertierung->art = 'faulty';
 			}
 			else {
@@ -308,54 +315,65 @@ class Konvertierung extends PgObject {
 		if (!file_exists($zip_path)) {
 			mkdir($zip_path, 0775, true);
 		}
+
 		$archive = new ZipArchive();
+
 		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
 			return array(
 				'success' => false,
 				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
 			);
 		}
+
 		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
 		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv"
-			);
-		}
-		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
-		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
-		if ($geodata_metadata_file === FALSE) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Lesen der Metadatendatei von " . $geodata_metadata_url
-			);
+			try {
+				$archive->close();
+			}
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
+				);
+			}
 		}
 
-		#add it to the zip
-		$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
-		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
-			);
+		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
+		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
+		if ($geodata_metadata_file !== FALSE) {
+			#add it to the zip
+			$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
+			if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+				try {
+					$archive->close();
+				}
+				catch (Exception $e) {
+					return array(
+						'success' => false,
+						'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
+					);
+				}
+			}
 		}
 
 		try {
+			$this->destroy();
 			$archive->close();
 		}
 		catch (Exception $e) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
-			);
+			if ($archive->numFiles > 0) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
+				);
+			}
+			else {
+				return array(
+					'success' => true,
+					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
+				);
+			}
 		}
-
-		$this->destroy();
-
-		return array(
-			'success' => true,
-			'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
-		);
 	}
 
 	/**

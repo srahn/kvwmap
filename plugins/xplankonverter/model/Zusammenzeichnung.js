@@ -127,6 +127,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
+      //form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val())
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
@@ -217,7 +218,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
       }
     })
   }

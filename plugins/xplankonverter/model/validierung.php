@@ -91,7 +91,7 @@ class Validierung extends PgObject {
 				konvertierung_id = " . $this->konvertierung_id . " AND
 				" . implode(' AND ', json_decode(str_replace('}', ']', str_replace('{', '[', $this->get('functionsargumente'))))) . "
 		";
-		$this->debug->show('plan_attribute_has_value sql: ' . $sql, false);
+		$this->debug->write('plan_attribute_has_value sql: ' . $sql, false);
 		$result = pg_fetch_assoc(pg_query($this->database->dbConn, $sql));
 		$has_value = $result['has_value'] == 't';
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
@@ -107,11 +107,11 @@ class Validierung extends PgObject {
 	}
 
 	function sql_ausfuehrbar($regel) {
-		$this->debug->show('<br>Validiere ob sql_ausfuehrbar: ', Validierung::$write_debug);
 		$ausfuehrbar = true;
 
 		$sql = $regel->get_convert_sql($this->konvertierung_id);
 
+		$this->debug->write('<br>Validiere ob sql_ausfuehrbar sql: ' . $sql, Validierung::$write_debug);
 		# Objekte anlegen
 		$result = @pg_query(
 			$this->database->dbConn,
@@ -131,12 +131,12 @@ class Validierung extends PgObject {
 			);
 			$ausfuehrbar = false;
 		}
-		$this->debug->show('<br>' . ($ausfuehrbar ? ' sql ist ausführbar.' : ' sql ist nicht ausführbar'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($ausfuehrbar ? ' sql ist ausführbar.' : ' sql ist nicht ausführbar'), Validierung::$write_debug);
 		return $ausfuehrbar;
 	}
 
 	function sql_vorhanden($sql, $regel) {
-		$this->debug->show('<hr><br>Regel: ' . $regel->get('name') . '<br>Validiere ob sql_vorhanden sql:<br>' . $sql . ' validieren.', Validierung::$write_debug);
+		$this->debug->write('<hr><br>Regel: ' . $regel->get('name') . '<br>Validiere ob sql_vorhanden sql:<br>' . $sql . ' validieren.', Validierung::$write_debug);
 		$vorhanden = true;
 		if (empty($sql)) {
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
@@ -151,13 +151,13 @@ class Validierung extends PgObject {
 			);
 			$vorhanden = false;
 		}
-		$this->debug->show('<br>' . ($vorhanden ? 'sql vorhanden' : 'sql nicht vorhanden'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($vorhanden ? 'sql vorhanden' : 'sql nicht vorhanden'), Validierung::$write_debug);
 		return $vorhanden;
 	}
 
 	function alle_sql_ausfuehrbar($alle_ausfuehrbar) {
 		if ($alle_ausfuehrbar) {
-			$this->debug->show('<br>Alle sql ausführbar.', Validierung::$write_debug);
+			$this->debug->write('<br>Alle sql ausführbar.', Validierung::$write_debug);
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
 				array(
@@ -191,10 +191,10 @@ class Validierung extends PgObject {
 	* noch gesetzt werden. Aber dann immer automatisch beim Anlegen des Layers.
 	*/
 	function geometrie_vorhanden($sql, $regel_id, $sourcetype = 'shape') {
-		$this->debug->show('<br>validate ob geometrie_vorhanden mit Ausgangs-sql: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>validate ob geometrie_vorhanden mit Ausgangs-sql: ' . $sql, Validierung::$write_debug);
 		$geometrie_vorhanden = true;
 		$sql = stristr($sql, 'select');
-		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
 		# Default Shape
 		# ogc_fid is pkey serial (an alternative oid would have to be added to each table after loading it)
@@ -210,7 +210,7 @@ class Validierung extends PgObject {
 			stripos($sql, 'select'),
 			strlen('select')
 		);
-		$this->debug->show('<br>sql mit ' . $gid_or_oid . ': ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit ' . $gid_or_oid . ': ' . $sql, Validierung::$write_debug);
 
 		# Hänge Where Klauses is null an
 		if (strpos(strtolower($sql), 'where') === false) {
@@ -225,11 +225,11 @@ class Validierung extends PgObject {
 			);
 			$sql .= ')';
 		}
-		$this->debug->show('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit where Klausel: ' . $sql, Validierung::$write_debug);
 
 		$sql = "SET search_path=" . $search_path . ", public; " . $sql;
 
-		$this->debug->show('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>Validiere ob geometrie_vorhanden mit sql:<br>' . $sql, 4, );;
 
 		$result = pg_query($this->database->dbConn, $sql);
 		$regel = Regel::find_by_id($this->gui, 'id', $this->konvertierung_id);
@@ -252,7 +252,7 @@ class Validierung extends PgObject {
 			$geometrie_vorhanden = false;
 		}
 
-		$this->debug->show('<br>' . ($geometrie_vorhanden ? ' geometrie vorhanden' : ' geometrie nicht vorhanden'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($geometrie_vorhanden ? ' geometrie vorhanden' : ' geometrie nicht vorhanden'), Validierung::$write_debug);
 		return $geometrie_vorhanden;
 	}
 
@@ -263,7 +263,7 @@ class Validierung extends PgObject {
 	* @return boolean $all_valid true wenn alle valide sind, false wenn nicht.
 	*/
 	function geometrie_isvalid($regel, $konvertierung) {
-		$this->debug->show('<br>Validate geom_isvalid:', Validierung::$write_debug);
+		$this->debug->write('<br>Validate geom_isvalid:', Validierung::$write_debug);
 		$all_geom_isvalid = true;
 		$sourcetype = $regel->is_source_shape_or_gmlas($regel,$konvertierung->get('id'));
 		# shape or gmlas?
@@ -273,7 +273,7 @@ class Validierung extends PgObject {
 
 		# Extrahiere alles ab select
 		$sql = stristr($sql, 'select');
-		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 
 		if($sourcetype != 'gmlas') {
 			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
@@ -286,7 +286,7 @@ class Validierung extends PgObject {
 				stripos($sql, 'select'),
 				strlen('select')
 			);
-			$this->debug->show('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
 		} else {
 			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
 			$sql = substr_replace(
@@ -308,7 +308,7 @@ class Validierung extends PgObject {
 				stripos($sql, 'select'),
 				strlen('select')
 			);
-			$this->debug->show('<br>sql mit is_validreason: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql mit is_validreason: ' . $sql, Validierung::$write_debug);
 		}
 
 		# where klausel für plan hinzufügen
@@ -320,12 +320,12 @@ class Validierung extends PgObject {
 			$sql
 		);
 
-		$this->debug->show('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
 #		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 
-		$this->debug->show('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
+		$this->debug->write('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
 
 		$result = @pg_query(
 			$this->database->dbConn,
@@ -333,7 +333,7 @@ class Validierung extends PgObject {
 		);
 
 		if (!$result) {
-			$this->debug->show('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
 			if (!$ausfuehrbar) echo 'SQL zur Abgrage der Geometrievalidität:<br>' . $sql . '<br><br><br><br>';
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
@@ -349,7 +349,7 @@ class Validierung extends PgObject {
 		}
 		else {
 			while ($row = pg_fetch_assoc($result)) {
-				$this->debug->show('<br>geometrie mit gid: ' . $row['gid'] . ' ist nicht valid', Validierung::$write_debug);
+				$this->debug->write('<br>geometrie mit gid: ' . $row['gid'] . ' ist nicht valid', Validierung::$write_debug);
 				$validierungsergebnis = new Validierungsergebnis($this->gui);
 
 				$validierungsergebnis->create(
@@ -381,7 +381,7 @@ class Validierung extends PgObject {
 			);
 		}
 
-		$this->debug->show('<br>' . ($all_geom_isvalid ? 'Alle Geometrien sind valid.' : 'Es sind nicht alle Geometrien valid.'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($all_geom_isvalid ? 'Alle Geometrien sind valid.' : 'Es sind nicht alle Geometrien valid.'), Validierung::$write_debug);
 		return $all_geom_isvalid;
 	}
 
@@ -396,7 +396,7 @@ class Validierung extends PgObject {
 	* @return boolean $all_within_plan true wenn alle drin liegen, false wenn nicht.
 	*/
 	function geom_within_plan($regel, $konvertierung) {
-		$this->debug->show('<br>Validate ob geom_within_plan sql.', Validierung::$write_debug);
+		$this->debug->write('<br>Validate ob geom_within_plan sql.', Validierung::$write_debug);
 		$all_within_plan = true;
 
 		$sql = $regel->get_convert_sql($konvertierung->get('id'));
@@ -408,7 +408,7 @@ class Validierung extends PgObject {
 
 		# Extrahiere alles ab select
 		$sql = stristr($sql, 'select');
-		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);
 		
 
 		# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und within und distance
@@ -437,7 +437,7 @@ class Validierung extends PgObject {
 			);
 			
 
-			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
 		} else {
 			$sql = substr_replace(
 				$sql,
@@ -449,7 +449,7 @@ class Validierung extends PgObject {
 				strlen('select')
 			);
 
-			$this->debug->show('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql mit gid, within und distance: ' . $sql, Validierung::$write_debug);
 		}
 
 		# tabelle " . $plantype . " hinzufügen
@@ -460,7 +460,7 @@ class Validierung extends PgObject {
 			",
 			$sql
 		);
-		$this->debug->show('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
 
 		# where klausel für plan hinzufügen
 		$sql = $this->str_ilreplace(
@@ -473,13 +473,13 @@ class Validierung extends PgObject {
 			$sql
 		);
 
-		$this->debug->show('<br>sql mit where Klausel für ' . $plantype . ': ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit where Klausel für ' . $plantype . ': ' . $sql, Validierung::$write_debug);
 
 		#$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . 
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
-		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
-		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
+		$this->debug->write('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
 
 
 		$search_path  = ($sourcetype == 'gmlas') ? "xplan_gmlas_{$this->gui->user->id}" : "xplan_shapes_{$this->konvertierung_id}";
@@ -491,7 +491,7 @@ class Validierung extends PgObject {
 		);
 
 		if (!$result) {
-			$this->debug->show('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
 				array(
@@ -507,7 +507,7 @@ class Validierung extends PgObject {
 		else {
 			while ($row = pg_fetch_assoc($result)) {
 				if ($row['ausserhalb'] == 't') {
-					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb des Geltungsbereich des Plans', Validierung::$write_debug);
+					$this->debug->write('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb des Geltungsbereich des Plans', Validierung::$write_debug);
 					$validierungsergebnis = new Validierungsergebnis($this->gui);
 					$validierungsergebnis->create(
 						array(
@@ -538,7 +538,7 @@ class Validierung extends PgObject {
 				)
 			);
 		}
-		$this->debug->show('<br>' . ($all_within_plan ? 'Alle Geometrien innerhalb des Geltungsbereiches des Plans.' : 'Nicht alle Geometrien innerhalb des Geltungsbereiches des Plans.'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($all_within_plan ? 'Alle Geometrien innerhalb des Geltungsbereiches des Plans.' : 'Nicht alle Geometrien innerhalb des Geltungsbereiches des Plans.'), Validierung::$write_debug);
 		return $all_within_plan;
 	}
 
@@ -553,7 +553,7 @@ class Validierung extends PgObject {
 	* @return boolean $all_within_bereich true wenn alle drin liegen, false wenn nicht.
 	*/
 	function geom_within_bereich($regel, $konvertierung) {
-		$this->debug->show('<br>Validiere ob Geometrien in Bereich. (ToDo: Noch zu implementieren)', Validierung::$write_debug);
+		$this->debug->write('<br>Validiere ob Geometrien in Bereich. (ToDo: Noch zu implementieren)', Validierung::$write_debug);
 		$all_within_bereich = true;
 
 		# SQL der Konvertierungsregel abfragen
@@ -568,7 +568,7 @@ class Validierung extends PgObject {
 
 		# Alles ab select extrahieren
 		$sql = stristr($sql, 'select');
-		$this->debug->show('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
+		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
 
 		# Tolerance and buffer, see comment in geom_within_plan
 		$tolerance_meters = '0.001';
@@ -586,7 +586,7 @@ class Validierung extends PgObject {
 		
 		);
 
-		$this->debug->show('<br>sql mit gid (nicht bei gmlas), within und distance: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit gid (nicht bei gmlas), within und distance: ' . $sql, Validierung::$write_debug);
 
 		# Tabelle " . $bereichtype . " hinzufügen
 		$sql = $this->str_ilreplace(
@@ -596,7 +596,7 @@ class Validierung extends PgObject {
 			",
 			$sql
 		);
-		$this->debug->show('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit " . $plantype . " Tabelle: ' . $sql, Validierung::$write_debug);
 
 		# where klausel für bereich hinzufügen
 		$sql = $this->str_ilreplace(
@@ -611,9 +611,9 @@ class Validierung extends PgObject {
 		);
 		
 
-		$this->debug->show('<br>sql mit where Klausel für ' . $bereichtype . ': ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql mit where Klausel für ' . $bereichtype . ': ' . $sql, Validierung::$write_debug);
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
-		$this->debug->show('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
+		$this->debug->write('<br>sql ohne returning: ' . $sql, Validierung::$write_debug);
 
 		# SQL zur Validierung ausführen
 		/*
@@ -637,14 +637,14 @@ class Validierung extends PgObject {
 			  objektstat = 'Ursprungsplan'
 			)
 		*/
-		$this->debug->show('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
+		$this->debug->write('Sql für Prüfung geom_within_plan:<br>' . $sql, false);
 		$result = @pg_query(
 			$this->database->dbConn,
 			$sql
 		);
 
 		if (!$result) {
-			$this->debug->show('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
+			$this->debug->write('<br>sql ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
 			$validierungsergebnis = new Validierungsergebnis($this->gui);
 			$validierungsergebnis->create(
 				array(
@@ -660,7 +660,7 @@ class Validierung extends PgObject {
 		else {
 			while ($row = pg_fetch_assoc($result)) {
 				if ($row['ausserhalb'] == 't') {
-					$this->debug->show('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb vom Planbereich', Validierung::$write_debug);
+					$this->debug->write('geometrie mit gid: ' . $row['gid'] . ' ist außerhalb vom Planbereich', Validierung::$write_debug);
 					$validierungsergebnis = new Validierungsergebnis($this->gui);
 					$validierungsergebnis->create(
 						array(
@@ -691,7 +691,7 @@ class Validierung extends PgObject {
 				)
 			);
 		}
-		$this->debug->show('<br>' . ($all_within_plan ? 'Alle Geometrien innerhalb ihrer Planbereiche.' : 'Nicht alle Geometrien innerhalb ihrer Planbereiche.'), Validierung::$write_debug);
+		$this->debug->write('<br>' . ($all_within_plan ? 'Alle Geometrien innerhalb ihrer Planbereiche.' : 'Nicht alle Geometrien innerhalb ihrer Planbereiche.'), Validierung::$write_debug);
 		return $all_within_bereich;
 	}
 
@@ -893,7 +893,7 @@ class Validierung extends PgObject {
 						konvertierung_id = " . $konvertierung_id . "
 				";
 		}
-		$this->debug->show('sql to find failed konformities: ' . $sql, false);
+		$this->debug->write('sql to find failed konformities: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$validierungsergebnis = new Validierungsergebnis($this->gui);
 		if (pg_num_rows($query) > 0) {
