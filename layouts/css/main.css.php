@@ -418,17 +418,17 @@ span[data-tooltip]:hover::after {
 }
 
 
-.image-select {
+.custom-select {
 	background-color: #e9e9ed;
   position: relative;
-  width: 250px;
+  /*width: 250px;*/
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
 	margin: 3px 3px 3px 0;
 }
 
-.image-select .dropdown {
+.custom-select .dropdown {
 	z-index: 10000;
 	color: black;
   list-style: none;
@@ -438,13 +438,13 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 }
 
-.image-select img {
+.custom-select img {
   display: inline-block;
   width: 30px;
 	margin-right: 5px;
 }
 
-.image-select .placeholder {
+.custom-select .placeholder {
 	width: 100%;
   display: flex;
   align-items: center;
@@ -452,12 +452,12 @@ span[data-tooltip]:hover::after {
   position: relative;
 }
 
-.image-select .placeholder.editable{
+.custom-select .placeholder.editable{
   cursor: pointer;
 }
 
-.image-select .placeholder.editable::before,
-.image-select .placeholder.editable::after {
+.custom-select .placeholder.editable::before,
+.custom-select .placeholder.editable::after {
   content: "";
   display: inline-block;
   height: 2px;
@@ -467,17 +467,17 @@ span[data-tooltip]:hover::after {
   right: 0;
 }
 
-.image-select .placeholder.editable::before {
+.custom-select .placeholder.editable::before {
   transform: rotate(45deg);
   right: 20px;
 }
 
-.image-select .placeholder.editable::after {
+.custom-select .placeholder.editable::after {
   transform: rotate(-45deg);
   right: <? echo $font_size_factor * 15; ?>px;
 }
 
-.image-select.active .dropdown {
+.custom-select.active .dropdown {
   display: flex;
   flex-direction: column;
   box-shadow: 1px 1px 6px 1px #ddd;
@@ -485,25 +485,26 @@ span[data-tooltip]:hover::after {
   top: 1px;
   right: 0;
   left: 0;
-  min-width: 200px;
+  /*min-width: 200px;*/
 	max-height: 400px;
 	overflow-y: auto;
 	margin: 0;
 }
 
-.image-select .dropdown li {
+.custom-select .dropdown li {
   display: flex;
   align-items: center;
   background-color: #fff;
   padding: 3px;
+	margin-bottom: 0;
   cursor: pointer;
 }
 
-.image-select .dropdown li:not(:last-child) {
+.custom-select .dropdown li:not(:last-child) {
   border-bottom: 1px solid #cdcdcd;
 }
 
-.image-select .dropdown li:hover {
+.custom-select .dropdown li.selected {
   background-color: #e0e0e6;
 }
 
@@ -1901,6 +1902,32 @@ thead.gle th {
 
 .gle_tabs > div:hover{
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_arrayelement_table {
+	width: 100%;
+	margin: 10px 0;
+}
+
+.gle_datatype_table {
+	width: 100%;
+	table-layout: auto;
+	border: 1px solid #bbb;
+	border-bottom: none;
+	border-collapse: collapse;
+	border-left: 3px solid #555;
+}
+
+.gle_datatype_table td.gle_attribute_name {
+	width: 10%;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value, .gle_attribute_name {
+	border: 1px solid #bbb;
 }
 
 .gle-attribute-name {
