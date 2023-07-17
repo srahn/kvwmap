@@ -464,7 +464,7 @@
 		# Setze Metadaten
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$bb = $admin_stelle->MaxGeorefExt;
-		$GUI->map->set('name', 'Flaechennutzungsplaene Niedersachsen');
+		$GUI->map->set('name', PUBLISHERNAME);
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
