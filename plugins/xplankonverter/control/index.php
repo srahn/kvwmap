@@ -1086,7 +1086,7 @@ function go_switch_xplankonverter($go) {
 			header('Content-Type: application/json');
 			$response = array(
 				'success' => true,
-				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ' erfolgreich geschrieben.'
+				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $result['mapfile'] . ' erfolgreich geschrieben.'
 			);
 			echo json_encode($response);
 		} break;
