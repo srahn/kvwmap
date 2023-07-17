@@ -1023,8 +1023,23 @@ class data_import_export {
 			return $layers;
 		}
 	}
-		
-	function adjustGeometryType($database, $schema, $table, $epsg){
+	
+	/**
+	 * Wenn alle Geometrien nur eine Geometrie beinhalten macht die passt die Funktion
+	 * den Geometrietyp auf single an (Entfernt ST_Multi von GeometryType)
+	 */
+	function adjustGeometryType($database, $schema, $table, $epsg) {
+		$sql = "
+			UPDATE
+				" . $schema . "." . $table . "
+			SET
+				the_geom = ST_Force2D(the_geom)
+		";
+		$ret = $database->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return 0;
+		}
+
 		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
@@ -1045,7 +1060,7 @@ class data_import_export {
 				}
 			}
 		}
-	}	
+	}
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
