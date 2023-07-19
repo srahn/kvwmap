@@ -457,8 +457,8 @@ INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@stelle
 # Insert default cron_jobs
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
 (1, 'Leere tmp Verzeichnis', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
-(2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root');
-
+(2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root'),
+(3, 'wms_checker', 'Ruft das Script tools/wms_checker.php alle 10 min auf.', '10 * * * *', '', 'cd /var/www/apps/kvwmap/tools/; php /var/www/apps/kvwmap/tools/wms_checker.php > /var/www/logs/wms_checker.html 2> /var/www/logs/wms_checker.log', NULL, 0, 0, 1, '', 'gisadmin');
 
 INSERT INTO `colors` (`id`, `name`, `red`, `green`, `blue`) VALUES
 (1, NULL, 166, 206, 227),
