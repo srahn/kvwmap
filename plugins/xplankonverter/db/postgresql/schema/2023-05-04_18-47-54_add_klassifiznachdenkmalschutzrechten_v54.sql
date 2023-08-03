@@ -3,6 +3,8 @@ BEGIN;
 Inserts enum value 1500 after enum value 1400
 Unlike ALTER TYPE ADD VALUE AFTER, this also works within a begin-commit transaction block (i.e. a kvwmap migration)
 */
+ALTER TYPE xplan_gml.so_klassifiznachdenkmalschutzrecht ADD VALUE '1500' AFTER '1400';
+/*
 INSERT INTO
 	pg_enum (enumtypid, enumlabel, enumsortorder)
 SELECT
@@ -24,11 +26,13 @@ SELECT
 WHERE
 	NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.so_klassifiznachdenkmalschutzrecht'::regtype AND enumlabel = '1500' )
 ;
-
+*/
 /*
 Inserts enum value 1600 after enum value 1500
 Unlike ALTER TYPE ADD VALUE AFTER, this also works within a begin-commit transaction block (i.e. a kvwmap migration)
 */
+ALTER TYPE xplan_gml.so_klassifiznachdenkmalschutzrecht ADD VALUE '1600' AFTER '1500';
+/*
 INSERT INTO
 	pg_enum (enumtypid, enumlabel, enumsortorder)
 SELECT
@@ -50,7 +54,7 @@ SELECT
 WHERE
 	NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplan_gml.so_klassifiznachdenkmalschutzrecht'::regtype AND enumlabel = '1600' )
 ;
-
+*/
 -- Update enum Tables
 INSERT INTO xplan_gml.enum_so_klassifiznachdenkmalschutzrecht (wert, abkuerzung, beschreibung) VALUES
 (1500, 'ArcheologischesDenkmal', 'Archäologisches Denkmal'),
