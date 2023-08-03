@@ -368,7 +368,7 @@ class data_import_export {
 							max(st_srid(the_geom)) as epsg,
 							count(*)
 						FROM
-							" . $schema . "." . $table . "
+							" . $schema . ".\"" . $table . "\"
 						GROUP BY replace(geometrytype(the_geom), 'MULTI', '')
 					";
 					$ret = $database->execSQL($sql,4, 0);
@@ -947,7 +947,7 @@ class data_import_export {
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
 			curl_close($ch);
@@ -978,45 +978,54 @@ class data_import_export {
 		}
 		return $ret;
 	}
-	
+
 	function ogrinfo($importfile) {
-		$command = ' -q -nogeomtype "' . $importfile . '"';;
+		$command = ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : '') . ' "' . $importfile . '"';
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
 			curl_close($ch);
 			$result = json_decode($output);
 		}
 		else {
+			$path_parts = pathinfo($importfile);
+			$errorfile = $path_parts['filename'] . '.err';
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogrinfo ' . $command;
-			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+			$command .= ' 2> ' . IMAGEPATH . $errorfile;
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
+			$result = new stdClass();
 			$result->stdout = $output;
-			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
+			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
-				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $errorfile . '" target="_blank">Fehlerprotokoll</a>'; 
 			}
 		}
 		return $result;
 	}
-	
+
 	function ogr_get_layers($importfile){
 		$result = $this->ogrinfo($importfile);
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
+			return array();
 		}
 		else {
-			$layers = explode("\r\n", $result->stdout);
-			array_pop($layers);
+			if (is_array($result->stdout)) {
+				$layers = $result->stdout;
+			}
+			else {
+				$layers = explode("\r\n", $result->stdout);
+				array_pop($layers);
+			}
 			array_walk($layers, function(&$value, $key){
 				$value = explode(': ', $value)[1];
 			});

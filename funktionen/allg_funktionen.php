@@ -168,16 +168,22 @@ function versionFormatter($version) {
 }
 
 /**
-* This function return the absolute path to a document in the file system of the server
-*
-* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
-*
-* @param string $layer_document_path The document path of the layer the attribute belongs to.
-*
-* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
-*
-* @return string The absolute path to the document
-*/
+ * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
+ * @return integer 3 digit version number of gdal
+ */
+function get_ogr_version() {
+	exec('gdalinfo --version', $output, $ret);
+	$version_str = explode(' ', explode(',', $output[0])[0])[1];
+	return intVal(versionFormatter($version_str));
+}
+
+/**
+ * This function return the absolute path to a document in the file system of the server
+ * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+ * @param string $layer_document_path The document path of the layer the attribute belongs to.
+ * @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+ * @return string The absolute path to the document
+ */
 function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
 	$value_part = explode('&original_name=', $document_attribute_value);
 	if ($layer_document_url != '') {
@@ -1219,6 +1225,8 @@ function umlaute_umwandeln($name) {
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
 	$name = str_replace(')', '', $name);
+	$name = str_replace('[', '', $name);
+	$name = str_replace(']', '', $name);
 	$name = str_replace('/', '-', $name);
 	$name = str_replace(' ', '_', $name);
 	$name = str_replace('-', '_', $name);
