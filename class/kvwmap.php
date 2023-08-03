@@ -10310,7 +10310,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url) . "'";
 								}
-								else {	
+								else {
 									if ($table['type'][$i] == 'Zahl') {
 										# bei Zahlen den Punkt (Tausendertrenner) entfernen
 										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);
@@ -14941,7 +14941,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
 			if ($json != '') {
-				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : '\"' . $json . '\"'));
+				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : $quote . $json . $quote));
 			}
 			else {
 				$result = $json;
