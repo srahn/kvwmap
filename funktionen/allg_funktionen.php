@@ -163,7 +163,7 @@ function versionFormatter($version) {
  * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
  * @return integer 3 digit version number of gdal
  */
-function get_gdal_version() {
+function get_ogr_version() {
 	exec('gdalinfo --version', $output, $ret);
 	$version_str = explode(' ', explode(',', $output[0])[0])[1];
 	return intVal(versionFormatter($version_str));
