@@ -180,11 +180,21 @@ class GUI {
 	}
 
 	function login() {
-		$this->expect = array('login_name', 'passwort', 'mobile');
-		if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
-			$this->expect[] = 'go';
+		if ($this->formvars['format'] == 'json') {
+			$this->mime_type = 'application/json';
+			$this->formvars['content_type'] = 'application/json';
+			$this->qlayerset[0]['shape'] = array(
+				'success' => false,
+				'msg' => 'Login erforderlich'
+			);
 		}
-		$this->gui = LOGIN;
+		else {
+			$this->expect = array('login_name', 'passwort', 'mobile');
+			if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
+				$this->expect[] = 'go';
+			}
+			$this->gui = LOGIN;
+		}
 		$this->output();
 	}
 
