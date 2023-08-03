@@ -2917,7 +2917,7 @@ echo '			</table>
 	}
 
 	function get_web_footer_template() {
-		$html = "
+		$html = "<!-- MapServer Template -->
 </html>
 ";
 		return $html;

@@ -264,7 +264,8 @@
 					(
 						`schema` LIKE 'xplan_gml' AND
 						LOWER(`Name`) NOT LIKE '%_textabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%_begruendungabschnitt'
+						LOWER(`Name`) NOT LIKE '%_begruendungabschnitt' AND
+						LOWER(`Name`) NOT LIKE '%_aendert'
 					) OR
 					(
 						`schema` LIKE 'xplankonverter' AND

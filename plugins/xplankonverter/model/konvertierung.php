@@ -1305,19 +1305,19 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layerGroup = new MyObject($this->gui, 'u_groups');
+			$layer_group = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
-				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
-				$layerGroup->create(array(
+				$layer_group = $layer_group->find_by('Gruppenname', 'XPlanung');
+				$layer_group->create(array(
 					'Gruppenname' => 'XPlanung'
 				));
 			}
 			else {
-				$layerGroup->create(array(
+				$layer_group->create(array(
 					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
-			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get($this->identifier));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layer_group->get($this->identifier));
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
