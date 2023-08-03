@@ -903,7 +903,6 @@ function go_switch_xplankonverter($go) {
 
 			$stelle = new MyObject($GUI, 'stelle');
 			$validation_msg = $stelle->validate_date_format($GUI->formvars['veroeffentlichungsdatum'], 'Y-M-D');
-			
 			if ($validation_msg != '') {
 				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn das Attribut Veroeffentlichungsdatum leer ist oder einen gültigen Datumswert hat.';
 				$response['success'] = false;
