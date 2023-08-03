@@ -574,16 +574,20 @@ class Gml_extractor {
 		return $result;
 	}
 
-	/*
+	/**
 	* Reverse vertex order of specific geometry (GML CCW Lefthand, Shape and DB CW Righthand)
+	* but not when geometrytype is of type ST_CurvePolygon, because it would make invalid geometry
 	*/
 	function revert_vertex_order_for_table_with_geom_column_in_schema($table, $geom_column, $schema) {
 		$sql = "
-			UPDATE " . 
-				$schema . "." . $table . " 
-			SET " .
-				$geom_column . " = ST_Reverse(" . $geom_column . ") 
-		;";
+		UPDATE " . 
+			$schema . "." . $table . " 
+		SET " .
+			$geom_column . " = ST_Reverse(" . $geom_column . ")
+		WHERE
+			ST_GeometryType(" . $geom_column . ") NOT LIKE 'ST_CurvePolygon'
+		";
+
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 	}
 
@@ -2166,6 +2170,7 @@ class Gml_extractor {
 					foreach($geometry_types as $g) {
 						$sql_regel = $this->get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($c, $bereich_gml_id, $g);
 						$sql_regel = str_replace("'", "''", $sql_regel); # Replaces all single commas with 2x single commas to escape them in SQL
+						# TODO: pk Hier vorher existierende Regeln der konvertierung des Bereiches löschen damit sie nicht mehrfach drin sind.
 						$this->insert_regel_into_db($c, $sql_regel, $g, $konvertierung_id, $stelle_id, $bereich_gml_id, $bereich_index);
 					}
 				}
@@ -2205,22 +2210,22 @@ class Gml_extractor {
 
 		# Loops through all attributes, comparing them with the mapping table original column (and table)
 		# If matches are found, the target attributes are taken and the associated regel is added to the SQL
-		foreach($gmlas_attributes AS $a) {
+		foreach ($gmlas_attributes AS $a) {
 			if(!in_array($a, array_column($mapping_table, 'o_column'))) {
 				continue;
 			}
 
-			foreach($mapping_table as $mapping) {
-				if(($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
+			foreach ($mapping_table as $mapping) {
+				if (($mapping['o_column'] == $a) and ($mapping['o_table'] == $gml_class)) {
 					# gehoertzubereich wird automatisiert bei der Konvertierung in die Regel eingearbeitet 
 					# muss deswegen für Attribute nicht verwendet werden, ggf aber für WHERE filter
-					if($mapping['t_column'] == 'gehoertzubereich') {
+					if ($mapping['t_column'] == 'gehoertzubereich') {
 						continue;
 					}
 
 					# fix for varying encountered gml-geometry types that are valid for xplanung (according to konformitaetsbedingungen-document) but can cause problems
 					# e.g. in display, in export, for wms/wfs services or are not supported by the konverter
-					if($mapping['t_column'] == 'position') {
+					if ($mapping['t_column'] == 'position') {
 						if(($geom_type == 'ST_CurvePolygon') or
 							($geom_type == 'ST_MultiSurface') or
 							($geom_type == 'ST_CompoundCurve') or
@@ -2248,28 +2253,29 @@ class Gml_extractor {
 		# attributes of normalized gmlas tables, e.g. praesentationsobjekte '_dientzurdarstellungvon', '_wirddargestelltdurch'
 		# TODO generically read all normalized tables
 		# zweckbestimmung e.g. for fp_generischesobjekt_zweckbestimmung
-		$norm_attributes = array("wirddargestelltdurch","dientzurdarstellungvon","reftextinhalt","detailliertezweckbestimmung","zweckbestimmung");
+		$norm_attributes = array("wirddargestelltdurch", "dientzurdarstellungvon", "reftextinhalt", "detailliertezweckbestimmung", "zweckbestimmung");
 		$i = 0;
-		foreach($norm_attributes AS $n_a) {
+		foreach ($norm_attributes AS $n_a) {
 			$i++;
 			# check if table exists
-				$sql_checkexists_norm_table = "
-					SELECT 
-						EXISTS (
-						 SELECT FROM information_schema.tables 
-						 WHERE table_schema = '" . $this->gmlas_schema . "'
-						 AND table_name = '" . $gml_class . '_' . $n_a . "'
-						);";
+			$sql_checkexists_norm_table = "
+				SELECT 
+					EXISTS (
+						SELECT FROM information_schema.tables 
+						WHERE table_schema = '" . $this->gmlas_schema . "'
+						AND table_name = '" . $gml_class . '_' . $n_a . "'
+					)
+			";
 			$ret = $this->pgdatabase->execSQL($sql_checkexists_norm_table, 4, 0);
 			$result = pg_fetch_row($ret[1]);
-			if($result[0] === 't') {
+			if ($result[0] === 't') {
 				# single ' escaped later
 				$norm_1 = "norm_table_" . $i;
-				if($n_a == "wirddargestelltdurch" or $n_a == "dientzurdarstellungvon" or $n_a == "reftextinhalt") {
+				if ($n_a == "wirddargestelltdurch" OR $n_a == "dientzurdarstellungvon" OR $n_a == "reftextinhalt") {
 					$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
 					$gml_attributes[] = $n_a;
 				}
-				if($n_a == "detailliertezweckbestimmung" or $n_a == "zweckbestimmung") {
+				if ($n_a == "detailliertezweckbestimmung" OR $n_a == "zweckbestimmung") {
 					$special_datatype = "";
 
 					$sql = "
@@ -2288,11 +2294,11 @@ class Gml_extractor {
 					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 					$result = pg_fetch_row($ret[1]);
 					$special_datatype = $result[0];
-					if(substr($special_datatype,0,1) == "_") {
+					if (substr($special_datatype,0,1) == "_") {
 						// remove leading underscore (for arrays) and add [] brackets at the end
 						$special_datatype = ltrim($special_datatype, "_") . "[]";
 					}
-					if($special_datatype != "") {
+					if ($special_datatype != "") {
 						$norm_2 = "norm_table_" . $i . "_" . $i;
 						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
 						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
@@ -2325,8 +2331,8 @@ class Gml_extractor {
 	}
 
 	/**
-		Returns all attributes for $class in $schema
-		that have not null values
+	*	Returns all attributes for $class in $schema
+	*	that have not null values
 	*/
 	function get_attributes_with_values_for_class_in_schema($class, $schema) {
 		$sql = "
@@ -2394,7 +2400,12 @@ class Gml_extractor {
 		# for xplan-objects that are specializations of xp_object, the geometry column is always position
 		# would not work on objects that are e.g. specializations of xp_plan or xp_bereich or non xplan-objects
 		$geom_column = 'position';
-		$sql = "SELECT DISTINCT(ST_GeometryType(" . $geom_column . ")) FROM " . $schema . "." . $class;
+		$sql = "
+			SELECT DISTINCT
+				ST_GeometryType(" . $geom_column . ")
+			FROM
+			 	" . $schema . "." . $class . "
+		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$geom_types = pg_fetch_all_columns($ret[1]);
 		return $geom_types;
@@ -2404,7 +2415,19 @@ class Gml_extractor {
 	* Returns a mapping table that should cover all mappable classes between gdal xplan_gmlas and the konverter xplan_gml schemas
 	*/
 	function get_gmlas_to_gml_mapping_table($class) {
-		$sql = "SELECT o_table, o_column, t_table, t_column, t_data_type, regel FROM xplankonverter.mappingtable_gmlas_to_gml WHERE t_table = '" . $class . "';";
+		$sql = "
+			SELECT
+				o_table,
+				o_column,
+				t_table,
+				t_column,
+				t_data_type,
+				regel
+			FROM
+				xplankonverter.mappingtable_gmlas_to_gml
+			WHERE
+				t_table = '" . $class . "'
+		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
 		return $result;

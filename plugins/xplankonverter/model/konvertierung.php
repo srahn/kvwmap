@@ -37,10 +37,8 @@ class Konvertierung extends PgObject {
 		return strtolower(str_replace('-', '_', $planart));
 	}
 
-	function create_geoweb_service($xplan_layers) {
+	function create_geoweb_service($xplan_layers, $ows_onlineresource) {
 		$gui = $this->gui;
-		$planartkuerzel = $this->plan->planartAbk[0];
-		$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . $this->get('stelle_id') . '/' . MAPFILENAME . '/';
 
 		$gui->class_load_level = 2;
 		$gui->loadMap('DataBase');
@@ -1433,7 +1431,7 @@ class Konvertierung extends PgObject {
 			$validierung->konvertierung_id = $this->get($this->identifier);
 			if ($validierung->regel_existiert($regeln)) {
 				$success = true;
-				foreach($regeln AS $regel) {
+				foreach ($regeln AS $regel) {
 					$result = $regel->validate($this);
 					if (!$result) {
 						$success = false;
@@ -1485,8 +1483,8 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-		This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
-		and write the report in xplankonverter database tables
+	*	This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
+	*	and write the report in xplankonverter database tables
 	*/
 	function xplanvalidator($gml_file) {
 		$pathinfo = pathinfo($gml_file);

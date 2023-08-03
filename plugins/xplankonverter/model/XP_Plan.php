@@ -10,7 +10,10 @@ class XP_Plan extends PgObject {
 	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
+		$this->planartShort = strtolower(substr($planart, 0, 1));
 		$this->tableName = $this->planartAbk . '_plan';
+		$this->shortName = $this->planartShort . 'plan';
+		$this->shortNamePlural = $this->planartShort . 'plaene';
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
@@ -47,8 +50,9 @@ class XP_Plan extends PgObject {
 	}
 
 	/**
-		Return names of layer that have content from the plan
-	*/
+	 * Return names of layer that have content from the plan
+	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
+	 */
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {

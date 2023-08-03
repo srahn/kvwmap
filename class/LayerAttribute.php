@@ -31,10 +31,10 @@ class LayerAttribute extends MyObject {
 	}
 
 	/**
-		function return the name of the first attribut in $attributes array that has PRIMARY KEY as constraint
-		@params array $attributes An array of attributes as returned by function mapdb->read_layer_attributes
-		@return string The name of the attribute
-	*/
+	 *	function return the name of the first attribut in $attributes array that has PRIMARY KEY as constraint
+	 *	@param array $attributes An array of attributes as returned by function mapdb->read_layer_attributes
+	 *	@return string The name of the attribute
+	 */
 	function get_oid($attributes) {
 		if (
 			array_key_exists('constraints', $attributes) AND
@@ -48,12 +48,20 @@ class LayerAttribute extends MyObject {
 				return $attributes['name'][$key];
 			}
 		}
-		return false;
+		return '';
 	}
 
 	function get_generic_select($layer, $attr) {
+		# Wenn $attr['is_array'] true und keine Elemente enthalten sind nicht {} ausgeben sonder NULL
+		if ($attr['is_array'] == 't') {
+			# Das Attribut ist vom Typ array und wird wenn das Array leer ist als NULL sonst Kommasepariert ausgegeben.
+			$select = "CASE WHEN array_length(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", 1) = 0 THEN NULL ELSE array_to_string(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", ',', '') END AS " . $attr['att_name'];
+		}
+		else {
+			$select = $layer->get_table_alias() . '.' . $attr['att_name'];
+		}
 		return array(
-			'select' => $layer->get_table_alias() . '.' . $attr['att_name']
+			'select' => $select
 		);
 	}
 }

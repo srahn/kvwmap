@@ -73,7 +73,6 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_xplanvalidator
 * xplankonverter_zusammenzeichnung
 */
-
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	function isInStelleAllowed($stelle, $requestStelleId) {
 		global $GUI;
@@ -279,6 +278,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'B-Plan';
 			$GUI->plan_class = 'BP_Plan';
 			$GUI->plan_abk = 'bplan';
+			$GUI->plan_abk_plural = 'bplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'inkrafttretensdatum';
 		} break;
@@ -287,6 +287,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'F-Plan';
 			$GUI->plan_class = 'FP_Plan';
 			$GUI->plan_abk = 'fplan';
+			$GUI->plan_abk_plural = 'fplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
 		} break;
@@ -295,6 +296,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'SO-Plan';
 			$GUI->plan_class = 'SO_Plan';
 			$GUI->plan_abk = 'soplan';
+			$GUI->plan_abk_plural = 'soplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'genehmigungsdatum';
 		} break;
@@ -303,6 +305,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'RP-Plan';
 			$GUI->plan_class = 'RP_Plan';
 			$GUI->plan_abk = 'rplan';
+			$GUI->plan_abk_plural = 'rplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'datumdesinkrafttretens';
 		} break;
@@ -311,6 +314,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'Plan';
 			$GUI->plan_class = 'XP_Plan';
 			$GUI->plan_abk = 'xplan';
+			$GUI->plan_abk_plural = 'xplaene';
 			$GUI->title = 'Plan';
 			$GUI->plan_attribut_aktualitaet = 'genehmigungsdatum';
 		} break;
@@ -358,7 +362,7 @@ function go_switch_xplankonverter($go) {
 
 			if ($GUI->konvertierung->plan) {
 				$result = $GUI->konvertierung->plan->get_layers_with_content(
-					$GUI->xplankonverter_get_xplan_layers(),
+					$GUI->xplankonverter_get_xplan_layers($GUI->konvertierung->get('planart')),
 					$GUI->konvertierung->get_id()
 				);
 				if (! $result['success']) {
@@ -1040,16 +1044,16 @@ function go_switch_xplankonverter($go) {
 				'konvertierung_id' => 'int'
 			]);
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
-			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers();
+			if ($konvertierung_id == '' AND $GUI->formvars['planart'] == 'Plan') {
+				send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.', false, false);
+				break;
+			}
 
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);	
 			if ($konvertierung_id == '') {
-				if ($GUI->formvars['planart'] == 'Plan') {
-					send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.', false, false);
-					break;
-				}
-
 				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
-				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers);
+
+				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . '/' . $GUI->plan_abk_plural);
 				if (! $result['success']) {
 					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
 					$GUI->data = array(
@@ -1059,10 +1063,10 @@ function go_switch_xplankonverter($go) {
 					$GUI->add_message('error', $msg);
 				}
 				else {
-					$result = $GUI->write_mapfile($result['mapfile']);
+					$result = $GUI->write_mapfile($result['mapfile'], $GUI->plan_abk_plural);
 					if (!$result['success']) {
 						$GUI->data = $result;
-						$this->add_message('error', $result['msg']);
+						$GUI->add_message('error', $result['msg']);
 					}
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
@@ -1081,12 +1085,12 @@ function go_switch_xplankonverter($go) {
 				}
 
 				# Erzeugt den Geowebservice für einen einzelnen Plan
-				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers);
+				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
 				if (! $result['success']) {
 					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
 					break;
 				}
-				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id);
+				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id . '/' . $GUI->plan_abk);
 				if (!$result['success']) {
 					send_error($result['msg']);
 					break;

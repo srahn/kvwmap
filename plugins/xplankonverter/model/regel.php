@@ -132,7 +132,7 @@ class Regel extends PgObject {
 				}
 			}
 			else {
-				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
+				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', Regel::$write_debug);
 				$success = false;
 			}
 		}

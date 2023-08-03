@@ -1669,13 +1669,14 @@ echo '			</table>
 	}
 
 	/**
-		function uses the following formvars to set the filter for reading layers
-			- nurAktiveLayer
-			- nurAufgeklappteLayer
-			- nurFremdeLayer
-			- nurNameLike
-			- class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
-	*/
+	 * function uses the following formvars to set the filter for reading layers
+	 * - nurAktiveLayer
+	 * - nurAufgeklappteLayer
+	 * - nurFremdeLayer
+	 * - nurNameLike
+	 * - class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+	 * @param String $loadMapSource von wo die Daten für die map geladen werden sollen Post, File oder DataBase
+	 */
   function loadMap($loadMapSource) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
@@ -2076,6 +2077,8 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
+		$bb = $this->Stelle->MaxGeorefExt;
+		$layer->setMetaData('ows_extent', $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
@@ -2917,7 +2920,7 @@ echo '			</table>
 	}
 
 	function get_web_footer_template() {
-		$html = "
+		$html = "<!-- MapServer Template -->
 </html>
 ";
 		return $html;
@@ -8142,10 +8145,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$order = @array_values($this->formvars['order']);
 		$legendorder = @array_values($this->formvars['classlegendorder']);
 		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
-		for($i = 0; $i < count($name); $i++) {
+		for ($i = 0; $i < count($name); $i++) {
 			$attrib['name'] = $name[$i];
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
+			foreach ($supportedLanguages as $language){
+				if ($language != 'german'){
 					$attrib['name_'.$language] = $name_[$language][$i];
 				}
 			}
@@ -8513,39 +8516,37 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
 	/**
-	 * This function write the mapfile, templates and a wrapper file for the current map object
+	 * This function write the mapfile, header und footer templates and a wrapper file for the current map object
 	 * If stelle_id is set, the location is in a subdirectory of OWS_ONLINE_RESOURCE.
+	 * WMS_MAPFILE_PATH
 	 */
-	function write_mapfile($mapfile, $stelle_id = '') {
-		$stelle_id = ($stelle_id != '' ? $stelle_id . '/' : '');
-		$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
+	function write_mapfile($mapfile, $wrapperfile) {
 		try {
 			# Schreibe MapFile-Templates
 			$this->save_web_header_template();
 			$this->save_web_footer_template();
 
 			# Schreibe MapFile
-			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+			if (!file_exists(WMS_MAPFILE_PATH)) {
+				mkdir(WMS_MAPFILE_PATH, 0775, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 
 			# Schreibe MapFile-Wrapper
-			$wrapper_path = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE) . $stelle_id;
-			if (!file_exists($wrapper_path)) {
-				mkdir($wrapper_path, 0775, true);
+			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
+			if (!file_exists($wrapperpath)) {
+				mkdir($wrapperpath, 0775, true);
 			}
-			$wrapper_file = $wrapper_path . MAPFILENAME;
-			if (!file_exists($wrapper_file)) {
-				file_put_contents($wrapper_file, '#!/bin/sh
+			if (!file_exists($wrapperpath . $wrapperfile)) {
+				file_put_contents($wrapperpath . $wrapperfile, '#!/bin/sh
 MAPSERV="/usr/lib/cgi-bin/mapserv"
 MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
-				chmod($wrapper_file, 0775);
+				chmod($wrapperpath . $wrapperfile, 0775);
 			}
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Speichern der Map-Datei ' . $mapfile . ', der Templates oder des Wrappers ' . $wrapper_file . ' für den Dienst in Funktion write_mapfile. ' . $ex
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex
 			);
 		}
 		return array(
@@ -19014,8 +19015,7 @@ class db_mapObj{
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
 		$zero_if_empty_attributes = array(
 			'drawingorder',
-			'listed',
-			'write_mapserver_templates'
+			'listed'
 		);
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
@@ -20601,7 +20601,7 @@ class db_mapObj{
 				`Class_ID` = ' . $attrib['new_class_id'] . ',
 				'.$names.',
 				`Layer_ID` = ' . $attrib['layer_id'] . ',
-				`Expression` = "' . $attrib['expression'] . '",
+				`Expression` = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
 				`text` = "' . $attrib['text'] . '",
 				`classification` = "' . $attrib['classification'] . '",
 				`legendgraphic`= "' . $attrib['legendgraphic'] . '",

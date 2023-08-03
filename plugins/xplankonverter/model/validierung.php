@@ -282,14 +282,14 @@ class Validierung extends PgObject {
 				" SELECT
 					gid,
 					st_isvalidreason(" . $geometry_col . ") validreason,
-				 ",
+				",
 				stripos($sql, 'select'),
 				strlen('select')
 			);
 			$this->debug->write('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
 		} else {
 			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
-			$sql = substr_replace(
+/*			$sql = substr_replace(
 				$sql,
 				"SELECT
 					st_isvalidreason(" . $geometry_col .") validreason,
@@ -297,7 +297,8 @@ class Validierung extends PgObject {
 				",
 				stripos($sql, 'select'),
 				strlen('select')
-			);
+			);*/
+
 			$sql = substr_replace(
 				$sql,
 				"SELECT
@@ -358,7 +359,7 @@ class Validierung extends PgObject {
 						'validierung_id' => $this->get('id'),
 						'status' => 'Fehler',
 						'regel_id' => $regel->get('id'),
-						'msg' => 'Regel: ' . $regel->get('name') . '. Geometrie: ' . $row['geom_text'] . ' im Objekt mit gid: ' . $row['gid'] . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason']
+						'msg' => 'Regel: ' . $regel->get('name') . '. Geometrie: ' . $row['geom_text'] . ' im Objekt mit gid: ' . $row['gid'] . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : '') . ' in Shape: ' . $regel->get_shape_table_name() . ' ist nicht valide. Grund: ' . $row['validreason'] . ' SQL: ' . $sql
 					)
 				);
 				if($row['gid'] != '') {

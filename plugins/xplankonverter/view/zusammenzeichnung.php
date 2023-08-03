@@ -70,7 +70,7 @@
 				);
 
 				$result = $zusammenzeichnung->plan->get_layers_with_content(
-						$this->xplankonverter_get_xplan_layers(),
+						$this->xplankonverter_get_xplan_layers($zusammenzeichnung->get('planart')),
 						$zusammenzeichnung->get($zusammenzeichnung->identifier)
 				);
 				if (! $result['success']) {
