@@ -1,6 +1,9 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
+	include(LAYOUTPATH . $language_file);
+	include(PLUGINS . 'mobile/' . $language_file);
+	include(PLUGINS . 'portal/' . $language_file);
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -9,6 +12,32 @@
 			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
 	}
+
+	function create_generic_data_sql(layer_id) {
+		$('#waitingdiv').show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go : 'get_generic_layer_data_sql',
+				selected_layer_id: layer_id,
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+			},
+			complete: function () {
+				$('#waitingdiv').hide();
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				message([{ type: 'error', msg: jqXHR + ' ' + textStatus + ' ' + errorThrown}]);
+			},
+			success: function(response) {
+				if (response.success) {
+					message([{ type: 'info', msg : 'SQL für Haupttabelle:<br><textarea style="width: 450px; height: 450px">' + response.data_sql + '</textarea>' }]);
+				}
+				else {
+					message([{ type: 'error', msg : response.msg}]);
+				}
+			}
+		});
+}
 
 	function updateConnection(){
 		if(document.getElementById('connectiontype').value == 6){
@@ -368,10 +397,10 @@
 										if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
 										echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 									}
-									?>							
+									?>
 								</select>
 						</td>
-					</tr>		
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
@@ -380,14 +409,18 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<?php echo $strData; ?>
+						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;
 							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."></span>
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<?php echo $strMaintable; ?> <a title="Zeige SELECT-Statement für <? echo $strMaintable; ?>" href="javascript:create_generic_data_sql(<? echo $this->formvars['selected_layer_id']; ?>);"><img src="graphics/autogen.png"></a>
+						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;
 							<span data-tooltip="Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die ID-Spalte liefern soll. Nur auf dieser Tabelle finden Schreiboperationen statt.&#xa;&#xa;Die Haupttabelle muss eine eindeutige ID-Spalte besitzen, welche allerdings nicht im SQL angegeben werden muss.&#xa;&#xa;Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"></span>
@@ -399,7 +432,7 @@
 							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;
 							<span data-tooltip="Hier muss die Spalte aus der Haupttabelle angegeben werden, mit der die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."></span>
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -418,7 +451,7 @@
 								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">&nbsp;
 								<span data-tooltip="<? echo $strSelectionTypeHelp; ?>"></span>
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -660,8 +693,19 @@
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWriteMapserverTemplates; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="write_mapserver_templates" type="checkbox" value="1"<? echo ($this->formvars['write_mapserver_templates'] ? ' checked' : ''); ?>>&nbsp;
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
+							echo FormObject::createSelectField(
+								'write_mapserver_templates',
+								array(array('value' => 'data', 'output' => $strWriteMapserverTemplatesOption1), array('value' => 'generic', 'output' => $strWriteMapserverTemplatesOption2)),
+								$this->formvars['write_mapserver_templates'],
+								1,
+								'width: auto',
+								'',
+								'',
+								'',
+								'',
+								$this->strPleaseSelect
+							); ?>&nbsp;
 							<span data-tooltip="<?php echo $strWriteMapserverTemplatesHelp; ?>"></span>
 						</td>
 					</tr>
@@ -757,12 +801,42 @@
 						</td>
 					</tr>
 
-				</table>
+				</table><?
+				if ($this->plugin_loaded('mobile')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_mobile_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $str_mobile_vector_tile_url; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="vector_tile_url" type="text" value="<?php echo $this->formvars['vector_tile_url']; ?>" size="50" maxlength="255">&nbsp;
+								<span data-tooltip="<? echo $str_mobile_vector_tile_url_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				}
+				if ($this->plugin_loaded('portal')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_portal_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><a name="cluster_option"></a><?php echo $str_portal_cluster_option; ?></th>
+							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="cluster_option" type="checkbox" value="1"<?php if ($this->formvars['cluster_option']) echo ' checked'; ?>>&nbsp;
+								<span data-tooltip="<?php echo $str_portal_cluster_option_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				} ?>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strAdministrative; ?></th>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -811,7 +885,7 @@
 						</tr><?
 					} ?>
 				</table>
-		</div>
+			</div>
 		
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">

@@ -15,7 +15,7 @@
 
 .xplankonverter div.table {
   display: table;
-  background-color: #ddd;
+  /*background-color: #ddd;*/
   padding: 0px;
   margin-top: 10px;
   border-spacing: 1px;
@@ -34,7 +34,7 @@ div.tr {
 div.th {
   display:table-cell;
   padding: 5px;
-  background-color: #eee;
+  /*background-color: #eee;*/
 /*  -webkit-border-top-left-radius: 5px;
   -webkit-border-top-right-radius: 5px;
   -moz-border-top-left-radius: 5px;
@@ -166,7 +166,7 @@ div.td {
     transition: 0s
 }*/
 
-body {
+/*body {
   color: #000000;
   background-color: #FFFBF5;
   font-family: Verdana;
@@ -174,7 +174,7 @@ body {
   text-align: justify;
   margin-left: 10px;
   margin-right: 10px;
-}
+}*/
 
 .error_msg {
 	color: #FF3333;
@@ -182,10 +182,10 @@ body {
 	font-weight: bold;
 }
 
-table { 
-/*  border-spacing: 2px;
-  border-collapse: separate;*/
-}
+/*table {
+  border-spacing: 2px;
+  border-collapse: separate;
+}*/
 
 table.planzeichen th {
   font-size : 75%;

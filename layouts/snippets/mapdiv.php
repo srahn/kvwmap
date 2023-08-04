@@ -79,7 +79,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 		</div>
 	</div>
 	<div id="map_copyrights_div" style="float: right; margin-right: 5px; height: 30px;">
-		<a href="javascript:void();" title="<? echo $strShowCopyrightsTitle; ?>" onclick="showCopyrights('<? echo $strShowCopyrightHeader; ?>')">
+		<a href="javascript:void(0);" title="<? echo $strShowCopyrightsTitle; ?>" onclick="showCopyrights('<? echo $strShowCopyrightHeader; ?>')">
 			<i class="fa fa-copyright fa-solid map-copyright-button" style="margin-top: 7px; font-size: 18px;"></i>
 		</a>
 	</div>	

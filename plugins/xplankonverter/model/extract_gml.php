@@ -334,7 +334,7 @@ class Gml_extractor {
 		$lines = file($this->gml_location);
 		$matched_ns_str;
 		foreach ($lines as $lineNumber => $line) {
-			if(strpos($line, 'XPlanAuszug') === false) {
+			if (strpos($line, 'XPlanAuszug') === false) {
 				continue;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
@@ -501,8 +501,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
-#		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -oo REMOVE_UNUSED_LAYERS=YES');
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
 
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 
@@ -1093,7 +1092,7 @@ class Gml_extractor {
 				gmlas.schluessel AS schluessel,
 				gmlas.gesetzlichegrundlage AS gesetzlichegrundlage,
 				gmlas.text AS text, ";
-		if($this->check_if_table_exists_in_schema("fp_textabschnitt_externereferenz", $this->gmlas_schema)) {
+		if($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema)) {
 			$sql .= "
 				CASE
 					WHEN count_externeref > 0
@@ -1117,7 +1116,7 @@ class Gml_extractor {
 		$sql .= "
 			FROM
 				" . $this->gmlas_schema . "." . $table . " gmlas ";
-		if($this->check_if_table_exists_in_schema("fp_textabschnitt_externereferenz", $this->gmlas_schema)) {
+		if($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema)) {
 			$sql .= "	LEFT JOIN
 				(
 					SELECT
@@ -1144,7 +1143,8 @@ class Gml_extractor {
 				";
 		}
 		for($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
-			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
+			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
+			#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
 		}
 		$sql .= ";";
 		# echo $sql;

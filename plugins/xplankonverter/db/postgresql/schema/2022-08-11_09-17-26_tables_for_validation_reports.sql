@@ -40,6 +40,8 @@ BEGIN;
     ON DELETE CASCADE;
   COMMENT ON TABLE xplankonverter.xplanvalidator_reports IS 'Ergebnisse der semantischen Prüfungen der xplanvalidator-Berichte.';
 	
+	ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'GML-Validierung abgeschlossen';
+/*
 	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
 	SELECT
 		'xplankonverter.enum_konvertierungsstatus'::regtype::oid, 'GML-Validierung abgeschlossen', 
@@ -51,6 +53,10 @@ BEGIN;
 	WHERE
 		NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplankonverter.enum_konvertierungsstatus'::regtype AND enumlabel = 'GML-Validierung abgeschlossen')
 	;
+*/
+
+ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'GML-Validierung mit Fehlern';
+/*
 	INSERT INTO pg_enum (enumtypid, enumlabel, enumsortorder)
 	SELECT
 		'xplankonverter.enum_konvertierungsstatus'::regtype::oid, 'GML-Validierung mit Fehlern', 
@@ -62,7 +68,7 @@ BEGIN;
 	WHERE
 		NOT EXISTS(SELECT 1 FROM pg_enum WHERE enumtypid = 'xplankonverter.enum_konvertierungsstatus'::regtype AND enumlabel = 'GML-Validierung mit Fehlern')
 	;
-	
+*/
   --ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'GML-Validierung abgeschlossen' AFTER 'GML-Erstellung abgeschlossen';
   --ALTER TYPE xplankonverter.enum_konvertierungsstatus ADD VALUE 'GML-Validierung mit Fehlern' AFTER 'GML-Validierung abgeschlossen';
 COMMIT;

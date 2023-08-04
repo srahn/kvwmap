@@ -730,11 +730,14 @@ function add_split_mapimgs() {
 	movegroup.insertBefore(mapimg3, mapimg4);
 }
 
+function pass_preloaded_img(){
+	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
+}
+
 function compare_view_for_layer(layer_id){
 	compare_clipping = true;
 	add_split_mapimgs();
-	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&not_layer_id=' + layer_id + '&current_date=' + current_date);
-	//mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_layer_id=' + layer_id + '&current_date=' + current_date);
+	get_map(mapimg3, 'not_layer_id=' + layer_id);
 	mapimg4.setAttribute("clip-path", 'url(#compare_clipper)');
 }
 
@@ -749,25 +752,23 @@ function set_hist_timestamp() {
 		new_hist_timestamp = new Date();
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
-	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
-	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
+	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
 }
 
-function pass_preloaded_img(){
-	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
-}
-
-function get_map(){
-	svgdoc = document.SVG.getSVGDocument();	
-	var mapimg0 = svgdoc.getElementById("mapimg0");
+function get_map_hist(){
 	var nht = structuredClone(new_hist_timestamp);
 	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
 	let ts = nht.toLocaleString().replace(',', '');
 	document.GUI.hist_timestamp2.value = ts;
-	mapimg0.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	get_map(mapimg0, 'only_postgis_layer=1&hist_timestamp=' + ts);
+}
+
+function get_map(img, filter){
+	img.setAttribute("href", loc + 'index.php?go=getMap&' + filter + '&current_date=' + current_date);
 }
 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
@@ -775,6 +776,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();
 	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg0")?.remove();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();
 	// nix
@@ -903,6 +905,58 @@ function overlay_link(data, start, target){
 		}
 	}
 }
+
+
+function toggle_custom_select(id) {
+	var custom_select_div = document.getElementById('custom_select_' + id);
+	if (custom_select_div.classList.contains('active')) {
+			custom_select_div.classList.remove('active');
+	 } else {
+		 custom_select_div.classList.add('active');
+	 }
+}
+
+function custom_select_register_keydown(){
+	document.onkeydown = custom_select_keydown;
+}
+
+function custom_select_keydown(evt){
+	var selected_option = document.querySelector('.custom-select.active li.selected');
+	switch (evt.keyCode) {
+		case 38 : {
+			selected_option.previousElementSibling.onmouseenter();
+		}break;
+		case 40 : {
+			selected_option.nextElementSibling.onmouseenter();
+		}break;
+		case 13 : {
+			selected_option.onclick();
+		}break;
+	}
+}
+
+function custom_select_hover(option) {
+	var custom_select_div = option.closest('.custom-select');
+	option.scrollIntoView({behavior: "smooth", block: "nearest"});
+	custom_select_div.querySelector('li.selected').classList.remove('selected');
+	option.classList.add('selected');
+}
+
+function custom_select_click(option) {
+	var custom_select_div = option.closest('.custom-select');
+	var field = custom_select_div.querySelector('input');
+	custom_select_hover(option);
+	field.value = option.dataset.value;
+	if (custom_select_div.querySelector('.placeholder img')) {
+		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
+	}
+	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+	if (field.onchange) {
+		field.onchange();
+	}
+	toggle_custom_select(field.id);
+}
+
 
 function datecheck(value){
 	dateElements = value.split('.');

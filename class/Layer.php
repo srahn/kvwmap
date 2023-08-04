@@ -7,6 +7,8 @@ class Layer extends MyObject {
 		parent::__construct($gui, 'layer');
 		$this->stelle_id = $gui->stelle->id;
 		$this->identifier = 'Layer_ID';
+		$this->geometry_types = array('Point', 'LineString', 'Polygon');
+		$this->geom_column = 'geom';
 	}
 
 	public static	function find($gui, $where, $order = '') {
@@ -72,6 +74,67 @@ class Layer extends MyObject {
 			}
 		}
 		return $duplicate_layer_ids;
+	}
+
+	function get_maintable_attributes() {
+		$sql = "
+			SELECT
+				attr.table_schema,
+				attr.table_name,
+				attr.att_name,
+				at.typname,
+				at.typcategory,
+				attr.is_array,
+				atc.relname AS dtd_table_name
+			FROM
+				(
+					SELECT
+						cn.nspname table_schema,
+						c.relname table_name,
+						a.attname att_name,
+						CASE WHEN t.typcategory = 'A' THEN te.oid ELSE t.oid END typid,
+						t.typcategory = 'A' is_array
+					FROM
+						pg_catalog.pg_class c JOIN
+						pg_catalog.pg_type ct ON c.reltype = ct.oid JOIN
+						pg_catalog.pg_namespace cn ON c.relnamespace = cn.oid JOIN
+						pg_catalog.pg_attribute a ON c.oid = a.attrelid JOIN
+						pg_catalog.pg_type t ON a.atttypid = t.oid JOIN
+						pg_catalog.pg_namespace tn ON t.typnamespace = tn.oid LEFT JOIN
+						pg_catalog.pg_type te ON t.typelem = te.oid
+					WHERE
+						a.attnum > 0 AND
+						NOT a.attisdropped
+				) attr JOIN
+				pg_type at ON attr.typid = at.oid LEFT JOIN
+				pg_class atc ON at.typrelid = atc.oid
+			WHERE
+				attr.table_schema LIKE '" . $this->get('schema') . "' AND
+				attr.table_name LIKE '" . $this->get('maintable') . "'
+			ORDER BY
+				attr.table_name,
+				attr.att_name
+		";
+		#echo 'SQL zur Abfrage der Attribute: ' . $sql;
+		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei der Abfrage der Tabellenattribute. Fehler: ' . $ret['msg']
+			);
+		}
+
+		while ($attr = pg_fetch_assoc($ret['query'])) {
+			$this->maintable_attributes[] = $attr;
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Maintable Attribute erfolgreich abgefragt.',
+			'maintable_attributes' => $this->maintable_attributes
+		);
 	}
 
 	/*
@@ -428,7 +491,13 @@ class Layer extends MyObject {
 		$layer_id = $this->get($this->identifier);
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
-		$all_data_attributes = $mapDB->getDataAttributes($layerdb, $layer_id, false);
+		$all_data_attributes = $mapDB->getDataAttributes(
+			$layerdb,
+			$layer_id,
+			array(
+				'use_generic_data_sql' => ($this->get('write_mapserver_templates') == 'generic')
+			)
+		);
 
 		$data_attributes = array_filter(
 			array_slice($all_data_attributes, 0, -2),
@@ -554,104 +623,42 @@ class Layer extends MyObject {
 		return $html;
 	}
 
+  function get_table_alias() {
+    return mb_substr($this->get('schema'), 0, 1) . mb_substr($this->get('maintable') , 0, 1);
+  }
+
 	/**
-		Liefert an Hand des schema und maintable ein data-Statement wie es vom MapServer genutzt wird mit den dazugehörigen Attributen der Datentypen, Aufzählungen, CodeListen mit oder ohne Array.
-		Hier ein Beispiel für die Attriubte noch ohne Aufspreizung auf Unterattribute von Typen, Arrays etc.
-		position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.rp_gewaesser.bedeutsamkeit, xplan_gml.rp_gewaesser.created_at, xplan_gml.rp_gewaesser.ebene, xplan_gml.rp_gewaesser.flaechenschluss, xplan_gml.rp_gewaesser.gebietstyp, xplan_gml.rp_gewaesser.gehoertzubereich, xplan_gml.rp_gewaesser.gesetzlichegrundlage, xplan_gml.rp_gewaesser.gewaessertyp, xplan_gml.rp_gewaesser.gid, xplan_gml.rp_gewaesser.gliederung1, xplan_gml.rp_gewaesser.gliederung2, xplan_gml.rp_gewaesser.gml_id, xplan_gml.rp_gewaesser.hatgenerattribut, xplan_gml.rp_gewaesser.hoehenangabe, xplan_gml.rp_gewaesser.imverbund, xplan_gml.rp_gewaesser.informell, xplan_gml.rp_gewaesser.istausgleichsgebiet, xplan_gml.rp_gewaesser.istzweckbindung, xplan_gml.rp_gewaesser.konkretisierung, xplan_gml.rp_gewaesser.konvertierung_id, xplan_gml.rp_gewaesser.kuestenmeer, xplan_gml.rp_gewaesser.position, xplan_gml.rp_gewaesser.rechtscharakter, xplan_gml.rp_gewaesser.rechtsstand, xplan_gml.rp_gewaesser.rechtsverbindlich, xplan_gml.rp_gewaesser.refbegruendunginhalt, xplan_gml.rp_gewaesser.reftextinhalt, xplan_gml.rp_gewaesser.text, xplan_gml.rp_gewaesser.textschluessel, xplan_gml.rp_gewaesser.textschluesselbegruendung, xplan_gml.rp_gewaesser.updated_at, xplan_gml.rp_gewaesser.user_id, xplan_gml.rp_gewaesser.uuid, xplan_gml.rp_gewaesser.wirddargestelltdurch from xplan_gml.rp_gewaesser JOIN xplankonverter.konvertierungen ON xplan_gml.rp_gewaesser.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
-	Die Abfrage der Attribute mit Hilfe von xplan_uml sieht so aus. Die Abfragen der Typen abhängig machen ob es ein uml-schema gibt oder nicht. Kann auch alkis_uml sein. evtl von Plugin abhängig machen.
-SELECT
-  attr.table_name,
-  attr.att_name,
-  at.typname,
-  at.typcategory,
-  attr.is_array,
-  st.name
-FROM
-  (
-    SELECT
-        c.relname table_name,
-        a.attname att_name,
-        CASE WHEN t.typcategory = 'A' THEN te.oid ELSE t.oid END typid,
-        t.typcategory = 'A' is_array
-      FROM
-        pg_catalog.pg_class c JOIN
-        pg_catalog.pg_type ct ON c.reltype = ct.oid JOIN
-        pg_catalog.pg_namespace cn ON c.relnamespace = cn.oid JOIN
-        pg_catalog.pg_attribute a ON c.oid = a.attrelid JOIN
-        pg_catalog.pg_type t ON a.atttypid = t.oid JOIN
-        pg_catalog.pg_namespace tn ON t.typnamespace = tn.oid LEFT JOIN
-        pg_catalog.pg_type te ON t.typelem = te.oid
-      WHERE
-        cn.nspname LIKE 'xplan_gml' AND
-        c.relname LIKE 'fp_gemeinbedarf' AND
-        a.attnum > 0 AND
-        NOT a.attisdropped
-      ORDER BY c.relname, a.attname
-   ) attr JOIN
-   pg_type at ON attr.typid = at.oid LEFT JOIN
-   xplan_uml.uml_classes uc ON at.typname = LOWER(uc.name) LEFT JOIN
-   xplan_uml.stereotypes st ON uc.stereotype_id = st.xmi_id
-ORDER BY
-  attr.table_name,
-  attr.att_name
-LIMIT 100
+	* Liefert an Hand des schema und maintable ein data-Statement wie es vom MapServer genutzt wird mit den dazugehörigen Attributen der Datentypen, Aufzählungen, CodeListen mit oder ohne Array.
+	* Hier ein Beispiel für die Attriubte noch ohne Aufspreizung auf Unterattribute von Typen, Arrays etc.
+	 position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.fp_landwirtschaft.aufschrift, xplan_gml.fp_landwirtschaft.created_at, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.detailliertezweckbestimmung)) AS detailliertezweckbestimmung, xplan_gml.fp_landwirtschaft.ebene, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.endebedingung), false) AS endebedingung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.externereferenz), true) AS externereferenz, xplan_gml.fp_landwirtschaft.flaechenschluss, xplan_gml.fp_landwirtschaft.flussrichtung, xplan_gml.fp_landwirtschaft.gehoertzubereich, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.gesetzlichegrundlage)) AS gesetzlichegrundlage, xplan_gml.fp_landwirtschaft.gliederung1, xplan_gml.fp_landwirtschaft.gliederung2, xplan_gml.fp_landwirtschaft.gml_id, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hatgenerattribut), true) AS hatgenerattribut, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hoehenangabe), true) AS hoehenangabe, xplan_gml.fp_landwirtschaft.konvertierung_id, xplan_gml.fp_landwirtschaft.nordwinkel, xplan_gml.fp_landwirtschaft.position, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtscharakter), 'xplan_gml', 'fp_rechtscharakter', false) AS rechtscharakter, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtsstand), 'xplan_gml', 'xp_rechtsstand', false) AS rechtsstand, xplan_gml.fp_landwirtschaft.refbegruendunginhalt, xplan_gml.fp_landwirtschaft.reftextinhalt, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.spezifischepraegung)) AS spezifischepraegung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.startbedingung), false) AS startbedingung, xplan_gml.fp_landwirtschaft.text, xplan_gml.fp_landwirtschaft.updated_at, xplan_gml.fp_landwirtschaft.user_id, xplan_gml.fp_landwirtschaft.uuid, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchflaeche, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchspe, xplan_gml.fp_landwirtschaft.wirddargestelltdurch, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.zweckbestimmung), 'xplan_gml', 'xp_zweckbestimmunglandwirtschaft', true) AS zweckbestimmung from xplan_gml.fp_landwirtschaft JOIN xplankonverter.konvertierungen ON xplan_gml.fp_landwirtschaft.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
+	* Die Abfrage der Attribute erfolgt in der Funktion get_maintable_attributes
 	*/
-	function get_generic_data_sql($attributes = array()) {
+	function get_generic_data_sql($options = array()) {
+		$default_options = array(
+			'attributes' => array(
+				'select' => array(),
+				'from' => array(),
+				'where' => array()
+			),
+			'geom_attribute' => 'geom',
+			'geom_type_filter' => false
+		);
+		$options = array_merge($default_options, $options);
+		$attributes = $options['attributes'];
+		$geom_attribute = $options['geom_attribute'];
+		$geom_type_filter = $options['geom_type_filter'];
+
 		include_once(CLASSPATH . 'Enumeration.php');
 		include_once(CLASSPATH . 'DataType.php');
 		include_once(CLASSPATH . 'CodeList.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
-		$sql = "
-			SELECT
-				attr.table_schema,
-				attr.table_name,
-				attr.att_name,
-				at.typname,
-				at.typcategory,
-				attr.is_array,
-				atc.relname AS dtd_table_name
-			FROM
-				(
-					SELECT
-						cn.nspname table_schema,
-						c.relname table_name,
-						a.attname att_name,
-						CASE WHEN t.typcategory = 'A' THEN te.oid ELSE t.oid END typid,
-						t.typcategory = 'A' is_array
-					FROM
-						pg_catalog.pg_class c JOIN
-						pg_catalog.pg_type ct ON c.reltype = ct.oid JOIN
-						pg_catalog.pg_namespace cn ON c.relnamespace = cn.oid JOIN
-						pg_catalog.pg_attribute a ON c.oid = a.attrelid JOIN
-						pg_catalog.pg_type t ON a.atttypid = t.oid JOIN
-						pg_catalog.pg_namespace tn ON t.typnamespace = tn.oid LEFT JOIN
-						pg_catalog.pg_type te ON t.typelem = te.oid
-					WHERE
-						a.attnum > 0 AND
-						NOT a.attisdropped
-				) attr JOIN
-				pg_type at ON attr.typid = at.oid LEFT JOIN
-				pg_class atc ON at.typrelid = atc.oid
-			WHERE
-				attr.table_schema LIKE '" . $this->get('schema') . "' AND
-				attr.table_name LIKE '" . $this->get('maintable') . "'
-			ORDER BY
-				attr.table_name,
-				attr.att_name
-		";
-		#echo 'SQL zur Abfrage der Attribute: ' . $sql;
-		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
-		$ret = $layerdb->execSQL($sql, 4, 0);
+		$ret = $this->get_maintable_attributes();
 		if (!$ret['success']) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage der Tabellenattribute. Fehler: ' . $ret['msg']
-			);
+			return $ret;
 		}
 
-		while ($attr = pg_fetch_assoc($ret['query'])) {
+		foreach ($ret['maintable_attributes'] AS $attr) {
 			switch($this->get_attribute_type($attr)) {
 				case 'Enumeration' : {
 					$formatter_objekt = new Enumeration($this->gui);
@@ -665,20 +672,44 @@ LIMIT 100
 				case 'DataType' : {
 					$formatter_objekt = new DataType($this->gui);
 				} break;
+				case 'TableType' : {
+					# There is no separate class for tabletype yet, take Enumeration for it
+					$formatter_objekt = new Enumeration($this->gui);
+				} break;
 				default : {
 					$formatter_objekt = new LayerAttribute($this->gui);
 				}
 			}
 			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
-			$attributes[] = $formatter_objekt->get_generic_select($this, $attr);
+			$sql = $formatter_objekt->get_generic_select($this, $attr);
+			#echo '<br>attr: ' . $attr['att_name'] . ' type: ' . $this->get_attribute_type($attr) . ' sql: ' . $sql['select'];
+			foreach(array('select', 'from', 'where') AS $key) {
+				if (array_key_exists($key, $sql) AND $sql[$key] != '') {
+					$attributes[$key][] = $sql[$key];
+				}
+			}
+
+			if ($attr['typname'] == 'geometry') {
+				$geom_attribute = $attr['att_name'];
+				if ($geom_type_filter) {
+					$attributes['where'][] = "ST_GeometryType(" . $this->get_table_alias() . "." . $geom_attribute . ") LIKE 'ST_%" . $this->geometry_types[$this->get('Datentyp')] . "'";
+				}
+			}
 		}
-		# ToDo find unique $id_attribute, $geom_attribute und $layer_epsg um vollständiges sql für data zu erzeugen
-		# ) AS foo using unique $id_attribute using srid = $layer_epsg
-		$geom_attriubte = "position";
-		$id_attribute = "gml_id";
-		$layer_epsg = "25832";
-		# ToDo füge noch Zusätze ein, die über array(select, from) an get_generic_data_sql übergeben werden.
-		$data_sql = $geom_attriubte . " (select " . implode(", ", array_map(function($a) { return $a['select']; }, $attributes)) . " from " . $this->get('schema') . "." . $this->get('maintable') . " " . implode("", array_map(function($a) { return $a['from']; }, $attributes)) . ") as foo using unique " . $id_attribute . " using srid=" . $layer_epsg;
+
+		$data_sql = $geom_attribute . " from (
+  select
+    " . implode(",
+    ", $attributes['select']) . "
+  from
+    " . $this->get('schema') . "." . $this->get('maintable') . " AS " . $this->get_table_alias()
+		. (count($attributes['from']) > 0 ? "
+    " . implode("
+    ", $attributes['from']) : '') . (count($attributes['where']) > 0 ? "
+  where
+    " . implode(" AND
+    ", $attributes['where']) : '') . "
+) as foo using unique " . $this->get('oid') . " using srid=" . $this->get('epsg_code');
 
 		return array(
 			'success' => true,
@@ -688,34 +719,93 @@ LIMIT 100
 	}
 
 	function enum_table_exists($table_name) {
-		return false;
+		$sql = "
+			SELECT EXISTS (
+				SELECT FROM 
+					pg_tables
+				WHERE 
+					schemaname = 'xplan_gml' AND 
+					tablename	= 'enum_" . $typname . "'
+			);
+		";
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0] == 't';
 	}
 
-	function codelist_table_exists($table_name) {
-		return false;
+	function codelist_table_exists($typname) {
+		$sql = "
+			SELECT
+				count(*) = 3
+			FROM 
+				information_schema.columns
+			WHERE 
+				table_schema = 'xplan_gml' AND 
+				table_name	= '" . $typname . "' AND
+				column_name IN ('id', 'value', 'codespace')
+		";
+		#echo $sql;
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0] == 't';
 	}
 
-	function datatype_table_exists($table_name) {
-		return false;
+	function datatype_table_exists($typname) {
+		$sql = "
+			SELECT EXISTS (
+				SELECT FROM 
+					pg_type
+				WHERE
+					typname	= '" . $typname . "'
+			)
+		";
+		#echo $sql;
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0] == 't';
 	}
-		
+
+	function tabletype_table_exists($typname) {
+		$sql = "
+			SELECT EXISTS (
+				SELECT FROM 
+					pg_tables
+				WHERE 
+					schemaname = 'xplan_gml' AND 
+					tablename	= '" . $typname . "'
+			);
+		";
+		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0] == 't';
+	}
+
 	function get_attribute_type($def) {
+		$type = 'normal';
 		if ($def['typcategory'] == 'E') {
 			if ($this->enum_table_exists($def['typname'])) {
 				#extent select to query wert and beschreibung
-				return 'Enumeration with table';
+				$type = 'Enumeration with table';
 			}
-			return 'Enumeration';
+			$type = 'Enumeration';
 		}
 		if ($def['dtd_table_name'] != '') {
 			if ($this->codelist_table_exists($def['typname'])) {
-				return 'CodeList';
+				$type = 'CodeList';
 			}
-			if ($this->datatype_table_exists($def['typname'])) {
-				return 'DataType';
+			else {
+				if ($this->datatype_table_exists($def['typname'])) {
+					$type = 'DataType';
+				}
+				else {
+					if ($this->tabletype_table_exists($def['typname'])) {
+						$type = 'TableType';
+					}
+				}
 			}
 		}
-		return 'normal';
+		#echo "\ncategory: " . $def['typcategory'] . " name: " . $def['att_name'] . " type: " . $def['typname'] . ' attr_type: ' . $type;
+		return $type;
 	}
 
 }

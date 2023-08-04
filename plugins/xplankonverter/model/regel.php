@@ -180,12 +180,19 @@ class Regel extends PgObject {
 
 			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
 		} else {
+			$ret = $this->database->execSQL($sql);
+			if (!$ret['success']) {
+				return array();
+			}
+			/*
 			$result = pg_query(
 				$this->database->dbConn,
 				$sql
 			);
-			
-			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+			*/
+			else {
+				return (pg_num_rows($ret['query']) == 0 ? array() : pg_fetch_all($ret['query']));
+			}
 		}
 	}
 

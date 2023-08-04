@@ -60,7 +60,7 @@
 															$ref = time();
 														}
 													?>
-													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map()">
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
 													<datalist style="display: flex; justify-content: space-between; width: 6030px;">
 													<?
 														for ($m = $start; $m <= $ende; $m++) {
