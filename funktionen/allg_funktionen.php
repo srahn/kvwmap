@@ -2382,10 +2382,13 @@ function sql_from_parse_tree($parse_tree) {
 }
 
 /**
-	Function sanitizes $value based on its $type and returns the sanitized value.
-	If $type or $value is empty or $type unknown, $value will not be sanitized at all.
-	If $value is an array all elements will be sanitized with $type.
-*/
+ * Function sanitizes $value based on its $type and returns the sanitized value.
+ * If $type or $value is empty or $type unknown, $value will not be sanitized at all.
+ * If $value is an array all elements will be sanitized with $type.
+ * @param any $value Value to sanitize
+ * @param string $type The type of the value
+ * @return any The sanitized value
+ */
 function sanitize(&$value, $type) {
 	if (empty($type)) {
 		return $value;
@@ -2414,9 +2417,10 @@ function sanitize(&$value, $type) {
 
 		case 'numeric' :
 		case '_numeric' :
+		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) $value;
+			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :

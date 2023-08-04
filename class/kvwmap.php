@@ -8968,12 +8968,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
 						}
 						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
-						if ($attributes['form_element_type'][$i] == 'Zahl') {
-							# bei Zahlen den Punkt (Tausendertrenner) entfernen
+						if ($attributes['form_element_type'][$i] == 'Zahl' AND strpos($value, ',') !== false) {
+							# bei Zahlen, vom Typ Text den Punkt (Tausendertrenner) entfernen
+							# bei Zahlen, vom Typ numeric und float-Varianten ist das schon beim sanitze erledigt worden.
 							$value = removeTausenderTrenner($value);
-						}
-						elseif (in_array($attributes['type'][$i], ['numeric', 'float4', 'float8'])) {
-							$value = str_replace(',', '.', $value);
 						}
 						if (is_array($value)) {
 							# multible-Auswahlfelder
