@@ -263,12 +263,12 @@ function go_switch($go, $exit = false) {
 					$GUI->loadMap('DataBase');
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
+				$GUI->drawMap();
 				$GUI->saveMap('');
 				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
 					$currenttime=date('Y-m-d H:i:s',time());
 					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				}
-				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
