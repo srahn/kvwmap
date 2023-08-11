@@ -460,7 +460,7 @@ class Regel extends PgObject {
 		}
 		else {
 			$regel_id = $this->get('id');
-			if(empty($regel_id)) {
+			if (empty($regel_id)) {
 				$regel_id = 0; // can't exist, but necessary for int comparison in SQL
 			}
 
@@ -602,6 +602,7 @@ class Regel extends PgObject {
 	}
 
 	function destroy() {
+		#echo "\ndestroy Regel: " . $this->get($this->identifier);
 		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
 		#$this->delete_gml_layer();
 		$this->delete();

@@ -417,7 +417,7 @@ class Gml_extractor {
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
 	*/
-	function check_if_table_exists_in_schema($table,$schema) {
+	function check_if_table_exists_in_schema($table, $schema) {
 		$sql = "
 			SELECT
 				EXISTS(
@@ -439,8 +439,8 @@ class Gml_extractor {
 	}
 
 	/**
-		Funktion liefert true wenn in angegebener Tabelle mehr als ein Plan liegt, sonst false
-	*/
+	 * Funktion liefert true wenn in angegebener Tabelle mehr als ein Plan liegt, sonst false
+	 */
 	function get_num_plaene($table_schema, $table_name) {
 		$sql = "
 			SELECT
@@ -534,9 +534,9 @@ class Gml_extractor {
 		return $mod_gml_id;
 	}
 
-	/*
-	* Returns an array of all tables in a specified schema according to the information_schema
-	*/
+	/**
+	 * Returns an array of all tables in a specified schema according to the information_schema
+	 */
 	function get_all_tables_in_schema($schema) {
 		$sql = "
 			SELECT
@@ -544,8 +544,8 @@ class Gml_extractor {
 			FROM
 				information_schema.tables
 			WHERE
-				table_schema = '" .$schema . "'
-			;";
+				table_schema = '" . $schema . "'
+		";
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		$result = pg_fetch_all($ret[1]);
 		//$result = (!empty($result)) ? array_column($result, 'table_name') : array();
@@ -1061,63 +1061,26 @@ class Gml_extractor {
 		return $result;
 	}
 
-	/*
-	* Inserts values of xplan_gmlas_... into xplan_gml textabschnitte tables, depending on the specific bereich (xp_textabschnitt, fp_textabschnitt etc.)
-	*/
+	/**
+	 * Inserts values of xplan_gmlas_... into xplan_gml textabschnitte tables, depending on the specific bereich (xp_textabschnitt, fp_textabschnitt etc.)
+	 * Im ersten Schritt wird die Tabelle bp_textabschnitte befüllt und falls vorhanden die Attribute inverszu_texte_xp_plan und inversezu_bp_wohngebaeudeflaeche gesetzt
+	 * Dann werden die Assoziationen in die Tabellen mit dem Suffix _zu_bp_textabschnitt geschrieben. (reftextinhalt in bp_objekt_zu_bp_textabschnitt und abweichungtext in bp_[nebenanlagenausschlussflaeche|baugebietsteilflaeche]_zu_bp_textabschnitte)
+	 */
 	function insert_into_textabschnitt($table, $konvertierung_id, $user_id) {
 		# Based on XPlanung 5.0.1
 		# currently no inverszu_baugebietsteilflaeche and nebenanlagenausschlussflaeche bp
 		$prefix_arr = explode("_", $table, 2);
 		$prefix = $prefix_arr[0];
-		
-		$all_tables_in_schema = $this->get_all_tables_in_schema($this->gmlas_schema);
-		$all_tables_with_reftextinhalt_suffix = [];
-		#print_r($all_tables_in_schema);
-		foreach($all_tables_in_schema as $table_in_schema) {
-			if($this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt")) {
-				array_push($all_tables_with_reftextinhalt_suffix, $table_in_schema['table_name']);
-			}
-		}
-		
-		$sql = "INSERT INTO xplan_gml." . $table . "(gml_id, schluessel, gesetzlichegrundlage, text, reftext, user_id, konvertierung_id, inverszu_texte_xp_plan, rechtscharakter";
-		$sql .= ", inverszu_reftextinhalt_" . $prefix . "_objekt";
-		// bp_special attributes xplan 5.0.1
-		if($prefix == 'bp') {
-			$sql .= ", inverszu_abweichungtext_bp_baugebietsteilflaeche, inverszu_abweichungtext_bp_nebenanlagenausschlussflaeche";
-		}
-		$sql .= ")";
-		$sql .= "
-			SELECT
-				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM gmlas.id)))::text::uuid AS gml_id,
-				gmlas.schluessel AS schluessel,
-				gmlas.gesetzlichegrundlage AS gesetzlichegrundlage,
-				gmlas.text AS text, ";
-		if($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema)) {
-			$sql .= "
-				CASE
+
+		# Verknüpfung reftext-Attribut
+		$reftext = "
+				" . ($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema) ? "CASE
 					WHEN count_externeref > 0
 					THEN array_to_json(externeref.externereferenz)
 					ELSE NULL
-				END AS reftext,";
-		} ELSE {
-			$sql .= 'NULL AS reftext,';
-		}
-		$sql .= $user_id . " AS user_id,
-						" . $konvertierung_id . " AS konvertierung_id,
-						NULL AS inverszu_texte_xp_plan,
-						gmlas.rechtscharakter::xplan_gml." . $prefix . "_rechtscharakter AS rechtscharakter,
-						NULL AS inverszu_reftextinhalt_" . $prefix . "_objekt";
-		if($prefix == "bp") {
-			$sql .= "
-			,NULL AS inverszu_abweichungtext_bp_baugebietsteilflaeche,
-			NULL AS inverszu_abweichungtext_bp_nebenanlagenausschlussflaeche";
-		}
-						
-		$sql .= "
-			FROM
-				" . $this->gmlas_schema . "." . $table . " gmlas ";
-		if($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema)) {
-			$sql .= "	LEFT JOIN
+				END" : "NULL");
+		$reftext_tables = "
+				" . ($this->check_if_table_exists_in_schema($prefix . "_textabschnitt_externereferenz", $this->gmlas_schema) ? " LEFT JOIN
 				(
 					SELECT
 						COUNT(*) AS count_externeref,
@@ -1133,31 +1096,132 @@ class Gml_extractor {
 								to_char(e_sub.datum, 'DD.MM.YYYY')
 							)::xplan_gml.xp_externereferenz) AS externereferenz
 					FROM
-						" . $this->gmlas_schema . "." . $prefix . "_textabschnitt_externereferenz externereferenzlink_sub ";
-
-			$sql .=	" LEFT JOIN
+						" . $this->gmlas_schema . "." . $prefix . "_textabschnitt_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_externereferenz e_sub ON externereferenzlink_sub.xp_externereferenz_pkid = e_sub.ogr_pkid
 					GROUP BY
 						externereferenzlink_sub.parent_id
-				) externeref ON gmlas.id = externeref.parent_id 
-				";
+				) externeref ON ta.id = externeref.parent_id" : "");
+		$inverszu_texte_xp_plan = "CASE WHEN plan_texte.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM plan_texte.parent_id)))::text::uuid END";
+		if ($prefix == 'bp' AND $this->check_if_table_exists_in_schema("bp_wohngebaeudeflaeche_abweichungtext", $this->gmlas_schema)) {
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "
+				CASE WHEN wgf_at.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM wgf_at.parent_id)))::text::uuid END";
+			$bp_wohngebaeudeflaeche_abweichungtext = "
+				LEFT JOIN " . $this->gmlas_schema . ".bp_wohngebaeudeflaeche_abweichungtext AS wgf_at ON ta.id = wgf_at.bp_textabschnitt_pkid";
 		}
-		for($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
-			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
-			#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
+		else {
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "NULL";
+			$bp_wohngebaeudeflaeche_abweichungtext = '';
 		}
-		$sql .= ";";
-		# echo $sql;
+		# Textabschnitte zum Planobjekt, Assoziation: texte
+		$sql = "
+			INSERT INTO xplan_gml." . $prefix . "_textabschnitt (
+				gml_id,
+				schluessel,
+				gesetzlichegrundlage,
+				text,
+				rechtscharakter,
+				reftext,
+				user_id,
+				konvertierung_id,
+				inverszu_texte_xp_plan,
+				inverszu_abweichungtext_bp_wohngebaeudeflaeche
+			)
+			SELECT
+				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM ta.id)))::text::uuid AS gml_id,
+				ta.schluessel AS schluessel,
+				ta.gesetzlichegrundlage AS gesetzlichegrundlage,
+				ta.text AS text,
+				ta.rechtscharakter::xplan_gml." . $prefix . "_rechtscharakter AS rechtscharakter,
+				" . $reftext . " AS reftext,
+				" . $user_id . " AS user_id,
+				" . $konvertierung_id . " AS konvertierung_id,
+				" . $inverszu_texte_xp_plan . " AS inverszu_texte_xp_plan,
+				" . $inverszu_abweichungtext_bp_wohngebaeudeflaeche . " AS inverszu_abweichungtext_bp_wohngebaeudeflaeche
+			FROM
+				" . $this->gmlas_schema . "." . $table . " ta
+				LEFT JOIN " . $this->gmlas_schema . "." . $prefix . "_plan_texte plan_texte ON ta.id = plan_texte.href_" . $prefix . "_textabschnitt_pkid" .
+				$bp_wohngebaeudeflaeche_abweichungtext .
+				$reftext_table . "
+		";
+		#echo '<br>SQL zum Eintragen der Textabschnitte zum Plan: ' . $sql; exit;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		#$result = pg_fetch_assoc($ret[1]);
-		return $ret;
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				$msg = $ret['msg']
+			);
+		}
+
+		# Textabschnitte zu Fachobjekten, Assoziation: reftextinhalt
+		$tables_with_reftextinhalt = array_filter(
+			$this->get_all_tables_in_schema($this->gmlas_schema),
+			function($table_in_schema) {
+				return $this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt");
+			}
+		);
+		$select_reftextinhalte = array();
+		foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
+			$select_reftextinhalte[] = "
+				SELECT
+					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+				FROM
+					" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+			";
+		}
+		$sql = "
+			INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
+				" . $prefix . "_objekt_gml_id,
+				" . $prefix . "_textabschnitt_gml_id
+			) SELECT * FROM (" . implode(' UNION ', $select_reftextinhalte) . ") AS reftextinhalte
+		";
+		#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
+		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return array(
+				'success' => false,
+				$msg = $ret['msg']
+			);
+		}
+
+		# Nur für BP-Pläne Textabschnitte für abweichende Texte zu ausgewählten BP-Objekten, Assoziation: abweichungtext
+		if ($prefix == 'bp') {
+			$tables_with_abweichungtext = array('bp_baugebietsteilflaeche', 'bp_nebenanlagenausschlussflaeche');
+			foreach ($tables_with_abweichungtext AS $table_with_abweichungtext) {
+				if ($this->check_if_table_exists_in_schema($table_with_abweichungtext . "_abweichungtext", $this->gmlas_schema)) {
+					$sql = "
+						INSERT INTO xplan_gml." . $table_with_abweichungtext . "_zu_bp_textabschnitt (
+							" . $table_with_abweichungtext . "_gml_id,
+							bp_textabschnitt_gml_id
+						)
+						SELECT
+							trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $table_with_abweichungtext . "_gml_id,
+							trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_bp_textabschnitt_pkid)))::text::uuid AS bp_textabschnitt_gml_id
+						FROM
+							" . $this->gmlas_schema . "." . $table_with_abweichungtext . "_abweichungtext
+					";
+					#echo '<br>SQL zum Eintragen der abweichungtext in Tabelle ' . $table_with_abweichungtext . ': ' . $sql;
+					$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+					if (!$ret['success']) {
+						return array(
+							'success' => false,
+							$msg = $ret['msg']
+						);
+					}
+				}
+			}
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Textabschnitte erfolgreich eingelesen.'
+		);
 	}
-	
-		/* string ends with 
-		* in php 8.0+ str_ends_with
-		*/
+
+	/* string ends with 
+	* in php 8.0+ str_ends_with
+	*/
 	function string_ends_with( $haystack, $needle ) {
-		return substr($haystack, -strlen($needle))===$needle;
+		return substr($haystack, -strlen($needle)) === $needle;
 	}
 
 	/*
