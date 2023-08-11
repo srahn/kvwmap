@@ -99,16 +99,16 @@ class Regel extends PgObject {
 		$validierung->konvertierung_id = $konvertierung_id;
 
 		if ($validierung->sql_vorhanden($this->get('sql'), $this)) {
+			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+			$validierung->konvertierung_id = $konvertierung_id;
+			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
+
 
 			# Prüft ob alle Objekte eine Geometrie haben
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_vorhanden');
 			$validierung->konvertierung_id = $konvertierung_id;
 			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'), $sourcetype);
-
-			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
-			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
-			$validierung->konvertierung_id = $konvertierung_id;
-			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
 			if ($sql_ausfuehrbar) {
@@ -132,7 +132,7 @@ class Regel extends PgObject {
 				}
 			}
 			else {
-				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
+				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', Regel::$write_debug);
 				$success = false;
 			}
 		}

@@ -115,9 +115,11 @@ class Zusammenzeichnung {
   }
 
   upload_zusammenzeichnung = (event) => {
+    console.log('upload_zusammenzeichnung');
     event.preventDefault();
     const file_obj = event.dataTransfer.files[0];
     if (file_obj != undefined) {
+      console.log('file_obj exists');
       var form_data = new FormData();
       form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
       if (this.id) {
@@ -127,6 +129,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
+      form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
@@ -178,6 +181,7 @@ class Zusammenzeichnung {
       ');
       this.next_step('upload_zusammenzeichnung');
       // $('#upload_zusammenzeichnung_msg').addClass('blink');
+      console.log('send_data', form_data);
       xhttp.send(form_data);
     }
   }
@@ -194,6 +198,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'uploaded_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response import_zusammenzeichnung: %o', result);
@@ -217,7 +222,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
       }
     })
   }
@@ -233,6 +238,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response create_plaene: %o', result);
@@ -269,6 +275,7 @@ class Zusammenzeichnung {
     formData.append('konvertierung_id', this.id);
     formData.append('planart', this.planart);
     formData.append('mime_type', 'json');
+    formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
     let response = fetch('index.php', {
       method: 'POST',
       body: formData
@@ -305,6 +312,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'reindexed_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
@@ -336,6 +344,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response convert_zusammenzeichnung: %o', result);
@@ -366,6 +375,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
@@ -395,6 +405,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
@@ -425,6 +436,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response create_metadata: %o', result);
@@ -461,6 +473,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response update_full_geoweb_service: %o', result);
@@ -490,6 +503,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response update_full_metadata: %o', result);
@@ -519,7 +533,8 @@ class Zusammenzeichnung {
         konvertierung_id: this.id,
         planart: this.planart,
         mime_type: 'json',
-        format: 'json_result'
+        format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response check_class_completeness: %o', result);
@@ -551,6 +566,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (response) => {
         //console.log('Response replace_zusammenzeichnung: %o', result);

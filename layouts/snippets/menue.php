@@ -64,6 +64,7 @@ function showMenue() {
 <?	
   if (!$this->user->rolle->hideMenue) {
 		include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
+
 		if (MENU_WAPPEN != 'kein') {
 			$wappen = $this->Stelle->getWappen();
 			$wappen_size = getimagesize(WAPPENPATH . $wappen['wappen']);
@@ -84,12 +85,16 @@ function showMenue() {
 				alt="Referenzkarte"
 				hspace="0"
 			>';
-
-		$wappen_html = '
-			<div id="wappen_div" style="position: relative; visibility: visible; left: 0px; top: 0px">' .
-				$wappen_html . '
-			</div>
-		';
+		if ($wappen['wappen'] != '') {
+			$wappen_html = '
+				<div id="wappen_div" style="position: relative; visibility: visible; left: 0px; top: 0px">' .
+					$wappen_html . '
+				</div>
+			';
+		}
+		else {
+			$wappen_html = '';
+		}
 
 		if (MENU_WAPPEN=="oben") {
 			echo $wappen_html;

@@ -18,7 +18,7 @@ $credentials = '../credentials.php';		# Pfad zur credentials.php (von tools aus 
 $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
-define('DBWRITE',false);
+define('DBWRITE',true);
 
 /**
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
@@ -136,9 +136,10 @@ if ($without_layer_id != '') {
 }
 
 #echo '<br>get layer with sql: ' . $query;
-$result = $userDb->execSQL($query);
+$userDb->execSQL($query);
+$result = $userDb->result;
 
-while($line = $userDb->result->fetch_assoc()){
+while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
   }

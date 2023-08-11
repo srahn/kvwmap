@@ -73,7 +73,6 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_xplanvalidator
 * xplankonverter_zusammenzeichnung
 */
-
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	function isInStelleAllowed($stelle, $requestStelleId) {
 		global $GUI;
@@ -216,12 +215,17 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		global $GUI;
 		$msg_zusatz = '';
 
-		if ($create_ticket) {
+		if (
+			!$GUI->formvars['suppress_ticket_and_notification'] AND
+			$create_ticket
+		) {
 			$ticket = create_ticket($msg);
 			$msg_zusatz .= "\n\nEs wurde ein Ticket angelegt (" . URL . APPLVERSION . "index.php?go=Layer-Suche_Suchen&selected_layer_id=258&value_id=" . $ticket->get_id() . "&operator_id==) Sie werden über den Stand der Behebung informiert.";
 		}
-
-		if ($send_notification) {
+		if (
+			!$GUI->formvars['suppress_ticket_and_notification'] AND
+			$send_notification
+		) {
 			# if konvertierung vorhanden
 			if ($GUI->konvertierung) {
 				$result = $GUI->konvertierung->send_notification('Beim Hochladen der Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . " ist ein Fehler aufgetreten.\n" . $msg . $msg_zusatz);
@@ -233,6 +237,8 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 				$msg_zusatz .= "\n\nDie Mitarbeiter des ARL und der Administrator des PlanDigital-Portals wurden darüber per E-Mail informiert.";
 			}
 		}
+
+		$GUI->debug->write('send_error: ' . $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg'], 4, false);
 
 		header('Content-Type: application/json');
 		echo json_encode(array(
@@ -251,7 +257,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			'kategorie_id' => 3, # Planuploadfehler
 			'status_id' => 1, # erstellt
 			'dringlichkeit' => 3, # dringlich
-			'created_at' => date('Y-m-d'), # current date
+			'created_at' => date('Y-m-d H:i:s'), # current date
 			'created_from' => $GUI->user->Vorname . ' ' . $GUI->user->Name, # angemeldeter Nutzer
 			'created_from_id' => $GUI->user->id,
 			'auftragsart_id' => 5, # Fehlerkorrektur
@@ -272,6 +278,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'B-Plan';
 			$GUI->plan_class = 'BP_Plan';
 			$GUI->plan_abk = 'bplan';
+			$GUI->plan_abk_plural = 'bplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'inkrafttretensdatum';
 		} break;
@@ -280,6 +287,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'F-Plan';
 			$GUI->plan_class = 'FP_Plan';
 			$GUI->plan_abk = 'fplan';
+			$GUI->plan_abk_plural = 'fplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
 		} break;
@@ -288,6 +296,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'SO-Plan';
 			$GUI->plan_class = 'SO_Plan';
 			$GUI->plan_abk = 'soplan';
+			$GUI->plan_abk_plural = 'soplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'genehmigungsdatum';
 		} break;
@@ -296,6 +305,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'RP-Plan';
 			$GUI->plan_class = 'RP_Plan';
 			$GUI->plan_abk = 'rplan';
+			$GUI->plan_abk_plural = 'rplaene';
 			$GUI->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
 			$GUI->plan_attribut_aktualitaet = 'datumdesinkrafttretens';
 		} break;
@@ -304,6 +314,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 			$GUI->plan_title = 'Plan';
 			$GUI->plan_class = 'XP_Plan';
 			$GUI->plan_abk = 'xplan';
+			$GUI->plan_abk_plural = 'xplaene';
 			$GUI->title = 'Plan';
 			$GUI->plan_attribut_aktualitaet = 'genehmigungsdatum';
 		} break;
@@ -351,7 +362,7 @@ function go_switch_xplankonverter($go) {
 
 			if ($GUI->konvertierung->plan) {
 				$result = $GUI->konvertierung->plan->get_layers_with_content(
-					$GUI->xplankonverter_get_xplan_layers(),
+					$GUI->xplankonverter_get_xplan_layers($GUI->konvertierung->get('planart')),
 					$GUI->konvertierung->get_id()
 				);
 				if (! $result['success']) {
@@ -382,12 +393,14 @@ function go_switch_xplankonverter($go) {
 						$msg = 'Es wurden ' . $num_unclassified . ' Objekte gefunden, die keinem Planzeichen zugeordnet werden konnten.';
 					}
 
-					$GUI->create_ticket($msg);
-					$result = $GUI->konvertierung->send_notification('Hinweis zur Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . $msg);
-					if (! $result['success']) {
-						send_error('Fehler bei der Benachrichtigung über das Fehlen von Planzeichenklassen!');
+					if (!$GUI->formvars['suppress_ticket_and_notification']) {
+						$GUI->create_ticket($msg);
+						$result = $GUI->konvertierung->send_notification('Hinweis zur Zusammenzeichnung ' . $GUI->konvertierung->get('bezeichnung') . ' id: ' . $GUI->konvertierung->get_id() . $msg);
+						if (! $result['success']) {
+							send_error('Fehler bei der Benachrichtigung über das Fehlen von Planzeichenklassen!');
+						}
+						$msg .= '<br>Der Support wurde benachrichtigt und ein Ticket angelegt um fehlende Klassen und Planzeichen anzulegen. Bis dahin werden die Objekte mit Default-Styles in den Diensten angezeigt. Sie werden ggf. angefragt bei der Ausgestaltung der fehlenden Planzeichenstyles behilflich zu sein. Sie werden schließlich informiert wenn die fehlenden Planzeichen angelegt wurden.';
 					}
-					$msg .= '<br>Der Support wurde benachrichtigt und ein Ticket angelegt um fehlende Klassen und Planzeichen anzulegen. Bis dahin werden die Objekte mit Default-Styles in den Diensten angezeigt. Sie werden ggf. angefragt bei der Ausgestaltung der fehlenden Planzeichenstyles behilflich zu sein. Sie werden schließlich informiert wenn die fehlenden Planzeichen angelegt wurden.';
 				}
 			}
 			else {
@@ -1040,16 +1053,16 @@ function go_switch_xplankonverter($go) {
 				'konvertierung_id' => 'int'
 			]);
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
-			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers();
+			if ($konvertierung_id == '' AND $GUI->formvars['planart'] == 'Plan') {
+				send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.', false, false);
+				break;
+			}
 
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);	
 			if ($konvertierung_id == '') {
-				if ($GUI->formvars['planart'] == 'Plan') {
-					send_error('Fehler beim Erzeugen des GeoWeb-Dienstes!<p>Wenn Keine Konvertierung-ID angegeben ist, muss mindestens die planart angegeben sein.', false, false);
-					break;
-				}
-
 				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
-				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers);
+
+				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . '/' . $GUI->plan_abk_plural);
 				if (! $result['success']) {
 					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
 					$GUI->data = array(
@@ -1059,10 +1072,10 @@ function go_switch_xplankonverter($go) {
 					$GUI->add_message('error', $msg);
 				}
 				else {
-					$result = $GUI->write_mapfile($result['mapfile']);
+					$result = $GUI->write_mapfile($result['mapfile'], $GUI->plan_abk_plural);
 					if (!$result['success']) {
 						$GUI->data = $result;
-						$this->add_message('error', $result['msg']);
+						$GUI->add_message('error', $result['msg']);
 					}
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
@@ -1081,12 +1094,12 @@ function go_switch_xplankonverter($go) {
 				}
 
 				# Erzeugt den Geowebservice für einen einzelnen Plan
-				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers);
+				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
 				if (! $result['success']) {
 					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
 					break;
 				}
-				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id);
+				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id . '/' . $GUI->plan_abk);
 				if (!$result['success']) {
 					send_error($result['msg']);
 					break;
@@ -1582,17 +1595,14 @@ function go_switch_xplankonverter($go) {
 		# - E-Mail Versand umstellen auf ARL
 		# + Prüfen ob die Landesdienst-Metadaten geupdated sind.
 		# + Prüfen ob die Metadaten geupdated sind
-		# + Metadatendokument mit in die Ältere Version zip-Datei packen.
 		# + Bei Erfolg fehlgeschlagene Upload-Versuche löschen.
-		# + xplan-gml Datei als Download Link in Metadaten über Geodatensatz mit einbauen
-		# + URL zu UVP Portal als Zugangsinfo mit in Metadaten einbauen und als Attribut in Geltungsbereiche Layer und Template
 		# + Video für Upload
 		case 'xplankonverter_replace_zusammenzeichnung' : {
 			header('Content-Type: application/json');
 
 			$konvertierung_id = $GUI->formvars['konvertierung_id'];
 			if ($konvertierung_id == '') {
-				send_error('Fehler beim Erzeugen der Metadaten!<p>Es muss eine Konvertierung-ID angegeben werden!');
+				send_error('Fehler beim Ersetzen der vorhandenen Zusammenzeichnung!<p>Es muss eine Konvertierung-ID angegeben werden!');
 				break;
 			}
 
@@ -1613,20 +1623,13 @@ function go_switch_xplankonverter($go) {
 				$GUI->konvertierung->plan_attribut_aktualitaet
 			);
 
-			if (count($zusammenzeichnungen['published']) == 0) {
-				$response = array(
-					'success' => true,
-					'msg' => 'Noch keine Zusammenzeichnung zur Ersetzung vorhanden.'
-				);
-				echo json_encode($response);
-				break;
-			}
-
-			$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $zusammenzeichnungen['published'][0]->get('id'));
-			$result = $old_konvertierung->archiv_old_zusammenzeichnung();
-			if (!$result['success']) {
-				send_error($result['msg']);
-				break;
+			if (count($zusammenzeichnungen['published']) > 0) {
+				$old_konvertierung = Konvertierung::find_by_id($GUI, 'id', $zusammenzeichnungen['published'][0]->get('id'));
+				$result = $old_konvertierung->archiv_old_zusammenzeichnung();
+				if (!$result['success']) {
+					send_error($result['msg']);
+					break;
+				}
 			}
 
 			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->plan->get($new_konvertierung->plan_attribut_aktualitaet) . "'"));
@@ -1635,22 +1638,12 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-      $result = $GUI->xplankonverter_remove_failed_konvertierungen();
-      if (!$result['success']) {
-        send_error($result['msg']);
-        break;
-      }
+			$result = $GUI->xplankonverter_remove_failed_konvertierungen();
+			if (!$result['success']) {
+				send_error($result['msg']);
+				break;
+			}
 
-			/*
-			Sehr geehrte Damen und Herren,
-
-auf der Plattform PlanDigital sind heute Daten (Zip-Datei) zum FNP <  Gemei=
-ndename > hochgeladen worden.
-
-
-Mit freundlichem Gru=DF
-GDI-Service Rostock
-*/
 			$result = $new_konvertierung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden.\n\nDiese E-Mail ist vom Portal https://testportal-plandigital.de/kvwmap versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan\n\nIhr Team von PlanDigital");
 			if (!$result['success']) {
 				send_error($result['msg']);
