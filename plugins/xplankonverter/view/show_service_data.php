@@ -23,9 +23,9 @@ Folgende Layer wurden angelegt:<br>
 			'',
 			array_map(
 				function($layer) { ?>
-					<li><b><? echo $layer; ?></b> [ <a target="_blank" href="<? echo $this->ows_onlineresource; ?>?request=GetMetadata&layer=<? echo $layer; ?>">Metadaten</a> | <a href="index.php?go=Layereditor&selected_layer_id=<?php echo $this->layers_with_content[$layer]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Ändern</a> ]</li><?
+					<li><b><? echo $layer; ?></b> [ <a target="_blank" href="<? echo $this->ows_onlineresource; ?>?request=GetMetadata&layer=<? echo $layer; ?>">Metadaten</a> | <a href="index.php?go=Layereditor&selected_layer_id=<?php echo $this->service_layers[$layer]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Ändern</a> ]</li><?
 				},
-				$this->layernames_with_content
+				$this->service_layernames
 			)
 		); ?>
 	</ul>

@@ -173,6 +173,7 @@ class MyObject {
 			($order != '' ? " ORDER BY " . $q . implode($q . ', ' . $q, $orders) . $q . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->write('mysql find_where sql: ' . $sql);
 		$this->database->execSQL($sql);
 		$result = array();
 		while ($this->data = $this->database->result->fetch_assoc()) {
