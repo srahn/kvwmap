@@ -20862,12 +20862,12 @@ class Document {
   }
 
   function save_frame($formvars, $_files, $stelle_id){
-    if($formvars['Name']){
+    if ($formvars['Name']){
       $frames = $this->load_frames($this->Stelle->id, NULL);
-      for($i = 0; $i < count($frames); $i++){
-        if($frames[$i]['Name'] == $formvars['Name']){
-          $this->Document->fehlermeldung = 'Name schon vergeben';
-        return;
+      for ($i = 0; $i < count($frames); $i++) {
+        if ($frames[$i]['Name'] == $formvars['Name']) {
+					GUI::add_message_('error', 'Name schon vergeben');
+					return;
         }
       }
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
