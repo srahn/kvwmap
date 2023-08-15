@@ -1147,8 +1147,8 @@ class Gml_extractor {
 				";
 		}
 		for($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
-			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
-			#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
+			#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
+			$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
 		}
 		$sql .= ";";
 		# echo $sql;

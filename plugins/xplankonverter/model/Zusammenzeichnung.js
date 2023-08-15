@@ -115,11 +115,11 @@ class Zusammenzeichnung {
   }
 
   upload_zusammenzeichnung = (event) => {
-    console.log('upload_zusammenzeichnung');
+    //console.log('upload_zusammenzeichnung');
     event.preventDefault();
     const file_obj = event.dataTransfer.files[0];
     if (file_obj != undefined) {
-      console.log('file_obj exists');
+      //console.log('file_obj exists');
       var form_data = new FormData();
       form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
       if (this.id) {
@@ -181,7 +181,7 @@ class Zusammenzeichnung {
       ');
       this.next_step('upload_zusammenzeichnung');
       // $('#upload_zusammenzeichnung_msg').addClass('blink');
-      console.log('send_data', form_data);
+      //console.log('send_data', form_data);
       xhttp.send(form_data);
     }
   }
@@ -439,7 +439,7 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response create_metadata: %o', result);
+        //console.log('Response create_metadata: %o', result);
         if (result.success) {
           this.confirm_step('create_metadata', 'ok');
           this.update_full_geoweb_service();
@@ -476,7 +476,7 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response update_full_geoweb_service: %o', result);
+        //console.log('Response update_full_geoweb_service: %o', result);
         if (result.success) {
           this.confirm_step('update_full_geoweb_service', 'ok');
           this.update_full_metadata();
@@ -506,7 +506,7 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response update_full_metadata: %o', result);
+        //console.log('Response update_full_metadata: %o', result);
         if (result.success) {
           this.confirm_step('update_full_metadata', 'ok');
           this.check_class_completeness();
@@ -537,7 +537,7 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response check_class_completeness: %o', result);
+        //console.log('Response check_class_completeness: %o', result);
         if (result.success) {
           this.confirm_step('check_class_completeness', 'ok');
           message([{ type: (result.num_unclassified == 0 ? 'notice' : 'warning'), msg: result.msg }]);

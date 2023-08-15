@@ -2961,13 +2961,12 @@ echo '			</table>
   # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
   function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
-      $saveMapDestination=SAVEMAPFILE;
+      $saveMapDestination = SAVEMAPFILE;
     }
     if ($saveMapDestination != '') {
       $this->map->save($saveMapDestination);
     }
     $this->user->rolle->saveSettings($this->map->extent);
-    # 2006-02-16 pk
     $this->user->rolle->readSettings();
   }
 
@@ -8535,10 +8534,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			# Schreibe MapFile-Templates
 			$this->save_web_header_template();
 			$this->save_web_footer_template();
+			$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
 
 			# Schreibe MapFile
-			if (!file_exists(WMS_MAPFILE_PATH)) {
-				mkdir(WMS_MAPFILE_PATH, 0775, true);
+			if (!file_exists($path_parts['dirname'])) {
+				mkdir($path_parts['dirname'], 0775, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 
