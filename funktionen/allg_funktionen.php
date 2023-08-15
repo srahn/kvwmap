@@ -1700,7 +1700,7 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	exec('gs -q -I / -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
 	return $output[0];
 }
 
