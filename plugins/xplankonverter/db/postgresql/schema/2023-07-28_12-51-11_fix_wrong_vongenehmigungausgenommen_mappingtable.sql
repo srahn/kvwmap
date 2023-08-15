@@ -33,7 +33,7 @@ BEGIN;
 	WHERE
 		p.zusammenzeichnung
 	ORDER BY
-		k.stelle_id, p.wirksamkeitsdatum, k.id DESC
+		k.stelle_id, p.wirksamkeitsdatum, k.id DESC;
 
 	ALTER TABLE IF EXISTS xplan_gml.fp_verentsorgung ADD CONSTRAINT fp_verentsorgung_pkey PRIMARY KEY (gml_id);
 

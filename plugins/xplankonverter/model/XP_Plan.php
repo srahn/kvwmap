@@ -231,16 +231,31 @@ class XP_Plan extends PgObject {
 		}
 	}
 
+	/**
+	 * Löscht textabschnitte des Planes
+	 * 
+	 */
+	function destroy_associated_textabschnitte() {
+		$sql = "
+			DELETE FROM
+				xplan_gml." . $this->planartAbk . "_textabschnitt ta
+			WHERE
+				ta.konvertierung_id = " . $this->get('konvertierung_id') . "
+		";
+		#echo '<br>SQL zum Löschen der Textabschnitte der Konvertierung' . $this->get('konvertierung_id') . ': ' . $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
+
 	/*
-	* Löscht den Plan und alles was damit verbunden ist
-	* Löscht die Bereiche
-	*/
+	 * Löscht den Plan und alles was damit verbunden ist
+	 */
 	function destroy() {
 		$this->debug->show('Objekt XP_Plan gml_id: ' . $this->get('gml_id') . ' destroy', false);
 		$bereiche = $this->get_bereiche();
-		foreach($bereiche AS $bereich) {
+		foreach ($bereiche AS $bereich) {
 			$bereich->destroy();
 		}
+		$this->destroy_associated_textabschnitte();
 		$this->delete();
 	}
 }

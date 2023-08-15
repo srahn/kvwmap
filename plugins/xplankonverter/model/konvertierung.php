@@ -376,8 +376,8 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-		Anlegen einer Konvertierung
-	*/
+	 *Anlegen einer Konvertierung
+	 */
 	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
@@ -1321,19 +1321,19 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layerGroup = new MyObject($this->gui, 'u_groups');
+			$layer_group = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
-				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
-				$layerGroup->create(array(
+				$layer_group = $layer_group->find_by('Gruppenname', 'XPlanung');
+				$layer_group->create(array(
 					'Gruppenname' => 'XPlanung'
 				));
 			}
 			else {
-				$layerGroup->create(array(
+				$layer_group->create(array(
 					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
-			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get($this->identifier));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layer_group->get($this->identifier));
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
@@ -1814,9 +1814,9 @@ class Konvertierung extends PgObject {
 	}
 
 	/*
-	* Entfernt alles was mit der Konvertierung zusammenhängt und
-	* löscht sich am Ende selbst.
-	*/
+	 * Entfernt alles was mit der Konvertierung zusammenhängt und
+	 * löscht sich am Ende selbst.
+	 */
 	function destroy() {
 		$this->debug->show('Lösche Konvertierung', Konvertierung::$write_debug);
 
@@ -1830,7 +1830,8 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
-			$regel->konvertierung = $regel->get_konvertierung();
+			# Wozu hier die Konvertierung holen wenn die Regel danach gelöscht wird?
+			#$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 
@@ -1872,11 +1873,13 @@ class Konvertierung extends PgObject {
 	}
 
 	function insert_textabschnitte($gml_extractor) {
-		# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
+		# Inserts all existing Textabschnitte if they exist (no regel as potential link to plan)
 		$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
-		foreach($textabschnitte as $textabschnitt) {
-			if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
-				$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+		foreach ($textabschnitte as $textabschnitt) {
+			if (strpos($textabschnitt, $this->plan->planartAbk) !== false) {
+				if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
+					$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+				}
 			}
 		}
 		return array(

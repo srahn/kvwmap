@@ -50,7 +50,6 @@ function get_from_default(attribute_names, stellen){
 			for(i = 0; i < names.length; i++){
 				element1 = document.getElementsByName('privileg_'+names[i]+'_'+stelle[j]);
 				element2 = document.getElementsByName('privileg_'+names[i]+'_');
-				console.log(element2);
 				element1[0].value = element2[0].value;
 				tooltip1 = document.getElementsByName('tooltip_'+names[i]+'_'+stelle[j]);
 				tooltip2 = document.getElementsByName('tooltip_'+names[i]+'_');

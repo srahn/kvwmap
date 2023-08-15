@@ -144,7 +144,10 @@
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
 
 					# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
-					$konvertierung->insert_textabschnitte($gml_extractor);
+					$result = $konvertierung->insert_textabschnitte($gml_extractor);
+					if (!$result['success']) {
+						$GUI->add_message('error', $result['msg']);
+					}
 
 					# Inserts regeln for each possible class loaded with GMLAS
 					//$gml_extractor->insert_all_regeln_into_db();
@@ -168,6 +171,7 @@
 				$konvertierung_id = $old_dataset['konvertierung_id'];
 				#echo '<p>Lösche Konvertierung mit Id: ' . $konvertierung_id;
 				$konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+
 				$konvertierung->destroy();
 			} break;
 
@@ -264,7 +268,8 @@
 					(
 						`schema` LIKE 'xplan_gml' AND
 						LOWER(`Name`) NOT LIKE '%\_textabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt'" .
+						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt' AND
+						LOWER(`Name`) NOT LIKE '%_aendert'" .
 						($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
 					) OR
 					(
@@ -293,12 +298,12 @@
 	};
 
 	/**
-	*	This function save the uploaded file on the server, test if it is a zip file
-	*	and if it contain the correkt files. After this the files will be validated
-	*	at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
-	*	If both files are valid, it creates a konvertierung, saves the validation reports,
-	*	moves the data to uploaded_gml diretory, removes the tmp_dir and
-	*	finish with success and a success message.
+	 * This function save the uploaded file on the server, test if it is a zip file
+	 * and if it contain the correkt files. After this the files will be validated
+	 * at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
+	 * If both files are valid, it creates a konvertierung, saves the validation reports,
+	 * moves the data to uploaded_gml diretory, removes the tmp_dir and
+	 * finish with success and a success message.
 	*/
 	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
 		$success = false;

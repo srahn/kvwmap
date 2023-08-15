@@ -962,6 +962,14 @@ function go_switch_xplankonverter($go) {
 			}
 			else {
 				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if ($GUI->konvertierung->data === false) {
+					$GUI->Fehlermeldung = "Die Konvertierung mit der ID={$GUI->formvars['konvertierung_id']} wurde nicht gefunden.";
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $GUI->Fehlermeldung
+					);
+					$GUI->output(); break;
+				}
 				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
 					$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
@@ -2227,23 +2235,23 @@ function go_switch_xplankonverter($go) {
 			$gml_extractor->gmlas_schema = 'xplan_gmlas_' . $GUI->konvertierung->get_id();
 			$GUI->konvertierung->insert_textabschnitte($gml_extractor);
 			$gml_extractor->insert_all_regeln_into_db($konvertierung_id, $GUI->Stelle->id);
-      $msg = 'Zusammenzeichnung';
+			$msg = 'Zusammenzeichnung';
 
 			$file_geltungsbereiche = $GUI->konvertierung->get_file_path('uploaded_xplan_gml') . 'Geltungsbereiche.gml';
-      if (file_exists($file_geltungsbereiche)) {
-  			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_geltungsbereiche, 'xplan_gmlas_tmp_' . $GUI->user->id);
-  			$result = $gml_extractor->import_gml_to_db();
+			if (file_exists($file_geltungsbereiche)) {
+				$gml_extractor = new Gml_extractor($GUI->pgdatabase, $file_geltungsbereiche, 'xplan_gmlas_tmp_' . $GUI->user->id);
+				$result = $gml_extractor->import_gml_to_db();
 
 	  		# Übernahme der Geltungsbereiche in die Zieltabelle
 		  	$result = $GUI->konvertierung->insert_geltungsbereiche($gml_extractor);
-        if (! $result['success']) {
-          $GUI->konvertierung->set('error_id', 5);
-          $GUI->konvertierung->update();
-          send_error('Fehler beim Einlesen der Geltungsbereiche. Fehler: ' . $result['msg'] . ' sql: ' . $result['sql']);
-          break;
-        }
-        $msg .= ' und Geltungsbereiche';
-      }
+				if (! $result['success']) {
+					$GUI->konvertierung->set('error_id', 5);
+					$GUI->konvertierung->update();
+					send_error('Fehler beim Einlesen der Geltungsbereiche. Fehler: ' . $result['msg'] . ' sql: ' . $result['sql']);
+					break;
+				}
+				$msg .= ' und Geltungsbereiche';
+			}
 
 			$response = array(
 				'success' => true,
@@ -2418,6 +2426,28 @@ function go_switch_xplankonverter($go) {
 				$GUI->zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($GUI, $GUI->formvars['planart'], $GUI->plan_class, $GUI->plan_attribut_aktualitaet);
 			}
 			$GUI->main = '../../plugins/xplankonverter/view/zusammenzeichnung.php';
+			$GUI->output();
+		} break;
+
+		case 'xplankonverter_insert_textabschnitte' : {
+			$GUI->main = 'Hinweis.php';
+			$GUI->check_csrf_token();
+			if ($GUI->formvars['konvertierung_id'] == '') {
+				$GUI->Hinweis = 'Diese Seite kann nur aufgerufen werden wenn vorher eine Konvertierung ausgewählt wurde.';
+			}
+			else {
+				$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $GUI->formvars['konvertierung_id']);
+				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+					$GUI->Hinweis = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+						Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+						Melden Sie sich mit einem anderen Benutzer an.";
+				}
+				else {
+					$gml_extractor = new Gml_extractor($GUI->pgdatabase, 'placeholder', 'xplan_gmlas_' . $GUI->konvertierung->get_id());
+					$GUI->konvertierung->insert_textabschnitte($gml_extractor);
+				}
+			}
 			$GUI->output();
 		} break;
 
