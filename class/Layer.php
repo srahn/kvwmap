@@ -544,8 +544,8 @@ class Layer extends MyObject {
 			fclose($fp);
 
 			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");
-			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html';
-			fwrite($fp, $this->get_wms_template_body($data_attribute_names, $ansicht));
+			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html' . 'oid-Spalte: ' . $this->get('oid');
+			fwrite($fp, $this->get_wms_template_body($this->get_name('alias'), $data_attribute_names, $ansicht));
 			fclose($fp);
 		}
 	}
@@ -575,8 +575,7 @@ class Layer extends MyObject {
 			border: 1px solid #cccccc;
 			padding: 5px;
 		}
-</style>
-<h2>" . $layer_name . "</h2>";
+</style>";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
 <table>
@@ -593,11 +592,13 @@ class Layer extends MyObject {
 		return $html;
 	}
 
-	function get_wms_template_body($attributes, $ansicht = 'Tabelle') {
-		$html = "<!-- MapServer Template -->";
+	function get_wms_template_body($layer_name, $attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->
+  <h2>" . $layer_name . "</h2>
+  Objekt: [item name=" . $this->get('oid') . " escape=none]";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
-	<tr>";
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">";
 			foreach ($attributes AS $attribute) {
 				$html .= "
 		<th>
@@ -612,7 +613,7 @@ class Layer extends MyObject {
 <table>";
 			foreach ($attributes AS $attribute) {
 				$html .= "
-	<tr>
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">
 		<th align=\"left\">" . $attribute['alias'] . "</th>
 		<td>[item name=" . $attribute['name'] . " escape=none]</td>
 	</tr>";
