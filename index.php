@@ -1002,7 +1002,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
-				$GUI-sanitize(['druckausschnitt' => 'int']);
+				$GUI->sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
