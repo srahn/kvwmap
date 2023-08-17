@@ -9999,7 +9999,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# das Listen-DIV neu geladen werden (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
-			$this->output();
 		}
 		else {
 			$this->data = array(
@@ -16349,9 +16348,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
-				$sql.=$subquery;
-				$sql.=') AS fooForMaxLayerExtent) as foo';
+				$sql = '
+					SELECT 
+						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
+						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
+						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
+						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
+					FROM (
+						SELECT 
+							st_transform(
+								st_setsrid(
+									st_extent(' . $this->attributes['the_geom'] . '), 
+									' . $layer[0]['epsg_code'] . '
+								), 
+								'.$this->user->rolle->epsg_code.'
+							) AS extent 
+						FROM (
+							SELECT 
+								' . $subquery . '
+						) AS fooForMaxLayerExtent
+					) as foo';
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
