@@ -592,12 +592,21 @@ class MyObject {
 
 	public function validate($on = '') {
 		$results = array();
-		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+		foreach ($this->validations AS $key => $validation) {
+			$result = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+			$this->validations[$key]['validated'] = true;
+			if (empty($result)) {
+				$this->validations[$key]['valid'] = true;
+			}
+			else {
+				$this->validations[$key]['valid'] = false;
+				$this->validations[$key]['result'] = $result['msg'];
+			}
+			$results[] = $result;
 		}
 
 		$messages = array();
-		foreach ($results AS $key => $result) {
+		foreach ($results AS $result) {
 			if (!empty($result)) {
 				$messages[] = $result;
 			}

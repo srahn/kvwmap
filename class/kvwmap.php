@@ -13010,11 +13010,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', 'name');
-			$this->titel='Menüdaten';
-			$this->main='menuedaten.php';
+			$this->titel = 'Menüdaten';
+			$this->main = 'menuedaten.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
+			$this->titel = 'Menü Editor';
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
