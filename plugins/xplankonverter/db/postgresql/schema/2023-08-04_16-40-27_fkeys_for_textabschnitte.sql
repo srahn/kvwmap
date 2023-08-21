@@ -29,7 +29,7 @@ BEGIN;
 		FROM
 			xplan_gml.bp_objekt_zu_bp_textabschnitt ot
 			LEFT JOIN xplan_gml.bp_textabschnitt ta ON ot.bp_textabschnitt_gml_id = ta.gml_id::text
-			LEFT JOIN xplan_gml.bp_objekt ob ON ot.bp_objekt_gml_id = ob.gml_id
+			LEFT JOIN xplan_gml.bp_objekt ob ON ot.bp_objekt_gml_id::text = ob.gml_id::text
 		WHERE
 			ta.gml_id IS NULL OR
 			ob.gml_id IS NULL

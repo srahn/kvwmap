@@ -268,7 +268,8 @@
 					(
 						`schema` LIKE 'xplan_gml' AND
 						LOWER(`Name`) NOT LIKE '%\_textabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt'" .
+						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt' AND
+						LOWER(`Name`) NOT LIKE '%_aendert'" .
 						($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
 					) OR
 					(
