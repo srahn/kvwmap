@@ -257,22 +257,6 @@ class GUI {
 			getenv('HTTP_USER_AGENT')
 		);
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
-		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
-			switch ($this->login_failed_reason) {
-				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
-				} break;
-				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
-				} break;
-				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
-				} break;
-				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
-				} break;
-			}
-		}
 		$this->output();
 	}
 
@@ -10440,7 +10424,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true, true);
 				if (value_of($this->formvars, 'geom_from_layer') == '') {
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
@@ -14667,7 +14651,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
 			if ($json != '') {
-				$result = ($json == 'NULL' ? '' : $json);
+				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : $quote . $json . $quote));
 			}
 			else {
 				$result = $json;
@@ -15460,10 +15444,11 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
 		$refmap->set('width', $width);
 		$refmap->set('height', $height);
-		$refmap->setextent($minx, $miny, $maxx, $maxy);
-#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
-#		$refmap->extent->project($projFROM, $projTO);
+		$extent = new rectObj();
+		$extent->setextent($minx, $miny, $maxx, $maxy);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$extent->project($projFROM, $refmap->projection);
+		$refmap->setextent($extent->minx, $extent->miny, $extent->maxx, $extent->maxy);
 		# zoomen
 		$oPixelPos = ms_newPointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
@@ -19307,7 +19292,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20861,12 +20846,12 @@ class Document {
   }
 
   function save_frame($formvars, $_files, $stelle_id){
-    if($formvars['Name']){
+    if ($formvars['Name']){
       $frames = $this->load_frames($this->Stelle->id, NULL);
-      for($i = 0; $i < count($frames); $i++){
-        if($frames[$i]['Name'] == $formvars['Name']){
-          $this->Document->fehlermeldung = 'Name schon vergeben';
-        return;
+      for ($i = 0; $i < count($frames); $i++) {
+        if ($frames[$i]['Name'] == $formvars['Name']) {
+					GUI::add_message_('error', 'Name schon vergeben');
+					return;
         }
       }
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);

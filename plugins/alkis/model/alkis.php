@@ -234,8 +234,8 @@ class ALKIS {
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
-			$emzges_222 = 0; $emzges_223 = 0;
-			$flaeche_222 = 0; $flaeche_223 = 0;
+			$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;			
+			
 			$limit = @count($flst->Klassifizierung)+2;
       for($kl = 0; $kl < $limit; $kl++){
 				if($kl == $limit-2){              
@@ -588,8 +588,7 @@ class ALKIS {
 							}
 						if($formvars['klassifizierung']){
 							$csv .= '"';
-							$emzges_222 = 0; $emzges_223 = 0;
-							$flaeche_222 = 0; $flaeche_223 = 0;
+							$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;			
 							for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 								if($flst->Klassifizierung[$j]['flaeche'] != ''){
 									$wert=$flst->Klassifizierung[$j]['wert'];
@@ -856,8 +855,7 @@ class ALKIS {
 	      }
 			if($formvars['klassifizierung']){
 				$csv .= '"';
-				$emzges_222 = 0; $emzges_223 = 0;
-				$flaeche_222 = 0; $flaeche_223 = 0;
+				$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;
 				for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 					if($flst->Klassifizierung[$j]['flaeche'] != ''){
 						$wert=$flst->Klassifizierung[$j]['wert'];
@@ -1131,8 +1129,7 @@ class ALKIS {
       }
       if($formvars['klassifizierung']){
 				$csv .= '"';
-				$emzges_222 = 0; $emzges_223 = 0;
-				$flaeche_222 = 0; $flaeche_223 = 0;
+				$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;
 				for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 					if($flst->Klassifizierung[$j]['flaeche'] != ''){
 						$wert=$flst->Klassifizierung[$j]['wert'];
