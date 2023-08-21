@@ -26,12 +26,14 @@
 		}
 	}
 </script>
-<div id="neuer_datensatz_button">
-	<a class="btn btn-new" href="index.php?go=Menueeditor&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="Lege einen neuen Menüpunkt an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neues&nbsp;Menue</a>
-</div>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr align="center">
-		<td><h2><?php echo $strTitel; ?></h2></td>
+		<td>
+			<h2><?php echo $strTitel; ?></h2>
+			<div id="neuer_datensatz_button">
+				<a class="btn btn-new" href="index.php?go=Menueeditor&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="Lege einen neuen Menüpunkt an." class="fa fa-plus" style="color: white;"></i>&nbsp;Neues&nbsp;Menue</a>
+			</div>
+		</td>
 	</tr>
 	<tr>
 		<td>
