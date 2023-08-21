@@ -8841,7 +8841,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->Layergruppe_Editor();
 		}
 	}
@@ -8858,7 +8858,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->Layergruppe_Editor();
 	}
@@ -8957,7 +8957,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->invitations_list();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->invitation_formular();
 		}
 	}
@@ -8986,7 +8986,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->invitation_formular();
 	}
@@ -13020,7 +13020,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
@@ -13738,7 +13738,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
