@@ -180,10 +180,10 @@ class GUI {
 	}
 
 	function login() {
-		if ($this->formvars['format'] == 'json') {
+		if (in_array($this->formvars['format'], ['json', 'json_result'])) {
 			$this->mime_type = 'application/json';
 			$this->formvars['content_type'] = 'application/json';
-			$this->qlayerset[0]['shape'] = array(
+			$this->data = $this->qlayerset[0]['shape'] = array(
 				'success' => false,
 				'msg' => 'Login erforderlich'
 			);
