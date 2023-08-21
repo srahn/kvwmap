@@ -17,7 +17,7 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
-		if (!empty(GUI::$messages)) {
+		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
 				$errors[] = $message['msg'];
 			}
