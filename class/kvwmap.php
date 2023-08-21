@@ -6861,12 +6861,14 @@ echo '			</table>
 					$parts = explode('&original_name', $path);
 					$path = array_shift($parts);
 				}
-				if (!$only_thumb AND file_exists($path)) {
-					unlink($path);
-				}
-				$pathinfo = pathinfo($path);
-				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				if ($path != $doc_path) {
+					if (!$only_thumb AND file_exists($path)) {
+						unlink($path);
+					}
+					$pathinfo = pathinfo($path);
+					if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+						unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+					}
 				}
 			}
 		}
@@ -13015,7 +13017,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->main='menuedaten.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
