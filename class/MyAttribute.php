@@ -36,7 +36,25 @@ class MyAttribute {
 		return $input_type;
 	}
 
+	function is_valid() {
+		$results = array_reduce(
+			$this->validations,
+			function($results, $validation) {
+				if ($validation['validated'] AND $validation['valid'] == false) {
+					$results[] = $validation['result'];
+				}
+				return $results;
+			},
+			array()
+		);
+		return array(
+			'success' => (count($results) == 0),
+			'results' => $results
+		);
+	}
+
 	function as_form_html() {
+		$is_valid = $this->is_valid();
 		$html = '';
 		if (!($this->is_identifier and $this->value == '')) {
 			$html .= "<label class=\"fetter\" for=\"" . $this->name . "\">" . ucfirst($this->name) . ($this->is_mandatory() ? ' *' : '' ) . "</label>";
@@ -44,7 +62,10 @@ class MyAttribute {
 				$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 			}
 			else {
-				$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . $this->value . "\">";
+				$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . $this->value . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
+				if (!$is_valid['success']) {
+					$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
+				}
 			}
 		}
 		return $html;
