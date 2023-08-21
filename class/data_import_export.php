@@ -1254,6 +1254,7 @@ class data_import_export {
 			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
 			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
 		}
+		// TODO hier checken ob oid und maintable abgefragt werden konnten und valide sind.
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);

@@ -3,7 +3,7 @@
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <div class="center-outerdiv">
-	<div class="input-form">
+	<div class="input-form" style="min-width: 620px">
 		<h2><?php echo $this->titel; ?></h2>
 		<em><span class="px13"><? echo $this->strAsteriskRequired; ?></span></em><br><?php
 		echo $this->menue->as_form_html(); ?>

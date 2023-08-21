@@ -34,6 +34,7 @@
 	}
 	else {
 		$zusammenzeichnung_exists = false;
+		$layers_with_content = array();
 
 		if (count($this->zusammenzeichnungen['published']) > 0) {
 			$zusammenzeichnung = $this->zusammenzeichnungen['published'][0];
@@ -43,19 +44,40 @@
 			$zusammenzeichnung = $this->zusammenzeichnungen['draft'][0];
 			$zusammenzeichnung_exists = true;
 		}
-
-		if ($zusammenzeichnung->plan === false) {
-			$this->add_message('error', 'Die Zusammenzeichnung ' . $zusammenzeichnung->get('id') . ' hat keinen zugeordneten Plan!');
-		}
-		else {
-			$result = $zusammenzeichnung->plan->get_layers_with_content(
-					$this->xplankonverter_get_xplan_layers(),
-					$zusammenzeichnung->get($zusammenzeichnung->identifier)
-			);
-			if (! $result['success']) {
-				$this->add_message('error', $result['msg']);
+		if ($zusammenzeichnung_exists) {
+			if ($zusammenzeichnung->plan === false) {
+				$this->add_message('error', 'Die Zusammenzeichnung ' . $zusammenzeichnung->get('id') . ' hat keinen zugeordneten Plan!');
+				$plandaten = array(
+					'name' => $zusammenzeichnung->get('bezeichnung'),
+					'aktualitaet' => 'Die gefundene Zusammenzeichnung hat keinen zugeordneten Plan',
+					'gml_id' => '',
+					'first_ags' => 'keine Angaben',
+					'first_gemeinde_name' => 'keine Angaben',
+					'nummer' => '',
+					'rechtsstand' => '0'
+				);
 			}
-			$layers_with_content = $result['layers_with_content'];
+			else {
+				$zusammenzeichnung->plan->get_center_coord();
+				$plandaten = array(
+					'name' => $zusammenzeichnung->plan->get('name'),
+					'aktualitaet' => $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet),
+					'gml_id' => $zusammenzeichnung->plan->get('gml_id'),
+					'first_ags' => $zusammenzeichnung->plan->get_first_ags(),
+					'first_gemeinde_name' => $zusammenzeichnung->plan->get_first_gemeinde_name(),
+					'nummer' => $zusammenzeichnung->plan->get('nummer'),
+					'rechtsstand' => $zusammenzeichnung->plan->get('rechtsstand')
+				);
+
+				$result = $zusammenzeichnung->plan->get_layers_with_content(
+						$this->xplankonverter_get_xplan_layers($zusammenzeichnung->get('planart')),
+						$zusammenzeichnung->get($zusammenzeichnung->identifier)
+				);
+				if (! $result['success']) {
+					$this->add_message('error', $result['msg']);
+				}
+				$layers_with_content = $result['layers_with_content'];
+			}
 		}
 
 		function get_rechtsstand($rechtsstand) {
@@ -261,15 +283,17 @@
 				ondragleave="$(this).removeClass('dragover')"
 			>
 				<span id="upload_zusammenzeichnung_msg"></span>
-			</div><p>
+			</div><p><?
+			if ($this->user->id == 3) { ?>
+				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
+			} ?>
 			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()">
 			<div id="upload_result_msg_div" class="hidden"></div>
 		</div><?
 
-		if ($zusammenzeichnung_exists) {
-			$zusammenzeichnung->plan->get_center_coord(); ?>
+		if ($zusammenzeichnung_exists) { ?>
 			<div id="zusammenzeichnung" class="centered_div">
-				Stand: <? echo $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet); ?>
+				Stand: <? echo $plandaten['aktualitaet']; ?>
 				<? if ($zusammenzeichnung->art == 'draft') {
 					?> <span class="red">Noch keine Dienste veröffentlicht!</a> <!--a href="#">jetzt veröffentlichen</a//--><?
 				} ?>
@@ -279,32 +303,34 @@
 				<div id="plandaten_div" class="content_div">
 					<table>
 						<tr>
-							<td>Name:</td><td><? echo $zusammenzeichnung->plan->get('name'); ?><td>
+							<td>Name:</td><td><? echo $plandaten['name']; ?><td>
 						</tr>
 						<tr>
-							<td>Nummer:</td><td><? echo $zusammenzeichnung->plan->get('nummer'); ?><td>
+							<td>Nummer:</td><td><? echo $plandaten['nummer']; ?><td>
 						</tr>
 						<tr>
-							<td>GML-ID:</td><td><? echo $zusammenzeichnung->plan->get('gml_id'); ?><td>
+							<td>GML-ID:</td><td><? echo $plandaten['gml_id']; ?><td>
 						</tr>
 						<tr>
-							<td>Gemeinde:</td><td><? echo $zusammenzeichnung->plan->get_first_gemeinde_name(); ?> (<? echo $zusammenzeichnung->plan->get_first_ags(); ?>)<td>
+							<td>Gemeinde:</td><td><? echo $plandaten['first_gemeinde_name']; ?> (<? echo $plandaten['first_gemeinde_ags']; ?>)<td>
 						</tr>
 						<tr>
-							<td>Rechtsstand:</td><td><? echo get_rechtsstand($zusammenzeichnung->plan->get('rechtsstand')); ?> (<? echo $zusammenzeichnung->plan->get('rechtsstand'); ?>)<td>
+							<td>Rechtsstand:</td><td><? echo get_rechtsstand($plandaten['rechtsstand']); ?> (<? echo $plandaten['rechtsstand']; ?>)<td>
 						</tr>
 						<tr>
-							<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet); ?><td>
+							<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $plandaten['aktualitaet']; ?><td>
 						</tr>
 						<tr>
 							<td>Konvertierung ID:</td><td><? echo $zusammenzeichnung->get_id(); ?><td>
 						</tr>
 						<tr>
 							<td align="center"><!--img src="<? #querymap oder Kartenauszug ?>"//--></td>
-							<td>
-								<a title="Details zum Plan im Sachdatenformular anzeigen." href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Plandetails anzeigen</a><br>
-								<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><br>
-								<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a>
+							<td><?
+								if ($zusammenzeichnung->plan != false) { ?>
+									<a title="Details zum Plan im Sachdatenformular anzeigen." href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Plandetails anzeigen</a><br>
+									<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><br>
+									<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a><?
+								} ?>
 							</td>
 						</tr>
 					</table>
@@ -460,7 +486,6 @@
 		} ?>
 		<script>
 			function toggle_head(head_div) {
-				console.log('toggle_head');
 				$(head_div).children().toggleClass('fa-caret-down fa-caret-right');
 				$(head_div).next().toggle();
 			}

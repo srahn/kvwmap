@@ -13,6 +13,7 @@ function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(' eq ', '=', $exp);
 	$exp = str_replace(' ne ', '!=', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
 	
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
 		if (strpos($exp, '/') === 0) {		# regex
@@ -1699,7 +1700,7 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	exec('gs -q -I / -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
 	return $output[0];
 }
 

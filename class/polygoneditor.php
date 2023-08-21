@@ -102,16 +102,16 @@ class polygoneditor {
 	 * @return string The WKT MultiLineString
 	 */
 	function get_multipolygon($polygon) {
-		return "ST_Multi(" . $this->get_polygon($polygon) . ")";
+		return "ST_Multi(ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . "))";
 	}
 
 	/**
-	 * Function returns a WKT Polygon from a polygon, transformed from client to layer system.
+	 * Function returns a WKT Polygon from a polygon or multipolygon by using only the first ring, transformed from client to layer system.
 	 * @params string $polygon The Polygon as comma separated text
 	 * @return string The WKT Polygon
 	 */
 	function get_polygon($polygon) {
-		return "ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . ")";
+		return "ST_geometryN(ST_GeometryFromText('" . $polygon . "', " . $this->clientepsg . "), 1)";
 	}
 
 	/**

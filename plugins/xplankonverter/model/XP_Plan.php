@@ -10,7 +10,10 @@ class XP_Plan extends PgObject {
 	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
+		$this->planartShort = strtolower(substr($planart, 0, 1));
 		$this->tableName = $this->planartAbk . '_plan';
+		$this->shortName = $this->planartShort . 'plan';
+		$this->shortNamePlural = $this->planartShort . 'plaene';
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
@@ -47,8 +50,9 @@ class XP_Plan extends PgObject {
 	}
 
 	/**
-		Return names of layer that have content from the plan
-	*/
+	 * Return names of layer that have content from the plan
+	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
+	 */
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
@@ -227,16 +231,31 @@ class XP_Plan extends PgObject {
 		}
 	}
 
+	/**
+	 * Löscht textabschnitte des Planes
+	 * 
+	 */
+	function destroy_associated_textabschnitte() {
+		$sql = "
+			DELETE FROM
+				xplan_gml." . $this->planartAbk . "_textabschnitt ta
+			WHERE
+				ta.konvertierung_id = " . $this->get('konvertierung_id') . "
+		";
+		#echo '<br>SQL zum Löschen der Textabschnitte der Konvertierung' . $this->get('konvertierung_id') . ': ' . $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
+
 	/*
-	* Löscht den Plan und alles was damit verbunden ist
-	* Löscht die Bereiche
-	*/
+	 * Löscht den Plan und alles was damit verbunden ist
+	 */
 	function destroy() {
 		$this->debug->show('Objekt XP_Plan gml_id: ' . $this->get('gml_id') . ' destroy', false);
 		$bereiche = $this->get_bereiche();
-		foreach($bereiche AS $bereich) {
+		foreach ($bereiche AS $bereich) {
 			$bereich->destroy();
 		}
+		$this->destroy_associated_textabschnitte();
 		$this->delete();
 	}
 }

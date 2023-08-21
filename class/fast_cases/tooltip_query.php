@@ -1833,7 +1833,7 @@ class db_mapObj{
 		return $pfad;
 	}	
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;
 		$attributes = array();
 		$einschr = '';
