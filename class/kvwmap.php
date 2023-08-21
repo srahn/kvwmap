@@ -8688,7 +8688,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->Layergruppe_Editor();
 		}
 	}
@@ -8705,7 +8705,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->Layergruppe_Editor();
 	}
@@ -8804,7 +8804,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->invitations_list();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->invitation_formular();
 		}
 	}
@@ -8833,7 +8833,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			);
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->invitation_formular();
 	}
@@ -12791,7 +12791,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->main='menuedaten.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
@@ -12809,7 +12809,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
@@ -13488,7 +13488,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
