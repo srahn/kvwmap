@@ -1936,7 +1936,7 @@ FROM
 			}
 			$sql.=")";
 		}
-		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		$sql.= $this->build_temporal_filter(array('f', 'p', 'anschrift', 'n', 'g', 'b'));
 		if ($formvars['alleiniger_eigentuemer']) {
 			$sql.= "
 				AND NOT EXISTS (
