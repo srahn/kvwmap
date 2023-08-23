@@ -180,10 +180,10 @@ class GUI {
 	}
 
 	function login() {
-		if ($this->formvars['format'] == 'json') {
+		if (in_array($this->formvars['format'], ['json', 'json_result'])) {
 			$this->mime_type = 'application/json';
 			$this->formvars['content_type'] = 'application/json';
-			$this->qlayerset[0]['shape'] = array(
+			$this->data = $this->qlayerset[0]['shape'] = array(
 				'success' => false,
 				'msg' => 'Login erforderlich'
 			);
@@ -13020,7 +13020,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_values($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';

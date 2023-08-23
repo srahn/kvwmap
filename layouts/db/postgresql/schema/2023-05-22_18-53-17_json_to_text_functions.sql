@@ -71,6 +71,43 @@ BEGIN;
 			END;
 	$BODY$;
 
+	CREATE OR REPLACE FUNCTION public.gdi_codelist_extract_ids(
+		input_value anyelement,
+		only_first boolean)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+	AS $BODY$
+	DECLARE
+		is_array boolean;
+		result text;
+	BEGIN
+		is_array = pg_typeof(input_value)::text LIKE '%[]';
+		IF input_value IS NULL THEN
+			RETURN NULL;
+		ELSE
+			IF is_array THEN
+				IF array_length(input_value, 1) IS NULL OR array_length(input_value, 1) = 0 THEN
+					RETURN NULL;
+				END IF;
+				IF only_first THEN
+					RETURN (input_value[1]).id;
+				ELSE
+					SELECT
+						string_agg((dt).id, ',')
+					FROM
+						unnest($1) AS dt
+					INTO result;
+					RETURN result;
+				END IF;
+			ELSE
+				RETURN (input_value).id;
+			END IF;
+		END IF;
+	END;
+	$BODY$;
+
 	CREATE OR REPLACE FUNCTION public.gdi_codelist_json_to_text(
 		codelist json)
 			RETURNS text
