@@ -693,7 +693,9 @@ class MyObject {
 	}
 
 	function validate_not_null($key, $msg = '') {
-		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		if ($msg == '') {
+			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		}
 
 		return ($this->get($key) != '' ? '' : $msg);
 	}

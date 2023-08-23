@@ -8841,8 +8841,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_values($results));
-			$this->Layergruppe_Editor();
+			$this->main = 'layergruppe_formular.php';
+			$this->output();
 		}
 	}
 
@@ -8851,16 +8851,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
 		$results = $this->layergruppe->validate();
+
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
-		else {
-			$this->add_message('array', array_values($results));
-		}
-		$this->Layergruppe_Editor();
+		$this->main = 'layergruppe_formular.php';
+		$this->output();
 	}
 
 	function Layergruppe_Loeschen(){

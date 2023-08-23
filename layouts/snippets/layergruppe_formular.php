@@ -28,8 +28,9 @@
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')" class="layergruppe-button">
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorhigen." type="reset" name="reset1" class="layergruppe-button">
 							<input type="hidden" name="selected_group_id" value="<?php echo  $this->layergruppe->get('id'); ?>" class="layergruppe-button"><?php
-							if ($this->formvars['selected_layer_id']) { ?>
-								<input value="zurück zum Layer" title="zurück zum Layer" type="button" name="selected_layer_id" class="layergruppe-button" onclick="gotoLayerEditor(<? echo $this->formvars['selected_layer_id']; ?>)"><?
+							if (intval($this->formvars['selected_layer_id']) > 0) { ?>
+								<input value="<? echo $this->formvars['selected_layer_id']; ?>" type="hidden" name="selected_layer_id">
+								<input value="zurück zum Layer" title="zurück zum Layer" type="button" class="layergruppe-button" onclick="gotoLayerEditor(<? echo $this->formvars['selected_layer_id']; ?>)"><?
 							}
 						}
 						else { ?>
