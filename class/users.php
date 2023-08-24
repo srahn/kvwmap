@@ -606,10 +606,14 @@ class account {
 
 	function getLayer($logged) {
 		# Abfrage der Anzahl der Layer
-		$sql ='SELECT COUNT(Layer_ID) AS layers FROM layer';
-		if ($logged) {
-			$sql.=' WHERE logconsume="1"';
-		}
+		$sql = "
+			SELECT
+				COUNT(Layer_ID) AS layers
+			FROM
+				layer
+			WHERE
+				" . ($logged ? "logconsume = '1'" : "true") . "
+		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }

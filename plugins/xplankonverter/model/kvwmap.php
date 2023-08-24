@@ -469,7 +469,7 @@
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
-		# Setze Metadaten
+		$GUI->xplog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$bb = $admin_stelle->MaxGeorefExt;
 		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
@@ -488,9 +488,8 @@
 			return $result;
 		}
 		$GUI->service_layers = $result['layers_with_content'];
-
 		$GUI->service_layernames = array_keys($GUI->service_layers);
-		#echo '<br>pk service_layernames: ' . print_r($GUI->service_layernames, true);
+		$GUI->xplog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
 
 		$layers_to_remove = array();
 
@@ -499,6 +498,8 @@
 			if (in_array($layer->name, $GUI->service_layernames)) {
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
+				# Extent mit Ausdehnung von adminstelle überschreiben
+				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer

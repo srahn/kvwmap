@@ -74,6 +74,13 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_zusammenzeichnung
 */
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
+	$GUI->xplog = new LogFile(
+		XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '') . '/xplankonverter.log',
+		'text',
+		'xplankonverter',
+		'xplankonverter Logfile',
+		true
+	);
 	function isInStelleAllowed($stelle, $requestStelleId) {
 		global $GUI;
 		if ($stelle->id == $requestStelleId) {
@@ -239,6 +246,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		}
 
 		$GUI->debug->write('send_error: ' . $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg'], 4, false);
+		$GUI->xplog->write('error: ' . $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg']);
 
 		header('Content-Type: application/json');
 		echo json_encode(array(
@@ -327,7 +335,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 function go_switch_xplankonverter($go) {
 	global $GUI;
 	switch ($go) {
-
 		/**
 		 * Check if objects falling into defined classes
 		 * @return integer 'The number of objects that fall not into defined classes' 
@@ -593,7 +600,7 @@ function go_switch_xplankonverter($go) {
 
 			$GUI->output();
 		} break;
-	*/
+		*/
 		case 'xplankonverter_shapefiles_index': {
 			$GUI->sanitize([
 				'konvertierung_id' => 'int'
@@ -1045,6 +1052,7 @@ function go_switch_xplankonverter($go) {
 		* je nach dem ob eine Konvertierung-ID übergeben wurde oder nicht
 		*/
 		case 'xplankonverter_create_geoweb_service' : {
+			$GUI->xplog->write('case xplankonverter_create_geoweb_service gestartet.');
 			$GUI->data = array(
 				'success' => true,
 				'msg' => 'Landesdienst erfolgreich angelegt.'
@@ -1060,11 +1068,12 @@ function go_switch_xplankonverter($go) {
 
 			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);	
 			if ($konvertierung_id == '') {
-				# Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml
+				$GUI->xplog->write('Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml');
 
 				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . '/' . $GUI->plan_abk_plural);
 				if (! $result['success']) {
 					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
+					$GUI->xplog->write('error: ' . $msg);
 					$GUI->data = array(
 						'success' => false,
 						'msg' => $msg
@@ -1074,9 +1083,11 @@ function go_switch_xplankonverter($go) {
 				else {
 					$result = $GUI->write_mapfile($result['mapfile'], $GUI->plan_abk_plural);
 					if (!$result['success']) {
+						$GUI->xplog->write('error: ' . $result['msg']);
 						$GUI->data = $result;
 						$GUI->add_message('error', $result['msg']);
 					}
+					$GUI->xplog->write('mafile: ' . $result['mapfile'] . ' geschrieben.');
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
 				$GUI->output();
@@ -1093,9 +1104,9 @@ function go_switch_xplankonverter($go) {
 					break;
 				}
 
-				# Erzeugt den Geowebservice für einen einzelnen Plan
+				$GUI->xplog->write('Erzeugt den Geowebservice für einen einzelnen Plan der Stelle ' . $GUI->Stelle->id);
 				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
-				if (! $result['success']) {
+				if (!$result['success']) {
 					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
 					break;
 				}
@@ -1355,9 +1366,9 @@ function go_switch_xplankonverter($go) {
 					$bereich = $pg_object->find_by('gml_id', $bereich_gml_id);
 					$konvertierung_id = $bereich->get('konvertierung_id');
 
-#					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id, 'RP-Plan');
-#					$plan = $bereich->get_plan();
-#					$konvertierung_id = $plan->get('konvertierung_id');
+				#					$bereich = XP_Bereich::find_by_id($GUI, 'gml_id', $bereich_gml_id, 'RP-Plan');
+				#					$plan = $bereich->get_plan();
+				#					$konvertierung_id = $plan->get('konvertierung_id');
 				}
 			}
 
@@ -1725,7 +1736,7 @@ function go_switch_xplankonverter($go) {
 			$GUI->konvertierung->create_edited_shapes();
 			if (!$GUI->konvertierung->download_files_exists('edited_shapes')) {
 				$GUI->add_message('warning', 'Es sind keine Dateien für den Export vorhanden.');
-//				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
+				//				$GUI->main = '../../plugins/xplankonverter/view/konvertierungen.php';
 				$GUI->formvars['planart'] = 'BP-Plan';
 				$GUI->main = '../../plugins/xplankonverter/view/plaene.php';
 				$GUI->output();
@@ -1776,7 +1787,7 @@ function go_switch_xplankonverter($go) {
 		case 'xplankonverter_download_xplan_gml' : {
 			if ($GUI->xplankonverter_is_case_forbidden()) {
 				include_once('plugins/xplankonverter/view/xplankonverter_download_files_not_allowed.php');
-#				echo 'Anwendungsfall nicht erlaubt!';
+			#				echo 'Anwendungsfall nicht erlaubt!';
 				return;
 			}
 			$filename = XPLANKONVERTER_FILE_PATH . $GUI->formvars['konvertierung_id'] . '/xplan_gml/xplan_' . $GUI->formvars['konvertierung_id'] . '.gml';
@@ -2189,10 +2200,10 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-#			if ($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml') {
-#				# Lösche Plan der Konvertierung
-#				$GUI->konvertierung->plan->destroy();
-#			}
+				#			if ($GUI->formvars['xplan_gml_path'] == 'reindexed_xplan_gml') {
+				#				# Lösche Plan der Konvertierung
+				#				$GUI->konvertierung->plan->destroy();
+				#			}
 
 			# Anlegen von Plan und Bereich der Zusammenzeichnung
 			$result = $GUI->konvertierung->create_plaene_from_gmlas('xplan_gmlas_tmp_' . $GUI->user->id, $GUI->plan_class, $konvertierung_id, true);
@@ -2275,7 +2286,7 @@ function go_switch_xplankonverter($go) {
 		case 'xplankonverter_extract_gml_to_form' : {
 			$GUI->checkCaseAllowed($go);
 
-#			if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
+			#if (!isset($_POST['gml_file']) or empty($_POST['gml_file'])) {
 			$upload_dir = XPLANKONVERTER_FILE_PATH . 'tmp/' . session_id() . '/';
 			$gml_file = $upload_dir . $GUI->formvars['gml_file'];
 			if (!is_file($gml_file)) {
@@ -2455,6 +2466,9 @@ function go_switch_xplankonverter($go) {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
+	if (!$GUI->goNotExecutedInPlugins AND !empty($GUI->xplog)) {
+		$GUI->xplog->close();
+	};
 }
 
 ?>

@@ -15,8 +15,8 @@ class Gml_extractor {
 	}
 
 	/**
-	* Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
-	*/
+	 * Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
+	 */
 	function import_gml_to_db() {
 		global $GUI;
 		$result = $this->get_source_srid();
@@ -152,8 +152,8 @@ class Gml_extractor {
 		#$this->import_gml_to_db();
 		#$this->extract_to_form($classname);
 		/**
-			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
-		*/
+		 *ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
+		 */
 		global $GUI;
 		
 		$result = $this->get_source_srid();
@@ -1105,11 +1105,22 @@ class Gml_extractor {
 					GROUP BY
 						externereferenzlink_sub.parent_id
 				) externeref ON ta.id = externeref.parent_id" : "");
-		$inverszu_texte_xp_plan = "CASE WHEN plan_texte.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM plan_texte.parent_id)))::text::uuid END";
+
+		if ($this->check_if_table_exists_in_schema($prefix . "_plan_texte", $this->gmlas_schema)) {
+			$inverszu_texte_xp_plan_insert = ",
+				inverszu_texte_xp_plan";
+			$inverszu_texte_xp_plan_select = ",
+				CASE WHEN plan_texte.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM plan_texte.parent_id)))::text::uuid END AS inverszu_texte_xp_plan";
+			$inverszu_texte_xp_plan_table = "
+				LEFT JOIN " . $this->gmlas_schema . "." . $prefix . "_plan_texte plan_texte ON ta.id = plan_texte.href_" . $prefix . "_textabschnitt_pkid";
+		}
+
 		if ($prefix == 'bp' AND $this->check_if_table_exists_in_schema("bp_wohngebaeudeflaeche_abweichungtext", $this->gmlas_schema)) {
-			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "
-				CASE WHEN wgf_at.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM wgf_at.parent_id)))::text::uuid END";
-			$bp_wohngebaeudeflaeche_abweichungtext = "
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert = ",
+				inverszu_abweichungtext_bp_wohngebaeudeflaeche";
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_select = ",
+				CASE WHEN wgf_at.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM wgf_at.parent_id)))::text::uuid END AS inverszu_abweichungtext_bp_wohngebaeudeflaeche";
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_table = "
 				LEFT JOIN " . $this->gmlas_schema . ".bp_wohngebaeudeflaeche_abweichungtext AS wgf_at ON ta.id = wgf_at.bp_textabschnitt_pkid";
 			for ($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
 				#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
@@ -1117,8 +1128,7 @@ class Gml_extractor {
 			}
 		}
 		else {
-			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "NULL";
-			$bp_wohngebaeudeflaeche_abweichungtext = '';
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert = $inverszu_abweichungtext_bp_wohngebaeudeflaeche_select = $inverszu_abweichungtext_bp_wohngebaeudeflaeche_table = "";
 		}
 		# Textabschnitte zum Planobjekt, Assoziation: texte
 		$sql = "
@@ -1130,9 +1140,9 @@ class Gml_extractor {
 				rechtscharakter,
 				reftext,
 				user_id,
-				konvertierung_id,
-				inverszu_texte_xp_plan,
-				inverszu_abweichungtext_bp_wohngebaeudeflaeche
+				konvertierung_id" .
+				$inverszu_texte_xp_plan_insert .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert . "
 			)
 			SELECT
 				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM ta.id)))::text::uuid AS gml_id,
@@ -1142,13 +1152,13 @@ class Gml_extractor {
 				ta.rechtscharakter::xplan_gml." . $prefix . "_rechtscharakter AS rechtscharakter,
 				" . $reftext . " AS reftext,
 				" . $user_id . " AS user_id,
-				" . $konvertierung_id . " AS konvertierung_id,
-				" . $inverszu_texte_xp_plan . " AS inverszu_texte_xp_plan,
-				" . $inverszu_abweichungtext_bp_wohngebaeudeflaeche . " AS inverszu_abweichungtext_bp_wohngebaeudeflaeche
+				" . $konvertierung_id . " AS konvertierung_id" .
+				$inverszu_texte_xp_plan_select .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_select . "
 			FROM
-				" . $this->gmlas_schema . "." . $table . " ta
-				LEFT JOIN " . $this->gmlas_schema . "." . $prefix . "_plan_texte plan_texte ON ta.id = plan_texte.href_" . $prefix . "_textabschnitt_pkid" .
-				$bp_wohngebaeudeflaeche_abweichungtext .
+				" . $this->gmlas_schema . "." . $table . " ta" .
+				$inverszu_texte_xp_plan_table .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_table .
 				$reftext_table . "
 		";
 		#echo '<br>SQL zum Eintragen der Textabschnitte zum Plan: ' . $sql; exit;
@@ -1169,10 +1179,17 @@ class Gml_extractor {
 		);
 		$select_reftextinhalte = array();
 		foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
+			#$select_reftextinhalte[] = "
+			#	SELECT
+			#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+			#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+			#	FROM
+			#		" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+			#";
 			$select_reftextinhalte[] = "
 				SELECT
 					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
-					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM reftextinhalt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
 				FROM
 					" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
 			";
@@ -1249,8 +1266,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* This function builds the basic xplan_gmlas tables for the basisobjekte of all schemas (xp, bp, fp, lp, rp, so)
-	*/
+	 * This function builds the basic xplan_gmlas tables for the basisobjekte of all schemas (xp, bp, fp, lp, rp, so)
+	 */
 	function build_basic_tables() {
 		# Prepare schema 
 		if ($this->check_if_schema_exists($this->gmlas_schema)) {
@@ -2216,8 +2233,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
-	*/
+	 * Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
+	 */
 	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
@@ -2247,8 +2264,10 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns all bereiche of a specific konvertierung
-	*/
+	 * Returns all bereiche of a specific konvertierung
+	 * @param integer $konvertierung_id Die ID der Konvertierung für die die ids der Bereiche abgefragt werden.
+	 * @return array Ein assoziatives Array mit dem Schlüssel gml_id welches die gml_ids der Bereiche enthält.
+	 */
 	function get_all_bereiche_ids_of_konvertierung($konvertierung_id) {
 		# requests xp_bereich to work for all schemata
 		$sql = "
@@ -2265,8 +2284,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns the SQL of a specified regel for a specific class in a specific bereich with a specific geometry type
-	*/
+	 * Returns the SQL of a specified regel for a specific class in a specific bereich with a specific geometry type
+	 */
 	function get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($gmlas_class, $bereich_id, $geom_type) {
 		$gml_class = $gmlas_class; # Is this always the case?
 		$gmlas_attributes = $this->get_attributes_with_values_for_class_in_schema($gmlas_class, $this->gmlas_schema);
