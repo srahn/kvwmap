@@ -180,10 +180,10 @@ class GUI {
 	}
 
 	function login() {
-		if ($this->formvars['format'] == 'json') {
+		if (in_array($this->formvars['format'], ['json', 'json_result'])) {
 			$this->mime_type = 'application/json';
 			$this->formvars['content_type'] = 'application/json';
-			$this->qlayerset[0]['shape'] = array(
+			$this->data = $this->qlayerset[0]['shape'] = array(
 				'success' => false,
 				'msg' => 'Login erforderlich'
 			);
@@ -257,22 +257,6 @@ class GUI {
 			getenv('HTTP_USER_AGENT')
 		);
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
-		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
-			switch ($this->login_failed_reason) {
-				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
-				} break;
-				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
-				} break;
-				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
-				} break;
-				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
-				} break;
-			}
-		}
 		$this->output();
 	}
 
@@ -6860,12 +6844,14 @@ echo '			</table>
 					$parts = explode('&original_name', $path);
 					$path = array_shift($parts);
 				}
-				if (!$only_thumb AND file_exists($path)) {
-					unlink($path);
-				}
-				$pathinfo = pathinfo($path);
-				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				if ($path != $doc_path) {
+					if (!$only_thumb AND file_exists($path)) {
+						unlink($path);
+					}
+					$pathinfo = pathinfo($path);
+					if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+						unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+					}
 				}
 			}
 		}
@@ -8855,8 +8841,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_value($results));
-			$this->Layergruppe_Editor();
+			$this->main = 'layergruppe_formular.php';
+			$this->output();
 		}
 	}
 
@@ -8865,16 +8851,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
 		$results = $this->layergruppe->validate();
+
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
-		else {
-			$this->add_message('array', array_value($results));
-		}
-		$this->Layergruppe_Editor();
+		$this->main = 'layergruppe_formular.php';
+		$this->output();
 	}
 
 	function Layergruppe_Loeschen(){
@@ -8971,7 +8956,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->invitations_list();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->invitation_formular();
 		}
 	}
@@ -9000,7 +8985,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->invitation_formular();
 	}
@@ -9999,7 +9984,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# das Listen-DIV neu geladen werden (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
-			$this->output();
 		}
 		else {
 			$this->data = array(
@@ -13011,11 +12995,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', 'name');
-			$this->titel='Menüdaten';
-			$this->main='menuedaten.php';
+			$this->titel = 'Menüdaten';
+			$this->main = 'menuedaten.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
+			$this->titel = 'Menü Editor';
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
@@ -13033,7 +13019,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
@@ -13751,7 +13738,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
@@ -15742,10 +15729,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
 		$refmap->set('width', $width);
 		$refmap->set('height', $height);
-		$refmap->setextent($minx, $miny, $maxx, $maxy);
-#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
-#		$refmap->extent->project($projFROM, $projTO);
+		$extent = new rectObj();
+		$extent->setextent($minx, $miny, $maxx, $maxy);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$extent->project($projFROM, $refmap->projection);
+		$refmap->setextent($extent->minx, $extent->miny, $extent->maxx, $extent->maxy);
 		# zoomen
 		$oPixelPos = ms_newPointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
@@ -16348,9 +16336,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
-				$sql.=$subquery;
-				$sql.=') AS fooForMaxLayerExtent) as foo';
+				$sql = '
+					SELECT 
+						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
+						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
+						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
+						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
+					FROM (
+						SELECT 
+							st_transform(
+								st_setsrid(
+									st_extent(' . $this->attributes['the_geom'] . '), 
+									' . $layer[0]['epsg_code'] . '
+								), 
+								'.$this->user->rolle->epsg_code.'
+							) AS extent 
+						FROM (
+							SELECT 
+								' . $subquery . '
+						) AS fooForMaxLayerExtent
+					) as foo';
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
@@ -19029,9 +19034,15 @@ class db_mapObj{
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
-				array('sync', 'cluster_option')
+				array('sync')
 			);
 		}
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
+			);
+		}		
 		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
@@ -21261,12 +21272,12 @@ class Document {
   }
 
   function save_frame($formvars, $_files, $stelle_id){
-    if($formvars['Name']){
+    if ($formvars['Name']){
       $frames = $this->load_frames($this->Stelle->id, NULL);
-      for($i = 0; $i < count($frames); $i++){
-        if($frames[$i]['Name'] == $formvars['Name']){
-          $this->Document->fehlermeldung = 'Name schon vergeben';
-        return;
+      for ($i = 0; $i < count($frames); $i++) {
+        if ($frames[$i]['Name'] == $formvars['Name']) {
+					GUI::add_message_('error', 'Name schon vergeben');
+					return;
         }
       }
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);

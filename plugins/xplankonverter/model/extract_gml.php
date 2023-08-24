@@ -108,12 +108,15 @@ class Gml_extractor {
 				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
 				$referenzen = json_decode($r_value);
 				if (is_array($referenzen) AND count($referenzen) > 0) {
+					/*
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
 						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
+					*/
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
+					#echo '<br>fill ' . $r_key . ' with: ' . $r_value;
 				}
 			}
 			$GUI->formvars['attributenames'][] = $r_key;
@@ -233,12 +236,15 @@ class Gml_extractor {
 				# TODO Das ist die Stelle wo man prüfen kann ob die hochgeladenen Dateien mit den referenzurl übereinstimmen
 				$referenzen = json_decode($r_value);
 				if (is_array($referenzen) AND count($referenzen) > 0) {
+					/*
 					$document_url = $GUI->user->rolle->getLayer($GUI->formvars['chosen_layer_id'])[0]['document_url'];
 					foreach ($referenzen AS $referenz) {
 						$path_parts = pathinfo(basename($referenz->referenzurl));
 						$referenz->referenzurl = $document_url . $path_parts['filename'] . '-' . $GUI->formvars['random_number'] . '.' . $path_parts['extension']; 
 					}
+					*/
 					$r_value = str_replace('\/', '/', json_encode($referenzen));
+					#echo '<br>fill ' . $r_key . ' with: ' . $r_value;
 				}
 			}
 			$GUI->formvars['attributenames'][] = $r_key;
