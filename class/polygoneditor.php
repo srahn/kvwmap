@@ -125,7 +125,7 @@ class polygoneditor {
 		$sql = "
 			SELECT
 				ST_Transform(
-					" . (strtoupper(substr($options['geomtype'], 0, 5)) == 'MULTI' ? $this->get_multipolygon($options['polygon']) : $this->get_polygon($options['polygon'])) . ",
+					" . ($options['geomtype'] == 'POLYGON' ? $this->get_polygon($options['polygon']) : $this->get_multipolygon($options['polygon'])) . ",
 					" . $this->layerepsg . "
 				) AS wkb_geometry
 		";

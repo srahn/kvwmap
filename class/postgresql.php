@@ -993,12 +993,11 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
-					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
-					 f_geometry_column = '" . $geomcolumn . "')
+					 f_geometry_column = '" . $geomcolumn . "'),
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
