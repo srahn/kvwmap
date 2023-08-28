@@ -291,13 +291,20 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
-		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
+		if ($this->get('icon') != '') {
+			$legendgraphic = $this->get('icon');
+		}
+		elseif (count($classes) > 0) {
+			$legendgraphic = $classes[0]->get('legendgraphic');
+		}
+		else {
+			$legendgraphic = 'graphics/leer.gif';
+		}
 		$layerdef = (Object) array(
-			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'options' => $this->get_baselayer_options(),
 			'shortLabel' => $this->get('Name'),
-			'img' => $legendgraphic,
+			'img' => URL . APPLVERSION . $legendgraphic,
 			'url' => $this->get_baselayer_url()
 		);
 		return $layerdef;
@@ -544,8 +551,8 @@ class Layer extends MyObject {
 			fclose($fp);
 
 			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");
-			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html';
-			fwrite($fp, $this->get_wms_template_body($data_attribute_names, $ansicht));
+			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html' . 'oid-Spalte: ' . $this->get('oid');
+			fwrite($fp, $this->get_wms_template_body($this->get_name('alias'), $data_attribute_names, $ansicht));
 			fclose($fp);
 		}
 	}
@@ -575,8 +582,7 @@ class Layer extends MyObject {
 			border: 1px solid #cccccc;
 			padding: 5px;
 		}
-</style>
-<h2>" . $layer_name . "</h2>";
+</style>";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
 <table>
@@ -593,11 +599,13 @@ class Layer extends MyObject {
 		return $html;
 	}
 
-	function get_wms_template_body($attributes, $ansicht = 'Tabelle') {
-		$html = "<!-- MapServer Template -->";
+	function get_wms_template_body($layer_name, $attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->
+  <h2>" . $layer_name . "</h2>
+  Objekt: [item name=" . $this->get('oid') . " escape=none]";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
-	<tr>";
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">";
 			foreach ($attributes AS $attribute) {
 				$html .= "
 		<th>
@@ -612,7 +620,7 @@ class Layer extends MyObject {
 <table>";
 			foreach ($attributes AS $attribute) {
 				$html .= "
-	<tr>
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">
 		<th align=\"left\">" . $attribute['alias'] . "</th>
 		<td>[item name=" . $attribute['name'] . " escape=none]</td>
 	</tr>";

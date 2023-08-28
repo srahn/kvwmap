@@ -180,11 +180,21 @@ class GUI {
 	}
 
 	function login() {
-		$this->expect = array('login_name', 'passwort', 'mobile');
-		if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
-			$this->expect[] = 'go';
+		if (in_array($this->formvars['format'], ['json', 'json_result'])) {
+			$this->mime_type = 'application/json';
+			$this->formvars['content_type'] = 'application/json';
+			$this->data = $this->qlayerset[0]['shape'] = array(
+				'success' => false,
+				'msg' => 'Login erforderlich'
+			);
 		}
-		$this->gui = LOGIN;
+		else {
+			$this->expect = array('login_name', 'passwort', 'mobile');
+			if (array_key_exists('go', $this->formvars) AND $this->formvars['go'] == 'logout') {
+				$this->expect[] = 'go';
+			}
+			$this->gui = LOGIN;
+		}
 		$this->output();
 	}
 
@@ -247,22 +257,6 @@ class GUI {
 			getenv('HTTP_USER_AGENT')
 		);
 		$this->gui = (file_exists(LOGIN) ? LOGIN : SNIPPETS . 'login.php');
-		if (strpos(file_get_contents($this->gui), 'include(LAYOUTPATH . \'languages/login_\'') === false) {
-			switch ($this->login_failed_reason) {
-				case 'authentication' : {
-					$this->add_message('error', 'Passwort ' . ($this->formvars['num_failed'] > 0 ? $this->formvars['num_failed'] . ' mal' : '') . ' falsch eingegeben!');
-				} break;
-				case 'login_is_locked' : {
-					$this->add_message('error', 'Der Zugang ist wegen mehrfacher falscher Eingabe bis<br>' . (new DateTime($this->user->login_locked_until))->format('d.m.Y H:i:s') . ' gesperrt!');
-				} break;
-				case 'expired' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers ist abgelaufen.');
-				} break;
-				case 'not_yet_started' : {
-					$this->add_message('error', 'Der zeitlich eingeschränkte Zugang des Nutzers hat noch nicht begonnen.');
-				} break;
-			}
-		}
 		$this->output();
 	}
 
@@ -1669,13 +1663,14 @@ echo '			</table>
 	}
 
 	/**
-		function uses the following formvars to set the filter for reading layers
-			- nurAktiveLayer
-			- nurAufgeklappteLayer
-			- nurFremdeLayer
-			- nurNameLike
-			- class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
-	*/
+	 * function uses the following formvars to set the filter for reading layers
+	 * - nurAktiveLayer
+	 * - nurAufgeklappteLayer
+	 * - nurFremdeLayer
+	 * - nurNameLike
+	 * - class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
+	 * @param String $loadMapSource von wo die Daten für die map geladen werden sollen Post, File oder DataBase
+	 */
   function loadMap($loadMapSource) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
@@ -2076,6 +2071,8 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
+		$bb = $this->Stelle->MaxGeorefExt;
+		$layer->setMetaData('ows_extent', $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
@@ -2917,7 +2914,7 @@ echo '			</table>
 	}
 
 	function get_web_footer_template() {
-		$html = "
+		$html = "<!-- MapServer Template -->
 </html>
 ";
 		return $html;
@@ -6858,12 +6855,14 @@ echo '			</table>
 					$parts = explode('&original_name', $path);
 					$path = array_shift($parts);
 				}
-				if (!$only_thumb AND file_exists($path)) {
-					unlink($path);
-				}
-				$pathinfo = pathinfo($path);
-				if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
-					unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+				if ($path != $doc_path) {
+					if (!$only_thumb AND file_exists($path)) {
+						unlink($path);
+					}
+					$pathinfo = pathinfo($path);
+					if (file_exists($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg')) {
+						unlink($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '_thumb.jpg');
+					}
 				}
 			}
 		}
@@ -8152,10 +8151,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$order = @array_values($this->formvars['order']);
 		$legendorder = @array_values($this->formvars['classlegendorder']);
 		$this->classes = $mapDB->read_Classes($this->formvars['selected_layer_id']);
-		for($i = 0; $i < count($name); $i++) {
+		for ($i = 0; $i < count($name); $i++) {
 			$attrib['name'] = $name[$i];
-			foreach($supportedLanguages as $language){
-				if($language != 'german'){
+			foreach ($supportedLanguages as $language){
+				if ($language != 'german'){
 					$attrib['name_'.$language] = $name_[$language][$i];
 				}
 			}
@@ -8523,39 +8522,37 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   }
 
 	/**
-	 * This function write the mapfile, templates and a wrapper file for the current map object
+	 * This function write the mapfile, header und footer templates and a wrapper file for the current map object
 	 * If stelle_id is set, the location is in a subdirectory of OWS_ONLINE_RESOURCE.
+	 * WMS_MAPFILE_PATH
 	 */
-	function write_mapfile($mapfile, $stelle_id = '') {
-		$stelle_id = ($stelle_id != '' ? $stelle_id . '/' : '');
-		$path_parts = pathinfo(WMS_MAPFILE_PATH . $mapfile);
+	function write_mapfile($mapfile, $wrapperfile) {
 		try {
 			# Schreibe MapFile-Templates
 			$this->save_web_header_template();
 			$this->save_web_footer_template();
 
 			# Schreibe MapFile
-			if (!file_exists($path_parts['dirname'])) {
-				mkdir($path_parts['dirname'], 0775, true);
+			if (!file_exists(WMS_MAPFILE_PATH)) {
+				mkdir(WMS_MAPFILE_PATH, 0775, true);
 			}
 			$this->saveMap(WMS_MAPFILE_PATH . $mapfile);
 
 			# Schreibe MapFile-Wrapper
-			$wrapper_path = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE) . $stelle_id;
-			if (!file_exists($wrapper_path)) {
-				mkdir($wrapper_path, 0775, true);
+			$wrapperpath = str_replace(URL, INSTALLPATH, OWS_SERVICE_ONLINERESOURCE);
+			if (!file_exists($wrapperpath)) {
+				mkdir($wrapperpath, 0775, true);
 			}
-			$wrapper_file = $wrapper_path . MAPFILENAME;
-			if (!file_exists($wrapper_file)) {
-				file_put_contents($wrapper_file, '#!/bin/sh
+			if (!file_exists($wrapperpath . $wrapperfile)) {
+				file_put_contents($wrapperpath . $wrapperfile, '#!/bin/sh
 MAPSERV="/usr/lib/cgi-bin/mapserv"
 MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
-				chmod($wrapper_file, 0775);
+				chmod($wrapperpath . $wrapperfile, 0775);
 			}
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Speichern der Map-Datei ' . $mapfile . ', der Templates oder des Wrappers ' . $wrapper_file . ' für den Dienst in Funktion write_mapfile. ' . $ex
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex
 			);
 		}
 		return array(
@@ -8854,8 +8851,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->Layergruppen_Anzeigen();
 		}
 		else {
-			$this->add_message('array', array_value($results));
-			$this->Layergruppe_Editor();
+			$this->main = 'layergruppe_formular.php';
+			$this->output();
 		}
 	}
 
@@ -8864,16 +8861,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layergruppe = LayerGroup::find_by_id($this, $this->formvars['selected_group_id']);
 		$this->layergruppe->setData($this->formvars);
 		$results = $this->layergruppe->validate();
+
 		if (empty($results)) {
 			$results = $this->layergruppe->update();
 		}
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
-		else {
-			$this->add_message('array', array_value($results));
-		}
-		$this->Layergruppe_Editor();
+		$this->main = 'layergruppe_formular.php';
+		$this->output();
 	}
 
 	function Layergruppe_Loeschen(){
@@ -8970,7 +8966,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->invitations_list();
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->invitation_formular();
 		}
 	}
@@ -8999,7 +8995,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 		}
 		$this->invitation_formular();
 	}
@@ -9127,12 +9123,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
 						}
 						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
-						if ($attributes['form_element_type'][$i] == 'Zahl') {
-							# bei Zahlen den Punkt (Tausendertrenner) entfernen
+						if ($attributes['form_element_type'][$i] == 'Zahl' AND strpos($value, ',') !== false) {
+							# bei Zahlen, vom Typ Text den Punkt (Tausendertrenner) entfernen
+							# bei Zahlen, vom Typ numeric und float-Varianten ist das schon beim sanitze erledigt worden.
 							$value = removeTausenderTrenner($value);
-						}
-						elseif (in_array($attributes['type'][$i], ['numeric', 'float4', 'float8'])) {
-							$value = str_replace(',', '.', $value);
 						}
 						if (is_array($value)) {
 							# multible-Auswahlfelder
@@ -10013,7 +10007,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'success' => $this->success,
 				'msg' => 'Datensatz erfolgreich gelöscht'
 			);
-			$this->output();
 		}
 
 		return $this->success;
@@ -10317,7 +10310,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									# bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url) . "'";
 								}
-								else {	
+								else {
 									if ($table['type'][$i] == 'Zahl') {
 										# bei Zahlen den Punkt (Tausendertrenner) entfernen
 										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);
@@ -10599,7 +10592,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true, true);
 				if (value_of($this->formvars, 'geom_from_layer') == '') {
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
@@ -13019,11 +13012,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($results[0]['success']) {
 			$this->add_message('notice', 'Menü erfolgreich angelegt.');
 			$this->menuedaten = Menue::find($this, '', 'name');
-			$this->titel='Menüdaten';
-			$this->main='menuedaten.php';
+			$this->titel = 'Menüdaten';
+			$this->main = 'menuedaten.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
+			$this->titel = 'Menü Editor';
 			$this->main = 'menue_formular.php';
 		}
 		$this->output();
@@ -13041,7 +13036,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->add_message('notice', 'Menü erfolgreich aktualisiert.');
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			# Nicht mehr erforderlich seit dem die Validierungsergebnisse im Formular angezeigt werden.
+			#$this->add_message('array', array_values($results));
 		}
 		$this->titel = 'Menü Editor';
 		$this->main = 'menue_formular.php';
@@ -13760,7 +13756,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->main = 'cronjobs.php';
 		}
 		else {
-			$this->add_message('array', array_value($results));
+			$this->add_message('array', array_values($results));
 			$this->main = 'cronjob_formular.php';
 		}
 		$this->output();
@@ -14948,8 +14944,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if (substr($json, 0, 5) == 'file:') {
 				$json = $this->save_uploaded_file(substr($json, 5), $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);		// Datei-Uploads verarbeiten
 			}
+			$json = addslashes($json);
 			if ($json != '') {
-				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : '\"' . $json . '\"'));
+				$result = ($json == 'NULL' ? '' : (is_numeric($json) ? $json : $quote . $json . $quote));
 			}
 			else {
 				$result = $json;
@@ -15750,10 +15747,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
 		$refmap->set('width', $width);
 		$refmap->set('height', $height);
-		$refmap->setextent($minx, $miny, $maxx, $maxy);
-#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
-#		$refmap->extent->project($projFROM, $projTO);
+		$extent = new rectObj();
+		$extent->setextent($minx, $miny, $maxx, $maxy);
+		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$extent->project($projFROM, $refmap->projection);
+		$refmap->setextent($extent->minx, $extent->miny, $extent->maxx, $extent->maxy);
 		# zoomen
 		$oPixelPos = ms_newPointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
@@ -16356,9 +16354,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
-				$sql.=$subquery;
-				$sql.=') AS fooForMaxLayerExtent) as foo';
+				$sql = '
+					SELECT 
+						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
+						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
+						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
+						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
+					FROM (
+						SELECT 
+							st_transform(
+								st_setsrid(
+									st_extent(' . $this->attributes['the_geom'] . '), 
+									' . $layer[0]['epsg_code'] . '
+								), 
+								'.$this->user->rolle->epsg_code.'
+							) AS extent 
+						FROM (
+							SELECT 
+								' . $subquery . '
+						) AS fooForMaxLayerExtent
+					) as foo';
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
@@ -19034,15 +19049,20 @@ class db_mapObj{
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
 		$zero_if_empty_attributes = array(
 			'drawingorder',
-			'listed',
-			'write_mapserver_templates'
+			'listed'
 		);
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
-				array('sync', 'cluster_option')
+				array('sync')
 			);
 		}
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
+			);
+		}		
 		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
@@ -19704,7 +19724,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20620,7 +20640,7 @@ class db_mapObj{
 				`Class_ID` = ' . $attrib['new_class_id'] . ',
 				'.$names.',
 				`Layer_ID` = ' . $attrib['layer_id'] . ',
-				`Expression` = "' . $attrib['expression'] . '",
+				`Expression` = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
 				`text` = "' . $attrib['text'] . '",
 				`classification` = "' . $attrib['classification'] . '",
 				`legendgraphic`= "' . $attrib['legendgraphic'] . '",
@@ -21271,12 +21291,12 @@ class Document {
   }
 
   function save_frame($formvars, $_files, $stelle_id){
-    if($formvars['Name']){
+    if ($formvars['Name']){
       $frames = $this->load_frames($this->Stelle->id, NULL);
-      for($i = 0; $i < count($frames); $i++){
-        if($frames[$i]['Name'] == $formvars['Name']){
-          $this->Document->fehlermeldung = 'Name schon vergeben';
-        return;
+      for ($i = 0; $i < count($frames); $i++) {
+        if ($frames[$i]['Name'] == $formvars['Name']) {
+					GUI::add_message_('error', 'Name schon vergeben');
+					return;
         }
       }
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);

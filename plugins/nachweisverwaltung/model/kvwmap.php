@@ -552,7 +552,7 @@
 			" . $user_id . ",
 			'" . $formvars['dokauswahl_name'] . "', 
 			'" . implode(',', $formvars['suchhauptart']) . "', 
-			'" . implode(',', $formvars['suchunterart']) . "')";
+			'" . implode(',', $formvars['suchunterart'] ?: []) . "')";
 		#echo $sql;
 		$GUI->debug->write("<p>file:users.php class:rolle->save_Dokumentauswahl ",4);
 		$GUI->database->execSQL($sql,4, 1);

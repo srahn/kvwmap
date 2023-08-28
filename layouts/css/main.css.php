@@ -15,6 +15,23 @@ input {
 	font-size: <? echo $font_size_factor * 15; ?>px
 }
 
+.alerts-border {
+	border: 2px #ff0000 dotted;
+	animation: borderblink 0.8s;
+	animation-iteration-count: 5;
+}
+
+@keyframes borderblink { 50% { border-color:#fff ; }  }
+
+.validation-error-msg-div {
+	background-color: #eee;
+	float: left;
+	width: 390px;
+	padding: 5px;
+	color: red;
+	border-radius: 5px;
+}
+
 #form-titel {
 	font-family: SourceSansPro3;
 

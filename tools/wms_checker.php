@@ -18,7 +18,7 @@ $credentials = '../credentials.php';		# Pfad zur credentials.php (von tools aus 
 $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
-define('DBWRITE',false);
+define('DBWRITE',true);
 
 /**
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
@@ -49,7 +49,7 @@ function checkStatus($request, $username, $password){
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_TIMEOUT,3);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 7);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -136,9 +136,10 @@ if ($without_layer_id != '') {
 }
 
 #echo '<br>get layer with sql: ' . $query;
-$result = $userDb->execSQL($query);
+$userDb->execSQL($query);
+$result = $userDb->result;
 
-while($line = $userDb->result->fetch_assoc()){
+while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
   }

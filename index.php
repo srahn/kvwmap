@@ -17,7 +17,7 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
-		if (!empty(GUI::$messages)) {
+		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
 				$errors[] = $message['msg'];
 			}
@@ -255,12 +255,12 @@ function go_switch($go, $exit = false) {
 					$GUI->loadMap('DataBase');
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
+				$GUI->drawMap();
 				$GUI->saveMap('');
 				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
 					$currenttime=date('Y-m-d H:i:s',time());
 					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				}
-				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
@@ -1037,7 +1037,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
-				$GUI-sanitize(['druckausschnitt' => 'int']);
+				$GUI->sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 

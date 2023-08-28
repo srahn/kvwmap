@@ -13,6 +13,7 @@ function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(' eq ', '=', $exp);
 	$exp = str_replace(' ne ', '!=', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
 	
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
 		if (strpos($exp, '/') === 0) {		# regex
@@ -168,16 +169,22 @@ function versionFormatter($version) {
 }
 
 /**
-* This function return the absolute path to a document in the file system of the server
-*
-* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
-*
-* @param string $layer_document_path The document path of the layer the attribute belongs to.
-*
-* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
-*
-* @return string The absolute path to the document
-*/
+ * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
+ * @return integer 3 digit version number of gdal
+ */
+function get_ogr_version() {
+	exec('gdalinfo --version', $output, $ret);
+	$version_str = explode(' ', explode(',', $output[0])[0])[1];
+	return intVal(versionFormatter($version_str));
+}
+
+/**
+ * This function return the absolute path to a document in the file system of the server
+ * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+ * @param string $layer_document_path The document path of the layer the attribute belongs to.
+ * @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+ * @return string The absolute path to the document
+ */
 function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
 	$value_part = explode('&original_name=', $document_attribute_value);
 	if ($layer_document_url != '') {
@@ -1219,6 +1226,8 @@ function umlaute_umwandeln($name) {
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
 	$name = str_replace(')', '', $name);
+	$name = str_replace('[', '', $name);
+	$name = str_replace(']', '', $name);
 	$name = str_replace('/', '-', $name);
 	$name = str_replace(' ', '_', $name);
 	$name = str_replace('-', '_', $name);
@@ -1691,7 +1700,7 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	exec('gs -q -I / -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
 	return $output[0];
 }
 
@@ -2442,11 +2451,13 @@ function sql_from_parse_tree($parse_tree) {
 }
 
 /**
-*	Function sanitizes $value based on its $type and returns the sanitized value.
-*
-*	If $type or $value is empty or $type unknown, $value will not be sanitized at all.
-*	If $value is an array all elements will be sanitized with $type.
-*/
+ * Function sanitizes $value based on its $type and returns the sanitized value.
+ * If $type or $value is empty or $type unknown, $value will not be sanitized at all.
+ * If $value is an array all elements will be sanitized with $type.
+ * @param any $value Value to sanitize
+ * @param string $type The type of the value
+ * @return any The sanitized value
+ */
 function sanitize(&$value, $type) {
 	if (empty($type)) {
 		return $value;
@@ -2475,9 +2486,10 @@ function sanitize(&$value, $type) {
 
 		case 'numeric' :
 		case '_numeric' :
+		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) $value;
+			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :

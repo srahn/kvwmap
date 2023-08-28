@@ -13,6 +13,10 @@
 		}
 	}
 
+	function showGruppenEditor(gruppeId, layerId) {
+		location.href = 'index.php?go=Layergruppe_Editor&selected_group_id=' + gruppeId + '&selected_layer_id=' + layerId + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+	}
+
 	function create_generic_data_sql(layer_id) {
 		$('#waitingdiv').show();
 		$.ajax({
@@ -300,11 +304,12 @@
 								1,																			# size
 								'',																			# style
 								'',			# onchange
-								'',		# id
+								'gruppe-select',												# id
 								'',																			# multiple
 								'',																			# class
 								'-- ' . $this->strPleaseSelect . ' --'	# first option
 							); ?>
+							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
 					</tr>
 					<tr>
