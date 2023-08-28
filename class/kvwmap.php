@@ -4549,7 +4549,7 @@ echo '			</table>
 						<td class="px13"><?
 							echo key($this->styledaten); ?>
 						</td>
-						<td><?
+						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
 								case 'linecap' : {
 									echo FormObject::createSelectField(
@@ -4634,6 +4634,16 @@ echo '			</table>
 									><?
 								} break;
 */
+								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="11"
+										type="text"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									>&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i><?
+								} break;
 								default : { ?>
 									<input
 										class="styleFormField"
@@ -9000,12 +9010,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
-
+	/**
+	 * @param array $attributes Attribut-Array des übergeordneten Layers
+	 * @param int $j Zähler in diesem Array mit dem SubForm-Attribut
+	 * @param string $maintable Hauptabelle des übergeordneten Layers
+	 * @param array $result Datensatz im übergeordneten Layer
+	 */
 	function getSubFormResultSet($attributes, $j, $maintable, $result){
-		# $attributes ist das Attribut-Array des übergeordneten Layers
-		# $j ist der Zähler in diesem Array mit dem SubForm-Attribut
-		# $maintable ist die Hauptabelle des übergeordneten Layers
-		# $result ist der Datensatz im übergeordneten Layer
 		$layerid_save = $this->formvars['selected_layer_id'];
 		$this->formvars['selected_layer_id'] = $attributes['subform_layer_id'][$j];
 		$this->formvars['no_output'] = true;
@@ -9015,12 +9026,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		$this->formvars['value_' . $maintable . '_oid'] = '';
 		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche
-			$this->formvars['value_' . $attributes['subform_pkeys'][$j][$p]] = $result[$attributes['subform_pkeys'][$j][$p]];
-			$this->formvars['operator_' . $attributes['subform_pkeys'][$j][$p]] = '=';
+			if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
+				$exp = explode(':', $attributes['subform_pkeys'][$j][$p]);
+				$key[$p] = $exp[0];			# Verknüpfungsattribut im Ober-Layer
+				$subkey[$p] = $exp[1];	# Verknüpfungsattribut im Sub-Layer
+			}
+			else {
+				$key[$p] = $subkey[$p] = $attributes['subform_pkeys'][$j][$p];
+			}		
+			$this->formvars['value_' . $subkey[$p]] = $result[$key[$p]];
+			$this->formvars['operator_' . $subkey[$p]] = '=';
 		}
 		$this->GenerischeSuche_Suchen();
-		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche wieder leeren
-			$this->formvars['value_'.$attributes['subform_pkeys'][$j][$p]] = '';
+		for ($p = 0; $p < count($key); $p++) {			# die Suchparameter für die Layersuche wieder leeren
+			$this->formvars['value_' . $subkey[$p]] = '';
 		}
 		$this->formvars['selected_layer_id'] = $layerid_save;
 	}
@@ -9335,11 +9354,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				/*
-				if ($this->user->id == 1) {
-					echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
-				}
-				*/
+				#if ($this->user->id == 1) {
+				#	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				#}
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -13342,6 +13359,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
 			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			$this->formvars['layer_data_import_allowed'] 	= $this->userdaten[0]['layer_data_import_allowed'];
+			$this->formvars['agreement_accepted']					= $this->userdaten[0]['agreement_accepted'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
@@ -17829,6 +17847,7 @@ class db_mapObj{
 	}
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
+		include_once(CLASSPATH . 'Layer.php');
 		$default_options = array(
 			'if_empty_use_query' => false,
 			'use_generic_data_sql' => false
@@ -18950,6 +18969,7 @@ class db_mapObj{
 					'duplicate_from_layer_id',
 					'duplicate_criterion',
 					'Name',
+					'Datentyp',
 					'template',
 					'queryable',
 					'use_geom',
@@ -19063,7 +19083,6 @@ class db_mapObj{
 		# the rest where column names equal to the field names in layer editor form
 
 		$column_equal_field_attributes = array(
-			'Datentyp',
 			'pfad',
 			'maintable',
 			'oid',

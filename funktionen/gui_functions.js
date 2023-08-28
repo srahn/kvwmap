@@ -1713,12 +1713,14 @@ function copyToClipboard(text) {
 		document.body.appendChild(textarea);
 		textarea.select();
 		try {
-				return document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			let result = document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			message([{ type: 'notice', msg: text + ' in die Zwischenablage kopiert'}], 500, 1000);
+			return result;
 		} catch (ex) {
-				console.warn("Copy to clipboard failed.", ex);
-				return false;
+			console.warn("Copy to clipboard failed.", ex);
+			return false;
 		} finally {
-				document.body.removeChild(textarea);
+			document.body.removeChild(textarea);
 		}
 	}
 }
