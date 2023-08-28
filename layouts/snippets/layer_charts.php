@@ -124,6 +124,11 @@
 	}
 </script>
 <style>
+	.chart_div {
+		width: 700px;
+		margin: auto;
+		/*height: 600px;*/
+	}
 	.diagram-edit-label-div {
 		float: left;
 		margin-right: 10px;
@@ -154,10 +159,19 @@
 	</tr>
 	<tr>
 		<td colspan="2">
-			<div id="diagramms" style="display: none"><?
+			<div id="diagramms" style="display: none">
+				<script>
+					let i;
+					let value_elements;
+					let name_elements;
+				</script><?
 				foreach ($layer['charts'] AS $chart) {
-					$id = $chart->get($chart->identifier); ?>
-					<div id="chart_div_<? echo $id; ?>">
+					$id = $chart->get($chart->identifier);
+					if ($this->user->id == 1) {
+						#echo '<p>chart: ' . print_r($chart->data, true);
+					}
+					?>
+					<div id="chart_div_<? echo $id; ?>" class="chart_div">
 						<canvas id="chart_<? echo $id; ?>"></canvas>
 						<div>
 							Diagrammtyp: 
@@ -193,9 +207,9 @@
 								<div class="diagram-edit-input-div">
 									<select class="diagram_form_elem_<? echo $id; ?>" name="diagram_aggregate_function">
 										<option value="sum"<? echo ($chart->get('aggregate_function') == 'sum' ? ' selected' : ''); ?>>Summe</option>
-										<option value="average"<? echo ($chart->get('aggregate_function') == 'average' ? ' selected' : ''); ?>>Durchschnitt</option>
+										<!--option value="average"<? echo ($chart->get('aggregate_function') == 'average' ? ' selected' : ''); ?>>Durchschnitt</option>
 										<option value="min"<? echo ($chart->get('aggregate_function') == 'min' ? ' selected' : ''); ?>>Minimalwert</option>
-										<option value="max"<? echo ($chart->get('aggregate_function') == 'max' ? ' selected' : ''); ?>>Maximalwert</option>
+										<option value="max"<? echo ($chart->get('aggregate_function') == 'max' ? ' selected' : ''); ?>>Maximalwert</option//-->
 									</select>
 								</div>
 								<div style="clear: both"></div>
@@ -221,22 +235,6 @@
 								<div style="clear: both"></div>
 								<div class="diagram-edit-label-div">Beschriftungsattribut (Rechtswert):</div>
 								<div class="diagram-edit-input-div"><?
-									if ($this->user->id == 1) {
-										echo '<p>name: ' . print_r($layer['attributes']['name'], true);
-										echo '<p>alias: ' . print_r($layer['attributes']['alias'], true);
-										echo '<p>map: ' . print_r(
-											array_map(
-											function($name, $alias) {
-												return array(
-													'value' => $name,
-													'output' => $alias
-												);
-											},
-											$layer['attributes']['name'],
-											$layer['attributes']['alias']
-											),
-										true);
-									}
 									echo FormObject::createSelectField(
 										'diagram_label_attribute_name',
 										array_map(
@@ -261,19 +259,35 @@
 					</div>
 					<script>
 						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
-						let values_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
-						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return v.options[v.selectedIndex].text});
+						value_elements = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>');
+						let values_<? echo $id; ?>;
+						if (value_elements[0].type == 'select-one') {
+							values_<? echo $id; ?> = value_elements.map((k, v) => { return v.options[v.selectedIndex].text; });
+						}
+						else {
+							values_<? echo $id; ?> = value_elements.map((k, v) => { return v.value; });
+						}
+						name_elements = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>');
+
+						let names_<? echo $id; ?>;
+						if (name_elements[0].type == 'select-one') {
+							names_<? echo $id; ?> = name_elements.map((k, v) => { return v.options[v.selectedIndex].text; });
+						}
+						else {
+							names_<? echo $id; ?> = name_elements.map((k, v) => { return v.value; });
+						}
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
-						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
+						for (i = 0; i < names_<? echo $id; ?>.length; i++) {
 							if (labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i]) == -1) {
 								labels_<? echo $id; ?>.push(names_<? echo $id; ?>[i]);
-								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]) / 10000);
+								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]));
 							}
 							else {
-								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]) / 10000;
+								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]);
 							}
 						}
+						// Chart-Objekt erzeugen
 						let chart_<? echo $id; ?> = new Chart(
 							document.getElementById('chart_<? echo $id; ?>'), {
 							type: chart_type_<? echo $id; ?>,
@@ -283,7 +297,7 @@
 									label: '<? echo $chart->get('value_attribute_label'); ?>',
 									data: data_<? echo $id; ?>,
 									backgroundColor: (chart_type_<? echo $id; ?> == 'bar' ? 'lightblue' : COLORS),
-								//backgroundColor: COLORS,
+									//backgroundColor: COLORS,
 									borderWidth: 1
 								}]
 							},

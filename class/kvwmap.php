@@ -4221,8 +4221,7 @@ echo '			</table>
 		}
 		echo $url . '&field_id='.$this->formvars['field_id'];
 	}
-
-  function showMapImage(){
+	function showMapImage() {
 		include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php');
   	$this->loadMap('DataBase');
   	$this->drawMap(true);
@@ -4230,10 +4229,10 @@ echo '			</table>
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
   	$fpsvg = fopen(IMAGEPATH.$svgfile, 'w');
-  	$svg='<?xml version="1.0"?>
+  	$svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="'.$this->map->width.'" height="'.$this->map->height.'"
+<svg id="svgmap" zoomAndPan="disable" width="' . $this->map->width . '" height="' . $this->map->height . '"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
@@ -4245,59 +4244,19 @@ echo '			</table>
   	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
   	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
-    if(function_exists('imagecreatefromjpeg')){
+    if (function_exists('imagecreatefromjpeg')) {
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
-    	if(strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'jpg'){
+    	if (strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'jpg') {
         $scaleimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['scalebar']));
       }
-      elseif(strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'png'){
+      elseif (strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'png') {
         $scaleimage = imagecreatefrompng(IMAGEPATH.basename($this->img['scalebar']));
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
     }
-		echo "
-			<html>
-				<head>
-					<title>Kartenbild</title>
-					<script type=\"text/javascript\">
-						function copyImageById(Id){
-							var imgs = document.createElement('img');
-							imgs.src = document.getElementById(Id).src;
-							var bodys = document.body;
-							bodys.appendChild(imgs);
-							if(document.createRange){
-								var myrange = document.createRange();
-								myrange.setStartBefore(imgs);
-								myrange.setEndAfter(imgs);
-								myrange.selectNode(imgs);
-							}
-							var sel = window.getSelection();
-							sel.addRange(myrange);
-							var successful = document.execCommand('copy');
-							bodys.removeChild(imgs);
-						}
-					</script>
-					<style>
-						table {
-							margin: auto;
-						}
-						td {
-							padding: 4px;
-						}
-					</style>
-				</head>
-				<body style=\"text-align:center\">
-					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
-					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
-					<div>
-						<h3>" . $strShowCopyrightHeader . "</h3>
-						" . $this->get_copyrights() . "
-					</div>
-				</body>
-			</html>
-			";
+		include(SNIPPETS . 'map_image.php');
   }
 
 	/*

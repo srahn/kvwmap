@@ -1370,7 +1370,7 @@ function go_switch($go, $exit = false) {
 				include_once(CLASSPATH . 'LayerChart.php');
 				if ($GUI->formvars['id'] > 0) {
 					$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
-					$response = $chart->update(formvars_strip($GUI->formvars, array('title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+					$response = $chart->update(formvars_strip($GUI->formvars, array('title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
 				}
 				elseif ($GUI->formvars['id'] == 0 AND $GUI->formvars['layer_id'] > 0) {
 					$chart = new LayerChart($GUI);
