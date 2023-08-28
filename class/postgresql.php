@@ -520,7 +520,7 @@ FROM
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
-				#header('error: true');	// damit ajax-Requests das auch mitkriegen
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
 		return $ret;
@@ -612,11 +612,12 @@ FROM
 	}
 
 	function get_table_alias_names($query_plan){
+		$table_alias_names = [];
 		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			if($table_oid AND $table_alias != 'unnamed_join'){
+			if($table_oid AND !array_key_exists($table_oid, $table_alias_names) AND $table_alias != 'unnamed_join'){
 				$table_alias_names[$table_oid] = $table_alias;
 			}
 		}
@@ -714,10 +715,14 @@ FROM
 					$fields[$i]['length'] = $attr_info['length'];
 					$fields[$i]['decimal_length'] = $attr_info['decimal_length'];
 					$fields[$i]['default'] = $attr_info['default'];
-					if($attr_info['is_array'] == 't')$prefix = '_'; else $prefix = '';
-					if($attr_info['type_type'] == 'c'){		# custom datatype
-						$datatype_id = $this->writeCustomType($attr_info['type'], $attr_info['type_schema']);
-						$fieldtype = $prefix.$datatype_id; 
+					$fields[$i]['type_type'] = $attr_info['type_type'];
+					$fields[$i]['type_schema'] = $attr_info['type_schema'];
+					$fields[$i]['is_array'] = $attr_info['is_array'];
+					if ($attr_info['is_array'] == 't') {
+						$prefix = '_'; 
+					}
+					else {
+						$prefix = '';
 					}
 					if($attr_info['type_type'] == 'e'){		# enum
 						$fieldtype = $prefix.'text';
@@ -860,9 +865,9 @@ FROM
 		return $attributes;
 	}
      	
-	function writeCustomType($typname, $schema) {
+	function writeCustomType($layer_id, $typname, $schema) {
 		$datatype_id = $this->getDatatypeId($typname, $schema, $this->connection_id);
-		$this->writeDatatypeAttributes($datatype_id, $typname, $schema);
+		$this->writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema);
 		return $datatype_id;
 	}
 	
@@ -916,7 +921,7 @@ FROM
 		return $result['enum_string'];
 	}
 	
-	function writeDatatypeAttributes($datatype_id, $typname, $schema){
+	function writeDatatypeAttributes($layer_id, $datatype_id, $typname, $schema){
 		$attr_info = $this->get_attribute_information($schema, $typname);
 		for($i = 1; $i < count($attr_info)+1; $i++){
 			$fields[$i]['real_name'] = $attr_info[$i]['name'];
@@ -928,7 +933,7 @@ FROM
 			$fields[$i]['default'] = $attr_info[$i]['default'];					
 			if($attr_info[$i]['is_array'] == 't')$prefix = '_'; else $prefix = '';
 			if($attr_info[$i]['type_type'] == 'c'){		# custom datatype
-				$sub_datatype_id = $this->writeCustomType($attr_info[$i]['type'], $attr_info[$i]['type_schema']);
+				$sub_datatype_id = $this->writeCustomType($layer_id, $attr_info[$i]['type'], $attr_info[$i]['type_schema']);
 				$fieldtype = $prefix.$sub_datatype_id; 
 			}
 			$constraintstring = '';
@@ -945,6 +950,7 @@ FROM
 				INSERT INTO
 					datatype_attributes
 				SET
+					layer_id = " . $layer_id . ",
 					datatype_id = " . $datatype_id . ",
 					name = '" . $fields[$i]['name'] . "',
 					real_name = '" . $fields[$i]['real_name'] . "',
@@ -988,12 +994,11 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
-					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
-					 f_geometry_column = '" . $geomcolumn . "')
+					 f_geometry_column = '" . $geomcolumn . "'),
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -1931,7 +1936,7 @@ FROM
 			}
 			$sql.=")";
 		}
-		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		$sql.= $this->build_temporal_filter(array('f', 'p', 'anschrift', 'n', 'g', 'b'));
 		if ($formvars['alleiniger_eigentuemer']) {
 			$sql.= "
 				AND NOT EXISTS (
@@ -1942,7 +1947,7 @@ FROM
 						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
 						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
 					WHERE 
-						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						(f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an)) " .
 						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
 				)";
 		}
@@ -2188,7 +2193,7 @@ FROM
 				TRIM(" . HAUSNUMMER_TYPE . "(lmh.hausnummer)) AS nrtext
 			FROM 
 				alkis.ax_lagebezeichnungmithausnummer lmh,
-				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1 \\2', 'g'), '(\D+)(\d+)', '\\1 \\2', 'g'), ' '), '') AS r
+				array_remove(string_to_array(regexp_replace(regexp_replace(" . HAUSNUMMER_TYPE . "(lmh.hausnummer), '(\d+)(\D+)', '\\1~\\2', 'g'), '(\D+)(\d+)', '\\1~\\2', 'g'), '~'), '') AS r
 			WHERE 
 				lmh.gemeinde = '" . substr($GemID, -3) . "'
 				AND lmh.lage IN ('" . implode("', '", explode(", ", $StrID)) . "')
@@ -2196,7 +2201,7 @@ FROM
     $sql.= $this->build_temporal_filter(array('lmh'));
 		$sql.= " 
 			GROUP BY lmh.land, lmh.regierungsbezirk, lmh.kreis, lmh.gemeinde, lmh.lage, lmh.hausnummer, r
-			ORDER BY r[1]::int, r[2] NULLS FIRST, r[3]::int NULLS FIRST";
+			ORDER BY r[1]::int, trim(r[2]) NULLS FIRST, r[3]::int NULLS FIRST";
     #echo $sql;
     $this->debug->write("<p>postgres getHausNrListe Abfragen der Strassendaten:<br>" . $sql, 4);
     $queryret = $this->execSQL($sql, 4, 0);

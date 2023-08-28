@@ -189,7 +189,7 @@ class data_import_export {
 			$layerdb = $dbmap->getlayerdatabase(-$layer_id, $this->Stelle->pgdbhost);
 			$path = $this->formvars['query'];
 			$attributes = $dbmap->load_attributes($layerdb, $path);
-			$dbmap->save_postgis_attributes(-$layer_id, $attributes, '', '');
+			$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 			$dbmap->addRollenLayerStyling($layer_id, $custom_table['datatype'], $custom_table['labelitem'], $user, 'import');
 		}
     return $layer_id;
@@ -368,7 +368,7 @@ class data_import_export {
 							max(st_srid(the_geom)) as epsg,
 							count(*)
 						FROM
-							" . $schema . "." . $table . "
+							" . $schema . ".\"" . $table . "\"
 						GROUP BY replace(geometrytype(the_geom), 'MULTI', '')
 					";
 					$ret = $database->execSQL($sql,4, 0);
@@ -947,7 +947,7 @@ class data_import_export {
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
 			curl_close($ch);
@@ -978,53 +978,77 @@ class data_import_export {
 		}
 		return $ret;
 	}
-	
+
 	function ogrinfo($importfile) {
-		$command = ' -q -nogeomtype "' . $importfile . '"';;
+		$command = ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : '') . ' "' . $importfile . '"';
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
 			curl_close($ch);
 			$result = json_decode($output);
 		}
 		else {
+			$path_parts = pathinfo($importfile);
+			$errorfile = $path_parts['filename'] . '.err';
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogrinfo ' . $command;
-			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+			$command .= ' 2> ' . IMAGEPATH . $errorfile;
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
+			$result = new stdClass();
 			$result->stdout = $output;
-			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
+			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
-				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $errorfile . '" target="_blank">Fehlerprotokoll</a>'; 
 			}
 		}
 		return $result;
 	}
-	
+
 	function ogr_get_layers($importfile){
 		$result = $this->ogrinfo($importfile);
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
+			return array();
 		}
 		else {
-			$layers = explode("\r\n", $result->stdout);
-			array_pop($layers);
+			if (is_array($result->stdout)) {
+				$layers = $result->stdout;
+			}
+			else {
+				$layers = explode("\r\n", $result->stdout);
+				array_pop($layers);
+			}
 			array_walk($layers, function(&$value, $key){
 				$value = explode(': ', $value)[1];
 			});
 			return $layers;
 		}
 	}
-		
-	function adjustGeometryType($database, $schema, $table, $epsg){
+	
+	/**
+	 * Wenn alle Geometrien nur eine Geometrie beinhalten macht die passt die Funktion
+	 * den Geometrietyp auf single an (Entfernt ST_Multi von GeometryType)
+	 */
+	function adjustGeometryType($database, $schema, $table, $epsg) {
+		$sql = "
+			UPDATE
+				" . $schema . "." . $table . "
+			SET
+				the_geom = ST_Force2D(the_geom)
+		";
+		$ret = $database->execSQL($sql, 4, 0);
+		if (!$ret['success']) {
+			return 0;
+		}
+
 		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
@@ -1045,7 +1069,7 @@ class data_import_export {
 				}
 			}
 		}
-	}	
+	}
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
@@ -1230,6 +1254,7 @@ class data_import_export {
 			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
 			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
 		}
+		// TODO hier checken ob oid und maintable abgefragt werden konnten und valide sind.
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);

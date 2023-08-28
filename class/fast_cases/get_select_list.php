@@ -62,37 +62,111 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, $value, $str);
+		}
+	}
+	$str = str_replace('$current_date', date('Y-m-d'), $str);
+	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
+	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace('$language', $language, $str);
+	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
+	return $str;
+}
+
+//TODO: Prüfen ob die Ausgabe $msg nicht mit htmlspecialchars($msg) erfolgen muss
+function sql_err_msg($title, $sql, $msg, $div_id) {
+	$err_msg = "
+		<div style=\"text-align: left;\">" .
+		$title . "<br>" .
+		$msg . "
+		<div style=\"text-align: center\">
+			<a href=\"#\" onclick=\"debug_t = this; $('#error_details_" . $div_id . "').toggle(); $(this).children().toggleClass('fa-caret-down fa-caret-up')\"><i class=\"fa fa-caret-down\" aria-hidden=\"true\"></i></a>
+		</div>
+		<div id=\"error_details_" . $div_id . "\" style=\"display: none\">
+			Aufgetreten bei SQL-Anweisung:<br>
+			<textarea id=\"sql_statement_" . $div_id . "\" class=\"sql-statement\" type=\"text\" style=\"height: " . round(strlen($sql) / 2) . "px; max-height: 600px\">
+				" . $sql . "
+			</textarea><br>
+			<button type=\"button\" onclick=\"
+				copyText = document.getElementById('sql_statement_" . $div_id . "');
+				copyText.select();
+				document.execCommand('copy');
+			\">In Zwischenablage kopieren</button>
+		</div>
+	</div>";
+	return $err_msg;
+}
+
 class GUI {
 
-  var $layout;
-  var $style;
-  var $mime_type;
-  var $menue;
-  var $pdf;
-  var $addressliste;
-  var $debug;
-  var $dbConn;
-  var $flst;
-  var $formvars;
-  var $legende;
-  var $map;
-  var $mapDB;
-  var $img;
-  var $FormObject;
-  var $StellenForm;
-  var $Fehlermeldung;
-  var $Hinweis;
-  var $Stelle;
-  var $ALB;
-  var $activeLayer;
-  var $nImageWidth;
-  var $nImageHeight;
-  var $user;
-  var $qlayerset;
-  var $scaleUnitSwitchScale;
-  var $map_scaledenom;
-  var $map_factor;
-  var $formatter;
+	var $alert;
+	var $gui;
+	var $layout;
+	var $style;
+	var $mime_type;
+	var $menue;
+	var $pdf;
+	var $addressliste;
+	var $debug;
+	var $mysqli;
+	var $flst;
+	var $formvars;
+	var $legende;
+	var $map;
+	var $mapdb;
+	var $img;
+	var $FormObject;
+	var $StellenForm;
+	var $Fehlermeldung;
+	var $Hinweis;
+	var $Stelle;
+	var $ALB;
+	var $activeLayer;
+	var $nImageWidth;
+	var $nImageHeight;
+	var $user;
+	var $qlayerset;
+	var $scaleUnitSwitchScale;
+	var $map_scaledenom;
+	var $map_factor='';
+	var $formatter;
+	var $success = true;
+	var $login_failed;
+	var $only_main = false;
+	var $class_load_level;
+	var $layer_id_string;
+	var $noMinMaxScaling;
+	var $stelle_id;
+	var $angle_attribute;
+	var $titel;
+	var $PasswordError;
+	var $Meldung;
+	var $radiolayers;
+	var $show_query_tooltip;
+	var $last_query;
+	var $querypolygon;
+	var $new_entry;
+	var $search;
+	var $form_field_names;
+	var $editable;
+	var $groupset;
+	var $use_form_data;
+	var $stelle;
+	var $zoomed;
+	var $error_position;
+	var $selected_search;
+	var $attributes = array();
+	var $scrolldown;
+	var $queryrect;
+	var $notices;
+	var $layers_replace_scale = array();
+	static $messages = array();
 
   function __construct($main, $style, $mime_type) {
     # Debugdatei setzen
@@ -113,6 +187,28 @@ class GUI {
 		$this->scaleUnitSwitchScale = 239210;
   }
 
+	function add_message($type, $msg) {
+		GUI::add_message_($type, $msg);
+	}
+
+	public static function add_message_($type, $msg) {
+		if (is_array($msg) AND array_key_exists('success', $msg) AND is_array($msg)) {
+			$type = 'notice';
+			$msg = $msg['msg'];
+		}
+		if ($type == 'array' or is_array($msg)) {
+			foreach($msg AS $m) {
+				GUI::add_message_($m['type'], $m['msg']);
+			}
+		}
+		else {
+			GUI::$messages[] = array(
+				'type' => $type,
+				'msg' => $msg
+			);
+		}
+	}
+
 	function sanitize($vars) {
 		foreach ($vars as $name => $type) {
 			sanitize($this->formvars[$name], $type);
@@ -126,12 +222,12 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-  function get_select_list(){
+	function get_select_list(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
     $attributenames[0] = $this->formvars['attribute'];
 		if($this->formvars['datatype_id'] != '')
-			$attributes = $mapDB->read_datatype_attributes($this->formvars['datatype_id'], $layerdb, $attributenames);
+			$attributes = $mapDB->read_datatype_attributes($this->formvars['layer_id'], $this->formvars['datatype_id'], $layerdb, $attributenames);
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
@@ -139,23 +235,34 @@ class GUI {
 		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelleid', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
+    if ($reqby_start > 0) {
+			$sql = substr($options, 0, $reqby_start);
+		}
+		else {
+			$sql = $options;
+		}
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
-		for($i = 0; $i < count($attributenames); $i++){
-			$sql = str_replace('= <requires>'.$attributenames[$i].'</requires>', " IN ('".$attributevalues[$i]."')", $sql);
-			$sql = str_replace('<requires>'.$attributenames[$i].'</requires>', "'".$attributevalues[$i]."'", $sql);	# fallback
+		for ($i = 0; $i < count($attributenames); $i++) {
+			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $attributevalues[$i] . "')", $sql);
+			$sql = str_replace('<requires>' . $attributenames[$i] . '</requires>', "'" . $attributevalues[$i] . "'", $sql);	# fallback
 		}
+		$sql = replace_params(
+			$sql,
+			rolle::$layer_params,
+			$this->user->id,
+			$this->Stelle->id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language
+		);
 		#echo $sql;
-		@$ret=$layerdb->execSQL($sql,4,0);
+		@$ret = $layerdb->execSQL($sql, 4, 0);
 		if (!$ret[0]) {
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					if ($reqby_start > 0 OR pg_num_rows($ret[1]) > 1) {
-						$html .= '<option value="">-- Bitte Auswählen --</option>';
-					}
+					$html .= '<option value="">-- Bitte Auswählen --</option>';
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
@@ -747,7 +854,7 @@ class db_mapObj{
 		}
 	}
 
-  function read_datatype_attributes($datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
+  function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
 		global $language;
 
 		$alias_column = (
@@ -803,6 +910,7 @@ class db_mapObj{
 				`datatype_attributes` as a LEFT JOIN
 				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
 			WHERE
+				`layer_id` = " . $layer_id . " AND 
 				`datatype_id` = " . $datatype_id .
 				$einschr . "
 			ORDER BY
@@ -837,7 +945,7 @@ class db_mapObj{
 			$attributes['typename'][$i]= $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
 			}
 			if($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
@@ -986,7 +1094,7 @@ class db_mapObj{
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];

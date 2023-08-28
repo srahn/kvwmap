@@ -1015,7 +1015,7 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, (select max(c.time_id) from u_consume c where u.ID = c.user_id ) as last_timestamp
+				u.*, (select nullif(max(r.last_time_id), '0000-00-00 00:00:00') from rolle r where u.ID = r.user_id ) as last_timestamp
 			FROM
 				user u " .
 				$more_from .
@@ -1461,6 +1461,7 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
+				`agreement_accepted` = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "

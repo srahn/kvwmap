@@ -15,8 +15,7 @@ class Enumeration extends MyObject {
 		# xplankonverter.enum_json_to_text(to_json(rechtscharakter), 'fp_rechtscharakter', false)
 
 		return array(
-			'select' => ($attr['is_array'] == 't' ? 'array_to_string(' . $layer->get_table_alias() . "." . $attr['att_name'] . ", ',', '*') AS " . $attr['att_name'] : $layer->get_table_alias() . "." . $attr['att_name']) . ",
-    gdi_enum_json_to_text(to_json(" . $layer->get_table_alias() . "." . $attr['att_name'] . "), 'xplan_gml', '" .  $attr['typname'] . "', " . ($attr['is_array'] == 't' ? "true" : "false") . ") AS " . $attr['att_name'] . "_text"
+			'select' => ($attr['is_array'] == 't' ? "CASE WHEN array_length(" . $layer->get_table_alias() . "." . $attr['att_name'] . ", 1) = 0 THEN NULL ELSE array_to_string(" . $layer->get_table_alias() . "." . $attr['att_name'] . ", ',', '') END AS " . $attr['att_name'] : $layer->get_table_alias() . "." . $attr['att_name']) . ", gdi_enum_json_to_text(to_json(" . $layer->get_table_alias() . "." . $attr['att_name'] . "), 'xplan_gml', '" .  $attr['typname'] . "', " . ($attr['is_array'] == 't' ? "true" : "false") . ") AS " . $attr['att_name'] . "_text"
 		);
 	}
 }

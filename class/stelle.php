@@ -138,17 +138,48 @@ class stelle {
 				$name_column . ",
 				`start`,
 				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`ows_namespace`,
 				`ows_title`,
 				`wms_accessconstraints`,
 				`ows_abstract`,
+				`ows_updatesequence`,
+				`ows_geographicdescription`,
+				`ows_fees`,
+				`ows_srs`,
+
 				`ows_contactorganization`,
+				`ows_contactaddress`,
+				`ows_contactpostalcode`,
+				`ows_contactcity`,
+				`ows_contactadministrativearea`,
 				`ows_contactemailaddress`,
 				`ows_contactperson`,
 				`ows_contactposition`,
 				`ows_contactvoicephone`,
 				`ows_contactfacsimile`,
-				`ows_fees`,
-				`ows_srs`,
+
+				`ows_distributionorganization`,
+				`ows_distributionaddress`,
+				`ows_distributionpostalcode`,
+				`ows_distributioncity`,
+				`ows_distributionadministrativearea`,
+				`ows_distributionemailaddress`,
+				`ows_distributionperson`,
+				`ows_distributionposition`,
+				`ows_distributionvoicephone`,
+				`ows_distributionfacsimile`,
+
+				`ows_contentorganization`,
+				`ows_contentaddress`,
+				`ows_contentpostalcode`,
+				`ows_contentcity`,
+				`ows_contentadministrativearea`,
+				`ows_contentemailaddress`,
+				`ows_contentperson`,
+				`ows_contentposition`,
+				`ows_contentvoicephone`,
+				`ows_contentfacsimile`,
+
 				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
@@ -171,15 +202,46 @@ class stelle {
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
-		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
+		$this->ows_namespace = $rs['ows_namespace'];
+		$this->ows_updatesequence = $rs['ows_updatesequence'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
+		$this->ows_fees = $rs['ows_fees'];
+		$this->ows_srs = $rs['ows_srs'];
+
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
-		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactaddress = $rs['ows_contactaddress'];
+		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
+		$this->ows_contactcity = $rs['ows_contactcity'];
+		$this->ows_contactadministrativearea = $rs['ows_contactadministrativearea'];
+		$this->ows_contactemailaddress = $rs['ows_contactemailaddress'];
 		$this->ows_contactperson = $rs['ows_contactperson'];
 		$this->ows_contactposition = $rs['ows_contactposition'];
 		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
 		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
-		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
+		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
+		$this->ows_distributioncity = $rs['ows_distributioncity'];
+		$this->ows_distributionadministrativearea = $rs['ows_distributionadministrativearea'];
+		$this->ows_distributionemailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
+		$this->ows_distributionvoicephone = $rs['ows_distributionvoicephone'];
+		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
+
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contentaddress = $rs['ows_contentaddress'];
+		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
+		$this->ows_contentcity = $rs['ows_contentcity'];
+		$this->ows_contentadministrativearea = $rs['ows_contentadministrativearea'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_contentvoicephone = $rs['ows_contentvoicephone'];
+		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
+
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
@@ -1458,7 +1520,7 @@ class stelle {
 										ul.Layer_ID = l.Layer_ID AND
 										locate(
 											concat('$', p.key),
-											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 										) > 0
 									UNION
 									SELECT

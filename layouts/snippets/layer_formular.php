@@ -1,6 +1,9 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
+	include(LAYOUTPATH . $language_file);
+	include(PLUGINS . 'mobile/' . $language_file);
+	include(PLUGINS . 'portal/' . $language_file);
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -8,6 +11,10 @@
 		if(event.layerX > 300){
 			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
+	}
+
+	function showGruppenEditor(gruppeId, layerId) {
+		location.href = 'index.php?go=Layergruppe_Editor&selected_group_id=' + gruppeId + '&selected_layer_id=' + layerId + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 
 	function create_generic_data_sql(layer_id) {
@@ -297,11 +304,12 @@
 								1,																			# size
 								'',																			# style
 								'',			# onchange
-								'',		# id
+								'gruppe-select',												# id
 								'',																			# multiple
 								'',																			# class
 								'-- ' . $this->strPleaseSelect . ' --'	# first option
 							); ?>
+							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
 					</tr>
 					<tr>
@@ -798,12 +806,42 @@
 						</td>
 					</tr>
 
-				</table>
+				</table><?
+				if ($this->plugin_loaded('mobile')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_mobile_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $str_mobile_vector_tile_url; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="vector_tile_url" type="text" value="<?php echo $this->formvars['vector_tile_url']; ?>" size="50" maxlength="255">&nbsp;
+								<span data-tooltip="<? echo $str_mobile_vector_tile_url_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				}
+				if ($this->plugin_loaded('portal')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_portal_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><a name="cluster_option"></a><?php echo $str_portal_cluster_option; ?></th>
+							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="cluster_option" type="checkbox" value="1"<?php if ($this->formvars['cluster_option']) echo ' checked'; ?>>&nbsp;
+								<span data-tooltip="<?php echo $str_portal_cluster_option_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				} ?>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strAdministrative; ?></th>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -852,7 +890,7 @@
 						</tr><?
 					} ?>
 				</table>
-		</div>
+			</div>
 		
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">

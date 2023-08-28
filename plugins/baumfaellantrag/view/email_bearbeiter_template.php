@@ -6,7 +6,7 @@
 	$mail_bearbeiter['to_email'] = $data['authority_email'];
 	$mail_bearbeiter['cc_email'] = '';
 
-	$mail_bearbeiter['subject'] = 'Baumfällantrag';
+	$mail_bearbeiter['subject'] = 'Baumfaellantrag';
 	$mail_bearbeiter['message']  = 'Sehr geehrte(r) Ansprechpartner(in) ' . $data['authority_contactPerson'] . ",\n";
 	$mail_bearbeiter['message'] .= "\n";
 	$mail_bearbeiter['message'] .= 'es ist ein neuer Antrag auf Baumfällgenehmigung eingegangen.' . "\n";

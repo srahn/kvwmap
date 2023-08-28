@@ -15,6 +15,23 @@ input {
 	font-size: <? echo $font_size_factor * 15; ?>px
 }
 
+.alerts-border {
+	border: 2px #ff0000 dotted;
+	animation: borderblink 0.8s;
+	animation-iteration-count: 5;
+}
+
+@keyframes borderblink { 50% { border-color:#fff ; }  }
+
+.validation-error-msg-div {
+	background-color: #eee;
+	float: left;
+	width: 390px;
+	padding: 5px;
+	color: red;
+	border-radius: 5px;
+}
+
 #form-titel {
 	font-family: SourceSansPro3;
 
@@ -1902,6 +1919,32 @@ thead.gle th {
 
 .gle_tabs > div:hover{
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_arrayelement_table {
+	width: 100%;
+	margin: 10px 0;
+}
+
+.gle_datatype_table {
+	width: 100%;
+	table-layout: auto;
+	border: 1px solid #bbb;
+	border-bottom: none;
+	border-collapse: collapse;
+	border-left: 3px solid #555;
+}
+
+.gle_datatype_table td.gle_attribute_name {
+	width: 10%;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value, .gle_attribute_name {
+	border: 1px solid #bbb;
 }
 
 .gle-attribute-name {

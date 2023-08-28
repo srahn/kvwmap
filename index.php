@@ -17,6 +17,11 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
+		if (class_exists('GUI') AND !empty(GUI::$messages)) {
+			foreach(GUI::$messages as $message) {
+				$errors[] = $message['msg'];
+			}
+		}
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
@@ -250,12 +255,12 @@ function go_switch($go, $exit = false) {
 					$GUI->loadMap('DataBase');
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
+				$GUI->drawMap();
 				$GUI->saveMap('');
 				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
 					$currenttime=date('Y-m-d H:i:s',time());
 					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				}
-				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
@@ -272,19 +277,29 @@ function go_switch($go, $exit = false) {
 				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
-				$GUI->mime_type='image/' . $format;
+				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
-			} break;			
-			
+			} break;
+
 			case 'write_mapserver_templates' : {
+				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');
-				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
-				foreach ($layers as $layer) {
-					echo $layer->get('Name') . '<br>';
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
+			case 'write_mapserver_templates_Erzeugen' : {
+				$GUI->checkCaseAllowed('write_mapserver_templates');
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				foreach ($GUI->layers as $layer) {
 					$layer->write_mapserver_templates('Formular');
 				}
-			}break;			
-			
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
 				$GUI->saveDrawmode();
@@ -1022,7 +1037,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
-				$GUI-sanitize(['druckausschnitt' => 'int']);
+				$GUI->sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -1229,7 +1244,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
 				$GUI->sanitize([
 					'selected_layer_id' => 'int',
 					'layer_name' => 'text',
@@ -1580,12 +1595,14 @@ function go_switch($go, $exit = false) {
 
 			case 'Attributeditor_speichern' : {
 				$GUI->checkCaseAllowed('Attributeditor');
-				if (!empty($GUI->formvars['selected_layer_id']) AND empty($GUI->formvars['selected_datatype_id'])) {
-					include_once(CLASSPATH . 'Layer.php');
-					$GUI->save_layers_attributes($GUI->formvars);
-				}
-				if (empty($GUI->formvars['selected_layer_id']) AND !empty($GUI->formvars['selected_datatype_id'])) {
-					$GUI->Datentypattribute_speichern();
+				if ($GUI->formvars['selected_layer_id'] != '') {
+					if ($GUI->formvars['selected_datatype_id'] == '') {
+						include_once(CLASSPATH . 'Layer.php');
+						$GUI->save_layers_attributes($GUI->formvars);
+					}
+					else {
+						$GUI->Datentypattribute_speichern();
+					}
 				}
 				$GUI->Attributeditor();
 			} break;
@@ -2061,7 +2078,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Query for all notifications and show it in a list
+			*	Query for all notifications and show it in a list
 			*/
 			case 'notifications_anzeigen' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2069,7 +2086,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Show notifications form to create or update notification
+			*	Show notifications form to create or update notification
 			*/
 			case 'notification_formular' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2078,7 +2095,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				create or update a user notification
+			*	create or update a user notification
 			*/
 			case 'put_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2093,7 +2110,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete the notification for user
+			*	delete the notification for user
 			*/
 			case 'delete_user2notification' : {
 				$GUI->sanitize(['notification_id' => 'int']);
@@ -2101,7 +2118,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete a notification
+			*	delete a notification
 			*/
 			case 'delete_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2110,7 +2127,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				query notifications that has to be shown for the current user
+			*	query notifications that has to be shown for the current user
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();

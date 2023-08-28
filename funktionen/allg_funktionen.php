@@ -1,13 +1,19 @@
 <?php
-/* hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
+/**
+ * hier befindet sich ein lose Sammlung von Funktionen, die so oder ähnlich im php
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
+
+ /**
+  * 
+  */
 function mapserverExp2SQL($exp, $classitem){
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', '=', $exp);
 	$exp = str_replace(' ne ', '!=', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
 	
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
 		if (strpos($exp, '/') === 0) {		# regex
@@ -44,7 +50,10 @@ function urlencode2($str){
 	return $str;
 }
 
-function get_url(){	# die Konstante URL kann durch diese Funktion ersetzt werden
+/**
+ * die Konstante URL kann durch diese Funktion ersetzt werden
+ */
+function get_url(){
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
@@ -159,13 +168,23 @@ function versionFormatter($version) {
   );
 }
 
-/*
-* This function return the absolute path to a document in the file system of the server
-* @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
-* @param string $layer_document_path The document path of the layer the attribute belongs to.
-* @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
-* @return string The absolute path to the document
-*/
+/**
+ * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
+ * @return integer 3 digit version number of gdal
+ */
+function get_ogr_version() {
+	exec('gdalinfo --version', $output, $ret);
+	$version_str = explode(' ', explode(',', $output[0])[0])[1];
+	return intVal(versionFormatter($version_str));
+}
+
+/**
+ * This function return the absolute path to a document in the file system of the server
+ * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
+ * @param string $layer_document_path The document path of the layer the attribute belongs to.
+ * @param string $layer_document_url optional, default '' The document url of the layer the attribute belongs to. If empty the $document_attribute_value containing an url
+ * @return string The absolute path to the document
+ */
 function get_document_file_path($document_attribute_value, $layer_document_path, $layer_document_url = '') {
 	$value_part = explode('&original_name=', $document_attribute_value);
 	if ($layer_document_url != '') {
@@ -204,11 +223,14 @@ function exif_identify_data($file) {
 }
 
 /**
-	function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
-	It uses php to read exif data per default. If coordinates are not found it try to read the values with identify command
-	@param string $img_path Absolute Path of file with Exif Data to read
-	@param boolean $force_identify Forces to use only function identify to read exif data from image, default is false
-	@return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
+*	function read exif and gps data from file given in $img_path and return GPS-Position, Direction and creation Time
+*	It uses php to read exif data per default. If coordinates are not found it try to read the values with identify command
+*
+*	@param string $img_path Absolute Path of file with Exif Data to read
+*
+*	@param boolean $force_identify Forces to use only function identify to read exif data from image, default is false
+*
+*	@return array Array with success true if read was successful, LatLng the GPS-Position where the foto was taken Richtung and Erstellungszeit.
 */
 function get_exif_data($img_path, $force_identify = false) {
 	if ($img_path != '') {
@@ -254,10 +276,12 @@ function get_exif_data($img_path, $force_identify = false) {
 /**
 * Function create a float value from a text
 * where numerator and denominator are delimited by a slash e.g. 23/100
-* @params string $slash_text First part of the string is numerator, second part is denominator.
+*
+* @param string $slash_text First part of the string is numerator, second part is denominator.
+*
 * @return float The float value calculated from numerator divided by denominator.
-* Return Null if string is empty or NULL.
-* Return numerator if only one part exists after explode by slash
+* 				Return Null if string is empty or NULL.
+*				Return numerator if only one part exists after explode by slash
 */
 function float_from_slash_text($slash_text) {
 	$parts = explode('/', $slash_text);
@@ -536,8 +560,10 @@ function dec2dms($number){
 	return $degrees."°".$minutes."'".$seconds.'"';
 }
 
+/**
+ * convert decimal degree value to degree and decimal minutes
+ */
 function dec2dmin($number){
-	# convert decimal degree value to degree and decimal minutes
 	$part1 = explode('.', $number);
 	$degrees = $part1[0];
 	$minutes = ('0.'.$part1[1]) * 60;
@@ -678,17 +704,18 @@ function checkPasswordAge($passwordSettingTime, $allowedPassordAgeMonth) {
 * Prüft ob ein Passwort ein gutes Passwort ist.
 *
 * Diese Funktion prüft die Länge, Anzahl wiederholter Zeichen und einfachheit von Passwörtern
-* Code wurde abgeleitet von http://scripts.franciscocharrua.com/check-password.php und
-* http://www.vbforums.com/showthread.php?p=2347960 und wurde stark verändert und ergänzt.
+* Code wurde abgeleitet von [http://scripts.franciscocharrua.com/check-password.php](http://scripts.franciscocharrua.com/check-password.php) und
+* [http://www.vbforums.com/showthread.php?p=2347960](http://www.vbforums.com/showthread.php?p=2347960) und wurde stark verändert und ergänzt.
 * Vielen Dank trotzdem an die Autoren.
 *
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
 *
 * @param string password Zu prüfendes Password als Text
+*
 * @return string Fehlermeldung zur Beschreibung, was an dem Password schlecht ist, oder leerer String, wenn Password gut ist.
+*
 * @see    createRandomPassword(), checkPasswordAge, $GUI, $user, $stelle
 */
-# Passwortprüfung
 function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
 	#echo '<p>allg_funktionen isPasswortValide old: ' . $oldPassword . ' new1: ' . $newPassword . ' new2: ' . $newPassword2;
   $password_errors = array();
@@ -815,7 +842,7 @@ function isPasswordValide($oldPassword, $newPassword, $newPassword2) {
   return $return_string;
 }
 
-/*
+/**
 * Erzeugt an Hand der Einstellungen für die Passwortstärke einen Hilfetext für die
 * Vergabe eines neuen Passwortes
 */
@@ -849,12 +876,13 @@ function password_erstellungs_hinweis($language) {
 * Erzeugen eines zufälligen Passwortes
 *
 * Diese Funktion erzeugt ein zufälliges sicheres Password. Die Funktion wurde von Totally PHP übernommen und mit zusätzlichen Zeichen versehen
-* siehe: http://www.totallyphp.co.uk/code/create_a_random_password.htm
+* siehe: [http://www.totallyphp.co.uk/code/create_a_random_password.htm](http://www.totallyphp.co.uk/code/create_a_random_password.htm)
 * Vielen Dank an den Autor.
 *
 * Reihenfolge: Übersichtssatz - Kommentar - Tags.
 *
 * @return string ein achtstelliges Password
+*
 * @see    isPasswordValide(), checkPasswordAge, $GUI, $user, $stelle
 */
 function createRandomPassword($passwordLength) {
@@ -1010,11 +1038,17 @@ function rgb2hex($rgb) {
  * Replace str_split()
  *
  * @category    PHP
+ * 
  * @package     PHP_Compat
+ * 
  * @link        http://php.net/function.str_split
+ * 
  * @author      Aidan Lister <aidan@php.net>
+ * 
  * @version     $Revision: 1.13 $
+ * 
  * @since       PHP 5
+ * 
  * @require     PHP 4.0.1 (trigger_error)
  */
 if (!function_exists('str_split')) {
@@ -1081,12 +1115,16 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 }
 
 /**
-	function check if file is a valid zip file. It check if
-	- file exists and is readable
-	- file extension is zip
-	- file has correct header
-	@param $file The path and filename of the file to be tested
-	@return true If it is a zip file else false
+* is_zip_file
+* 
+* function check if file is a valid zip file. It check if
+* - file exists and is readable
+* - file extension is zip
+* - file has correct header
+*
+* @param $file The path and filename of the file to be tested
+*
+* @return true If it is a zip file else false
 */
 function is_zip_file($file) {
 	//check is valid file or not and readable
@@ -1188,6 +1226,8 @@ function umlaute_umwandeln($name) {
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
 	$name = str_replace(')', '', $name);
+	$name = str_replace('[', '', $name);
+	$name = str_replace(']', '', $name);
 	$name = str_replace('/', '-', $name);
 	$name = str_replace(' ', '_', $name);
 	$name = str_replace('-', '_', $name);
@@ -1264,8 +1304,10 @@ function is_dir_empty($path){
 	}
 }
 
+/**
+ * liefert ein Array mit den Pfaden aller Dateien im Verzeichnis
+ */
 function searchdir($path, $recursive){
-    # liefert ein Array mit den Pfaden aller Dateien im Verzeichnis
     if (substr($path, strlen($path) - 1 ) != '/' ){
       $path .= '/';
     }
@@ -1380,7 +1422,9 @@ function str_space($string, $split_length = 1) {
   return $returnstr;
 }
 
-########### Zeigt Text in einem Java-Script Alarmfenster an
+/**
+ * Zeigt Text in einem Java-Script Alarmfenster an
+ */
 function showAlert($text) {
   ?>
   <script type="text/javascript">
@@ -1388,7 +1432,9 @@ function showAlert($text) {
   </script><?php
 }
 
-########### Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
+/**
+ * Funktion wandelt UNIX Zeichen in DOS Zeichen um für Konvertierung WLDGE-Dateien
+ */
 function unix2dos($text) {
    $search  = array ("{", "|", "}", "~","'","[","\\","]","@");
    $replace = array ("ä", "ö", "ü", "ß","\"","Ä","Ö","Ü","§");
@@ -1426,11 +1472,14 @@ function convertDBFCodePage($filename) {
   dbase_close ($dbfid);
 }
 
-# Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um
-# Beispiel:
-# $block=zeilenumbruch('Dies ist ein Beilspiel.',12);
-# echo $block[0]; # liefert "Dies ist ein"
-# echo $block[1]; # liefert "Beispiel"
+/**
+ * Funktion bricht $text in Wörtern in ein Array von Zeilen der Länge $laenge um
+ * 
+ * Beispiel:
+ * $block=zeilenumbruch('Dies ist ein Beilspiel.',12);
+ * echo $block[0]; # liefert "Dies ist ein"
+ * echo $block[1]; # liefert "Beispiel"
+ */
 function zeilenumbruch($text,$laenge) {
   $wort=explode(' ',$text);
   $ausgabetext=$wort[0];
@@ -1447,12 +1496,14 @@ function zeilenumbruch($text,$laenge) {
   return $ausgabe;
 }
 
+/**
+ * Funktion führt eine Lauflängenkodierung des Arrays aus
+ * und komprimiert somit das Array von Einzelwerten
+ * array runLenComp(array array);
+ * von den vorkommenden ganzen Zahlen werden von-bis Intervalle gebildet
+ * sortieren der Liste
+ */
 function runLenComp($liste) {
-  # Funktion führt eine Lauflängenkodierung des Arrays aus
-  # und komprimiert somit das Array von Einzelwerten
-  # array runLenComp(array array);
-  # von den vorkommenden ganzen Zahlen werden von-bis Intervalle gebildet
-  # sortieren der Liste
   sort($liste);
   $anz=count($liste);
   $comp=$liste[0];
@@ -1481,8 +1532,9 @@ function runLenComp($liste) {
   return $comp;
 }
 
-#**** Funktion, die prüft, ob Datum sinnvoll ist.
-
+/**
+ * Funktion, die prüft, ob Datum sinnvoll ist.
+ */
 function date_ok($date) {
 
    $today = date(Ymd);
@@ -1557,10 +1609,12 @@ function date_ok($date) {
 
 }
 
+/**
+ * Funktion teilt eine EDBS Datei in einzelne Dateien
+ * Jeder Auftrag wird in eine separate Datei geschrieben
+ * Öffnen der EDBS Datei
+ */
 function split_edbs_file($pfad,$filename) {
-  # Funktion teilt eine EDBS Datei in einzelne Dateien
-  # Jeder Auftrag wird in eine separate Datei geschrieben
-  # Öffnen der EDBS Datei
   $fp=fopen($pfad.$filename,'r');
   $i=1;
   $fpteil=fopen($pfad.'EDBS_teil_'.$i.'.edbs','w');
@@ -1586,9 +1640,9 @@ function split_edbs_file($pfad,$filename) {
   fclose($fp);
 }
 
-############################################################################
-# Prüft eine E-Mail adresse auf richtige schreibweise
-############################################################################
+/**
+ * Prüft eine E-Mail adresse auf richtige schreibweise
+ */
 function emailcheck($email) {
   $Meldung='';
   # enthält die Adresse ein Leerzeichen?
@@ -1646,7 +1700,7 @@ function buildExpressionString($str) {
 }
 
 function getNumPagesPdf($filepath){
-	exec('gs -q -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
+	exec('gs -q -I / -dNODISPLAY -c "('.$filepath.') (r) file runpdfbegin pdfpagecount = quit"', $output);
 	return $output[0];
 }
 
@@ -1805,15 +1859,18 @@ function get_upload_error_message($code) {
   return $message;
 }
 
-/*
+/**
 * This function removes or keeps elements defined in $strip_list from $fromvars array
+*
 * If elements from strip_list shall be removed (default), all other will be keeped in the formvars array.
 * If elements shall be keeped, all other will be removed in the formars array.
 * strip_type 'remove' delete formvars defined in strip_list.
 * strip_type ('keep' | any other than 'remove') keep formvars defined in strip_list.
 *
 * @param $formvars array
+*
 * @param $strip_list comma separated string or array - formvar names to keep or to remove
+*
 * @param $strip_type string - Tells the function to keep or remove the formvars
 */
 function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
@@ -1854,7 +1911,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 	return $stripped_formvars;
 }
 
-/*
+/**
 * Funktion ersetzt in $str die Schlüsselwörter, die in $params
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
@@ -1887,7 +1944,8 @@ function replace_params_link($str, $params, $layer_id) {
 
 /**
 * Funktion sendet e-mail mit Dateien im Anhang
-* siehe http://www.php-einfach.de/codeschnipsel_1114.php
+* siehe [http://www.php-einfach.de/codeschnipsel_1114.php](http://www.php-einfach.de/codeschnipsel_1114.php)
+*
 * @param $anhang Array mit den Elementen "name", "size" und "data" oder Array mit Elementen solcher Arrays
 * $pfad = array();
 * $pfad[] = "ordner/datei1.exe";
@@ -1967,7 +2025,7 @@ function mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $
 		return 0;
 }
 
-/*
+/**
 * function replaced square brackets at the beginning and the end of the string
 * and return the elements of the string as array separated by the delimmiter.
 * The elements of the string will be replaced by slashes and timed from white spaces and ".
@@ -1984,12 +2042,19 @@ function arrStrToArr($str, $delimiter) {
 
 /**
 * @param string $form_field_name - used also als form field id
+*
 * @param array $data - array with values and options per array element
+*
 * @param string $selected_value
+*
 * @param string $onchange - javascript to execute on change
+*
 * @param string $title - of the select field
+*
 * @param string $null_option - create a first option with value = '' and the text of $null_option
+*
 * @param string $style - css Style for the select element
+*
 * @return string - the html representing the select form element
 * */
 function output_select($form_field_name, $data, $selected_value = null, $onchange = null, $title = null, $null_option = null, $style = null) {
@@ -2045,7 +2110,7 @@ function geometrytype_to_datatype($geometrytype) {
 	return $datatype;
 }
 
-/*
+/**
 * Function erzeugt von den übergebenen formvars hidden input fields
 * außer von denen, dessen keys im except array stehen.
 */
@@ -2068,15 +2133,19 @@ function hidden_formvars_fields($formvars, $except = array()) {
 	return $html;
 }
 
-/*
+/**
 * Function liefert eine Liste von Parametern von einem verschachtelten array
 * z.B. wir aus:
+*
 * Array('a' => 1, 'b' => Array(0 => 2, 1 => Array('c' => 3, 'd' => 4)))
 * Array('a' => 1, 'b[0]' => 2, 'b[1][c]' => 3, 'b[1][d]' => 4)
 * Diese Funktion kann verwendet werden, um formvars in Parameter zu wandeln,
 * die in hidden input Feldern ausgegeben werden soll.
+*
 * @param $array_key String Name des Layer_Parameter_speichern
-* @params $array Array Das Array mit den default-Werten
+*
+* @param $array Array Das Array mit den default-Werten
+*
 * @return Die Liste der Parameter
 */
 function values_from_array($array_key, $array) {
@@ -2107,12 +2176,17 @@ function uuid() {
 *  either in bytes or - default - as human-readable formatted string.
 *
 *  @author  Stephan Schmitz <eyecatchup@gmail.com>
+*
 *  @license MIT <http://eyecatchup.mit-license.org/>
-*  @url     <https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d>
+*
+*  @link https://gist.github.com/eyecatchup/f26300ffd7e50a92bc4d
 *
 *  @param   string   $url          Takes the remote object's URL.
+*
 *  @param   boolean  $formatSize   Whether to return size in bytes or formatted.
+*
 *  @param   boolean  $useHead      Whether to use HEAD requests. If false, uses GET.
+*
 *  @return  string                 Returns human-readable formatted size
 *                                  or size in bytes (default: formatted).
 */
@@ -2148,14 +2222,14 @@ function get_remote_filesize($url, $formatSize = true, $useHead = true) {
 	return $size; // return formatted size
 }
 
-/*
+/**
 * Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
 */
 function err_msg($file, $line, $msg, $find = '') {
 	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
-# ToDo: Prüfen ob die Ausgabe $msg nicht mit htmlspecialchars($msg) erfolgen muss
+//TODO: Prüfen ob die Ausgabe $msg nicht mit htmlspecialchars($msg) erfolgen muss
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
@@ -2231,12 +2305,15 @@ function count_or_0($val) {
 
 /**
 * Replacing part of a string with another string is straight forward, but what if you have to replace last occurrence of a character or string with another string.
-* https://pageconfig.com/post/replace-last-occurrence-of-a-string-php
+* [https://pageconfig.com/post/replace-last-occurrence-of-a-string-php](https://pageconfig.com/post/replace-last-occurrence-of-a-string-php)
 * In case the $search is not found inside the $str, the function returns the original untouched string $str.
 * This behavior is compatible with the default behavior of str_replace PHP’s builtin function that replaces all
 * occurrances of a string inside another string.
+*
 * @param string $search keeps the string to be searched for
+*
 * @param string $replace Is the replacement string
+*
 * @param string $str Is the subject string, commonly known as haystack
 */
 function str_replace_last($search , $replace, $str) {
@@ -2247,19 +2324,22 @@ function str_replace_last($search , $replace, $str) {
   return $str;
 }
 
-/*
+/**
 * Liefert den Originalnamen vom Namen der Thumb-Datei
 */
 function get_name_from_thump($thumb) {
 	return before_last($thumb, '_thumb.jpg');
 }
 
-/*
+/**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
 * Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
 * z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
+*
 * @param string $txt Der Text von dem der Teilstring extrahiert werden soll.
+*
 * @param string $delimiter Der Text, der den Text trennt in davor und danach.
+*
 * @return string Der Teilstring vor dem letzten Vorkommen von $delimiter
 * oder ein Leerstring wenn $txt $delimiter nicht enthält oder $delimiter leer ist
 */
@@ -2326,9 +2406,10 @@ function get_requires_options($sql, $requires) {
 	return $creator->created;
 }
 
-/*
+/**
 * This function convert an assosiative array with 1-dim vectors of values of the same length
 * to an array with associative arrays e.g.
+*
 * from: array(
 * 	'id' => array(1,2,3),
 * 	'name' => array('a', 'b', 'c');
@@ -2370,10 +2451,13 @@ function sql_from_parse_tree($parse_tree) {
 }
 
 /**
-	Function sanitizes $value based on its $type and returns the sanitized value.
-	If $type or $value is empty or $type unknown, $value will not be sanitized at all.
-	If $value is an array all elements will be sanitized with $type.
-*/
+ * Function sanitizes $value based on its $type and returns the sanitized value.
+ * If $type or $value is empty or $type unknown, $value will not be sanitized at all.
+ * If $value is an array all elements will be sanitized with $type.
+ * @param any $value Value to sanitize
+ * @param string $type The type of the value
+ * @return any The sanitized value
+ */
 function sanitize(&$value, $type) {
 	if (empty($type)) {
 		return $value;
@@ -2402,9 +2486,10 @@ function sanitize(&$value, $type) {
 
 		case 'numeric' :
 		case '_numeric' :
+		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) $value;
+			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :
@@ -2428,9 +2513,9 @@ function sanitize(&$value, $type) {
 }
 
 /**
-	Function determine the max allowed file size in MB
-	If php configuration parameter are defined with G the values
-	will be multiplied by 1024
+*	Function determine the max allowed file size in MB
+*	If php configuration parameter are defined with G the values
+*	will be multiplied by 1024
 */
 function get_max_file_size() {
 	$post_max_size_txt = ini_get('post_max_size');
@@ -2452,11 +2537,14 @@ function get_max_file_size() {
 }
 
 /**
-	Function searches for $value in $array and if exists
-	remove it and put it at first position in array
-	@param $array, Array
-	@param $value, Any
-	@return Array
+*	Function searches for $value in $array and if exists
+*	remove it and put it at first position in array
+*
+*	@param $array, Array
+*
+*	@param $value, Any
+*
+*	@return Array
 */
 function put_value_first($array, $value) {
 	$key = array_search($value, $array);
@@ -2468,8 +2556,8 @@ function put_value_first($array, $value) {
 }
 
 /**
-	Convert German date format 25.12.2020
-	to English date format 2022-12-25
+*	Convert German date format 25.12.2020
+*	to English date format 2022-12-25
 */
 function en_date($date_de) {	
 	return date('Y-m-d', strtotime($date_de));
