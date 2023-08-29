@@ -2049,7 +2049,7 @@ echo '			</table>
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
-		$layer->setMetaData('wms_name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
+		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
@@ -4243,8 +4243,7 @@ echo '			</table>
 		}
 		echo $url . '&field_id='.$this->formvars['field_id'];
 	}
-
-  function showMapImage(){
+	function showMapImage() {
 		include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php');
   	$this->loadMap('DataBase');
   	$this->drawMap(true);
@@ -4252,10 +4251,10 @@ echo '			</table>
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
   	$fpsvg = fopen(IMAGEPATH.$svgfile, 'w');
-  	$svg='<?xml version="1.0"?>
+  	$svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="'.$this->map->width.'" height="'.$this->map->height.'"
+<svg id="svgmap" zoomAndPan="disable" width="' . $this->map->width . '" height="' . $this->map->height . '"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
@@ -4267,59 +4266,19 @@ echo '			</table>
   	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
   	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
-    if(function_exists('imagecreatefromjpeg')){
+    if (function_exists('imagecreatefromjpeg')) {
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
-    	if(strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'jpg'){
+    	if (strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'jpg') {
         $scaleimage = imagecreatefromjpeg(IMAGEPATH.basename($this->img['scalebar']));
       }
-      elseif(strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'png'){
+      elseif (strtolower(array_pop(explode('.', basename($this->img['scalebar'])))) == 'png') {
         $scaleimage = imagecreatefrompng(IMAGEPATH.basename($this->img['scalebar']));
       }
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
     }
-		echo "
-			<html>
-				<head>
-					<title>Kartenbild</title>
-					<script type=\"text/javascript\">
-						function copyImageById(Id){
-							var imgs = document.createElement('img');
-							imgs.src = document.getElementById(Id).src;
-							var bodys = document.body;
-							bodys.appendChild(imgs);
-							if(document.createRange){
-								var myrange = document.createRange();
-								myrange.setStartBefore(imgs);
-								myrange.setEndAfter(imgs);
-								myrange.selectNode(imgs);
-							}
-							var sel = window.getSelection();
-							sel.addRange(myrange);
-							var successful = document.execCommand('copy');
-							bodys.removeChild(imgs);
-						}
-					</script>
-					<style>
-						table {
-							margin: auto;
-						}
-						td {
-							padding: 4px;
-						}
-					</style>
-				</head>
-				<body style=\"text-align:center\">
-					<img id=\"mapimg\" src=\"".TEMPPATH_REL.$jpgfile."\" style=\"box-shadow:  0px 0px 14px #777;\"><br><br>
-					<input type=\"button\" onclick=\"copyImageById('mapimg');\" value=\"Bild kopieren\">
-					<div>
-						<h3>" . $strShowCopyrightHeader . "</h3>
-						" . $this->get_copyrights() . "
-					</div>
-				</body>
-			</html>
-			";
+		include(SNIPPETS . 'map_image.php');
   }
 
 	/*
@@ -4546,7 +4505,7 @@ echo '			</table>
 						<td class="px13"><?
 							echo key($this->styledaten); ?>
 						</td>
-						<td><?
+						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
 								case 'linecap' : {
 									echo FormObject::createSelectField(
@@ -4631,6 +4590,16 @@ echo '			</table>
 									><?
 								} break;
 */
+								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
+									<input
+										class="styleFormField"
+										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
+										name="style_<? echo key($this->styledaten); ?>"
+										size="11"
+										type="text"
+										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
+									>&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i><?
+								} break;
 								default : { ?>
 									<input
 										class="styleFormField"
@@ -8996,12 +8965,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->invitation->delete();
 		$this->add_message('notice', 'Einladung erfolgreich gelöscht.');
 	}
-
+	/**
+	 * @param array $attributes Attribut-Array des übergeordneten Layers
+	 * @param int $j Zähler in diesem Array mit dem SubForm-Attribut
+	 * @param string $maintable Hauptabelle des übergeordneten Layers
+	 * @param array $result Datensatz im übergeordneten Layer
+	 */
 	function getSubFormResultSet($attributes, $j, $maintable, $result){
-		# $attributes ist das Attribut-Array des übergeordneten Layers
-		# $j ist der Zähler in diesem Array mit dem SubForm-Attribut
-		# $maintable ist die Hauptabelle des übergeordneten Layers
-		# $result ist der Datensatz im übergeordneten Layer
 		$layerid_save = $this->formvars['selected_layer_id'];
 		$this->formvars['selected_layer_id'] = $attributes['subform_layer_id'][$j];
 		$this->formvars['no_output'] = true;
@@ -9011,12 +8981,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		$this->formvars['value_' . $maintable . '_oid'] = '';
 		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche
-			$this->formvars['value_' . $attributes['subform_pkeys'][$j][$p]] = $result[$attributes['subform_pkeys'][$j][$p]];
-			$this->formvars['operator_' . $attributes['subform_pkeys'][$j][$p]] = '=';
+			if (strpos($attributes['subform_pkeys'][$j][$p], ':')) {
+				$exp = explode(':', $attributes['subform_pkeys'][$j][$p]);
+				$key[$p] = $exp[0];			# Verknüpfungsattribut im Ober-Layer
+				$subkey[$p] = $exp[1];	# Verknüpfungsattribut im Sub-Layer
+			}
+			else {
+				$key[$p] = $subkey[$p] = $attributes['subform_pkeys'][$j][$p];
+			}		
+			$this->formvars['value_' . $subkey[$p]] = $result[$key[$p]];
+			$this->formvars['operator_' . $subkey[$p]] = '=';
 		}
 		$this->GenerischeSuche_Suchen();
-		for ($p = 0; $p < count($attributes['subform_pkeys'][$j]); $p++) {			# die Suchparameter für die Layersuche wieder leeren
-			$this->formvars['value_'.$attributes['subform_pkeys'][$j][$p]] = '';
+		for ($p = 0; $p < count($key); $p++) {			# die Suchparameter für die Layersuche wieder leeren
+			$this->formvars['value_' . $subkey[$p]] = '';
 		}
 		$this->formvars['selected_layer_id'] = $layerid_save;
 	}
@@ -9036,6 +9014,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($layerset == NULL) {
 			$ret['success'] = false;
 			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
+		}
+		if (
+			! (
+				$this->formvars['without_diagramms'] OR
+				in_array($this->formvars['format'], array('json', 'json_result')) OR
+				$this->formvars['mime_type'] == 'json'
+			)
+		) {
+			$layerset[0]['charts'] = array();
+		}
+		else {
+			include_once(CLASSPATH . 'LayerChart.php');
+			$layerset[0]['chats'] = LayerChart::find('`layer_id` = ' . $this->formvars['selected_layer_id']);
+			echo 'l: ' . print_r($layerset[0]['charts'], true); exit;
 		}
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		switch ($layerset[0]['connectiontype']) {
@@ -9324,11 +9316,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				/*
-				if ($this->user->id == 1) {
-					echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
-				}
-				*/
+				#if ($this->user->id == 1) {
+				#	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				#}
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -9478,7 +9468,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}   # Ende switch connectiontype
 
 		$layerset[0]['attributes'] = $attributes;
-		$this->qlayerset[0]=$layerset[0];
+		$this->qlayerset[0] = $layerset[0];
 		$i = 0;
 		$this->search = true;
 
@@ -11260,6 +11250,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
+	function chart_erzeugen() {
+		include_once(CLASSPATH . 'LayerChart.php');
+		$chart = new LayerChart($this);
+		$result = $chart->create(array_intersect_key($this->formvars, array('id', 'layer_id', 'title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name')));
+		return $result;
+	}
+
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
@@ -11281,54 +11278,54 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true, $this->Stelle->id);
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
     # Daten abfragen
-    $sql = $newpath;
-    if($this->formvars['all'] != 'true'){
-	    for($i = 0; $i < count($checkbox_names); $i++){
-	      if($this->formvars[$checkbox_names[$i]] == 'on'){
-	        $element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-	        $oids .= $element[3].', ';
-	      }
-	    }
-	    $sql .= " AND " . $element[1].".oid IN (" . $oids.'0)';
-    }
-    if($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
-    	$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby'.$this->formvars['chosen_layer_id']]);
-    }
-    #echo $sql.'<br><br>';
-    $this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
-    $ret = $layerdb->execSQL($sql,4, 1);
-    if (!$ret[0]) {
-      while ($rs=pg_fetch_array($ret[1])) {
-        $result[] = $rs;
-        if($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] > $maximum){
-        	$maximum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        }
-        if($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] < $minimum){
-        	$minimum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        }
-        $summe += $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
-        $maxlabelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $rs[$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]]);
-        if($maxlabelwidth < $maxlabelbox[2] - $maxlabelbox[0]){
-    			$maxlabelwidth = $maxlabelbox[2] - $maxlabelbox[0];
-        }
-      }
-    }
-    # defining colors
-    $colors['white'] =			 Array(255, 255, 255);
-    $colors['yellowLight'] = Array(255, 255, 200);
+		$sql = $newpath;
+		if ($this->formvars['all'] != 'true') {
+			for ($i = 0; $i < count($checkbox_names); $i++) {
+				if ($this->formvars[$checkbox_names[$i]] == 'on') {
+					$element = explode(';', $checkbox_names[$i]); # check;table_alias;table;oid
+					$oids .= $element[3] . ', ';
+				}
+			}
+			$sql .= " AND " . $element[1] . "." . $layerset[0]['oid'] . " IN (" . $oids . '0)';
+		}
+		if ($this->formvars['orderby'.$this->formvars['chosen_layer_id']] != ''){
+			$sql .= ' ORDER BY ' . replace_semicolon($this->formvars['orderby' . $this->formvars['chosen_layer_id']]);
+		}
+		#echo $sql.'<br><br>';
+		$this->debug->write("<p>file:kvwmap class:generisches_sachdaten_diagramm :",4);
+		$ret = $layerdb->execSQL($sql,4, 1);
+		if (!$ret[0]) {
+			while ($rs=pg_fetch_array($ret[1])) {
+				$result[] = $rs;
+				if ($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] > $maximum){
+					$maximum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				}
+				if ($rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]] < $minimum){
+					$minimum = $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				}
+				$summe += $rs[$this->formvars['chartvalue_'.$this->formvars['chosen_layer_id']]];
+				$maxlabelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $rs[$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]]);
+				if ($maxlabelwidth < $maxlabelbox[2] - $maxlabelbox[0]){
+					$maxlabelwidth = $maxlabelbox[2] - $maxlabelbox[0];
+				}
+			}
+		}
+		# defining colors
+		$colors['white'] =			 Array(255, 255, 255);
+		$colors['yellowLight'] = Array(255, 255, 200);
 		$colors['red'] =				 Array(255,  50,  50);
 		$colors['blue'] =				 Array( 80,  80, 255);
-    $colors['black'] =  		 Array(  0,   0,   0);
+		$colors['black'] =  		 Array(  0,   0,   0);
 
-    $result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
-    for($i = 0; $i < count($result_colors); $i++){
+		$result_colors = read_colors($this->database);		# Farben fürs Kreisdiagramm
+    for ($i = 0; $i < count($result_colors); $i++) {
     	$piecolors[] = Array($result_colors[$i]['red'], $result_colors[$i]['green'], $result_colors[$i]['blue']);
     }
 		$index = $attributes['indizes'][$this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']]];
-		
+
     switch($this->formvars['charttype_'.$this->formvars['chosen_layer_id']]){
     	case 'bar' : {
-     	  $image = imagecreatetruecolor(2380, 60*count($result)+170);
+     	  $image = imagecreatetruecolor(2380, 60 * count($result)+170);
 		    $chartColors = allocateImageColors($image, $colors);
 
         $backGroundColor = $chartColors['yellowLight'];
@@ -13325,6 +13322,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['share_rollenlayer_allowed'] 	= $this->userdaten[0]['share_rollenlayer_allowed'];
 			$this->formvars['archived'] 									= $this->userdaten[0]['archived'];
 			$this->formvars['layer_data_import_allowed'] 	= $this->userdaten[0]['layer_data_import_allowed'];
+			$this->formvars['agreement_accepted']					= $this->userdaten[0]['agreement_accepted'];
 			# Abfragen der Stellen des Nutzers
 			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
@@ -15055,7 +15053,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars['qLayer'.$layer_id] = 1;
+				$this->formvars['qLayer' . $layer_id] = 1;
 			}
 		}
 		if (is_string($rect)){
@@ -15076,8 +15074,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset[$i]['queryable'] AND
 				$layerset[$i]['status']  == '' AND 
 				(
-					value_of($this->formvars, 'qLayer'.$layerset[$i]['Layer_ID'])=='1' OR
-					value_of($this->formvars, 'qLayer'.$layerset[$i]['requires'])=='1'
+					value_of($this->formvars, 'qLayer' . $layerset[$i]['Layer_ID']) == '1' OR
+					value_of($this->formvars, 'qLayer' . $layerset[$i]['requires']) == '1'
 				) AND
 				(
 					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 
@@ -15087,6 +15085,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Dieser Layer soll abgefragt werden
 				if (value_of($this->formvars, 'anzahl') == '') {
 					$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
+				}
+				if (
+						$this->formvars['without_diagramms'] OR
+						in_array($this->formvars['format'], array('json', 'json_result')) OR
+						$this->formvars['mime_type'] == 'json'
+				) {
+					$layerset[$i]['charts'] = array();
+				}
+				else {
+					include_once(CLASSPATH . 'LayerChart.php');
+					$layerset[$i]['charts'] = LayerChart::find($this, '`layer_id` = ' . $layerset[$i]['Layer_ID']);
 				}
 				switch ($layerset[$i]['connectiontype']) {
 					case MS_SHAPEFILE : { # Shape File Layer (1)
@@ -17828,6 +17837,7 @@ class db_mapObj{
 	}
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
+		include_once(CLASSPATH . 'Layer.php');
 		$default_options = array(
 			'if_empty_use_query' => false,
 			'use_generic_data_sql' => false
@@ -18949,6 +18959,7 @@ class db_mapObj{
 					'duplicate_from_layer_id',
 					'duplicate_criterion',
 					'Name',
+					'Datentyp',
 					'template',
 					'queryable',
 					'use_geom',
@@ -19067,7 +19078,6 @@ class db_mapObj{
 		# the rest where column names equal to the field names in layer editor form
 
 		$column_equal_field_attributes = array(
-			'Datentyp',
 			'pfad',
 			'maintable',
 			'oid',

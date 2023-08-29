@@ -128,7 +128,9 @@
 			$field_class .= ' visibility_changer';
 			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
-		
+
+		$field_class = 'attr_' . $layer_id . '_' . $name . ($field_class != '' ? ' ' . $field_class : ''); 
+
 		if($attributes['vcheck_attribute'][$j] != ''){
 			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
 			$after_attribute .= '<input type="hidden" id="vcheck_operator_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_operator'][$j].'">';
@@ -376,7 +378,7 @@
 						# Auswahl beliebiger Farben mit einem Colorpicker
 						$datapart .= '<input
 							type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
-							class="' . $field_class . '"
+							class="attr_' . $layer_id . '_' . $name . ' ' . $field_class . '"
 							name="' . $fieldname . '"
 							id="' . $layer_id . '_' . $name . '_' . $k . '"
 							onchange="' . $onchange . '"
@@ -1199,8 +1201,8 @@
 					break;
 				}
 			}
-			$datapart .= '<input readonly id="'.$layer_id.'_'.$name.'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
-			$datapart .= '<input type="hidden" name="'.$fieldname.'" class="'.$field_class.'" onchange="'.$onchange.'" value="' . htmlspecialchars($value) . '">';		// falls das Attribut ein visibility-changer ist
+			$datapart .= '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
+			$datapart .= '<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
@@ -1208,7 +1210,7 @@
 			if($change_all){
 				$onchange = 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 			}
-			$datapart .= '<select class="'.$field_class.'" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
+			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
 			if($req_by != ''){
 				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));'.$onchange;
 			}

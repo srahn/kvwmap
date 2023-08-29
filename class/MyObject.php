@@ -286,6 +286,10 @@ class MyObject {
 		return $this->database->result->num_rows > 0;
 	}
 
+	function get_id() {
+		return $this->get($this->identifier);
+	}
+
 	function getAttributes() {
 		$attributes = [];
 		foreach ($this->data AS $key => $value) {
@@ -559,7 +563,8 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}

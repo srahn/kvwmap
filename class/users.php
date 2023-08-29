@@ -713,6 +713,12 @@ class user {
 		) {
 			return true;
 		}
+		elseif (
+			$case == 'chart_speichern' AND
+			$this->funktion == 'admin'
+		) {
+			return true;
+		}
 		else {
 			return false;
 		}
@@ -1206,6 +1212,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
 			if (value_of($formvars, 'freetext')) { $buttons .= 'freetext,';}
@@ -1454,6 +1461,7 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
+				`agreement_accepted` = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "

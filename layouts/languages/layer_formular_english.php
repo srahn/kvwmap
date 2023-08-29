@@ -28,6 +28,10 @@
 	$strDefaultValues = "Default-Values for Usergroup-Assignment";
 	$strDelete = "Delete";
 	$strDescribtion = "Short Description";
+	$strDuplicateFromLayerId  =  'Von Layer duplizieren';
+	$strDuplicateFromLayerIdHelp  =  'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen, Datentyp und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Eine Vollständige Liste aller nicht übertragenen Attribute findet sich in der Funktion updateLayer() der Klasse db_mapObj Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Query und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
+	$strDuplicateTableFieldsCloseTitle  =  'Schließe Felder zum duplizieren von Layereinstellungen.';
+	$strDuplicateTableFieldsOpenTitle  =  'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strDocument_path = "Document Path";
 	$strDocument_url = "Document URL";
 	$strDrawingOrder = "drawingorder";

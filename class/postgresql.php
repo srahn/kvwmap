@@ -612,11 +612,12 @@ FROM
 	}
 
 	function get_table_alias_names($query_plan){
+		$table_alias_names = [];
 		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
 			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			if($table_oid AND $table_alias != 'unnamed_join'){
+			if($table_oid AND !array_key_exists($table_oid, $table_alias_names) AND $table_alias != 'unnamed_join'){
 				$table_alias_names[$table_oid] = $table_alias;
 			}
 		}
