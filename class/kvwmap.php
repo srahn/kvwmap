@@ -8952,11 +8952,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
 						}
 						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
-						if ($attributes['form_element_type'][$i] == 'Zahl' AND strpos($value, ',') !== false) {
-							# bei Zahlen, vom Typ Text den Punkt (Tausendertrenner) entfernen
-							# bei Zahlen, vom Typ numeric und float-Varianten ist das schon beim sanitze erledigt worden.
-							$value = removeTausenderTrenner($value);
-						}
 						if (is_array($value)) {
 							# multible-Auswahlfelder
 							if (count($value) > 1){
@@ -10096,6 +10091,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
+						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]]);
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
@@ -10143,13 +10139,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 									$insert[$table['attributname'][$i]] = "'" . $this->processJSON($this->formvars[$table['formfield'][$i]], $doc_path, $doc_url)."'";
 								}
 								else {
-									if($table['type'][$i] == 'Zahl') {
-										# bei Zahlen den Punkt (Tausendertrenner) entfernen
-										$this->formvars[$table['formfield'][$i]] = removeTausenderTrenner($this->formvars[$table['formfield'][$i]]);
-									}
-									elseif (in_array($table['datatype'][$i], ['numeric', 'float4', 'float8'])) {
-										$this->formvars[$table['formfield'][$i]] = str_replace(',', '.', $this->formvars[$table['formfield'][$i]]);
-									}
 									if ($table['type'][$i] == 'Checkbox' AND $this->formvars[$table['formfield'][$i]] == '') {
 										$this->formvars[$table['formfield'][$i]] = 'f';
 									}
@@ -10432,10 +10421,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				for ($i = 0; $i < count($form_fields); $i++) {
 					if ($form_fields[$i] != '') {
 						$element = explode(';', $form_fields[$i]);
+						$this->sanitize([$form_fields[$i] => $element[6]]);
 						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
-						if ($formElementType == 'Zahl') {
-							$this->formvars[$form_fields[$i]] = removeTausenderTrenner($this->formvars[$form_fields[$i]]);	# beim Typ Zahl Tausendertrenner entfernen
-						}
 					}
 				}
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
@@ -14306,6 +14293,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$formtype = $element[4];
 				$datatype = $element[6];
 				$saveable = $element[7];
+				$this->sanitize([$form_fields[$i] => $datatype]);
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
@@ -14370,10 +14358,6 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 						case 'Checkbox' : {
 							if ($this->formvars[$form_fields[$i]] == '')$this->formvars[$form_fields[$i]] = 'f';
 							$eintrag = $this->formvars[$form_fields[$i]];
-						} break;
-						case 'Zahl' : {
-							$eintrag = removeTausenderTrenner($this->formvars[$form_fields[$i]]); # bei Zahlen den Punkt (Tausendertrenner) entfernen
-							if ($this->formvars[$form_fields[$i]] == '')$eintrag = 'NULL';
 						} break;
 						case 'Link' : {
 							$eintrag = $this->formvars[$form_fields[$i]];
