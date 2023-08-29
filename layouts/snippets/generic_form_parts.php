@@ -129,7 +129,7 @@
 			$onchange .= 'this.oninput();" oninput="check_visibility('.$layer_id.', this, [\''.implode('\',\'', $attributes['dependents'][$j]).'\'], '.$k.');';
 		}
 
-		$field_class = 'attr_' . $layer_id . '_' . $name . ($field_class != '' ? ' ' . $field_class : ''); 
+		$field_class = ($field_class != '' ? $field_class . ' ' : '') . 'attr_' . $layer_id . '_' . $name; 
 
 		if($attributes['vcheck_attribute'][$j] != ''){
 			$after_attribute .= '<input type="hidden" id="vcheck_attribute_'.$attributes['name'][$j].'" value="'.$attributes['vcheck_attribute'][$j].'">';
@@ -378,7 +378,7 @@
 						# Auswahl beliebiger Farben mit einem Colorpicker
 						$datapart .= '<input
 							type="' . ($name == 'lock' ? 'hidden' : 'color') . '"
-							class="attr_' . $layer_id . '_' . $name . ' ' . $field_class . '"
+							class="' . $field_class . ' attr_' . $layer_id . '_' . $name . '"
 							name="' . $fieldname . '"
 							id="' . $layer_id . '_' . $name . '_' . $k . '"
 							onchange="' . $onchange . '"

@@ -10402,9 +10402,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					if (!empty($layerset[0]['trigger_function'])) {
 						$this->exec_trigger_function('BEFORE', 'INSERT', $layerset[0]);
 					}
-
 					$this->debug->write("<p>file:kvwmap class:neuer_Layer_Datensatz_speichern :",4);
-					#echo '<p>SQL zum Anlegen des Datensatzes: ' . $sql;
+					$this->debug->show('<p>SQL zum Anlegen des Datensatzes: ' . $sql);
 					$ret = $layerdb->execSQL($sql, 4, 1, true);
 
 					if ($ret['success']) {
@@ -14777,9 +14776,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
-							#echo '<br>sql for update: ' . $sql;
+							$this->debug->show('<br>sql for update: ' . $sql);
 
-							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :",4);
+							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :", 4);
 							$ret = $layerdb[$layer_id]->execSQL($sql, 4, 9999999, true);
 							if ($ret['success']) {
 								$result = pg_fetch_row($ret['query']);
