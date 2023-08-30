@@ -670,10 +670,9 @@ class user {
 	var $language = 'german';
 
 	/**
-		Create a user object
-		if only login_name is defined, find_by login_name only
-		if login_name and password is defined, find_by login_name and password
-		if
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
 	*/
 	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
@@ -815,6 +814,7 @@ class user {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
+		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
