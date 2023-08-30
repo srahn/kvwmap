@@ -2477,7 +2477,6 @@ function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' :
 		case 'int4' :
-		case '_int4' :
 		case 'oid' :
 		case 'boolean':
 		case 'int8' : {
@@ -2485,7 +2484,6 @@ function sanitize(&$value, $type) {
 		} break;
 
 		case 'numeric' :
-		case '_numeric' :
 		case 'float4' :
 		case 'float8' :
 		case 'float' : {
