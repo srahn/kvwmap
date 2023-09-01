@@ -630,6 +630,7 @@ select {
 
 select option{
 	font-family: SourceSansPro1,arial;
+	padding: 2px;
 }
 
 textarea {
