@@ -226,7 +226,7 @@ else {
 								</div>
 								<div style="width: 215px;">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}">
+									&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 										<option value="">alle</option>
 										<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
 											<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
