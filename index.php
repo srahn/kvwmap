@@ -1371,6 +1371,57 @@ function go_switch($go, $exit = false) {
 				$GUI->neuer_Layer_Datensatz_speichern();
 			} break;
 
+			case 'chart_speichern' : {
+				$GUI->checkCaseAllowed('chart_speichern');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int',
+					'title' => 'text',
+					'aggregate_function' => 'text',
+					'value_attribute_label' => 'text',
+					'value_attribute_name' => 'text',
+					'label_attribute_name' => 'text'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				if ($GUI->formvars['id'] > 0) {
+					$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
+					$response = $chart->update(formvars_strip($GUI->formvars, array('title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+				}
+				elseif ($GUI->formvars['id'] == 0 AND $GUI->formvars['layer_id'] > 0) {
+					$chart = new LayerChart($GUI);
+					$response = $chart->create(array_intersect_key($GUI->formvars, array('id', 'layer_id', 'title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name')));
+				}
+				else {
+					$response = array(
+						'success' => false,
+						'msg' => 'Zum Anlegen einer Chart muss die Layer-ID angegeben werden und zum Update zusätzlich die Chart-ID!'
+					);
+				}
+				header('Content-Type: application/json');
+				echo json_encode($response);
+			} break;
+
+			case 'chart_loeschen' : {
+				$GUI->checkCaseAllowed('chart_speichern');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				if ($GUI->formvars['id'] > 0 OR $GUI->formvars['layer_id'] > 0) {
+					$chart = LayerChart::find($GUI, '`id` = ' . $GUI->formvars['id'] . ' AND `layer_id` = ' . $GUI->formvars['layer_id']);
+					$response = $chart->delete();
+				}
+				else {
+					$response = array(
+						'success' => false,
+						'msg' => 'Zum Löschen eines Diagramms müssen die Parameter id und layer_id angegeben sein!' . ($GUI->formvars['id'] == 0 ? ' Parameter id ist leer.' : '') . ($GUI->formvars['id'] == 0 ? ' Parameter layer_id ist leer.' : '') 
+					);
+				}
+				header('Content-Type: application/json');
+				echo json_encode($response);
+			} break;
+
 			case 'generisches_sachdaten_diagramm' : {
 				$GUI->generisches_sachdaten_diagramm($GUI->formvars['width']);
 			} break;
