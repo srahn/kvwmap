@@ -403,6 +403,9 @@ function go_switch($go, $exit = false) {
 
 			case 'setHistTimestamp' : {
 				$GUI->setHistTimestamp();
+				$GUI->loadMap('DataBase');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'setLanguage' : {

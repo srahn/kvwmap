@@ -894,9 +894,6 @@ echo '			</table>
 		$this->user->rolle->setHistTimestamp($this->formvars['timestamp'], $this->formvars['go_next']);
 		$this->user->rolle->readSettings();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->loadMap('DataBase');
-		$this->drawMap();
-		$this->output();
 	}
 
 	function setLanguage(){
