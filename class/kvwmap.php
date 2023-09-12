@@ -14290,9 +14290,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$formtype = $element[4];
 				$datatype = $element[6];
 				$saveable = $element[7];
-				echo $this->formvars[$form_fields[$i]].' ';
 				$this->sanitize([$form_fields[$i] => $datatype]);
-				echo $this->formvars[$form_fields[$i]].'<br>';
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
