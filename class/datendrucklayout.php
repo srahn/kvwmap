@@ -846,7 +846,7 @@ class ddl {
 	}
 
 	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
-		if($y < $this->layout['margin_bottom']){
+		if($y < $this->pdf->ez['bottomMargin']){
 			$nextpage = $this->getNextPage($this->pdf->currentContents);
 			if($nextpage != NULL){
 				$this->pdf->reopenObject($nextpage);
