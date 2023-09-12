@@ -472,7 +472,7 @@ function formatFlurstkennzALK($FlurstKennz){
 function tausenderTrenner($number){
 	if($number != ''){
 		$explo = explode('.', $number);
-		$formated_number = number_format($explo[0], 0, ',', '.');
+		$formated_number = number_format((float)$explo[0], 0, ',', '.');
 		if($explo[1] != '')$formated_number .= ','.$explo[1];
 		return $formated_number;
 	}
