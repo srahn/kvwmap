@@ -975,7 +975,10 @@ class ddl {
 			case 'Checkbox' : {
 				$option = (json_decode($this->attributes['options'][$j]));
 				$output = ($value != 'f' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
-			} break;			
+			} break;
+			case 'Zahl': {
+				$output = tausenderTrenner($value);
+			} break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$value = str_replace('t', "ja", $value);	
