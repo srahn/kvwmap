@@ -2418,7 +2418,7 @@ function sanitize(&$value, $type) {
 		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) (is_string($value) ? removeTausenderTrenner($value) : $value);
+			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :
