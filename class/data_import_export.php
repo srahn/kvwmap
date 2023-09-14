@@ -970,12 +970,20 @@ class data_import_export {
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
-			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0) {
-				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+			if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+				# nochmal mit anderem Encoding versuchen
+				$url = str_replace(['UTF-8', 'LATIN1', 'utf8alt', 'latin1alt'], ['utf8alt', 'latin1alt', 'LATIN1', 'UTF-8'], $url);
+				curl_setopt($ch, CURLOPT_URL, $url);
+				$output = curl_exec($ch);
+				$result = json_decode($output);
+				$ret = $result->exitCode;
+				if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+				}
 			}
+			curl_close($ch);
 		}
 		else {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
