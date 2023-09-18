@@ -1016,6 +1016,7 @@ FROM
 	}
   
   function eliminate_star($query, $offset){
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
