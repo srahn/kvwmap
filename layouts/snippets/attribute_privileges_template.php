@@ -13,7 +13,12 @@
 	}
 ?>
 
-<td class="apt-main-td">
+<td class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
+														echo 'unterstelle';
+														if ($this->formvars['unterstellen_ausblenden']) {
+															echo ' hidden';
+														}
+													} ?>">
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
 		<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
@@ -46,6 +51,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 			<tr>
 				<td><span class="fett">Attribut</span></td>
 				<td><span class="fett">Privileg</span></td>
+				<td style="padding: 0"></td>
 				<td><span class="fett">Tooltip</span></td>
 			</tr>
 <?
@@ -74,28 +80,31 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 				<td>
 <?
 			$privilege_options = array(
-				array(
-					'value' => '',
+				'' => array(
 					'output' => $strNoAccess,
+					'color' => '#ff735a'
 				),
-				array(
-					'value' => '0',
+				'0' => array(
 					'output' => $strRead,
+					'color' => '#9ae394'
 				),
-				array(
-					'value' => '1',
+				'1' => array(
 					'output' => $strEdit,
+					'color' => '#eeee39'
 				)
 			);
 ?>
-					<select style="width:100px" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"  <? echo $disabled; ?>>
-<?
-			foreach($privilege_options AS $option) {
-				$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-?>
-			<option value="<? echo $option['value']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>
-<?			} ?>
-				</select>
+					<select class="<? echo ($this->stelle->id == ''? 'default_' : ''); ?>privileg_<? echo $this->attributes['name'][$i]; ?>" style="width:100px; background-color: <? echo $privilege_options[$this->attributes_privileges[$this->attributes['name'][$i]]]['color']; ?>" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>" onchange="this.setAttribute('style', 'width: 100px;' + this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+						foreach($privilege_options AS $value => $option) {
+							$selected = (strval($this->attributes_privileges[$this->attributes['name'][$i]]) === strval($value) ? ' selected' : '');	?>
+							<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>
+<?					} ?>
+					</select>
+				</td>
+				<td style="padding: 0">
+<? 		if ($this->stelle->id == '') { ?>
+					<a href="javascript:set_all_for_attribute('<? echo $this->attributes['name'][$i]; ?>');" title="<? echo $strUseForAllStellen; ?>"><i class="fa fa-sign-out" style="font-size: 20px"></i></a>
+<? 		} ?>
 				</td>
 				<td style="text-align: center;">
 					<input type="checkbox" name="tooltip_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"&nbsp; <? echo $disabled; ?>
@@ -106,7 +115,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 			<tr height="50px" valign="middle">
 				<td><? if($this->formvars['stelle'] != 'a'){ ?>Alle<? } ?></td>
 				<td>
-					<select style="width:100px" name="" onchange="set_all('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);"  <? echo $disabled; ?>>
+					<select style="width:100px" name="" onchange="set_all_for_stelle('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);"  <? echo $disabled; ?>>
 						<option value=""> - <? echo $this->strChoose; ?> - </option>
 						<option value=""><? echo $strNoAccess; ?></option>
 						<option value="0"><? echo $strRead; ?></option>

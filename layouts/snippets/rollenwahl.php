@@ -244,6 +244,39 @@ if ($this->Fehlermeldung!='') {
 											<input name="visually_impaired" type="checkbox" value="1" <? if($this->user->rolle->visually_impaired == '1') { echo 'checked="true"';} ?> >
 											<span data-tooltip="<? echo $strHintVisuallyImpaired; ?>"></span>
 										</td>
+									</tr>
+									<tr>
+										<td class="rollenwahl-option-header">
+											<label for="font_size_factor">Textgröße</label>
+										</td>
+										<td class="rollenwahl-option-data">
+											<input
+											  type="range"
+											  name="font_size_factor"
+											  id="font_size_factor"
+											  min="0.75"
+											  max="1.25"
+											  step="0.125"
+											  value="<?php echo $this->user->rolle->font_size_factor; ?>"
+												style="width: 300px"
+												onchange="$('#font_size_factor_text').css('font-size', ($('#font_size_factor').val() * 15) + 'px')"
+											/>
+											<output class="font_size_factor" for="font_size_factor"></output>
+											<?php
+											/* ToDo pk:
+											  - language for font_size_factor eintragen
+											  - styles mit font_size_factor ausstatten mit laden des Styles zum zeitpunkt des Ladens der Seite in php
+											  - prüfen wo überall mail_css.php geladen wird
+											  - Anpassung laden von custom css
+											*/
+											?>
+											<span data-tooltip="Verändert die Textgröße"></span><br>
+											<div id="font_size_factor_text" style="font-size: <?php echo $this->user->rolle->font_size_factor * 15;?>px">
+												<div style="float: left; width: 100px; text-align: left;">klein</div>
+												<div style="float: left; width: 100px; text-align: center">mittel</div>
+												<div style="float: left; width: 100px; text-align: right">groß</div>
+											</div>
+										</td>
 									</tr><?
 								} ?>
 							</table>
@@ -279,6 +312,7 @@ if ($this->Fehlermeldung!='') {
 											<div title="<? echo $strInfoInPolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo polygonquery($strInfoInPolygon); ?></svg></div><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
 											<br>
 											<div title="<? echo $strRuler; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo dist($strRuler); ?></svg></div><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>&nbsp;
+											<div title="<? echo $strPunktfang; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo punktfang($strPunktfang); ?></svg></div><input type="checkbox" name="punktfang" value="1" <? if($this->user->rolle->punktfang){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreePolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freepolygon($strFreePolygon); ?></svg></div><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?> onchange="$('#freeTextOptionsDiv').toggle();">&nbsp;
 											<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
@@ -600,6 +634,20 @@ if ($this->Fehlermeldung!='') {
 								</tr>
 								<tr>
 									<td class="rollenwahl-option-header">
+										<? echo $strDatasetOperationsPosition; ?>:
+									</td>
+									<td class="rollenwahl-option-data">
+										<select name="dataset_operations_position">
+											<option value="unten"<? if ($this->user->rolle->dataset_operations_position == 'unten') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionUnten; ?></option>
+											<option value="oben"<? if ($this->user->rolle->dataset_operations_position == 'oben') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionOben; ?></option>
+											<!-- Bis jetzt nur drüber und drunter weil nicht klar ist wie sich das auswirken soll wenn oben und unten angegeben wäre.
+												option value="beide"<? if ($this->user->rolle->dataset_operations_position == 'beide') { echo ' selected'; }	?>><? echo $strDatasetOperationsPositionBeide; ?></option//-->
+										</select>&nbsp;
+										<span data-tooltip="<? echo $strHintDatasetOperationsPosition; ?>"></span>
+									</td>
+								</tr>
+								<tr>
+									<td class="rollenwahl-option-header">
 										<? echo $strAlwaysCreateNext; ?>:
 									</td>
 									<td class="rollenwahl-option-data">
@@ -641,7 +689,7 @@ if ($this->Fehlermeldung!='') {
 										<input name="tooltipquery" type="checkbox" value="1" <? if($this->user->rolle->tooltipquery == '1'){echo 'checked="true"';} ?> >&nbsp;
 										<span data-tooltip="<? echo $strHintTooltipQuery; ?>"></span>
 									</td>
-								</tr>		
+								</tr>
 								<tr <? if(!$this->Stelle->hist_timestamp)echo 'style="display:none"'; ?> >		
 									<td class="rollenwahl-option-header">
 										<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp" class="calendar" style="bottom:40px"></div></td>

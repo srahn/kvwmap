@@ -78,6 +78,11 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 		</div>
 	</div>
+	<div id="map_copyrights_div" style="float: right; margin-right: 5px; height: 30px;">
+		<a href="javascript:void(0);" title="<? echo $strShowCopyrightsTitle; ?>" onclick="showCopyrights('<? echo $strShowCopyrightHeader; ?>')">
+			<i class="fa fa-copyright fa-solid map-copyright-button" style="margin-top: 7px; font-size: 18px;"></i>
+		</a>
+	</div>	
 	<div id="map_info_div" style="float: right; margin-right: 5px; height: 30px;">
 		<a
 			href="#"
@@ -97,7 +102,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 				}"; ?>
 			)"
 		>
-			<i class="fa fa-info-circle" style="margin-top: 8px; color: #666; font-size: 110%"></i>
+			<i class="fa fa-info-circle map-info-button"></i>
 		</a>
 	</div>
 	<div id="scalebar_div" style="float: right; margin-top: 1px;">
@@ -186,12 +191,12 @@ if ($this->user->rolle->showmapfunctions) { ?>
 			</div>
 		</div>
 		<div class="special-options" style="float: right; margin-top: 5px; margin-right: 5px">
-			<input type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;<? echo $strPointSnap; ?>
+			<span id="punktfang-map"><input id="punktfang" type="checkbox" onclick="toggle_vertices()" name="punktfang">&nbsp;<? echo $strPointSnap; ?></span>
 			<div id="options" style="padding-left: 10px;float: right"></div><!-- hier werden die Spezialoptionen eingefügt -->
 		</div>
 	</div><?
 }
 else { ?>
 	<div id="options" style="display: none;"></div>
-	<input type="hidden" name="punktfang"><?php
+	<input id="punktfang" class="punktfang-map" type="hidden" name="punktfang"><?php
 } ?>

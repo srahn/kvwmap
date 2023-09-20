@@ -18,6 +18,11 @@ var root = window;
 root.resized = 0;
 root.open_subform_requests = 0;
 root.getlegend_requests = new Array();
+var current_date = new Date().toLocaleString().replace(',', '');;
+var new_hist_timestamp;
+var loc = window.location.href.toString().split('index.php')[0];
+var mapimg0, mapimg3, mapimg4;
+var compare_clipping = false;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -123,6 +128,10 @@ function ahahDone(url, targets, req, actions) {
 							}
 						break;
 						
+						case "setouterhtml":
+							targets[i].outerHTML = responsevalues[i];
+						break;
+						
 						case "prependhtml":
 							targets[i].insertAdjacentHTML('beforebegin', responsevalues[i]);
 						break;
@@ -185,6 +194,38 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+function delete_user2notification(notification_id) {
+	let formData = new FormData();
+	formData.append('go', 'delete_user2notification');
+	formData.append('notification_id', notification_id);
+	formData.append('csrf_token', csrf_token);
+	let response = fetch('index.php', {
+		method: 'POST',
+		body: formData
+	})
+	.then(response => response.text())
+	.then(text => {
+		try {
+			const data = JSON.parse(text);
+			if (data.success) {
+				$('#notification_box_' + notification_id).remove();
+				let num_notifications = $('#num_notification_div').html() - 1;
+				if (num_notifications == 0) {
+					$('#num_notification_div').hide();
+				}
+				else {
+					$('#num_notification_div').html(num_notifications);
+				}
+			}
+			else {
+				message([{ 'type': 'error', 'msg' : 'Fehler beim Löschen Benachrichtigung für den Nutzer: ' + data.err_msg + ' ' + text}]);
+			}
+		} catch(err) {
+			message([{ 'type': 'error', 'msg' : err.name + ': ' + err.message + ' in Zeile: ' + err.lineNumber + ' Response: ' + text}]);
+		}
+	});
+}
+
 highlight_object = function(layer_id, oid){
 	root.ahah('index.php', 'go=tooltip_query&querylayer_id='+layer_id+'&oid='+oid, new Array(root.document.GUI.result, ''), new Array('setvalue', 'execute_function'));
 }
@@ -233,7 +274,7 @@ function rgbToHex(r, g, b) {
   return "#" + componentToHex(r_) + componentToHex(g_) + componentToHex(b_);
 }
 
-function Bestaetigung(link,text) {
+function Bestaetigung(link, text) {
 	Check = confirm(text);
 	if (Check == true) {
 		window.location.href = link;
@@ -359,18 +400,20 @@ function stopwaiting() {
 }
 
 function getBrowserSize(){
-	if(typeof(window.innerWidth) == 'number'){
+	if (typeof(window.innerWidth) == 'number'){
 		width = window.innerWidth;
 		height = window.innerHeight;
-	}else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
+	} else if(document.documentElement && (document.documentElement.clientWidth || document.documentElement.clientHeight)){
 		width = document.documentElement.clientWidth;
 		height = document.documentElement.clientHeight;
-	}else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
+	} else if(document.body && (document.body.clientWidth || document.body.clientHeight)){
 		width = document.body.clientWidth;
 		height = document.body.clientHeight;
 	}
-	root.document.GUI.browserwidth.value = width;
-	root.document.GUI.browserheight.value = height;
+  if (root.document.GUI) {
+    root.document.GUI.browserwidth.value = width;
+	  root.document.GUI.browserheight.value = height;
+  }
 }
 
 function resizemap2window(){
@@ -404,7 +447,7 @@ function resizemap2window(){
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancle_button_value = 'Abbrechen') {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', width = null) {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -416,6 +459,9 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 	else {
 		msgBoxDiv.html('');
+	}
+	if (width != null) {
+		msgBoxDiv.css('maxWidth', width);
 	}
 	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
@@ -475,7 +521,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
 			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancle_button_value + '" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -663,10 +709,76 @@ function formdata2urlstring(formdata){
 	}
 	return url;
 }
-	 
+
+function add_split_mapimgs() {
+	svgdoc = document.SVG.getSVGDocument();
+	svgdoc.getElementById("mapimg3")?.remove();
+	svgdoc.getElementById("mapimg4")?.remove();	
+	svgdoc.getElementById("mapimg0")?.remove();
+	var mapimg = svgdoc.getElementById("mapimg");
+	var movegroup = svgdoc.getElementById("moveGroup");
+	var cartesian = svgdoc.getElementById("cartesian");
+	mapimg3 = mapimg.cloneNode();
+	mapimg4 = mapimg.cloneNode();
+	mapimg0 = mapimg.cloneNode();
+	mapimg3.setAttribute('id', 'mapimg3');
+	mapimg4.setAttribute('id', 'mapimg4');
+	mapimg0.setAttribute('id', 'mapimg0');
+	mapimg0.setAttribute('onload', 'top.pass_preloaded_img()');
+	movegroup.insertBefore(mapimg0, mapimg);
+	movegroup.insertBefore(mapimg4, cartesian);
+	movegroup.insertBefore(mapimg3, mapimg4);
+}
+
+function pass_preloaded_img(){
+	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
+}
+
+function compare_view_for_layer(layer_id){
+	compare_clipping = true;
+	add_split_mapimgs();
+	get_map(mapimg3, 'not_layer_id=' + layer_id);
+	mapimg4.setAttribute("clip-path", 'url(#compare_clipper)');
+}
+
+function set_hist_timestamp() {
+	add_split_mapimgs();
+	if (hist_timestamp != '') {
+		var scroll = 2720;
+		new_hist_timestamp = structuredClone(hist_timestamp);
+	}
+	else {
+		var scroll = 6000;
+		new_hist_timestamp = new Date();
+	}
+	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
+	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
+	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
+	document.GUI.hist_timestamp3.value = 0;
+	$('#hist_timestamp_form').show();
+	document.getElementById('hist_range_div').scrollLeft = scroll;
+}
+
+function get_map_hist(){
+	var nht = structuredClone(new_hist_timestamp);
+	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
+	let ts = nht.toLocaleString().replace(',', '');
+	document.GUI.hist_timestamp2.value = ts;
+	get_map(mapimg0, 'only_postgis_layer=1&hist_timestamp=' + ts);
+}
+
+function get_map(img, filter){
+	img.setAttribute("href", loc + 'index.php?go=getMap&' + filter + '&current_date=' + current_date);
+}
+
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
+	current_date = new Date().toLocaleString().replace(',', '');
 	top.startwaiting();
-	svgdoc = document.SVG.getSVGDocument();	
+	svgdoc = document.SVG.getSVGDocument();
+	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg0")?.remove();
+	svgdoc.getElementById("mapimg3")?.remove();
+	svgdoc.getElementById("mapimg4")?.remove();
 	// nix
 	var mapimg = svgdoc.getElementById("mapimg2");
 	var scalebar = document.getElementById("scalebar");
@@ -794,6 +906,58 @@ function overlay_link(data, start, target){
 	}
 }
 
+
+function toggle_custom_select(id) {
+	var custom_select_div = document.getElementById('custom_select_' + id);
+	if (custom_select_div.classList.contains('active')) {
+			custom_select_div.classList.remove('active');
+	 } else {
+		 custom_select_div.classList.add('active');
+	 }
+}
+
+function custom_select_register_keydown(){
+	document.onkeydown = custom_select_keydown;
+}
+
+function custom_select_keydown(evt){
+	var selected_option = document.querySelector('.custom-select.active li.selected');
+	switch (evt.keyCode) {
+		case 38 : {
+			selected_option.previousElementSibling.onmouseenter();
+		}break;
+		case 40 : {
+			selected_option.nextElementSibling.onmouseenter();
+		}break;
+		case 13 : {
+			selected_option.onclick();
+		}break;
+	}
+}
+
+function custom_select_hover(option) {
+	var custom_select_div = option.closest('.custom-select');
+	option.scrollIntoView({behavior: "smooth", block: "nearest"});
+	custom_select_div.querySelector('li.selected').classList.remove('selected');
+	option.classList.add('selected');
+}
+
+function custom_select_click(option) {
+	var custom_select_div = option.closest('.custom-select');
+	var field = custom_select_div.querySelector('input');
+	custom_select_hover(option);
+	field.value = option.dataset.value;
+	if (custom_select_div.querySelector('.placeholder img')) {
+		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
+	}
+	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+	if (field.onchange) {
+		field.onchange();
+	}
+	toggle_custom_select(field.id);
+}
+
+
 function datecheck(value){
 	dateElements = value.split('.');
 	var date1 = new Date(dateElements[2],dateElements[1]-1,dateElements[0]);
@@ -818,16 +982,17 @@ function update_legend(layerhiddenstring){
 }
 
 /*
-* optional status to set values irrespective of current value
+* optional status to set values irrespective of current value and open all subgroups
 */
 function getlegend(groupid, layerid, fremde, status) {
+	status = status || 0;
 	groupdiv = document.getElementById('groupdiv_' + groupid);
 	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
 		group = document.getElementById('group_' + groupid);
-		status = status || !parseInt(group.value);
-		if (status) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		var open = status || !parseInt(group.value);
+		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
 			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde, new Array(groupdiv), "");
+			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
 		}
 		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
 			group.value = 0;
@@ -846,7 +1011,7 @@ function getlegend(groupid, layerid, fremde, status) {
 		else{
 			layer.value = 0;
 		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), "");
+		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), ['setouterhtml']);
 	}
 }
 
@@ -983,35 +1148,40 @@ function preventDefault(e){
 }
 
 function selectgroupquery(group, instantreload){
-  value = group.value+"";
-  layers = value.split(",");
-  i = 0;
-  test = null;
-  while(test == null){
-    test = document.getElementById("qLayer"+layers[i]);
-    i++;
-    if(i > layers.length){
-      return;
-    }
-  }
-  check = !test.checked;
-  for(i = 0; i < layers.length; i++){
-    query = document.getElementById("qLayer"+layers[i]);
-    if(query){
-      query.checked = check;
-      thema = document.getElementById("thema_"+layers[i]);
-      updateThema('', thema, query, '', '', 0);
-    }
-  }
-	if(instantreload)neuLaden();
+	if (group) {
+		if(Array.isArray(group)) {
+			group = group.filter(function( x ) {
+				return x !== undefined;
+			});
+			value = group.map(function(x){return x.value+""}).join(",");
+		} else {
+			value = group.value+"";
+		}
+		
+		var layers = value.split(",");
+		var check;
+		for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query && query.type == 'checkbox' && !query.disabled){
+				check = !query.checked;
+				break;
+			}
+		}
+		for(i = 0; i < layers.length; i++){
+			query = document.getElementById("qLayer"+layers[i]);
+			if(query){
+				query.checked = check;
+				thema = document.getElementById("thema_"+layers[i]);
+				updateThema('', thema, query, '', '', 0);
+			}
+		}
+		if(instantreload)neuLaden();
+	}
 }
 
 function selectgroupthema(group, instantreload){
 	var value = "";
 	if(Array.isArray(group)) {
-		//activates/deactivates all passed array of groups layers. 
-		//non-opened groups will be undefined and skipped (can be worked around with getlegend(..) on group-id call before this function
-		// remove potential undefined values
 		group = group.filter(function( x ) {
 			return x !== undefined;
 		});
@@ -1140,11 +1310,11 @@ function toggleDrawingOrderForm(){
 var dragSrcEl = null;
 
 function handleDragStart(e){
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	dragSrcEl = e.target;
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
     dropzone.classList.add('ready');
   });
-	dragSrcEl = e.target;
   if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
 	dragSrcEl.classList.add('dragging');
 	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
@@ -1181,7 +1351,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });
@@ -1333,6 +1503,14 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 	else if (selClass.value == '2'){
 		selImg.src="graphics/outline"+height+".jpg";
 	}
+}
+
+function showCopyrights(header){
+	message([{
+			'type': 'info',
+			'msg': '<h2 style="padding: 4px 4px 10px 4px">' + header + '</h2><div id="copyrights_div"></div>'
+	}], 1000, 2000, null, null, null, 'Ja', 'Abbrechen', 800);
+	root.ahah('index.php', 'go=get_copyrights', new Array(root.document.getElementById('copyrights_div')), new Array('sethtml'));
 }
 
 function showMapParameter(epsg_code, width, height, l) {
@@ -1535,12 +1713,66 @@ function copyToClipboard(text) {
 		document.body.appendChild(textarea);
 		textarea.select();
 		try {
-				return document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			let result = document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			message([{ type: 'notice', msg: text + ' in die Zwischenablage kopiert'}], 500, 1000);
+			return result;
 		} catch (ex) {
-				console.warn("Copy to clipboard failed.", ex);
-				return false;
+			console.warn("Copy to clipboard failed.", ex);
+			return false;
 		} finally {
-				document.body.removeChild(textarea);
+			document.body.removeChild(textarea);
 		}
 	}
+}
+
+format_duration = function (sec_num) {
+	var hours   = Math.floor(sec_num / 3600);
+	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	var seconds = sec_num - (hours * 3600) - (minutes * 60);
+	var parts = [];
+
+	if (hours 		> 0) parts.push(hours 	+ ' Stunde' 	+ (hours 		> 1 ? 'n' : ''));
+	if (minutes 	> 0) parts.push(minutes + ' Minute' 	+ (minutes 	> 1 ? 'n' : ''));
+	if (seconds 	> 0) parts.push(seconds + ' Sekunde' 	+ (seconds 	> 1 ? 'n' : ''));
+	if (parts.length == 0) return '';
+	if (parts.length == 1) return parts[0];
+	if (parts.length == 2) return parts[0] + ' und ' + parts[1];
+	if (parts.length == 3) return parts[0] + ', ' + parts[1] + ' und ' + parts[2]
+}
+
+function show_validation_error(validation_error) {
+	const attribute = validation_error.attribute;
+	const formElem = $('#' + validation_error.attribute);
+	const errElemId = validation_error.attribute + '_error_messages';
+	if ($('#' + errElemId).length == 0) {
+		formElem.after('<div id="' + errElemId + '"></div>');
+		formElem.change((evt) => {
+			errElem.remove();
+			formElem.unbind('change');
+			formElem.removeClass('message-box-error');
+			if ($('.message-box-error').length == 0) {
+				$('#form-submit-button').show();
+			}
+		});
+	}
+	const errElem = $('#' + errElemId);
+	formElem.addClass('message-box-error');
+	errElem.append('<div class="red">' + validation_error.msg + '</div>');
+	$('#form-submit-button').hide();
+}
+
+/**
+	Split text by delimiter and add text line by line with delay and delimiter in between to element.
+	@param text String The text that shall be added to the element with this delay function.
+  @param element jquery Element object where the text has to be append.
+	@param delay integer Delay in milliseconds between adding one line after the other
+	@param prefix String Text in front of each line
+  @param delimiter String Text to delimit the lines of text
+*/
+function add_text_with_delay(text, element, delay = 3000, prefix = '', delimiter = '<br>') {
+	text.split(delimiter).forEach(
+		(line, i) => {
+			setTimeout((i, prefix, delimiter) => { element.append(prefix + line + delimiter) }, i * delay, i, prefix, delimiter);
+		}
+	)
 }

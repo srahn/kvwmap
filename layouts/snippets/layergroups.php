@@ -1,5 +1,7 @@
 <?php
 	include(LAYOUTPATH . 'languages/layergroups_' . $this->user->rolle->language . '.php');
+	#$layers = array_map(function($group) { return $group->layers; }, $this->layergruppen);
+	#echo 'Layer: ' . print_r(arra$layers[15]->data, true); exit;
 	$has_shared_group = array_reduce(
 		$this->layergruppen,
 		function($has_shared_group, $layergruppe) {
@@ -10,7 +12,7 @@
 ?>
 <script>
 	function group_delete(id) {
-	  Check = confirm('Gruppe wirklick löschen?');
+	  Check = confirm('Gruppe wirklich löschen?');
 	  if (Check == true) {
 			$.ajax({
 				url: 'index.php',
@@ -40,7 +42,8 @@
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=Gruppenname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
 					<th><a href="index.php?go=Layergruppen_Anzeigen&order=obergruppe&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Obergruppe</th>
-					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Order</a></th><?
+					<th><a href="index.php?go=Layergruppen_Anzeigen&order=order&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Order</a></th>
+					<th>Anzahl Layer</th><?
 					$colspan = 2;
 					if ($has_shared_group) {
 						$colspan += 1;
@@ -60,6 +63,9 @@
 						</td>
 						<td>
 							<span><?php echo $this->layergruppen[$i]->get('order'); ?></span>
+						</td>
+						<td style="text-align: center">
+							<span><?php echo (count($this->layergruppen[$i]->layers) > 0 ? count($this->layergruppen[$i]->layers) : ''); ?></span>
 						</td><?
 						if ($has_shared_group) { ?>
 							<td align="right"><?

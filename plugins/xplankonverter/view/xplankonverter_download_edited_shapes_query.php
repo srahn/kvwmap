@@ -24,7 +24,7 @@
 				Es wurden keine Shape-Dateien bearbeitet. Daher stehen auch keine für den Download zur Verfügung.<?
 			}
 		} break;
-		case 'xplan_gml_file' : {
+		case 'xplan_gml' : {
 			if ($this->files_exists) { ?>
 				<a title="XPlan-GML Datei" class="btn btn-link btn-xs xpk-func-download-gml xpk-func-btn" href="index.php?go=xplankonverter_download_xplan_gml&konvertierung_id=<? echo $this->formvars['konvertierung_id']; ?>"><i class="btn-link fa fa-lg fa-file-excel-o" style="color: red;"></i></a><?
 			}
@@ -40,7 +40,7 @@
 				Für den Plan existieren noch keine Fachdaten. Deshalb können auch keine XPlanung konformen Shape-Dateien heruntergeladen werden. Sie müssen erst Shapes hochladen, Regeln für die Konvertierung definieren, die Konvertierung durchführen und dann stehen die XPlan-Shapes zum Download zur Vergügung.<?
 			}
 		} break;
-		case 'inspire_gml_file' : {
+		case 'inspire_gml' : {
 			if ($this->files_exists) { ?>
 				<a title="INSPIRE-GML Datei" class="btn btn-link btn-xs xpk-func-download-gml xpk-func-btn" href="index.php?go=xplankonverter_download_inspire_gml&konvertierung_id=<? echo $this->formvars['konvertierung_id']; ?>"><i class="btn-link fa fa-lg fa-file-code-o" style="color: blue;"></i></a><?
 			}

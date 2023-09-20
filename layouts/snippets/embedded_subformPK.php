@@ -177,11 +177,12 @@
 						if ($preview_attributes[$p] == $attributes['name'][$j]) {
 							$output[$p] = '';
 							switch ($attributes['form_element_type'][$j]) {
-								case 'Auswahlfeld' : case 'Radiobutton' : {
+								case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : case 'Radiobutton' : {
 									if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 										for ($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++) {
 											if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = $attributes['enum_output'][$j][$k][$e];
+												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$k][$e])) . '">&nbsp;' : '') .
+																			$attributes['enum_output'][$j][$k][$e];
 												break;
 											}
 										}
@@ -189,7 +190,8 @@
 									else {
 										for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
 											if ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = $attributes['enum_output'][$j][$e];
+												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$e])) . '">&nbsp;' : '') .
+																			$attributes['enum_output'][$j][$e];
 												break;
 											}
 										}

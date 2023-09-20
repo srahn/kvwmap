@@ -605,4 +605,51 @@ SYMBOLSET
 			1 0
 		END
 	END
+
+	SYMBOL #59
+		NAME 'north_arrow'
+		TYPE VECTOR
+		FILLED TRUE
+		POINTS
+			0.1 0
+			0.1 0.1
+			0 0.5
+			0.1 0.4
+			0.1 0.1
+			-99 -99
+			0.1 0.1
+			0.2 0.5
+			-99 -99
+			0.2 0.5
+			0.1 0.4
+			-99 -99
+			0.1 0.4
+			0.1 1
+		END
+	END
+
+	SYMBOL #60
+		NAME 'north_arrow_left_part'
+		TYPE VECTOR
+		FILLED TRUE
+		POINTS
+			0.1 0
+			0.1 0.1
+			0 0.5
+			0.1 0.4
+			0.1 0.1
+		END
+	END
+
+	SYMBOL #61
+		NAME 'north_arrow_right_part'
+		TYPE VECTOR
+		POINTS
+			0.1 0.1
+			0.2 0.5
+			0.1 0.4
+			0.1 1
+		END
+	END
+
 END

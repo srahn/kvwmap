@@ -13,6 +13,7 @@ if($this->user->rolle->touchquery){$SVGvars_mainnavbuttons .= touchquery($strTou
 if($this->user->rolle->queryradius){$SVGvars_mainnavbuttons .= pquery($strInfoWithRadius);}
 if($this->user->rolle->polyquery){$SVGvars_mainnavbuttons .= polygonquery($strInfoInPolygon);}
 if($this->user->rolle->measure){$SVGvars_mainnavbuttons .= dist($strRuler);}
+if($this->user->rolle->punktfang){$SVGvars_mainnavbuttons .= punktfang($strPunktfang);}
 if($this->user->rolle->freepolygon){$SVGvars_mainnavbuttons .= freepolygon($strFreePolygon);}
 if($this->user->rolle->freetext){$SVGvars_mainnavbuttons .= freetext($strFreeText);}
 if($this->user->rolle->freearrow){$SVGvars_mainnavbuttons .= freearrow($strFreeArrow);}

@@ -25,6 +25,7 @@ function compare_legendorder($a, $b){
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
+	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);
@@ -34,7 +35,15 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	return $str;
+}
+
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
 	return $str;
 }
 
@@ -153,8 +162,7 @@ class GUI {
 		for($i = 0; $i < @count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
-		$this->map->draw();			# sonst werden manche Klassenbilder nicht generiert
-    echo $this->create_group_legend($this->formvars['group']);
+    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
 
   function loadMap($loadMapSource) {
@@ -1104,14 +1112,9 @@ class GUI {
           if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
             $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
           }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-	          	$klasse->label->set('anglemode', MS_AUTO);
-	          }
-	          else{
-	          	$klasse->label->set('autoangle',$dbLabel['autoangle']);
-            }
-          }
+					if($dbLabel['anglemode'] != NULL) {
+						$label->set('anglemode', $dbLabel['anglemode']);
+					}
           if ($dbLabel['buffer']!='') {
             $klasse->label->set('buffer',$dbLabel['buffer']);
           }
@@ -1208,19 +1211,6 @@ class GUI {
 							$style->set('width', $dbLabel['buffer']);
 						}
           }
-
-          $label->angle = $dbLabel['angle'];
-          if($layerset['labelangleitem']!=''){
-            $label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-        	if($dbLabel['autoangle']==1) {
-            if(MAPSERVERVERSION >= 600){
-            	$label->set('anglemode', MS_AUTO);
-            }
-            else{
-            	$label->autoangle = $dbLabel['autoangle'];
-            }
-          }
           if ($dbLabel['buffer']!='') {
             $label->buffer = $dbLabel['buffer'];
           }
@@ -1283,11 +1273,11 @@ class GUI {
     } # end of Schleife Class
   }
 
-	function create_group_legend($group_id){
+	function create_group_legend($group_id, $status = NULL){
 		$layerlist = $this->layerset['list'];
 		if(value_of($this->groupset[$group_id], 'untergruppen') == NULL AND $this->layerset['layers_of_group'][$group_id] == NULL)return;			# wenns keine Layer oder Untergruppen gibt, nix machen
     $groupname = $this->groupset[$group_id]['Gruppenname'];
-	  $groupstatus = $this->groupset[$group_id]['status'];
+	  $groupstatus = $status ?: $this->groupset[$group_id]['status'];
     $legend =  '
 	  <div id="groupdiv_'.$group_id.'" style="width:100%">
       <table cellspacing="0" cellpadding="0" border="0" style="width:100%">
@@ -1306,7 +1296,7 @@ class GUI {
 								<i id="test_' . $group_id . '" class="fa fa-bars" style="display: none;"></i>
 							</a//-->' .
 							html_umlaute($groupname) . '
-							'.($groupname == 'Suchergebnis' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
+							'.($groupname == 'eigene Abfragen' ? '<a href="javascript:deleteRollenlayer(\'search\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							'.(($groupname == 'Eigene Importe' OR $groupname == 'WMS-Importe') ? '<a href="javascript:deleteRollenlayer(\'import\');"><i class="fa fa-trash pointer" title="alle entfernen"></i></a>' : '').'
 							<div style="position:static;" id="group_options_' . $group_id . '"></div>
 						</span>
@@ -1320,7 +1310,7 @@ class GUI {
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
 					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
-					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u]);
+					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
 					$legend .= '</td></tr></table></td></tr>';
 				}
 			}
@@ -1464,18 +1454,8 @@ class GUI {
 				if ($this->user->rolle->showlayeroptions) {
 					$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';
 				}
-				if (value_of($layer, 'metalink') != ''){
-					if (substr($layer['metalink'], 0, 10) != 'javascript'){
-						$legend .= ' target="_blank"';
-						if (strpos($layer['metalink'], '?') === false) {
-							$layer['metalink'] .= '?';
-						}
-						else {
-							$layer['metalink'] .= '&';
-						}
-						$layer['metalink'] .= 'time='.time();
-					}
-					$legend .= ' class="metalink boldhover" href="'.$layer['metalink'].'">';
+				if(value_of($layer, 'metalink') != ''){
+					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
 				else
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
@@ -1483,7 +1463,7 @@ class GUI {
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias']).'</span>';
+				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -1549,7 +1529,9 @@ class GUI {
 										}
 									}
 									else{		# Punktlayer
-										if($style->size > 14)$style->set('size', 14);
+										if($style->size > 14 OR $style->size == -1){
+											$style->set('size', 14);
+										}
 										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
@@ -2118,6 +2100,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -2126,6 +2109,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -2284,7 +2268,7 @@ class pgdatabase {
 		}
 		else {
 			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
-			$this->setClientEncoding();
+			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
 		}
@@ -2352,12 +2336,15 @@ class pgdatabase {
 		);
 	}
 
-  function setClientEncoding() {
-    $sql ="SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';";
+  function setClientEncodingAndDateStyle() {
+    $sql = "
+			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
+			SET datestyle TO 'German';
+			";
 		$ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    return $ret[1];    	
-  }  
+    return $ret[1];
+  }
 
 	function execSQL($sql, $debuglevel, $loglevel, $suppress_err_msg = false) {
 		$ret = array(); // Array with results to return
@@ -2379,9 +2366,6 @@ class pgdatabase {
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
 		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
 			#echo "<br>SQL in execSQL: " . $sql;
-			//if (stristr($sql, 'SELECT')) {
-				$sql = "SET datestyle TO 'German';" . $sql;
-			//};
 			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
@@ -2688,6 +2672,11 @@ class db_mapObj {
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
+			$rs['alias_link'] = replace_params_link(
+				$rs['alias'],
+				rolle::$layer_params,
+				$rs['Layer_ID']
+			);				
 			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -2920,6 +2909,7 @@ class db_mapObj {
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
       $Layer[] = $rs;
     }
     return $Layer;

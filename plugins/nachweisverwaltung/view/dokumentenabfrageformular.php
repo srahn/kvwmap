@@ -226,7 +226,7 @@ else {
 								</div>
 								<div style="width: 215px;">
 				<?				if($this->dokumentarten[$hauptdokumentart['id']] != ''){	?>
-									&nbsp;<select name="suchunterart[]" multiple="true" style="height: 20px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='20px'){this.style.height = this.length * 20;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='20px';scrollToSelected(this);}">
+									&nbsp;<select name="suchunterart[]" multiple="true" style="overflow: hidden;height: 24px;z-index:<? echo $z_index-=1; ?>;position: absolute;width: 219px" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 										<option value="">alle</option>
 										<? foreach($this->dokumentarten[$hauptdokumentart['id']] as $dokumentart){ ?>
 											<option <? if(in_array($dokumentart['id'], $this->formvars['suchunterart'])){echo 'selected';} ?> value="<? echo $dokumentart['id']; ?>"><? echo $dokumentart['art']; ?></option>	
@@ -359,7 +359,8 @@ else {
 					<td colspan="3">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">&nbsp;
+						<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
  					</td>
 				</tr>
 				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
@@ -398,7 +399,8 @@ else {
 			  </tr>
 				<tr>
 					<td colspan="3">Bemerkung:<br>
-						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">
+						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">&nbsp;
+						<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
 					</td>
 				</tr>
       </table>

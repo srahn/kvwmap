@@ -454,7 +454,7 @@ class synchro {
 				)
 			ORDER BY version;
 		";
-		$log.=$sql;
+		$log .= $sql;
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {

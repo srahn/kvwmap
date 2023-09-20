@@ -10,7 +10,10 @@ class XP_Plan extends PgObject {
 	function __construct($gui, $planart, $select = '*') {
 		$this->planart = $planart;
 		$this->planartAbk = strtolower(substr($planart, 0, 2));
+		$this->planartShort = strtolower(substr($planart, 0, 1));
 		$this->tableName = $this->planartAbk . '_plan';
+		$this->shortName = $this->planartShort . 'plan';
+		$this->shortNamePlural = $this->planartShort . 'plaene';
 		$this->umlName = strtoupper($this->planartAbk) . '_Plan';
 		$this->bereichTableName = $this->planartAbk . '_bereich';
 		$this->bereichUmlName = strtoupper($this->planartAbk) . '_Bereich';
@@ -19,17 +22,75 @@ class XP_Plan extends PgObject {
 		$this->select = $select;
 		$this->identifier = 'gml_id';
 		$this->identifier_type = 'text';
+		$this->identifiers = array(
+			array(
+				'column' => 'gml_id',
+				'type' => 'character varying'
+			)
+		);
 		$this->debug->show('Objekt XP_Plan created with planart: ' . $this->planart . ' tableName: ' . $this->tableName, false);
+		$this->geom_column = 'raeumlichergeltungsbereich';
 	}
 
 	public static	function find_by_id($gui, $by, $id, $planart) {
 		$xp_plan = new XP_Plan($gui, $planart);
 		$xp_plan->find_by($by, $id);
+		$xp_plan->get_extent();
 		return $xp_plan;
+	}
+
+	public static	function find_where_by_planart($gui, $planart, $where, $order = '', $select = '*', $limit = '') {
+		$plan = new XP_Plan($gui, $planart);
+		$plaene = $plan->find_where($where, $order, $select, $limit);
+		return $plaene;
 	}
 
 	function get_anzeige_name() {
 		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+	}
+
+	/**
+	 * Return names of layer that have content from the plan
+	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
+	 */
+	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
+		$layers_with_content = array();
+		foreach ($xplan_layers AS $xplan_layer) {
+			#echo '<br>' . $xplan_layer['Name'] . ' ' . $xplan_layer['geom_column'];
+
+			$sql = "
+				SELECT
+					'" . $xplan_layer['Name'] . "',
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+				FROM
+					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
+				WHERE
+					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
+			";
+			#echo '<p>' . $sql;
+			set_error_handler(function($e) {
+				return true;
+			});
+			$ret = $this->database->execSQL($sql, 4, 0, true);
+			if (! $ret['success']) {
+				$ret['msg'] .= ' Aufgetreten in SQL: ' . $sql;
+				return $ret;
+			}
+			$content = pg_fetch_array($ret[1]);
+			if (
+				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
+			) {
+				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
+			}
+		}
+		return array(
+			'success' => true,
+			'layers_with_content' => $layers_with_content
+		);
 	}
 
 	/*
@@ -58,9 +119,9 @@ class XP_Plan extends PgObject {
 	function get_planart_table() {
 		switch ($this->planart) {
 			case ('BP-Plan') : { $table_name = 'enum_bp_planart'; $value_attribute = 'wert'; $name_attribute = 'abkuerzung'; } break;
-			case ('FP-Plan') : { $table_name = 'enum_fp_planart'; $value_attribute= 'wert'; $name_attribute = 'abkuerzung'; } break;
-			case ('SO-Plan') : { $table_name = 'so_planart'; $value_attribute= 'id'; $name_attribute = 'value'; } break;
-			case ('RP-Plan') : { $table_name = 'enum_rp_art'; $value_attribute= 'wert'; $name_attribute = 'beschreibung'; } break;
+			case ('FP-Plan') : { $table_name = 'enum_fp_planart'; $value_attribute = 'wert'; $name_attribute = 'abkuerzung'; } break;
+			case ('SO-Plan') : { $table_name = 'so_planart'; $value_attribute = 'id'; $name_attribute = 'value'; } break;
+			case ('RP-Plan') : { $table_name = 'enum_rp_art'; $value_attribute = 'wert'; $name_attribute = 'beschreibung'; } break;
 		}
 		return array(
 			'table_name' => $table_name,
@@ -86,7 +147,41 @@ class XP_Plan extends PgObject {
 		if (strpos($g, '{') !== false) {
 		  $g = json_decode(str_replace(array( '{', '}' ), array('[',']'), $g))[0];
 		}
-		return trim(explode(',',trim($g,'()'))[2]);
+		return trim(explode(',',trim($g,'()'))[2], '"');
+	}
+
+	function get_first_ags() {
+		$g = $this->get('gemeinde');
+		if (strpos($g, '{') !== false) {
+		  $g = json_decode(str_replace(array( '{', '}' ), array('[',']'), $g))[0];
+		}
+		return trim(explode(',',trim($g,'()'))[0], '"');
+	}
+
+	function get_center_coord() {
+		$sql = "
+			SELECT
+				ST_Y(
+					ST_Transform(
+						ST_Centroid(raeumlichergeltungsbereich),
+						4326
+					)
+				) AS lat,
+				ST_X(
+					ST_Transform(
+						ST_Centroid(raeumlichergeltungsbereich),
+						4326
+					)
+				) AS lon
+			FROM
+				" . $this->qualifiedTableName . "
+			WHERE
+				gml_id = '" . $this->get($this->identifier) . "'
+		";
+		#echo 'SQL zur Abfrage der Centroid-Koordinate: ' . $sql;
+		$results = $this->getSQLResults($sql);
+		$this->center_coord = $results[0];
+		return $this->center_coord;
 	}
 
 	function get_bereiche() {
@@ -136,16 +231,31 @@ class XP_Plan extends PgObject {
 		}
 	}
 
+	/**
+	 * Löscht textabschnitte des Planes
+	 * 
+	 */
+	function destroy_associated_textabschnitte() {
+		$sql = "
+			DELETE FROM
+				xplan_gml." . $this->planartAbk . "_textabschnitt ta
+			WHERE
+				ta.konvertierung_id = " . $this->get('konvertierung_id') . "
+		";
+		#echo '<br>SQL zum Löschen der Textabschnitte der Konvertierung' . $this->get('konvertierung_id') . ': ' . $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
+
 	/*
-	* Löscht den Plan und alles was damit verbunden ist
-	* Löscht die Bereiche
-	*/
+	 * Löscht den Plan und alles was damit verbunden ist
+	 */
 	function destroy() {
 		$this->debug->show('Objekt XP_Plan gml_id: ' . $this->get('gml_id') . ' destroy', false);
 		$bereiche = $this->get_bereiche();
-		foreach($bereiche AS $bereich) {
+		foreach ($bereiche AS $bereich) {
 			$bereich->destroy();
 		}
+		$this->destroy_associated_textabschnitte();
 		$this->delete();
 	}
 }

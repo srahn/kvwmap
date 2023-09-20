@@ -42,6 +42,7 @@ class Gml_builder {
 		$this->debug = $debug;
 		$this->database = $database;
 		$this->typeInfo = new TypeInfo($database);
+		$this->errmsg = '';
 
 		$this->tmpFile = tmpfile();
 	}
@@ -60,7 +61,7 @@ class Gml_builder {
 	* Mit der Funktion save($path) kann die temporäre Datei in
 	* eine Zieldatei gespeichert werden
 	*/
-	function build_gml($konvertierung, $plan){
+	function build_gml($konvertierung, $plan) {
 		# set encoding to UTF-8
 		$old_encoding = mb_internal_encoding();
 		mb_internal_encoding('UTF-8');
@@ -75,23 +76,30 @@ class Gml_builder {
 			*,
 			ST_AsGML(
 				3,
-				ST_Reverse(ST_Transform(
-				raeumlichergeltungsbereich,
-				{$konvertierung->get('output_epsg')})),
+				ST_Reverse(
+					ST_Transform(
+						raeumlichergeltungsbereich,
+						{$konvertierung->get('output_epsg')}
+					)
+				),
 				{$konvertierung->get('geom_precision')},
 				0,
 				null,
-				'GML_' || gml_id::text || '_geom') AS gml_raeumlichergeltungsbereich,
-				ST_AsGML(
-					3,
-					ST_Transform(
-						raeumlichergeltungsbereich,
-						{$konvertierung->get('output_epsg')}),
-						{$konvertierung->get('geom_precision')},
-						32,
-						null,
-						'GML_' || gml_id::text || '_envelope' ) AS envelope";
-						$plan->find_by('konvertierung_id',$konvertierung->get('id'));
+				'GML_' || gml_id::text || '_geom'
+			) AS gml_raeumlichergeltungsbereich,
+			ST_AsGML(
+				3,
+				ST_Transform(
+					raeumlichergeltungsbereich,
+					{$konvertierung->get('output_epsg')}
+				),
+				{$konvertierung->get('geom_precision')},
+				32,
+				null,
+				'GML_' || gml_id::text || '_envelope'
+			) AS envelope
+		";
+					$plan->find_by('konvertierung_id',$konvertierung->get('id'));
 
 		# XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
 		fwrite(
@@ -268,6 +276,7 @@ class Gml_builder {
 	}
 
 	function generateGmlForAttributes($gml_object, $uml_attribute_info, $depth) {
+		$this->err_msg = '';
 		if (($depth) < 0) return '';
 		$xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 		$gmlStr = '';
@@ -409,7 +418,7 @@ class Gml_builder {
 								for ($j = 0; $j < count($gml_value_array); $j++) {
 									$timestamp = strtotime($gml_value_array[$j]);
 									if (!$timestamp) {
-										echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value_array[$j];
+										$this->errmsg = "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value_array[$j];
 										break;
 									}
 									$iso_date_str = date("Y-m-d", $timestamp);
@@ -418,7 +427,7 @@ class Gml_builder {
 							} else {
 								$timestamp = strtotime($gml_value);
 								if (!$timestamp) {
-									echo "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value;
+									$this->errmsg = "Ungueltige Datumsangabe im Attribut " . $uml_attribute['col_name'] . ": " . $gml_value;
 									break;
 								}
 								$iso_date_str = date("Y-m-d", $timestamp);

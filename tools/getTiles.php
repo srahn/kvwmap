@@ -30,8 +30,10 @@ function num2deg($xtile, $ytile, $zoom){
 }
 
 
-#get the numbers of the tiles that intersect with the polygon	
-function getTileNumbers($polygon, $zoom){
+/**
+ * get the numbers of the tiles that intersect with the polygon	
+*/
+ function getTileNumbers($polygon, $zoom){
 	global $database;
 	# BBox des Polygons bestimmen
 	$sql = "

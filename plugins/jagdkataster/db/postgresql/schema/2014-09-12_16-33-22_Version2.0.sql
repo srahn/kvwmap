@@ -95,13 +95,11 @@ COMMENT ON COLUMN jagdpaechter.id IS 'entspricht Waffenbesitzer.Code in conditio
 CREATE TABLE jagdpaechter2bezirke
 (
   bezirkid integer NOT NULL,
-  paechterid integer NOT NULL
-)
-WITH (
-  OIDS=TRUE
+  paechterid integer NOT NULL,
+	gid serial
 );
 ALTER TABLE jagdpaechter2bezirke
-  ADD CONSTRAINT jagdpaechter2bezirke_pkey PRIMARY KEY(oid);
+  ADD CONSTRAINT jagdpaechter2bezirke_pkey PRIMARY KEY(gid);
 
 
 -- View zu den Jagdbezirken

@@ -126,6 +126,36 @@ $SVGvars_defs = '
 		</cursor>
 
 		<polygon points="-5 -40, 5 -40, 5 -20, 15 -20, 0 0, -15 -20, -5 -20, -5 -40" id="free_arrow" style="opacity:1;fill:rgb(255,0,0);stroke:rgb(0,0,0);stroke-width:2;"/>
+		
+		<marker
+      id="measure_start"
+      viewBox="0 0 20 20"
+      refX="0"
+      refY="10"
+      markerUnits="userSpaceOnUse"
+      markerWidth="20"
+      markerHeight="20"
+      orient="auto">
+      <line x1="0" y1="20" x2="0" y2="0" stroke="black" stroke-width="3" />
+    </marker>
+		
+		<marker
+      id="measure_end"
+      viewBox="0 0 20 20"
+      refX="20"
+      refY="10"
+      markerUnits="userSpaceOnUse"
+      markerWidth="20"
+      markerHeight="20"
+      orient="auto">
+			<line x1="20" y1="20" x2="20" y2="0" stroke="black" stroke-width="3" />
+			<line x1="0" y1="0" x2="20" y2="10" stroke="black" stroke-width="1.5" />
+			<line x1="0" y1="20" x2="20" y2="10" stroke="black" stroke-width="1.5" />
+    </marker>
+		
+		<clipPath id="compare_clipper">
+      <rect id="compare_clipper_rect" x="0" y="0" width="' . $this->user->rolle->nImageWidth . '" height="' . $this->user->rolle->nImageHeight . '" />
+    </clipPath>
 ';
 
 	$ret=$this->user->rolle->getConsume($this->user->rolle->newtime);
@@ -441,7 +471,21 @@ $SVGvars_defs = '
     $last_x += 36;
   	return $dist;
 	}
-	
+
+	function punktfang($strPunktfang){
+		global $last_x;global $events;
+		$dist ='
+		<g id="punktfang" transform="translate('.$last_x.' 0)">
+		<rect id="punktfang0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strPunktfang.'\',evt.clientX,evt.clientY)" onmousedown="top.document.getElementById(\'punktfang\').click();hidetooltip(evt);"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
+			<g class="navbutton" transform="translate(5 5) scale(0.8)">
+				<path d="M15,26 C21.8,26 26,21.8 26,15 C26,8.9 21.8,4 15,4 C8.9,4 4,8.9 4,15 C4,21.8 8.9,26 15,26 M15,24 C20,24 24,20 24,15 C24,10.0 20,6 15,6 C10.0,6 6,10.0 6,15 C6,20 10.0,24 15,24" style="fill-rule: evenodd;"></path>
+				<circle cx="15" cy="15" r="7"></circle>
+			</g>
+		</g>';
+    $last_x += 36;
+  	return $dist;
+	}
+
 	function freepolygon($strFreePolygon){
 		global $last_x;global $events;
 		$freepolygon ='

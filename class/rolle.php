@@ -115,8 +115,9 @@ class rolle {
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				sync,
+				wfs_geom,
+				write_mapserver_templates,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -142,6 +143,9 @@ class rolle {
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer 
 				" . $privilegfk . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
@@ -168,7 +172,7 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach(array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -179,7 +183,7 @@ class rolle {
 					$rs['duplicate_criterion']
 				);
 			}
-			$layer[$i]=$rs;
+			$layer[$i] = $rs;
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
@@ -236,6 +240,28 @@ class rolle {
     }
     return $ret;
   }
+	
+  function read_disabled_class_expressions() {
+		$sql = "
+			SELECT 
+				cl.Layer_ID,
+				cl.Class_ID,
+				cl.Expression
+			FROM 
+				classes as cl
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID 
+			WHERE 
+				r2uc.status = 0 AND 
+				r2uc.user_id = " . $this->user_id . "	AND 
+				r2uc.stelle_id = " . $this->stelle_id . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->database->execSQL($sql);
+    while ($row = $this->database->result->fetch_assoc()) {
+  		$result[$row['Layer_ID']][] = $row;
+		}
+		return $result ?: [];
+  }	
 
   function getGroups($GroupName) {
 		global $language;
@@ -436,6 +462,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -444,6 +471,7 @@ class rolle {
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
 			$this->visually_impaired = $rs['visually_impaired'];
+			$this->font_size_factor = $rs['font_size_factor'];
 			$this->legendtype = $rs['legendtype'];
 			$this->print_legend_separate = $rs['print_legend_separate'];
 			$this->print_scale = $rs['print_scale'];
@@ -470,6 +498,7 @@ class rolle {
 			$this->polyquery = in_array('polyquery', $buttons);
 			$this->touchquery = in_array('touchquery', $buttons);
 			$this->measure = in_array('measure', $buttons);
+			$this->punktfang = in_array('punktfang', $buttons);
 			$this->freepolygon = in_array('freepolygon', $buttons);
 			$this->freetext = in_array('freetext', $buttons);
 			$this->freearrow = in_array('freearrow', $buttons);
@@ -1355,6 +1384,21 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerName:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setRollenLayerAutoDelete($formvars){
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				autodelete = '" . ($formvars['layer_options_autodelete'] ?: '0') . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . " AND
+				id = -1*" . $formvars['layer_options_open'] . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->setRollenLayerAutoDelete:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+	}	
 
 	function setLabelitem($formvars) {
 		if (isset($formvars['layer_options_labelitem'])) {
@@ -1438,12 +1482,30 @@ class rolle {
 				styles 
 			SET 
 				color = "'.$formvars['layer_options_color'].'",
+				' . ($formvars['layer_options_hatching']? 'size = 11, width = 5, angle = 45, ' : 'size = 8, width = NULL, angle = NULL, ') . '
 				symbolname = CASE WHEN symbolname IS NULL OR symbolname = "hatch" OR symbolname = "" THEN "'.$formvars['layer_options_hatching'].'" ELSE symbolname END
 			WHERE 
 				Style_ID = '.$style_id;
 		$this->debug->write("<p>file:rolle.php class:rolle->setColor:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
+	
+	function setBuffer($formvars) {
+		if ($formvars['layer_options_open'] < 0) { # Rollenlayer
+			$sql = "
+				UPDATE
+					rollenlayer
+				SET
+					buffer = " . ($formvars['layer_options_buffer'] ?: 'NULL') . "
+				WHERE
+					user_id = " . $this->user_id . " AND
+					stelle_id = " . $this->stelle_id . " AND
+					id = -1* " . $formvars['layer_options_open'] . "
+			";
+			$this->debug->write("<p>file:rolle.php class:rolle->setBuffer:",4);
+			$this->database->execSQL($sql,4, $this->loglevel);
+		}
+	}	
 
 	function setTransparency($formvars) {
 		if ($formvars['layer_options_transparency'] < 0 OR $formvars['layer_options_transparency'] > 100) {
@@ -1588,6 +1650,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`dataset_operations_position`,
 					`immer_weiter_erfassen`,
 					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
@@ -1595,15 +1658,16 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
 					`redline_font_size`,
 					`redline_font_weight`
-				) 
-				SELECT ".
-					$user_id.", ".
-					$stelle_id.",
+				)
+				SELECT " .
+					$user_id . ", " .
+					$stelle_id . ",
 					`nImageWidth`, `nImageHeight`,
 					`auto_map_resize`,
 					`minx`, `miny`, `maxx`, `maxy`,
@@ -1633,6 +1697,7 @@ class rolle {
 					`singlequery`,
 					`querymode`,
 					`geom_edit_first`,
+					`dataset_operations_position`,
 					`immer_weiter_erfassen`,
 					`upload_only_file_metadata`,
 					`overlayx`, `overlayy`,
@@ -1640,6 +1705,7 @@ class rolle {
 					`menu_auto_close`,
 					`layer_params`,
 					`visually_impaired`,
+					`font_size_factor`,
 					`menue_buttons`,
 					`redline_text_color`,
 					`redline_font_family`,
@@ -1648,8 +1714,8 @@ class rolle {
 				FROM
 					`rolle`
 				WHERE
-					`user_id` = ".$default_user_id." AND
-					`stelle_id` = ".$stelle_id."
+					`user_id` = " . $default_user_id . " AND
+					`stelle_id` = " . $stelle_id . "
 			";
 		}
 		else {
@@ -1667,10 +1733,10 @@ class rolle {
 				FROM
 					stelle
 				WHERE
-					ID = ".$stelle_id."
+					ID = " . $stelle_id . "
 			";
 		}
-		#echo '<br>'.$sql;
+		#debug_write('Rolle eintragen', $sql, 1);
 		$this->debug->write("<p>file:rolle.php class:rolle function:setRolle - Einfügen einer neuen Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
@@ -1695,6 +1761,25 @@ class rolle {
 			if (!$ret['success']) {
 				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
 				return 0;
+			}
+			# default_user_id
+			$sql = "
+				UPDATE
+					`stelle` 
+				SET	
+					default_user_id = NULL
+				WHERE 
+					default_user_id = " . $user_id . " AND 
+					ID = " . $stellen[$i];
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				$this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . $ret[1], 4);
+				return 0;
+			}
+			else {
+				if ($this->database->mysqli->affected_rows > 0){
+					GUI::add_message_('notice', 'Achtung! Der Standardnutzer wurde von der Stelle entfernt.');
+				}
 			}
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
@@ -2227,8 +2312,7 @@ class rolle {
 						time_id = '" . $time . "',
 						format = '" . $format . "',
 						log_number = '" . $log_number[$i] . "',
-						wz = '" . $wz . "',
-						numpages = " . $pagecount;
+						wz = '" . $wz . "'";
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {

@@ -75,10 +75,12 @@ class spatial_processor {
 		";
 		
 		if(
-			NORMALIZE_AREA_THRESHOLD == 0 AND 
-			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
-			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
-			NORMALIZE_NULL_AREA == 0
+				(	NORMALIZE_AREA_THRESHOLD == 0 AND 
+					NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+					NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+					NORMALIZE_NULL_AREA == 0)
+				OR
+					strpos($geom_2, 'LINESTRING') !== false
 		){
 			$normalize = false;
 		}
@@ -130,10 +132,12 @@ class spatial_processor {
 		";
 		
 		if (
-			NORMALIZE_AREA_THRESHOLD == 0 AND 
-			NORMALIZE_ANGLE_THRESHOLD == 0 AND 
-			NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
-			NORMALIZE_NULL_AREA == 0
+				(	NORMALIZE_AREA_THRESHOLD == 0 AND 
+					NORMALIZE_ANGLE_THRESHOLD == 0 AND 
+					NORMALIZE_POINT_DISTANCE_THRESHOLD == 0 AND 
+					NORMALIZE_NULL_AREA == 0)
+				OR
+					strpos($geom_2, 'LINESTRING') !== false
 		) {
 			$normalize = false;
 		}
@@ -600,7 +604,8 @@ class spatial_processor {
 				$data = str_replace('$scale', 1000, $data);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
-				$select = $fromwhere = $dbmap->getSelectFromData($data);
+				$select = $dbmap->getSelectFromData($data);
+				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');
@@ -719,7 +724,12 @@ class spatial_processor {
         $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
-	      $wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
+				if ($layerset[0]['Datentyp'] == 2) {
+					$wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
+				}
+				elseif ($layerset[0]['Datentyp'] == 1) {
+					$wkt = $this->composeMultilineWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
+				}
 	      #$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);
 	      if($layerset[0]['epsg_code'] != $this->rolle->epsg_code)$wkt = $this->pgdatabase->transformPoly($wkt, $layerset[0]['epsg_code'], $this->rolle->epsg_code);
 	      return $wkt;
@@ -1031,6 +1041,35 @@ class spatial_processor {
     }
     return 'ARRAY['.implode(',', $wkt_polygon).']';
   }
+	
+  function composeMultilineWKTStringFromGML($gml, $geom_attribute){
+    $polygons = explode('<gml:LineString', $gml);
+    for($i = 1; $i < count($polygons); $i++){
+    	$wkt_linestring[$i-1] = 'st_geomfromtext(\'LINESTRING';
+    	$rings = explode('<gml:posList', $polygons[$i]);
+      for($j = 1; $j < count($rings); $j++){
+      	if($j > 1){$wkt_linestring[$i-1] .= ',';}
+      	$wkt_linestring[$i-1] .= '(';
+      	$start = strpos($rings[$j], '>')+1;
+      	$end = strpos($rings[$j], '</gml:posList>');
+      	$coords = substr($rings[$j], $start, $end-$start);
+				$coord_array = explode(' ', $coords);
+				$wkt_coords = $coord_array[0].' '.$coord_array[1];
+      	for($k = 2; $k < count($coord_array)-1; $k=$k+2){
+					$wkt_coords .= ','.$coord_array[$k].' '.$coord_array[$k+1];
+				}
+      	$wkt_linestring[$i-1] .= $wkt_coords;
+      	$wkt_linestring[$i-1] .= ')';
+      }
+      $wkt_linestring[$i-1] .= '\')';
+    }
+    $sql = "SELECT st_astext(st_union(ARRAY[".implode(',', $wkt_linestring)."]))";
+  	$ret=$this->pgdatabase->execSQL($sql,4, 0);
+  	if(!$ret[0]){
+  		$rs=pg_fetch_array($ret[1]);
+  		return $rs[0];	
+    }
+  }	
 	
 	function composeMultipointWKTStringFromGML($gml, $geom_attribute){
     $points = explode('<gml:Point', $gml);

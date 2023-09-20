@@ -17,7 +17,7 @@
 			<tr>
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
-						<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? '' ?>">
+						<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?: '' ?>">
 						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
@@ -36,18 +36,45 @@
 											window.name = 'root';
 											currentform = document.GUI;
 											<? $this->currentform = 'document.GUI'; ?>
-											function set_hist_timestamp() {
-												$('#hist_timestamp_form').show();
-											}
 										</script>
 										<div id="hist_timestamp_form" style="display:none;">
-											<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
-											<? echo $this->histTimestamp; ?>:&nbsp;<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp2', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp2" class="calendar" style="top:35px;left:150px"></div>
-											<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
-											<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
+											<div style="display: flex">
+												<div>													
+													<? echo $this->histTimestamp; ?>:
+													<div style="margin: 8px">
+														<a href="javascript:;" onclick="new CalendarJS().init('hist_timestamp2', 'timestamp');"><img title="TT.MM.JJJJ hh:mm:ss" src="<? echo GRAPHICSPATH; ?>calendarsheet.png" border="0"></a><div id="calendar_hist_timestamp2" class="calendar" style="top:35px;left:150px"></div>
+														<input onchange="if(this.value.length == 10)this.value = this.value + ' 06:00:00'" id="hist_timestamp2" name="hist_timestamp2" type="text" value="<? echo $this->user->rolle->hist_timestamp_de; ?>" size="16">
+														<input type="button" onclick="location.href='index.php?go=setHistTimestamp&timestamp='+document.GUI.hist_timestamp2.value" value="ok">
+													</div>
+												</div>
+												<div id="hist_range_div">
+													<?
+														if (rolle::$hist_timestamp != '') {
+															$start = -60;
+															$ende = 60;
+															$ref = DateTime::createFromFormat('Y-m-d\TH:i:s\Z', rolle::$hist_timestamp)->getTimestamp();
+														}
+														else {
+															$start = -120;
+															$ende = 0;
+															$ref = time();
+														}
+													?>
+													<input type="range" name="hist_timestamp3" id="hist_timestamp3" value="0" style="width: 6000px; margin-left: 15px;" max="<? echo $ende ?>" min="<? echo $start; ?>" step="1" oninput="get_map_hist()">
+													<datalist style="display: flex; justify-content: space-between; width: 6030px;">
+													<?
+														for ($m = $start; $m <= $ende; $m++) {
+															$ts = strtotime($m . " month", $ref);
+															echo '<option value="' . $m . '" label="' . date("m/y", $ts) . '">' . date("m/y", $ts) . '</option>';
+														}
+													?>
+													</datalist>
+												</div>
+												<i class="fa fa-close" style="cursor: pointer; float: right; margin: 0 5px 0 5px;" onclick="$('#hist_timestamp_form').hide();"></i>
+											</div>
 										</div>
 										<?php
-										$this->debug->write("<br>Include <b>".$this->main."</b> in gui.php",4);
+										$this->debug->write("<br>Include <b>" . $this->main . "</b> in gui.php",4);
 										if (file_exists($this->main)) {
 											include($this->main); # Pluginviews
 										}

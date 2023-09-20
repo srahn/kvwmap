@@ -147,7 +147,7 @@ function get_oid_alternative($layer) {
 				a.attrelid = '" . $layer['maintable'] . "'::regclass and 
 				attnum > 0 and 
 				attisdropped is false and 
-				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique)
+				(pg_get_serial_sequence('" . $layer['maintable'] . "', attname) IS NOT NULL OR i.indisunique OR atttypid::regtype = 'uuid'::regtype)
 		";
 		$ret = @pg_query($GUI->layer_dbs[$layer['connection_id']]->dbConn, $sql);
 		if($ret == false){
@@ -218,7 +218,7 @@ switch ($this->formvars['action']) {
 	}break;
 	case 'set_new_data' : {
 		foreach ($this->formvars['layer_id'] as $layer_id) {
-			if ($this->formvars['check_' . $layer_id] AND strpos($this->formvars['new_data_' . $layer_id], 'using ') !== false) {
+			if ($this->formvars['check_' . $layer_id] AND strpos(strtolower($this->formvars['new_data_' . $layer_id]), 'using ') !== false) {
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$select = $mapDB->getSelectFromData($this->formvars['new_data_' . $layer_id]);
 				$from = substr($select, strrpos(strtolower($select), 'from') + 5);
@@ -228,7 +228,7 @@ switch ($this->formvars['action']) {
 					if ($table_part[1] == ''){
 						$table_part[1] = $table_part[0];
 					}
-					if ($table_part[1] == $this->formvars['maintable_' . $layer_id]) {
+					if (trim($table_part[1]) == $this->formvars['maintable_' . $layer_id]) {
 						$sql = "
 							UPDATE
 								layer
@@ -251,14 +251,16 @@ $color[true] = '#36908a';
 $this->formvars['order'] = $this->formvars['order'] ?: 'Name';
 
 $query = "
-	SELECT
+	SELECT DISTINCT 
 		layer.*,
+		ul.Layer_ID as used_layer_layer_id,
 		CONCAT('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password) as connectionstring,
 		g.Gruppenname
 	FROM 
-		`layer` LEFT JOIN
-		u_groups g ON layer.Gruppe = g.id LEFT JOIN
-		connections c ON c.id = connection_id
+		`layer` 
+		LEFT JOIN used_layer ul ON ul.Layer_ID = layer.Layer_ID
+		LEFT JOIN	u_groups g ON layer.Gruppe = g.id 
+		LEFT JOIN	connections c ON c.id = connection_id
 	WHERE
 		connectiontype = 6
 	ORDER BY " . $this->formvars['order'] . "
@@ -328,7 +330,7 @@ $result = $this->database->execSQL($query);
 	}	
 	.scrolltable_header {
     position: absolute;
-    top: 5px;
+    top: -25px;
     height: 31px;
     border-left: 1px solid #555;
     padding: 5px 0 0 5px;
@@ -355,6 +357,7 @@ $result = $this->database->execSQL($query);
 <script type="text/javascript">
 
 	var ok_layer_display = '';
+	var nicht_zu_stelle_zugeordnet_layer_display = '';
 
 	function select_text(textarea, str){
 		var index = textarea.value.indexOf(str);
@@ -378,6 +381,21 @@ $result = $this->database->execSQL($query);
 				ok_layer.style.display = ok_layer_display;
 		});
 	}
+	
+	function toggle_layer2(){
+		if (nicht_zu_stelle_zugeordnet_layer_display == '') {
+			nicht_zu_stelle_zugeordnet_layer_display = 'none';
+			document.getElementById('nicht_zu_stelle_zugeordnet_layer_toggle_link').innerHTML = 'alle PostGIS-Layer anzeigen';
+		}
+		else {
+			nicht_zu_stelle_zugeordnet_layer_display = '';
+			document.getElementById('nicht_zu_stelle_zugeordnet_layer_toggle_link').innerHTML = 'nur die PostGIS-Layer mit Stellenzuordnung anzeigen';
+		}
+		var nicht_zu_stelle_zugeordnet_layers = document.querySelectorAll('.nicht_zu_stelle_zugeordnet');
+		[].forEach.call(nicht_zu_stelle_zugeordnet_layers, function (nicht_zu_stelle_zugeordnet_layer){
+				nicht_zu_stelle_zugeordnet_layer.style.display = nicht_zu_stelle_zugeordnet_layer_display;
+		});
+	}
 
 </script>
 
@@ -394,14 +412,17 @@ $oid_layer_count = 0;
 $i = 0;
 $layer_count = $this->database->result->num_rows;
 while ($layer = $this->database->result->fetch_assoc()) {
+	$class = '';
   $status = checkStatus($layer);
 	$result = array();
 	$result = get_oid_alternative($layer);
+	if ($layer['used_layer_layer_id'] == '') {
+		$class .= 'nicht_zu_stelle_zugeordnet ';
+	}
 	if ($status['oid'] AND $status['query'] AND $status['data']) {
-		$class = 'layer_ok';
+		$class .= 'layer_ok ';
 	}
 	else{
-		$class = '';
 		$oid_layer_count++;
 	}
 	echo '
@@ -463,6 +484,8 @@ echo '</tbody></table></div>';
 					<? echo $oid_layer_count; ?> PostGIS-Layer müssen angepasst werden<br>
 					<a href="javascript:void(0);" id="layer_toggle_link" onclick="toggle_layer();">nur die anzupassenden PostGIS-Layer anzeigen</a>
 					<br>
+					<a href="javascript:void(0);" id="nicht_zu_stelle_zugeordnet_layer_toggle_link" onclick="toggle_layer2();">nur die PostGIS-Layer mit Stellenzuordnung anzeigen</a>
+					<br>
 					Sortierung: 
 					<select name="order" onchange="document.GUI.submit();">
 						<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
@@ -484,34 +507,54 @@ echo '</tbody></table></div>';
 <div id="db_check">
 	<h2>Datenbankobjekte die oids verwenden</h2>
 <?
-		include_once(CLASSPATH . 'Connection.php');
-		$this->connections = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
-		foreach ($this->connections as $connection) {
-			if ($this->layer_dbs[$connection->data['id']]->dbConn != false) {
-				echo '<h3>' . $connection->data['dbname'] . ':</h3>';
-				foreach ($db_check_sqls as $db_check_sql) {
-					$ret = @pg_query($this->layer_dbs[$connection->data['id']]->dbConn, $db_check_sql['sql']);
-					if($ret == false){
-						echo @pg_last_error($this->layer_dbs[$layer['connection_id']]->dbConn);
-					}
-					else{
-						if ($rs = pg_fetch_all($ret)) {
-							echo '<h4>' . $db_check_sql['name'] . '</h4>';
-							echo '<table>';
-							foreach ($rs[0] as $key => $value) {
-									echo "<th>" . $key . "</th>";
-							}
-							foreach ($rs as $row) {
-								echo "<tr>";
-								foreach ($row as $cell) {
-									echo "<td>" . $cell . "</td>";
+		$credentials = $this->pgdatabase->get_object_credentials();
+		$sql = "
+			SELECT 
+				datname 
+			FROM 
+				pg_database
+			WHERE 
+				datistemplate = false AND 
+				datname != 'postgres';
+		";
+		$ret1 = $this->pgdatabase->execSQL($sql);
+		while($rs = pg_fetch_assoc($ret1[1])){		
+			$database = new pgdatabase();
+			$credentials['dbname'] = $rs['datname'];
+			$database->set_object_credentials($credentials);
+			echo '<h3>' . $credentials['dbname'] . ':</h3>';
+			try {
+				if ($database->open()) {
+					foreach ($db_check_sqls as $db_check_sql) {
+						$ret = @pg_query($database->dbConn, $db_check_sql['sql']);
+						if($ret == false){
+							echo @pg_last_error($database->dbConn);
+						}
+						else{
+							if ($rs = pg_fetch_all($ret)) {
+								echo '<h4>' . $db_check_sql['name'] . '</h4>';
+								echo '<table>';
+								foreach ($rs[0] as $key => $value) {
+										echo "<th>" . $key . "</th>";
+								}
+								foreach ($rs as $row) {
+									echo "<tr>";
+									foreach ($row as $cell) {
+										echo "<td>" . $cell . "</td>";
+									} 
+									echo "</tr>";
 								} 
-								echo "</tr>";
-							} 
-							echo "</table>";
+								echo "</table>";
+							}
 						}
 					}
 				}
+				else {
+					echo 'Verbindung nicht möglich';
+				}
+			}
+			catch (Exception $e){
+				echo 'Fehler: ' . $e->getMessage(), "\n";
 			}
 		}
 ?>

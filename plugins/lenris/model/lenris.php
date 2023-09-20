@@ -13,7 +13,7 @@ class LENRIS {
     $this->database = $database;
 		$this->database2 = clone $database;		// zweites Datenbankobjekt um unabhängig von der Transaktion etwas in die Datenbank zu schreiben
 		#$this->database2->close();
-		$this->database2->open();
+		$this->database2->open(0, PGSQL_CONNECT_FORCE_NEW);
 		$this->clients = $this->get_client_information();
 		$this->dokumentart_mapping = $this->get_dokumentart_mapping();
 		$this->vermessungsstellen_mapping = $this->get_vermessungsstellen_mapping();
@@ -38,7 +38,7 @@ class LENRIS {
 				VALUES (
 					" . $client_id . ",
 					'" . $time . "',
-					'" . $error . "'
+					'" . pg_escape_string($error) . "'
 				);";
 			$ret = $this->database2->execSQL($sql, 4, 0);
 		}
@@ -57,7 +57,7 @@ class LENRIS {
 			VALUES (
 				" . $client_id . ",
 				'" . $time . "',
-				'" . $msg . "'
+				'" . pg_escape_string($msg) . "'
 			)";
 		$ret = $this->database->execSQL($sql, 4, 0);
 	}
@@ -302,9 +302,9 @@ class LENRIS {
 	}
 	
 	function get_new_nachweise($client){
-		$bom = pack('H*','EFBBBF');
-		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise')));
-		if ($result != '') {
+		$result = trim(file_get_contents($client['url'] . 'go=LENRIS_get_new_nachweise'));
+		$result = substr($result, strpos($result, '['));
+		if (strpos($result, '[') !== false) {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' neue Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -320,9 +320,9 @@ class LENRIS {
 	}
 	
 	function get_changed_nachweise($client){
-		$bom = pack('H*','EFBBBF');
-		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise')));
-		if ($result != '') {
+		$result = trim(file_get_contents($client['url'] . 'go=LENRIS_get_changed_nachweise'));
+		$result = substr($result, strpos($result, '['));
+		if (strpos($result, '[') !== false) {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' veränderte Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -338,9 +338,9 @@ class LENRIS {
 	}
 	
 	function get_deleted_nachweise($client){
-		$bom = pack('H*','EFBBBF');
-		$result = trim(preg_replace("/^$bom/", '', file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise')));
-		if ($result != '') {
+		$result = trim(file_get_contents($client['url'] . 'go=LENRIS_get_deleted_nachweise'));
+		$result = substr($result, strpos($result, '['));
+		if (strpos($result, '[') !== false) {
 			if ($json = json_decode($result, true))	{
 				$this->log($client['client_id'], count($json) . ' gelöschte Nachweise von Client ' . $client['client_id']);
 				return $json;
@@ -402,7 +402,7 @@ class LENRIS {
 					" . $geom . ", 
 					" . ($n['fortfuehrung'] ?: 'NULL') . ", 
 					'" . $n['rissnummer'] . "', 
-					" . ($n['bemerkungen'] ? "'" . $n['bemerkungen'] . "'" : 'NULL') . ", 
+					" . ($n['bemerkungen'] ? "'" . pg_escape_string($n['bemerkungen']) . "'" : 'NULL') . ",
 					" . ($n['bearbeiter'] ? "'" . $n['bearbeiter'] . "'" : 'NULL') . ", 
 					" . ($n['zeit'] ? "'" . $n['zeit'] . "'" : 'NULL') . ", 
 					" . ($n['erstellungszeit'] ? "'" . $n['erstellungszeit'] . "'" : 'NULL') . ", 

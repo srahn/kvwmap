@@ -24,8 +24,8 @@
   $strTooltipQuery="Objekt-Schnellinfo";
   $strPlatt="Plattdüütsch";
   $strSearchColor="Faarf van de Sökergebnis";
-	$strSearchHatching="Suchergebnis/Import-Schraffur";
-	$strSearchTransparency="Suchergebnis/Import-Transparenz";
+	$strSearchHatching="eigene Abfragen/Import-Schraffur";
+	$strSearchTransparency="eigene Abfragen/Import-Transparenz";
   $strPolish="Polnisch";
 	$strCoordType="Utsehn van de Koordinaten";
 	$strSingleQuery="blot een Thema affraagbar";
@@ -78,4 +78,9 @@
 	$strRedlineFontFamily = "Fontfamilie";
 	$strRedlineFontSize = "Textgröße";
 	$strRedlineFontWeight = "Schriftschnitt";
+	$strDatasetOperationsPosition = "Position der Datensatzfunktionen";
+	$strDatasetOperationsPositionUnten = "unter den Datensätzen";
+	$strDatasetOperationsPositionOben = "über den Datensätzen";
+	$strDatasetOperationsPositionBeide = "unter und über den Datensätzen";
+	$strHintDatasetOperationsPosition = "Legen Sie fest ob die Funktionen für die ausgewählten Datensätze über oder unter den Datensätzen angezeigt werden sollen.";
 ?>

@@ -15,6 +15,73 @@ class MyObject {
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 		$this->validations = array();
+		if (!empty($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$this->$key = array();
+			}
+		}
+		$this->field_types = array(
+			MYSQLI_TYPE_DECIMAL => 'MYSQLI_TYPE_DECIMAL',
+			MYSQLI_TYPE_NEWDECIMAL => 'MYSQLI_TYPE_NEWDECIMAL',
+			MYSQLI_TYPE_BIT => 'MYSQLI_TYPE_BIT',
+			MYSQLI_TYPE_TINY => 'MYSQLI_TYPE_TINY',
+			MYSQLI_TYPE_SHORT => 'MYSQLI_TYPE_SHORT',
+			MYSQLI_TYPE_LONG => 'MYSQLI_TYPE_LONG',
+			MYSQLI_TYPE_FLOAT => 'MYSQLI_TYPE_FLOAT',
+			MYSQLI_TYPE_DOUBLE => 'MYSQLI_TYPE_DOUBLE',
+			MYSQLI_TYPE_NULL => 'MYSQLI_TYPE_NULL',
+			MYSQLI_TYPE_TIMESTAMP => 'MYSQLI_TYPE_TIMESTAMP',
+			MYSQLI_TYPE_LONGLONG => 'MYSQLI_TYPE_LONGLONG',
+			MYSQLI_TYPE_INT24 => 'MYSQLI_TYPE_INT24',
+			MYSQLI_TYPE_DATE => 'MYSQLI_TYPE_DATE',
+			MYSQLI_TYPE_TIME => 'MYSQLI_TYPE_TIME',
+			MYSQLI_TYPE_DATETIME => 'MYSQLI_TYPE_DATETIME',
+			MYSQLI_TYPE_YEAR => 'MYSQLI_TYPE_YEAR',
+			MYSQLI_TYPE_NEWDATE => 'MYSQLI_TYPE_NEWDATE',
+			MYSQLI_TYPE_INTERVAL => 'MYSQLI_TYPE_INTERVAL',
+			MYSQLI_TYPE_ENUM => 'MYSQLI_TYPE_ENUM',
+			MYSQLI_TYPE_SET => 'MYSQLI_TYPE_SET',
+			MYSQLI_TYPE_TINY_BLOB => 'MYSQLI_TYPE_TINY_BLOB',
+			MYSQLI_TYPE_MEDIUM_BLOB => 'MYSQLI_TYPE_MEDIUM_BLOB',
+			MYSQLI_TYPE_LONG_BLOB => 'MYSQLI_TYPE_LONG_BLOB',
+			MYSQLI_TYPE_BLOB => 'MYSQLI_TYPE_BLOB',
+			MYSQLI_TYPE_VAR_STRING => 'MYSQLI_TYPE_VAR_STRING',
+			MYSQLI_TYPE_STRING => 'MYSQLI_TYPE_STRING',
+			MYSQLI_TYPE_CHAR => 'MYSQLI_TYPE_CHAR',
+			MYSQLI_TYPE_GEOMETRY => 'MYSQLI_TYPE_GEOMETRY',
+			MYSQLI_TYPE_JSON => 'MYSQLI_TYPE_JSON'
+		);
+/*
+		tinyint_    1
+		boolean_    1
+		smallint_    2
+		int_        3
+		float_        4
+		double_        5
+		real_        5
+		timestamp_    7
+		bigint_        8
+		serial        8
+		mediumint_    9
+		date_        10
+		time_        11
+		datetime_    12
+		year_        13
+		bit_        16
+		decimal_    246
+		text_        252
+		tinytext_    252
+		mediumtext_    252
+		longtext_    252
+		tinyblob_    252
+		mediumblob_    252
+		blob_        252
+		longblob_    252
+		varchar_    253
+		varbinary_    253
+		char_        254
+		binary_        254
+*/
 	}
 
 	/*
@@ -33,7 +100,7 @@ class MyObject {
 		";
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
-		$rs = $this->database->result->fetch_assoc();
+		$rs = $this->mysqli_fetch_assoc_casted($this->database->result);
 		if ($rs !== false) {
 			$this->data = $rs;
 		}
@@ -108,9 +175,10 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY " .$q.implode($q.', '.$q, $orders).$q.($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
+			($order != '' ? " ORDER BY " . $q . implode($q . ', ' . $q, $orders) . $q . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->write('mysql find_where sql: ' . $sql);
 		$this->database->execSQL($sql);
 		$result = array();
 		while ($this->data = $this->database->result->fetch_assoc()) {
@@ -149,6 +217,62 @@ class MyObject {
 		return $results;
 	}
 
+	function mysqli_fetch_assoc_casted($result) {
+		$fields = mysqli_fetch_fields($result);
+		$types = array();
+		foreach ($fields as $field) {
+			switch ($field->type) {
+				case MYSQLI_TYPE_DECIMAL:
+				case MYSQLI_TYPE_NEWDECIMAL:
+				case MYSQLI_TYPE_FLOAT:
+				case MYSQLI_TYPE_DOUBLE:
+					$types[$field->name] = 'float';
+					break;
+				case MYSQLI_TYPE_BIT:
+					$types[$field->name] = 'boolean';
+					break;
+				case MYSQLI_TYPE_TINY:
+				case MYSQLI_TYPE_SHORT:
+				case MYSQLI_TYPE_LONG:
+				case MYSQLI_TYPE_LONGLONG:
+				case MYSQLI_TYPE_INT24:
+				case MYSQLI_TYPE_YEAR:
+				case MYSQLI_TYPE_ENUM:
+					$types[$field->name] = 'int';
+					break;
+				case MYSQLI_TYPE_TIMESTAMP:
+				case MYSQLI_TYPE_DATE:
+				case MYSQLI_TYPE_TIME:
+				case MYSQLI_TYPE_DATETIME:
+				case MYSQLI_TYPE_NEWDATE:
+				case MYSQLI_TYPE_INTERVAL:
+				case MYSQLI_TYPE_SET:
+				case MYSQLI_TYPE_VAR_STRING:
+				case MYSQLI_TYPE_STRING:
+				case MYSQLI_TYPE_CHAR:
+				case MYSQLI_TYPE_GEOMETRY:
+					$types[$field->name] = 'string';
+					break;
+				case MYSQLI_TYPE_TINY_BLOB:
+				case MYSQLI_TYPE_MEDIUM_BLOB:
+				case MYSQLI_TYPE_LONG_BLOB:
+				case MYSQLI_TYPE_BLOB:
+					$types[$field->name] = 'string';
+					break;
+				default:
+					$types[$field->name] = 'string';
+			}
+			$this->debug->show('Cast attribute: ' . $field->name . ' (' . $field->type . ':' . $this->field_types[$field->type] . ' => ' . $types[$field->name] . ')', MyObject::$write_debug);
+		}
+		$rs = mysqli_fetch_assoc($result);
+		foreach ($types as $name => $type) {
+			if (gettype($rs[$name]) != 'NULL') {
+				settype($rs[$name], $type);
+			}
+		}
+		return $rs;
+	}
+
 	function exists($key) {
 		$types = $this->getTypesFromColumns();
 
@@ -165,6 +289,10 @@ class MyObject {
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		return $this->database->result->num_rows > 0;
+	}
+
+	function get_id() {
+		return $this->get($this->identifier);
 	}
 
 	function getAttributes() {
@@ -208,11 +336,11 @@ class MyObject {
 
 	function setKeysFromFormvars($formvars) {
 		$this->debug->show('setKeysFromFormvars', MyObject::$write_debug);
-		$this->data = array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable())));
+		$this->data = array_map(function($attribute) { return null; }, array_flip(array_intersect(array_keys($formvars), array_map(function($attribute) { return $attribute['Field']; }, $this->getColumnsFromTable()))));
 	}
 
 	function getColumnsFromTable() {
-		#$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
+		$this->debug->show('getColumnsFromTable', MyObject::$write_debug);
 		$this->columns = array();
 		$sql = "
 			SHOW COLUMNS
@@ -245,9 +373,10 @@ class MyObject {
 	* @return string The expression representing true or false in a sql statement
 	*/
 	function get_identifier_expression() {
-		#echo '<br>Class MyObject Method get_identifier_expression';
+		$this->debug->show('<br>Class MyObject Method get_identifier_expression', MyObject::$write_debug);
 		$where = array();
 		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
+			$this->debug->show('<br>identifier: ' . print_r($this->identifier, true), MyObject::$write_debug);
 			$where = array_map(
 				function($id) {
 					$quote = ($id['type'] == 'text' ? "'" : "");
@@ -287,16 +416,17 @@ class MyObject {
 		return array_values($this->data);
 	}
 
-	function getKVP($options = array('escaped' => false)) {
+	function getKVP($options = array('escaped' => false), $data = array()) {
 		#$this->debug->show('getKVP', MyObject::$write_debug);
+		$data = (count($data) > 0 ? $data : $this->data);
 		$types = $this->getTypesFromColumns();
 		$kvp = array();
-		if (is_array($this->data)) {
-			foreach ($this->data AS $key => $value) {
+		if (is_array($data)) {
+			foreach ($data AS $key => $value) {
 				if ($options['escaped']) {
 					$value = str_replace("'", "''", $value);
 				}
-				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
+				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false OR stripos($types[$key], 'time') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
@@ -308,6 +438,10 @@ class MyObject {
 
 	function set($attribute, $value) {
 		$this->data[$attribute] = $value;
+	}
+	
+	function print_data() {
+		echo '<br>data: ' . print_r($this->data, true);
 	}
 
 	function create($data = array()) {
@@ -326,7 +460,7 @@ class MyObject {
 					", ",
 					array_map(
 						function ($value) {
-							if ($value === NULL OR $value == '' AND $value != 0) {
+							if ($value === NULL OR $value == '' AND $value !== 0) {
 								$v = 'NULL';
 							}
 							else if (is_numeric($value)) {
@@ -358,7 +492,8 @@ class MyObject {
 		else {
 			$results[] = array(
 				'success' => false,
-				'msg' => $this->database->errormessage
+				'msg' => $this->database->errormessage,
+				'err_msg' => $this->database->errormessage
 			);
 		}
 
@@ -413,16 +548,18 @@ class MyObject {
 		return $result;
 	}
 
-	function update($data = array()) {
+	function update($data = array(), $update_all_attributes = true) {
 		$results = array();
 		if (!empty($data)) {
+			$this->debug->show('Merge this->data: ' . print_r($this->data, true) . ' mit data: ' . print_r($data, true), MyObject::$write_debug);
 			$this->data = array_merge($this->data, $data);
 		}
+		$data = (count($data) > 0 ? $data : $this->data);
 		$sql = "
 			UPDATE
 				`" . $this->tableName . "`
 			SET
-				" . implode(', ', $this->getKVP(array('escaped' => true))) . "
+				" . implode(', ', $this->getKVP(array('escaped' => true), $data)) . "
 			WHERE
 				" . $this->get_identifier_expression() . "
 		";
@@ -431,13 +568,13 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => $err_msg . ' Aufgetreten bei SQL: ' . $sql
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}
 
 	function delete() {
-		#echo '<br>Class MyObject Method delete';
 		$sql = "
 			DELETE
 			FROM
@@ -447,7 +584,12 @@ class MyObject {
 		";
 		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
 		$result = $this->database->execSQL($sql);
-		return $result;
+		$err_msg = $this->database->errormessage;
+		$results[] = array(
+			'success' => ($err_msg == ''),
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+		);
+		return $results;
 	}
 
 	function reset_auto_increment() {
@@ -461,12 +603,21 @@ class MyObject {
 
 	public function validate($on = '') {
 		$results = array();
-		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+		foreach ($this->validations AS $key => $validation) {
+			$result = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+			$this->validations[$key]['validated'] = true;
+			if (empty($result)) {
+				$this->validations[$key]['valid'] = true;
+			}
+			else {
+				$this->validations[$key]['valid'] = false;
+				$this->validations[$key]['result'] = $result['msg'];
+			}
+			$results[] = $result;
 		}
 
 		$messages = array();
-		foreach($results AS $result) {
+		foreach ($results AS $result) {
 			if (!empty($result)) {
 				$messages[] = $result;
 			}
@@ -475,39 +626,55 @@ class MyObject {
 	}
 
 	public function validates($key, $condition, $msg = '', $option = '', $on = '') {
-		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . $option, MyObject::$write_debug);
+		$this->debug->show('MyObject validates key: ' . $key . ' condition: ' . $condition . ' msg: ' . $msg . ' option: ' . print_r($option, true), MyObject::$write_debug);
 		switch ($condition) {
 
-			case 'presence' :
-				$result = $this->validate_presence($key, $msg);
-				break;
-
-			case 'pending_value' :
-				$result = $this->validate_pending_value($key, $option, $msg);
-				break;
-
-			case 'not_null' :
-				$result = $this->validate_not_null($key, $msg);
-				break;
-
-			case 'presence_one_of' :
-				$result = $this->validate_presence_one_of($key, $msg);
-				break;
-
-			case 'validate_value_is_one_off' :
-				$result = $this->validate_value_is_one_off($key, $option, $msg);
+			case 'date' :
+				$result = $this->validate_date($key, $msg);
 				break;
 
 			case 'format' :
 				$result = $this->validate_format($key, $msg, $option);
 				break;
 
+			case 'greater_or_equal' :
+				$result = $this->validate_greater_or_equal($key, $msg, $option);
+				break;
+
+			case 'not_null' :
+				$result = $this->validate_not_null($key, $msg);
+				break;
+
+			case 'pending_value' :
+				$result = $this->validate_pending_value($key, $option, $msg);
+				break;
+
+			case 'presence' :
+				$result = $this->validate_presence($key, $msg);
+				break;
+
+			case 'presence_one_of' :
+				$result = $this->validate_presence_one_of($key, $msg);
+				break;
+
 			case 'unique' :
 				$result = ($this->get($key) == '' ? '' : $this->validate_unique($key, $msg, $option, $on));
 				break;
+
+			case 'validate_value_is_one_off' :
+				$result = $this->validate_value_is_one_off($key, $option, $msg);
+				break;
 		}
 		$this->debug->show('MyObject validates result: ' . print_r($result, true), MyObject::$write_debug);
-		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result));
+		return (empty($result) ? '' : array('type' => 'error', 'msg' => $result, 'attribute' => $key, 'condition' => $condition, 'option' => $option));
+	}
+
+	function validate_greater_or_equal($key, $msg, $option) {
+		$this->debug->show('MyObject validate if ' . $key . ' = ' . $this->get($key) . ' is grater than ' . $option['other_key'] . '=' . $this->data[$option['other_key']], MyObject::$write_debug);
+		if ($this->get($key) >= $this->get($option['other_key'])) {
+			return '';
+		}
+		return $msg;
 	}
 
 	function validate_presence($key, $msg = '') {
@@ -536,7 +703,9 @@ class MyObject {
 	}
 
 	function validate_not_null($key, $msg = '') {
-		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		if ($msg == '') {
+			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		}
 
 		return ($this->get($key) != '' ? '' : $msg);
 	}
@@ -587,7 +756,17 @@ class MyObject {
 		return ($invalid_msg == '' ? '' : $msg . '<br>' . $invalid_msg);
 	}
 
-	function validate_date($key, $format) {
+	function validate_date($key, $msg) {
+		if ($this->get('key') != '') {
+			$date_arr = explode('-', $this->get($key));
+			if (!checkdate($date_arr[1], $date_arr[2], $date_arr[0])) {
+				return $msg;
+			}
+		}
+		return '';
+	}
+
+	function validate_date_format($key, $format) {
 		$invalid_msg = array();
 		DateTime::createFromFormat($format, $this->get($key));
 		$last_errors = DateTime::getLastErrors();
@@ -602,14 +781,23 @@ class MyObject {
 	}
 
 	function as_form_html() {
+		$attributes_html = array_map(
+			function ($attribute) {
+				return $attribute->as_form_html();
+			},
+			$this->getAttributes()
+		);
+
+		if (!empty($this->has_many) AND is_array($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				array_push($attributes_html, $many_attribut->as_form_html());
+			}
+		}
+
 		$html = implode(
 			"<div class=\"clear\"></div>",
-			array_map(
-				function ($attribute) {
-					return $attribute->as_form_html();
-				},
-				$this->getAttributes()
-			)
+			$attributes_html
 		);
 		return $html;
 	}

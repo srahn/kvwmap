@@ -7,6 +7,15 @@ class LayerGroup extends MyObject {
 	static $identifier = 'id';
 
 	function __construct($gui) {
+		$this->has_many = array(
+			"layers" => array(
+				"alias" => 'Layer',
+				"table" => 'layer',
+				"vorschau" => 'Name',
+				"pk" => 'Layer_ID',
+				"fk" => 'Gruppe'
+			)
+		);
 		parent::__construct($gui, 'u_groups');
 		$this->validations = array(
 			array(
@@ -19,8 +28,10 @@ class LayerGroup extends MyObject {
 	}
 
 	public static	function find_by_id($gui, $id) {
-		$group = new LayerGroup($gui);
-		return $group->find_by(LayerGroup::$identifier, $id);
+		$lg = new LayerGroup($gui);
+		$group = $lg->find_by(LayerGroup::$identifier, $id);
+		$group->layers = $group->get_Layer();
+		return $group;
 	}
 
 	public static	function find($gui, $where, $order) {

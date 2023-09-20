@@ -81,28 +81,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-	
-	function toggle_image_select(id) {
-		var image_select = document.getElementById('image_select_' + id);
-    if (image_select.classList.contains('active')) {
-        image_select.classList.remove('active');
-     } else {
-			 image_select.classList.add('active');
-     }
-	}
-	
-	function image_select(option) {
-		var image_select = option.closest('.image-select');
-		var field = image_select.querySelector('input');
-		field.value = option.dataset.value;
-		image_select.querySelector('.placeholder img').src = option.querySelector('img').src;
-		image_select.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
-		if (field.onchange) {
-			field.onchange();
-		}
-		toggle_image_select(field.id);
-	}
-	
+		
 	toggle_group = function(id){
 		var group = document.getElementById('group'+id);
 		var group_img = document.getElementById('group_img'+id);
@@ -257,7 +236,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			[].forEach.call(gap_elements, function (gap_element){
 				gap_element.colSpan=1;		// Leerspalte zwischen den Gruppen verkleinern
 			});
-			group.colSpan=group.dataset.colspan;
+			group.colSpan=group.dataset.origcolspan;
 			img.src='graphics/minus.gif';
 		}
 	}
@@ -283,39 +262,41 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		values = new Array();
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
-			value = elements[i].value;
-			name = elements[i].name;
-			type = elements[i].type;
-			if(name.slice(-4) != '_alt'){
-				if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
-					if (value != '') {
-						value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
-					}
-					else {
-						old_file_path = document.getElementsByName(name+'_alt');
-						if (old_file_path[0] != undefined) {
-							value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
-						}
-					}
-				}
-				if (!is_array) { // Datentyp
-					if (value == '') {
-						value = 'null';
-					}
-					else {
-						if (value.substring(0,1) != '{') {
-							value = '"' + value + '"';
-						}
-					}
-					id_parts = elements[i].id.split('_');
-					if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
-					else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
-					values.push('"' + attribute_name + '":' + value);
-				}
-				else {
-					if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+			if (elements[i].classList[0] == id)	{
+				value = elements[i].value;
+				name = elements[i].name;
+				type = elements[i].type;
+				if(name.slice(-4) != '_alt'){
+					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
-							values.push(value);
+							value = 'file:' + name; // wenn value vorhanden, wurde eine Datei ausgewählt, dann den Namen des Input-Feldes einsammeln + einem Prefix "file:"
+						}
+						else {
+							old_file_path = document.getElementsByName(name+'_alt');
+							if (old_file_path[0] != undefined) {
+								value = old_file_path[0].value; // ansonsten den gespeicherten alten Dateipfad
+							}
+						}
+					}
+					if (!is_array) { // Datentyp
+						if (value == '') {
+							value = 'null';
+						}
+						else {
+							if (['{', '['].indexOf(value.substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
+								value = '"' + value + '"';
+							}
+						}
+						id_parts = elements[i].id.split('_');
+						if(id_parts.length == 3)attribute_name = id_parts[1];		// normales Attribut
+						else attribute_name = id_parts.pop();										// Nutzerdatentyp-Attribut
+						values.push('"' + attribute_name + '":' + value);
+					}
+					else {
+						if (i > 0) { // Array (hier ist das erste Element ein Dummy -> auslassen)
+							if (value != '') {
+								values.push(value);
+							}
 						}
 					}
 				}
@@ -693,7 +674,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 					return;
 				}
   		}
-			if(form_fields[i].type != 'checkbox' || form_fields[i].checked){			
+			if (['checkbox', 'radio'].indexOf(form_fields[i].type) == -1 || form_fields[i].checked) {
 				if(form_fields[i].type == 'file' && form_fields[i].files[0] != undefined)value = form_fields[i].files[0];
 				else value = form_fields[i].value;
 				formData.append(form_fields[i].name, value);

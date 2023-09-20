@@ -77,31 +77,33 @@ INSERT INTO `u_funktionen` (`id`, `bezeichnung`, `link`) VALUES
 (20, 'Nachweise_bearbeiten', NULL),
 (22, 'Kolibristart', NULL),
 (23, 'Administratorfunktionen', NULL),
-(24, 'Stelle_waehlen', NULL);
+(24, 'Stelle_waehlen', NULL),
+(25, 'show_snippet', NULL);
 
 ####################################################################################
 # Eintragen von Berechtigungen für einen Administrator zum Ausführen von Funktionen
 ####################################################################################
 # 2006-05-12
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (5,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (6,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (7,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (8,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23,@stelle_id);
-INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24,@stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (2, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (3, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (4, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (5, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (6, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (7, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (8, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (9, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (10, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (11, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (12, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (14, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (17, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (18, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (19, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (20, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (22, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (23, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (24, @stelle_id);
+INSERT INTO `u_funktion2stelle` (`funktion_id`,`stelle_id`) VALUES (25, @stelle_id);
 
 ###########################
 # Einträge der Menüpunkte #
@@ -425,7 +427,7 @@ INSERT INTO `u_groups` (`id`, `Gruppenname`, `Gruppenname_english`, `order`) VAL
 INSERT INTO `u_groups` (`id`, `Gruppenname`, `Gruppenname_english`, `order`) VALUES (9, 'Administration', 'Administration', 100);
 
 # einen ersten WMS Layer anlegen
-INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `metalink`) VALUES('ORKa-MV (OSM)', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', 3, 'pixels', '25833', '', '0', NULL, NULL, NULL, NULL, '', 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '1.3.0', 'WMS der offenen Regionalkarte Mecklenburg-Vorpommern (ORKa.MV)', 'Auf Basis von Katasterdaten und OpenStreetMap-Daten', 'Hanse- und Universitätsstadt Rostock', 'presse@rostock.de', '+49 381 381-1417', 'https://www.orka-mv.de');
+INSERT INTO layer (`Name`, `alias`, `Datentyp`, `Gruppe`, `pfad`, `maintable`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, `wms_auth_username`, `wms_auth_password`, `wfs_geom`, `selectiontype`, `querymap`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `metalink`) VALUES('ORKa-MV (OSM)', '', '3', '1', NULL, NULL, NULL, NULL, NULL, '', '', '', '', NULL, NULL, '', 'http://www.orka-mv.de/geodienste/orkamv/wms?VERSION=1.1.1&LAYERS=orkamv&STYLES=&FORMAT=image/jpeg', '', 7, '', 3, 'pixels', '25833', '', '0', NULL, 0, NULL, NULL, '', 'EPSG:25833', 'stadtplan', '1.1.1', 'image/png', 60, '', '', '', 'radio', '0', '1.3.0', 'WMS der offenen Regionalkarte Mecklenburg-Vorpommern (ORKa.MV)', 'Auf Basis von Katasterdaten und OpenStreetMap-Daten', 'Hanse- und Universitätsstadt Rostock', 'presse@rostock.de', '+49 381 381-1417', 'https://www.orka-mv.de');
 INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `Filter` , `template` , `header` , `footer` , `symbolscale`, `privileg` )VALUES ('1', '1', '0', '', '', '', '' , NULL, NULL,'' , NULL , NULL , NULL, '0');
 INSERT IGNORE INTO u_groups2rolle SELECT DISTINCT 1, 1, u_groups.id, 1 FROM (SELECT @id AS id, @id := IF(@id IS NOT NULL, (SELECT obergruppe FROM u_groups WHERE id = @id), NULL) AS obergruppe FROM u_groups, (SELECT @id := (SELECT Gruppe FROM layer where layer.Layer_ID = 1)) AS vars WHERE @id IS NOT NULL	 ) AS dat	JOIN u_groups ON dat.id = u_groups.id;
 INSERT IGNORE INTO u_rolle2used_layer (
@@ -455,8 +457,8 @@ INSERT INTO `druckrahmen2stelle` (`stelle_id`, `druckrahmen_id`) VALUES (@stelle
 # Insert default cron_jobs
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
 (1, 'Leere tmp Verzeichnis', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
-(2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root');
-
+(2, 'Update Let\'s Encrypt Certificate', 'Führt regelmäßig certbot-auto renew zur Aktualisierung des https Zertifikates aus.', '0 0,12 * * *', '', 'python -c \'import random; import time; time.sleep(random.random() * 3600)\' && rm -rf /etc/apt/sources.list.d/* || true && /usr/local/certbot-auto renew -q', NULL, 0, 0, 1, '', 'root'),
+(3, 'wms_checker', 'Ruft das Script tools/wms_checker.php alle 10 min auf.', '10 * * * *', '', 'cd /var/www/apps/kvwmap/tools/; php /var/www/apps/kvwmap/tools/wms_checker.php > /var/www/logs/wms_checker.html 2> /var/www/logs/wms_checker.log', NULL, 0, 0, 1, '', 'gisadmin');
 
 INSERT INTO `colors` (`id`, `name`, `red`, `green`, `blue`) VALUES
 (1, NULL, 166, 206, 227),
@@ -527,7 +529,6 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 ('COORD_ZOOM_SCALE', '', '50000', 'Maßstab ab dem bei einem Koordinatensprung auch gezoomt wird\r\n', 'numeric', 'Administration', '', 1, 2),
 ('ZOOMBUFFER', '', '100', 'Puffer in der Einheit (ZOOMUNIT) der beim Zoom auf ein Objekt hinzugegeben wird\r\n', 'numeric', 'Administration', '', 1, 2),
 ('ZOOMUNIT', '', 'meter', 'Einheit des Puffer der beim Zoom auf ein Objekt hinzugegeben wird\r\n\'meter\' oder \'scale\'\r\n', 'string', 'Administration', '', 1, 2),
-('DELETE_ROLLENLAYER', '', 'true', 'Legt fest, ob die Rollenlayer beim Login eines Nutzers gelöscht werden sollen   # Version 1.6.5\r\n', 'boolean', 'Administration', '', 1, 2),
 ('SHOW_MAP_IMAGE', '', 'true', 'Definiert, ob das aktuelle Kartenbild separat angezeigt werden darf oder nicht\r\n', 'boolean', 'Administration', '', 1, 2),
 ('kvwmap_plugins', '', '[\r\n]', '', 'array', 'Administration', '', 1, 2),
 ('INFO1', '', 'Prüfen Sie ob Ihr Datenbankmodell aktuell ist.', 'Festlegung von Fehlermeldungen und Hinweisen\r\n', 'string', 'Administration', '', 1, 2),
@@ -546,8 +547,8 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 ('THIRDPARTY_PATH', '', '../3rdparty/', '3rdparty Pfad\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('FONTAWESOME_PATH', 'THIRDPARTY_PATH', 'font-awesome-4.6.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('JQUERY_PATH', 'THIRDPARTY_PATH', 'jQuery-3.6.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
-('BOOTSTRAP_PATH', 'THIRDPARTY_PATH', 'bootstrap-3.3.6/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
-('BOOTSTRAPTABLE_PATH', 'THIRDPARTY_PATH', 'bootstrap-table-1.11.0/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
+('BOOTSTRAP_PATH', 'THIRDPARTY_PATH', 'bootstrap-4.6.1/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
+('BOOTSTRAPTABLE_PATH', 'THIRDPARTY_PATH', 'bootstrap-table-1.20.2/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('PROJ4JS_PATH', 'THIRDPARTY_PATH', 'proj4js-2.4.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('POSTGRESBINPATH', '', '/usr/lib/postgresql/9.6/bin/', 'Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 ('OGR_BINPATH', '', '/usr/bin/', 'Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),

@@ -2,21 +2,21 @@
 #####################################
 /* class_stelle
 * functions
-*	stelle($id, $database)
-* getsubmenues($id)
-* getName()
-* readDefaultValues()
-* checkClientIpIsOn()
-* Löschen()
-* deleteMenue(text)
-* deleteLayer($layer, $pgdatabase)
-* deleteDruckrahmen()
-* deleteStelleGemeinden()
-* deleteFunktionen()
-* getstellendaten()
-* NeueStelleAnlegen($stellendaten)
-* Aendern($stellendaten)
-* getStellen($order)
+*		stelle($id, $database)
+*		getsubmenues($id)
+*		getName()
+*		readDefaultValues()
+*		checkClientIpIsOn()
+*		Löschen()
+*		deleteMenue(text)
+*		deleteLayer($layer, $pgdatabase)
+*		deleteDruckrahmen()
+*		deleteStelleGemeinden()
+*		deleteFunktionen()
+*		getstellendaten()
+*		NeueStelleAnlegen($stellendaten)
+*		Aendern($stellendaten)
+*		getStellen($order)
 */
 class stelle {
 	var $id;
@@ -28,6 +28,7 @@ class stelle {
 	var $pixsize;
 	var $selectedButton;
 	var $database;
+	var $data;
 
 	function __construct($id, $database) {
 		global $debug;
@@ -39,7 +40,15 @@ class stelle {
 		$ret = $this->readDefaultValues();
 	}
 
-	function getsubmenues($id){
+	function get($attribute) {
+		return $this->data[$attribute];
+	}
+
+	function set($attribute, $value) {
+		$this->data[$attribute] = $value;
+	}
+
+	function getsubmenues($id) {
 		global $language;
 		$sql ='SELECT menue_id,';
 		if ($language != 'german') {
@@ -129,15 +138,48 @@ class stelle {
 				$name_column . ",
 				`start`,
 				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`ows_namespace`,
 				`ows_title`,
 				`wms_accessconstraints`,
 				`ows_abstract`,
+				`ows_updatesequence`,
+				`ows_geographicdescription`,
+				`ows_fees`,
+				`ows_srs`,
+
 				`ows_contactorganization`,
+				`ows_contactaddress`,
+				`ows_contactpostalcode`,
+				`ows_contactcity`,
+				`ows_contactadministrativearea`,
 				`ows_contactemailaddress`,
 				`ows_contactperson`,
 				`ows_contactposition`,
-				`ows_fees`,
-				`ows_srs`,
+				`ows_contactvoicephone`,
+				`ows_contactfacsimile`,
+
+				`ows_distributionorganization`,
+				`ows_distributionaddress`,
+				`ows_distributionpostalcode`,
+				`ows_distributioncity`,
+				`ows_distributionadministrativearea`,
+				`ows_distributionemailaddress`,
+				`ows_distributionperson`,
+				`ows_distributionposition`,
+				`ows_distributionvoicephone`,
+				`ows_distributionfacsimile`,
+
+				`ows_contentorganization`,
+				`ows_contentaddress`,
+				`ows_contentpostalcode`,
+				`ows_contentcity`,
+				`ows_contentadministrativearea`,
+				`ows_contentemailaddress`,
+				`ows_contentperson`,
+				`ows_contentposition`,
+				`ows_contentvoicephone`,
+				`ows_contentfacsimile`,
+
 				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`
 			FROM
 				stelle s
@@ -151,7 +193,8 @@ class stelle {
 			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->Bezeichnung=$rs['Bezeichnung'];
+		$this->data = $rs;
+		$this->Bezeichnung = $rs['Bezeichnung'];
 		$this->MaxGeorefExt = ms_newRectObj();
 		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
@@ -159,13 +202,46 @@ class stelle {
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
-		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->ows_contactorganization = $rs['ows_contactorganization'];
-		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
-		$this->ows_contactperson = $rs['ows_contactperson'];
-		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_namespace = $rs['ows_namespace'];
+		$this->ows_updatesequence = $rs['ows_updatesequence'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
 		$this->ows_srs = $rs['ows_srs'];
+
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactaddress = $rs['ows_contactaddress'];
+		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
+		$this->ows_contactcity = $rs['ows_contactcity'];
+		$this->ows_contactadministrativearea = $rs['ows_contactadministrativearea'];
+		$this->ows_contactemailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
+
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
+		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
+		$this->ows_distributioncity = $rs['ows_distributioncity'];
+		$this->ows_distributionadministrativearea = $rs['ows_distributionadministrativearea'];
+		$this->ows_distributionemailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
+		$this->ows_distributionvoicephone = $rs['ows_distributionvoicephone'];
+		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
+
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contentaddress = $rs['ows_contentaddress'];
+		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
+		$this->ows_contentcity = $rs['ows_contentcity'];
+		$this->ows_contentadministrativearea = $rs['ows_contentadministrativearea'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_contentvoicephone = $rs['ows_contentvoicephone'];
+		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
+
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
@@ -197,13 +273,16 @@ class stelle {
     }
     return 0;
   }
-	
-	function Löschen() {
-		$sql ='DELETE FROM stelle';
-		$sql.=' WHERE ID = '.$this->id;
-		$ret=$this->database->execSQL($sql,4, 0);
+
+	function delete() {
+		$sql = "
+			DELETE FROM stelle
+			WHERE
+				ID = " . $this->id . "
+		";
+		$ret=$this->database->execSQL($sql, 4, 0);
 		if ($ret[0]) {
-			$ret[1].='<br>Die Stelle konnte nicht gelöscht werden.<br>'.$ret[1];
+			$ret[1] .= '<br>Die Stelle konnte nicht gelöscht werden.<br>' . $ret[1];
 		}
 		return $ret;
 	}
@@ -338,6 +417,7 @@ class stelle {
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$rs = $this->database->result->fetch_array();
+		$this->data = $rs;
 		return $rs;
 	}
 
@@ -1440,7 +1520,7 @@ class stelle {
 										ul.Layer_ID = l.Layer_ID AND
 										locate(
 											concat('$', p.key),
-											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 										) > 0
 									UNION
 									SELECT
@@ -1741,7 +1821,7 @@ class stelle {
 		}
 		if($user_id != NULL){
 			$sql .= ' UNION ';
-			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -Suchergebnis-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
+			$sql .= 'SELECT -id as Layer_ID, concat(`Name`, CASE WHEN Typ = "search" THEN " -eigene Abfrage-" ELSE " -eigener Import-" END), "", Gruppe, " ", `connection`, 1 FROM rollenlayer';
 			$sql .= ' WHERE stelle_id = '.$this->id.' AND user_id = '.$user_id.' AND connectiontype = 6';			
 			if($rollenlayer_type != NULL){
 				$sql .=' AND Typ = "'.$rollenlayer_type.'"';
@@ -2167,7 +2247,7 @@ class stelle {
 			ORDER BY 
 				user.ID = stelle.default_user_id desc, user.Name
 		";
-		#echo "<br>Sql: " . $sql;
+		#debug_write('Abfrage der Nutzer der Stelle mit getUser', $sql, 1);
 		$this->debug->write("<p>file:stelle.php class:stelle->getUser - Lesen der User zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -2175,9 +2255,9 @@ class stelle {
 		}
 		else{
 			while($rs=$this->database->result->fetch_array()) {
-				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
-				$user['email'][]=$rs['email'];
+				$user['ID'][] = $rs['ID'];
+				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['email'][] = $rs['email'];
 			}
 		}
 		if ($result == 'only_ids') {
@@ -2215,6 +2295,11 @@ class stelle {
 		}
 		#echo '<p>Stelle->get_mapfile returns mapfiles: ' . print_r($mapfiles, true);
 		return $mapfiles;
+	}
+
+	function is_gast_stelle() {
+		global $gast_stellen;
+		return (in_array($this->id, array_values($gast_stellen)) ? 'true' : 'false');
 	}
 }
 ?>

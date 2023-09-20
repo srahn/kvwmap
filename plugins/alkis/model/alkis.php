@@ -234,8 +234,8 @@ class ALKIS {
       $flst->readALB_Data($flurstkennz, true, 'ogc_fid');
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,0);
-			$emzges_222 = 0; $emzges_223 = 0;
-			$flaeche_222 = 0; $flaeche_223 = 0;
+			$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;			
+			
 			$limit = @count($flst->Klassifizierung)+2;
       for($kl = 0; $kl < $limit; $kl++){
 				if($kl == $limit-2){              
@@ -257,7 +257,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -299,14 +299,24 @@ class ALKIS {
 				if($wert != ''){
 					$csv .= '"';
 					$emz = round($flst->Klassifizierung[$kl]['flaeche'] * $wert / 100);
+
 					if($flst->Klassifizierung[$kl]['objart'] == 1000){
-						$emzges_222 = $emzges_222 + $emz;
-						$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$kl]['flaeche'];
+						$emzges_a = $emzges_a + $emz;
+						$flaeche_a = $flaeche_a + $flst->Klassifizierung[$kl]['flaeche'];
+					}
+					if($flst->Klassifizierung[$kl]['objart'] == 2000){
+						$emzges_agr = $emzges_agr + $emz;
+						$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$kl]['flaeche'];
 					}
 					if($flst->Klassifizierung[$kl]['objart'] == 3000){
-						$emzges_223 = $emzges_223 + $emz;
-						$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$kl]['flaeche'];
-					}					
+						$emzges_gr = $emzges_gr + $emz;
+						$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$kl]['flaeche'];
+					}
+					if($flst->Klassifizierung[$kl]['objart'] == 4000){
+						$emzges_gra = $emzges_gra + $emz;
+						$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$kl]['flaeche'];
+					}
+					
 					$csv .= $flst->Klassifizierung[$kl]['label'];
 					$csv .= '";';
 					$csv .= $flst->Klassifizierung[$kl]['flaeche'].';';
@@ -325,14 +335,22 @@ class ALKIS {
 				}
 				$csv .= ';';
 				if($kl == $limit-1){
-					if($emzges_222 > 0){
-						$BWZ_222 = round($emzges_222/$flaeche_222*100);
-						$csv .= ' Ackerland gesamt: EMZ '.$emzges_222.' , BWZ '.$BWZ_222." ";
+					if($emzges_a > 0){
+						$BWZ_a = round($emzges_a/$flaeche_a*100);
+						$csv .= ' Ackerland gesamt: EMZ '.$emzges_a.' , BWZ '.$BWZ_a." ";
 					}
-					if($emzges_223 > 0){
-						$BWZ_223 = round($emzges_223/$flaeche_223*100);
-						$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_223.' , BWZ '.$BWZ_223);
+					if($emzges_gr > 0){
+						$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+						$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr);
 					}
+					if($emzges_agr > 0){
+						$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+						$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr);
+					}
+					if($emzges_gra > 0){
+						$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+						$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra);
+					}					
 				}
 				$csv .= ';';
         	      
@@ -532,7 +550,7 @@ class ALKIS {
 							if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 							if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 							if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+							if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 							if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 							if($formvars['lagebezeichnung']){
@@ -570,20 +588,29 @@ class ALKIS {
 							}
 						if($formvars['klassifizierung']){
 							$csv .= '"';
-							$emzges_222 = 0; $emzges_223 = 0;
-							$flaeche_222 = 0; $flaeche_223 = 0;
+							$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;			
 							for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 								if($flst->Klassifizierung[$j]['flaeche'] != ''){
 									$wert=$flst->Klassifizierung[$j]['wert'];
 									$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+									
 									if($flst->Klassifizierung[$j]['objart'] == 1000){
-										$emzges_222 = $emzges_222 + $emz;
-										$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+										$emzges_a = $emzges_a + $emz;
+										$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									if($flst->Klassifizierung[$j]['objart'] == 2000){
+										$emzges_agr = $emzges_agr + $emz;
+										$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
 									}
 									if($flst->Klassifizierung[$j]['objart'] == 3000){
-										$emzges_223 = $emzges_223 + $emz;
-										$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+										$emzges_gr = $emzges_gr + $emz;
+										$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
 									}
+									if($flst->Klassifizierung[$j]['objart'] == 4000){
+										$emzges_gra = $emzges_gra + $emz;
+										$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+									}
+									
 									$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 									$csv .= $flst->Klassifizierung[$j]['label'];
 									$csv .= ' EMZ: '.$emz." \n";
@@ -593,14 +620,22 @@ class ALKIS {
 							if($nichtgeschaetzt > 0){
 								$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 							}
-							if($emzges_222 > 0){
-								$BWZ_222 = round($emzges_222/$flaeche_222*100);
-								$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+							if($emzges_a > 0){
+								$BWZ_a = round($emzges_a/$flaeche_a*100);
+								$csv .= ' Ackerland gesamt: EMZ '.$emzges_a.' , BWZ '.$BWZ_a." \n";
 							}
-							if($emzges_223 > 0){
-								$BWZ_223 = round($emzges_223/$flaeche_223*100);
-								$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+							if($emzges_gr > 0){
+								$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+								$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
 							}
+							if($emzges_agr > 0){
+								$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+								$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+							}
+							if($emzges_gra > 0){
+								$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+								$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+							}	
 							$csv .= '";';
 						}      
 							if($formvars['freitext']) {
@@ -782,7 +817,7 @@ class ALKIS {
 	      if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
 	      if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
 	      if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+	      if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 	      if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
 	      if($formvars['lagebezeichnung']){
@@ -820,20 +855,29 @@ class ALKIS {
 	      }
 			if($formvars['klassifizierung']){
 				$csv .= '"';
-				$emzges_222 = 0; $emzges_223 = 0;
-				$flaeche_222 = 0; $flaeche_223 = 0;
+				$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;
 				for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 					if($flst->Klassifizierung[$j]['flaeche'] != ''){
 						$wert=$flst->Klassifizierung[$j]['wert'];
 						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						
 						if($flst->Klassifizierung[$j]['objart'] == 1000){
-							$emzges_222 = $emzges_222 + $emz;
-							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+							$emzges_a = $emzges_a + $emz;
+							$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 2000){
+							$emzges_agr = $emzges_agr + $emz;
+							$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
 						}
 						if($flst->Klassifizierung[$j]['objart'] == 3000){
-							$emzges_223 = $emzges_223 + $emz;
-							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+							$emzges_gr = $emzges_gr + $emz;
+							$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
 						}
+						if($flst->Klassifizierung[$j]['objart'] == 4000){
+							$emzges_gra = $emzges_gra + $emz;
+							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+						}						
+						
 						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
@@ -843,13 +887,21 @@ class ALKIS {
 				if($nichtgeschaetzt > 0){
 					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 				}
-				if($emzges_222 > 0){
-					$BWZ_222 = round($emzges_222/$flaeche_222*100);
-					$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+				if($emzges_a > 0){
+					$BWZ_a = round($emzges_a/$flaeche_a*100);
+					$csv .= ' Ackerland gesamt: EMZ '.$emzges_a.' , BWZ '.$BWZ_a." \n";
 				}
-				if($emzges_223 > 0){
-					$BWZ_223 = round($emzges_223/$flaeche_223*100);
-					$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
+				if($emzges_gr > 0){
+					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+				}
+				if($emzges_agr > 0){
+					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+				}
+				if($emzges_gra > 0){
+					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
 				}
         $csv .= '";';
       }      
@@ -1039,7 +1091,7 @@ class ALKIS {
       if($formvars['forstschluessel']){ $csv .= '00'.$flst->Forstamt['schluessel'].';';}
       if($formvars['flaeche']){ $csv .= $flst->ALB_Flaeche.';';}
       if($formvars['amtsgerichtnr']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
-			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Amtsgerichte)) . ';';}
+			if($formvars['amtsgerichtname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Amtsgerichte)) . ';';}
 			if($formvars['grundbuchbezirkschl']){ $csv .= implode(",", array_map(function($e){return $e['schluessel'];},	$flst->Grundbuchbezirke)) . ';';}
 			if($formvars['grundbuchbezirkname']){ $csv .= implode(",", array_map(function($e){return $e['name'];},	$flst->Grundbuchbezirke)) . ';';}
       if($formvars['lagebezeichnung']){
@@ -1077,20 +1129,29 @@ class ALKIS {
       }
       if($formvars['klassifizierung']){
 				$csv .= '"';
-				$emzges_222 = 0; $emzges_223 = 0;
-				$flaeche_222 = 0; $flaeche_223 = 0;
+				$emzges_a = $flaeche_a = $emzges_agr = $flaeche_agr = $emzges_gr = $flaeche_gr = $emzges_gra = $flaeche_gra = 0;
 				for($j = 0; $j < @count($flst->Klassifizierung); $j++){
 					if($flst->Klassifizierung[$j]['flaeche'] != ''){
 						$wert=$flst->Klassifizierung[$j]['wert'];
 						$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
+						
 						if($flst->Klassifizierung[$j]['objart'] == 1000){
-							$emzges_222 = $emzges_222 + $emz;
-							$flaeche_222 = $flaeche_222 + $flst->Klassifizierung[$j]['flaeche'];
+							$emzges_a = $emzges_a + $emz;
+							$flaeche_a = $flaeche_a + $flst->Klassifizierung[$j]['flaeche'];
+						}
+						if($flst->Klassifizierung[$j]['objart'] == 2000){
+							$emzges_agr = $emzges_agr + $emz;
+							$flaeche_agr = $flaeche_agr + $flst->Klassifizierung[$j]['flaeche'];
 						}
 						if($flst->Klassifizierung[$j]['objart'] == 3000){
-							$emzges_223 = $emzges_223 + $emz;
-							$flaeche_223 = $flaeche_223 + $flst->Klassifizierung[$j]['flaeche'];
+							$emzges_gr = $emzges_gr + $emz;
+							$flaeche_gr = $flaeche_gr + $flst->Klassifizierung[$j]['flaeche'];
 						}
+						if($flst->Klassifizierung[$j]['objart'] == 4000){
+							$emzges_gra = $emzges_gra + $emz;
+							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
+						}						
+						
 						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
@@ -1100,14 +1161,22 @@ class ALKIS {
 				if($nichtgeschaetzt > 0){
 					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
 				}
-				if($emzges_222 > 0){
-					$BWZ_222 = round($emzges_222/$flaeche_222*100);
-					$csv .= 'Ackerland gesamt: EMZ '.$emzges_222.', BWZ '.$BWZ_222." \n";
+				if($emzges_a > 0){
+					$BWZ_a = round($emzges_a/$flaeche_a*100);
+					$csv .= ' Ackerland gesamt: EMZ '.$emzges_a.' , BWZ '.$BWZ_a." \n";
 				}
-				if($emzges_223 > 0){
-					$BWZ_223 = round($emzges_223/$flaeche_223*100);
-					$csv .= utf8_encode('Grünland gesamt: EMZ '.$emzges_223.', BWZ '.$BWZ_223." \n");
-				}      
+				if($emzges_gr > 0){
+					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
+					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+				}
+				if($emzges_agr > 0){
+					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
+					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+				}
+				if($emzges_gra > 0){
+					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
+					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+				}
         $csv .= '";';
       }      
       if($formvars['freitext']) {
@@ -1647,19 +1716,19 @@ class ALKIS {
 			}
 			if($emzges_a > 0){
 				$BWZ_a = round($emzges_a/$flaeche_a*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: EMZ '.$emzges_a.', BWZ '.$BWZ_a);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: ' . $flaeche_a . ' m², EMZ '.$emzges_a.', BWZ '.$BWZ_a);
 			}
 			if($emzges_gr > 0){
 				$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Grünland gesamt: EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Grünland gesamt: ' . $flaeche_gr . ' m², EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
 			}
 			if($emzges_agr > 0){
 				$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grünland gesamt: EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grünland gesamt: ' . $flaeche_agr . ' m², EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
 			}
 			if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$pdf->addText($col1,$row-=12,$fontSize, 'Grünland-Acker gesamt: EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
+					$pdf->addText($col1,$row-=12,$fontSize, 'Grünland-Acker gesamt: ' . $flaeche_gra . ' m², EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
 			}
 		}
 
@@ -1719,8 +1788,8 @@ class ALKIS {
 									$row = $row - 12;
 									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
-										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1751,8 +1820,8 @@ class ALKIS {
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
-										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1807,8 +1876,8 @@ class ALKIS {
 									$row = $row - 12;
 									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
-										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -1839,8 +1908,8 @@ class ALKIS {
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
-										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+										$positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+										$positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
 										if($positionkomma>$positionleerzeichen){
 											$positiontrenner=$positionkomma;
 										}
@@ -2034,8 +2103,8 @@ class ALKIS {
         if ($buchungen[0]['zusatz_eigentuemer'] != '') {
                 $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
                 while(strlen($zusatzeigentuemertext) > 60){
-                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+                  $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+                  $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
                   if($positionkomma>$positionleerzeichen){
                     $positiontrenner=$positionkomma;
                   }
@@ -2223,8 +2292,8 @@ class ALKIS {
 				if ($buchungen[0]['zusatz_eigentuemer'] != '') {
           $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
           while(strlen($zusatzeigentuemertext) > 60){
-            $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'),",",'utf8');
-            $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8')," ",'utf8');
+            $positionkomma=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), ",", 0, 'utf8');
+            $positionleerzeichen=mb_strrpos(mb_substr($zusatzeigentuemertext,0,60,'utf8'), " ", 0, 'utf8');
             if($positionkomma>$positionleerzeichen){
               $positiontrenner=$positionkomma;
             }

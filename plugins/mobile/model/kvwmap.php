@@ -81,7 +81,6 @@
 						$layer_id,
 						$GUI->Stelle->pgdbhost
 					);
-					$layerdb->setClientEncoding();
 					$attributes = $mapDB->read_layer_attributes(
 						$layer_id,
 						$layerdb,
@@ -382,9 +381,6 @@
 				created_at timestamp without time zone NOT NULL DEFAULT (now())::timestamp without time zone,
 				username character varying,
 				CONSTRAINT " . $layer->get('maintable') . "_deltas_pkey PRIMARY KEY (version)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			--

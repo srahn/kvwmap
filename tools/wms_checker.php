@@ -18,9 +18,9 @@ $credentials = '../credentials.php';		# Pfad zur credentials.php (von tools aus 
 $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
-define('DBWRITE',false);
+define('DBWRITE',true);
 
-/*
+/**
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
@@ -35,8 +35,10 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	}
 }
 
-/*
-* @params(string) $request ein getMap Request von dem der Status geprüft werden soll 
+/**
+ * checkStatus
+ * 
+* @param string $request ein getMap Request von dem der Status geprüft werden soll 
 * gibt einen array mit 2 elementen zurück das erste element ist entweder true
 *(abfrage war erfolgreich) oder false(d.h. abfrage war nicht erfolgreich) und das zweite
 * ist wenn der erste wert false ist eine kurze Info was falsch ist.
@@ -47,7 +49,7 @@ function checkStatus($request, $username, $password){
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_TIMEOUT,3);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 7);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -134,9 +136,10 @@ if ($without_layer_id != '') {
 }
 
 #echo '<br>get layer with sql: ' . $query;
-$result = $userDb->execSQL($query);
+$userDb->execSQL($query);
+$result = $userDb->result;
 
-while($line = $userDb->result->fetch_assoc()){
+while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
   }

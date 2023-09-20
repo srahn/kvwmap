@@ -395,12 +395,20 @@ if ($anzNamen>0) {
 						<div class="float_right"><input name="name2" type="text" value="<?php echo $this->formvars['name2']; ?>" tabindex="2"></div>
 					</div>
 				</div>
-				<div><div class="form_formular-aic">
-					<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
-					<span><?php echo $strExactSearch; ?></span>
-					<span data-tooltip="Name/Firma und Vorname:
+				<div>
+					<div class="form_formular-aic">
+						<input style="cursor: pointer;" type="checkbox" name="exakt" value="1" tabindex="3" <? if($this->formvars['exakt']) echo 'checked'; ?>>
+						<span><?php echo $strExactSearch; ?></span>
+						<span data-tooltip="Name/Firma und Vorname:
 Suche genau nach der Eingabe"></span>
-				</div></div>
+					</div>
+					<br>
+					<div class="form_formular-aic">
+						<input style="cursor: pointer;" type="checkbox" name="alleiniger_eigentuemer" value="1" tabindex="3" <? if($this->formvars['alleiniger_eigentuemer']) echo 'checked'; ?>>
+						<span>alleiniger Eigentümer</span>
+						<span data-tooltip="Die Person ist der einzige Eigentümer des Flurstücks."></span>
+					</div>
+				</div>				
 			</div>
 			<div class="form_formular-input form_formular-aic">
 				<div><?php echo $strName3; ?></div>
@@ -498,7 +506,7 @@ if ($anzNamen>0) {
 				<td class="menu"><a href="javascript:changeorder('bezirk');" title="nach <?php echo $strGbbezShort; ?> sortieren"><div><?php echo $strGbbezShort; ?></div><? if($this->formvars['order'] == 'bezirk')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('blatt');" title="nach <?php echo $strGbblShort; ?> sortieren"><div><?php echo $strGbblShort; ?></div><? if($this->formvars['order'] == 'blatt')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('nachnameoderfirma, vorname');" title="nach <?php echo $strName1Short; ?> sortieren"><div><?php echo $strName1Short; ?></div><? if($this->formvars['order'] == 'nachnameoderfirma, vorname')echo '<div class="nsf_sort"></div>'; ?></a></td>
-				<td class="menu"><a href="javascript:changeorder('geburtsname');" title="nach <?php echo $strName2Short; ?> sortieren"><div><?php echo $strName2Short; ?></div><? if($this->formvars['order'] == 'geburtsname')echo '<div class="nsf_sort"></div>'; ?></a></td>
+				<td class="menu"><a href="javascript:changeorder('geburtsdatum');" title="nach <?php echo $strName2Short; ?> sortieren"><div><?php echo $strName2Short; ?></div><? if($this->formvars['order'] == 'geburtsname')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('strasse,hausnummer');" title="nach <?php echo $strName3Short; ?> sortieren"><div><?php echo $strName3Short; ?></div><? if($this->formvars['order'] == 'strasse,hausnummer')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu"><a href="javascript:changeorder('postleitzahlpostzustellung, ort_post');" title="nach <?php echo $strName4Short; ?> sortieren"><div><?php echo $strName4Short; ?></div><? if($this->formvars['order'] == 'postleitzahlpostzustellung, ort_post')echo '<div class="nsf_sort"></div>'; ?></a></td>
 				<td class="menu" colspan="2"><span><?php echo $strFst; ?></span></td>
@@ -604,7 +612,7 @@ if ($anzNamen>0) {
 	</div>
 </div>
 <div id="nsf_grundbuch">
-	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');">'.$strCheckAll.'</a>'; ?></div>
+	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');">'.$strCheckAll.' (' . count($this->namen) . ')</a>'; ?></div>
 	<div><? echo '<a href="javascript:checkall(\'check_grundbuch\');"><img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0"></a>'; ?>&nbsp;<?php echo $strSelGbbl; ?>: <a href="javascript:send_selected_grundbuecher('Grundbuchblatt_Auswaehlen_Suchen');">anzeigen</a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Suche_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFst; ?></a>&nbsp;|&nbsp;<a href="javascript:send_selected_grundbuecher('Zeige_Flurstuecke_zu_Grundbuechern');"><?php echo $strShowFstInMap; ?></a></div>
 </div>
 <div id="nsf_offset">

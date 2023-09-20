@@ -174,22 +174,21 @@ else {
 				if not allready exists and only if it matches with the old md5 method.
 			*/
 			if (prepare_sha1(trim($GUI->database->mysqli->real_escape_string($GUI->formvars['login_name'])), trim($GUI->database->mysqli->real_escape_string($GUI->formvars['passwort'])))) {
-				$GUI->debug->write('prepare_sha1 ausgeführt.', 4, $GUI->echo);
 				if ($GUI->database->mysqli->affected_rows > 0) {
 					$GUI->debug->write('Passwort mit SHA1 Methode für login_name ' . $GUI->formvars['login_name'] . ' eingetragen.', 4, $GUI->echo);
 				}
-
-				# Frage den Nutzer mit dem login_namen und password ab
-				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database, $GUI->formvars['passwort']);
+				$GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
 				$GUI->debug->write('Nutzer mit login_name ' . $GUI->formvars['login_name'] . ' abgefragt.', 4, $GUI->echo);
 				if ($GUI->database->success) {
-					if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'])) {
+					if ($GUI->is_login_granted($GUI->user, $GUI->formvars['login_name'], $GUI->formvars['passwort'])) {
 						$GUI->debug->write('Nutzer mit id: ' . $GUI->user->id . ' gefunden. Setze Session.', 4, $GUI->echo);
 						set_session_vars($GUI->formvars);
-						$GUI->user->updateTokens($_SESSION['csrf_token']);
+						$GUI->user->update_tokens($_SESSION['csrf_token']);
 						$GUI->user->has_logged_in = true;
 						$GUI->debug->write('Anmeldung war erfolgreich, Benutzer wurde mit angegebenem Passwort gefunden.', 4, $GUI->echo);
-						Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
+						$nutzer = Nutzer::reset_num_login_failed($GUI, $GUI->formvars['login_name']);
+						$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = 0;
+						$GUI->user->login_locked_until 	= '';
 						if ($GUI->user->stelle_id == '') {
 							# Nutzer hat keine stellen_id
 							$GUI->user->Stellen = $GUI->user->getStellen(0);
@@ -199,11 +198,20 @@ else {
 							}
 						}
 					}
-					else { # Anmeldung ist fehlgeschlagen
-						$GUI->debug->write('Anmeldung ist fehlgeschlagen. ' . $GUI->login_failed_reason, 4, $GUI->echo);
+					else {
+						# Anmeldung ist fehlgeschlagen
+						$GUI->debug->write('Anmeldung ist fehlgeschlagen. Grund: ' . $GUI->login_failed_reason, 4, $GUI->echo);
 						if ($GUI->login_failed_reason == 'authentication') {
-							$GUI->formvars['num_failed'] = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
-							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+							$GUI->debug->write('Passwort passt nicht zum login_namen:', 4, $GUI->echo);
+							$nutzer = Nutzer::increase_num_login_failed($GUI, $GUI->formvars['login_name']);
+							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = $nutzer->get('num_login_failed');
+							$GUI->user->login_locked_until 	= $nutzer->get('login_locked_until');
+							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
+#							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+						}
+						if ($GUI->login_failed_reason == 'login_is_locked') {
+							$nutzer = Nutzer::find_by_login_name($GUI, $GUI->formvars['login_name']);
+							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
 						}
 						$show_login_form = true;
 						$go = 'login_failed';
@@ -256,7 +264,7 @@ else {
 							set_session_vars($GUI->formvars);
 							unset($GUI->formvars['Stelle_ID']);
 							unset($GUI->formvars['token']);
-							unset($GUI->fromvsrs['passwort']);
+							unset($GUI->fromvars['passwort']);
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
@@ -445,7 +453,6 @@ if (is_logged_in()) {
 else {
 	$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 }
-
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
 if ($show_login_form) {
 	$GUI->debug->write('Zeige Login-Form', 4, $GUI->echo);
@@ -524,23 +531,10 @@ else {
 		# Löschen der Rollenfilter
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
-		if(DELETE_ROLLENLAYER == 'true'){
-			$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search');
-	    for($i = 0; $i < count($rollenlayerset); $i++){
-	      $mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
-				$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
-	      # auch die Klassen und styles löschen
-				if($rollenlayerset[$i]['Class'] != ''){
-					foreach($rollenlayerset[$i]['Class'] as $class){
-						$mapdb->delete_Class($class['Class_ID']);
-						if($class['Style'] != ''){
-							foreach($class['Style'] as $style){
-								$mapdb->delete_Style($style['Style_ID']);
-							}
-						}
-					}
-				}
-	    }
+		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
+		for($i = 0; $i < @count($rollenlayerset); $i++){
+			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
+			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}
 		# Zurücksetzen des histtimestamps
 		if ($GUI->user->rolle->hist_timestamp_de != '') {
@@ -668,13 +662,8 @@ function get_permission_in_stelle($GUI) {
 	if (is_user_member_in_stelle($GUI->Stelle->id, $GUI->user->Stellen['ID'])) {
 		$GUI->debug->write('Nutzer gehört zur Stelle ' . $GUI->Stelle->id, 4, $GUI->echo);
 
-		if (is_password_expired($GUI->user, $GUI->Stelle)) {
-			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
-			$allowed = false;
-			$reason = 'password expired';
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten. Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
-		}
-		else {
+		$expiration_info = is_password_expired($GUI->user, $GUI->Stelle);
+		if ($expiration_info === 'not_expired') {
 			$GUI->debug->write('Passwort ist nicht abgelaufen.', 4, $GUI->echo);
 
 			if (CHECK_CLIENT_IP) {
@@ -691,6 +680,24 @@ function get_permission_in_stelle($GUI) {
 					}
 				}
 			}
+		}
+		else  {
+			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
+			$allowed = false;
+			$reason = 'password expired';
+			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
+			switch ($expiration_info) {
+				case 'password_age_expired' : {
+					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
+				} break;
+				case 'password_age_expired' : {
+					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
+				} break;
+				default : {
+					$errmsg .= 'abgelaufen.';
+				}
+			}
+			$errmsg .= ' Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
 		}
 	}
 	else {
@@ -720,13 +727,17 @@ function is_new_password_valid($msg) {
 }
 
 function is_password_expired($user, $stelle) {
-	$abgelaufen = false;
+	if ($user->password_expired) {
+		return 'password_expired';
+	}
 	if ($stelle->checkPasswordAge) {
 		$remainingDays = checkPasswordAge($user->password_setting_time, $stelle->allowedPasswordAge);
 		#echo '<br>Passwort setting time: ' . $user->password_setting_time . ' erlaubt iin Monat: ' . $stelle->allowedPasswordAge . ' Verbleibende Tage: ' . $remainingDays;
-		return ($remainingDays <= 0);
+		if ($remainingDays <= 0) {
+			return 'password_age_expired';
+		}
 	}
-	return $abgelaufen;
+	return 'not_expired';
 }
 
 function is_registration($formvars) {
@@ -855,13 +866,13 @@ function set_session_vars($formvars) {
 }
 
 /**
-	Here we switch from the old md5 to the new sha1 password encryption method.
-	The new password reside in the new attribut password (with d at the end)
-	This function set the password in attribut password with method sha1
-	when password match with md5 method in attribut passwort.
-	This function is to prepare the use of sha1 password encryption in kvwmap
-	If any user have been switched to the new sha1 method, this function and as well
-	the attribut passwort (with t at the end) will become useless and can be removed.
+*	Here we switch from the old md5 to the new sha1 password encryption method.
+*	The new password reside in the new attribut password (with d at the end)
+*	This function set the password in attribut password with method sha1
+*	when password match with md5 method in attribut passwort.
+*	This function is to prepare the use of sha1 password encryption in kvwmap
+*	If any user have been switched to the new sha1 method, this function and as well
+*	the attribut passwort (with t at the end) will become useless and can be removed.
 */
 function prepare_sha1($login_name, $password) {
 	global $GUI;

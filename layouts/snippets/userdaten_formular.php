@@ -1,6 +1,5 @@
 <?
- # 2008-01-12 pkvvm
-  include(LAYOUTPATH . 'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
 ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -57,14 +56,13 @@
 		message('<span style="font-size: larger;"><? echo $strInvitationConfirmation1; ?></span><br><br><? echo $strInvitationConfirmation2; ?>.<br><span style="color: red"><? echo $strInvitationConfirmation3; ?>!</span>', 1000, 2000, '', '<? echo $strInvitationConfirmation4; ?>');
 		$('<input>').attr({
 			type: 'hidden',
-			name: 'password_setting_time',
-			value: '<? echo date('Y-m-d', time() - (60 * 60 * 24 * 31 * ($this->user_stelle->allowedPasswordAge > 0 ? $this->user_stelle->allowedPasswordAge : 1))); ?>'
+			name: 'reset_password',
+			value: '1'
 		}).appendTo('#GUI');
 		$('#GUI input[name=password1]').prop('disabled', false).val(newPassword);
 		$('#GUI input[name=password2]').prop('disabled', false).val(newPassword);
 		document.GUI.changepasswd.value = 1;
 	}
-	
 </script>
 
 <style>
@@ -224,17 +222,23 @@
 				$passwordSettingUnixTime = strtotime($this->formvars['password_setting_time']);
 				if ($this->formvars['selected_user_id'] > 0) { ?>
 					<div class="udf_eingabe-time">
-						<span><? echo $strLastModPassword;?>:&nbsp;<? echo date('d.m.Y', $passwordSettingUnixTime); ?></span><?
-						if ($this->Stelle->checkPasswordAge) {
-							$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->Stelle->allowedPasswordAge); ?>
-							<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
-								if ($allowedPasswordAgeRemainDays < 0) {
-									echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
-								} else {
-									echo $strPasswordValid;?>&nbsp;(<? echo $allowedPasswordAgeRemainDays; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
-								}
-							} ?>
-						</span>
+						<span><? echo $strLastModPassword; ?>:&nbsp;<? echo date('d.m.Y', $passwordSettingUnixTime); ?></span><?
+						if ($this->formvars['password_expired']) { ?>
+							<span style="color: #f21515"><? echo $strPasswordExpired; ?></span><?
+						}
+						else {
+							if ($this->user_stelle->checkPasswordAge) {
+								$allowedPasswordAgeRemainDays = checkPasswordAge($this->formvars['password_setting_time'], $this->user_stelle->allowedPasswordAge); ?>
+								<span style="color: <? echo ($allowedPasswordAgeRemainDays < 0 ? '#f21515' : '#139513'); ?>"><?
+									if ($allowedPasswordAgeRemainDays < 0) {
+										echo $strPasswordExpired; ?>&nbsp;(<? echo $allowedPasswordAgeRemainDays * -1; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
+									}
+									else {
+										echo $strPasswordValid;?>&nbsp;(<? echo $allowedPasswordAgeRemainDays; ?>&nbsp;<? echo $strPasswordExpiredDays;?>)<?
+									} ?>
+								</span><?
+							}
+						} ?>
 					</div><?
 				} ?>
 				<div class="udf_eingabe-pw-input">
@@ -301,6 +305,11 @@
 			<div><? echo $strStop;?></div>
 			<div><input name="stop" type="text" value="<? echo $this->formvars['stop']; ?>"></div>
 		</div>
+		
+		<div class="form_formular-input form_formular-aic">
+			<div><? echo $strArchived;?></div>
+			<div><input name="archived" type="text" value="<? echo $this->formvars['archived']; ?>"></div>
+		</div>		
 
 		<div class="form_formular-input">
 			<div class="udf_eingabe-stelle-title"><? echo $strAuthorizeTask;?></div>
@@ -310,8 +319,10 @@
 						<td>
 							<select name="selectedstellen" style="height: auto;" size="5" multiple>
 								<? 
-								for ($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
-									echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+								if(isset($this->formvars['selstellen']["Bezeichnung"])) {
+									for ($i=0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+										echo '<option value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
+									}
 								}
 								?>
 							</select>
@@ -356,44 +367,57 @@
 						><?php echo $strLayerDataImportAllowedCheckboxText; ?>
 			</div>
 		</div>
-		
-		<?
-	if ($this->formvars['selected_user_id'] > 0) {
-		if (is_array($this->formvars['selstellen'])) {
-			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
-			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
-		} ?>
-		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strActiveSite;?></div>
-			<div>
-				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
-			</div>
-		</div>
-
-		<div class="form_formular-input">
-			<div><? echo $strActiveLayers;?></div>
-			<div class="udf_eingabe-layers">
-				<table><?	
-					for ($i = 0; $i < count($this->active_layers); $i++) { ?>
-						<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
-							<td>
-								<? echo $this->active_layers[$i]['alias']; ?>
-							</td>
-							<td>
-								<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
-							</td>
-						</tr><?
-					} ?>
-				</table>
-			</div>
-		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strChangeUser;?></div>
-			<div>
-				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+			<div><? echo $strAgreementAccepted; ?></div>
+			<div><input
+							name="agreement_accepted"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['agreement_accepted'] ? 'checked' : ''); ?>
+						><?php echo $strAgreementAcceptedText; ?>
+						<span data-tooltip="<?php echo $strAgreementAcceptedDescription; ?>"></span>
 			</div>
 		</div><?
+
+		if ($this->formvars['selected_user_id'] > 0) {
+			if (is_array($this->formvars['selstellen'])) {
+				$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
+				$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
+			} ?>
+			<div class="form_formular-input form_formular-aic">
+				<div><? echo $strActiveSite;?></div>
+				<div>
+					<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
+				</div>
+			</div>
+
+			<div class="form_formular-input">
+				<div><? echo $strActiveLayers;?></div>
+				<div class="udf_eingabe-layers">
+					<table><?	
+						if(isset($this->active_layers)) {
+							for ($i = 0; $i < count($this->active_layers); $i++) { ?>
+								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+									<td>
+										<? echo $this->active_layers[$i]['alias']; ?>
+									</td>
+									<td>
+										<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
+									</td>
+								</tr><?
+							}
+						}					?>
+					</table>
+				</div>
+			</div>
+
+			<div class="form_formular-input form_formular-aic">
+				<div><? echo $strChangeUser;?></div>
+				<div>
+					<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+				</div>
+			</div><?
 		} ?>
 	</div>
 </div>

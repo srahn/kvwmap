@@ -19,6 +19,7 @@
   $strInfoWithRadius="Informationsabfrage mit Suchradius";
   $strInfoInPolygon="Informationsabfrage im Polygon";
   $strRuler="Wegstrecke messen";
+	$strPunktfang = "Punktfang umschalten";
   $strFreePolygon="Polygon zeichnen";
   $strFreeArrow="Pfeil zeichnen";
   $strFreeText="Text Hinzufügen";
@@ -43,6 +44,6 @@
 	$strLegendTypeAlphabetical="Themen alphabetisch";
 	$strDrawingOrder="Zeichenreihenfolge anpassen";
 	$strRemoveAllImportLayers="alle eigenen Importe entfernen";
-	$strRemoveAllSearchLayers="alle Suchergebnislayer entfernen";
+	$strRemoveAllSearchLayers="alle eigenen Abfragen entfernen";
   
 ?>

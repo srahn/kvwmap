@@ -7,19 +7,29 @@
 
 function toggle_privileges(checkbox){
 	var fields = checkbox.closest('.apt-main-div').querySelectorAll('input[type=“checkbox”], select');
-	[].forEach.call(fields, function (field){		// DropZones groesser machen
+	[].forEach.call(fields, function (field){
     if (field != checkbox) {
 			field.disabled = checkbox.checked;
 		}
   });
 }
 
-function set_all(attribute_names, stelle, value){
+function set_all_for_stelle(attribute_names, stelle, value){
 	names = attribute_names.split('|');
 	for(i = 0; i < names.length; i++){
 		element = document.getElementsByName('privileg_'+names[i]+'_'+stelle);
 		element[0].value = value;
+		element[0].onchange();
 	}
+}
+
+function set_all_for_attribute(attribute){
+	var default_field = document.querySelector('.default_privileg_' + attribute);
+	var fields = document.querySelectorAll('.privileg_' + attribute);
+	[].forEach.call(fields, function (field){
+		field.value = default_field.value;
+		field.onchange();
+  });
 }
 
 function get_from_default(attribute_names, stellen){
@@ -40,7 +50,6 @@ function get_from_default(attribute_names, stellen){
 			for(i = 0; i < names.length; i++){
 				element1 = document.getElementsByName('privileg_'+names[i]+'_'+stelle[j]);
 				element2 = document.getElementsByName('privileg_'+names[i]+'_');
-				console.log(element2);
 				element1[0].value = element2[0].value;
 				tooltip1 = document.getElementsByName('tooltip_'+names[i]+'_'+stelle[j]);
 				tooltip2 = document.getElementsByName('tooltip_'+names[i]+'_');
@@ -65,6 +74,14 @@ function save(stelle, other_selected_layer_id) {
 	}
 	document.GUI.submit();
 }
+
+function toggle_unterstellen(){
+	var unterstellen = document.querySelectorAll('.unterstelle');
+	[].forEach.call(unterstellen, function (unterstelle){
+		unterstelle.classList.toggle('hidden');
+  });
+}
+
 </script>
 
 <style>
@@ -244,6 +261,9 @@ function save(stelle, other_selected_layer_id) {
 					></i>
 					&nbsp;
 					<span style="float: right; --left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
+					<div style="padding-right: 20px; float: right">
+						<input type="checkbox" name="unterstellen_ausblenden" <? echo ($this->formvars['unterstellen_ausblenden'] != ''? 'checked' : ''); ?> onclick="toggle_unterstellen();"> Unterstellen ausblenden
+					</div>
 				</div>
 			</div>
   	</td>

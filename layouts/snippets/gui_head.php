@@ -1,6 +1,6 @@
 <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
 <? include(WWWROOT . APPLVERSION . 'funktionen/gui_defs.php'); ?>
-<script type="text/javascript" src="funktionen/gui_functions.js?v=78"></script>
+<script type="text/javascript" src="funktionen/gui_functions.js?v=97"></script>
 <script type="text/javascript" src="funktionen/calendar.js"></script>
 <script type="text/javascript" src="funktionen/keyfunctions.js"></script>
 <script type="text/javascript" src="<? echo JQUERY_PATH; ?>jquery.min.js"></script><?
@@ -9,9 +9,13 @@ if (true) { ?>
 } ?>
 <link rel="stylesheet" href="<?php echo FONTAWESOME_PATH; ?>css/font-awesome.min.css" type="text/css">
 <link rel="shortcut icon" href="<? echo CUSTOM_PATH; ?>wappen/favicon.ico">
-<link rel="stylesheet" href="<?php echo $this->style . '?gui=' . $this->user->rolle->gui; ?>"><?
+<style>
+	<? include(WWWROOT . APPLVERSION . 'layouts/css/main.css.php'); ?>
+</style><?
 if (defined('CUSTOM_STYLE') AND CUSTOM_STYLE != '') { ?>
-	<link rel="stylesheet" href="<?php echo CUSTOM_STYLE; ?>"><?
+	<style>
+		<? include(WWWROOT . APPLVERSION . CUSTOM_STYLE); ?>
+	</style><?
 }
 if (isset($this->Stelle) AND isset($this->Stelle->style) AND $this->Stelle->style != '') { ?>
 	<link rel="stylesheet" href="<? echo $this->Stelle->style; ?>"><?
