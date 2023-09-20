@@ -1823,6 +1823,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 2px 2px 2px 0;
 }
 
+.gle_neu_link {
+	text-align: right;
+}
+
 .subForm:not(:empty){
 	border: 1px solid #bbb;
 	margin: 10px 5px 10px 5px;

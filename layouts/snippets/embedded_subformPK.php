@@ -262,7 +262,7 @@
 
 		<table width="100%">
 			<tr>
-				<td align="right"><?
+				<td class="gle_neu_link"><?
 					# alle anzeigen
 					if ($anzObj > 1) {
 						# alle in Liste anzeigen
