@@ -784,37 +784,69 @@ class ddl {
 	}
 	
 
-	function putImage($dokumentpfad, $j, $x, $y, $offsetx, $width, $preview){
-		if($width == '')$width = 50;
-		if(substr($dokumentpfad, 0, 4) == 'http'){
+	function putImage($dokumentpfad, $j, $x, $y, $offsetx, $width, $preview) {
+		if ($width == '') {
+			$width = 50;
+		}
+		if (substr($dokumentpfad, 0, 4) == 'http') {
 			$file = file_get_contents($dokumentpfad);
 			$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
 			file_put_contents($dokumentpfad, $file);
 		}
 		$pfadteil = explode('&original_name=', $dokumentpfad);
 		$dateiname = $pfadteil[0];
-		if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
-		if($dateiname != '' AND file_exists($dateiname)){
+		if ($dateiname == $this->attributes['alias'][$j] AND $preview) {
+			$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png'; # als Platzhalter im Editor
+		}
+		if ($dateiname != '' AND file_exists($dateiname)) {
 			$dateinamensteil = pathinfo($dateiname);
-			if(in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
-				$new_filename = IMAGEPATH.$dateinamensteil['filename'].'.jpg';
-				exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
-				$size = getimagesize($new_filename);
-				$ratio = $size[1]/$size[0];
-				$height = $ratio*$width;
-				$x = $x + $offsetx;
-				$y = $y - $height;
-				$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
-				if ($this->layout['maxx'] < ($x + $width)){
-					$this->layout['maxx'] = ($x + $width);			# maximaler x-Wert für Spaltenanordnung
+			if (in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+				$new_filename = IMAGEPATH . $dateinamensteil['filename'] . '.jpg';
+				if (!file_exists($new_filename)) {
+					$command = IMAGEMAGICKPATH . 'convert "' . $dateiname . '" -background white -flatten "' . $new_filename . '"';
+					#echo 'Kommando zum konvertieren der Bilddatei: ' . $command;
+					exec($command, $result, $status);
+					#echo '<br>Result of command: ' . print_r($command, true) . ' status: ' . $status;
+				}
+
+				if (file_exists($new_filename)) {
+					$size = getimagesize($new_filename);
+					$ratio = $size[1] / $size[0];
+					$height = $ratio * $width;
+					$x = $x + $offsetx;
+					$y = $y - $height;
+					if ($y < $this->layout['margin_bottom']) {
+						$nextpage = $this->getNextPage($this->pdf->currentContents);
+						if ($nextpage != NULL) {
+							$this->pdf->reopenObject($nextpage);
+						}
+						else {
+							$this->pdf->ezNewPage();
+							$this->miny[$this->pdf->currentContents] = $this->layout['height'];
+							$this->maxy = 800;
+							if($this->layout['type'] == 2)$this->offsety = 50;
+							$this->page_overflow = true;
+						}
+						$y = $this->layout['height'] - $this->layout['margin_top'] - 20 - $height;
+					}
+					$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+					if ($this->layout['maxx'] < ($x + $width)){
+						$this->layout['maxx'] = ($x + $width);			# maximaler x-Wert für Spaltenanordnung
+					}
+				}
+				else {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler beim hinzufügen der Datei ' . $dateiname . ' zum Drucklayout. Die Datei ' . $new_filename . ' konnte nicht erzeugt oder gefunden werden!'
+					);
 				}
 			}
 		}
 		return $y;
 	}
-	
+
 	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
-		if($y < $this->layout['margin_bottom']){
+		if($y < $this->pdf->ez['bottomMargin']){
 			$nextpage = $this->getNextPage($this->pdf->currentContents);
 			if($nextpage != NULL){
 				$this->pdf->reopenObject($nextpage);
@@ -836,7 +868,7 @@ class ddl {
 		else{							# linksbündig
 			$x = $x + $offsetx;
 			if($width != ''){
-				$right = $this->layout['width'] - $width - $x + 20;
+				$right = $this->layout['width'] - $width - $x;
 				$just = 'full';
 			}
 			else{
@@ -943,7 +975,10 @@ class ddl {
 			case 'Checkbox' : {
 				$option = (json_decode($this->attributes['options'][$j]));
 				$output = ($value != 'f' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
-			} break;			
+			} break;
+			case 'Zahl': {
+				$output = tausenderTrenner($value);
+			} break;
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$value = str_replace('t', "ja", $value);	

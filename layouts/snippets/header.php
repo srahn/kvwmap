@@ -36,7 +36,7 @@
 			</div><?php
 			$this->user->Stellen = $this->user->getStellen(0);
 			if (count($this->user->Stellen['ID']) > 21) { ?>
-				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value" style="margin: 0px 3px 0px 6px"><?
+				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value + '&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value" style="margin: 0px 3px 0px 6px"><?
 					foreach (array_keys($this->user->Stellen['ID']) AS $id) {
 						echo '
 							<option value="' . $this->user->Stellen['ID'][$id] . '"' . ($this->user->Stellen['ID'][$id] == $this->user->stelle_id ? ' selected' : '') . '>' .

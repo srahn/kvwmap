@@ -670,10 +670,9 @@ class user {
 	var $language = 'german';
 
 	/**
-		Create a user object
-		if only login_name is defined, find_by login_name only
-		if login_name and password is defined, find_by login_name and password
-		if
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
 	*/
 	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
@@ -710,6 +709,12 @@ class user {
 		elseif (
 			$case == 'Layereditor' AND
 			$this->database->gui->go == 'Klasseneditor'
+		) {
+			return true;
+		}
+		elseif (
+			$case == 'chart_speichern' AND
+			$this->funktion == 'admin'
 		) {
 			return true;
 		}
@@ -809,6 +814,7 @@ class user {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
+		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
@@ -1206,6 +1212,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
 			if (value_of($formvars, 'freetext')) { $buttons .= 'freetext,';}
@@ -1454,6 +1461,7 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
+				`agreement_accepted` = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "

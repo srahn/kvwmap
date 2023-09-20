@@ -154,6 +154,7 @@ function bearbeiten(){
 }
 
 function loeschen(id){
+	var loesch_nachweise = '';
 	if (id != null) {
 		if (window.confirm("Möchten Sie den Nachweis wirklich löschen?")) {
 			currentform.go.value='Nachweisloeschen';
@@ -161,7 +162,18 @@ function loeschen(id){
 		}
 	}
 	else {
-		if (window.confirm("Möchten Sie die Nachweise wirklich löschen?")) {
+		[].forEach.call(nachweise, function (nachweis){
+			console.log(nachweis.link_datei.split('/'));
+			if (document.getElementById('id_'+nachweis.id).checked) {
+				loesch_nachweise = loesch_nachweise + "\n" + 
+															 nachweis.flurid + ' ' + 
+															 <? echo (NACHWEIS_SECONDARY_ATTRIBUTE ? ' nachweis.' . NACHWEIS_SECONDARY_ATTRIBUTE . " + ' ' +": '') ; ?> 
+															 nachweis.<? echo NACHWEIS_PRIMARY_ATTRIBUTE; ?> + ' ' + 
+															 nachweis.blattnummer + ' ' + 
+															 nachweis.unterart_name
+			}
+		});
+		if (window.confirm("Möchten Sie die Nachweise wirklich löschen?" + loesch_nachweise)) {
 			currentform.go.value='Nachweisloeschen';
 			overlay_submit(currentform, false);
 		}
