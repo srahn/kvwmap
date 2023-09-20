@@ -9014,18 +9014,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
 		}
 		if (
-			! (
+			(
 				$this->formvars['without_diagramms'] OR
 				in_array($this->formvars['format'], array('json', 'json_result')) OR
-				$this->formvars['mime_type'] == 'json'
+				$this->formvars['mime_type'] == 'json' OR
+				empty($this->formvars['selected_layer_id'])
 			)
 		) {
 			$layerset[0]['charts'] = array();
 		}
 		else {
 			include_once(CLASSPATH . 'LayerChart.php');
-			$layerset[0]['chats'] = LayerChart::find('`layer_id` = ' . $this->formvars['selected_layer_id']);
-			echo 'l: ' . print_r($layerset[0]['charts'], true); exit;
+			$layerset[0]['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
 		}
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		switch ($layerset[0]['connectiontype']) {
