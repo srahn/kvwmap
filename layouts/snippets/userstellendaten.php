@@ -56,7 +56,7 @@ function Bestaetigung(link,text) {
 						</a><?
 					}
 					else {
-						echo $this->stellen['user'][$s]['Bezeichnung'][$i];
+						echo $this->stellen['user'][$s]['Bezeichnung'][$i] . '&nbsp;&nbsp;-&nbsp;&nbsp;' . $this->stellen['user'][$s]['position'][$i];
 					}
 					if ($this->formvars['go'] != 'BenutzerderStelleAnzeigen') { ?>
 						<a style="float: right" href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&nutzerstellen=1&selected_user_id=<?php echo $this->stellen['user'][$s]['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->stellen['user'][$s]['Bezeichnung'][$i], $loeschen); ?>?')" title="<?php echo $this->strDelete; ?>">
