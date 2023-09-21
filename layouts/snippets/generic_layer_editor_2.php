@@ -392,7 +392,7 @@ if ($doit == true) {
 				</td>
 			</tr>
 		</table><?
-		if (count($layer['charts']) > 0) {
+		if (array_key_exists('charts', $layer) AND count($layer['charts']) > 0) {
 			include(SNIPPETS . 'layer_charts.php');
 		} ?>
 		<script type="text/javascript">
