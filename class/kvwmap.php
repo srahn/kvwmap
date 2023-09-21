@@ -2069,8 +2069,6 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
-		$bb = $this->Stelle->MaxGeorefExt;
-		$layer->setMetaData('ows_extent', $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
@@ -9140,7 +9138,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
 											$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
 											$i--;
-											break;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
+											continue 2;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 										}
 										#####################################################################################
 										if (strpos($value, '%') === false) {

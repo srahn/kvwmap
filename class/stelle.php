@@ -2257,6 +2257,7 @@ class stelle {
 			while($rs=$this->database->result->fetch_array()) {
 				$user['ID'][] = $rs['ID'];
 				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
 			}
 		}
