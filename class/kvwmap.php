@@ -8996,7 +8996,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 											$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
 											$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
 											$i--;
-											break;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
+											continue 2;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 										}
 										#####################################################################################
 										if (strpos($value, '%') === false) {
