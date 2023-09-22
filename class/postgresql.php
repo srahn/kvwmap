@@ -998,7 +998,7 @@ FROM
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
 					 f_geometry_column = '" . $geomcolumn . "'),
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " where " . $geomcolumn . " IS NOT NULL limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
