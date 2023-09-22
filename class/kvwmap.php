@@ -3007,7 +3007,8 @@ echo '			</table>
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		if (!$img_urls) {
+		#if (!$img_urls) { wegen Bug im Firefox
+		if (false) {
 			ob_start();
 			$this->image_map->saveImage();
 			$image = ob_get_clean();
