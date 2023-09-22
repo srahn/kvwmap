@@ -282,22 +282,21 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$geometrytype = $pgdatabase->get_geom_type($schemaname, 'the_geom', $tablename);
 			if ($adjustments) {
 				$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 				$sql = "
 					SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 					" . $this->rename_reserved_attribute_names($schemaname, $tablename);
+				$ret = $pgdatabase->execSQL($sql,4, 0);
 			}
-			$sql .= "
-				SELECT geometrytype(the_geom) AS geometrytype FROM " . pg_quote($schemaname) . "." . pg_quote($tablename) . " LIMIT 1;
-			";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if ($ret[0]) {
 				$custom_table['error'] = $ret;
 			}
 			else {
 				$rs = pg_fetch_assoc($ret[1]);
-				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+				$custom_table['datatype'] = geometrytype_to_datatype($geometrytype);
 				$custom_table['tablename'] = $tablename;
 			}
 			return array($custom_table);
