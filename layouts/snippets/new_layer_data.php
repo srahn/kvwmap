@@ -20,7 +20,7 @@
 	margin-top: 10px;
 }
 #nds_titel p {
-	margin: 0px 0px 0px 0px;
+	margin: 0px 0px -32px 0px;
 }
 #nds_formular {
 	margin: 40px 0px 20px 0px;
