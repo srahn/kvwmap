@@ -934,7 +934,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -1045,17 +1045,6 @@ class data_import_export {
 	 * den Geometrietyp auf single an (Entfernt ST_Multi von GeometryType)
 	 */
 	function adjustGeometryType($database, $schema, $table, $epsg) {
-		$sql = "
-			UPDATE
-				" . $schema . "." . $table . "
-			SET
-				the_geom = ST_Force2D(the_geom)
-		";
-		$ret = $database->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			return 0;
-		}
-
 		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
