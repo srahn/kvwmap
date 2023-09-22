@@ -1069,7 +1069,7 @@ class data_import_export {
 			$rs = pg_fetch_row($ret[1]);
 			if ($rs[0] == 0) {
 				$sql = "
-					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " WHERE the_geom IS NOT NULL LIMIT 1 
 				";
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
