@@ -411,7 +411,7 @@ class GUI {
 		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id']);
+			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
@@ -590,7 +590,7 @@ class GUI {
 													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
-															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
 																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
 															}
@@ -610,18 +610,15 @@ class GUI {
 												<td>
 													<select style="width: 110px" name="layer_options_labelitem">
 														<option value=""> - '.$this->noLabel.' - </option>';
-														if ($this->formvars['layer_id'] > 0) {
-															echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.($query_attributes['alias'][$layer[0]['original_labelitem']] != ''? $query_attributes['alias'][$layer[0]['original_labelitem']] : $layer[0]['original_labelitem']).'</option>';
-														}
 														for($i = 0; $i < count($attributes)-2; $i++){
-															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if(
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
 																		OR 
 																		(
 																			$privileges[$attributes[$i]['name']] != '' 									# mind. Leserecht
 																			AND 
-																			!in_array($attributes[$i]['name'], [$layer[0]['original_labelitem'], 'oid'])	# und Attribut ist nicht das Originallabelitem oder die oid
+																			!in_array($attributes[$i]['name'], ['oid'])	# und Attribut ist nicht die oid
 																		)
 																	)
 																	AND 
