@@ -1716,19 +1716,19 @@ class ALKIS {
 			}
 			if($emzges_a > 0){
 				$BWZ_a = round($emzges_a/$flaeche_a*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: EMZ '.$emzges_a.', BWZ '.$BWZ_a);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: ' . $flaeche_a . ' m², EMZ '.$emzges_a.', BWZ '.$BWZ_a);
 			}
 			if($emzges_gr > 0){
 				$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Grünland gesamt: EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Grünland gesamt: ' . $flaeche_gr . ' m², EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
 			}
 			if($emzges_agr > 0){
 				$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grünland gesamt: EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grünland gesamt: ' . $flaeche_agr . ' m², EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
 			}
 			if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$pdf->addText($col1,$row-=12,$fontSize, 'Grünland-Acker gesamt: EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
+					$pdf->addText($col1,$row-=12,$fontSize, 'Grünland-Acker gesamt: ' . $flaeche_gra . ' m², EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
 			}
 		}
 

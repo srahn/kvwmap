@@ -193,7 +193,7 @@ if ($doit == true) {
 														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 															<tr>
 																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
-																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
+																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
 																</td>
 															</tr>
 														</table>
@@ -282,7 +282,7 @@ if ($doit == true) {
 								}
 							}
 							else{
-								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
+								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" class="attr_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 								$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
 							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1)){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
@@ -327,7 +327,7 @@ if ($doit == true) {
 											<? } ?>
 											<td class="button_background" style="box-shadow: none; padding: 5px;" valign="middle" colspan="19"><?
 												if (!value_of($layer['shape'][$k], 'wfs_geom')) { // kein WFS
-													echo '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$columnname.'_'.$k.'" value="'.$layer['shape'][$k][$columnname].'">'; ?>
+													echo '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $columnname . '_' . $k . '" class="attr_' . $layer['Layer_ID'] . '_' . $columnname . '" value="'.$layer['shape'][$k][$columnname].'">'; ?>
 													<table cellspacing="0" cellpadding="0">
 														<tr><?
 															if ($privileg == 1) { ?>
@@ -382,11 +382,18 @@ if ($doit == true) {
 				if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
 					include('dataset_operations.php');
 				} ?>
+			<tr style="display: none">
+				<td><?
+					if (value_of($invisible_attributes, $layer['Layer_ID'])){
+						for ($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
+							echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
+						}
+					} ?>
+				</td>
+			</tr>
 		</table><?
-		if (value_of($invisible_attributes, $layer['Layer_ID'])){
-			for ($l = 0; $l < count($invisible_attributes[$layer['Layer_ID']]); $l++){
-				echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
-			}
+		if (array_key_exists('charts', $layer) AND count($layer['charts']) > 0) {
+			include(SNIPPETS . 'layer_charts.php');
 		} ?>
 		<script type="text/javascript">
 			var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');

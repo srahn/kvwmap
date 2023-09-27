@@ -196,6 +196,7 @@ function go_switch_alkis($go){
 			$GUI->sanitize(['FlurstKennz' => 'text']);
 			include_once(PLUGINS.'alkis/model/kvwmap.php');
 			$GUI->checkCaseAllowed($go);
+			$GUI->formvars['without_temporal_filter'] = true;
 			if($GUI->last_query != ''){
 				$GUI->formvars['FlurstKennz'] = $GUI->last_query[$GUI->last_query['layer_ids'][0]]['sql'];
 			}

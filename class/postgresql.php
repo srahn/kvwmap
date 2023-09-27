@@ -998,7 +998,7 @@ FROM
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
 					 f_geometry_column = '" . $geomcolumn . "'),
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " where " . $geomcolumn . " IS NOT NULL limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -1017,6 +1017,7 @@ FROM
 	}
   
   function eliminate_star($query, $offset){
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);

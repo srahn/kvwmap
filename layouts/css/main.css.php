@@ -630,6 +630,7 @@ select {
 
 select option{
 	font-family: SourceSansPro1,arial;
+	padding: 2px;
 }
 
 textarea {
@@ -2015,6 +2016,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border: 1px solid grey;
 	border-collapse: collapse;
 	margin: 2px 2px 2px 0;
+}
+
+.gle_neu_link {
+	text-align: right;
 }
 
 .subForm:not(:empty){

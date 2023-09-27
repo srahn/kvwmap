@@ -472,7 +472,7 @@ function formatFlurstkennzALK($FlurstKennz){
 function tausenderTrenner($number){
 	if($number != ''){
 		$explo = explode('.', $number);
-		$formated_number = number_format($explo[0], 0, ',', '.');
+		$formated_number = number_format((float)$explo[0], 0, ',', '.');
 		if($explo[1] != '')$formated_number .= ','.$explo[1];
 		return $formated_number;
 	}
@@ -2456,16 +2456,17 @@ function sql_from_parse_tree($parse_tree) {
  * If $value is an array all elements will be sanitized with $type.
  * @param any $value Value to sanitize
  * @param string $type The type of the value
+ * @param bool $removeTT If true, floats and integers are converted by the function removeTausenderTrenner
  * @return any The sanitized value
  */
-function sanitize(&$value, $type) {
+function sanitize(&$value, $type, $removeTT = false) {
 	if (empty($type)) {
 		return $value;
 	}
 
 	if (is_array($value)) {
 		foreach ($value AS &$single_value) {
-			sanitize($single_value, $type);
+			sanitize($single_value, $type, $removeTT);
 		}
 		return $value;
 	}
@@ -2477,19 +2478,17 @@ function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' :
 		case 'int4' :
-		case '_int4' :
 		case 'oid' :
 		case 'boolean':
 		case 'int8' : {
-			$value = (int) $value;
+			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'numeric' :
-		case '_numeric' :
 		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
+			$value = (float) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :

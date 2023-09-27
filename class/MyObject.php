@@ -15,6 +15,11 @@ class MyObject {
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 		$this->validations = array();
+		if (!empty($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$this->$key = array();
+			}
+		}
 		$this->field_types = array(
 			MYSQLI_TYPE_DECIMAL => 'MYSQLI_TYPE_DECIMAL',
 			MYSQLI_TYPE_NEWDECIMAL => 'MYSQLI_TYPE_NEWDECIMAL',
@@ -284,6 +289,10 @@ class MyObject {
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		return $this->database->result->num_rows > 0;
+	}
+
+	function get_id() {
+		return $this->get($this->identifier);
 	}
 
 	function getAttributes() {
@@ -559,7 +568,8 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}
@@ -771,14 +781,23 @@ class MyObject {
 	}
 
 	function as_form_html() {
+		$attributes_html = array_map(
+			function ($attribute) {
+				return $attribute->as_form_html();
+			},
+			$this->getAttributes()
+		);
+
+		if (!empty($this->has_many) AND is_array($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				array_push($attributes_html, $many_attribut->as_form_html());
+			}
+		}
+
 		$html = implode(
 			"<div class=\"clear\"></div>",
-			array_map(
-				function ($attribute) {
-					return $attribute->as_form_html();
-				},
-				$this->getAttributes()
-			)
+			$attributes_html
 		);
 		return $html;
 	}
