@@ -262,22 +262,21 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$geometrytype = $pgdatabase->get_geom_type($schemaname, 'the_geom', $tablename);
 			if ($adjustments) {
 				$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 				$sql = "
 					SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 					" . $this->rename_reserved_attribute_names($schemaname, $tablename);
+				$ret = $pgdatabase->execSQL($sql,4, 0);
 			}
-			$sql .= "
-				SELECT geometrytype(the_geom) AS geometrytype FROM " . pg_quote($schemaname) . "." . pg_quote($tablename) . " LIMIT 1;
-			";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if ($ret[0]) {
 				$custom_table['error'] = $ret;
 			}
 			else {
 				$rs = pg_fetch_assoc($ret[1]);
-				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+				$custom_table['datatype'] = geometrytype_to_datatype($geometrytype);
 				$custom_table['tablename'] = $tablename;
 			}
 			return array($custom_table);
@@ -935,7 +934,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -950,12 +949,20 @@ class data_import_export {
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
-			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0) {
-				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+			if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+				# nochmal mit anderem Encoding versuchen
+				$url = str_replace(['UTF-8', 'LATIN1', 'utf8alt', 'latin1alt'], ['utf8alt', 'latin1alt', 'LATIN1', 'UTF-8'], $url);
+				curl_setopt($ch, CURLOPT_URL, $url);
+				$output = curl_exec($ch);
+				$result = json_decode($output);
+				$ret = $result->exitCode;
+				if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+				}
 			}
+			curl_close($ch);
 		}
 		else {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
@@ -1039,17 +1046,6 @@ class data_import_export {
 	 */
 	function adjustGeometryType($database, $schema, $table, $epsg) {
 		$sql = "
-			UPDATE
-				" . $schema . "." . $table . "
-			SET
-				the_geom = ST_Force2D(the_geom)
-		";
-		$ret = $database->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			return 0;
-		}
-
-		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
 		$ret = $database->execSQL($sql,4, 0);
@@ -1057,7 +1053,7 @@ class data_import_export {
 			$rs = pg_fetch_row($ret[1]);
 			if ($rs[0] == 0) {
 				$sql = "
-					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " WHERE the_geom IS NOT NULL LIMIT 1 
 				";
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {

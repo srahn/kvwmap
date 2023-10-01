@@ -63,7 +63,7 @@ include('config.php');
 # Session
 if(!isset($_SESSION)){
 	$maxlifetime = 0;
-	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
@@ -408,6 +408,9 @@ function go_switch($go, $exit = false) {
 
 			case 'setHistTimestamp' : {
 				$GUI->setHistTimestamp();
+				$GUI->loadMap('DataBase');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'setLanguage' : {

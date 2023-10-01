@@ -141,13 +141,14 @@ class GUI {
 	/**
 		function sanitizes all values of $this->formvars array
 		with names by type given in $vars array
-		@params	$vars Array of formvars elements and types
+		@param	$vars Array of formvars elements and types
 						eg: ['selected_layer_id' => 'int', name' => 'text']
 						allowed types: 'int', 'text'
+		@param bool $removeTT If true, floats and integers are converted by the function removeTausenderTrenner
 		@return	$this->formvars is passed by reference to sanitize function,
 						That's why it is changed at the end of this function
 	*/
-	function sanitize($vars) {
+	function sanitize($vars, $removeTT = false) {
 		$vars_with_asterisk = array_filter(
 			$vars,
 			function($key) {
@@ -166,7 +167,7 @@ class GUI {
 			unset($vars[$asterisk_key]);
 		}
 		foreach ($vars as $name => $type) {
-			sanitize($this->formvars[$name], $type);
+			sanitize($this->formvars[$name], $type, $removeTT);
 		}
 	}
 	
@@ -410,7 +411,7 @@ class GUI {
 		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id']);
+			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
@@ -589,7 +590,7 @@ class GUI {
 													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
-															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
 																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
 															}
@@ -609,18 +610,15 @@ class GUI {
 												<td>
 													<select style="width: 110px" name="layer_options_labelitem">
 														<option value=""> - '.$this->noLabel.' - </option>';
-														if ($this->formvars['layer_id'] > 0) {
-															echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.($query_attributes['alias'][$layer[0]['original_labelitem']] != ''? $query_attributes['alias'][$layer[0]['original_labelitem']] : $layer[0]['original_labelitem']).'</option>';
-														}
 														for($i = 0; $i < count($attributes)-2; $i++){
-															$index = $query_attributes[$i]['indizes'][$attributes[$i]['name']];
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if(
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
 																		OR 
 																		(
 																			$privileges[$attributes[$i]['name']] != '' 									# mind. Leserecht
 																			AND 
-																			!in_array($attributes[$i]['name'], [$layer[0]['original_labelitem'], 'oid'])	# und Attribut ist nicht das Originallabelitem oder die oid
+																			!in_array($attributes[$i]['name'], ['oid'])	# und Attribut ist nicht die oid
 																		)
 																	)
 																	AND 
@@ -917,9 +915,6 @@ echo '			</table>
 		$this->user->rolle->setHistTimestamp($this->formvars['timestamp'], $this->formvars['go_next']);
 		$this->user->rolle->readSettings();
 		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->loadMap('DataBase');
-		$this->drawMap();
-		$this->output();
 	}
 
 	function setLanguage(){
@@ -2071,8 +2066,6 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
-		$bb = $this->Stelle->MaxGeorefExt;
-		$layer->setMetaData('ows_extent', $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
 		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
@@ -3011,7 +3004,8 @@ echo '			</table>
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		if (!$img_urls) {
+		#if (!$img_urls) { wegen Bug im Firefox
+		if (false) {
 			ob_start();
 			$this->image_map->saveImage();
 			$image = ob_get_clean();
@@ -9021,7 +9015,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			(
 				$this->formvars['without_diagramms'] OR
 				in_array($this->formvars['format'], array('json', 'json_result')) OR
-				$this->formvars['mime_type'] == 'json'
+				$this->formvars['mime_type'] == 'json' OR
+				empty($this->formvars['selected_layer_id'])
 			)
 		) {
 			$layerset[0]['charts'] = array();
@@ -9090,11 +9085,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						if (value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]) == 'IN') {
 							# Sanitize all elements in list delimited with | separately and compose afterward again together to list string
 							$value = explode('|', value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]));
-							$value = sanitize(explode('|', value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i])), $attributes['type'][$i]);
+							$value = sanitize(explode('|', value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i])), $attributes['type'][$i], true);
 							$value = implode('|', $value);
 						}
 						else {
-							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i]);
+							$value = sanitize(value_of($this->formvars, $prefix . 'value_' . $attributes['name'][$i]), $attributes['type'][$i], true);
 						}
 						$operator = sanitize(value_of($this->formvars, $prefix . 'operator_' . $attributes['name'][$i]), 'text');
 						if (is_array($value)) {
@@ -9143,7 +9138,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											$this->formvars[$prefix.'value_'.$attributes['name'][$i]] = implode('|', $keys);
 											$this->formvars[$prefix.'operator_'.$attributes['name'][$i]] = 'IN';
 											$i--;
-											break;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
+											continue 2;		# dieses Attribut nochmal behandeln aber diesmal mit dem Operator IN und den gefundenen Schlüsseln der LIKE-Suche
 										}
 										#####################################################################################
 										if (strpos($value, '%') === false) {
@@ -10233,7 +10228,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($table['tablename'] != '' AND $table['tablename'] == $layerset[0]['maintable']) {		# nur Attribute aus der Haupttabelle werden gespeichert
 				for ($i = 0; $i < count($table['attributname']); $i++) {
 					if (array_key_exists($table['attributname'][$i], $attributes['constraints'])) { 	# Rechte
-						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]]);
+						$this->sanitize([$table['formfield'][$i] => $table['datatype'][$i]], true);
 						switch (true) {
 							case ($table['type'][$i] == 'Time') : {                       # Typ "Time"
 								if (in_array($attributes['options'][$table['attributname'][$i]], array('', 'insert'))){
@@ -10562,7 +10557,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				for ($i = 0; $i < count($form_fields); $i++) {
 					if ($form_fields[$i] != '') {
 						$element = explode(';', $form_fields[$i]);
-						$this->sanitize([$form_fields[$i] => $element[6]]);
+						$this->sanitize([$form_fields[$i] => $element[6]], true);
 						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 					}
 				}
@@ -14617,7 +14612,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$formtype = $element[4];
 				$datatype = $element[6];
 				$saveable = $element[7];
-				$this->sanitize([$form_fields[$i] => $datatype]);
+				$this->sanitize([$form_fields[$i] => $datatype], true);
 				if ($layerset[$layer_id] == NULL) {
 					$layerset[$layer_id] = $this->user->rolle->getLayer ($layer_id);
 				}
