@@ -1095,10 +1095,10 @@ class data_import_export {
 		return $encoding;
 	}
 
-	function create_csv($result, $attributes, $groupnames){
+	function create_csv($result, $attributes, $groupnames) {
 		# Gruppennamen in die erste Zeile schreiben
-		if($groupnames != ''){
-			foreach($result[0] As $key => $value){
+		if ($groupnames != ''){
+			foreach ($result[0] AS $key => $value){
 				$i = $attributes['indizes'][$key];
 				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 					$groupname = explode(';', $attributes['group'][$i]);
@@ -1116,7 +1116,7 @@ class data_import_export {
     if(substr($attributes['name'][0], 0, 2) == 'ID'){
       $attributes['name'][0] = str_replace('ID', 'id', $attributes['name'][0]);
     }
-    foreach($result[0] As $key => $value){
+    foreach($result[0] AS $key => $value){
 			$i = $attributes['indizes'][$key];
     	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	      if($attributes['alias'][$i] != ''){
@@ -1508,11 +1508,20 @@ class data_import_export {
 					} break;
 
 					case 'CSV' : {
-						while ($rs=pg_fetch_assoc($ret[1])){
+						$result = array();
+						while ($rs = pg_fetch_assoc($ret[1])){
 							$result[] = $rs;
 						}
-						$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
-						$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						# Bugfix 3.5.64: Fehlerbehebung liefert bei leeren Tabellen nur leere csv
+						# ToDo: statt dessen sollte wenigstens die Kopfzeile mit geliefert werden.
+						# create_csv dahingehend verbessern, dass Kopfzeile auch ohne result erzeugt werden kann.
+						if (count($result) == 0) {
+							$csv = '';
+						}
+						else {
+							$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
+							$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						}
 						$exportfile = $exportfile.'.csv';
 						$fp = fopen($exportfile, 'w');
 						fwrite($fp, $csv);
