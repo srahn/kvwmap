@@ -190,7 +190,7 @@ if ($doit == true) {
 														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
 															<tr>
 																<td colspan="40">&nbsp;<a href="javascript:void(0);" onclick="toggle_group(\''.$layer['Layer_ID'].'_'.$j.'_'.$k.'\')">
-																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH.'/'; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
+																	<img id="group_img'.$layer['Layer_ID'].'_'.$j.'_'.$k.'" border="0" src="'.GRAPHICSPATH; if($collapsed)echo 'plus.gif'; else echo 'minus.gif'; echo '"></a>&nbsp;&nbsp;<span class="fett">'.$groupname.'</span>
 																</td>
 															</tr>
 														</table>

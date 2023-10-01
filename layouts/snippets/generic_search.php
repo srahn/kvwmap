@@ -455,6 +455,11 @@ span[data-tooltip] {
 	display: inline-block;
 	height: 25px;
 }
+
+.gsm_tabelle_td_third, .gsm_tabelle_td_third > div {
+	height: inherit;
+}
+
 .gsm_tabelle_attribute .gsm_tabelle_td_third>div select option {
 	margin-top: 2px;
 	margin-left: 2px;

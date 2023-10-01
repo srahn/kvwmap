@@ -228,13 +228,20 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
-		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
+		if ($this->get('icon') != '') {
+			$legendgraphic = $this->get('icon');
+		}
+		elseif (count($classes) > 0) {
+			$legendgraphic = $classes[0]->get('legendgraphic');
+		}
+		else {
+			$legendgraphic = 'graphics/leer.gif';
+		}
 		$layerdef = (Object) array(
-			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'options' => $this->get_baselayer_options(),
 			'shortLabel' => $this->get('Name'),
-			'img' => $legendgraphic,
+			'img' => URL . APPLVERSION . $legendgraphic,
 			'url' => $this->get_baselayer_url()
 		);
 		return $layerdef;

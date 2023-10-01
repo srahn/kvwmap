@@ -993,12 +993,11 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
-					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
-					 f_geometry_column = '" . $geomcolumn . "')
+					 f_geometry_column = '" . $geomcolumn . "'),
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -1017,6 +1016,7 @@ FROM
 	}
   
   function eliminate_star($query, $offset){
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
@@ -1936,7 +1936,7 @@ FROM
 			}
 			$sql.=")";
 		}
-		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		$sql.= $this->build_temporal_filter(array('f', 'p', 'anschrift', 'n', 'g', 'b'));
 		if ($formvars['alleiniger_eigentuemer']) {
 			$sql.= "
 				AND NOT EXISTS (
@@ -1947,7 +1947,7 @@ FROM
 						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
 						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
 					WHERE 
-						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						(f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an)) " .
 						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
 				)";
 		}
