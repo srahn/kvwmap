@@ -448,8 +448,9 @@ class MyObject {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
 
 		$results = array();
-		if (!empty($data))
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$sql = "
 			INSERT INTO `" . $this->tableName . "` (

@@ -1,9 +1,28 @@
 <?php
+include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'LayerAttribute.php');
+include_once(CLASSPATH . 'LayerChart.php');
 class Layer extends MyObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
+		$this->has_many = array(
+			"attributes" => array(
+				"alias" => 'Attribute',
+				"table" => 'layer_attributes',
+				"vorschau" => 'name',
+				"pk" => 'layer_id, name',
+				"fk" => 'layer_id'
+			),
+			"charts" => array(
+				"alias" => 'Diagramme',
+				"table" => 'layer_charts',
+				"vorschau" => 'title',
+				"pk" => 'id',
+				"fk" => 'layer_id'
+			)
+		);
 		parent::__construct($gui, 'layer');
 		$this->stelle_id = $gui->stelle->id;
 		$this->identifier = 'Layer_ID';
@@ -17,8 +36,13 @@ class Layer extends MyObject {
 	}
 
 	public static	function find_by_id($gui, $id) {
-		$layer = new Layer($gui);
-		return $layer->find_by('Layer_ID', $id);
+		$obj = new Layer($gui);
+		$layer = $obj->find_by('Layer_ID', $id);
+		if ($layer->get_id() != '')  {
+			$layer->attributes = $layer->get_layer_attributes();
+			$layer->charts = $layer->get_layer_charts();
+		}
+		return $layer;
 	}
 
 	public static	function find_by_name($gui, $name) {
@@ -74,6 +98,23 @@ class Layer extends MyObject {
 			}
 		}
 		return $duplicate_layer_ids;
+	}
+
+	function get_layer_attributes() {
+		$obj = new LayerAttribute($this->gui);
+		$layer_attributes = $obj->find_where(
+			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
+			'order'
+		);
+		return $layer_attributes;
+	}
+	function get_layer_charts() {
+		$obj = new LayerChart($this->gui);
+		$layer_charts = $obj->find_where(
+			$this->has_many['charts']['fk'] . ' = ' . $this->get_id(),
+			'title'
+		);
+		return $layer_charts;
 	}
 
 	function get_maintable_attributes() {

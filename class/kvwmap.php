@@ -8054,6 +8054,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function Layereditor() {
+		include_once(CLASSPATH . 'LayerChart.php');
 		$this->titel = 'Layer Editor';
 		$this->main = 'layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -8071,6 +8072,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->layerdata['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
 		$this->output();
 	}
 
@@ -9016,7 +9018,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$ret['msg'] = 'Der Layer mit der ID '.$this->formvars['selected_layer_id'].' ist der aktuellen Stelle nicht zugeordnet.';
 		}
 		if (
-			! (
+			(
 				$this->formvars['without_diagramms'] OR
 				in_array($this->formvars['format'], array('json', 'json_result')) OR
 				$this->formvars['mime_type'] == 'json'
@@ -9026,8 +9028,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			include_once(CLASSPATH . 'LayerChart.php');
-			$layerset[0]['chats'] = LayerChart::find('`layer_id` = ' . $this->formvars['selected_layer_id']);
-			echo 'l: ' . print_r($layerset[0]['charts'], true); exit;
+			$layerset[0]['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
 		}
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		switch ($layerset[0]['connectiontype']) {
@@ -11249,11 +11250,61 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
-	function chart_erzeugen() {
-		include_once(CLASSPATH . 'LayerChart.php');
-		$chart = new LayerChart($this);
-		$result = $chart->create(array_intersect_key($this->formvars, array('id', 'layer_id', 'title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name')));
-		return $result;
+	function layer_charts_Anzeigen() {
+		include_once(CLASSPATH . 'Layer.php');
+		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
+		$this->main = 'layer_chart_list.php';
+		$this->output();
+	}
+
+	function layer_chart_Editor() {
+		include_once(CLASSPATH . 'Layer.php');
+
+		if ($this->formvars['id'] != '') {
+			# edit
+			$this->layer_chart = LayerChart::find_by_id($this, $this->formvars['id']);
+			$this->formvars['layer_id'] = $this->layer_chart->get('layer_id');
+		}
+		else {
+			# new
+			$this->layer_chart = new LayerChart($this);
+			$this->layer_chart->setKeysFromTable();
+			$this->layer_chart->set('layer_id', $this->formvars['layer_id']);
+		}
+		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
+		$this->main = 'layer_chart_formular.php';
+		$this->output();
+	}
+
+	function layer_chart_Speichern($chart) {
+		include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
+		if ($chart->get_id() == '') {
+			$results = $chart->create(formvars_strip($this->formvars, array('layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+			if ($results[0]['success']) {
+				$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+			}
+		}
+		else {
+			$results = $chart->update(formvars_strip($this->formvars, array('title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+			if ($results[0]['success']) {
+				$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
+			}
+		}
+		return $results[0];
+	}
+
+	function layer_chart_Loeschen() {
+		if ($this->formvars['id'] != '') {
+			$chart = LayerChart::find_by_id($this, $this->formvars['id']);
+			$response = $chart->delete();
+		}
+		else {
+			$response = array(
+				'success' => false,
+				'msg' => $strLayerChartMissingLayerId
+			);
+		}
+		return $response;
 	}
 
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
