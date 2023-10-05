@@ -187,10 +187,12 @@ class MyObject {
 		return $result;
 	}
 
-	/*
-	* Search for a records in the database by the given sql clause
-	* @ return all found objects
-	*/
+	/**
+	 * 
+	 * Function searching for records in the database by the given sql clause
+	 * @param Array $params: Array with select, from, where and order parts of sql.
+	 * @return Array $results: All found objects.
+	 */
 	function find_by_sql($params, $hierarchy_key = NULL) {
 		$sql = "
 			SELECT

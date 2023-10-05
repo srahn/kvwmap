@@ -117,6 +117,22 @@ class Layer extends MyObject {
 		return $layer_charts;
 	}
 
+	/**
+	 * Function returning array of stelle_id's
+	 * where layer belongs to in table used_layer.
+	 */
+	function get_stellen() {
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		$used_layers = Layer2Stelle::find($this->gui, "Layer_ID = " . $this->get_id());
+		$stellen_ids = array_map(
+			function($used_layer) {
+				return $used_layer->get('Stelle_ID');
+			},
+			$used_layers
+		);
+		return $stellen_ids;
+	}
+
 	function get_maintable_attributes() {
 		$sql = "
 			SELECT
@@ -178,12 +194,71 @@ class Layer extends MyObject {
 		);
 	}
 
-	/*
-	* Diese Funktion legt vom aktuellen layer Objekt einen neuen Layer an
-	* mit der übergebenen Layergruppe sowie alle seine zugehörigen Klassen und layer_attributes.
-	* Vom Layer verwendete Styles und Labels werden wiederverwendet.
-	* @return Layer Das kopierte Layerobjekt
-	*/
+	/**
+	 * This function check if the stellen, where the layer belongs to,
+	 * have given menue_or_functions
+	 * @param Array $menue_or_functions: The array with the go resp. function_names
+	 * @return Array $msg: An Array of messages when conditions not matches.
+	 */
+	function has_sync_functions($functions) {
+		include_once(CLASSPATH . 'Menue.php');
+		include_once(CLASSPATH . 'Funktion.php');
+		$msg = array();
+		$stellen_ids = $this->get_stellen();
+		foreach ($functions AS $function) {
+			$menues = Menue::find($this->gui, "links LIKE '%go=" . $function . "%'");
+			$funktionen = Funktion::find($this->gui, "bezeichnung = '" . $function . "'");
+			if (count($menues) == 0 AND count($funktionen) == 0) {
+				$msg[] = "Die Funktion '" . $function . "' ist für die Synchronisation von Layern notwendig. Sie konnte weder in den Menüs noch den Funktionen gefunden werden. Bitte Menü oder Funktion anlegen und den Stellen, in denen der zu synchronisierende Layer ist, zuordnen.";
+			}
+			else {
+				foreach($stellen_ids AS $stelle_id) {
+					$menues2stelle = array();
+					$funktionen2stelle = array();	
+					if (count($menues) > 0) {
+						include_once(CLASSPATH . 'Menue2Stelle.php');
+						$menues2stelle = Menue2Stelle::find($this->gui, "stelle_id = " . $stelle_id . " AND menue_id = " . $menues[0]->get_id());
+					}
+					if (count($funktionen) > 0) {
+						include_once(CLASSPATH . 'Funktion2Stelle.php');
+						$funktionen2stelle = Funktion2Stelle::find($this->gui, "stelle_id = " . $stelle_id . " AND funktion_id = " . $funktionen[0]->get_id());
+					}
+					if (count($menues2stelle) == 0 AND count($funktionen2stelle) == 0) {
+						$msg[] = "Die Funktion '" . $function . "' muss in einem Menü oder als Funktion der Stelle ID: " . $stelle_id . " zugewiesen sein damit der Layer '" . $this->get('Name') . "' synchronisiert werden kann!";
+					}
+				}
+			}
+		}
+		return $msg;
+	}
+
+	/**
+	 * Function check if layer have the attributes, there type and dependencies.
+	 * @param Array $attributes: The array with attributes that have to be checked.
+	 * @return Array $msg: An Array of messages when conditions not matches.
+	 */
+	function has_sync_attributes($attributes) {
+		$msg = array();
+		return $msg;
+	}
+
+	/**
+	 * Function check if layer has $id as primary key in main table and
+	 * is set as oid in layer definition.
+	 * @param text $id: Name of the unique id for the sync layer.
+	 * @return Array $msg: An Array of messages when condition not maches.
+	 */
+	function has_sync_id($id) {
+		$msg = array();
+		return $msg;
+	}
+
+	/**
+	 * Diese Funktion legt vom aktuellen layer Objekt einen neuen Layer an
+	 * mit der übergebenen Layergruppe sowie alle seine zugehörigen Klassen und layer_attributes.
+	 * Vom Layer verwendete Styles und Labels werden wiederverwendet.
+	 * @return Layer Das kopierte Layerobjekt
+	 */
 	function copy($attributes) {
 		$success = true;
 		$this->debug->show('<p>Clone Templatelayer: ' . $this->get($this->identifier), Layer::$write_debug);

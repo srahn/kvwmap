@@ -1844,6 +1844,7 @@ a:hover .preview_image{
 	margin-left: 20px;
 	padding: 0px;
 	text-align: left;
+	width: 90%;
 }
 
 .dstable{
