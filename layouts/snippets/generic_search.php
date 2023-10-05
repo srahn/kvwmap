@@ -32,20 +32,20 @@ function operatorchange(layer_id, attributname, searchmask_number){
 	else prefix = '';
 
 	if (document.getElementById(prefix+"operator_" + attributname).value == "IS NULL" || document.getElementById(prefix+"operator_" + attributname).value == "IS NOT NULL") {
-		document.getElementById("gsm_default_input1_" + attributname).style.display = "none";
-		document.getElementById(prefix+"value_" + attributname).style.display = "none";
+		document.getElementById(prefix + "_third_" + attributname).style.display = "none";
 	}
 	else {
-		document.getElementById("gsm_default_input1_" + attributname).style.display = "block";
-		document.getElementById(prefix+"value_" + attributname).style.display = "block";
+		document.getElementById(prefix + "_third_" + attributname).style.display = "";
 	}
-	if (document.getElementById(prefix+"operator_" + attributname).value == "between"){
-		document.getElementById("gsm_default_input1_" + attributname).style.display = "block";
-		document.getElementById("gsm_default_input2_" + attributname).style.display = "block";
-	}
-	else {
-		if (typeof document.getElementById(prefix+"value2_"+attributname) !== 'undefined'){
-			document.getElementById("gsm_default_input2_" + attributname).style.display = "none";
+	if (document.getElementById("gsm_default_input2_" + attributname) != undefined) {
+		if (document.getElementById(prefix+"operator_" + attributname).value == "between"){
+			document.getElementById("gsm_default_input1_" + attributname).style.display = "block";
+			document.getElementById("gsm_default_input2_" + attributname).style.display = "block";
+		}
+		else {
+			if (typeof document.getElementById(prefix+"value2_"+attributname) !== 'undefined'){
+				document.getElementById("gsm_default_input2_" + attributname).style.display = "none";
+			}
 		}
 	}
 	if (document.getElementById(prefix+"_avf_" + attributname) != undefined) {
@@ -59,8 +59,8 @@ function operatorchange(layer_id, attributname, searchmask_number){
 		else {
 			document.getElementById(prefix + "_avf_" + attributname).style.display = 'inline';
 			document.getElementById(prefix + "_text_" + attributname).style.display = 'none';			
-			document.getElementById(attributname + "_" + prefix).value = '';
-			document.getElementById(attributname + "_" + prefix).disabled = false;
+			document.getElementById(layer_id + "_" + attributname + "_" + prefix).value = '';
+			document.getElementById(layer_id + "_" + attributname + "_" + prefix).disabled = false;
 			document.getElementById(prefix + "text_value_" + attributname).disabled = true;
 		}
 	}
