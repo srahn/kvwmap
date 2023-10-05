@@ -1371,10 +1371,10 @@ class user {
 			$sql.=',position="'.$userdaten['position'].'"';
 		}
 		if ($userdaten['start'] != '') {
-			$sql.=',start="'.$userdaten['start'].'"';
+			$sql.=',start="' . ($userdaten['start'] ?: '0000-00-00') . '"';
 		}
 		if ($userdaten['stop'] != '') {
-			$sql.=',stop="'.$userdaten['stop'].'"';
+			$sql.=',stop="' . ($userdaten['stop'] ?: '0000-00-00') . '"';
 		}
 		if ($userdaten['ips']!='') {
 			$sql.=',ips="'.$userdaten['ips'].'"';
@@ -1442,8 +1442,8 @@ class user {
 				`Vorname` = '" . $userdaten['vorname'] . "',
 				`login_name` = '" . $userdaten['loginname'] . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
-				`start` = '" . $userdaten['start'] . "',
-				`stop`= '" . $userdaten['stop'] . "',
+				`start` = '" . ($userdaten['start'] ?: '0000-00-00') . "',
+				`stop`= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
 				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
 				`ID` =  " . $userdaten['id'].",
 				`phon` = '" . $userdaten['phon']."',
