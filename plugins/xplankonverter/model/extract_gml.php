@@ -1169,29 +1169,31 @@ class Gml_extractor {
 				return $this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt");
 			}
 		);
-		$select_reftextinhalte = array();
-		foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
-			$select_reftextinhalte[] = "
-				SELECT
-					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
-					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
-				FROM
-					" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+		if(!empty($table_with_reftextinhalt)) {
+			$select_reftextinhalte = array();
+			foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
+				$select_reftextinhalte[] = "
+					SELECT
+						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+					FROM
+						" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+				";
+			}
+			$sql = "
+				INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
+					" . $prefix . "_objekt_gml_id,
+					" . $prefix . "_textabschnitt_gml_id
+				) SELECT * FROM (" . implode(' UNION ', $select_reftextinhalte) . ") AS reftextinhalte
 			";
-		}
-		$sql = "
-			INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
-				" . $prefix . "_objekt_gml_id,
-				" . $prefix . "_textabschnitt_gml_id
-			) SELECT * FROM (" . implode(' UNION ', $select_reftextinhalte) . ") AS reftextinhalte
-		";
-		#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
-		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			return array(
-				'success' => false,
-				$msg = $ret['msg']
-			);
+			#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				return array(
+					'success' => false,
+					$msg = $ret['msg']
+				);
+			}
 		}
 
 		# Nur für BP-Pläne Textabschnitte für abweichende Texte zu ausgewählten BP-Objekten, Assoziation: abweichungtext
