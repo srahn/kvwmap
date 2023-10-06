@@ -688,7 +688,7 @@ class GUI {
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 53px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -4494,117 +4494,93 @@ echo '			</table>
 		$this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
 		if (is_array($this->styledaten)) { ?>
 			<table align="left" border="0" cellspacing="0" cellpadding="3"><?
-				for ($i = 0; $i < count($this->styledaten); $i++) { ?>
+				for ($i = 0; $i < count($this->styledaten); $i++) {
+					$select_options = [];
+					$copy = false;
+					$min = $max = $onkeyup = NULL;	?>
 					<tr>
 						<td class="px13"><?
 							echo key($this->styledaten); ?>
 						</td>
 						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
+								case 'Style_ID' : {
+									$onkeyup = "if (event.keyCode != 8) { get_style(this.value) }' : '');";
+								} break;
+								
 								case 'linecap' : {
-									echo FormObject::createSelectField(
-										'style_linecap',
-										array(
-											array('value' => 'butt', 'output' => 'abgeflacht'),
-											array('value' => 'round', 'output' => 'rund'),
-											array('value' => 'square', 'output' => 'eckig'),
-											array('value' => 'triangle', 'output' => 'dreieckig')
-										),
-										$this->styledaten[key($this->styledaten)],
-										1,
-										"width: 87px",
-										"",
-										"",
-										"",
-										'styleFormField',
-										"ohne"
-									);
+									$select_options = [
+										['value' => 'butt', 'output' => 'abgeflacht'],
+										['value' => 'round', 'output' => 'rund'],
+										['value' => 'square', 'output' => 'eckig'],
+										['value' => 'triangle', 'output' => 'dreieckig']
+									];
 								} break;
+								
 								case 'linejoin' : {
-									echo FormObject::createSelectField(
-										'style_linejoin',
-										array(
-											array('value' => 'round', 'output' => 'rund'),
-											array('value' => 'miter', 'output' => 'phasig'),
-											array('value' => 'bevel', 'output' => 'abgeschrägt')
-										),
-										$this->styledaten[key($this->styledaten)],
-										1,
-										"width: 87px",
-										"",
-										"",
-										"",
-										'styleFormField',
-										"ohne"
-									);
+									$select_options = [
+										['value' => 'round', 'output' => 'rund'],
+										['value' => 'miter', 'output' => 'phasig'],
+										['value' => 'bevel', 'output' => 'abgeschrägt']
+									];
 								} break;
-								case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										min="0"
-										max="200"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : {									
+									$type = 'number';
+									$min = '0';
+									$max = '200';
+									$onkeyup = 'enforceMinMax(this)';
 								} break;
-								case 'minwidth' : case 'maxwidth' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										min="0"
-										max="100"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'minwidth' : case 'maxwidth' : case 'opacity' : { 
+									$type = 'number';
+									$min = '0';
+									$max = '100';
+									$onkeyup = 'enforceMinMax(this)';
 								} break;
-								case 'offsetx' : case 'offsety' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'offsetx' : case 'offsety' : { 
+									$type = 'number';
 								} break;
-								/*
-								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										style="width: 89px"
-										type="color"
-										value=""
-									><?
+								
+								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { 
+									$type = 'text';
+									$copy = true;
 								} break;
-*/
-								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="11"
-										type="text"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									>&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i><?
-								} break;
-								default : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="11"
-										type="text"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								default : { 
+									$type = 'text';
 								}
-							} ?>
+							} 
+							if (!empty($select_options)) {
+								echo FormObject::createSelectField(
+									'style_' . key($this->styledaten),
+									$select_options,
+									$this->styledaten[key($this->styledaten)],
+									1,
+									"",
+									"",
+									"",
+									"",
+									'styleFormField',
+									"ohne"
+								);
+							}
+							else {
+								echo '
+									<input
+										class="styleFormField"
+										onkeyup="' . $onkeyup . '"
+										name="style_' . key($this->styledaten) . '"
+										size="' . $size . '"
+										type="' . $type . '"
+										' . ($min !== NULL? 'min="' . $min .'"' : '') . '
+										' . ($max !== NULL? 'max="' . $max .'"' : '') . '
+										value="' . $this->styledaten[key($this->styledaten)] .'"
+									>
+									' . ($copy? '&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i>' : '');
+							}
+							?>
 						</td>
 					</tr><?
 					next($this->styledaten);

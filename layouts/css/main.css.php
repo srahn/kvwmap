@@ -540,6 +540,10 @@ span[data-tooltip]:hover::after {
 	border:	1px solid #C3C7C3;
 }
 
+.styleFormField {
+	width: 87px;
+}
+
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
 	height: calc(100vh - 210px);
 	overflow-y: scroll;
