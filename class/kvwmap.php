@@ -3182,6 +3182,8 @@ echo '			</table>
 
 	function notification_formular() {
 		include_once(CLASSPATH . 'Notification.php');
+		include_once(CLASSPATH . 'Nutzer.php');
+		include_once(CLASSPATH . 'User2Notification.php');
 		if (value_of($this->formvars, 'id') != '') {
 			$this->sanitize(['id' => 'int']);
 			$this->notification = Notification::find_by_id($this, $this->formvars['id']);
@@ -3189,14 +3191,17 @@ echo '			</table>
 		else {
 			$this->notification = new Notification($this);
 		}
+		$this->allstellen = Stelle::find($this, 'true', 'Bezeichnung');
+		$this->allusers = Nutzer::find($this, 'true');
+
 		$this->main = 'notification_formular.php';
 		$this->output();
 	}
 
 	/**
-		Create a new user notification or update if an id has been sent
-		Return only success or fail messages.
-	*/
+	 * Create a new user notification or update if an id has been sent
+	 * Return only success or fail messages.
+	 */
 	function put_notification() {
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
@@ -8536,7 +8541,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$mapDB->save_postgis_attributes($layerdb, $formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
+						$this->mobile_prepare_sync_table(
+							$layerdb,
+							$formvars['sync']
+						);
 						$this->mobile_prepare_layer_sync(
+							$layerdb,
+							$formvars['selected_layer_id'],
+							$formvars['sync']
+						);
+						$this->mobile_validate_layer_sync(
 							$layerdb,
 							$formvars['selected_layer_id'],
 							$formvars['sync']
@@ -12576,9 +12590,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   function Stelleneditor() {
 		global $language;
 		#echo '<p><b>Stelleneditor</b>';
-		include_(CLASSPATH.'datendrucklayout.php');
-		include_(CLASSPATH.'funktion.php');
-		include_(CLASSPATH.'FormObject.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
+		include_(CLASSPATH . 'Funktion.php');
+		include_(CLASSPATH . 'FormObject.php');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
 		$stelle = new MyObject($this, 'stelle');
@@ -12690,7 +12704,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
-    $funktion = new funktion($this->database);
+    $funktion = new Funktion($this);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung', $this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Kartendruck-Layouts
     $this->formvars['frames'] = $document->load_frames(NULL, NULL);
@@ -13254,19 +13268,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionenAnzeigen(){
-		include_(CLASSPATH.'funktion.php');
+		include_(CLASSPATH . 'Funktion.php');
     $this->main='funktionen.php';
     # Abfragen aller Funktionen
-    $this->funktion = new funktion($this->database);
+    $this->funktion = new Funktion($this);
     $this->funktionen = $this->funktion->getFunktionen(NULL, $this->formvars['order']);
     $this->output();
   }
 
   function FunktionenFormular(){
-		include_once (CLASSPATH.'funktion.php');
+		include_once (CLASSPATH . 'Funktion.php');
     $this->main='funktionen_formular.php';
     if ($this->formvars['selected_function_id']>0) {
-      $this->funktion = new funktion($this->database);
+      $this->funktion = new Funktion($this);
       $this->funktionen = $this->funktion->getFunktionen($this->formvars['selected_function_id'], NULL);
       $this->formvars['bezeichnung'] = $this->funktionen[0]['bezeichnung'];
     }
@@ -13274,8 +13288,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionAnlegen() {
-		include_(CLASSPATH.'funktion.php');
-    $this->funktion = new funktion($this->database);
+		include_(CLASSPATH . 'Funktion.php');
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->NeuAnlegen($this->formvars);
     if ($ret[0]) {
       # Fehler beim Eintragen der Funktion
@@ -13295,8 +13309,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionAendern(){
-		include_(CLASSPATH.'funktion.php');
-    $this->funktion = new funktion($this->database);
+		include_(CLASSPATH . 'Funktion.php');
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->Aendern($this->formvars);
     if($this->formvars['id'] != ''){
       $this->formvars['selected_function_id'] = $this->formvars['id'];
@@ -13311,9 +13325,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionLoeschen(){
-		include_(CLASSPATH.'funktion.php');
+		include_(CLASSPATH . 'Funktion.php');
     $this->main='funktionen.php';
-    $this->funktion = new funktion($this->database);
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->Loeschen($this->formvars);
     $this->funktionen = $this->funktion->getFunktionen(NULL, $this->formvars['order']);
     $this->output();

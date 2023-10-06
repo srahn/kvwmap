@@ -7,7 +7,20 @@
 		'nur in ausgewählten Stellen'
 	);
 ?>
+<script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script>
+	function gotoStelle(event, option_obj) {
+		if (event.layerX > 300){
+			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+		}
+	}
+
+	function gotoUser(event, option_obj) {
+		if(event.layerX > 300){
+			location.href = 'index.php?go=Benutzerdaten_Formular&selected_user_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+		}
+	}
+
 	let formElem = document.getElementById('GUI');
 	formElem.onsubmit = async (e) => {
 		e.preventDefault();
@@ -88,7 +101,85 @@
 	<tr>
 		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_stellen_filter; ?> <span data-tooltip="<?php echo $strStellenFilterHint; ?>"></span></th>
 		<td style="border-bottom:1px solid #C3C7C3">
-			<input id="stellen_filter" name="stellen_filter" type="text" placeholder="<? echo $strPlaceholder_stellen_filter; ?>" value="<?php echo $this->notification->get('stellen_filter'); ?>"/>
+			<table>
+				<tr valign="top">
+						<td>
+							<select name="selectedstellen" size="6" multiple style="position: relative; width: 340px"><?
+								foreach ($this->notification->selstellen AS $selstelle) {?>
+									<option
+										class="select_option_link"
+										onclick="gotoStelle(event, this)"
+										title="<?php echo str_replace(' ', '&nbsp;', $selstelle->get('Bezeichnung')); ?>"
+										value="<?php echo $selstelle->get('ID'); ?>"
+									><?php echo $selstelle->get('Bezeichnung'); ?></option><?php
+								} ?>
+							</select>
+							<input
+								name="stellen_filter"
+								value="<? echo $this->notification->get('stellen_filter'); ?>"
+								type="hidden"
+							>
+						</td>
+						<td align="center" valign="middle" width="1">
+							<input type="button" name="addStellen" value="&laquo;" onClick=addOptions(document.GUI.allstellen,document.GUI.selectedstellen,document.GUI.stellen_filter,'value')>
+							<input type="button" name="substractStellen" value="&raquo;" onClick=substractOptions(document.GUI.selectedstellen,document.GUI.stellen_filter,'value')>
+						</td>
+						<td>
+							<select name="allstellen" size="6" multiple style="position: relative; width: 340px"><?
+								foreach ($this->allstellen AS $stelle) { ?>
+									<option
+										class="select_option_link"
+										onclick="gotoStelle(event, this)"
+										title="<?php echo str_replace(' ', '&nbsp;', $stelle->get('Bezeichnung')); ?>"
+										value="<?php echo $stelle->get('ID'); ?>"
+									><?php echo $stelle->get('Bezeichnung'); ?></option><?php
+								}?>
+							</select>
+						</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_user_filter; ?> <span data-tooltip="<?php echo $strUserFilterHint; ?>"></span></th>
+		<td style="border-bottom:1px solid #C3C7C3">
+			<table>
+				<tr valign="top">
+						<td>
+							<select name="selectedusers" size="6" multiple style="position: relative; width: 340px"><?
+								foreach ($this->notification->selusers AS $seluser) {?>
+									<option
+										class="select_option_link"
+										onclick="gotoUser(event, this)"
+										title="<?php echo str_replace(' ', '&nbsp;', $seluser->get_name()); ?>"
+										value="<?php echo $seluser->get_id(); ?>"
+									><?php echo $seluser->get_name(); ?></option><?php
+								} ?>
+							</select>
+							<input
+								name="user_filter"
+								value="<? echo $this->notification->get('user_filter'); ?>"
+								type="hidden"
+							>
+						</td>
+						<td align="center" valign="middle" width="1">
+							<input type="button" name="addUsers" value="&laquo;" onClick="addOptions(document.GUI.allusers,document.GUI.selectedusers,document.GUI.user_filter,'value')">
+							<input type="button" name="substractUsers" value="&raquo;" onClick="substractOptions(document.GUI.selectedusers,document.GUI.user_filter,'value');">
+						</td>
+						<td>
+							<select name="allusers" size="6" multiple style="position: relative; width: 340px"><?
+								foreach ($this->allusers AS $user) { ?>
+									<option
+										class="select_option_link"
+										onclick="gotoUser(event, this)"
+										title="<?php echo str_replace(' ', '&nbsp;', $user->get_name()); ?>"
+										value="<?php echo $user->get_id(); ?>"
+									><?php echo $user->get_name(); ?></option><?php
+								}?>
+							</select>
+						</td>
+				</tr>
+			</table>
 		</td>
 	</tr>
 	<tr>

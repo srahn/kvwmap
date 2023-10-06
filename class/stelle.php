@@ -40,6 +40,11 @@ class stelle {
 		$ret = $this->readDefaultValues();
 	}
 
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$stelle = new MyObject($gui, 'stelle');
+		return $stelle->find_where($where, $order, $sort_direction);
+	}
+
 	function get($attribute) {
 		return $this->data[$attribute];
 	}
