@@ -44,6 +44,7 @@
 		<th><? echo $strLabel_veroeffentlichungsdatum; ?></th>
 		<th><? echo $strLabel_ablaufdatum; ?></th>
 		<th><? echo $strLabel_stellen_filter; ?></th>
+		<th><? echo $strLabel_user_filter; ?></th>
 		<th><div style="width: 60px"><a class="btn btn-new" href="index.php?go=notification_formular&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_notification; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></div></th>
 	<tr><?php
 	foreach ($this->notifications AS $notification) { ?>
@@ -53,6 +54,7 @@
 			<td><? echo $notification->get('veroeffentlichungsdatum'); ?></td>
 			<td><? echo $notification->get('ablaufdatum'); ?></td>
 			<td><? echo $notification->get('stellen_filter'); ?></td>
+			<td><? echo $notification->get('user_filter'); ?></td>
 			<td>
 				<a href="index.php?go=notification_formular&id=<?php echo $notification->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
 				<a href="#" style="margin-left: 10px;" onclick="deleteNotification(<?php echo $notification->get('id'); ?>);"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>

@@ -194,6 +194,17 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+function enforceMinMax(el) {
+  if (el.value != '') {
+    if (parseInt(el.value) < parseInt(el.min)) {
+      el.value = el.min;
+    }
+    if (parseInt(el.value) > parseInt(el.max)) {
+      el.value = el.max;
+    }
+  }
+}
+
 function delete_user2notification(notification_id) {
 	let formData = new FormData();
 	formData.append('go', 'delete_user2notification');

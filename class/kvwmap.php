@@ -688,7 +688,7 @@ class GUI {
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 53px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -3182,6 +3182,8 @@ echo '			</table>
 
 	function notification_formular() {
 		include_once(CLASSPATH . 'Notification.php');
+		include_once(CLASSPATH . 'Nutzer.php');
+		include_once(CLASSPATH . 'User2Notification.php');
 		if (value_of($this->formvars, 'id') != '') {
 			$this->sanitize(['id' => 'int']);
 			$this->notification = Notification::find_by_id($this, $this->formvars['id']);
@@ -3189,14 +3191,17 @@ echo '			</table>
 		else {
 			$this->notification = new Notification($this);
 		}
+		$this->allstellen = Stelle::find($this, 'true', 'Bezeichnung');
+		$this->allusers = Nutzer::find($this, 'true');
+
 		$this->main = 'notification_formular.php';
 		$this->output();
 	}
 
 	/**
-		Create a new user notification or update if an id has been sent
-		Return only success or fail messages.
-	*/
+	 * Create a new user notification or update if an id has been sent
+	 * Return only success or fail messages.
+	 */
 	function put_notification() {
 		include_once(CLASSPATH . 'Notification.php');
 		include_once(CLASSPATH . 'formatter.php');
@@ -4494,117 +4499,93 @@ echo '			</table>
 		$this->styledaten = $mapDB->get_Style($this->formvars['style_id']);
 		if (is_array($this->styledaten)) { ?>
 			<table align="left" border="0" cellspacing="0" cellpadding="3"><?
-				for ($i = 0; $i < count($this->styledaten); $i++) { ?>
+				for ($i = 0; $i < count($this->styledaten); $i++) {
+					$select_options = [];
+					$copy = false;
+					$min = $max = $onkeyup = NULL;	?>
 					<tr>
 						<td class="px13"><?
 							echo key($this->styledaten); ?>
 						</td>
 						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
+								case 'Style_ID' : {
+									$onkeyup = "if (event.keyCode != 8) { get_style(this.value) }' : '');";
+								} break;
+								
 								case 'linecap' : {
-									echo FormObject::createSelectField(
-										'style_linecap',
-										array(
-											array('value' => 'butt', 'output' => 'abgeflacht'),
-											array('value' => 'round', 'output' => 'rund'),
-											array('value' => 'square', 'output' => 'eckig'),
-											array('value' => 'triangle', 'output' => 'dreieckig')
-										),
-										$this->styledaten[key($this->styledaten)],
-										1,
-										"width: 87px",
-										"",
-										"",
-										"",
-										'styleFormField',
-										"ohne"
-									);
+									$select_options = [
+										['value' => 'butt', 'output' => 'abgeflacht'],
+										['value' => 'round', 'output' => 'rund'],
+										['value' => 'square', 'output' => 'eckig'],
+										['value' => 'triangle', 'output' => 'dreieckig']
+									];
 								} break;
+								
 								case 'linejoin' : {
-									echo FormObject::createSelectField(
-										'style_linejoin',
-										array(
-											array('value' => 'round', 'output' => 'rund'),
-											array('value' => 'miter', 'output' => 'phasig'),
-											array('value' => 'bevel', 'output' => 'abgeschrägt')
-										),
-										$this->styledaten[key($this->styledaten)],
-										1,
-										"width: 87px",
-										"",
-										"",
-										"",
-										'styleFormField',
-										"ohne"
-									);
+									$select_options = [
+										['value' => 'round', 'output' => 'rund'],
+										['value' => 'miter', 'output' => 'phasig'],
+										['value' => 'bevel', 'output' => 'abgeschrägt']
+									];
 								} break;
-								case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										min="0"
-										max="200"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'minsize' : case 'maxsize' : case 'gap' : case 'initialgap' : case 'linejoinmaxsize' : {									
+									$type = 'number';
+									$min = '0';
+									$max = '200';
+									$onkeyup = 'enforceMinMax(this)';
 								} break;
-								case 'minwidth' : case 'maxwidth' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										min="0"
-										max="100"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'minwidth' : case 'maxwidth' : case 'opacity' : { 
+									$type = 'number';
+									$min = '0';
+									$max = '100';
+									$onkeyup = 'enforceMinMax(this)';
 								} break;
-								case 'offsetx' : case 'offsety' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="9"
-										type="number"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								case 'offsetx' : case 'offsety' : { 
+									$type = 'number';
 								} break;
-								/*
-								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										style="width: 89px"
-										type="color"
-										value=""
-									><?
+								
+								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { 
+									$type = 'text';
+									$copy = true;
 								} break;
-*/
-								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="11"
-										type="text"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									>&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i><?
-								} break;
-								default : { ?>
-									<input
-										class="styleFormField"
-										onkeyup="<? echo ($i === 0 ? 'if (event.keyCode != 8) { get_style(this.value) }' : ''); ?>"
-										name="style_<? echo key($this->styledaten); ?>"
-										size="11"
-										type="text"
-										value="<? echo $this->styledaten[key($this->styledaten)]; ?>"
-									><?
+								
+								default : { 
+									$type = 'text';
 								}
-							} ?>
+							} 
+							if (!empty($select_options)) {
+								echo FormObject::createSelectField(
+									'style_' . key($this->styledaten),
+									$select_options,
+									$this->styledaten[key($this->styledaten)],
+									1,
+									"",
+									"",
+									"",
+									"",
+									'styleFormField',
+									"ohne"
+								);
+							}
+							else {
+								echo '
+									<input
+										class="styleFormField"
+										onkeyup="' . $onkeyup . '"
+										name="style_' . key($this->styledaten) . '"
+										size="' . $size . '"
+										type="' . $type . '"
+										' . ($min !== NULL? 'min="' . $min . '"' : '') . '
+										' . ($max !== NULL? 'max="' . $max . '"' : '') . '
+										value="' . $this->styledaten[key($this->styledaten)] . '"
+									>
+									' . ($copy? '&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i>' : '');
+							}
+							?>
 						</td>
 					</tr><?
 					next($this->styledaten);
@@ -8048,6 +8029,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 	}
 
 	function Layereditor() {
+		include_once(CLASSPATH . 'LayerChart.php');
 		$this->titel = 'Layer Editor';
 		$this->main = 'layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -8065,6 +8047,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
+		$this->layerdata['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
 		$this->output();
 	}
 
@@ -8558,7 +8541,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$mapDB->save_postgis_attributes($layerdb, $formvars['selected_layer_id'], $attributes, $formvars['maintable'], $formvars['schema']);
 					#---------- Speichern der Layerattribute -------------------
 					if ($this->plugin_loaded('mobile')) {
+						$this->mobile_prepare_sync_table(
+							$layerdb,
+							$formvars['sync']
+						);
 						$this->mobile_prepare_layer_sync(
+							$layerdb,
+							$formvars['selected_layer_id'],
+							$formvars['sync']
+						);
+						$this->mobile_validate_layer_sync(
 							$layerdb,
 							$formvars['selected_layer_id'],
 							$formvars['sync']
@@ -11243,11 +11235,61 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
-	function chart_erzeugen() {
-		include_once(CLASSPATH . 'LayerChart.php');
-		$chart = new LayerChart($this);
-		$result = $chart->create(array_intersect_key($this->formvars, array('id', 'layer_id', 'title', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name')));
-		return $result;
+	function layer_charts_Anzeigen() {
+		include_once(CLASSPATH . 'Layer.php');
+		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
+		$this->main = 'layer_chart_list.php';
+		$this->output();
+	}
+
+	function layer_chart_Editor() {
+		include_once(CLASSPATH . 'Layer.php');
+
+		if ($this->formvars['id'] != '') {
+			# edit
+			$this->layer_chart = LayerChart::find_by_id($this, $this->formvars['id']);
+			$this->formvars['layer_id'] = $this->layer_chart->get('layer_id');
+		}
+		else {
+			# new
+			$this->layer_chart = new LayerChart($this);
+			$this->layer_chart->setKeysFromTable();
+			$this->layer_chart->set('layer_id', $this->formvars['layer_id']);
+		}
+		$this->layer = Layer::find_by_id($this, $this->formvars['layer_id']);
+		$this->main = 'layer_chart_formular.php';
+		$this->output();
+	}
+
+	function layer_chart_Speichern($chart) {
+		include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
+		if ($chart->get_id() == '') {
+			$results = $chart->create(formvars_strip($this->formvars, array('layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+			if ($results[0]['success']) {
+				$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+			}
+		}
+		else {
+			$results = $chart->update(formvars_strip($this->formvars, array('title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
+			if ($results[0]['success']) {
+				$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
+			}
+		}
+		return $results[0];
+	}
+
+	function layer_chart_Loeschen() {
+		if ($this->formvars['id'] != '') {
+			$chart = LayerChart::find_by_id($this, $this->formvars['id']);
+			$response = $chart->delete();
+		}
+		else {
+			$response = array(
+				'success' => false,
+				'msg' => $strLayerChartMissingLayerId
+			);
+		}
+		return $response;
 	}
 
 	function generisches_sachdaten_diagramm($width, $datei = NULL){
@@ -12548,9 +12590,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   function Stelleneditor() {
 		global $language;
 		#echo '<p><b>Stelleneditor</b>';
-		include_(CLASSPATH.'datendrucklayout.php');
-		include_(CLASSPATH.'funktion.php');
-		include_(CLASSPATH.'FormObject.php');
+		include_(CLASSPATH . 'datendrucklayout.php');
+		include_(CLASSPATH . 'Funktion.php');
+		include_(CLASSPATH . 'FormObject.php');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database, $this);
 		$stelle = new MyObject($this, 'stelle');
@@ -12662,7 +12704,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Abfragen aller möglichen Menuepunkte
     $this->formvars['menues'] = Menue::get_all_ober_menues($this);
     # Abfragen aller möglichen Funktionen
-    $funktion = new funktion($this->database);
+    $funktion = new Funktion($this);
     $this->formvars['functions'] = $funktion->getFunktionen(NULL, 'bezeichnung', $this->Stelle->id, $this->user->id);
     # Abfragen aller möglichen Kartendruck-Layouts
     $this->formvars['frames'] = $document->load_frames(NULL, NULL);
@@ -13226,19 +13268,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionenAnzeigen(){
-		include_(CLASSPATH.'funktion.php');
+		include_(CLASSPATH . 'Funktion.php');
     $this->main='funktionen.php';
     # Abfragen aller Funktionen
-    $this->funktion = new funktion($this->database);
+    $this->funktion = new Funktion($this);
     $this->funktionen = $this->funktion->getFunktionen(NULL, $this->formvars['order']);
     $this->output();
   }
 
   function FunktionenFormular(){
-		include_once (CLASSPATH.'funktion.php');
+		include_once (CLASSPATH . 'Funktion.php');
     $this->main='funktionen_formular.php';
     if ($this->formvars['selected_function_id']>0) {
-      $this->funktion = new funktion($this->database);
+      $this->funktion = new Funktion($this);
       $this->funktionen = $this->funktion->getFunktionen($this->formvars['selected_function_id'], NULL);
       $this->formvars['bezeichnung'] = $this->funktionen[0]['bezeichnung'];
     }
@@ -13246,8 +13288,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionAnlegen() {
-		include_(CLASSPATH.'funktion.php');
-    $this->funktion = new funktion($this->database);
+		include_(CLASSPATH . 'Funktion.php');
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->NeuAnlegen($this->formvars);
     if ($ret[0]) {
       # Fehler beim Eintragen der Funktion
@@ -13267,8 +13309,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionAendern(){
-		include_(CLASSPATH.'funktion.php');
-    $this->funktion = new funktion($this->database);
+		include_(CLASSPATH . 'Funktion.php');
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->Aendern($this->formvars);
     if($this->formvars['id'] != ''){
       $this->formvars['selected_function_id'] = $this->formvars['id'];
@@ -13283,9 +13325,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function FunktionLoeschen(){
-		include_(CLASSPATH.'funktion.php');
+		include_(CLASSPATH . 'Funktion.php');
     $this->main='funktionen.php';
-    $this->funktion = new funktion($this->database);
+    $this->funktion = new Funktion($this);
     $ret = $this->funktion->Loeschen($this->formvars);
     $this->funktionen = $this->funktion->getFunktionen(NULL, $this->formvars['order']);
     $this->output();

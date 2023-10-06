@@ -38,8 +38,6 @@
 # stefan.rahn@gdi-service.de                                      #
 #
 ############################################################################################
-#########################
-# class_user #
 class funktion {
 
 	function __construct($database) {

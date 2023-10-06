@@ -28,8 +28,8 @@ class LayerGroup extends MyObject {
 	}
 
 	public static	function find_by_id($gui, $id) {
-		$lg = new LayerGroup($gui);
-		$group = $lg->find_by(LayerGroup::$identifier, $id);
+		$obj = new LayerGroup($gui);
+		$group = $obj->find_by(LayerGroup::$identifier, $id);
 		$group->layers = $group->get_Layer();
 		return $group;
 	}
