@@ -202,7 +202,7 @@ function setScale(select){
 		color: #111;
 	}
 	#selected_style_div {
-		width: 218px;
+		width: 213px;
 	}
 	.fa-clipboard:hover {
 		cursor: pointer;
