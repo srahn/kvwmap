@@ -4574,8 +4574,8 @@ echo '			</table>
 										name="style_' . key($this->styledaten) . '"
 										size="' . $size . '"
 										type="' . $type . '"
-										' . ($min !== NULL? 'min="' . $min .'"' : '') . '
-										' . ($max !== NULL? 'max="' . $max .'"' : '') . '
+										' . ($min !== NULL? 'min="' . $min . '"' : '') . '
+										' . ($max !== NULL? 'max="' . $max . '"' : '') . '
 										value="' . $this->styledaten[key($this->styledaten)] .'"
 									>
 									' . ($copy? '&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i>' : '');
