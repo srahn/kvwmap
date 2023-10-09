@@ -42,6 +42,7 @@ class GUI {
 	var $pdf;
 	var $addressliste;
 	var $debug;
+	var $database;
 	var $mysqli;
 	var $flst;
 	var $formvars;
@@ -10826,7 +10827,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_(CLASSPATH.'datendrucklayout.php');
 		$ddl=new ddl($this->database);
 		$mapdb = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->ddl=$ddl;
+    $this->ddl = $ddl;
     $layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['aktivesLayout'] = $this->ddl->save_layout($this->formvars, $this->attributes, $_files, $this->Stelle->id);

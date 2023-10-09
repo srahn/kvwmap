@@ -1474,13 +1474,16 @@ class ddl {
 	}
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
-    if($formvars['name']){
-    	if($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-      $sql = "INSERT INTO `datendrucklayouts`";
-      $sql .= " SET `name` = '".$formvars['name']."'";
-      $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
-			$sql .= ", `format` = '".$formvars['format']."'";
-  		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
+    if ($formvars['name']) {
+    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
+			$sql = "
+				INSERT INTO
+					`datendrucklayouts`
+				SET
+					`name` = '" . $formvars['name'] . "'
+					`layer_id` = " . (int)$formvars['selected_layer_id'] . "
+					`format` = '" . $formvars['format'] . "'";
+			if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
       else $sql .= ", `bgposy` = NULL";
@@ -1509,6 +1512,7 @@ class ddl {
 			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
+			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
@@ -1530,21 +1534,26 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-			for($i = 0; $i < count($attributes['name']); $i++){
-				if($formvars['font_'.$attributes['name'][$i]] == 'NULL')$formvars['font_'.$attributes['name'][$i]] = NULL;
-				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
-				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
-				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
-				else $sql.= " ,offset_attribute = NULL";
-				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-				else $sql.= " ,width = NULL";
-				if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-				else $sql.= " ,border = NULL";
-				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-				else $sql.= " ,fontsize = NULL";
+			for ($i = 0; $i < count($attributes['name']); $i++){
+				if ($formvars['font_'.$attributes['name'][$i]] == 'NULL') {
+					$formvars['font_'.$attributes['name'][$i]] = NULL;
+				}
+				$sql = "
+					REPLACE INTO
+						ddl_elemente
+					SET
+						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
+						name = '"							. $attributes['name'][$i] . "',
+						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
+						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
+						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
+						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
+						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
+						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
+						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
+				";
 				#echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
@@ -1646,12 +1655,16 @@ class ddl {
   
   function update_layout($formvars, $attributes, $_files){
   	$_files = $_FILES;
-    if($formvars['name']){
-    	if($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-      $sql = "UPDATE `datendrucklayouts`";
-      $sql .= " SET `name` = '".$formvars['name']."'";
-      $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
-			$sql .= ", `format` = '".$formvars['format']."'";
+    if ($formvars['name']){
+    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
+				$sql = "
+					UPDATE
+						`datendrucklayouts`
+					SET
+						`name` = '".$formvars['name'] . "',
+						`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
+						`format` = '" . $formvars['format'] . "'
+				";
   		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
@@ -1681,6 +1694,7 @@ class ddl {
 			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
+			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
@@ -1700,29 +1714,32 @@ class ddl {
       $lastddl_id = $this->database->mysqli->insert_id;
 
 			for($i = 0; $i < count($attributes['name']); $i++){
-				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
-				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
-				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
-				else $sql.= " ,offset_attribute = NULL";
-				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-				else $sql.= " ,width = NULL";
-				if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-				else $sql.= " ,border = NULL";
-				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-				else $sql.= " ,fontsize = NULL";
+				$sql = "
+					REPLACE INTO
+						ddl_elemente
+					SET
+						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
+						name = '"							. $attributes['name'][$i] . "',
+						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
+						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
+						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
+						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
+						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
+						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
+						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
+				";
 				#echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-        $this->database->execSQL($sql,4, 1);
+				$this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
+				$this->database->execSQL($sql,4, 1);
 			}
 			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < @count($formvars['text']); $i++){
+      for ($i = 0; $i < @count($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;

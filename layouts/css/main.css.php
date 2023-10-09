@@ -370,8 +370,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"], input[type="float"] {
-
+input[type="text"], input[type="float"], input[type="number"] {
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
@@ -404,6 +403,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	font-weight: normal;
 }
 
 span[data-tooltip]::before {

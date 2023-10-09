@@ -1,7 +1,7 @@
 <?php
+	include(LAYOUTPATH . 'languages/datendrucklayouts_' . $this->user->rolle->language . '.php');
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
-	include_once(CLASSPATH . 'FormObject.php');
-		
+	include_once(CLASSPATH . 'FormObject.php');	
 ?>
 
 <style>
@@ -11,197 +11,203 @@
 </style>
 
 <script type="text/javascript">
-<!--
+	var counter = 0;
+	var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
+	var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"] ?: []); ?>'];
 
-var counter = 0;
-var fonts = ['<? echo implode("','", array_map(function ($entry) {return $entry["value"];}, $this->ddl->fonts)); ?>'];
-var attributes = ['', '<? echo implode("','", $this->ddl->attributes["name"] ?: []); ?>'];
-
-function input_check_num(field){
-	field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
-	field.value = field.value.replace(/,/g, '.');
-}
-
-function show_select(input, options){
-	var parent = input.parentNode;
-	var value = input.value;
-	var select = '<select name="'+input.name+'" onchange="hide_select(this, \''+options+'\')">';
-	if(options == 'fonts'){
-		options_array = fonts;
+	function input_check_num(field){
+		field.value = field.value.replace(/[^(0-9| |\.|,|\-)]/g, '');
+		field.value = field.value.replace(/,/g, '.');
 	}
-	else{
-		options_array = attributes;
-	}
-	options_array.forEach(function(value){select = select + '<option value="'+value+'">'+value+'</option>'});
-	select = select + '</select>';
-	parent.innerHTML = select;
-	parent.firstChild.value = value;
-}
 
-function hide_select(select, options){
-	var parent = select.parentNode;
-	parent.innerHTML = '<input type="text" onmouseenter="show_select(this, \''+options+'\')" name="'+select.name+'" value="'+select.value+'">';
-}
-
-function highlight_line(id){
-	var form = document.getElementById('line_form_'+id);
-	form.classList.add('legend_layer_highlight');
-	svg_line = document.getElementById('line_'+id)
-	if(svg_line){	
-		svg_line.classList.add('line_highlight');
-	}
-}
-
-function de_highlight_line(id){
-	var form = document.getElementById('line_form_'+id);
-	form.classList.remove('legend_layer_highlight');
-	svg_line = document.getElementById('line_'+id)
-	if(svg_line){	
-		svg_line.classList.remove('line_highlight');
-	}
-}
-
-function jump_to_line(id){
-	var form = document.getElementById('line_form_'+id);
-	form.scrollIntoView({behavior: 'smooth'});
-}
-
-function highlight_rect(id){
-	var form = document.getElementById('rect_form_'+id);
-	form.classList.add('legend_layer_highlight');
-	svg_rect = document.getElementById('rect_'+id)
-	if(svg_rect){	
-		svg_rect.classList.add('line_highlight');
-	}
-}
-
-function de_highlight_rect(id){
-	var form = document.getElementById('rect_form_'+id);
-	form.classList.remove('legend_layer_highlight');
-	svg_rect = document.getElementById('rect_'+id)
-	if(svg_rect){	
-		svg_rect.classList.remove('line_highlight');
-	}
-}
-
-function jump_to_rect(id){
-	var form = document.getElementById('rect_form_'+id);
-	form.scrollIntoView({behavior: 'smooth'});
-}
-
-function image_coords(event){
-	document.getElementById('coords').style.visibility='';
-	var offset = 0;
-	var pointer_div = document.getElementById("preview_div");
-	var height = parseInt(pointer_div.style.height);
-	if(window.ActiveXObject){		//for IE
-		pos_x = window.event.offsetX;
-		pos_y = window.event.offsetY;
-	}
-	else{	//for Firefox
-		var top = 0, left = 0;
-		var elm = pointer_div;
-		while(elm){
-			left += elm.offsetLeft;
-			top += elm.offsetTop;
-			elm = elm.offsetParent;
+	function show_select(input, options){
+		var parent = input.parentNode;
+		var value = input.value;
+		var select = '<select name="'+input.name+'" onchange="hide_select(this, \''+options+'\')">';
+		if(options == 'fonts'){
+			options_array = fonts;
 		}
-		pos_x = event.pageX - left;
-		pos_y = event.pageY - top;
-	}
-	if(pos_y > height - 140){
-		offset = 130;
-	}
-	document.getElementById("coords").style.left = pos_x+7;
-	document.getElementById("coords").style.top = pos_y-offset;
-	document.getElementById("posx").value = pos_x;
-	document.getElementById("posy").value = height - pos_y;
-}
-
-
-function updateheight(imagewidth, imageheight){
-	ratio = imageheight/imagewidth;
-	document.GUI.headheight.value = Math.round(document.GUI.headwidth.value * ratio); 
-}
-
-function updatewidth(imagewidth, imageheight){
-	ratio = imagewidth/imageheight;
-	document.GUI.headwidth.value = Math.round(document.GUI.headheight.value * ratio); 
-}
-
-function update_options(){
-	if(document.GUI.type.value > 0)document.getElementById('list_type_options').style.display = '';
-	else document.getElementById('list_type_options').style.display = 'none';
-}
-
-function addfreetext(layer_id, ddl_id){
-	var posx = '', posy = '', font = '', size = '';
-	if(document.getElementsByName('textposx[]').length > 0){
-		posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
-		posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
-		font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
-		size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
-	}
-	ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
-	document.GUI.textcount.value = document.GUI.textcount.value + 1;
-}
-
-function addline(){
-	document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
-	document.GUI.submit();
-}
-
-function addrect(){
-	document.GUI.go.value = 'sachdaten_druck_editor_Rechteckhinzufuegen';
-	document.GUI.submit();
-}
-
-function toggle(attribute){
-	if(document.getElementById('tr1_'+attribute).style.display == 'none'){
-		document.getElementById('tr1_'+attribute).style.display = '';
-		document.getElementById('tr2_'+attribute).style.display = '';
-		document.getElementById('img_'+attribute).src = '<? echo GRAPHICSPATH; ?>minus.gif';
-		if(document.getElementsByName('posx_'+attribute)[0].value == ''){
-			document.getElementsByName('posx_'+attribute)[0].value = 70;
+		else{
+			options_array = attributes;
 		}
-		if(document.getElementsByName('posy_'+attribute)[0].value == ''){
-			document.getElementsByName('posy_'+attribute)[0].value = 750-counter*20;
-			counter++;
-		}
-		if(document.getElementsByName('fontsize_'+attribute)[0].value == ''){
-			document.getElementsByName('fontsize_'+attribute)[0].value = 13;
+		options_array.forEach(function(value){select = select + '<option value="'+value+'">'+value+'</option>'});
+		select = select + '</select>';
+		parent.innerHTML = select;
+		parent.firstChild.value = value;
+	}
+
+	function hide_select(select, options){
+		var parent = select.parentNode;
+		parent.innerHTML = '<input type="text" onmouseenter="show_select(this, \''+options+'\')" name="'+select.name+'" value="'+select.value+'">';
+	}
+
+	function highlight_line(id){
+		var form = document.getElementById('line_form_'+id);
+		form.classList.add('legend_layer_highlight');
+		svg_line = document.getElementById('line_'+id)
+		if(svg_line){	
+			svg_line.classList.add('line_highlight');
 		}
 	}
-	else{
-		document.getElementById('tr1_'+attribute).style.display = 'none';
-		document.getElementById('tr2_'+attribute).style.display = 'none';
-		document.getElementById('img_'+attribute).src = '<? echo GRAPHICSPATH; ?>plus.gif';
-	}
-}
 
-function save_layout(){
-	if(document.GUI.name.value == ''){
-		alert('Bitte geben Sie einen Namen für das Layout ein.');
+	function de_highlight_line(id){
+		var form = document.getElementById('line_form_'+id);
+		form.classList.remove('legend_layer_highlight');
+		svg_line = document.getElementById('line_'+id)
+		if(svg_line){	
+			svg_line.classList.remove('line_highlight');
+		}
 	}
-	else{
-		check = true;
-		for(i = 1; i < document.GUI.aktivesLayout.options.length; i++){
-			if(document.GUI.aktivesLayout.options[i].text == document.GUI.name.value){
-				check = confirm('Es existiert bereits ein Layout mit diesem Namen. Wollen Sie wirklich ein neues Layout anlegen?');
+
+	function jump_to_line(id){
+		var form = document.getElementById('line_form_'+id);
+		form.scrollIntoView({behavior: 'smooth'});
+	}
+
+	function highlight_rect(id){
+		var form = document.getElementById('rect_form_'+id);
+		form.classList.add('legend_layer_highlight');
+		svg_rect = document.getElementById('rect_'+id)
+		if(svg_rect){	
+			svg_rect.classList.add('line_highlight');
+		}
+	}
+
+	function de_highlight_rect(id){
+		var form = document.getElementById('rect_form_'+id);
+		form.classList.remove('legend_layer_highlight');
+		svg_rect = document.getElementById('rect_'+id)
+		if(svg_rect){	
+			svg_rect.classList.remove('line_highlight');
+		}
+	}
+
+	function jump_to_rect(id){
+		var form = document.getElementById('rect_form_'+id);
+		form.scrollIntoView({behavior: 'smooth'});
+	}
+
+	function image_coords(event){
+		document.getElementById('coords').style.visibility='';
+		var offset = 0;
+		var pointer_div = document.getElementById("preview_div");
+		var height = parseInt(pointer_div.style.height);
+		if(window.ActiveXObject){		//for IE
+			pos_x = window.event.offsetX;
+			pos_y = window.event.offsetY;
+		}
+		else{	//for Firefox
+			var top = 0, left = 0;
+			var elm = pointer_div;
+			while(elm){
+				left += elm.offsetLeft;
+				top += elm.offsetTop;
+				elm = elm.offsetParent;
+			}
+			pos_x = event.pageX - left;
+			pos_y = event.pageY - top;
+		}
+		if(pos_y > height - 140){
+			offset = 130;
+		}
+		document.getElementById("coords").style.left = pos_x+7;
+		document.getElementById("coords").style.top = pos_y-offset;
+		document.getElementById("posx").value = pos_x;
+		document.getElementById("posy").value = height - pos_y;
+	}
+
+
+	function updateheight(imagewidth, imageheight){
+		ratio = imageheight/imagewidth;
+		document.GUI.headheight.value = Math.round(document.GUI.headwidth.value * ratio); 
+	}
+
+	function updatewidth(imagewidth, imageheight){
+		ratio = imagewidth/imageheight;
+		document.GUI.headwidth.value = Math.round(document.GUI.headheight.value * ratio); 
+	}
+
+	function update_options(){
+		if(document.GUI.type.value > 0)document.getElementById('list_type_options').style.display = '';
+		else document.getElementById('list_type_options').style.display = 'none';
+	}
+
+	function addfreetext(layer_id, ddl_id){
+		var posx = '', posy = '', font = '', size = '';
+		if(document.getElementsByName('textposx[]').length > 0){
+			posx = [].slice.call(document.getElementsByName('textposx[]')).pop().value;
+			posy = [].slice.call(document.getElementsByName('textposy[]')).pop().value;
+			font = [].slice.call(document.getElementsByName('textfont[]')).pop().value;
+			size = [].slice.call(document.getElementsByName('textsize[]')).pop().value;
+		}
+		ahah('index.php?go=sachdaten_druck_editor_Freitexthinzufuegen&selected_layer_id='+layer_id+'&aktivesLayout='+ddl_id+'&posx='+posx+'&posy='+posy+'&size='+size+'&font='+font, '', new Array(document.getElementById('add_freetext')), new Array('prependhtml'));
+		document.GUI.textcount.value = document.GUI.textcount.value + 1;
+	}
+
+	function addline(){
+		document.GUI.go.value = 'sachdaten_druck_editor_Liniehinzufuegen';
+		document.GUI.submit();
+	}
+
+	function addrect(){
+		document.GUI.go.value = 'sachdaten_druck_editor_Rechteckhinzufuegen';
+		document.GUI.submit();
+	}
+
+	function toggle(attribute){
+		if(document.getElementById('tr1_'+attribute).style.display == 'none'){
+			document.getElementById('tr1_'+attribute).style.display = '';
+			document.getElementById('tr2_'+attribute).style.display = '';
+			document.getElementById('img_'+attribute).src = '<? echo GRAPHICSPATH; ?>minus.gif';
+			if(document.getElementsByName('posx_'+attribute)[0].value == ''){
+				document.getElementsByName('posx_'+attribute)[0].value = 70;
+			}
+			if(document.getElementsByName('posy_'+attribute)[0].value == ''){
+				document.getElementsByName('posy_'+attribute)[0].value = 750-counter*20;
+				counter++;
+			}
+			if(document.getElementsByName('fontsize_'+attribute)[0].value == ''){
+				document.getElementsByName('fontsize_'+attribute)[0].value = 13;
 			}
 		}
-		if(check){
-			document.GUI.go.value = 'sachdaten_druck_editor_als neues Layout speichern';
-			document.GUI.submit();
+		else{
+			document.getElementById('tr1_'+attribute).style.display = 'none';
+			document.getElementById('tr2_'+attribute).style.display = 'none';
+			document.getElementById('img_'+attribute).src = '<? echo GRAPHICSPATH; ?>plus.gif';
 		}
 	}
-}
 
-function scrolltop(){
-	document.getElementById('datendrucklayouteditor_formular_scroll').scrollTop = 0;
-}
-	
-//-->
+	function toggle_margin(label_elm, abstand_elm_id) {
+		let elms = $('#margin_' + abstand_elm_id + ', label[for="margin_' + abstand_elm_id + '"]');
+		if (label_elm.value.length > 0) {
+			elms.show();
+		}
+		else {
+			elms.hide();
+		}
+	}
+
+	function save_layout(){
+		if(document.GUI.name.value == ''){
+			alert('Bitte geben Sie einen Namen für das Layout ein.');
+		}
+		else{
+			check = true;
+			for(i = 1; i < document.GUI.aktivesLayout.options.length; i++){
+				if(document.GUI.aktivesLayout.options[i].text == document.GUI.name.value){
+					check = confirm('Es existiert bereits ein Layout mit diesem Namen. Wollen Sie wirklich ein neues Layout anlegen?');
+				}
+			}
+			if(check){
+				document.GUI.go.value = 'sachdaten_druck_editor_als neues Layout speichern';
+				document.GUI.submit();
+			}
+		}
+	}
+
+	function scrolltop(){
+		document.getElementById('datendrucklayouteditor_formular_scroll').scrollTop = 0;
+	}
 </script>
 
 <br>
@@ -387,7 +393,7 @@ function scrolltop(){
 					</tr>
 					<tr>
 						<td>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td colspan="4" class="fett" align="center" style="border-top:1px solid #C3C7C3;border-bottom:1px solid #C3C7C3">&nbsp;Layoutdaten</td>
 								</tr>
@@ -457,9 +463,26 @@ function scrolltop(){
 										<input type="text" name="margin_right" value="<? echo $this->ddl->selectedlayout[0]['margin_right'] ?>" size="2">&nbsp;&nbsp;
 									</td>
 								</tr>
+								<tr>
+									<td colspan="4">
+										<label
+											for="dont_print_empty"
+											class="fett"
+										>
+											Leere Attributwerte nicht drucken:
+										</label>
+										<input
+											id="dont_print_empty"
+											type="checkbox"
+											name="dont_print_empty"
+											value="1"<?
+											echo ($this->ddl->selectedlayout[0]['dont_print_empty'] == '1' ? ' checked="true"' : ''); ?>
+										/>
+									</td>
+								</tr>
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td class="fett" align="center" style="border-bottom:2px solid #C3C7C3;border-top:2px solid #C3C7C3" colspan="8">&nbsp;Grafik&nbsp;</td>
 								</tr>
@@ -479,7 +502,7 @@ function scrolltop(){
 								</tr>
 							</table>
 							<br>
-							<table width="597" border=0 cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr>
@@ -496,27 +519,27 @@ function scrolltop(){
 											<img id="img_<? echo $this->ddl->attributes['name'][$i]; ?>" src="<? echo GRAPHICSPATH.'minus.gif'?>">&nbsp;<? echo $this->ddl->attributes['alias'][$i].' ($'.$this->ddl->attributes['name'][$i].')'; ?>
 										<? } ?>
 										</td>
-									</tr>		
-				<?				switch ($this->ddl->attributes['form_element_type'][$i]){ 
+									</tr><?
+									switch ($this->ddl->attributes['form_element_type'][$i]){ 
 										case 'SubFormPK' : case 'SubFormEmbeddedPK' : {
-											$subformlayouts = $this->ddl->load_layouts(NULL, NULL, $this->ddl->attributes['subform_layer_id'][$i], array(2));
-										?>
+											$subformlayouts = $this->ddl->load_layouts(NULL, NULL, $this->ddl->attributes['subform_layer_id'][$i], array(2)); ?>
 											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
 												<td style="border-top:1px solid #C3C7C3">&nbsp;&nbsp;&nbsp;x:</td>
-												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input type="text" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
+												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3">
+													<input type="text" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5">
+												</td>
 												<td style="border-top:1px solid #C3C7C3" align="left" colspan="5" align="center">
 													&nbsp;Druckrahmen:&nbsp;
 													<select title="Druckrahmen" name="font_<? echo $this->ddl->attributes['name'][$i]; ?>">
-														<option value=""> - Bitte wählen - </option>
-														<?																																											# die font-Spalte wird hier zum Speichern des eingebetteten Layouts genutzt
-														for($j = 0; $j < count($subformlayouts); $j++){
+														<option value=""> - Bitte wählen - </option><?
+														# die font-Spalte wird hier zum Speichern des eingebetteten Layouts genutzt
+														for ($j = 0; $j < count($subformlayouts); $j++){
 															echo '<option ';
-															if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font'] == $subformlayouts[$j]['id']){
+															if ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font'] == $subformlayouts[$j]['id']){
 																echo 'selected ';
 															}
 															echo 'value="'.$subformlayouts[$j]['id'].'">'.$subformlayouts[$j]['name'].'</option>';
-														}
-														?>
+														} ?>
 													</select>
 												</td>
 											</tr>
@@ -540,8 +563,8 @@ function scrolltop(){
 														?>
 													</select>
 												</td>
-											</tr>
-					 <?				} break;
+											</tr><?
+										} break;
 				 
 										case 'Dokument' : { ?>
 											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
@@ -555,31 +578,182 @@ function scrolltop(){
 												<td>&nbsp;&nbsp;&nbsp;y:</td>
 												<td><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
 												<td colspan="5">&nbsp;</td>
-											</tr>	
-							<?			}break;
+											</tr><?
+										} break;
 								
 										default : {	?>
 											<tr id="tr1_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
-												<td style="border-top:1px solid #C3C7C3">&nbsp;x:</td>
-												<td style="border-top:1px solid #C3C7C3"><input type="text" title="negative Werte bewirken eine rechtsbündige Ausrichtung" name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>" size="5"></td>
-												<td style="border-top:1px solid #C3C7C3" width="60px">&nbsp;Breite:</td>
-												<td style="border-top:1px solid #C3C7C3;border-right:1px solid #C3C7C3"><input	type="text" name="width_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>" size="5"></td>
-												<td style="border-top:1px solid #C3C7C3" align="left" colspan="2" align="center">
-													<input type="text" onmouseenter="show_select(this, 'fonts')" name="font_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font']; ?>">
+												<td style="border-top:1px solid #C3C7C3">
+													<label
+														for="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitlePosx; ?>"
+													>
+														x:
+													</label>
+													<input
+														id="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="number"
+														min="-596"
+														max="596"
+														title="<? echo $strTitlePosx; ?>"
+														name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>"
+														size="5">
 												</td>
-												<td style="border-top:1px solid #C3C7C3" align="left" align="center"><input type="text" title="Schriftgröße" name="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['fontsize']; ?>" size="2">&nbsp;pt</td>
+												<td style="border-top:1px solid #C3C7C3; width: 60px; text-align: left;">
+													<label
+														for="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleWidth; ?>"
+													>
+														Breite:
+													</label>
+												</td>
+												<td style="border-top:1px solid #C3C7C3;">
+													<input
+														id="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="number"
+														min="0"
+														max="596"
+														title="<? echo $strTitleWidth; ?>"
+														name="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>"
+														size="5"
+													>
+													<label
+														for="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleFontsize; ?>"
+														style="margin-left: 4px"
+													>
+														Größe:
+													</label>
+													<input
+														id="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="number"
+														min="1"
+														max="100"
+														title="<? echo $strTitleFontsize; ?>"
+														name="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['fontsize']; ?>"
+														size="2"
+														style="margin-left: 2px; width: 37px"
+													>&nbsp;pt
+												</td>
+												<td style="border-top:1px solid #C3C7C3;">
+													<label
+														for="font_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleFont; ?>"
+													>
+														Font:
+													</label>
+												</td>
+												<td style="border-top:1px solid #C3C7C3;">
+													<input
+														id="font_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="text"
+														title="<? echo $strTitleFont; ?>"
+														onmouseenter="show_select(this, 'fonts')"
+														name="font_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font']; ?>">
+												</td>
+												<td style="border-top:1px solid #C3C7C3">
+													<label
+														for="border_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleBorder; ?>"
+													>
+														Rahmen:
+													</label>
+												</td>
+												<td style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; width: 50px">
+													<input
+														id="border_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="checkbox"
+														title="<? echo $strTitleBorder; ?>"
+														name="border_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="1"
+														style="margin-left: 0px;"<?
+														echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['border'] == '1' ? ' checked="true"' : ''); ?>
+													>
+												</td>
 											</tr>
 											<tr id="tr2_<? echo $this->ddl->attributes['name'][$i]; ?>" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos'] == ''){echo 'style="display:none"';} ?>>
-												<td>&nbsp;y:</td>
-												<td><input type="text" name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>" size="5"></td>
-												<td width="60px">&nbsp;unterhalb&nbsp;von:</td>
-												<td style="border-right:1px solid #C3C7C3">
-													<input type="text" onmouseenter="show_select(this, 'attributes')" name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>" value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute']; ?>">
+												<td>
+													<label
+														for="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitlePosy; ?>"
+													>
+														y:
+													</label>
+													<input
+														id="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="number"
+														min="0"
+														max="5000"
+														title="<? echo $strTitlePosy; ?>"
+														name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>"
+														size="5"
+													>
 												</td>
-												<td>&nbsp;Rahmen:</td>
-												<td><input type="checkbox" name="border_<? echo $this->ddl->attributes['name'][$i]; ?>" value="1" <? if($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['border'] == '1'){echo 'checked="true"';} ?> size="5"></td>
-											</tr>
-					 <?				}
+												<td style="width: 60px; text-align: right;">
+													<label
+														for="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleOffset_attribute; ?>"
+													>
+														unterhalb&nbsp;von:
+													</label>
+												</td>
+												<td align="left" align="center">
+													<input
+														id="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="text"
+														title="<? echo $strTitleOffset_attribute; ?>"
+														onmouseenter="show_select(this, 'attributes')"
+														name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute']; ?>"
+													>
+												</td>
+												<td>
+													<label
+														for="label_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleLabel; ?>"
+													>
+														Label:
+													</label>
+												</td>
+												<td>
+													<input
+														id="label_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="text"
+														title="<? echo $strTitleLabel; ?>"
+														name="label_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label']; ?>"
+														onKeyUp="toggle_margin(this, '<? echo $this->ddl->attributes['name'][$i]; ?>');"
+													/>
+												</td>
+												<td>
+													<label
+														for="margin_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														title="<? echo $strTitleMargin; ?>"
+														style="display: <? echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label'] != '' ? 'block' : 'none');?>"
+													>
+														Abstand:
+													</label>
+												</td>
+												<td style="border-right:1px solid #C3C7C3; width: 50px">
+													<input
+														id="margin_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														type="number"
+														min="0"
+														max="596"
+														title="<? echo $strTitleMargin; ?>"
+														name="margin_<? echo $this->ddl->attributes['name'][$i]; ?>"
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['margin']; ?>"
+														size="4"
+														style="display: <? echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label'] != '' ? 'block' : 'none');?>"
+													>
+												</td>
+											</tr><?
+										}
 									}
 								}	
 							}

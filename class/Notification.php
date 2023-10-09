@@ -3,6 +3,9 @@ include_once(CLASSPATH . 'User2Notification.php');
 class Notification extends MyObject {
 
 	static $write_debug = false;
+	var $selusers;
+	var $selstellen;
+	var $validations;
 
 	function __construct($gui) {
 		parent::__construct($gui, 'notifications');
