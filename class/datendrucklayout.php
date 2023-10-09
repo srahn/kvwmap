@@ -1127,7 +1127,7 @@ class ddl {
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_rectangles = $this->add_rectangles($offsetx, 'running');
-			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running', NULL, NULL, $preview);
 			$this->remaining_lines = $this->add_lines($offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
 
@@ -1150,14 +1150,14 @@ class ddl {
 
 			#################  feste Freitexte und Linien hinzufügen, falls keine Attribute da sind ##################
 			$this->remaining_rectangles = $this->add_rectangles($offsetx, 'fixed'); # feste Rechtecke hinzufügen
-			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed', NULL, NULL, $preview);
 			$this->remaining_lines = $this->add_lines($offsetx, 'fixed');
 			###############################################################################################
 			
 			################# fortlaufende Freitexte schreiben ###############
 			# (die festen Freitexte werden vor jedem Attribut geschrieben, da ein Attribut zu einem Seitenüberlauf führen können)
 			$this->remaining_rectangles = $this->add_rectangles($offsetx, 'running');
-			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running');
+			$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'running', NULL, NULL, $preview);
 			$this->remaining_lines = $this->add_lines($offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
 
@@ -1293,14 +1293,14 @@ class ddl {
 			if($this->layout['record_paging']){
 				$record_page_count = $this->pdf->record_page_count[$record_paging_index];
 				$record_page_number++;
-				$this->add_freetexts(0, 0, 'everypage', $record_page_number, $record_page_count);
+				$this->add_freetexts(0, 0, 'everypage', $record_page_number, $record_page_count, $preview);
 				if($record_page_number == $record_page_count){
 					$record_paging_index++;		# im Array mit den Seitenzahlen pro Datensatz eins weiter rücken
 					$record_page_number = 0;	# und Seitennummer wieder auf 0 setzen
 				}
 			}
 			else{
-				$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount);
+				$this->add_freetexts(0, 0, 'everypage', $i + 1, $pagecount, $preview);
 			}
 			$this->add_lines(0, 'everypage');
 			$this->add_rectangles(0, 'everypage');			# feste Rechtecke hinzufügen
