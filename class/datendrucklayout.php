@@ -977,8 +977,8 @@ class ddl {
 				$output = ($value != 'f' ? ($option->print->true != '' ? $option->print->true : 'ja') : ($option->print->false != '' ? $option->print->false : 'nein'));
 			} break;
 			case 'Zahl': {
-				$output = tausenderTrenner($value);
-			} break;
+				$output = (!$preview? tausenderTrenner($value) : $value);
+			} break;			
 			default: {
 				if(!$preview AND $this->attributes['type'][$j] == 'bool'){
 					$value = str_replace('t', "ja", $value);	
