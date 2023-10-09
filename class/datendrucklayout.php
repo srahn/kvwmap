@@ -84,7 +84,7 @@ class ddl {
     }
   }
 	
-	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL) {
+	function add_freetexts($i, $offsetx, $type, $pagenumber = NULL, $pagecount = NULL, $preview) {
 		if (count($this->remaining_freetexts) == 0) {
 			return array();
 		}
@@ -135,7 +135,7 @@ class ddl {
 							$x = $x + $this->xoffset_onpage;
 						}
 					}
-					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount);
+					$text = $this->substituteFreitext($this->layout['texts'][$j]['text'], $i, $pagenumber, $pagecount, $preview);
 					$width = $this->layout['texts'][$j]['width'];
 					$border = $this->layout['texts'][$j]['border'];
 					if ($text == 'WIRO-Kartenserver') {
@@ -392,10 +392,10 @@ class ddl {
 				in_array($attributes['name'][$j], $this->remaining_attributes) AND
 				$this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0
 			) {
-				# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat
+				# wenn Attribut noch nicht geschrieben wurde und einen y-Wert hat 
 				# da ein Attribut zu einem Seitenüberlauf führen kann, müssen davor alle festen Freitexte geschrieben werden, die geschrieben werden können
 				# d.h. alle, deren Position nicht abhängig vom einem Attribut ist und alle deren Position abhängig ist und das Attribut schon geschrieben wurde
-				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed');			#  feste Freitexte hinzufügen
+				$this->remaining_freetexts = $this->add_freetexts($i, $offsetx, 'fixed', NULL, NULL, $preview);			#  feste Freitexte hinzufügen
 				$this->remaining_lines = $this->add_lines($offsetx, 'fixed');			# feste Linien hinzufügen
 				$this->remaining_rectangles = $this->add_rectangles($offsetx, 'fixed');			# feste Rechtecke hinzufügen
 				if ($attributes['type'][$j] != 'geometry') {
@@ -869,7 +869,7 @@ class ddl {
 		return $ret;
 	}
   
-  function substituteFreitext($text, $i, $pagenumber, $pagecount){
+  function substituteFreitext($text, $i, $pagenumber, $pagecount, $preview){
   	$text = str_replace('$stelle', $this->Stelle->Bezeichnung, $text);
   	$text = str_replace('$user', $this->user->Name, $text);
 		$text = str_replace('$pagenumber', $pagenumber, $text);
@@ -878,13 +878,13 @@ class ddl {
 		if(strpos($text, '${') !== false){
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				$value = $this->result[$i][$this->attributes['name'][$j]];
-				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, $i, $j, true), $text);
+				$text = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, $i, $j, $preview), $text);
 			}
 		}
 		if(strpos($text, '$') !== false){
 			for($j = 0; $j < count($this->attributes['name']); $j++){
 				$value = $this->result[$i][$this->attributes['name'][$j]];
-				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, $i, $j, true), $text);
+				$text = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, $i, $j, $preview), $text);
 			}
 		}
   	return $text;
@@ -1251,11 +1251,11 @@ class ddl {
 				# Attribute
 				for ($j = 0; $j < count($this->attributes['name']); $j++) {
 					$value = $this->result[0][$this->attributes['name'][$j]];
-					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, 0, $j, true), $dateiname);
+					$dateiname = str_replace('${'.$this->attributes['name'][$j].'}', $this->get_result_value_output($value, 0, $j, $preview), $dateiname);
 				}
 				for ($j = 0; $j < count($this->attributes['name']); $j++) {
 					$value = $this->result[0][$this->attributes['name'][$j]];
-					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, 0, $j, true), $dateiname);
+					$dateiname = str_replace('$'.$this->attributes['name'][$j], $this->get_result_value_output($value, 0, $j, $preview), $dateiname);
 				}
 				# Nutzer
 				$dateiname = str_replace('$user', $this->user->Vorname.'_'.$this->user->Name, $dateiname);
