@@ -4584,7 +4584,7 @@ echo '			</table>
 										' . ($max !== NULL? 'max="' . $max . '"' : '') . '
 										value="' . $this->styledaten[key($this->styledaten)] . '"
 									>
-									' . ($copy? '&nbsp;<i class="fa fa-clipboard" aria-hidden="true" onclick="copyToClipboard(this.previousElementSibling.value)"></i>' : '');
+									' . ($copy? '&nbsp;<i class="fa fa-reply fa-flip-vertical" aria-hidden="true" onclick="this.previousElementSibling.value = document.GUI.rgb.value"></i>' : '');
 							}
 							?>
 						</td>
