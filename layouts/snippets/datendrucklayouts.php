@@ -6,7 +6,7 @@
 
 <style>
 	select{
-		width: 144px;
+		width: 150px;
 	}
 </style>
 
@@ -502,7 +502,7 @@
 								</tr>
 							</table>
 							<br>
-							<table width="597" border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3">
+							<table border="0" cellpadding="3" cellspacing="0" style="border-bottom:1px solid #C3C7C3; width: 700px">
 								<tr>
 									<td align="center" style="border-top:2px solid #C3C7C3" colspan=8><span class="fett">&nbsp;Attribute</span></td>
 								</tr>
@@ -587,10 +587,7 @@
 													<label
 														for="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitlePosx; ?>"
-													>
-														x:
-													</label>
-													<input
+													>x:</label><input
 														id="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
 														min="-596"
@@ -598,15 +595,14 @@
 														title="<? echo $strTitlePosx; ?>"
 														name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>"
+														style="margin-left: 2px"
 														size="5">
 												</td>
 												<td style="border-top:1px solid #C3C7C3; width: 60px; text-align: left;">
 													<label
 														for="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitleWidth; ?>"
-													>
-														Breite:
-													</label>
+													>Breite:</label>
 												</td>
 												<td style="border-top:1px solid #C3C7C3;">
 													<input
@@ -618,15 +614,11 @@
 														name="width_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['width']; ?>"
 														size="5"
-													>
-													<label
+													><label
 														for="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitleFontsize; ?>"
-														style="margin-left: 4px"
-													>
-														Größe:
-													</label>
-													<input
+														style="margin-left: 8px"
+													>Größe:</label><input
 														id="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
 														min="1"
@@ -635,8 +627,8 @@
 														name="fontsize_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['fontsize']; ?>"
 														size="2"
-														style="margin-left: 2px; width: 37px"
-													>&nbsp;pt
+														style="margin-left: 2px; width: 45px"
+													>
 												</td>
 												<td style="border-top:1px solid #C3C7C3;">
 													<label
@@ -653,7 +645,9 @@
 														title="<? echo $strTitleFont; ?>"
 														onmouseenter="show_select(this, 'fonts')"
 														name="font_<? echo $this->ddl->attributes['name'][$i]; ?>"
-														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font']; ?>">
+														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['font']; ?>"
+														style="width: 150px"
+													>
 												</td>
 												<td style="border-top:1px solid #C3C7C3">
 													<label
@@ -680,10 +674,7 @@
 													<label
 														for="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitlePosy; ?>"
-													>
-														y:
-													</label>
-													<input
+													>y:</label><input
 														id="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
 														min="0"
@@ -691,6 +682,7 @@
 														title="<? echo $strTitlePosy; ?>"
 														name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>"
+														style="margin-left: 2px"
 														size="5"
 													>
 												</td>
@@ -710,6 +702,7 @@
 														onmouseenter="show_select(this, 'attributes')"
 														name="offset_attribute_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['offset_attribute']; ?>"
+														style="width: 150px"
 													>
 												</td>
 												<td>
@@ -728,6 +721,7 @@
 														name="label_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label']; ?>"
 														onKeyUp="toggle_margin(this, '<? echo $this->ddl->attributes['name'][$i]; ?>');"
+														style="width: 150px"
 													/>
 												</td>
 												<td>
@@ -739,7 +733,7 @@
 														Abstand:
 													</label>
 												</td>
-												<td style="border-right:1px solid #C3C7C3; width: 50px">
+												<td style="border-right:1px solid #C3C7C3;">
 													<input
 														id="margin_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
@@ -749,7 +743,7 @@
 														name="margin_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['margin']; ?>"
 														size="4"
-														style="display: <? echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label'] != '' ? 'block' : 'none');?>"
+														style="width: 50px; display: <? echo ($this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['label'] != '' ? 'block' : 'none');?>"
 													>
 												</td>
 											</tr><?
