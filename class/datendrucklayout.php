@@ -507,6 +507,21 @@ class ddl {
 						} break;
 
 						default : {
+							$value = $this->result[$i][$attributes['name'][$j]];
+							$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
+							$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+							$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
+							$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
+							$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
+							$label = $this->layout['elements'][$attributes['name'][$j]]['label'];
+							$margin = $this->layout['elements'][$attributes['name'][$j]]['margin'];
+							$pagecount = count($this->pdf->objects['3']['info']['pages']);
+
+							if ($label != '') {
+								$label_x = $x;
+								$x = $x + $margin;
+							}
+
 							if ($this->page_overflow) {
 								# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 								$this->pdf->reopenObject($this->record_startpage);
@@ -516,16 +531,15 @@ class ddl {
 								$this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR
 								$attributes['form_element_type'][$j] == 'Dokument'
 							) {
-								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-								#### relative Positionierung über Offset-Attribut ####
+								#### relative Positionierung über Offset-Attribut #
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
-								if ($offset_attribute != '') {
-									# es ist ein offset_attribute gesetzt
+								if ($offset_attribute != '') {		# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-									if ($offset_value != ''){
-										# Offset wurde auch schon bestimmt, relative y-Position berechnen
-										# Seitenüberläufe berücksichtigen
-										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);
+									if ($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
+										if ($this->layout['dont_print_empty'] AND $value == '') {
+											$y = 0;
+										}
+										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 									}
 									else {
 										#$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
@@ -539,11 +553,8 @@ class ddl {
 									# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
 									#$this->pdf->reopenObject($this->pdf->getFirstPageId());
 								}
-								#### relative Positionierung über Offset-Attribut ####
-								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
-								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
-
-								$pagecount = count($this->pdf->objects['3']['info']['pages']);
+								# relative Positionierung über Offset-Attribut ####
+								
 								if ($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1) {
 									# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 									$y = $y + $this->initial_yoffset;
@@ -567,13 +578,14 @@ class ddl {
 										$this->maxy = $y;
 									}
 								}
-
-								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
-								$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
 								
+								if ($label != '' AND !($this->layout['dont_print_empty'] AND $value == '')) {
+									$this->putText($label, $zeilenhoehe, NULL, $label_x, $y, $offsetx, $border);
+								}
+
 								if (substr($attributes['type'][$j], 0, 1) == '_') {
 									# Array
-									$values = json_decode($this->result[$i][$attributes['name'][$j]]);
+									$values = json_decode($value);
 									$x2 = $x;
 									$y2 = $miny_array = $y;
 									for ($v = 0; $v < @count($values); $v++) {
@@ -608,7 +620,6 @@ class ddl {
 								}
 								else {
 									# normal
-									$value = $this->result[$i][$attributes['name'][$j]];
 									if ($attributes['form_element_type'][$j] == 'Dokument') {
 										$y = $this->putImage($value, $j, $x, $y, $offsetx, $width, $preview);
 									}
@@ -1480,8 +1491,8 @@ class ddl {
 				INSERT INTO
 					`datendrucklayouts`
 				SET
-					`name` = '" . $formvars['name'] . "'
-					`layer_id` = " . (int)$formvars['selected_layer_id'] . "
+					`name` = '" . $formvars['name'] . "',
+					`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
 					`format` = '" . $formvars['format'] . "'";
 			if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
