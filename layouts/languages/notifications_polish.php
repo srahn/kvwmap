@@ -14,6 +14,7 @@
 	$strLabel_stellen_filter = 'Stellenfilter';
 	$strStellenFilterHint = "Ist keine Stelle ausgewählt, wird die Benachrichtigung in allen Stellen angezeigt, ansonsten nur in denen die ausgewählt sind. Die Anzeige erfoglt aber nur wenn auch der Nutzerfilter passt.";
 	$strLabel_user_filter = 'Nutzerfilter';
-	$strUserFilterHint = "Ist kein Nutzer ausgewählt, wird die Benachrichtigung bei allen angezeigt, ansonsten nur bei denen die hier ausgewählt sind. Die Anzeige erfolgt aber nur wenn auch der Stellenfilter passt.";
+	$strNutzerFilterHint = "Ist kein Nutzer ausgewählt, wird die Benachrichtigung bei allen angezeigt, ansonsten nur bei denen die hier ausgewählt sind. Die Anzeige erfolgt aber nur wenn auch der Stellenfilter passt.";
 	$strNewNotification = "Neue Benachrichtigung";
 	$strShowAllNotifications = "Alle Benachrichtigungen anzeigen";
+?>

@@ -6,12 +6,35 @@ class Nutzer extends MyObject {
 	function __construct($gui) {
 		parent::__construct($gui, 'user');
 		$this->identifier = 'ID';
+		$this->validations = array(
+			array(
+				'attribute' => 'ID',
+				'condition' => 'unique',
+				'description' => 'Die id darf nur ein Mal vorkommen.',
+				'option' => 'on Insert'
+			),
+			array(
+				'attribute' => 'login_name',
+				'condition' => 'not_null',
+				'description' => 'Es muss ein login-Name angegeben werden.',
+				'option' => null
+			)
+		);
+	}
+
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$nutzer = new Nutzer($gui);
+		return $nutzer->find_where($where, $order, $sort_direction);
 	}
 
 	public static	function find_by_login_name($gui, $login_name) {
 		$gui->debug->show('Frage Nutzer mit login_name ab.', Nutzer::$write_debug);
 		$user = new Nutzer($gui);
 		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
+	}
+
+	function get_name() {
+		return ($this->get('Vorname') ? $this->get('Vorname') . ' ' : '') . ($this->get('Name') ? $this->get('Name') : $this->login_name);
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {

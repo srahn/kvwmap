@@ -318,6 +318,57 @@
 		);
 	};
 
+	/**
+	 * Function prepare table for layer synchronisation.
+	 * It calls the function mobile_create_sync_table
+	 * if table public.syncs does not exists
+	 * @param $layerdb Database where the layer table resists
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_prepare_sync_table = function($layerdb, $sync) use ($GUI) {
+		$sql = "
+			SELECT EXISTS (
+				SELECT 1
+				FROM information_schema.tables 
+				WHERE 
+					table_schema = 'public' AND
+					table_name = 'syncs'
+			) AS table_exists
+		";
+
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+
+		$rs = pg_fetch_assoc($ret[1]);
+		if ($sync == 1 AND $rs['table_exists'] == 'f') {
+			$GUI->mobile_create_sync_table($layerdb);
+		}
+	};
+
+		/**
+	 * Function create table for layer synchronisation.
+	 * @param $layerdb Database where the layer table resists
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_create_sync_table = function($layerdb) use ($GUI) {
+		$sql = "
+			CREATE TABLE IF NOT EXISTS public.syncs (
+				id serial NOT NULL PRIMARY KEY,
+				client_id character varying,
+				username character varying,
+				schema_name character varying,
+				table_name character varying,
+				client_time timestamp without time zone,
+				pull_from_version integer,
+				pull_to_version integer,
+				push_from_version integer,
+				push_to_version integer
+			);
+		";
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+	};
+
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
@@ -335,14 +386,12 @@
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 
-		# ToDo create Table syncs if not exists
-
 		$rs = pg_fetch_assoc($ret[1]);
-		if ($rs['table_exists'] == 't' and $sync == 0) {
+		if ($rs['table_exists'] == 't' AND $sync == 0) {
 			$GUI->mobile_drop_layer_sync($layerdb, $layer);
 		}
 
-		if ($rs['table_exists'] == 'f' and $sync == 1) {
+		if ($rs['table_exists'] == 'f' AND $sync == 1) {
 			$GUI->mobile_create_layer_sync($layerdb, $layer);
 		}
 	};
@@ -625,6 +674,35 @@
 			return 0;
 		}
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+	};
+
+	/**
+	 * Function check if layer is valid for synchronisation
+	 * - Check for assignments to stelle and functions and access rights
+	 * - Check for necessary attributes
+	 * - Check the data statement for function calls not allowed for sqlite
+	 * @param $layerdb Database where the layer table resists
+	 * @param $layer_id The ID of the layer that has to be validate for sync
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_validate_layer_sync = function($layerdb, $layer_id, $sync) use ($GUI) {
+		if ($sync = 1) {
+			include_once(CLASSPATH . 'synchronisation.php');
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($GUI, $layer_id);
+			$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+			$results = $layer->has_sync_attributes(synchro::NECESSARY_ATTRIBUTES);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+			$results = $layer->has_sync_id(synchro::NECESSARY_ID);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+		}
 	};
 
 	/*

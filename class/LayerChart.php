@@ -18,36 +18,5 @@ class LayerChart extends MyObject {
 		return $layer_chart->find_where($where);
 	}
 
-	function create($data = array()) {
-		$result = array(
-			'success' => true,
-			'msg' => 'LayerChart angelegt',
-			'id' => 3
-		);
-		return $result;
-	}
-
-	function update($data = array(), $update_all_attributes = true) {
-		$results = parent::update($data);
-		if ($results[0]['success']) {
-			$response = array(
-				'success' => true,
-				'msg' => 'Diagramm erfolgreich gespeichert.'
-			);
-		}
-		else {
-			$response = $results[0];
-		}
-		return $response;
-	}
-
-	function delete() {
-		$result = array(
-			'success' => true,
-			'msg' => 'LayerChart gelöscht',
-			'id' => 3
-		);
-		return $result;
-	}
 }
 ?>

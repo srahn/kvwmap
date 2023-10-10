@@ -53,6 +53,7 @@
 	$strLabelMinScale = "Labelminscale";
 	$strLabelRequires = "Labelrequires";
 	$strLayer = "Layer";
+	$strLayerCharts = "Diagramme";
 	$strLayerID = "Layer ID*";
 	$strLegend = "Legende";
 	$strLegendGraphic = "Legendengrafik";

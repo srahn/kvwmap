@@ -3,16 +3,22 @@ include_once(CLASSPATH . 'User2Notification.php');
 class Notification extends MyObject {
 
 	static $write_debug = false;
+	var $selusers;
+	var $selstellen;
+	var $validations;
 
 	function __construct($gui) {
 		parent::__construct($gui, 'notifications');
+		$this->selusers = array();
+		$this->selstellen = array();
 		$this->setKeys(
 			array(
 				"id",
 				"notification",
 				"veroeffentlichungsdatum",
 				"ablaufdatum",
-				"stellen_filter"
+				"stellen_filter",
+				"user_filter"
 			)
 		);
 		$this->validations = array(
@@ -61,20 +67,25 @@ class Notification extends MyObject {
 			array(
 				'attribute' => 'stellen_filter',
 				'condition' => 'comma_list',
-				'description' => 'Es können nur mit Komma getrennte Stellen-IDs oder der Text "nicht in Gaststellen" angegeben werden.'
+				'description' => 'Es können nur mit Komma getrennte Stellen-IDs angegeben werden.'
+			),
+			array(
+				'attribute' => 'user_filter',
+				'condition' => 'comma_list',
+				'description' => 'Es können nur mit Komma getrennte User-IDs angegeben werden.'
 			)
 		);
 	}
 
-	function create_with_users($user_id = NULL) {
+	function create_with_users() {
 		$results = $this->create();
-		array_merge($results, User2Notification::create_user2notifications($this->gui, $this->get($this->identifier), $user_id));
+		array_merge($results, User2Notification::create_user2notifications($this->gui, $this));
 		return $results;
 	}
 
 	function update_with_users() {
 		$results = $this->update();
-		array_merge($results, User2Notification::update_notification($this->gui, $this->get($this->identifier)));
+		array_merge($results, User2Notification::update_notification($this->gui, $this));
 		return $results;
 	}
 
@@ -100,6 +111,12 @@ class Notification extends MyObject {
 	public static function find_by_id($gui, $id) {
 		$notification = new Notification($gui);
 		$notification->find_by('id', $id);
+		if ($notification->get('user_filter') != '') {
+			$notification->selusers = Nutzer::find($gui, 'ID IN (' . $notification->get('user_filter') . ')', 'Vorname, Name');
+		}
+		if ($notification->get('stellen_filter') != '') {
+			$notification->selstellen = Stelle::find($gui, 'ID IN (' . $notification->get('stellen_filter') . ')', 'Bezeichnung');
+		}
 		$notification->set('users', User2Notification::find_by_notification_id($gui, $id));
 		return $notification;
 	}
@@ -120,11 +137,7 @@ class Notification extends MyObject {
 					(
 						m.stellen_filter IS NULL OR
 						m.stellen_filter = '' OR
-						concat(',', m.stellen_filter, ',') LIKE '%," . $gui->Stelle->id . ",%' OR
-						(
-							m.stellen_filter = 'nicht in Gaststellen' AND
-							NOT " . $gui->Stelle->is_gast_stelle() . "
-						)
+						concat(',', m.stellen_filter, ',') LIKE '%," . $gui->Stelle->id . ",%'
 					)
 				",
 				'order' => "veroeffentlichungsdatum, id"
@@ -150,6 +163,10 @@ class Notification extends MyObject {
 	public static	function find($gui, $where = '1=1') {
 		$notification = new Notification($gui);
 		return $notification->find_where($where, 'veroeffentlichungsdatum, id');
+	}
+
+	function get_stellen() {
+
 	}
 
 	/*
