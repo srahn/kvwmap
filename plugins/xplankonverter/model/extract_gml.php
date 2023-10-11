@@ -276,14 +276,16 @@ class Gml_extractor {
 		 #print_r($GUI->formvars);
 	}
 
+	/**
+	 * Parse the EPSG of the file $this->gml_location and return the epsg-Value
+	 * According to Konformitaetsbedingung 2.1.3.1 there needs to be a standard gml:Envelope in each valid xplan-file.
+	 * A fallback value will be provided as conformity currently cannot be validated at the moment of loading (schema could be validated with xsd-validator)
+	 * 
+	 * NOTE:
+	 * Konformitaetsbedingung 2.13.1 currently also still allows a "kurzbezeichnung" akin to ALKIS, e.g "urn:adv:crs:DE_DHDN_3GK3", where DE_DHDN_3GK3 is Gauss-Krueger Streifen 3
+	 * This method of CRS will likely become obsolete in XPlanung 6.0, and is also currently not supported with this parser (default value would be used)
+	 */
 	function get_source_srid() {
-		# Parse the EPSG of the file
-		# According to Konformitaetsbedingung 2.1.3.1 there needs to be a standard gml:Envelope in each valid xplan-file.
-		# A fallback value will be provided as conformity currently cannot be validated at the moment of loading (schema could be validated with xsd-validator)
-		
-		# NOTE:
-		# Konformitaetsbedingung 2.13.1 currently also still allows a "kurzbezeichnung" akin to ALKIS, e.g "urn:adv:crs:DE_DHDN_3GK3", where DE_DHDN_3GK3 is Gauss-Krueger Streifen 3
-		# This method of CRS will likely become obsolete in XPlanung 6.0, and is also currently not supported with this parser (default value would be used)
 		$epsg = $this->input_epsg;
 		$lines = file($this->gml_location);
 		foreach ($lines as $lineNumber => $line) {
@@ -295,9 +297,6 @@ class Gml_extractor {
 				break; #found it
 			}
 			if (preg_match('/srsName=\'([^"]+)\'/', $line, $matched_epsg_str)) {
-				break; #found it
-			}
-			if (preg_match('/srsname=\'([^"]+)\'/', $line, $matched_epsg_str)) {
 				break; #found it
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
@@ -507,7 +506,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location . ' -s_srs EPSG:' . $this->input_epsg . ' -t_srs EPSG:' . $this->input_epsg);
 
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 
