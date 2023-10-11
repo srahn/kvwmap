@@ -1079,9 +1079,10 @@ class data_import_export {
 			unlink($folder . '/test.csv');
 		}
 		#echo '<br>output: ' . $output[0];
-		if (strpos($output[0], 'UTF') !== false) 			$encoding = 'UTF-8';
-		if (strpos($output[0], 'ISO-8859') !== false) $encoding = 'LATIN1';
-		if (strpos($output[0], 'ASCII') !== false) 		$encoding = 'LATIN1';
+		$encoding = 'LATIN1';
+		if (strpos($output[0], 'UTF') !== false) {
+			$encoding = 'UTF-8';
+		}
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
