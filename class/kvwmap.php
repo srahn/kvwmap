@@ -4511,7 +4511,7 @@ echo '			</table>
 						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
 								case 'Style_ID' : {
-									$onkeyup = "if (event.keyCode != 8) { get_style(this.value) }' : '');";
+									$onkeyup = "if (event.keyCode != 8) { get_style(this.value); }";
 								} break;
 								
 								case 'linecap' : {
