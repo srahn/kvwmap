@@ -11705,6 +11705,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function daten_import(){
 		$this->main = 'data_import.php';
+		if ($this->formvars['chosen_layer_id'] != NULL) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+			if (!$this->user->layer_data_import_allowed OR $layerset[0]['privileg'] == 0) {
+				$this->add_message('error', 'Der Daten-Import in diesen Layer ist nicht erlaubt.');
+			}
+			$this->formvars['after_import_action'] = 'import_into_layer';
+		}
 		exec('rm ' . UPLOADPATH . $this->user->id . '/*');
 		$this->output();
 	}
@@ -11719,14 +11726,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
 					$file_number = 1;
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
-					if ($this->formvars['chosen_layer_id'] != NULL) {
-						$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-						if (!$this->user->layer_data_import_allowed OR $layerset[0]['privileg'] == 0) {
-							echo 'Der Daten-Import in diesen Layer ist nicht erlaubt.';
-							return;
-						}
-						$this->formvars['after_import_action'] = 'import_into_layer';
-					}
 					if ($dateityp == 'zip') {
 						$files = unzip($nachDatei, false, false, true);
 						foreach ($files as $file) {
