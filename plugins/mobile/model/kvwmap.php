@@ -686,21 +686,39 @@
 	 * @param $sync Switch if Synchronisation ist on or off
 	 */
 	$GUI->mobile_validate_layer_sync = function($layerdb, $layer_id, $sync) use ($GUI) {
-		if ($sync = 1) {
+		if ($sync == 1) {
 			include_once(CLASSPATH . 'synchronisation.php');
 			include_once(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($GUI, $layer_id);
+
 			$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
 			foreach ($results AS $result) {
 				$GUI->add_message('warning', $result);
 			}
+
 			$results = $layer->has_sync_attributes(synchro::NECESSARY_ATTRIBUTES);
 			foreach ($results AS $result) {
 				$GUI->add_message('warning', $result);
 			}
+
 			$results = $layer->has_sync_id(synchro::NECESSARY_ID);
 			foreach ($results AS $result) {
 				$GUI->add_message('warning', $result);
+			}
+
+		$results = $layer->get_missing_sublayers($layer_id);
+		foreach ($results AS $l) {
+			$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
+		}
+
+			$results = $layer->get_missing_sub_layers_in_stellen($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') fehlt in Stelle ' . $l['stelle_bezeichnung'] . ' (' . $l['stelle_id'] . ')!');
+			}
+	
+			$results = $layer->get_none_synced_sub_layers($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') ist nicht im sync Modus!');
 			}
 		}
 	};

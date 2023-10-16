@@ -3,6 +3,18 @@
 class MyObject {
 
 	static $write_debug = false;
+	public $gui;
+	public $debug;
+	public $database;
+	public $stelle_id;
+	public $tableName;
+	public $identifier;
+	public $identifier_type;
+	public $field_types;
+	public $data;
+	public $has_many;
+	public $children_ids;
+	public $validations;
 
 	function __construct($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
 		$this->gui = $gui;
