@@ -15294,12 +15294,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 							$wfs->rename_features();
 							$features = $wfs->extract_features();
 							if (!empty($features)) {
+								$f = 0;
 								for($j = 0; $j < @count($features); $j++){
-									foreach($features[$j]['value'] as $attribute => $value){
-										$layerset[$i]['shape'][$j][$attribute] = $value;
-									}
-									if ($features[$j]['geom'] != '') {
-										$layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+									if (array_key_exists('value', $features[$j])) {
+										foreach($features[$j]['value'] as $attribute => $value){
+											$layerset[$i]['shape'][$f][$attribute] = $value;
+										}
+										if ($features[$j]['geom'] != '') {
+											$layerset[$i]['shape'][$f]['wfs_geom'] = $features[$j]['geom'];
+										}
+										$f++;
 									}
 								}
 								foreach($layerset[$i]['shape'][0] as $attribute => $value){
