@@ -5,8 +5,13 @@ include_once(CLASSPATH . 'LayerChart.php');
 class Layer extends MyObject {
 
 	static $write_debug = false;
+	public $geometry_types;
+	public $geom_column;
+	public $attributes;
+	public $charts;
 
 	function __construct($gui) {
+		$this->gui = $gui;
 		$this->has_many = array(
 			"attributes" => array(
 				"alias" => 'Attribute',
@@ -233,11 +238,12 @@ class Layer extends MyObject {
 	}
 
 	/**
-	 * Function check if layer have the attributes, there type and dependencies.
+	 * Function check if layer have the necessary attributes, there type and dependencies.
 	 * @param Array $attributes: The array with attributes that have to be checked.
 	 * @return Array $msg: An Array of messages when conditions not matches.
 	 */
 	function has_sync_attributes($attributes) {
+		# ToDo: implement
 		$msg = array();
 		return $msg;
 	}
@@ -249,8 +255,106 @@ class Layer extends MyObject {
 	 * @return Array $msg: An Array of messages when condition not maches.
 	 */
 	function has_sync_id($id) {
+		# ToDo: implement
 		$msg = array();
 		return $msg;
+	}
+
+	/**
+	 * Function check if coupled sub_layers are in symc mode
+	 */
+	function get_none_synced_sub_layers($id) {
+		$sql = "
+		SELECT DISTINCT
+			la.layer_id,
+			la.name attribute_name,
+			SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+l.Name AS sub_layer_name
+		FROM
+			`layer_attributes` la JOIN
+			`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id LEFT JOIN
+			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+		WHERE
+			la.layer_id = " . $id . " AND
+			la.form_element_type = 'SubFormEmbeddedPK' AND
+			l.Layer_ID IS NOT NULL AND
+			l.sync != '1' AND
+			las.privileg = '1'
+		";
+		#echo '<br>SQL to find coupled sub_layer that are not in sync mode: ' . $sql;
+		$this->database->execSQL($sql);
+		$not_synced_sub_layers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$not_synced_sub_layers[] = $rs;
+		}
+		return $not_synced_sub_layers;
+	}
+
+	/**
+	 * find coupled sublayer that not exists.
+	 * TODO: Muss eigentlich
+	 *       beim Speichern der options,
+	 *       beim Ändern der Layer-ID,
+	 *       und Löschen von Layern geprüft werden
+	 */
+	function get_missing_sublayers($id) {
+		$sql = "
+			SELECT DISTINCT
+				la.name attribute_name,
+				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+				l.Name AS layer_name
+			FROM
+				`layer_attributes` la LEFT JOIN
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+			WHERE
+				la.layer_id = " . $id . " AND
+				la.visible = 1 AND
+				la.form_element_type = 'SubFormEmbeddedPK' AND
+				l.Layer_ID IS NULL
+		";
+		#echo '<br>SQL to find coupled sublayer that not exists: ' . $sql;
+		$this->database->execSQL($sql);
+		$sublayers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$sublayers[] = $rs;
+		}
+		return $sublayers;
+	}
+
+	/**
+	 * find coupled sublayer that are not in same stelle
+	 * TODO: Muss eigentlich
+	 *       beim Ändern der Zugehörigkeit zu Stellen geprüft werden
+	 */
+	function get_missing_sub_layers_in_stellen($id) {
+		$sql = "
+			SELECT DISTINCT
+				la.name AS attribute_name,
+				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+				l.Name AS layer_name,
+				ul.Stelle_ID AS stelle_id,
+				s.Bezeichnung AS stelle_bezeichnung
+			FROM
+				`layer_attributes` la JOIN
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID JOIN
+				`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id JOIN 
+				`stelle` s ON ul.Stelle_ID = s.ID LEFT JOIN
+				`used_layer` ul2 ON ul.Stelle_ID = ul2.Stelle_ID AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.Layer_ID
+			WHERE
+				la.layer_id = " . $id. " AND
+				la.form_element_type = 'SubFormEmbeddedPK' AND
+				ul2.Stelle_ID IS NULL AND
+				ul2.Layer_ID IS NULL
+		";
+		#echo '<br>SQL to find sublayer that are not in same stelle: ' . $sql;
+		$this->database->execSQL($sql);
+		$sublayers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$sublayers[] = $rs;
+		}
+		return $sublayers;
 	}
 
 	/**

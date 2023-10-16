@@ -2,10 +2,10 @@
 class LayerChart extends MyObject {
 
 	static $write_debug = false;
-	static $identifier = 'id';
 
 	function __construct($gui) {
 		parent::__construct($gui, 'layer_charts');
+		$this->identifier = 'id';
 	}
 
 	public static	function find_by_id($gui, $id) {

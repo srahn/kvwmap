@@ -4511,7 +4511,7 @@ echo '			</table>
 						<td class="style-value-column"><?
 							switch (key($this->styledaten)) {
 								case 'Style_ID' : {
-									$onkeyup = "if (event.keyCode != 8) { get_style(this.value) }' : '');";
+									$onkeyup = "if (event.keyCode != 8) { get_style(this.value); }";
 								} break;
 								
 								case 'linecap' : {
@@ -9100,7 +9100,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 						if ($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL') {
 							if (substr($attributes['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL') { # Array-Datentyp
-								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(query.'.$attributes['name'][$i].') a) foo where true ';
+								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(query.'.$attributes['name'][$i].'::json) a) foo where true ';
 								$attr = 'a';
 							}
 							else {
@@ -11705,6 +11705,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function daten_import(){
 		$this->main = 'data_import.php';
+		if ($this->formvars['chosen_layer_id'] != NULL) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+			if (!$this->user->layer_data_import_allowed OR $layerset[0]['privileg'] == 0) {
+				$this->add_message('error', 'Der Daten-Import in diesen Layer ist nicht erlaubt.');
+			}
+			$this->formvars['after_import_action'] = 'import_into_layer';
+		}
 		exec('rm ' . UPLOADPATH . $this->user->id . '/*');
 		$this->output();
 	}
@@ -11719,14 +11726,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (move_uploaded_file($_files['uploadfile']['tmp_name'], $nachDatei)) {
 					$file_number = 1;
 					$dateityp = strtolower(array_pop(explode('.', $nachDatei)));
-					if ($this->formvars['chosen_layer_id'] != NULL) {
-						$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-						if (!$this->user->layer_data_import_allowed OR $layerset[0]['privileg'] == 0) {
-							echo 'Der Daten-Import in diesen Layer ist nicht erlaubt.';
-							return;
-						}
-						$this->formvars['after_import_action'] = 'import_into_layer';
-					}
 					if ($dateityp == 'zip') {
 						$files = unzip($nachDatei, false, false, true);
 						foreach ($files as $file) {
@@ -15625,12 +15624,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$wfs->rename_features();
 							$features = $wfs->extract_features();
 							if (!empty($features)) {
+								$f = 0;
 								for($j = 0; $j < @count($features); $j++){
-									foreach($features[$j]['value'] as $attribute => $value){
-										$layerset[$i]['shape'][$j][$attribute] = $value;
-									}
-									if ($features[$j]['geom'] != '') {
-										$layerset[$i]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+									if (array_key_exists('value', $features[$j])) {
+										foreach($features[$j]['value'] as $attribute => $value){
+											$layerset[$i]['shape'][$f][$attribute] = $value;
+										}
+										if ($features[$j]['geom'] != '') {
+											$layerset[$i]['shape'][$f]['wfs_geom'] = $features[$j]['geom'];
+										}
+										$f++;
 									}
 								}
 								foreach($layerset[$i]['shape'][0] as $attribute => $value){
