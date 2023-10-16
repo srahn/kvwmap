@@ -587,7 +587,10 @@
 													<label
 														for="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitlePosx; ?>"
-													>x:</label><input
+													>x:</label>
+												</td>
+												<td style="border-top:1px solid #C3C7C3">
+													<input
 														id="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
 														min="-596"
@@ -595,7 +598,6 @@
 														title="<? echo $strTitlePosx; ?>"
 														name="posx_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['xpos']; ?>"
-														style="margin-left: 2px"
 														size="5">
 												</td>
 												<td style="border-top:1px solid #C3C7C3; width: 60px; text-align: left;">
@@ -674,7 +676,10 @@
 													<label
 														for="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														title="<? echo $strTitlePosy; ?>"
-													>y:</label><input
+													>y:</label>
+												</td>
+												<td>
+													<input
 														id="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														type="number"
 														min="0"
@@ -682,7 +687,6 @@
 														title="<? echo $strTitlePosy; ?>"
 														name="posy_<? echo $this->ddl->attributes['name'][$i]; ?>"
 														value="<? echo $this->ddl->selectedlayout[0]['elements'][$this->ddl->attributes['name'][$i]]['ypos']; ?>"
-														style="margin-left: 2px"
 														size="5"
 													>
 												</td>

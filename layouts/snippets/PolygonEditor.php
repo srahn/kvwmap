@@ -163,7 +163,7 @@ function buildwktpolygonfromsvgpath(svgpath){
 						<div id="data_import" style="position: fixed; top: 50%; left: 50%; margin-top: -220px; margin-left: -300px;display: none;box-shadow: 6px 5px 7px #777;">
 							<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="document.getElementById('data_import').style.display='none';" title="Schlie&szlig;en"><img style="border:none" src="graphics/exit2.png"></img></a></div>
 							<? 
-								$this->after_import_action = 'use_geometry';
+								$this->formvars['after_import_action'] = 'use_geometry';
 								include(SNIPPETS.'data_import.php'); 
 							?>
 						</div>
