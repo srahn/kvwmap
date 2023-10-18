@@ -13,7 +13,7 @@
 	}
 ?>
 
-<td class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
+<td id="stellen_td_<? echo $this->stelle->id; ?>" class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
 														echo 'unterstelle';
 														if ($this->formvars['unterstellen_ausblenden']) {
 															echo ' hidden';
