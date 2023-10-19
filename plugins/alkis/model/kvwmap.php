@@ -331,7 +331,8 @@
 					$datastring .= " AND l.kreis = '" . $kreis . "' AND l.gemeinde = '" . $gemeinde . "' AND l.lage IN ('" . str_replace(", ", "', '", $Strasse) . "')";
 				}
 			}
-			$datastring.= ")" . $GUI->build_temporal_filter(array('g'));
+      $datastring.= $GUI->pgdatabase->build_temporal_filter(['l']);
+			$datastring.= ")" . $GUI->pgdatabase->build_temporal_filter(['g']);
 	    $datastring.=") as foo using unique oid using srid=" . $epsg;
 	    $legendentext ="Gebäude";
 	    if ($Hausnr!='') {
