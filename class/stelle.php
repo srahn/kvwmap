@@ -2038,7 +2038,7 @@ class stelle {
 			}
 			if(value_of($privileges, trim($attributename, '"')) != ''){
 				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json' . (POSTGRESVERSION >= 950? '':'') . '('.$real_attributename.')::text as '.$attributename.', ';		# Array oder Datentyp
+				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.')::text as '.$attributename.', ';		# Array oder Datentyp
 				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
 			}
 			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
