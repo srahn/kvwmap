@@ -539,7 +539,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 
 			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '') {
 				completeDate(element);
-				console.log(element.value);
 				if (!checkDate(element.value)) {
 					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
@@ -559,7 +558,6 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 			}
 		}
-		return;
 		enclosingForm.go.value = 'Sachdaten_speichern';
 		document.getElementById('loader').style.display = '';
 		setTimeout('document.getElementById(\'loaderimg\').src=\'graphics/ajax-loader.gif\'', 50);
