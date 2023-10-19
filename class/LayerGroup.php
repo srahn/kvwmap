@@ -4,7 +4,6 @@ include_once(CLASSPATH . 'Layer.php');
 class LayerGroup extends MyObject {
 
 	static $write_debug = false;
-	static $identifier = 'id';
 
 	function __construct($gui) {
 		$this->has_many = array(
@@ -17,6 +16,7 @@ class LayerGroup extends MyObject {
 			)
 		);
 		parent::__construct($gui, 'u_groups');
+
 		$this->validations = array(
 			array(
 				'attribute' => 'Gruppenname',
