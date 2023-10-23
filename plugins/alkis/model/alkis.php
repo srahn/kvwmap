@@ -194,36 +194,36 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlï¿½ssel;');}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlï¿½ssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlï¿½ssel;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Flï¿½che;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlï¿½ssel;');}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= utf8_encode('Fortfï¿½hrung;');}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
     if($formvars['nachfolger']){ $csv .= 'Nachfolger;';}
-    $csv .= utf8_encode('Klassifizierung;Klass-Fläche;EMZ;gesamt;');
+    $csv .= utf8_encode('Klassifizierung;Klass-Flï¿½che;EMZ;gesamt;');
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausfï¿½hrende Stelle;');}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstï¿½ck;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentï¿½mer;');}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
     
@@ -327,7 +327,7 @@ class ALKIS {
 				
 				if($kl == $limit-2){
 					if($nichtgeschaetzt>0){
-						$csv .= utf8_encode('nicht geschätzt: ;'.$nichtgeschaetzt.';');
+						$csv .= utf8_encode('nicht geschï¿½tzt: ;'.$nichtgeschaetzt.';');
 					}
 					else{
 						$csv .= ';;';
@@ -341,15 +341,15 @@ class ALKIS {
 					}
 					if($emzges_gr > 0){
 						$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-						$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr);
+						$csv .= utf8_encode(' Grï¿½nland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr);
 					}
 					if($emzges_agr > 0){
 						$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-						$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr);
+						$csv .= utf8_encode(' Acker-Grï¿½nland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr);
 					}
 					if($emzges_gra > 0){
 						$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-						$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra);
+						$csv .= utf8_encode(' Grï¿½nland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra);
 					}					
 				}
 				$csv .= ';';
@@ -487,19 +487,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlï¿½ssel;');}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlï¿½ssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlï¿½ssel;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Flï¿½che;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlï¿½ssel;');}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= utf8_encode('Fortfï¿½hrung;');}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -508,12 +508,12 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausfï¿½hrende Stelle;');}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstï¿½ck;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
@@ -611,14 +611,14 @@ class ALKIS {
 										$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 									}
 									
-									$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+									$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' mï¿½ ');
 									$csv .= $flst->Klassifizierung[$j]['label'];
 									$csv .= ' EMZ: '.$emz." \n";
 								}
 							}
 							$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 							if($nichtgeschaetzt > 0){
-								$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+								$csv .= utf8_encode('nicht geschï¿½tzt: '.$nichtgeschaetzt." mï¿½ \n");
 							}
 							if($emzges_a > 0){
 								$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -626,15 +626,15 @@ class ALKIS {
 							}
 							if($emzges_gr > 0){
 								$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-								$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+								$csv .= utf8_encode(' Grï¿½nland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
 							}
 							if($emzges_agr > 0){
 								$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-								$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+								$csv .= utf8_encode(' Acker-Grï¿½nland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
 							}
 							if($emzges_gra > 0){
 								$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-								$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+								$csv .= utf8_encode(' Grï¿½nland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
 							}	
 							$csv .= '";';
 						}      
@@ -758,19 +758,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlï¿½ssel;');}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlï¿½ssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlï¿½ssel;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Flï¿½che;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlï¿½ssel;');}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= utf8_encode('Fortfï¿½hrung;');}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -779,17 +779,17 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausfï¿½hrende Stelle;');}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
    	if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstï¿½ck;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
-    $csv .= utf8_encode('Nutzung - Fläche;');
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentï¿½mer;');}
+    $csv .= utf8_encode('Nutzung - Flï¿½che;');
     $csv .= 'Nutzung - Kennzeichen;';
     $csv .= 'Nutzung - Bezeichnung;';
     
@@ -878,14 +878,14 @@ class ALKIS {
 							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 						}						
 						
-						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' mï¿½ ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
 				}
 				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
-					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					$csv .= utf8_encode('nicht geschï¿½tzt: '.$nichtgeschaetzt." mï¿½ \n");
 				}
 				if($emzges_a > 0){
 					$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -893,15 +893,15 @@ class ALKIS {
 				}
 				if($emzges_gr > 0){
 					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+					$csv .= utf8_encode(' Grï¿½nland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
 				}
 				if($emzges_agr > 0){
 					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+					$csv .= utf8_encode(' Acker-Grï¿½nland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
 				}
 				if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+					$csv .= utf8_encode(' Grï¿½nland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
 				}
         $csv .= '";';
       }      
@@ -1036,19 +1036,19 @@ class ALKIS {
     if($formvars['gemeindename']){ $csv .= 'Gem-Name;';}
     if($formvars['gemeinde']){ $csv .= 'Gemeinde;';}
     if($formvars['kreisname']){ $csv .= 'Kreisname;';}
-    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlüssel;');}
+    if($formvars['kreisid']){ $csv .= utf8_encode('Kreisschlï¿½ssel;');}
     if($formvars['finanzamtname']){ $csv .= 'Finanzamtname;';}
-    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlüssel;');}
+    if($formvars['finanzamt']){ $csv .= utf8_encode('Finanzamtschlï¿½ssel;');}
     if($formvars['forstname']){ $csv .= 'Forstamtname;';}
-    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlüssel;');}
-    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Fläche;');}
+    if($formvars['forstschluessel']){ $csv .= utf8_encode('Forstamtschlï¿½ssel;');}
+    if($formvars['flaeche']){ $csv .= utf8_encode('amtliche Flï¿½che;');}
     if($formvars['amtsgerichtnr']){ $csv .= 'Amtsgericht;';}
     if($formvars['amtsgerichtname']){ $csv .= 'Amtsgerichtname;';}
-    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlüssel;');}
+    if($formvars['grundbuchbezirkschl']){ $csv .= utf8_encode('GBBschlï¿½ssel;');}
     if($formvars['grundbuchbezirkname']){ $csv .= 'GBBname;';}
     if($formvars['lagebezeichnung']){ $csv .= 'Lage;';}
     if($formvars['entsteh']){ $csv .= 'Entstehung;';}
-    if($formvars['letzff']){ $csv .= utf8_encode('Fortführung;');}
+    if($formvars['letzff']){ $csv .= utf8_encode('Fortfï¿½hrung;');}
     if($formvars['karte']){ $csv .= 'Flurkarte;';}
     if($formvars['status']){ $csv .= 'Status;';}
     if($formvars['vorgaenger']){ $csv .= 'Vorgaenger;';}
@@ -1057,17 +1057,17 @@ class ALKIS {
     if($formvars['freitext']){ $csv .= 'Freitext;';}
     if($formvars['hinweis']){ $csv .= 'Hinweis;';}
     if($formvars['baulasten']){ $csv .= 'Baulasten;';}
-    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausführende Stelle;');}
+    if($formvars['ausfstelle']){ $csv .= utf8_encode('ausfï¿½hrende Stelle;');}
     if($formvars['verfahren']){ $csv .= 'Verfahren;';}
     if($formvars['nutzung']){ $csv .= 'Nutzung;';}
     if($formvars['blattnr']){ $csv .= 'Blattnummer;';}
     if($formvars['pruefzeichen']){ $csv .= 'P Buchung;';}
-  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstück;');}
+  	if($formvars['pruefzeichen_f']){ $csv .= utf8_encode('P Flurstï¿½ck;');}
     if($formvars['bvnr']){ $csv .= 'BVNR;';}
     if($formvars['buchungsart']){ $csv .= 'Buchungsart;';}
 		if($formvars['abweichenderrechtszustand']){ $csv .= utf8_encode('abweichender Rechtszustand;');}
 		if($formvars['baubodenrecht']){ $csv .= utf8_encode('Bauraum/Bodenordnungsrecht;');}
-    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentümer;');}
+    if($formvars['eigentuemer']){ $csv .= utf8_encode('Namensnummer;Eigentï¿½mer;');}
     
     $csv .= chr(10);
     for($i = 0; $i < @count($flurstuecke); $i++) {
@@ -1152,14 +1152,14 @@ class ALKIS {
 							$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 						}						
 						
-						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' m² ');
+						$csv .= utf8_encode($flst->Klassifizierung[$j]['flaeche'].' mï¿½ ');
 						$csv .= $flst->Klassifizierung[$j]['label'];
 						$csv .= ' EMZ: '.$emz." \n";
 					}
 				}
 				$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 				if($nichtgeschaetzt > 0){
-					$csv .= utf8_encode('nicht geschätzt: '.$nichtgeschaetzt." m² \n");
+					$csv .= utf8_encode('nicht geschï¿½tzt: '.$nichtgeschaetzt." mï¿½ \n");
 				}
 				if($emzges_a > 0){
 					$BWZ_a = round($emzges_a/$flaeche_a*100);
@@ -1167,15 +1167,15 @@ class ALKIS {
 				}
 				if($emzges_gr > 0){
 					$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-					$csv .= utf8_encode(' Grünland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
+					$csv .= utf8_encode(' Grï¿½nland gesamt: EMZ '.$emzges_gr.' , BWZ '.$BWZ_gr." \n");
 				}
 				if($emzges_agr > 0){
 					$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-					$csv .= utf8_encode(' Acker-Grünland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
+					$csv .= utf8_encode(' Acker-Grï¿½nland gesamt: EMZ '.$emzges_agr.' , BWZ '.$BWZ_agr." \n");
 				}
 				if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$csv .= utf8_encode(' Grünland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
+					$csv .= utf8_encode(' Grï¿½nland-Acker gesamt: EMZ '.$emzges_gra.' , BWZ '.$BWZ_gra." \n");
 				}
         $csv .= '";';
       }      
@@ -1316,13 +1316,13 @@ class ALKIS {
 		if($row<120){
 			# Seitenumbruch
 			$seite++;
-			# aktuelle Seite abschließen
+			# aktuelle Seite abschlieï¿½en
 			$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 			# neue Seite beginnen
 			$pageid=$pdf->newPage();
 			$pagecount[$f] = $pagecount[$f] + 1;
 			$row=825; # 812 -> 825 2007-04-02 Schmidt;
-			$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+			$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 		}
 		else {
 			#$row-=12;
@@ -1361,7 +1361,7 @@ class ALKIS {
 	}
 	
 	function ALBAuszug_SeitenKopf(&$pdf,$flst,$Ueberschrift,$art,$seite,&$row,$fontSize,$BestandStr,$AktualitaetsNr) {
-    # 2006-11-23 Holger Riedel Formatierungsänderung
+    # 2006-11-23 Holger Riedel Formatierungsï¿½nderung
     $col0=50; # 28 -> 50 2007-04-02 Schmidt
     $col1=$col0+7.23;
     $col27=$col0+195.17;
@@ -1433,16 +1433,16 @@ class ALKIS {
       if ($flst->Status != 'H' OR $formnummer = '30') {
         switch ($formnummer) {
           case '30' : {
-            $Ueberschrift='Flurstücksdaten - interne Verwendung';
-            $art = 'Flurstück';
+            $Ueberschrift='Flurstï¿½cksdaten - interne Verwendung';
+            $art = 'Flurstï¿½ck';
           } break;
           case '35' : {
-            $Ueberschrift='Flurstücks- und Eigentümerdaten - interne Verwendung';
-            $art = 'Flurstück';
+            $Ueberschrift='Flurstï¿½cks- und Eigentï¿½merdaten - interne Verwendung';
+            $art = 'Flurstï¿½ck';
           } break;
           case '40' : {
-            $Ueberschrift='Eigentümerdaten zum Flurstück - interne Verwendung';
-            $art = 'Flurstück';
+            $Ueberschrift='Eigentï¿½merdaten zum Flurstï¿½ck - interne Verwendung';
+            $art = 'Flurstï¿½ck';
           } break;
         }
 
@@ -1475,7 +1475,7 @@ class ALKIS {
         $pdf->addText($col0,$row-=12,$fontSize,'Flur');
         $pdf->addText($col2,$row,$fontSize,ltrim(substr($flst->FlurstKennz,6,3),'0'));
         if ($flst->Nenner!=0) { $nennerausgabe="/".$flst->Nenner; }
-        $pdf->addText($col0,$row-=12,$fontSize,'Flurstück');
+        $pdf->addText($col0,$row-=12,$fontSize,'Flurstï¿½ck');
         $pdf->addText($col2,$row,$fontSize,$flst->Zaehler.$nennerausgabe);
 
 
@@ -1501,7 +1501,7 @@ class ALKIS {
 
         if($formnummer == '30' || $formnummer == '35'){
           if($flst->Status == 'H'){ ### Status gibt es in ALKIS nicht mehr, der Hinweis kommt nicht!
-          	$pdf->addText($col0,$row-=24,$fontSize,'Status: Historisches Flurstück '.$flst->Status);
+          	$pdf->addText($col0,$row-=24,$fontSize,'Status: Historisches Flurstï¿½ck '.$flst->Status);
           }
 
           $pdf->addText($col0,$row-=24,$fontSize,'Entstehung');
@@ -1509,9 +1509,9 @@ class ALKIS {
             $flst->Entstehung = 2;
           }
           $pdf->addText($col2,$row,$fontSize,$flst->Entstehung);
-          $pdf->addText($col0,$row-=12,$fontSize,'Fortführung');
+          $pdf->addText($col0,$row-=12,$fontSize,'Fortfï¿½hrung');
           $pdf->addText($col2,$row,$fontSize,$flst->LetzteFF);
-          $pdf->addText($col0,$row-=12,$fontSize,'Flurkarte Riß');
+          $pdf->addText($col0,$row-=12,$fontSize,'Flurkarte Riï¿½');
 
           $pdf->addText($col0,$row-=24,$fontSize,'Lage');
           # Ausgabe der Adressangabe zur Lage
@@ -1531,16 +1531,16 @@ class ALKIS {
             $pdf->addText($col2,$row-=12,$fontSize,utf8_decode($Lagebezeichnung[$i]));
           }
 
-          $pdf->addText($col0,$row-=24,$fontSize,'Amtliche Fläche');
-          $pdf->addText($col2,$row,$fontSize,$flst->ALB_Flaeche.' m²');
+          $pdf->addText($col0,$row-=24,$fontSize,'Amtliche Flï¿½che');
+          $pdf->addText($col2,$row,$fontSize,$flst->ALB_Flaeche.' mï¿½');
 
-          # Hinweise zum Flurstücke
+          # Hinweise zum Flurstï¿½cke
           if($flst->abweichenderrechtszustand == 'ja'){
-						$pdf->addText($col0,$row-=24,$fontSize,'In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer');
+						$pdf->addText($col0,$row-=24,$fontSize,'In einem durch Gesetz geregelten Verfahren der Bodenordnung ist fï¿½r das Flurstï¿½ck ein neuer');
 						$pdf->addText($col0,$row-=12,$fontSize,'Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegen-');
-						$pdf->addText($col0,$row-=12,$fontSize,'schaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.');
+						$pdf->addText($col0,$row-=12,$fontSize,'schaftskataster ï¿½bernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.');
 					}
-					if($flst->zweifelhafterflurstuecksnachweis == 'ja')$pdf->addText($col0,$row-=24,$fontSize,'Zweifelhafter Flurstücksnachweis');
+					if($flst->zweifelhafterflurstuecksnachweis == 'ja')$pdf->addText($col0,$row-=24,$fontSize,'Zweifelhafter Flurstï¿½cksnachweis');
 
           # Baulastenblattnummer
           if (@count($flst->Baulasten)>0) {
@@ -1565,22 +1565,22 @@ class ALKIS {
   	          if($row<120) {
   	            # Seitenumbruch
   	            $seite++;
-  	            # aktuelle Seite abschließen
+  	            # aktuelle Seite abschlieï¿½en
   	            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
   	            # neue Seite beginnen
   	            $pageid=$pdf->newPage();
   	            $pagecount[$f] = $pagecount[$f] + 1;
   	            $row=825; # 812 -> 825 2007-04-02 Schmidt
-  	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+  	          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
   	          }
-  	          $pdf->addText($col1,$row-=12,$fontSize,$flst->BauBodenrecht[$i]['flaeche'].'m²');
+  	          $pdf->addText($col1,$row-=12,$fontSize,$flst->BauBodenrecht[$i]['flaeche'].'mï¿½');
   	          $art=zeilenumbruch($flst->BauBodenrecht[$i]['art'],60);
   	          $pdf->addText($col2,$row,$fontSize,utf8_decode($art[0]).' ('.$flst->BauBodenrecht[$i]['bezeichnung'].')');
   	          for ($j=1;$j<count($art);$j++) {
   	          	$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($art[$j]));
   	          }
   	          if($flst->BauBodenrecht[$i]['stelle'] != ''){
-  	          	$AusfStelleName=zeilenumbruch(utf8_encode('Ausführende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],60);
+  	          	$AusfStelleName=zeilenumbruch(utf8_encode('Ausfï¿½hrende Stelle: ').$flst->BauBodenrecht[$i]['stelle'],60);
   	          	$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[0]));
   	          	for ($j=1;$j<count($AusfStelleName);$j++) {
   	          		$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($AusfStelleName[$j]));
@@ -1589,9 +1589,9 @@ class ALKIS {
             }
           }
 
-          # Freier Text zum Flurstück
+          # Freier Text zum Flurstï¿½ck
           if (@count($flst->FreiText)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Zusätzliche Angaben');
+            $pdf->addText($col0,$row-=24,$fontSize,'Zusï¿½tzliche Angaben');
             $row-=6;
             for ($z=0;$z<count($flst->FreiText);$z++) {
               if ($z==0) { $row+=12; }
@@ -1603,41 +1603,41 @@ class ALKIS {
             }
           }
 
-          # Vorgängerflurstücke
+          # Vorgï¿½ngerflurstï¿½cke
           if (@count($flst->Vorgaenger)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Vorgängerflurstück');
+            $pdf->addText($col0,$row-=24,$fontSize,'Vorgï¿½ngerflurstï¿½ck');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Vorgaenger[0]['vorgaenger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Vorgaenger);$v++) {
               $pdf->addText($col2_1,$row-=12,$fontSize,mb_substr($flst->Vorgaenger[$v]['vorgaenger'],0,20,'utf8'));
             }
           }
-          # Nachfolgerflurstücke
+          # Nachfolgerflurstï¿½cke
           if (@count($flst->Nachfolger)>0) {
-            $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstück');
+            $pdf->addText($col0,$row-=24,$fontSize,'Nachfolgerflurstï¿½ck');
             $pdf->addText($col2_1,$row,$fontSize,mb_substr($flst->Nachfolger[0]['nachfolger'],0,20,'utf8'));
             for ($v=1;$v<count($flst->Nachfolger);$v++) {
               $pdf->addText($col2_1,$row-=12,$fontSize,mb_substr($flst->Nachfolger[$v]['nachfolger'],0,20,'utf8'));
             }
           }
 
-# Tatsächliche Nutzung
+# Tatsï¿½chliche Nutzung
           if (trim($flst->Nutzung[0]['flaeche'])!='') {
-            $pdf->addText($col0,$row-=24,$fontSize,'Tatsächliche Nutzung');
+            $pdf->addText($col0,$row-=24,$fontSize,'Tatsï¿½chliche Nutzung');
             $row-=6;
             for ($i=0;$i<count($flst->Nutzung);$i++) {
             	# Seitenumbruch wenn erforderlich
               if($row<120) {
                 # Seitenumbruch
                 $seite++;
-                # aktuelle Seite abschließen
+                # aktuelle Seite abschlieï¿½en
                 $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
                 # neue Seite beginnen
                 $pageid=$pdf->newPage();
                 $pagecount[$f] = $pagecount[$f] + 1;
                 $row=825; # 812 -> 825 2007-04-02 Schmidt
-                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+                $this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
               }
-              $pdf->addText($col1,$row-=12,$fontSize,$flst->Nutzung[$i]['flaeche'].' m²');
+              $pdf->addText($col1,$row-=12,$fontSize,$flst->Nutzung[$i]['flaeche'].' mï¿½');
               $pdf->addText($col2,$row,$fontSize,'('.$flst->Nutzung[$i]['nutzungskennz'].')');
               $Nutzunglangtext = '';
 							if($flst->Nutzung[$i]['untergliederung2'])$Nutzunglangtext = $flst->Nutzung[$i]['untergliederung2'].' ';
@@ -1658,7 +1658,7 @@ class ALKIS {
 
 # Gesetzliche Klassifizierung
           if($flst->Klassifizierung[0]['wert'] != ''){
-			$pdf->addText($col0,$row-=24,$fontSize, 'Gesetzl. Klassifizierung Bodenschätzung');
+			$pdf->addText($col0,$row-=24,$fontSize, 'Gesetzl. Klassifizierung Bodenschï¿½tzung');
 			$row-=6;
 			$emzges_a = 0; $emzges_gr = 0; $emzges_agr = 0; $emzges_gra = 0;
 			$flaeche_a = 0; $flaeche_gr = 0; $flaeche_agr = 0; $flaeche_gra = 0;
@@ -1667,13 +1667,13 @@ class ALKIS {
 					if($row<120) {
 						# Seitenumbruch
 						$seite++;
-						# aktuelle Seite abschließen
+						# aktuelle Seite abschlieï¿½en
 						$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 						# neue Seite beginnen
 						$pageid=$pdf->newPage();
 						$pagecount[$f] = $pagecount[$f] + 1;
 						$row=825; # 812 -> 825 2007-04-02 Schmidt
-						$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+						$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 					}
 					$wert=$flst->Klassifizierung[$j]['wert'];
 					$emz = round($flst->Klassifizierung[$j]['flaeche'] * $wert / 100);
@@ -1693,7 +1693,7 @@ class ALKIS {
 						$emzges_gra = $emzges_gra + $emz;
 						$flaeche_gra = $flaeche_gra + $flst->Klassifizierung[$j]['flaeche'];
 					}
-					$pdf->addText($col1,$row-=12,$fontSize, round($flst->Klassifizierung[$j]['flaeche']).' m²');
+					$pdf->addText($col1,$row-=12,$fontSize, round($flst->Klassifizierung[$j]['flaeche']).' mï¿½');
 					$pdf->addText($col2,$row,$fontSize,utf8_decode($flst->Klassifizierung[$j]['label']));
 					$pdf->addText($col5,$row,$fontSize, 'EMZ: '.$emz);
 					$pdf->addText($col7,$row,$fontSize, 'BWZ: '.$wert);
@@ -1702,46 +1702,46 @@ class ALKIS {
 	if($row<120) {
 				# Seitenumbruch
 				$seite++;
-				# aktuelle Seite abschließen
+				# aktuelle Seite abschlieï¿½en
 				$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 				# neue Seite beginnen
 				$pageid=$pdf->newPage();
 				$pagecount[$f] = $pagecount[$f] + 1;
 				$row=825; # 812 -> 825 2007-04-02 Schmidt
-				$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+				$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 			}
 			$nichtgeschaetzt=$flst->Klassifizierung['nicht_geschaetzt'];
 			if($nichtgeschaetzt>0){
-				$pdf->addText($col1,$row-=12,$fontSize, 'nicht geschätzt: '.$nichtgeschaetzt.' m²');
+				$pdf->addText($col1,$row-=12,$fontSize, 'nicht geschï¿½tzt: '.$nichtgeschaetzt.' mï¿½');
 			}
 			if($emzges_a > 0){
 				$BWZ_a = round($emzges_a/$flaeche_a*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: ' . $flaeche_a . ' m², EMZ '.$emzges_a.', BWZ '.$BWZ_a);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Ackerland gesamt: ' . $flaeche_a . ' mï¿½, EMZ '.$emzges_a.', BWZ '.$BWZ_a);
 			}
 			if($emzges_gr > 0){
 				$BWZ_gr = round($emzges_gr/$flaeche_gr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Grünland gesamt: ' . $flaeche_gr . ' m², EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Grï¿½nland gesamt: ' . $flaeche_gr . ' mï¿½, EMZ '.$emzges_gr.', BWZ '.$BWZ_gr);
 			}
 			if($emzges_agr > 0){
 				$BWZ_agr = round($emzges_agr/$flaeche_agr*100);
-				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grünland gesamt: ' . $flaeche_agr . ' m², EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
+				$pdf->addText($col1,$row-=12,$fontSize, 'Acker-Grï¿½nland gesamt: ' . $flaeche_agr . ' mï¿½, EMZ '.$emzges_agr.', BWZ '.$BWZ_agr);
 			}
 			if($emzges_gra > 0){
 					$BWZ_gra = round($emzges_gra/$flaeche_gra*100);
-					$pdf->addText($col1,$row-=12,$fontSize, 'Grünland-Acker gesamt: ' . $flaeche_gra . ' m², EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
+					$pdf->addText($col1,$row-=12,$fontSize, 'Grï¿½nland-Acker gesamt: ' . $flaeche_gra . ' mï¿½, EMZ '.$emzges_gra.', BWZ '.$BWZ_gra);
 			}
 		}
 
         if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieï¿½en
             $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
             # neue Seite beginnen
             $pageid=$pdf->newPage();
             $pagecount[$f] = $pagecount[$f] + 1;
             $row=825; # 812 -> 825 2007-04-02 Schmidt
-          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+          	$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
           }
 
 
@@ -1766,16 +1766,16 @@ class ALKIS {
 								if($row<120) {
 									# Seitenumbruch
 									$seite++;
-									# aktuelle Seite abschließen
+									# aktuelle Seite abschlieï¿½en
 									$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
 									$row=825; # 812 -> 825 2007-04-02 Schmidt
-									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 								}
 
-								# Ausgabe der Zeile für die Bestandbezeichnung
+								# Ausgabe der Zeile fï¿½r die Bestandbezeichnung
 								$pdf->addText($col0,$row-=12,$fontSize,'Bestand');
 								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
@@ -1799,13 +1799,13 @@ class ALKIS {
 										if($row<120) {
 											# Seitenumbruch
 											$seite++;
-											# aktuelle Seite abschließen
+											# aktuelle Seite abschlieï¿½en
 											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
-											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
 										$pdf->addText($col2,$row-=12,$fontSize,utf8_decode(mb_substr($sondereigentum,0,$positiontrenner,'utf8')));
 										$sondereigentum=mb_substr($sondereigentum,$positiontrenner+1, 999,'utf8');
@@ -1813,10 +1813,10 @@ class ALKIS {
 									$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($sondereigentum));
 								}
 
-								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+								# Abfragen und Ausgeben der Eigentï¿½mer zum Grundbuchblatt
 								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 								reset($Eigentuemerliste);
-								$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
+								$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
@@ -1831,13 +1831,13 @@ class ALKIS {
 										if($row<120) {
 											# Seitenumbruch
 											$seite++;
-											# aktuelle Seite abschließen
+											# aktuelle Seite abschlieï¿½en
 											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
-											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
 										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
 										$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
@@ -1854,16 +1854,16 @@ class ALKIS {
 								if($row<120) {
 									# Seitenumbruch
 									$seite++;
-									# aktuelle Seite abschließen
+									# aktuelle Seite abschlieï¿½en
 									$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
 									$row=825; # 812 -> 825 2007-04-02 Schmidt;
-									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 								}
 
-								# Ausgabe der Zeile für die Bestandbezeichnung
+								# Ausgabe der Zeile fï¿½r die Bestandbezeichnung
 								$pdf->addText($col0,$row-=12,$fontSize,'Bestand');
 								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
@@ -1887,13 +1887,13 @@ class ALKIS {
 										if($row<120) {
 											# Seitenumbruch
 											$seite++;
-											# aktuelle Seite abschließen
+											# aktuelle Seite abschlieï¿½en
 											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
-											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
 										$pdf->addText($col2,$row-=12,$fontSize,utf8_decode(mb_substr($sondereigentum,0,$positiontrenner,'utf8')));
 										$sondereigentum=mb_substr($sondereigentum,$positiontrenner+1, 999,'utf8');
@@ -1901,10 +1901,10 @@ class ALKIS {
 									$pdf->addText($col2,$row-=12,$fontSize,utf8_decode($sondereigentum));
 								}
 
-								# Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+								# Abfragen und Ausgeben der Eigentï¿½mer zum Grundbuchblatt
 								$Eigentuemerliste=$flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
 								reset($Eigentuemerliste);
-								$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
+								$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
 								if ($flst->Buchungen[$b]['zusatz_eigentuemer'] != '') {
 									$zusatzeigentuemertext = $flst->Buchungen[$b]['zusatz_eigentuemer'];
 									while(strlen($zusatzeigentuemertext) > 60){
@@ -1919,13 +1919,13 @@ class ALKIS {
 										if($row<120) {
 											# Seitenumbruch
 											$seite++;
-											# aktuelle Seite abschließen
+											# aktuelle Seite abschlieï¿½en
 											$pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
 											# neue Seite beginnen
 											$pageid=$pdf->newPage();
 											$pagecount[$f] = $pagecount[$f] + 1;
 											$row=825; # 812 -> 825 2007-04-02 Schmidt;
-											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+											$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 										}
 										$pdf->addText($col1,$row-=12,$fontSize,utf8_decode(mb_substr($zusatzeigentuemertext,0,$positiontrenner,'utf8')));
 										$zusatzeigentuemertext=mb_substr($zusatzeigentuemertext,$positiontrenner+1, 999,'utf8');
@@ -1945,17 +1945,17 @@ class ALKIS {
 								if($row<60) {
 									# Seitenumbruch
 									$seite++;
-									# aktuelle Seite abschließen
+									# aktuelle Seite abschlieï¿½en
 									$pdf->addText($col9_1,$row-=24,$fontSize,'Forts. Seite '.$seite);
 									# neue Seite beginnen
 									$pageid=$pdf->newPage();
 									$pagecount[$f] = $pagecount[$f] + 1;
 									$row=825; # 812 -> 825 2007-04-02 Schmidt
-									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
+									$this->ALBAuszug_SeitenKopf($pdf,$flst,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,NULL,$AktualitaetsNr);
 									$pdf->addText($col0,$row-=24,$fontSize,'Bestand');
 								}
 
-								# Ausgabe der Zeile für die Bestandbezeichnung
+								# Ausgabe der Zeile fï¿½r die Bestandbezeichnung
 								$BestandStr =$flst->Buchungen[$b]['bezirk'].'-'.intval($flst->Buchungen[$b]['blatt']);
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
@@ -1974,8 +1974,8 @@ class ALKIS {
           $pageid=$pdf->newPage();
           //$pagecount[$f] = $pagecount[$f] + 1;
         }
-      } # end of flurstück is not historisch
-    } # end of for all flurstücke
+      } # end of flurstï¿½ck is not historisch
+    } # end of for all flurstï¿½cke
     $pdf->pagecount = $pagecount;
     return $pdf;
   }
@@ -1986,11 +1986,11 @@ class ALKIS {
     # Hilfsobjekte erzeugen
 
     $grundbuch=new grundbuch($Grundbuchbezirk,$Grundbuchblatt,$this->database);
-    # Abfrage aller Flurstücke, die auf dem angegebenen Grundbuchblatt liegen.
+    # Abfrage aller Flurstï¿½cke, die auf dem angegebenen Grundbuchblatt liegen.
     $ret=$grundbuch->getBuchungen('','','',1);
     $buchungen=$ret[1];
 
-    # ein Flurstück erzeugen
+    # ein Flurstï¿½ck erzeugen
     $flst=new flurstueck($buchungen[0]['flurstkennz'],$this->database);
     $flst->database=$this->database;
     $ret=$flst->readALB_Data($buchungen[0]['flurstkennz'], true, 'ogc_fid');
@@ -2046,8 +2046,8 @@ class ALKIS {
         $art = 'Bestand';
       } break;
       case '25' : {
-#        $Ueberschrift='******** Bestandsübersicht *******';
-        $Ueberschrift='Übersicht Bestandsdaten - interne Verwendung';
+#        $Ueberschrift='******** Bestandsï¿½bersicht *******';
+        $Ueberschrift='ï¿½bersicht Bestandsdaten - interne Verwendung';
         $art = 'Bestand';
       } break;
     }
@@ -2095,10 +2095,10 @@ class ALKIS {
       case 25 : {
         # Bestand
 
-        # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+        # Abfragen und Ausgeben der Eigentï¿½mer zum Grundbuchblatt
         $Eigentuemerliste=$flst->getEigentuemerliste($buchungen[0]['bezirk'],$buchungen[0]['blatt'],$buchungen[0]['bvnr']);
 				reset($Eigentuemerliste);
-				$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
+				$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
 
         if ($buchungen[0]['zusatz_eigentuemer'] != '') {
                 $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
@@ -2114,7 +2114,7 @@ class ALKIS {
                   if($row<120) {
                     # Seitenumbruch
                     $seite++;
-                    # aktuelle Seite abschließen
+                    # aktuelle Seite abschlieï¿½en
                     $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.$seite);
                     # neue Seite beginnen
                     $pageid=$pdf->newPage();
@@ -2129,7 +2129,7 @@ class ALKIS {
 
         $gesamtflaeche = 0;
         for ($b=0;$b < @count($buchungen);$b++) {
-          # Flurstück erzeugen
+          # Flurstï¿½ck erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
           $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true, 'ogc_fid');
@@ -2138,7 +2138,7 @@ class ALKIS {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieï¿½en
 #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
@@ -2153,10 +2153,10 @@ class ALKIS {
             $pdf->addText($col10,$row-=24,$fontSize,'Gemarkung  '.utf8_decode($flst->GemkgName));
 #         $pdf->addText($col0,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
       $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
-#         $pdf->addText($col9-10,$row,$fontSize,'Fläche');
-#29.11.2006 H. Riedel, Flurkarte, Riss hinzugefügt
+#         $pdf->addText($col9-10,$row,$fontSize,'Flï¿½che');
+#29.11.2006 H. Riedel, Flurkarte, Riss hinzugefï¿½gt
       $pdf->addText($col44,$row,$fontSize,'Flurkarte Riss');
-      $pdf->addText($col64,$row,$fontSize,'Fläche');
+      $pdf->addText($col64,$row,$fontSize,'Flï¿½che');
         }
           if ($flst->Nenner!=0) {
             $nennerausgabe="/".$flst->Nenner;
@@ -2217,7 +2217,7 @@ class ALKIS {
             if($row<120) {
               # Seitenumbruch
               $seite++;
-              # aktuelle Seite abschließen
+              # aktuelle Seite abschlieï¿½en
   #            $pdf->addText($col9_1,$row-=12,$fontSize,'Forts. Seite '.$seite);
               $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
               # neue Seite beginnen
@@ -2275,8 +2275,8 @@ class ALKIS {
         } # ende Schleife Bestand
 #        $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("-",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("-",29));
-#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsfläche '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
-        $pdf->addText($col44,$row-=12,$fontSize,'Bestandsfläche '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
+#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsflï¿½che '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
+        $pdf->addText($col44,$row-=12,$fontSize,'Bestandsflï¿½che '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
 #       $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("=",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("=",29));
       } # ende Ausgabe Formular 25
@@ -2284,10 +2284,10 @@ class ALKIS {
       case 20 : {
         # Bestand
 
-        # Abfragen und Ausgeben der Eigentümer zum Grundbuchblatt
+        # Abfragen und Ausgeben der Eigentï¿½mer zum Grundbuchblatt
         $Eigentuemerliste=$flst->getEigentuemerliste($buchungen[0]['bezirk'],$buchungen[0]['blatt'],$buchungen[0]['bvnr']);
         reset($Eigentuemerliste);
-				$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstück',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
+				$this->ALBAuszug_outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, NULL, $pdf,$Ueberschrift,'Flurstï¿½ck',$seite,$row,$fontSize,$pagecount,$f, $col0, $col1, $col9_1);
 
 				if ($buchungen[0]['zusatz_eigentuemer'] != '') {
           $zusatzeigentuemertext=$buchungen[0]['zusatz_eigentuemer'];
@@ -2303,7 +2303,7 @@ class ALKIS {
             if($row<120) {
               # Seitenumbruch
               $seite++;
-              # aktuelle Seite abschließen
+              # aktuelle Seite abschlieï¿½en
               $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.$seite);
               # neue Seite beginnen
               $pageid=$pdf->newPage();
@@ -2318,7 +2318,7 @@ class ALKIS {
 
         $gesamtflaeche = 0;
         for ($b=0;$b < @count($buchungen);$b++) {
-          # Flurstück erzeugen
+          # Flurstï¿½ck erzeugen
           $flst=new flurstueck($buchungen[$b]['flurstkennz'],$this->database);
           $flst->database=$this->database;
           $ret=$flst->readALB_Data($buchungen[$b]['flurstkennz'], true, 'ogc_fid');
@@ -2327,7 +2327,7 @@ class ALKIS {
           if($row<120) {
             # Seitenumbruch
             $seite++;
-            # aktuelle Seite abschließen
+            # aktuelle Seite abschlieï¿½en
             $pdf->addText($col57,$row-=12,$fontSize,'Forts. Seite '.str_pad($seite,3," ",STR_PAD_LEFT));
             # neue Seite beginnen
             $pageid=$pdf->newPage();
@@ -2337,7 +2337,7 @@ class ALKIS {
           if($buchungen[$b-1]['gemkgname'] != $buchungen[$b]['gemkgname']) {
             $pdf->addText($col10,$row-=36,$fontSize,'Gemarkung  '.utf8_decode($flst->GemkgName));
             $pdf->addText($col1,$row-=24,$fontSize,'BVNR Art GMKG   FLR FLURST-NR    P');
-            $pdf->addText($col64,$row,$fontSize,'Fläche');
+            $pdf->addText($col64,$row,$fontSize,'Flï¿½che');
           }
           if ($flst->Nenner!=0) {
             $nennerausgabe="/".$flst->Nenner;
@@ -2394,8 +2394,8 @@ class ALKIS {
         } # ende Schleife Bestand
 #        $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("-",29));
         $pdf->addText($col44,$row-=12,$fontSize,str_repeat("-",29));
-#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsfläche '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
-  $pdf->addText($col44,$row-=12,$fontSize,'Bestandsfläche '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
+#       $pdf->addText($col7+10,$row-=12,$fontSize,'Bestandsflï¿½che '.str_pad($gesamtflaeche,11,'*',STR_PAD_LEFT).' m2');
+  $pdf->addText($col44,$row-=12,$fontSize,'Bestandsflï¿½che '.str_pad(str_space($gesamtflaeche,3).' m2',14,'*',STR_PAD_LEFT));
 #       $pdf->addText($col7+10,$row-=12,$fontSize,str_repeat("=",29));
   $pdf->addText($col44,$row-=12,$fontSize,str_repeat("=",29));
       } # ende Ausgabe Formular 20
@@ -2409,21 +2409,24 @@ class ALKIS {
     $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
-      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
-      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
-      $ret[1]=$rect;
+      $rect->minx = $ret[1]['minx'];
+			$rect->maxx = $ret[1]['maxx'];
+      $rect->miny = $ret[1]['miny'];
+			$rect->maxy = $ret[1]['maxy'];
+      $ret[1]['rect'] = $rect;
     }
     return $ret;
   }
   
   function getMERfromGemeinde($Gemeinde, $epsgcode) {
-    # 2006-01-31 pk
-    $ret=$this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
-    if ($ret[0]==0) {
-      $rect=ms_newRectObj();
-      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
-      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
-      $ret[1]=$rect;
+    $ret = $this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
+    if ($ret[0] == 0) {
+      $rect = ms_newRectObj();
+      $rect->minx = $ret[1]['minx'];
+			$rect->maxx = $ret[1]['maxx'];
+      $rect->miny = $ret[1]['miny'];
+			$rect->maxy = $ret[1]['maxy'];
+      $ret[1] = $rect;
     }
     return $ret;
   }
@@ -2433,9 +2436,11 @@ class ALKIS {
     $ret=$this->database->getMERfromGemarkung($Gemkgschl, $epsgcode);
     if ($ret[0]==0) {
       $rect=ms_newRectObj();
-      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
-      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
-      $ret[1]=$rect;
+      $rect->minx = $ret[1]['minx'];
+			$rect->maxx = $ret[1]['maxx'];
+      $rect->miny = $ret[1]['miny'];
+			$rect->maxy = $ret[1]['maxy'];
+      $ret[1] = $rect;
     }
     return $ret;
   }

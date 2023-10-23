@@ -1,6 +1,6 @@
 <script type="text/javascript">
 
-	checknumbers = function(input, type, length, decimal_length){
+	checknumbers = function(input, type, length, decimal_length) {
 		var val;
 		var properties = input.name.split(';');
 		var datatype = properties[6];
@@ -51,7 +51,7 @@
 		}
 	}
 
-	checkDate = function(string){
+	checkDate = function(string) {
 		var split = string.split(".");
 		var day = parseInt(split[0], 10);
 		var month = parseInt(split[1], 10);

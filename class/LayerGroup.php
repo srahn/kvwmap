@@ -5,6 +5,8 @@ class LayerGroup extends MyObject {
 
 	static $write_debug = false;
 
+	var $layers = [];
+
 	function __construct($gui) {
 		$this->has_many = array(
 			"layers" => array(
@@ -15,7 +17,8 @@ class LayerGroup extends MyObject {
 				"fk" => 'Gruppe'
 			)
 		);
-		parent::__construct($gui, 'u_groups', 'id');
+		parent::__construct($gui, 'u_groups');
+
 		$this->validations = array(
 			array(
 				'attribute' => 'Gruppenname',
@@ -28,7 +31,7 @@ class LayerGroup extends MyObject {
 
 	public static	function find_by_id($gui, $id) {
 		$obj = new LayerGroup($gui);
-		$group = $obj->find_by(LayerGroup::$identifier, $id);
+		$group = $obj->find_by($obj->identifier, $id);
 		$group->layers = $group->get_Layer();
 		return $group;
 	}
