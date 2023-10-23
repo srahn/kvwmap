@@ -10173,7 +10173,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
-			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtypes = array('POINT', 'MULTILINESTRING', 'MULTIPOLYGON');
 			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 
