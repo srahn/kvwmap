@@ -198,7 +198,7 @@
     $style->outlinecolor->setRGB(0,0,0);
   };
 
-	$GUI->zoomToALKFlurst = function($FlurstListe,$border) use ($GUI){
+	$GUI->zoomToALKFlurst = function($FlurstListe, $border, $zoom = true) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
 		$alkis = new ALKIS($GUI->pgdatabase);
@@ -270,14 +270,11 @@
     $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
     $GUI->loadMap('DataBase');
-    # zu 2)
-    $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$GUI->map_scaledenom = $GUI->map->scaledenom;
-		}
-		else {
-			$GUI->map_scaledenom = $GUI->map->scale;
-		}
+
+    if ($zoom) {
+      $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
+		  $GUI->map_scaledenom = $GUI->map->scaledenom;
+    }
   };
 
 	$GUI->zoomToALKGebaeude = function($Gemeinde,$Strasse,$Hausnr,$border) use ($GUI){
@@ -289,22 +286,16 @@
     # zu 1)
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
-    $ret=$alkis->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $GUI->user->rolle->epsg_code);
+    $ret = $alkis->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $GUI->user->rolle->epsg_code);
     if ($ret[0]) {
-      #$GUI->Fehlermeldung='Es konnten keine Gebäude gefunden werden.<br>'.$ret[1];
       $rect=$GUI->user->rolle->oGeorefExt;
     }
     else {
-      $rect=$ret[1];
+      $rect = $ret[1]['rect'];
       $randx=($rect->maxx-$rect->minx)*$border/100;
       $randy=($rect->maxy-$rect->miny)*$border/100;
 
-	    if(MAPSERVERVERSION >= 600 ) {
-				$GUI->map_scaledenom = $GUI->map->scaledenom;
-			}
-			else {
-				$GUI->map_scaledenom = $GUI->map->scale;
-			}
+			$GUI->map_scaledenom = $GUI->map->scaledenom;
 	    # zu 3)
 			$epsg = EPSGCODE_ALKIS;
 			$datastring = "the_geom from (
@@ -339,8 +330,8 @@
 	      $legendentext.="<br>HausNr: ".str_replace(',', '<br>', $Hausnr);
 	    }
 	    else{
-				$ret = $GUI->pgdatabase->getStrNameByID($Gemeinde,$Strasse);
-	    	$legendentext .= $ret[1];
+				$str = $GUI->pgdatabase->getStrNameByID($Gemeinde,$Strasse);
+	    	$legendentext .= $str[1];
 	    }
 
 	    $dbmap = new db_mapObj($GUI->Stelle->id,$GUI->user->id);
@@ -375,12 +366,7 @@
 	    $GUI->loadMap('DataBase');
 	    # zu 2)
 	    $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-	    if(MAPSERVERVERSION >= 600 ) {
-				$GUI->map_scaledenom = $GUI->map->scaledenom;
-			}
-			else {
-				$GUI->map_scaledenom = $GUI->map->scale;
-			}
+			$GUI->map_scaledenom = $GUI->map->scaledenom;
     }
     return $ret;
   };
@@ -529,12 +515,15 @@
       }
       else {
         # StrassenID ist angegeben
-        $FlurstKennz=$Adresse->getFlurstKennzListe();
         if($GUI->formvars['ALK_Suche'] == 1){
 	        $ret = $GUI->zoomToALKGebaeude($GemID,$StrID,$HausID,100);
-	        if($ret[0]){
-	        	$GUI->zoomToALKFlurst($FlurstKennz,100);
-	        }
+          if (!$ret[0]) {
+            $GUI->saveMap('');
+          }
+          $FlurstKennz = $Adresse->getFlurstKennzListe($ret[1]['gml_ids']);
+          if ($FlurstKennz) {
+	          $GUI->zoomToALKFlurst($FlurstKennz, 100, $ret[1]['gml_ids'] == '');
+          }
 					if($GUI->formvars['go_next'] != ''){
 						$GUI->saveMap('');
 						go_switch($GUI->formvars['go_next']);
@@ -542,10 +531,11 @@
 					}
 	        $currenttime=date('Y-m-d H:i:s',time());
           $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-          $GUI->drawMap();
           $GUI->saveMap('');
+          $GUI->drawMap();
         }
         else{
+          $FlurstKennz = $Adresse->getFlurstKennzListe();
 	        if ($FlurstKennz > 0) {
 	          $GUI->flurstAnzeige($FlurstKennz);
 	        }
