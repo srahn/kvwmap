@@ -6,7 +6,6 @@ class DataSource extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'datasources');
-		$this->identifier = 'id';
 		$this->attributes = array(
 			[
 				'attribute'	=> 'id',
