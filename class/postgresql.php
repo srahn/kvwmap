@@ -1393,7 +1393,7 @@ FROM
 		return $rs;
 	}
   
-  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl, $StrassenSchl, $HausNr, $exclude_lmh_gml_ids) {
 		if ($HausNr != '') {
 			$adressen = explode(', ', $HausNr);
 			foreach($adressen as $adresse){
@@ -1413,6 +1413,9 @@ FROM
 			}
 			$adressfilter = "(l.gemeinde, l.lage, l.kreis) IN (" . implode(', ', $adr) . ")";
 		}
+		if ($exclude_lmh_gml_ids != '') {
+			$adressfilter .= " AND gml_id NOT IN (" . $exclude_lmh_gml_ids . ")";
+		}
   	$sql = "
 			SELECT 
 				f.flurstueckskennzeichen as flurstkennz
@@ -1430,7 +1433,7 @@ FROM
 																			$adressfilter . 
 																			$this->build_temporal_filter(array('l')) . "
 																		)";
-		if ($HausNr == '') {
+		if ($HausNr == '' AND $exclude_lmh_gml_ids == '') {
 			$sql .= "
 				OR f.zeigtauf && ARRAY	(
 																	SELECT 
@@ -2566,10 +2569,12 @@ FROM
 			  min(st_xmin(env)) AS minx, 
 			  max(st_xmax(env)) AS maxx,
 			  min(st_ymin(env)) AS miny, 
-			  max(st_ymax(env)) AS maxy
+			  max(st_ymax(env)) AS maxy,
+				'''' || array_to_string(array_agg(gml_ids), ''',''') || '''' as gml_ids
 			FROM
 			  alkis.ax_gebaeude g,
-			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env
+			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env,
+				unnest(g.zeigtauf) as gml_ids
 			WHERE
 			  g.zeigtauf && ARRAY (
 			  SELECT
@@ -2590,11 +2595,8 @@ FROM
 			$rs = pg_fetch_assoc($ret[1]);
 			if ($rs['minx'] == 0) {
 				$ret[0] = 1;
-				$ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
 			}
-			else {
-				$ret[1] = $rs;
-			}
+			$ret[1] = $rs;
 		}
 		return $ret;
 	}
