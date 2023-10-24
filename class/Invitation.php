@@ -3,13 +3,9 @@ include_once(CLASSPATH . 'MyObject.php');
 class Invitation extends MyObject {
 
 	static $write_debug = false;
-	static $identifier = 'token';
 
 	function __construct($gui) {
-		parent::__construct($gui, 'invitations');
-		//$this->MyObject($gui, 'invitations');
-		$this->identifier = Invitation::$identifier;
-		$this->identifier_type = 'text';
+		parent::__construct($gui, 'invitations', 'token', 'text');
 		$this->validations = array(
 			array(
 				'attribute' => 'token',

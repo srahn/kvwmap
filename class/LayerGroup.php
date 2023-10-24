@@ -4,7 +4,8 @@ include_once(CLASSPATH . 'Layer.php');
 class LayerGroup extends MyObject {
 
 	static $write_debug = false;
-	static $identifier = 'id';
+
+	var $layers = [];
 
 	function __construct($gui) {
 		$this->has_many = array(
@@ -17,6 +18,7 @@ class LayerGroup extends MyObject {
 			)
 		);
 		parent::__construct($gui, 'u_groups');
+
 		$this->validations = array(
 			array(
 				'attribute' => 'Gruppenname',
@@ -29,7 +31,7 @@ class LayerGroup extends MyObject {
 
 	public static	function find_by_id($gui, $id) {
 		$obj = new LayerGroup($gui);
-		$group = $obj->find_by(LayerGroup::$identifier, $id);
+		$group = $obj->find_by($obj->identifier, $id);
 		$group->layers = $group->get_Layer();
 		return $group;
 	}
