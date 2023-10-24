@@ -10,7 +10,7 @@ class BelatedFile extends MyObject {
 
 	public static	function find_by_id($gui, $id) {
 		$belated_file = new BelatedFile($gui);
-		$belated_files = $belated_file->find_by(BelatedFile::$identifier, $id);
+		$belated_files = $belated_file->find_by($belated_file->identifier, $id);
 		return $belated_files;
 	}
 
