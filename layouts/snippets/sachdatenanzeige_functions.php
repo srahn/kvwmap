@@ -274,7 +274,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			}
 		}
 	}
-	
+
 	buildJSONString = function(id, is_array) {
 		var field = document.getElementById(id);
 		var value;
@@ -519,7 +519,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 
-	save = function(){
+	save = function() {
 		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
 		if (open_subforms.length > 0) {
 			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);

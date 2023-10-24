@@ -338,10 +338,15 @@ class Gml_extractor {
 		$version = '5.1'; //default
 		$lines = file($this->gml_location);
 		$matched_ns_str;
+		$is_within_auszug = false; // check within auszug with linebreaks
 		foreach ($lines as $lineNumber => $line) {
-			if (strpos($line, 'XPlanAuszug') === false) {
+			if (strpos($line, 'XPlanAuszug') === false and $is_within_auszug === false) {
 				continue;
 			}
+			$is_within_auszug = true;
+			if (strpos($line, '>')) {
+				$is_within_auszug = false;
+			};
 			# needs to check for both single and double quotes as both are permitted by XML spec
 			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
 				break; #found it
