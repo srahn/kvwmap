@@ -6,7 +6,6 @@ class CronJob extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'cron_jobs');
-		$this->identifier = 'id';
 		$this->setKeys(
 			array(
 				"id",

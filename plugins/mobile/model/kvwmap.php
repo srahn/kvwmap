@@ -706,10 +706,10 @@
 				$GUI->add_message('warning', $result);
 			}
 
-		$results = $layer->get_missing_sublayers($layer_id);
-		foreach ($results AS $l) {
-			$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
-		}
+			$results = $layer->get_missing_sublayers($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
+			}
 
 			$results = $layer->get_missing_sub_layers_in_stellen($layer_id);
 			foreach ($results AS $l) {

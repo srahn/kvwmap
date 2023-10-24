@@ -7,7 +7,6 @@ class Connection extends MyObject {
 	function __construct($gui) {
 		parent::__construct($gui, 'connections');
 		$this->alias = 'Datenbankverbindungen';
-		$this->identifier = 'id';
 		$this->attributes = array(
 			[
 				'attribute' => 'id',
