@@ -6,8 +6,7 @@ class Menue extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_menues');
-		$this->identifier = 'id';
+		parent::__construct($gui, 'u_menues', 'id');
 		$this->validations = array(
 			array(
 				'attribute' => 'id',
