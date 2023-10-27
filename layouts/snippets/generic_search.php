@@ -102,9 +102,6 @@ function suche(){
 			}
 		}
 	}?>
-	if(typeof $("#"+prefix+"value2_"+attrname) !== 'undefined'){
-		$("#"+prefix+"value2_"+attrname).val("");
-	}
 	if(document.GUI.map_flag.value == 1){
 		if(document.GUI.newpathwkt.value == ''){
 			if(document.GUI.newpath.value == ''){
