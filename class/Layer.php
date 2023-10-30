@@ -891,9 +891,6 @@ l.Name AS sub_layer_name
 				case 'Enumeration' : {
 					$formatter_objekt = new Enumeration($this->gui);
 				} break;
-				case 'Enumeration with table' : {
-					$formatter_objekt = new Enumeration($this->gui, 'enum_' . $attr['typname']);
-				} break;
 				case 'CodeList' : {
 					$formatter_objekt = new CodeList($this->gui);
 				} break;
@@ -946,29 +943,14 @@ l.Name AS sub_layer_name
 		);
 	}
 
-	function enum_table_exists($table_name) {
-		$sql = "
-			SELECT EXISTS (
-				SELECT FROM 
-					pg_tables
-				WHERE 
-					schemaname = 'xplan_gml' AND 
-					tablename	= 'enum_" . $typname . "'
-			);
-		";
-		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
-		$rs = pg_fetch_array($ret[1]);
-		return $rs[0] == 't';
-	}
-
-	function codelist_table_exists($typname) {
+	function codelist_table_exists($typname, $schema) {
 		$sql = "
 			SELECT
 				count(*) = 3
 			FROM 
 				information_schema.columns
 			WHERE 
-				table_schema = 'xplan_gml' AND 
+				table_schema = '" . $schema . "' AND 
 				table_name	= '" . $typname . "' AND
 				column_name IN ('id', 'value', 'codespace')
 		";
@@ -978,12 +960,13 @@ l.Name AS sub_layer_name
 		return $rs[0] == 't';
 	}
 
-	function datatype_table_exists($typname) {
+	function datatype_table_exists($typname, $schema) {
 		$sql = "
 			SELECT EXISTS (
 				SELECT FROM 
 					pg_type
 				WHERE
+					schemaname = '" . $schema . "' AND 
 					typname	= '" . $typname . "'
 			)
 		";
@@ -993,13 +976,13 @@ l.Name AS sub_layer_name
 		return $rs[0] == 't';
 	}
 
-	function tabletype_table_exists($typname) {
+	function tabletype_table_exists($typname, $schema) {
 		$sql = "
 			SELECT EXISTS (
 				SELECT FROM 
 					pg_tables
 				WHERE 
-					schemaname = 'xplan_gml' AND 
+					schemaname = '" . $schema . "' AND 
 					tablename	= '" . $typname . "'
 			);
 		";
@@ -1011,22 +994,18 @@ l.Name AS sub_layer_name
 	function get_attribute_type($def) {
 		$type = 'normal';
 		if ($def['typcategory'] == 'E') {
-			if ($this->enum_table_exists($def['typname'])) {
-				#extent select to query wert and beschreibung
-				$type = 'Enumeration with table';
-			}
 			$type = 'Enumeration';
 		}
 		if ($def['dtd_table_name'] != '') {
-			if ($this->codelist_table_exists($def['typname'])) {
+			if ($this->codelist_table_exists($def['typname'], $def['table_schema'])) {
 				$type = 'CodeList';
 			}
 			else {
-				if ($this->datatype_table_exists($def['typname'])) {
+				if ($this->datatype_table_exists($def['typname'], $def['table_schema'])) {
 					$type = 'DataType';
 				}
 				else {
-					if ($this->tabletype_table_exists($def['typname'])) {
+					if ($this->tabletype_table_exists($def['typname'], $def['table_schema'])) {
 						$type = 'TableType';
 					}
 				}
