@@ -74,16 +74,7 @@ class Konvertierung extends PgObject {
 				$layer->set('template', '../templates/' . $layer->name . '_body.html');
 				# Set Data sql for layer
 				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
-				$options = array(
-					'attributes' => array(
-						'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-						'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-						'where' => array('k.stelle_id = ' . $gui->user->rolle->stelle_id)
-					),
-					'geom_attribute' => 'position',
-					'geom_type_filter' => true
-				);
-				$result = $layerObj->get_generic_data_sql($options);
+				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
 				}
