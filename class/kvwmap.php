@@ -17878,8 +17878,7 @@ class db_mapObj{
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(
-			'if_empty_use_query' => false,
-			'use_generic_data_sql' => false
+			'if_empty_use_query' => false
 		);
 		$options = array_merge($default_options, $options);
 		global $language;
