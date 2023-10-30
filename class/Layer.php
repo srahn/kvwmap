@@ -729,7 +729,7 @@ l.Name AS sub_layer_name
 				'geom_attribute' => 'position',
 				'geom_type_filter' => true
 			);
-			$result = $layerObj->get_generic_data_sql($options);
+			$result = $this->get_generic_data_sql($options);
 			if ($result['success']) {
 				$data = $result['data_sql'];
 			}
