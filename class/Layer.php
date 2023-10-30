@@ -737,7 +737,11 @@ l.Name AS sub_layer_name
 				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
 				return $result;
 			}
-			$ret = $layerdb->getFieldsfromSelect($data);
+			$select = $mapDB->getSelectFromData($data);
+			if ($layerdb->schema != '') {
+				$select = str_replace($layerdb->schema . '.', '', $select);
+			}
+			$ret = $layerdb->getFieldsfromSelect($select);
 			if ($ret[0]) {
 				$this->gui->add_message('error', $ret[1]);
 			}
