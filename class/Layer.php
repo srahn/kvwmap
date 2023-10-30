@@ -718,13 +718,34 @@ l.Name AS sub_layer_name
 		$layer_id = $this->get($this->identifier);
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
-		$all_data_attributes = $mapDB->getDataAttributes(
-			$layerdb,
-			$layer_id,
-			array(
-				'use_generic_data_sql' => ($this->get('write_mapserver_templates') == 'generic')
-			)
-		);
+
+		if ($this->get('write_mapserver_templates') == 'generic') {
+			$options = array(
+				'attributes' => array(
+					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
+					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $this->get_table_alias() . '.konvertierung_id = k.id'),
+					'where' => array('k.stelle_id = ' . $this->gui->user->rolle->stelle_id)
+				),
+				'geom_attribute' => 'position',
+				'geom_type_filter' => true
+			);
+			$result = $layerObj->get_generic_data_sql($options);
+			if ($result['success']) {
+				$data = $result['data_sql'];
+			}
+			else {
+				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+				return $result;
+			}
+			$ret = $layerdb->getFieldsfromSelect($data);
+			if ($ret[0]) {
+				$this->gui->add_message('error', $ret[1]);
+			}
+			$all_data_attributes = $ret[1];
+		}
+		else {
+			$all_data_attributes = $mapDB->getDataAttributes($layerdb, $layer_id, []);
+		}
 
 		$data_attributes = array_filter(
 			array_slice($all_data_attributes, 0, -2),
