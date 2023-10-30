@@ -966,7 +966,7 @@ l.Name AS sub_layer_name
 				SELECT FROM 
 					pg_type
 				WHERE
-					schemaname = '" . $schema . "' AND 
+					typnamespace = '" . $schema . "'::regnamespace AND 
 					typname	= '" . $typname . "'
 			)
 		";
