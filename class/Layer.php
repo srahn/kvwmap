@@ -723,8 +723,8 @@ l.Name AS sub_layer_name
 			$options = array(
 				'attributes' => array(
 					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-					'where' => array('k.stelle_id = ' . $this->GUI->user->rolle->stelle_id)
+					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $this->get_table_alias() . '.konvertierung_id = k.id'),
+					'where' => array('k.stelle_id = ' . $this->gui->user->rolle->stelle_id)
 				),
 				'geom_attribute' => 'position',
 				'geom_type_filter' => true
