@@ -1020,7 +1020,7 @@ l.Name AS sub_layer_name
 		}
 
 		# neue Attribute ins Data einfügen
-		$pos = strpos($data, 'from', strpos($data, 'select'));
+		$pos = stripos($data, 'from', stripos($data, 'select'));
 		if ($pos !== false) {
 			$data = substr_replace(
 								$data, 
