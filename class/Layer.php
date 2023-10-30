@@ -43,7 +43,7 @@ class Layer extends MyObject {
 	public static	function find_by_id($gui, $id) {
 		$obj = new Layer($gui);
 		$layer = $obj->find_by('Layer_ID', $id);
-		if ($layer->get_id() != '')  {
+		if ($layer->get_id() != '') {
 			$layer->attributes = $layer->get_layer_attributes();
 			$layer->charts = $layer->get_layer_charts();
 		}

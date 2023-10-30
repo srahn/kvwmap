@@ -8050,7 +8050,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-		$this->layerdata['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
+		$this->layerdata['charts'] = (empty($this->formvars['selected_layer_id']) ? array() : LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']));
 		$this->output();
 	}
 
