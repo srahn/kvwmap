@@ -17877,36 +17877,13 @@ class db_mapObj{
 	}
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
-		include_once(CLASSPATH . 'Layer.php');
 		$default_options = array(
 			'if_empty_use_query' => false,
 			'use_generic_data_sql' => false
 		);
 		$options = array_merge($default_options, $options);
 		global $language;
-		$layerObj = Layer::find_by_id($this->GUI, $layer_id);
-		if ($options['use_generic_data_sql']) {
-			$options = array(
-				'attributes' => array(
-					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-					'where' => array('k.stelle_id = ' . $this->GUI->user->rolle->stelle_id)
-				),
-				'geom_attribute' => 'position',
-				'geom_type_filter' => true
-			);
-			$result = $layerObj->get_generic_data_sql($options);
-			if ($result['success']) {
-				$data = $result['data_sql'];
-			}
-			else {
-				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
-				return $result;
-			}
-		}
-		else {
-			$data = str_replace('$scale', '1000', $this->getData($layer_id));
-		}
+		$data = str_replace('$scale', '1000', $this->getData($layer_id));
 
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
@@ -17931,7 +17908,7 @@ class db_mapObj{
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
-			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
+			$this->GUI->add_message('warning', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}
