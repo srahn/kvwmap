@@ -9,6 +9,7 @@ class Layer extends MyObject {
 	public $geom_column;
 	public $attributes;
 	public $charts;
+	public $table_alias;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -138,7 +139,7 @@ class Layer extends MyObject {
 		return $stellen_ids;
 	}
 
-	function get_maintable_attributes() {
+	function get_maintable_attributes($layerdb) {
 		$sql = "
 			SELECT
 				attr.table_schema,
@@ -178,8 +179,6 @@ class Layer extends MyObject {
 				attr.att_name
 		";
 		#echo 'SQL zur Abfrage der Attribute: ' . $sql;
-		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
 			return array(
@@ -189,7 +188,7 @@ class Layer extends MyObject {
 		}
 
 		while ($attr = pg_fetch_assoc($ret['query'])) {
-			$this->maintable_attributes[] = $attr;
+			$this->maintable_attributes[$attr['att_name']] = $attr;
 		}
 
 		return array(
@@ -723,8 +722,7 @@ l.Name AS sub_layer_name
 			$options = array(
 				'attributes' => array(
 					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $this->get_table_alias() . '.konvertierung_id = k.id'),
-					'where' => array('k.stelle_id = ' . $this->gui->user->rolle->stelle_id)
+					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $this->get_table_alias() . '.konvertierung_id = k.id')
 				),
 				'geom_attribute' => 'position',
 				'geom_type_filter' => true
@@ -877,7 +875,7 @@ l.Name AS sub_layer_name
 	}
 
   function get_table_alias() {
-    return mb_substr($this->get('schema'), 0, 1) . mb_substr($this->get('maintable') , 0, 1);
+    return $this->table_alias;
   }
 
 	/**
@@ -886,7 +884,7 @@ l.Name AS sub_layer_name
 	 position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.fp_landwirtschaft.aufschrift, xplan_gml.fp_landwirtschaft.created_at, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.detailliertezweckbestimmung)) AS detailliertezweckbestimmung, xplan_gml.fp_landwirtschaft.ebene, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.endebedingung), false) AS endebedingung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.externereferenz), true) AS externereferenz, xplan_gml.fp_landwirtschaft.flaechenschluss, xplan_gml.fp_landwirtschaft.flussrichtung, xplan_gml.fp_landwirtschaft.gehoertzubereich, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.gesetzlichegrundlage)) AS gesetzlichegrundlage, xplan_gml.fp_landwirtschaft.gliederung1, xplan_gml.fp_landwirtschaft.gliederung2, xplan_gml.fp_landwirtschaft.gml_id, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hatgenerattribut), true) AS hatgenerattribut, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hoehenangabe), true) AS hoehenangabe, xplan_gml.fp_landwirtschaft.konvertierung_id, xplan_gml.fp_landwirtschaft.nordwinkel, xplan_gml.fp_landwirtschaft.position, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtscharakter), 'xplan_gml', 'fp_rechtscharakter', false) AS rechtscharakter, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtsstand), 'xplan_gml', 'xp_rechtsstand', false) AS rechtsstand, xplan_gml.fp_landwirtschaft.refbegruendunginhalt, xplan_gml.fp_landwirtschaft.reftextinhalt, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.spezifischepraegung)) AS spezifischepraegung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.startbedingung), false) AS startbedingung, xplan_gml.fp_landwirtschaft.text, xplan_gml.fp_landwirtschaft.updated_at, xplan_gml.fp_landwirtschaft.user_id, xplan_gml.fp_landwirtschaft.uuid, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchflaeche, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchspe, xplan_gml.fp_landwirtschaft.wirddargestelltdurch, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.zweckbestimmung), 'xplan_gml', 'xp_zweckbestimmunglandwirtschaft', true) AS zweckbestimmung from xplan_gml.fp_landwirtschaft JOIN xplankonverter.konvertierungen ON xplan_gml.fp_landwirtschaft.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
 	* Die Abfrage der Attribute erfolgt in der Funktion get_maintable_attributes
 	*/
-	function get_generic_data_sql($options = array()) {
+	function get_generic_data_sql_alt($options = array()) {
 		$default_options = array(
 			'attributes' => array(
 				'select' => array(),
@@ -967,6 +965,77 @@ l.Name AS sub_layer_name
 			'data_sql' => $data_sql
 		);
 	}
+
+	function get_generic_data_sql($options = array()) {
+		include_once(CLASSPATH . 'Enumeration.php');
+		include_once(CLASSPATH . 'DataType.php');
+		include_once(CLASSPATH . 'CodeList.php');
+		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
+		$data_attributes = $mapDB->getDataAttributes($layerdb, $this->get($this->identifier));
+		$data = str_replace('$scale', '1000', $mapDB->getData($this->get($this->identifier)));
+		$this->table_alias = $data_attributes[0]['table_alias_name'];
+
+		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
+		$ret = $this->get_maintable_attributes($layerdb);
+		if (!$ret['success']) {
+			return $ret;
+		}
+		foreach($data_attributes as $data_attribute) {
+			# bereits im Data vorhandene Attribute weglassen
+			if (is_array($data_attribute) AND array_key_exists($data_attribute['real_name'], $ret['maintable_attributes'])) {
+				unset($ret['maintable_attributes'][$data_attribute['real_name']]);
+			}
+		}
+
+		foreach ($ret['maintable_attributes'] AS $attr) {
+			switch($this->get_attribute_type($attr)) {
+				case 'Enumeration' : {
+					$formatter_objekt = new Enumeration($this->gui);
+				} break;
+				case 'CodeList' : {
+					$formatter_objekt = new CodeList($this->gui);
+				} break;
+				case 'DataType' : {
+					$formatter_objekt = new DataType($this->gui);
+				} break;
+				case 'TableType' : {
+					# There is no separate class for tabletype yet, take Enumeration for it
+					$formatter_objekt = new Enumeration($this->gui);
+				} break;
+				default : {
+					$formatter_objekt = new LayerAttribute($this->gui);
+				}
+			}
+			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
+			$sql = $formatter_objekt->get_generic_select($this, $attr);
+			#echo '<br>attr: ' . $attr['att_name'] . ' type: ' . $this->get_attribute_type($attr) . ' sql: ' . $sql['select'];
+			foreach(array('select', 'from', 'where') AS $key) {
+				if (array_key_exists($key, $sql) AND $sql[$key] != '') {
+					$attributes[$key][] = $sql[$key];
+				}
+			}
+		}
+
+		# neue Attribute ins Data einfügen
+		$pos = strpos($data, 'from', strpos($data, 'select'));
+		if ($pos !== false) {
+			$data = substr_replace(
+								$data, 
+								', ' . implode(', ', $attributes['select']) . ' from', 
+								$pos, 
+								strlen('from')
+							);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => $msg,
+			'data_sql' => $data
+		);
+	}	
 
 	function codelist_table_exists($typname, $schema) {
 		$sql = "
