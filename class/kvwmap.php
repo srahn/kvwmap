@@ -550,10 +550,12 @@ class GUI {
 						if ($this->formvars['layer_id'] > 0 AND $layer[0]['connectiontype'] == MS_POSTGIS) {
 							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
 						}						
-						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
-							if ($this->user->layer_data_import_allowed) {
-								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+						if ($layer[0]['queryable']) {
+							if ($layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
+								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+								if ($this->user->layer_data_import_allowed) {
+									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+								}
 							}
 							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
@@ -9029,6 +9031,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['oid'] = $attributes['pk'][0];
 				}
+
 				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 				}
@@ -9053,7 +9056,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$attributes['groupby'] = ' '.substr($newpath, $groupbyposition);
 					$newpath = substr($newpath, 0, $groupbyposition);
 		  	}
-
 				for($j = 0; $j < count($attributes['name']); $j++){
 					$attributes['privileg'][$j] = $privileges[$attributes['name'][$j]];
 					$attributes['privileg'][$attributes['name'][$j]] = $privileges[$attributes['name'][$j]];
@@ -9207,13 +9209,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$sql_where .= ')'.$spatial_sql_where;		// äußere Klammer wieder zu und räumliche Einschränkung anhängen
-
         $distinctpos = strpos(strtolower($newpath), 'distinct');
         if($distinctpos !== false && $distinctpos < 10){
           $pfad = substr(trim($newpath), $distinctpos+8);
           $distinct = true;
         }
-        else{
+        else {
 					$distinct = false;
           $pfad = substr(trim($newpath), 7);
         }
@@ -10171,7 +10172,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 
 		if ($this->formvars['geomtype'] == 'GEOMETRY') {
-			$geomtypes = array('POINT', 'LINESTRING', 'POLYGON');
+			$geomtypes = array('POINT', 'MULTILINESTRING', 'MULTIPOLYGON');
 			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 

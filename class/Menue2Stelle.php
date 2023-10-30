@@ -4,8 +4,7 @@ class Menue2Stelle extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_menue2stelle');
-		$this->identifier = 'stelle_id, menue_id';
+		parent::__construct($gui, 'u_menue2stelle', 'stelle_id, menue_id');
 	}
 
 	public static	function find($gui, $where) {

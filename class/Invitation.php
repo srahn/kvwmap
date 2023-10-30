@@ -3,13 +3,9 @@ include_once(CLASSPATH . 'MyObject.php');
 class Invitation extends MyObject {
 
 	static $write_debug = false;
-	static $identifier = 'token';
 
 	function __construct($gui) {
-		parent::__construct($gui, 'invitations');
-		//$this->MyObject($gui, 'invitations');
-		$this->identifier = Invitation::$identifier;
-		$this->identifier_type = 'text';
+		parent::__construct($gui, 'invitations', 'token', 'text');
 		$this->validations = array(
 			array(
 				'attribute' => 'token',
@@ -34,7 +30,7 @@ class Invitation extends MyObject {
 
 	public static	function find_by_id($gui, $id) {
 		$invitation = new Invitation($gui);
-		$invitation = $invitation->find_by(Invitation::$identifier, $id);
+		$invitation = $invitation->find_by($invitation->identifier, $id);
 		$inviter = new MyObject($gui, 'user');
 		$invitation->inviter = $inviter->find_by('ID', $invitation->get('inviter_id'));
 		$stelle = new MyObject($gui, 'stelle');
