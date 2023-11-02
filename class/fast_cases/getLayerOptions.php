@@ -474,10 +474,12 @@ class GUI {
 						if ($this->formvars['layer_id'] > 0 AND $layer[0]['connectiontype'] == MS_POSTGIS) {
 							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
 						}						
-						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
-							if ($this->user->layer_data_import_allowed) {
-								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+						if ($layer[0]['queryable']) {
+							if ($layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
+								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+								if ($this->user->layer_data_import_allowed) {
+									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+								}
 							}
 							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
@@ -613,7 +615,7 @@ class GUI {
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 53px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -1640,35 +1642,11 @@ class db_mapObj {
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(
-			'if_empty_use_query' => false,
-			'use_generic_data_sql' => false
+			'if_empty_use_query' => false
 		);
 		$options = array_merge($default_options, $options);
 		global $language;
-		include_once(CLASSPATH . 'Layer.php');
-		$layerObj = Layer::find_by_id($this->GUI, $layer_id);
-		if ($options['use_generic_data_sql']) {
-			$options = array(
-				'attributes' => array(
-					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-					'where' => array('k.stelle_id = ' . $this->GUI->user->rolle->stelle_id)
-				),
-				'geom_attribute' => 'position',
-				'geom_type_filter' => true
-			);
-			$result = $layerObj->get_generic_data_sql($options);
-			if ($result['success']) {
-				$data = $result['data_sql'];
-			}
-			else {
-				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
-				return $result;
-			}
-		}
-		else {
-			$data = str_replace('$scale', '1000', $this->getData($layer_id));
-		}
+		$data = str_replace('$scale', '1000', $this->getData($layer_id));
 
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
@@ -1693,7 +1671,7 @@ class db_mapObj {
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
-			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
+			$this->GUI->add_message('warning', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}
@@ -2573,9 +2551,7 @@ class pgdatabase {
         if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
         else $attr_info['length'] = $attr_info['character_maximum_length'];
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
-	  		else $attr_info['default'] = '';
-				$attributes[] = $attr_info;
+				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
 		return $attributes;

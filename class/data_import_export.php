@@ -934,7 +934,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -1046,17 +1046,6 @@ class data_import_export {
 	 */
 	function adjustGeometryType($database, $schema, $table, $epsg) {
 		$sql = "
-			UPDATE
-				" . $schema . "." . $table . "
-			SET
-				the_geom = ST_Force2D(the_geom)
-		";
-		$ret = $database->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			return 0;
-		}
-
-		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
 		$ret = $database->execSQL($sql,4, 0);
@@ -1090,17 +1079,18 @@ class data_import_export {
 			unlink($folder . '/test.csv');
 		}
 		#echo '<br>output: ' . $output[0];
-		if (strpos($output[0], 'UTF') !== false) 			$encoding = 'UTF-8';
-		if (strpos($output[0], 'ISO-8859') !== false) $encoding = 'LATIN1';
-		if (strpos($output[0], 'ASCII') !== false) 		$encoding = 'LATIN1';
+		$encoding = 'LATIN1';
+		if (strpos($output[0], 'UTF') !== false) {
+			$encoding = 'UTF-8';
+		}
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
 
-	function create_csv($result, $attributes, $groupnames){
+	function create_csv($result, $attributes, $groupnames) {
 		# Gruppennamen in die erste Zeile schreiben
-		if($groupnames != ''){
-			foreach($result[0] As $key => $value){
+		if ($groupnames != ''){
+			foreach ($result[0] AS $key => $value){
 				$i = $attributes['indizes'][$key];
 				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 					$groupname = explode(';', $attributes['group'][$i]);
@@ -1118,7 +1108,7 @@ class data_import_export {
     if(substr($attributes['name'][0], 0, 2) == 'ID'){
       $attributes['name'][0] = str_replace('ID', 'id', $attributes['name'][0]);
     }
-    foreach($result[0] As $key => $value){
+    foreach($result[0] AS $key => $value){
 			$i = $attributes['indizes'][$key];
     	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	      if($attributes['alias'][$i] != ''){
@@ -1511,11 +1501,20 @@ class data_import_export {
 					} break;
 
 					case 'CSV' : {
-						while ($rs=pg_fetch_assoc($ret[1])){
+						$result = array();
+						while ($rs = pg_fetch_assoc($ret[1])){
 							$result[] = $rs;
 						}
-						$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
-						$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						# Bugfix 3.5.64: Fehlerbehebung liefert bei leeren Tabellen nur leere csv
+						# ToDo: statt dessen sollte wenigstens die Kopfzeile mit geliefert werden.
+						# create_csv dahingehend verbessern, dass Kopfzeile auch ohne result erzeugt werden kann.
+						if (count($result) == 0) {
+							$csv = '';
+						}
+						else {
+							$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
+							$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						}
 						$exportfile = $exportfile.'.csv';
 						$fp = fopen($exportfile, 'w');
 						fwrite($fp, $csv);

@@ -50,5 +50,5 @@
 	$strArchived = "archiviert";
 	$strAgreementAccepted = "Nutzungshinweis";
 	$strAgreementAcceptedText = "zugestimmt";
-	$strAgreementAcceptedDescription = "Wenn die Option gesetzt ist hat der Nutzer den Nutzungsbedingungen zugestimmt. Wenn die Checkbox geleert, muss der Nutzer den Nutzungsbedingungen beim Anmelden erneut zustimmen.";
+	$strAgreementAcceptedDescription = "Wenn die Option gesetzt ist, hat der Nutzer den Nutzungsbedingungen zugestimmt. Wenn die Checkbox geleert wird, muss der Nutzer den Nutzungsbedingungen beim Anmelden erneut zustimmen.";
 ?>

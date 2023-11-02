@@ -3,6 +3,18 @@
 class MyObject {
 
 	static $write_debug = false;
+	public $gui;
+	public $debug;
+	public $database;
+	public $stelle_id;
+	public $tableName;
+	public $identifier;
+	public $identifier_type;
+	public $field_types;
+	public $data;
+	public $has_many;
+	public $children_ids;
+	public $validations;
 
 	function __construct($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
 		$this->gui = $gui;
@@ -90,6 +102,12 @@ class MyObject {
 	* @ return this object with the record in data or empty array if not found
 	*/
 	function find_by($attribute, $value) {
+		if (empty($attribute)) {
+			$attribute = $this->identifer;
+		}
+		if (empty($value)) {
+			$value = $this->get_id();
+		}
 		$sql = "
 			SELECT
 				*
@@ -187,10 +205,12 @@ class MyObject {
 		return $result;
 	}
 
-	/*
-	* Search for a records in the database by the given sql clause
-	* @ return all found objects
-	*/
+	/**
+	 * 
+	 * Function searching for records in the database by the given sql clause
+	 * @param Array $params: Array with select, from, where and order parts of sql.
+	 * @return Array $results: All found objects.
+	 */
 	function find_by_sql($params, $hierarchy_key = NULL) {
 		$sql = "
 			SELECT
@@ -448,8 +468,9 @@ class MyObject {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
 
 		$results = array();
-		if (!empty($data))
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$sql = "
 			INSERT INTO `" . $this->tableName . "` (

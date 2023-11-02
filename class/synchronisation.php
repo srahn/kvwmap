@@ -38,6 +38,54 @@
 * 
 */
 class synchro {
+	# ToDo: Weitere notwenige Bedingungen für Synchronisierung:
+	# - extension uuid-ossp
+	const NECESSARY_ID = 'uuid';
+
+	const NECESSARY_FUNCTIONS = array(
+		'mobile_delete_images',
+		'mobile_download_image',
+		'mobile_upload_image',
+		'Daten_Export'
+	);
+
+	const NECESSARY_ATTRIBUTES = array(
+		'uuid' => array(
+			'type' => 'uuid'
+		),
+		'created_at' => array(
+			'type' => 'timestamp without time zone',
+			'form_element_type' => 'Time'
+		),
+		'updated_at_client' => array(
+			'type' => 'timestamp without time zone',
+			'form_element_type' => 'Time'
+		),
+		'updated_at_server' => array(
+			'type' => 'timestamp without time zone',
+			'form_element_type' => 'Time'
+		),
+		'user_name' => array(
+			'type' => 'text',
+			'form_element_type' => 'User'
+		),
+		'status' => array(
+			'type' => 'integer',
+			'nullable' => false
+		),
+		'version' => array(
+			'type' => 'integer',
+			'nullable' => false
+		),
+		'bilder' => array(
+			'optional' => true,
+			'pending' => 'bilder_updated_at'
+		),
+		'bilder_updated_at' => array(
+			'optional' => true,
+			'pending' => 'bilder'
+		)
+	);
 
 	function __construct($stelle, $user, $database) {
 		$this->Stelle = $stelle;

@@ -94,7 +94,7 @@ FROM (
 			WHEN table_name = 'fp_privilegiertesvorhaben' AND column_name = 'zweckbestimmung' THEN 'fp_zweckbestimmungprivilegiertesvorhaben[]'
 			WHEN table_name = 'bp_wegerecht' AND column_name = 'thema' THEN column_name
 			WHEN table_name = 'fp_zentralerversorgungsbereich' AND column_name = 'auspraegung' THEN 'fp_zentralerversorgungsbereichauspraegung'
-			WHEN table_name = 'bp_anpflanzungbindungerhaltung' AND column_name = 'baumart' THEN 'vegetationsobjekttypen'
+			WHEN table_name = 'bp_anpflanzungbindungerhaltung' AND column_name = 'baumart' THEN 'bp_vegetationsobjekttypen'
 			WHEN table_name IN ('bp_baugebietsteilflaeche','bp_ueberbaubaregrundstuecksflaeche') AND column_name = 'bauweise' THEN 'bp_bauweise'
 			WHEN table_name IN ('bp_baugebietsteilflaeche','bp_ueberbaubaregrundstuecksflaeche') AND column_name IN ('bebauungrueckwaertigegrenze','bebauungseitlichegrenze','bebauungvorderegrenze') THEN 'bp_grenzebebauung'
 			WHEN table_name IN ('bp_baugebietsteilflaeche','bp_ueberbaubaregrundstuecksflaeche') AND column_name = 'bebauungsart' THEN 'bp_bebauungsart'

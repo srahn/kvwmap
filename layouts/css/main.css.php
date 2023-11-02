@@ -370,8 +370,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"], input[type="float"] {
-
+input[type="text"], input[type="float"], input[type="number"] {
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
@@ -404,6 +403,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	font-weight: normal;
 }
 
 span[data-tooltip]::before {
@@ -538,6 +538,10 @@ span[data-tooltip]:hover::after {
 
 .table_border_collapse>tbody>tr>td{
 	border:	1px solid #C3C7C3;
+}
+
+.styleFormField {
+	width: 87px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
@@ -1844,6 +1848,7 @@ a:hover .preview_image{
 	margin-left: 20px;
 	padding: 0px;
 	text-align: left;
+	width: 90%;
 }
 
 .dstable{

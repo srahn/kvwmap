@@ -40,6 +40,11 @@ class stelle {
 		$ret = $this->readDefaultValues();
 	}
 
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$stelle = new MyObject($gui, 'stelle');
+		return $stelle->find_where($where, $order, $sort_direction);
+	}
+
 	function get($attribute) {
 		return $this->data[$attribute];
 	}
@@ -2100,7 +2105,7 @@ class stelle {
 			}
 			if(value_of($privileges, trim($attributename, '"')) != ''){
 				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
+				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.')::text as '.$attributename.', ';		# Array oder Datentyp
 				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
 			}
 			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){

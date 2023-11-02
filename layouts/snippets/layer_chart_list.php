@@ -1,298 +1,90 @@
-<?
-	/**
-	 * View zur Darstellung von Diagrammen des Layers $layer
-	 * Dargestellt werden die LayerCharts-Objekte aus dem Array $layer['charts']
-	 */
+<?php
+	include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
 ?>
-<script type="text/javascript" src="<? echo THIRDPARTY_PATH; ?>Chart/chart.js"></script>
-<script>
-	const COLORS = [
-		'#4dc9f6',
-		'#f67019',
-		'#f53794',
-		'#537bc4',
-		'#acc236',
-		'#166a8f',
-		'#00a950',
-		'#58595b',
-		'#8549ba'
-	];
-
-	function change_chart_type(chart, chart_type) {
-		chart.config.type = chart_type;
-		chart.config.data.datasets[0].backgroundColor = (chart_type == 'bar' ? 'lightblue' : COLORS);
-		chart.update();
-	}
-
-	function change_chart_title(chart, chart_title) {
-		chart.config.options.plugins.title.text = chart_title;
-		chart.update();
-	}
-
-	function create_chart() {
-		let id = '';
-		Check = confirm('Diagramm wirklich anlegen?');
-		if (Check == true) {
-			alert('Diagramm wird angelegt!');
-			$.ajax({
-				url: 'index.php',
-				data: {
-					go: 'chart_speichern',
-					layer_id: <? echo $layer['Layer_ID']; ?>,
-					title: $('.diagram_form_elem_' + id + '[name="diagram_title"]').val(),
-					type: $('.diagram_form_elem_' + id + '[name="diagram_type"]').val(),
-					value_attribute_label: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_label"]').val(),
-					aggregate_function: $('.diagram_form_elem_' + id + '[name="diagram_aggregate_function"]').val(),
-					value_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_name"]').val(),
-					label_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_label_attribute_name"]').val(),
-					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
-				},
-				error: function(response) {
-					message([{'type' : 'error', 'msg': response.msg}])
-				},
-				success: function(response) {
-					if (response.success) {
-						message([{'type' : 'notice', 'msg': response.msg}]);
-						alert('Erzeuge Chart im Browser');
-						$('#diagram_edit_div_' + id + ', #diagram_save_button_' + id + ', #diagram_edit_button_' + id + ', #diagram_delete_button_' + id).toggle(1000);
-					}
-					else {
-						message([{'type' : 'error', 'msg': response.msg}]);
-					}
-				}
-			});
-		};
-	}
-
-	function save_chart(chart, id) {
-		Check = confirm('Diagramm wirklich speichern?');
-		console.log('dvan: ', $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_name"]'));
-		if (Check == true) {
-			$.ajax({
-				url: 'index.php',
-				data: {
-					go: 'chart_speichern',
-					id: id,
-					title: $('.diagram_form_elem_' + id + '[name="diagram_title"]').val(),
-					type: $('.diagram_form_elem_' + id + '[name="diagram_type"]').val(),
-					value_attribute_label: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_label"]').val(),
-					aggregate_function: $('.diagram_form_elem_' + id + '[name="diagram_aggregate_function"]').val(),
-					value_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_value_attribute_name"]').val(),
-					label_attribute_name: $('.diagram_form_elem_' + id + '[name="diagram_label_attribute_name"]').val(),
-					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
-				},
-				error: function(response) {
-					message([{'type' : 'error', 'msg': response.msg}])
-				},
-				success: function(response) {
-					if (response.success) {
-						$('#chart_type_selector_' + id).val($('.diagram_form_elem_' + id + '[name="diagram_type"]').val());
-						$('#chart_type_selector_' + id)[0].dispatchEvent(new Event('change'));
-						change_chart_title(chart, $('.diagram_form_elem_' + id + '[name="diagram_title"]').val());
-						message([{'type' : 'notice', 'msg': response.msg}]);
-						$('#diagram_edit_div_' + id + ', #diagram_save_button_' + id + ', #diagram_edit_button_' + id + ', #diagram_delete_button_' + id).toggle(1000);
-					}
-					else {
-						message([{'type' : 'error', 'msg': response.msg}]);
-					}
-				}
-			});
+<h2 style="margin: 20px"><? echo $strLayerChartTitle; ?></h2>
+<h3>Layer: <? echo (empty($this->layer->get('Name_' . $this->user->rolle->language)) ? $this->layer->get('Name') : $this->layer->get('Name_' . $this->user->rolle->language)); ?></h3><?
+if ($this->formvars['layer_id'] == '' AND $this->formvars['selected_layer_id'] == '') {
+	$this->Fehlermeldung = $strLayerChartMissingLayerId;
+}
+elseif ($this->layer->get('Name') == '') {
+	$this->Fehlermeldung = $strLayerChartMissingLayer;
+}
+else {
+	$this->Fehlermeldung = '';
+}
+if ($this->Fehlermeldung != '') {
+	include('Fehlermeldung.php');
+}
+else { ?>
+	<script>
+		function show_layer_editor(event) {
+			event.preventDefault();
+			window.location = 'index.php?go=Layereditor&selected_layer_id=<? echo $this->layer->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>#query_parameter';
 		}
-	}
-	function delete_chart(id) {
-		Check = confirm('Diagramm wirklich löschen?');
-		if (Check == true) {
-			alert('Diagramm wird gelöscht');
-			/*
-			$.ajax({
-				url: 'index.php',
-				data: {
-					go: 'chart_loeschen',
-					id: id,
-					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
-				},
-				error: function(response) {
-					message(response.msg);
-				},
-				success: function(response) {
-					$('#chart_div_' + id).remove();
-				}
-			});
-			*/
+
+		function layer_chart_delete(id) {
+			Check = confirm('<? echo $strDeleteWarningMessage; ?>');
+			if (Check == true) {
+				$.ajax({
+					url: 'index.php',
+					data: {
+						go: 'layer_chart_Loeschen',
+						id: id,
+						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+					},
+					error: function(response) {
+						message(response.msg);
+					},
+					success: function(response) {
+						$('#layer_chart_' + id).fadeOut(1000);
+					}
+				});
+			}
 		}
-	}
-</script>
-<style>
-	.diagram-edit-label-div {
-		float: left;
-		margin-right: 10px;
-		text-align: right;
-		width: 300px;
-		margin-top: 3px;
-		font-weight: bold;
-	}
-	.diagram-edit-input-div {
-		float: left;
-		width: 50%;
-		margin-top: 3px;
-	}
-</style>
-<table style="width: 100%">
-	<tr>
-		<td style="
-			background-color: #cdd8dc;
-			padding: 5px;
-			border: 1px solid #bbb;
-			font-weight: bold;
-		">
-			<a href="javascript:void(0);" onclick="$('#diagramms, .diagram_group_img').toggle()">
-				<img class="diagram_group_img" src="graphics//plus.gif" border="0">
-				<img class="diagram_group_img" src="graphics//minus.gif" border="0" style="display: none">
-			</a> Diagramme
-		</td>
-	</tr>
-	<tr>
-		<td colspan="2">
-			<div id="diagramms" style="display: none"><?
-				foreach ($layer['charts'] AS $chart) {
-					$id = $chart->get($chart->identifier);
-					echo 'Chart: ' . $id; ?>
-					<div id="chart_div_<? echo $id; ?>">
-						<canvas id="chart_<? echo $id; ?>"></canvas>
-						<div>
-							Diagrammtyp: 
-							<select id="chart_type_selector_<? echo $id; ?>" onchange="change_chart_type(chart_<? echo $id; ?>, this.value)">
-								<option value="bar"<? echo ($chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
-								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
-								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
-							</select><?
-							if ($this->user->funktion == 'admin') { ?>
-								<button id="diagram_edit_button_<? echo $id; ?>" type="button" style="margin-left: 10px" onclick="$('#diagram_edit_div_<? echo $id; ?>, #diagram_save_button_<? echo $id; ?>, #diagram_edit_button_<? echo $id; ?>, #diagram_delete_button_<? echo $id; ?>').toggle()">Bearbeiten</button>
-								<button id="diagram_delete_button_<? echo $id; ?>" type="button" style="margin-left: 10px" onclick="delete_chart(<? echo $id; ?>)">Löschen</button><?php
-							} ?>
-						</div><?
-						if ($this->user->funktion == 'admin') { ?>
-							<div id="diagram_edit_div_<? echo $id; ?>" style="display: none">
-								<input type="hidden" name="diagram_id_<? echo $id; ?>" value="<? echo $id; ?>">
-								<div class="diagram-edit-label-div">Diagrammtitel:</div>
-								<div class="diagram-edit-input-div"><input type="text" class="diagram_form_elem_<? echo $id; ?>" name="diagram_title" value="<? echo $chart->get('title'); ?>" style="width: 100%"></div>
-								<div style="clear: both"></div>
-								<div class="diagram-edit-label-div">Diagrammtyp:</div>
-								<div class="diagram-edit-input-div">
-									<select class="diagram_form_elem_<? echo $id; ?>" name="diagram_type">
-										<option value="bar"<? echo ($chart->get('type') == 'bar' ? ' selected' : ''); ?>>Balken</option>
-										<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
-										<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
-									</select>
-								</div>
-								<div style="clear: both"></div>
-								<div class="diagram-edit-label-div">Beschriftung Balken:</div>
-								<div class="diagram-edit-input-div"><input class="diagram_form_elem_<? echo $id; ?>" type="text" name="diagram_value_attribute_label" value="<? echo $chart->get('value_attribute_label'); ?>"></div>
-								<div style="clear: both"></div>
-								<div class="diagram-edit-label-div">Aggregationsfunktion:</div>
-								<div class="diagram-edit-input-div">
-									<select class="diagram_form_elem_<? echo $id; ?>" name="diagram_aggregate_function">
-										<option value="sum"<? echo ($chart->get('aggregate_function') == 'sum' ? ' selected' : ''); ?>>Summe</option>
-										<option value="average"<? echo ($chart->get('aggregate_function') == 'average' ? ' selected' : ''); ?>>Durchschnitt</option>
-										<option value="min"<? echo ($chart->get('aggregate_function') == 'min' ? ' selected' : ''); ?>>Minimalwert</option>
-										<option value="max"<? echo ($chart->get('aggregate_function') == 'max' ? ' selected' : ''); ?>>Maximalwert</option>
-									</select>
-								</div>
-								<div style="clear: both"></div>
-								<div class="diagram-edit-label-div">Werteattribut (Hochwert):</div>
-								<div class="diagram-edit-input-div"><?
-									echo FormObject::createSelectField(
-										'diagram_value_attribute_name',
-										array_map(
-											function($name, $alias) {
-												return array(
-													'value' => $name,
-													'output' => $alias
-												);
-											},
-											$layer['attributes']['name'],
-											$layer['attributes']['alias']
-										),
-										$chart->get('value_attribute_name'),
-										1, '', '', '', '',
-										'diagram_form_elem_' . $id
-									); ?>
-								</div>
-								<div style="clear: both"></div>
-								<div class="diagram-edit-label-div">Beschriftungsattribut (Rechtswert):</div>
-								<div class="diagram-edit-input-div"><?
-									echo FormObject::createSelectField(
-										'diagram_label_attribute_name',
-										array_map(
-											function($name, $alias) {
-												return array(
-													'value' => $name,
-													'output' => $alias
-												);
-											},
-											$layer['attributes']['name'],
-											$layer['attributes']['alias']
-										),
-										$chart->get('label_attribute_name'),
-										1, '', '', '', '',
-										'diagram_form_elem_' . $id
-									); ?>
-								<div style="clear: both"></div>
-							</div>
-							<div style="clear: both"></div>
-							<button id="diagram_save_button_<? echo $id; ?>" type="button" style="margin-top: 9px; margin-left: 309px; display: none" onclick="save_chart(chart_<? echo $id; ?>, <? echo $id; ?>);">Speichern</button><?
-						} ?>
-					</div>
-					<script>
-						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
-						let values_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
-						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return v.options[v.selectedIndex].text});
-						let labels_<? echo $id; ?> = [];
-						let data_<? echo $id; ?> = [];
-						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
-							if (labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i]) == -1) {
-								labels_<? echo $id; ?>.push(names_<? echo $id; ?>[i]);
-								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]) / 10000);
-							}
-							else {
-								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]) / 10000;
-							}
-						}
-						let chart_<? echo $id; ?> = new Chart(
-							document.getElementById('chart_<? echo $id; ?>'), {
-							type: chart_type_<? echo $id; ?>,
-							data: {
-								labels: labels_<? echo $id; ?>,
-								datasets: [{
-									label: '<? echo $chart->get('value_attribute_label'); ?>',
-									data: data_<? echo $id; ?>,
-									backgroundColor: (chart_type_<? echo $id; ?> == 'bar' ? 'lightblue' : COLORS),
-								//backgroundColor: COLORS,
-									borderWidth: 1
-								}]
-							},
-							options: {
-								plugins : {
-									title: {
-										display: true,
-										font: {
-											weight: 'bold',
-											size: '20px'
-										},
-										text: '<? echo $chart->get('title'); ?>'
-									}
-								},
-								scales: {
-									y: {
-										beginAtZero: true
-									}
-								}
-							}
-						});
-					</script><?
-				} ?>
-			</div>
-			<button type="button" style="margin-top: 10px" onclick="create_chart()">Neues Diagramm anlegen</button>
-		</td>
-	<tr>
-</table>
+	</script>
+	<table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
+		<tr>
+			<td>
+				<table width="100%" border="0" cellspacing="0" cellpadding="2">
+					<tr>
+						<th><a href="index.php?go=layer_charts_Anzeigen&order=id&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
+						<th><a href="index.php?go=layer_charts_Anzeigen&order=title&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Titel</a></th>
+						<th><a href="index.php?go=layer_charts_Anzeigen&order=type&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Typ</th>
+						<th><a href="index.php?go=layer_charts_Anzeigen&order=aggregate_function&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Funktion</a></th>
+						<td colspan="2" align="right"><a class="btn btn-new" href="index.php?go=layer_chart_Editor&layer_id=<? echo $this->layer->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strCreateNewLayerChartTitle; ?>" class="fa fa-plus" style="color: white; margin-bottom: 10px"></i></a></td>
+					</tr><?php
+					foreach ($this->layer->charts AS $chart) { ?>
+						<tr id="layer_chart_<?php echo $chart->get('id'); ?>" onMouseover="this.bgColor='<?php echo BG_TR; ?>'" onMouseout="this.bgColor=''">
+							<td>
+								<?php echo $chart->get('id'); ?>
+							</td>
+							<td>
+								<?php echo $chart->get('title') ?>
+							</td>
+							<td>
+								<span><?php echo $chart->get('type'); ?></span>
+							</td>
+							<td>
+								<span><?php echo $chart->get('aggregate_function'); ?></span>
+							</td>
+							<td align="right">
+								<a
+									title="<?php echo $this->strChange; ?>"
+									href="index.php?go=layer_chart_Editor&id=<?php echo $chart->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"
+								><i class="fa fa-pencil" style="padding: 3px"></i></a>
+							</td>
+							<td>
+								<span
+									title="<?php echo $this->strDelete; ?>"
+									onclick="layer_chart_delete(<?php echo $chart->get('id'); ?>);"
+									style="padding: 3px"
+								><i class="fa fa-trash"></i></span>
+							</td>
+						</tr><?php
+					} ?>
+				</table>
+			</td>
+		</tr>
+	</table>
+	<button type="button" onclick="show_layer_editor(event);"><? echo $strLayerChartEditorButton; ?></button><?
+} ?>
