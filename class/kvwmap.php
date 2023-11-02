@@ -1319,6 +1319,12 @@ echo '			</table>
 						}
 						else{
 							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+							if (strpos(strtolower($url), 'format') === false) {
+								$url .= 'format=image/png';
+							}
+							if (strpos(strtolower($url), 'version') === false) {
+								$url .= 'version=' . $layer['wms_server_version'];
+							}
 							$pos = strpos(strtolower($layer['connection']), 'layers');
 							if ($pos !== false) {
 								$layersection = substr($layer['connection'], $pos + 7);
