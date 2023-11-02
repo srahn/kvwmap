@@ -529,16 +529,28 @@
 				}break;
 
 				case 'SubFormFK' : {
+					$linkParams = '';
 					$datapart .= '<table width="98%" cellpadding="0" cellspacing="0"><tr><td>';
 					$attribute_foreign_keys = $attributes['subform_fkeys'][$j];	# die FKeys des aktuellen Attributes
-					for($f = 0; $f < count($attribute_foreign_keys); $f++){											
-						$name_ = $attribute_foreign_keys[$f];
+					for($f = 0; $f < count($attribute_foreign_keys); $f++){
+						if (strpos($attribute_foreign_keys[$f], ':')) {
+							$exp = explode(':', $attribute_foreign_keys[$f]);
+							$key = $exp[0];			# Verknüpfungsattribut in diesem Layer
+							$oberkey = $exp[1];	# Verknüpfungsattribut im Ober-Layer
+						}
+						else {
+							$key = $oberkey = $attribute_foreign_keys[$f];
+						}
+						$linkParams .= '&value_'.$oberkey.'='.$dataset[$key];
+						$linkParams .= '&operator_'.$oberkey.'==';
+
+						$name_ = $key;
 						$tablename_ = $attributes['table_name'][$name_];
 						$oid = $dataset[$tablename_.'_oid'];
-						$index = $attributes['indizes'][$attribute_foreign_keys[$f]];
+						$index = $attributes['indizes'][$key];
 						$fieldname_[$f] = $layer_id.';'.$attributes['real_name'][$name_].';'.$tablename_.';'.$oid.';'.$attributes['form_element_type'][$index].';'.$attributes['nullable'][$index].';'.$attributes['type'][$index].';'.$attributes['saveable'][$index];
 						if($dataset[$name_] == '')$dataset[$name_] = $gui->formvars[$fieldname_[$f]];
-						switch ($attributes['form_element_type'][$attribute_foreign_keys[$f]]){
+						switch ($attributes['form_element_type'][$key]){
 							case 'Autovervollständigungsfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
 								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
@@ -585,12 +597,7 @@
 					$datapart .= '</td><td align="right" valign="top">';
 					if($gui->new_entry != true){
 						if($value != ''){
-							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' . $attributes['subform_layer_id'][$j] . '&csrf_token=' . $_SESSION['csrf_token'];
-							for($f = 0; $f < count($attribute_foreign_keys); $f++){
-								$datapart .= '&value_'.$attribute_foreign_keys[$f].'='.$dataset[$attribute_foreign_keys[$f]];
-								$datapart .= '&operator_'.$attribute_foreign_keys[$f].'==';
-							}
-							$datapart .= 	'&subform_link=true\')"';
+							$datapart .= '<a class="buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id=' . $attributes['subform_layer_id'][$j] . $linkParams . '&csrf_token=' . $_SESSION['csrf_token'] . '&subform_link=true\')"';
 							if($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
