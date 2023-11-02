@@ -1318,28 +1318,7 @@ echo '			</table>
 							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
-							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
-							if (strpos(strtolower($url), 'format') === false) {
-								$url .= '&format=image/png';
-							}
-							if (strpos(strtolower($url), 'version') === false) {
-								$url .= '&version=' . $layer['wms_server_version'];
-							}
-							$pos = strpos(strtolower($layer['connection']), 'layers');
-							if ($pos !== false) {
-								$layersection = substr($layer['connection'], $pos + 7);
-								$pos = strpos($layersection, '&');
-								if ($pos !== false) {
-									$layersection = substr($layersection, 0, $pos);
-								}
-							}
-							else {
-								$layersection = $layer['wms_name'];
-							}
-							$layers = explode(',', $layersection);
-							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
-							}
+							$legend .=  $this->get_legend_graphics($layer);
 						}
 					}
 					else {
@@ -1515,6 +1494,33 @@ echo '			</table>
 			}
 		}
 		return $legend;
+	}
+
+	function get_legend_graphics($layer){
+		$output = '';
+		$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+		if (strpos(strtolower($url), 'format') === false) {
+			$url .= '&format=image/png';
+		}
+		if (strpos(strtolower($url), 'version') === false) {
+			$url .= '&version=' . $layer['wms_server_version'];
+		}
+		$pos = strpos(strtolower($layer['connection']), 'layers');
+		if ($pos !== false) {
+			$layersection = substr($layer['connection'], $pos + 7);
+			$pos = strpos($layersection, '&');
+			if ($pos !== false) {
+				$layersection = substr($layersection, 0, $pos);
+			}
+		}
+		else {
+			$layersection = $layer['wms_name'];
+		}
+		$layers = explode(',', $layersection);
+		for($l = 0; $l < count($layers); $l++){
+			$output .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+		}
+		return $output;
 	}
 
 	function colorramp($path, $width, $height, $colorrange){
