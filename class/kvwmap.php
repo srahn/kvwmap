@@ -10123,7 +10123,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function neuer_Layer_Datensatz_speichern() {
 		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
-				$this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+				$this->formvars[$key] = replace_tags($value, 'script|embed');
 			}
 		}
 		$_files = $_FILES;
@@ -14600,7 +14600,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_speichern() {
 		$document_attributes = array();
 		foreach($this->formvars as $key => $value) {
-			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+			if (is_string($value)) $this->formvars[$key] = replace_tags($value, 'script|embed');
 		}
 		if ($this->formvars['document_attributename'] != '') {
 			$_FILES[$this->formvars['document_attributename']]['name'] = 'delete'; # das zu löschende Dokument
