@@ -95,7 +95,7 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
@@ -279,7 +279,7 @@
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
-				"alias" => $attr['alias'][$value],
+				"alias" => $attr['alias'][$key],
 				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
@@ -290,6 +290,7 @@
 				"privilege" => $attr['privileg'][$key],
 				"default" => $attr['default'][$key]
 			);
+
 		}
 		return $attributes;
 	};
