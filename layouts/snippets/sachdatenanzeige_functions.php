@@ -281,12 +281,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var name;
 		var type;
 		values = new Array();
+		field_infos = field.name.split(';');
+		datatype = field_infos[6].replace('_', '');
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
 				type = elements[i].type;
+				if (['int', 'int4', 'int8'].includes(datatype)) {
+					value = parseInt(value);
+				}
+				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
+					value = parseFloat(value);
+				}
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
@@ -304,7 +312,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 							value = 'null';
 						}
 						else {
-							if (['{', '['].indexOf(value.substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
+							if (['{', '['].indexOf(String(value).substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
 								value = '"' + value + '"';
 							}
 						}
@@ -358,7 +366,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var remove_element = document.getElementById('div_'+remove_element_id);
 		getFileAttributesInArray(remove_element);
 		outer_div.removeChild(remove_element);
-		buildJSONString(fieldname, false);
+		buildJSONString(fieldname, true);
 	}
 	
 	moveArrayElement = function(fieldname, element_id, direction){
