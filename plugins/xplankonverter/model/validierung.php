@@ -113,9 +113,10 @@ class Validierung extends PgObject {
 
 		$this->debug->write('<br>Validiere ob sql_ausfuehrbar sql: ' . $sql, Validierung::$write_debug);
 		# Objekte anlegen
+		$search_path  = "SET search_path=xplan_gmlas_{$this->gui->user->id}, xplan_shapes_{$this->konvertierung_id},public;";
 		$result = @pg_query(
 			$this->database->dbConn,
-			'EXPLAIN ' . $sql
+			$search_path . ' EXPLAIN ' . $sql
 		);
 
 		if (!$result) {
