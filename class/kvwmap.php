@@ -4227,7 +4227,7 @@ echo '			</table>
 		}
 		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
-    if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 		$rs = pg_fetch_array($ret[1]);
 		echo $rs[0];
   }
@@ -8166,7 +8166,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$order = 1;
         while($rs = pg_fetch_assoc($ret[1])){
           $class['name'] = $rs[$class_item];
@@ -8190,7 +8190,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         #echo '<br>' . $sql;
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         while($rs = pg_fetch_assoc($ret[1])){
           $min = $rs['min'];
           $max = $rs['max'];
@@ -8222,7 +8222,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         ";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $rows = pg_fetch_all($ret[1]);
         $range_floor = 0;
         $range_ceil = count($rows);
@@ -8253,7 +8253,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             " . replace_semicolon($class_item) . "
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         // flatten data
@@ -8288,7 +8288,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             prozent
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $histogram = pg_fetch_all($ret[1]);
         // flatten histogram
         $flatHistogram = array_fill(0,101,0);
@@ -8333,7 +8333,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         ";
         #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         if (count($data) > 0) {
@@ -9121,7 +9121,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
 											$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
 											$ret=$layerdb->execSQL($sql,4,0);
-											if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+											if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 											while($rs = pg_fetch_assoc($ret[1])){
 												$keys[] = $rs['value'];
 											}
@@ -16393,7 +16393,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# Abfragen der Layerausdehnung
 				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
 			}break;
 

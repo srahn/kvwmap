@@ -122,6 +122,7 @@
 	};
 
 	$GUI->mobile_sync = function() use ($GUI) {
+		$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
 		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -141,9 +142,14 @@
 		}
 
 		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+		$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
+		$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+		$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
 		move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+		$GUI->deblog->write('Run function mobile_sync_parameter_valide');
 
 		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
+		$GUI->deblog->write('Client Delta sync parameter result: ' . print_r($result, true));
 		if ($result['success']) {
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
@@ -337,7 +343,7 @@
 		";
 
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($sync == 1 AND $rs['table_exists'] == 'f') {
@@ -366,7 +372,7 @@
 			);
 		";
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 	};
 
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
@@ -384,7 +390,7 @@
 		";
 		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 
 		$rs = pg_fetch_assoc($ret[1]);
 		if ($rs['table_exists'] == 't' AND $sync == 0) {
@@ -446,7 +452,6 @@
 					search_path_schema TEXT;
 					version_column TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--raise notice '_query: %', _query;
@@ -545,7 +550,6 @@
 					search_path_schema TEXT;
 					version_column TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--raise notice '_query: %', _query;
@@ -624,7 +628,6 @@
 					part TEXT;
 					search_path_schema TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--RAISE NOTICE 'Current Query unverändert: %', _query;
