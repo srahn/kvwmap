@@ -1975,16 +1975,28 @@ class stelle {
 	}
 
 	function get_attributes_privileges($layer_id) {
-		$sql = "
-			SELECT
-				`attributename`,
-				`privileg`,
-				`tooltip`
-			FROM
-				`layer_attributes2stelle`
-			WHERE
-				`stelle_id` = " . $this->id . " AND
+		if ($layer_id > 0) {
+			$sql = "
+				SELECT
+					`attributename`,
+					`privileg`,
+					`tooltip`
+				FROM
+					`layer_attributes2stelle`
+				WHERE
+					`stelle_id` = " . $this->id . " AND
+					`layer_id` = " . $layer_id;
+		}
+		else {
+			$sql = "
+				SELECT 
+					name as `attributename`,
+					0 as `privileg`
+				FROM 
+					`layer_attributes` 
+				WHERE 
 				`layer_id` = " . $layer_id;
+		}
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
