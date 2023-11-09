@@ -12,66 +12,6 @@
 	</script>
 <? } ?>
 
-<style>
-#nds_titel {
-	font-family: SourceSansPro3;
-	font-size: 20px;
-	margin-bottom: 0px;
-	margin-top: 10px;
-}
-#nds_titel p {
-	margin: 0px 0px -32px 0px;
-}
-#nds_formular {
-	margin: 40px 0px 20px 0px;
-	padding-left: 20px;
-}
-.nds_select  {
-	display: flex;
-	width: 500px;
-	margin: 0px 0px 10px 0px;
-}
-.nds_select select {
-	height: 25px;
-	width: 360px;
-	border-radius: 2px;
-	border: 1px solid #777;
-	padding-left: 5px;
-}
-.nds_select div:first-child {
-	margin-right: 10px;
-	align-self: center;
-	width: 50px;
-}
-#nds_submit {
-	display:flex;
-	flex-flow: row nowrap;
-	justify-content: center;
-	margin-bottom: 15px;
-}
-#nds_submit>div {
-	display: flex;
-	align-items: center;
-}
-#nds_submit input {
-	margin-right: 5px;
-}
-#nds_submit input[type="checkbox"] {
-	margin-top: auto;
-	margin-bottom: auto;
-	margin-left: 15px;
-}
-#nds_submit span {
-	margin: auto;
-	margin-left: 3px;
-}
-
-#nds_edit #dataset_operations {
-	display: none;
-}
-</style>
-
-
 <div id="nds_titel">
 	<p><?php echo $strtitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
 </div>

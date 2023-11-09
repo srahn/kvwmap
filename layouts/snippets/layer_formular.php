@@ -58,6 +58,18 @@
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
 			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
+			if (getMapURL.toLowerCase().indexOf('version') == -1){
+				getMapURL += '&version=' + document.GUI.wms_server_version.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('format') == -1){
+				getMapURL += '&format=' + document.GUI.wms_format.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('layers') == -1){
+				getMapURL += '&layers=' + document.GUI.wms_name.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('styles') == -1){
+				getMapURL += '&styles=';
+			}
 			document.getElementById('test_img').src = getMapURL;
 			document.getElementById('test_img').style.display='block';
 			document.getElementById('test_link').href=getCapabilitiesURL;

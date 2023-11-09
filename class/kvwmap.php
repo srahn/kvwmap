@@ -1318,14 +1318,7 @@ echo '			</table>
 							$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="'.$imagename.'"></div>';
 						}
 						else{
-							$url = str_ireplace('&styles=', '&style=', $layer['connection']);
-							$layersection = substr($layer['connection'], strpos(strtolower($layer['connection']), 'layers')+7);
-							$pos = strpos($layersection, '&');
-							if($pos !== false)$layersection = substr($layersection, 0, $pos);
-							$layers = explode(',', $layersection);
-							for($l = 0; $l < count($layers); $l++){
-								$legend .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
-							}
+							$legend .=  $this->get_legend_graphics($layer);
 						}
 					}
 					else {
@@ -1501,6 +1494,33 @@ echo '			</table>
 			}
 		}
 		return $legend;
+	}
+
+	function get_legend_graphics($layer){
+		$output = '';
+		$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+		if (strpos(strtolower($url), 'format') === false) {
+			$url .= '&format=image/png';
+		}
+		if (strpos(strtolower($url), 'version') === false) {
+			$url .= '&version=' . $layer['wms_server_version'];
+		}
+		$pos = strpos(strtolower($layer['connection']), 'layers');
+		if ($pos !== false) {
+			$layersection = substr($layer['connection'], $pos + 7);
+			$pos = strpos($layersection, '&');
+			if ($pos !== false) {
+				$layersection = substr($layersection, 0, $pos);
+			}
+		}
+		else {
+			$layersection = $layer['wms_name'];
+		}
+		$layers = explode(',', $layersection);
+		for($l = 0; $l < count($layers); $l++){
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+		}
+		return $output;
 	}
 
 	function colorramp($path, $width, $height, $colorrange){
@@ -9031,13 +9051,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['oid'] = $attributes['pk'][0];
 				}
-
-				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
-					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
-				}
-				else {
-					$newpath = $path;
-				}
+				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
@@ -9696,7 +9710,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$path = $mapdb->getPath($this->formvars['selected_layer_id']);
 					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 
-
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 
 					$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
@@ -10103,7 +10116,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function neuer_Layer_Datensatz_speichern() {
 		foreach ($this->formvars as $key => $value) {
 			if (is_string($value)) {
-				$this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+				$this->formvars[$key] = replace_tags($value, 'script|embed');
 			}
 		}
 		$_files = $_FILES;
@@ -14580,7 +14593,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function sachdaten_speichern() {
 		$document_attributes = array();
 		foreach($this->formvars as $key => $value) {
-			if (is_string($value)) $this->formvars[$key] = pg_escape_string(replace_tags($value, 'script|embed'));
+			if (is_string($value)) $this->formvars[$key] = replace_tags($value, 'script|embed');
 		}
 		if ($this->formvars['document_attributename'] != '') {
 			$_FILES[$this->formvars['document_attributename']]['name'] = 'delete'; # das zu löschende Dokument
@@ -15244,13 +15257,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$path = $layerset[$i]['pfad'];
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
-							if ($layerset[$i]['Layer_ID'] > 0) {
-								# bei Rollenlayern nicht
-								$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
-							}
-							else {
-								$newpath = $path;
-							}
+
+							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
@@ -17222,6 +17230,10 @@ class db_mapObj{
 			if ($rs['requires'] != '') {
 				# requires-Array füllen
 				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+				if ($rs['queryable']) {
+					# wenn der untergeordnete Layer queryable ist, wird queryable auch beim übergeordneten gesetzt, damit die Checkbox in der Legende erscheint
+					$layer['layer_ids'][$rs['requires']]['queryable'] = $rs['queryable'];
+				}
 			}
 			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
@@ -17524,9 +17536,7 @@ class db_mapObj{
 		);
 		$privileges = $stelle->get_attributes_privileges($layerset['Layer_ID']);
 		$layerset['attributes'] = $this->read_layer_attributes($layerset['Layer_ID'], $layerdb, $privileges['attributenames']);
-		if($layerset['Layer_ID'] > 0){			# bei Rollenlayern nicht
-			$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
-		}
+		$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
