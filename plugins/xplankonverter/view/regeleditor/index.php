@@ -288,7 +288,7 @@
 				echo '<span id="distinctValues_' . $shp_table . "_" . $row[0] . '" style="display: none">';
 				$sqlDistinct = "
 					SELECT 
-						DISTINCT " . $row[0] . "
+						 DISTINCT \"" . $row[0] . "\"
 					FROM
 						xplan_shapes_" . $konvertierung_id . "." . $shp_table . "
 					LIMIT 100

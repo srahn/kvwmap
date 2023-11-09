@@ -12,9 +12,8 @@
 	$strLabel_ablaufdatum = 'Ablaufdatum';
 	$strAblaufdatumHint = 'Datum bis zu dem die Benachrichtigungen angezeigt werden sollen. Dies ist eine Pflichtangabe.';
 	$strLabel_stellen_filter = 'Stellenfilter';
+	$strStellenFilterHint = "Ist keine Stelle ausgewählt, wird die Benachrichtigung in allen Stellen angezeigt, ansonsten nur in denen die ausgewählt sind. Die Anzeige erfoglt aber nur wenn auch der Nutzerfilter passt.";
+	$strLabel_user_filter = 'Nutzerfilter';
+	$strUserFilterHint = "Ist kein Nutzer ausgewählt, wird die Benachrichtigung bei allen angezeigt, ansonsten nur bei denen die hier ausgewählt sind. Die Anzeige erfolgt aber nur wenn auch der Stellenfilter passt.";
 	$strNewNotification = "Neue Benachrichtigung";
 	$strShowAllNotifications = "Alle Benachrichtigungen anzeigen";
-	$strStellenFilterHint = "Sie können eine oder mehrere mit Komma getrennte ID's von Stellen angeben. Dann werden die Benachrichtigungen nur in diesen angzeigt. Wird statt der ID's der Text
-'nicht in Gaststellen'
-eingetragen, werden die Benachrichtigungen nicht in Gaststellen angezeigt. Wird nichts eingetragen, erscheint die Benachrichtigung in allen Stellen. (default)";
-?>

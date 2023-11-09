@@ -63,7 +63,7 @@
 	starteKonvertierung = function(e) {
 		e.preventDefault();
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
-		document.getElementById('sperrspinner').style.display = 'block';
+		document.getElementById('sperr_div').style.display = 'block';
 		result.success('Starte Konvertierung und Validierung für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_KONVERTIERUNG'
 		$.ajax({
@@ -87,7 +87,7 @@
 						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
-						document.getElementById('sperrspinner').style.display = 'none';
+						document.getElementById('sperr_div').style.display = 'none';
 					},
 					error: function(response) {
 						result.error(response.msg);
@@ -103,7 +103,7 @@
 								csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 							},
 							complete: function () {
-								document.getElementById('sperrspinner').style.display = 'none';
+								document.getElementById('sperr_div').style.display = 'none';
 							},
 							error: function(response) {
 								result.error(response.msg);
@@ -128,7 +128,7 @@
 		symbol.removeClass('fa-code');
 		symbol.addClass('fa-spinner fa-pulse fa-fw');
 
-		// onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
+		// onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"
 		result.success('Starte GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_GML_ERSTELLUNG'
 		$.ajax({
@@ -139,7 +139,7 @@
 				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			complete: function () {
-				// document.getElementById('sperrspinner').style.display = 'none';
+				// document.getElementById('sperr_div').style.display = 'none';
 			},
 			error: function(response) {
 				result.error('Fehler beim Starten der GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -155,7 +155,7 @@
 						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
-						//document.getElementById('sperrspinner').style.display = 'none';
+						//document.getElementById('sperr_div').style.display = 'none';
 					},
 					error: function(response) {
 						$('#konvertierungen_table').bootstrapTable('refresh');
@@ -195,7 +195,7 @@
 		e.preventDefault();
 		var konvertierung_id = $(e.target).parent().parent().attr('konvertierung_id');
 
-		//onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"
+		//onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"
 		result.success('Starte INSPIRE GML-Ausgabe für Konvertierung-Id: ' + konvertierung_id);
 		// set status to 'IN_INSPIRE_GML_ERSTELLUNG'
 		$.ajax({
@@ -206,7 +206,7 @@
 				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 			},
 			complete: function () {
-				// document.getElementById('sperrspinner').style.display = 'none';
+				// document.getElementById('sperr_div').style.display = 'none';
 			},
 			error: function(response) {
 				result.error('Fehler beim Starten der INSPIRE-GML-Erstellung für Konvertierung-Id: ' + konvertierung_id);
@@ -222,7 +222,7 @@
 						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
 					complete: function () {
-						// document.getElementById('sperrspinner').style.display = 'none';
+						// document.getElementById('sperr_div').style.display = 'none';
 					},
 					error: function(response) {
 						$('#konvertierungen_table').bootstrapTable('refresh');
@@ -259,10 +259,12 @@
 					go: 'xplankonverter_konvertierung_loeschen',
 					planart: '<?php echo $this->formvars['planart']; ?>',
 					plan_oid: plan_oid,
+					format: 'json',
+					mime_type: 'json',
 					csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 				},
 				success: function(response) {
-					message([response]);
+					message([{type: response['type'], msg : response['msg']}]);
 				}
 			});
 		}
@@ -408,7 +410,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
+		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
@@ -420,7 +422,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Validierungsergebnisse der Konvertierung anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"><i class="fa fa-lg fa-list-alt"></i></a>';
+		output += '<a title="Validierungsergebnisse der Konvertierung anzeigen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_validierungsergebnisse&konvertierung_id=' + value + '" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-list-alt"></i></a>';
 
 		// GML-Erzeugen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['KONVERTIERUNG_OK'					]; ?>"
@@ -471,7 +473,7 @@
 									'title="Validierungsergebnisse der Konvertierung anzeigen" ' +
 									'class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" ' +
 									'href="index.php?go=Layer-Suche_Suchen&selected_layer_id=522&konvertierung_id_operator==&konvertierung_id_value=' + row.konvertierung_id +
-									'onclick="document.getElementById(\'sperrspinner\').style.display = \'block\';"' +
+									'onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"' +
 								'>' +
 									 '<i class="fa fa-lg fa-list-alt"></i>' +
 									 '<i class="fa fa-lg fa-check" style="position: absolute; top: 7px; left: 13px;"></i>' +
@@ -527,7 +529,7 @@
 	function konvertierungVeroeffentlichungsdatumFormatter(value, row) {
 		var symbol = {};
 		var today = new Date();
-		var veroeffentlichungsdatum = row.veroeffentlichungsdatum === null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
+		var veroeffentlichungsdatum = row.veroeffentlichungsdatum == null ? '' : row.veroeffentlichungsdatum.split('.').reverse().join('-');
 
 		//console.log('today: ', today);
 		//console.log('veroeff: ', new Date(veroeffentlichungsdatum));
@@ -801,14 +803,16 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-sortable="true"
 					data-visible="false"
 					data-switchable="true"
-					data-searchable="false"
+					data-searchable="true"
 				>Konvertierung Id</th>
 				<th
 					data-field="plan_gml_id"
 					data-sortable="true"
 					data-visible="false"
 					data-switchable="true"
-				>Plan-Id</th>
+					data-searchable="true"
+					data-search_selector="input"
+					>Plan-Id</th>
 				<th
 					data-field="stelle_id"
 					data-sortable="true"
@@ -821,6 +825,6 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 </div><br>
 <button type="button" id="backButton" class="xplankonverter-back-button" title="Nach oben" onclick="window.scrollTo({ top: 0, behavior: 'smooth' });">Zurück nach oben</button><?
 if ($this->Stelle->id > 200) { ?>
-	<button style="margin-top: 10px; margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>'">neu</button>
-	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>'">Neuer Plan aus XPlanGML</button><?
+	<button style="margin-top: 10px; margin-bottom: 10px" type="button" id="new_konvertierung" name="go_plus" onclick="location.href='index.php?go=neuer_Layer_Datensatz&selected_layer_id=<?php echo $this->plan_layer_id ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">neu</button>
+	<button type="button" id="new_konvertierung_from_gml" name="go_plus" onclick="location.href='index.php?go=xplankonverter_upload_xplan_gml&planart=<?php echo $this->formvars['planart'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>'">Neuer Plan aus XPlanGML</button><?
 } ?>

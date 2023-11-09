@@ -7,19 +7,29 @@
 
 function toggle_privileges(checkbox){
 	var fields = checkbox.closest('.apt-main-div').querySelectorAll('input[type=“checkbox”], select');
-	[].forEach.call(fields, function (field){		// DropZones groesser machen
+	[].forEach.call(fields, function (field){
     if (field != checkbox) {
 			field.disabled = checkbox.checked;
 		}
   });
 }
 
-function set_all(attribute_names, stelle, value){
+function set_all_for_stelle(attribute_names, stelle, value){
 	names = attribute_names.split('|');
 	for(i = 0; i < names.length; i++){
 		element = document.getElementsByName('privileg_'+names[i]+'_'+stelle);
 		element[0].value = value;
+		element[0].onchange();
 	}
+}
+
+function set_all_for_attribute(attribute){
+	var default_field = document.querySelector('.default_privileg_' + attribute);
+	var fields = document.querySelectorAll('.privileg_' + attribute);
+	[].forEach.call(fields, function (field){
+		field.value = default_field.value;
+		field.onchange();
+  });
 }
 
 function get_from_default(attribute_names, stellen){
@@ -40,7 +50,6 @@ function get_from_default(attribute_names, stellen){
 			for(i = 0; i < names.length; i++){
 				element1 = document.getElementsByName('privileg_'+names[i]+'_'+stelle[j]);
 				element2 = document.getElementsByName('privileg_'+names[i]+'_');
-				console.log(element2);
 				element1[0].value = element2[0].value;
 				tooltip1 = document.getElementsByName('tooltip_'+names[i]+'_'+stelle[j]);
 				tooltip2 = document.getElementsByName('tooltip_'+names[i]+'_');
@@ -65,6 +74,27 @@ function save(stelle, other_selected_layer_id) {
 	}
 	document.GUI.submit();
 }
+
+function toggle_unterstellen(){
+	var unterstellen = document.querySelectorAll('.unterstelle');
+	[].forEach.call(unterstellen, function (unterstelle){
+		unterstelle.classList.toggle('hidden');
+  });
+}
+
+function update_stellen_visibility(){
+	var options = document.GUI.stellen_visibility.options;
+	for (var i=1; i < options.length; i++) {
+		var td = document.getElementById('stellen_td_' + options[i].value);
+    if (options[0].selected || options[i].selected) {
+      td.style.display = '';
+    }
+		else {
+			td.style.display = 'none';
+		}
+  }
+}
+
 </script>
 
 <style>
@@ -202,8 +232,8 @@ function save(stelle, other_selected_layer_id) {
   <? if($this->layer[0]['Name'] != ''){ ?>
 	<tr>
   	<td>
-			<div class="apf-tip-magic">
-				<div class="apf-tip">
+			<div style="display: flex; justify-content: space-between">
+				<div class="apf-tip-magic" style="min-width: 200px;">
 <?					echo FormObject::createSelectField(
 						'for_attribute_privileges_selected_layer_id',
 						$layer_options,
@@ -226,7 +256,6 @@ function save(stelle, other_selected_layer_id) {
 						)"
 						value="Attributrechte für ausgewählten Layer übernehmen"
 					>
-					<span style="margin-left: 10px;">
 					<i
 						id="show_attribute_privileges_for_other_layer_button"
 						style="cursor: pointer" 
@@ -243,8 +272,28 @@ function save(stelle, other_selected_layer_id) {
 						onclick="$('#attribute_privileges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_privileges_for_other_layer_button, #close_attribute_privileges_for_other_layer_button').toggle();"
 					></i>
 					&nbsp;
-					<span style="float: right; --left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
 				</div>
+				<div style="flex-grow: 2; text-align: center; position: relative">
+					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
+						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
+						<select name="stellen_visibility" style="height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+							<option value="">- alle -</option>
+							<?
+							for($i = 0; $i < count($this->stellen['ID']); $i++){
+								echo '<option value="'.$this->stellen['ID'][$i].'" ';
+								if($this->formvars['stelle'] == $this->stellen['ID'][$i]){
+									echo 'selected';
+								}
+								echo '>'.$this->stellen['Bezeichnung'][$i].'</option>';
+							}
+						?>
+						</select>
+					</div>
+				</div>
+				<div style="padding-right: 20px; float: right">
+					<input type="checkbox" name="unterstellen_ausblenden" <? echo ($this->formvars['unterstellen_ausblenden'] != ''? 'checked' : ''); ?> onclick="toggle_unterstellen();"> Unterstellen ausblenden
+				</div>
+				<span style="--left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
 			</div>
   	</td>
   </tr>

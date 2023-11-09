@@ -26,27 +26,48 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 
-	completeDate = function(datefield){
+	/**
+	 * @abstract Vervollständigt value vom datefield Element
+	 * Wenn Tag, Monat oder Jahr nicht angegeben sind wird es vom aktuellen Datum genommen.
+	 * Wenn Werte negativ sind wird 1 für Tag und Monat sowie 2000 für Jahr genommen.
+	 * Wenn Tag > 31 wird 31 genommen.
+	 * Wenn Monat > 12 wird 12 genommen.
+	 * Wenn Jahr > 9999 wird 9999 genommen.
+	 * Wenn Jahr >= 0 und <=99 ist wird das aktuelle Jahrhundert davor gehängt. Dadurch
+	 * kann man die Jahre '0000' bis '0099' im nullten Jahrhundert nicht angeben!
+	 */
+	completeDate = function(datefield) {
 		var d = new Date();
-		var year = d.getFullYear();
-		var split = datefield.value.split(".");
-		if (split.length == 2) {
-			if (split[1] != '') {
-				datefield.value += '.' + year;
-			}
+
+		var currentYear = d.getFullYear();
+		var currentCentury = Math.round(currentYear / 100);
+		var currentMonth = d.getMonth() + 1;
+		var currentDay = d.getDate();
+
+		var part = datefield.value.split(".");
+
+		var	inputDay = parseInt(part[0]);
+		var day = (isNaN(inputDay) ? currentDay : (inputDay > 31 ? 31 : (inputDay < 1 ? 1 : inputDay)));
+
+		var inputMonth = parseInt(part[1]);
+		var month = (isNaN(inputMonth) ? currentMonth : (inputMonth > 12 ? 12 : (inputMonth < 1 ? 1 : inputMonth)));
+
+		var inputYear = parseInt(part[2]);
+		var year = 9999;
+		if (isNaN(inputYear)) {
+			year = currentYear;
 		}
-		else if (split.length == 3) {
-			if (split[2] == '') {
-				datefield.value += year;
+		else {
+			if (inputYear < 0) {
+				inputYear = 0;
 			}
-			else {
-				if (split[2].length == 2) {
-					// add century
-					split[2] = String(year).slice(0,2) + split[2];
-					datefield.value = split.join('.');
-				}
+			if (inputYear > 9999) {
+				inputYear = 9999;
 			}
+			year = ((inputYear >= 0 && inputYear <= 99) ? currentCentury * 100 : 0) + inputYear;
 		}
+
+		datefield.value = ('00' + day).slice(-2) + '.' + ('00' + month).slice(-2) + '.' + ('0000' + year).slice(-4);
 	}
 	
 	completeTime = function(timefield){
@@ -81,28 +102,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			document.getElementById('contentdiv').scrollTop = document.getElementById('contentdiv').scrollHeight;
 		}
 	}
-	
-	function toggle_image_select(id) {
-		var image_select = document.getElementById('image_select_' + id);
-    if (image_select.classList.contains('active')) {
-        image_select.classList.remove('active');
-     } else {
-			 image_select.classList.add('active');
-     }
-	}
-	
-	function image_select(option) {
-		var image_select = option.closest('.image-select');
-		var field = image_select.querySelector('input');
-		field.value = option.dataset.value;
-		image_select.querySelector('.placeholder img').src = option.querySelector('img').src;
-		image_select.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
-		if (field.onchange) {
-			field.onchange();
-		}
-		toggle_image_select(field.id);
-	}
-	
+		
 	toggle_group = function(id){
 		var group = document.getElementById('group'+id);
 		var group_img = document.getElementById('group_img'+id);
@@ -274,7 +274,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			}
 		}
 	}
-	
+
 	buildJSONString = function(id, is_array) {
 		var field = document.getElementById(id);
 		var value;
@@ -527,7 +527,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}
 
-	save = function(){
+	save = function() {
 		var open_subforms = document.querySelectorAll('.subForm:not(:empty)');
 		if (open_subforms.length > 0) {
 			message([{'type': 'info', 'msg': 'Es gibt noch offene Unterformulare, die noch nicht gespeichert wurden!'}]);
@@ -540,17 +540,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			field = fieldstring.split(';');
 			var element = document.getElementsByName(fieldstring)[0];
 			
-			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == ''){
+			if (element != undefined && element.type != 'hidden' && field[4] != 'Dokument' && (element.readOnly != true) && field[5] == '0' && element.value == '') {
 				message('Das Feld ' + element.title + ' erfordert eine Eingabe.');
 				return;
 			}
-			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)){
+
+			if (element != undefined && field[6] == 'date' && field[4] != 'Time' && element.value != '') {
 				completeDate(element);
-				if(!checkDate(element.value)){
+				if (!checkDate(element.value)) {
 					message('Das Datumsfeld ' + element.title + ' hat nicht das Format TT.MM.JJJJ.');
 					return;
 				}
 			}
+
 			if (element != undefined && field[6] == 'time' && field[4] != 'Time' && element.value != '' && !checkDate(element.value)) {
 				completeTime(element);
 				if(!checkTime(element.value)){

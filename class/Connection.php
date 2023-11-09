@@ -6,7 +6,58 @@ class Connection extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'connections');
-		$this->identifier = 'id';
+		$this->alias = 'Datenbankverbindungen';
+		$this->attributes = array(
+			[
+				'attribute' => 'id',
+				'alias'			=> 'ID',
+				'type'			=> 'text',
+				'privileg'	=> '',
+				'size'			=> 2
+			],
+			[
+				'attribute' => 'name',
+				'alias'			=> 'Bezeichnung',
+				'type'			=> 'text',
+				'privileg'	=> 'editable',
+				'size'			=> 40
+			],
+			[
+				'attribute' => 'host',
+				'alias'			=> 'Host',
+				'type'			=> 'text',
+				'privileg'	=> 'editable',
+				'size'			=> 8
+			],
+			[
+				'attribute' => 'port',
+				'alias'			=> 'Port',
+				'type'			=> 'text',
+				'privileg'	=> 'editable',
+				'size'			=> 5
+			],
+			[
+				'attribute' => 'dbname',
+				'alias'			=> 'Datenbankname',
+				'type'			=> 'text',
+				'privileg'	=> 'editable',
+				'size'			=> 10
+			],
+			[
+				'attribute' => 'user',
+				'alias'			=> 'Nutzername',
+				'type'			=> 'text',
+				'privileg'	=> 'editable',
+				'size'			=> 15
+			],
+			[
+				'attribute' => 'password',
+				'alias'			=> 'Passwort',
+				'type'			=> 'password',
+				'privileg'	=> 'editable',
+				'size'			=> 12
+			],
+		);
 		$this->validations = array(
 			array(
 				'attribute' => 'name',

@@ -20,7 +20,7 @@ $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "to
 
 define('DBWRITE',true);
 
-/*
+/**
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
@@ -35,8 +35,10 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	}
 }
 
-/*
-* @params(string) $request ein getMap Request von dem der Status geprüft werden soll 
+/**
+ * checkStatus
+ * 
+* @param string $request ein getMap Request von dem der Status geprüft werden soll 
 * gibt einen array mit 2 elementen zurück das erste element ist entweder true
 *(abfrage war erfolgreich) oder false(d.h. abfrage war nicht erfolgreich) und das zweite
 * ist wenn der erste wert false ist eine kurze Info was falsch ist.

@@ -6,8 +6,7 @@ class Menue extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_menues');
-		$this->identifier = 'id';
+		parent::__construct($gui, 'u_menues', 'id');
 		$this->validations = array(
 			array(
 				'attribute' => 'id',
@@ -32,6 +31,12 @@ class Menue extends MyObject {
 				'condition' => 'validate_value_is_one_off',
 				'description' => 'Es muss Menüebene 1=Obermenü oder 2=Untermenü angegeben werden.',
 				'option' => array(1, 2)
+			),
+			array(
+				'attribute' => 'order',
+				'condition' => 'not_null',
+				'description' => 'Es wurde keine Reihenfolge angegeben.',
+				'option' => null
 			)
 		);
 	}
@@ -293,12 +298,12 @@ class Menue extends MyObject {
 
 		$html .= '<div class="'.$style.'-menue" id="menue_div_'.$this->get('id').'">';
 		$html .= '<a href="' .  htmlspecialchars($href) . '" target="' . $target . '" onclick="' . $onclick . '">';
-		if ($style == 'button') {		# Button-Menüpunkt
+		if ($style == 'button') { # Button-Menüpunkt
 			$html .= '<div class="button_background">';
 			$html .= '	<div class="button ' .  htmlspecialchars($this->get('button_class')) . '" title="' .  htmlspecialchars($this->get('name')) . '"></div>';
 			$html .= '</div>';
 		}
-		else{				# textueller Menüpunkt
+		else { # textueller Menüpunkt
 			$html .= '<div id="menue_div_name_'.$this->get('id').'" title="'.$this->get('title').'" class="menu '.$class.'">';
 			$html .= '	<img src="graphics/menue_top.gif" class="menue_before">';
 			$html .= '	<span style="vertical-align: top">'.$this->get('name').'</span>';

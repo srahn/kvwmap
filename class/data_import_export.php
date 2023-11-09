@@ -45,29 +45,14 @@ class data_import_export {
 		if ($filetype == NULL) {
 			$filetype = strtolower($file_name_parts[1]);
 		}
-		$this->unique_column = 'gid';
-		if ($formvars['chosen_layer_id']) {		
-			# Daten-Import in einen vorhandenen Layer
-			$layerset = $user->rolle->getLayer($formvars['chosen_layer_id']);
-			if ($user->layer_data_import_allowed AND $layerset[0]['privileg'] > 0) {
-				$mapDB = new db_mapObj($stelle->id, $user->id);
-				$database = $mapDB->getlayerdatabase($formvars['chosen_layer_id'], $stelle->pgdbhost);
-				$schema = $layerset[0]['schema'];
-				$table = $layerset[0]['maintable'];
-				$adjustments = false;
-			}
-			else {
-				echo 'Der Daten-Import in diesen Layer ist nicht erlaubt.';
-				return;
-			}
-		}
-		else {		
-			# Daten-Import in einen neuen Rollenlayer
-			$database = $pgdatabase;
-			$schema = CUSTOM_SHAPE_SCHEMA;
-			$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
-			$adjustments = true;
-		}
+		$this->unique_column = 'gid';	
+		
+		# Daten-Import in einen neuen Rollenlayer
+		$database = $pgdatabase;
+		$schema = CUSTOM_SHAPE_SCHEMA;
+		$table = 'a'.strtolower(umlaute_umwandeln(substr(basename($filename), 0, 15))). date("_Y_m_d_H_i_s", time());
+		$adjustments = true;
+		
 		switch ($filetype) {
 			case 'shp' : case 'dbf' : case 'shx' : {
 				$custom_tables = $this->import_custom_shape($file_name_parts, $user, $database, $schema, $table, $epsg, $adjustments);
@@ -123,21 +108,16 @@ class data_import_export {
 				}
 			}
 			else {
-				if ($formvars['chosen_layer_id'] == '') {
-					foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
-						$layer_id = -$this->create_rollenlayer(
-							$pgdatabase,
-							$stelle,
-							$user,
-							($custom_table['layername'] ? : basename($filename)) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
-							$custom_table,
-							$epsg ?: $custom_table['epsg'],
-							$this->unique_column
-						);
-					}
-				}
-				else {
-					$layer_id = $formvars['chosen_layer_id'];
+				foreach ($custom_tables as $custom_table){				# ------ Rollenlayer erzeugen ------- #
+					$layer_id = -$this->create_rollenlayer(
+						$pgdatabase,
+						$stelle,
+						$user,
+						($custom_table['layername'] ? : basename($filename)) . " (" . date('d.m. H:i',time()) . ")" . str_repeat(' ', $custom_table['datatype']),
+						$custom_table,
+						$epsg ?: $custom_table['epsg'],
+						$this->unique_column
+					);
 				}
 				return $layer_id;
 			}
@@ -954,7 +934,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -1059,8 +1039,12 @@ class data_import_export {
 			return $layers;
 		}
 	}
-		
-	function adjustGeometryType($database, $schema, $table, $epsg){
+	
+	/**
+	 * Wenn alle Geometrien nur eine Geometrie beinhalten macht die passt die Funktion
+	 * den Geometrietyp auf single an (Entfernt ST_Multi von GeometryType)
+	 */
+	function adjustGeometryType($database, $schema, $table, $epsg) {
 		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
@@ -1081,7 +1065,7 @@ class data_import_export {
 				}
 			}
 		}
-	}	
+	}
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
@@ -1095,9 +1079,10 @@ class data_import_export {
 			unlink($folder . '/test.csv');
 		}
 		#echo '<br>output: ' . $output[0];
-		if (strpos($output[0], 'UTF') !== false) 			$encoding = 'UTF-8';
-		if (strpos($output[0], 'ISO-8859') !== false) $encoding = 'LATIN1';
-		if (strpos($output[0], 'ASCII') !== false) 		$encoding = 'LATIN1';
+		$encoding = 'LATIN1';
+		if (strpos($output[0], 'UTF') !== false) {
+			$encoding = 'UTF-8';
+		}
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
@@ -1266,6 +1251,7 @@ class data_import_export {
 			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
 			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
 		}
+		// TODO hier checken ob oid und maintable abgefragt werden konnten und valide sind.
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);

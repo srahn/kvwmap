@@ -25,7 +25,7 @@ class Zusammenzeichnung {
         nr: 3,
         msg: 'Anlegen der Pläne der Zusammenzeichnung',
         description: 'Das im vorherigen Schritt temporär angelegte Importschema wird umbenannt und der Plan sowie der Bereich der Zusammenzeichnung angelegt.<br>\
-        Falls Einzelfassungen mit hochgeladen wurden werden die Geometrien der Änderungspläne in die Tabelle Geltungsbereiche übernommen.'
+        Falls Geltungsbereiche mit hochgeladen wurden, werden die Geometrien der Änderungspläne in die Tabelle Geltungsbereiche übernommen.'
       },
       convert_zusammenzeichnung: {
         nr: 4,
@@ -39,7 +39,7 @@ class Zusammenzeichnung {
         nr: 5,
         msg: 'Erzeugen der GML-Datei in Version 5.4',
         description: `In diesem Schritt wird eine neue XPlan-GML Datei in der Version ${this.xplan_version} auf den Server geschrieben.<br>\
-        Diese kann später vom Nutzer heruntergeladen werden.`
+        Diese kann später vom Nutzer heruntergeladen werden. Der Downloadlink befindet sich in dem Abschnitt Dokumente in der Ansicht der Zusammenzeichnung.`
       },
       create_geoweb_service: {
         nr: 6,
@@ -67,8 +67,16 @@ class Zusammenzeichnung {
         msg: 'Aktualisieren der Metadatendokumente über die Landesdienste',
         description: 'Aktualisieren der Capabilities-Metadaten des Dienstes und des Geodatensatzes in denen alle Pläne veröffentlicht werden.',
       },
-      replace_zusammenzeichnung: {
+      check_class_completeness: {
         nr: 10,
+        msg: 'Prüfen ob sich alle Objekte vorhandenen Planzeichenklassen zuordnen lassen.',
+        description: 'Es wird geprüft ob Objekte zu definierten Klassen gehören.<br>\
+        Solche, die nicht zu definierten Klassen gehören, werden aufaddiert und die Summe derer angezeigt.<br>\
+        Um welche Layer und Objekte sich handelt kann im nachhinein in der Ansicht der Zusammenzeichnung evaluiert werden.<br>\
+        Des Weiteren wird der Support benachrichtigt um die fehlenden Klassen anzulegen.'
+      },
+      replace_zusammenzeichnung: {
+        nr: 11,
         msg: 'Ersetzen der alten Zusammenzeichnung durch die neue',
         description: 'Archivierung der original hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
         Lösche die hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
@@ -76,14 +84,14 @@ class Zusammenzeichnung {
         '
       },
       reindex_gml_ids: {
-        nr: 11,
+        nr: 12,
         msg: 'Umbenennen der GML-ID\'s',
         description: 'Es existiert schon ein Plan mit der GML-ID der hochgeladenen Zusammenzeichnung.<br>\
         Deshalb wird eine neue Zusammenzeichnung mit geänderten GML-IDs angelegt.<br>\
         Der Importprozess wird mit der geänderten Zusammenzeichnung neu gestartet.'
       },
       import_reindexed_zusammenzeichnung: {
-        nr: 12,
+        nr: 13,
         msg: 'Importieren der neu indizierten GML-Datei in die Portaldatenbank',
         description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit mit den umbenannten GML-IDs.<br>\
         Es laufen die gleichen Teilschritte ab wie im Schritt Importieren der GML-Datei in die Portaldatenbank.'
@@ -107,9 +115,11 @@ class Zusammenzeichnung {
   }
 
   upload_zusammenzeichnung = (event) => {
+    console.log('upload_zusammenzeichnung');
     event.preventDefault();
     const file_obj = event.dataTransfer.files[0];
     if (file_obj != undefined) {
+      console.log('file_obj exists');
       var form_data = new FormData();
       form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
       if (this.id) {
@@ -119,6 +129,7 @@ class Zusammenzeichnung {
       form_data.append('format', 'json_result');
       form_data.append('mime_type', 'json');
       form_data.append('upload_file', file_obj);
+      form_data.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
@@ -170,6 +181,7 @@ class Zusammenzeichnung {
       ');
       this.next_step('upload_zusammenzeichnung');
       // $('#upload_zusammenzeichnung_msg').addClass('blink');
+      console.log('send_data', form_data);
       xhttp.send(form_data);
     }
   }
@@ -186,6 +198,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'uploaded_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response import_zusammenzeichnung: %o', result);
@@ -209,7 +222,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
       }
     })
   }
@@ -225,6 +238,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response create_plaene: %o', result);
@@ -260,8 +274,8 @@ class Zusammenzeichnung {
     formData.append('go', 'xplankonverter_reindex_gml_ids');
     formData.append('konvertierung_id', this.id);
     formData.append('planart', this.planart);
-    form_data.append('mime_type', 'json');
-    form_data.append('upload_file', file_obj);
+    formData.append('mime_type', 'json');
+    formData.append('suppress_ticket_and_notification', $('#suppress_ticket_and_notification').val());
     let response = fetch('index.php', {
       method: 'POST',
       body: formData
@@ -298,6 +312,7 @@ class Zusammenzeichnung {
         xplan_gml_path: 'reindexed_xplan_gml',
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
@@ -329,6 +344,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response convert_zusammenzeichnung: %o', result);
@@ -359,6 +375,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
@@ -388,6 +405,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
@@ -418,6 +436,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response create_metadata: %o', result);
@@ -454,6 +473,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response update_full_geoweb_service: %o', result);
@@ -483,12 +503,13 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
         console.log('Response update_full_metadata: %o', result);
         if (result.success) {
           this.confirm_step('update_full_metadata', 'ok');
-          this.replace_zusammenzeichnung();
+          this.check_class_completeness();
         }
         else {
           this.confirm_step('update_full_metadata', 'error');
@@ -498,6 +519,38 @@ class Zusammenzeichnung {
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('update_full_metadata', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten des Landesdienstes zu erzeugen. Fehlerart: ' + errorThrown }]);
+      }
+    })
+  }
+
+  check_class_completeness = () => {
+    this.next_step('check_class_completeness');
+    //console.log('check_class_completeness konvertierung_id: ', this.id);
+    $.ajax({
+      url: 'index.php',
+      data: {
+        go: 'xplankonverter_check_class_completenesses',
+        konvertierung_id: this.id,
+        planart: this.planart,
+        mime_type: 'json',
+        format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
+      },
+      success: (result) => {
+        console.log('Response check_class_completeness: %o', result);
+        if (result.success) {
+          this.confirm_step('check_class_completeness', 'ok');
+          message([{ type: (result.num_unclassified == 0 ? 'notice' : 'warning'), msg: result.msg }]);
+          this.replace_zusammenzeichnung();
+        }
+        else {
+          this.confirm_step('check_class_completeness', 'error');
+          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data}]);
+        }
+      },
+      error: (jqXHR, textStatus, errorThrown) => {
+        this.confirm_step('check_class_completeness', 'error');
+        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten bei der Prüfung der Planzeichenzuordnung. Fehlerart: ' + errorThrown }]);
       }
     })
   }
@@ -513,6 +566,7 @@ class Zusammenzeichnung {
         planart: this.planart,
         mime_type: 'json',
         format: 'json_result',
+        suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (response) => {
         //console.log('Response replace_zusammenzeichnung: %o', result);

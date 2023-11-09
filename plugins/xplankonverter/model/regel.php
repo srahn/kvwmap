@@ -99,16 +99,16 @@ class Regel extends PgObject {
 		$validierung->konvertierung_id = $konvertierung_id;
 
 		if ($validierung->sql_vorhanden($this->get('sql'), $this)) {
+			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
+			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
+			$validierung->konvertierung_id = $konvertierung_id;
+			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
+
 
 			# Prüft ob alle Objekte eine Geometrie haben
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_vorhanden');
 			$validierung->konvertierung_id = $konvertierung_id;
 			$validierung->geometrie_vorhanden($this->get('sql'), $this->get('id'), $sourcetype);
-
-			# Prüft ob das sql ausführbar ist und legt die Objekte an wenn ja.
-			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'sql_ausfuehrbar');
-			$validierung->konvertierung_id = $konvertierung_id;
-			$sql_ausfuehrbar = $validierung->sql_ausfuehrbar($this, $konvertierung_id);
 
 			$this->debug->show('<br>bereich_gml_id: ' . $this->get('bereich_gml_id'), Regel::$write_debug);
 			if ($sql_ausfuehrbar) {
@@ -132,7 +132,7 @@ class Regel extends PgObject {
 				}
 			}
 			else {
-				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', true);
+				$this->debug->show('<br>Regel->validate(): SQL der Regel: ' . $this->get('name') . ' nicht ausfuehrbar', Regel::$write_debug);
 				$success = false;
 			}
 		}
@@ -180,12 +180,19 @@ class Regel extends PgObject {
 
 			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
 		} else {
+			$ret = $this->database->execSQL($sql);
+			if (!$ret['success']) {
+				return array();
+			}
+			/*
 			$result = pg_query(
 				$this->database->dbConn,
 				$sql
 			);
-			
-			return (pg_num_rows($result) == 0 ? array() : pg_fetch_all($result));
+			*/
+			else {
+				return (pg_num_rows($ret['query']) == 0 ? array() : pg_fetch_all($ret['query']));
+			}
 		}
 	}
 
@@ -453,7 +460,7 @@ class Regel extends PgObject {
 		}
 		else {
 			$regel_id = $this->get('id');
-			if(empty($regel_id)) {
+			if (empty($regel_id)) {
 				$regel_id = 0; // can't exist, but necessary for int comparison in SQL
 			}
 
@@ -595,6 +602,7 @@ class Regel extends PgObject {
 	}
 
 	function destroy() {
+		#echo "\ndestroy Regel: " . $this->get($this->identifier);
 		$this->debug->show('destroy regel ' . $this->get('name'), Regel::$write_debug);
 		#$this->delete_gml_layer();
 		$this->delete();

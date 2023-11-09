@@ -269,30 +269,50 @@ class GUI {
 								<td class="rollenwahl-option-data">
 									<table>';
 				}
-									foreach($params AS $param) {
-										echo '
-										<tr id="layer_parameter_'.$param['key'].'_tr">
-											<td valign="top" class="rollenwahl-option-header">
-												<span>' . $param['alias'] .
-												 ((@count($this->params_layer[$param['id']]) == 1 AND $layer_id == NULL)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
-												</span>
-											</td>
-											<td>
-												'.FormObject::createSelectField(
-													'options_layer_parameter_' . $param['key'],		# name
-													$param['options'],										# options
-													rolle::$layer_params[$param['key']],	# value
-													1,																		# size
-													'width: 110px',												# style
-													'onLayerParameterChanged(this);',			# onchange
-													'layer_parameter_' . $param['key'],		# id
-													'',																		# multiple
-													'',																		# class
-													''																		# firstoption
-												).'
-											</td>
-										</tr>';
-									}
+				foreach($params AS $param) {
+					echo '
+					<tr id="layer_parameter_'.$param['key'].'_tr">
+						<td valign="top" class="rollenwahl-option-header">
+							<span>' . $param['alias'] .
+							 ((@count($this->params_layer[$param['id']]) == 1 AND $layer_id == NULL)? ' (' . $this->params_layer[$param['id']][0]['Name'] . ')' : '') . ':
+							</span>
+						</td>
+						<td>
+							'.($layer_id == NULL ?
+								FormObject::createSelectField(
+									'options_layer_parameter_' . $param['key'],		# name
+									$param['options'],										# options
+									rolle::$layer_params[$param['key']],	# value
+									1,																		# size
+									'width: 110px',												# style
+									'onLayerParameterChanged(this);',			# onchange
+									'layer_parameter_' . $param['key'],		# id
+									'',																		# multiple
+									'',																		# class
+									''																		# firstoption
+								)
+								:
+								FormObject::createCustomSelectField(
+									'options_layer_parameter_' . $param['key'],										# name
+									$param['options'],																						# options
+									rolle::$layer_params[$param['key']],													# value
+									1,																														# size
+									'',																														# style
+									'',																														# onchange
+									'layer_parameter_' . $param['key'],														# id
+									'',																														# multiple
+									'',																														# class
+									'',																														# firstoption
+									'', 																													# option_style
+									'', 																													# option_class
+									'',																														# onclick
+									"if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
+									"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+								)
+							).'
+						</td>
+					</tr>';
+				}
 				if($layer_id == NULL){
 					echo'	</table>
 							</td>
@@ -316,7 +336,7 @@ class GUI {
 		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
-			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'], false);
+			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
 			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
@@ -446,7 +466,7 @@ class GUI {
 							echo '<li><a href="' . $href . '" target="' . $target . '">' . $this->strMetadata . '</a></li>';
 						}
 						if($layer[0]['connectiontype']==6 OR($layer[0]['Datentyp']==MS_LAYER_RASTER AND $layer[0]['connectiontype']!=7)){
-							echo '<li><a href="javascript:void();" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
+							echo '<li><a href="javascript:void(0);" onclick="zoomToMaxLayerExtent(' . $this->formvars['layer_id'] . ')">' . ucfirst($this->FullLayerExtent) . '</a></li>';
 						}
 						if(in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
 							echo '<li><a href="index.php?go=Layer-Suche&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strSearch . '</a></li>';
@@ -454,15 +474,21 @@ class GUI {
 						if ($this->formvars['layer_id'] > 0 AND $layer[0]['connectiontype'] == MS_POSTGIS) {
 							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
 						}						
-						if ($layer[0]['queryable'] AND $layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-							echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
-							if ($this->user->layer_data_import_allowed) {
-								echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+						if ($layer[0]['queryable']) {
+							if ($layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
+								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+								if ($this->user->layer_data_import_allowed) {
+									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
+								}
+							}
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
 							}
 						}
+						echo '<li><a href="javascript:void(0);" onclick="compare_view_for_layer(' . $this->formvars['layer_id'] . ');closeLayerOptions(' . $this->formvars['layer_id'] . ');">' . $this->strCompareView . '</a></li>';
 						if ($layer[0]['Class'][0]['Name'] != '') {
 							if ($layer[0]['showclasses'] != '') {
-								echo '<li><a href="javascript:void();" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
+								echo '<li><a href="javascript:void(0);" onclick="getlegend(\'' . $layer[0]['Gruppe'] . '\', ' . $this->formvars['layer_id'] . ', document.GUI.nurFremdeLayer.value);closeLayerOptions(' . $this->formvars['layer_id'] . ')">';
 								if($layer[0]['showclasses'])echo $this->HideClasses;
 								else echo $this->DisplayClasses;
 								echo '</a></li>';
@@ -482,6 +508,24 @@ class GUI {
 						}
 						echo '</ul>
 						<table class="ul_table">';
+						if ($this->formvars['layer_id'] < 0) {
+							echo '<tr>
+												<td>
+													<span>' . $this->strAutoClassify . ':</span>
+												</td>
+												<td>
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+														<option value=""> - </option>';
+														for ($i = 0; $i < count($attributes)-2; $i++){
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
+															if ($attributes['the_geom'] != $attributes[$i]['name']) {		# Attribut ist nicht das Geometrieattribut
+																echo '<option value="'.$attributes[$i]['name'].'">'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
+															}
+														}
+									echo 	 '</select>
+												</td>
+											</tr>';
+						}
 						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if ($layer[0]['connectiontype'] == 6) {
 							if ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '') {
@@ -493,23 +537,21 @@ class GUI {
 												<td>
 													<select style="width: 110px" name="layer_options_labelitem">
 														<option value=""> - '.$this->noLabel.' - </option>';
-														if ($this->formvars['layer_id'] > 0) {
-															echo '<option value="'.$layer[0]['original_labelitem'].'" '.($layer[0]['labelitem'] == $layer[0]['original_labelitem'] ? 'selected' : '').'>'.($query_attributes['alias'][$layer[0]['original_labelitem']] != ''? $query_attributes['alias'][$layer[0]['original_labelitem']] : $layer[0]['original_labelitem']).'</option>';
-														}
 														for($i = 0; $i < count($attributes)-2; $i++){
+															$index = $query_attributes['indizes'][$attributes[$i]['name']];
 															if(
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
 																		OR 
 																		(
 																			$privileges[$attributes[$i]['name']] != '' 									# mind. Leserecht
 																			AND 
-																			!in_array($attributes[$i]['name'], [$layer[0]['original_labelitem'], 'oid'])	# und Attribut ist nicht das Originallabelitem oder die oid
+																			!in_array($attributes[$i]['name'], ['oid'])	# und Attribut ist nicht die oid
 																		)
 																	)
 																	AND 
 																	$attributes['the_geom'] != $attributes[$i]['name']		# Attribut ist nicht das Geometrieattribut
 																) {
-																	echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.($query_attributes['alias'][$attributes[$i]['name']] != ''? $query_attributes['alias'][$attributes[$i]['name']] : $attributes[$i]['name']).'</option>';
+																	echo '<option value="'.$attributes[$i]['name'].'" '.($layer[0]['labelitem'] == $attributes[$i]['name'] ? 'selected' : '').'>'.($query_attributes['alias'][$index] ?: $attributes[$i]['name']).'</option>';
 																}
 														}
 									echo 	 '</select>
@@ -573,7 +615,7 @@ class GUI {
 											<span>' . $this->transparency . ':</span>
 										</td>
 										<td>
-											<input name="layer_options_transparency" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 32px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
+											<input name="layer_options_transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" onchange="transparency_slider.value=parseInt(layer_options_transparency.value);" style="width: 53px" value="'.$layer[0]['transparency'].'"><input type="range" id="transparency_slider" name="transparency_slider" style="height: 6px; width: 120px" value="'.$layer[0]['transparency'].'" onchange="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()" oninput="layer_options_transparency.value=parseInt(transparency_slider.value);layer_options_transparency.onchange()">
 										</td>
 									</tr>';
 						if (ROLLENFILTER AND $this->user->rolle->showrollenfilter) {
@@ -906,7 +948,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -925,7 +967,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -973,7 +1015,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -989,7 +1031,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
 		}
 		else{
@@ -1091,7 +1133,7 @@ class rolle {
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
@@ -1154,6 +1196,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -1289,7 +1332,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -1399,7 +1442,7 @@ class db_mapObj {
 			WHERE
 				locate(
 					concat('$', p.key),
-					concat(l.Name, COALESCE(l.alias, ''), l.connection, l.Data, l.pfad, l.classitem, l.classification, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
 		if($param_id != NULL){
@@ -1559,7 +1602,6 @@ class db_mapObj {
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];
@@ -1596,25 +1638,20 @@ class db_mapObj {
 			$attributes['all_table_names'] = array();
 		}
 		return $attributes;
-  }	
+	}
 
-	function getDataAttributes($database, $layer_id, $ifEmptyUseQuery = false) {
+	function getDataAttributes($database, $layer_id, $options = array()) {
+		$default_options = array(
+			'if_empty_use_query' => false
+		);
+		$options = array_merge($default_options, $options);
 		global $language;
-		$data = $this->getData($layer_id);
+		$data = str_replace('$scale', '1000', $this->getData($layer_id));
+
 		if ($data != '') {
-			$data = replace_params(
-				$data,
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$language,
-				NULL,
-				1000
-			);
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
-				$select = str_replace($database->schema.'.', '', $select);
+				$select = str_replace($database->schema . '.', '', $select);
 			}
 			$ret = $database->getFieldsfromSelect($select);
 			if ($ret[0]) {
@@ -1622,7 +1659,7 @@ class db_mapObj {
 			}
 			return $ret[1];
 		}
-		elseif ($ifEmptyUseQuery){
+		elseif ($options['if_empty_use_query']) {
 			$path = replace_params(
 				$this->getPath($layer_id),
 				rolle::$layer_params,
@@ -1634,7 +1671,7 @@ class db_mapObj {
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
-			echo 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.';
+			$this->GUI->add_message('warning', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}
@@ -2514,8 +2551,6 @@ class pgdatabase {
         if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
         else $attr_info['length'] = $attr_info['character_maximum_length'];
 	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
-	      if($attr_info['default'] != '' AND substr($attr_info['default'], 0, 7) != 'nextval')$attr_info['default'] = 'SELECT '.$attr_info['default'];
-	  		else $attr_info['default'] = '';
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}

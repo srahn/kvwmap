@@ -13,9 +13,6 @@ CREATE TABLE IF NOT EXISTS xplan_gml.so_detailklassifizgelaendemorphologie
     value text COLLATE pg_catalog."default",
     CONSTRAINT so_detailklassifizgelaendemorphologie_pkey PRIMARY KEY (id)
 )
-WITH (
-    OIDS = TRUE
-)
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS xplan_gml.so_detailklassifizgelaendemorphologie
@@ -46,9 +43,6 @@ CREATE TABLE IF NOT EXISTS xplan_gml.enum_so_klassifizgelaendemorphologie
     abkuerzung character varying COLLATE pg_catalog."default",
     beschreibung character varying COLLATE pg_catalog."default",
     CONSTRAINT enum_so_klassifizgelaendemorphologie_pkey PRIMARY KEY (wert)
-)
-WITH (
-    OIDS = TRUE
 )
 TABLESPACE pg_default;
 
@@ -103,9 +97,6 @@ CREATE TABLE IF NOT EXISTS xplan_gml.so_gelaendemorphologie
 	nummer character varying COLLATE pg_catalog."default"
 )
  INHERITS (xplan_gml.so_geometrieobjekt)
- WITH (
- OIDS = TRUE
- )
  TABLESPACE pg_default;
  ALTER TABLE IF EXISTS xplan_gml.so_gelaendemorphologie
 	OWNER to kvwmap;

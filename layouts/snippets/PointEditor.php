@@ -71,7 +71,7 @@ else {
 					<td colspan="2"></td>
 					<? } ?>
 					<td align="right">
-						<input type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
+						<input id="punktfang" type="checkbox" onclick="toggle_vertices()" name="punktfang" <? if($this->formvars['punktfang'] == 'on')echo 'checked="true"'; ?>>&nbsp;Punktfang
 						&nbsp;<img id="scalebar" valign="top"	style="display:none;margin-top: 5px; padding-right:<? echo ($this->user->rolle->hideLegend ? '35' : '5'); ?>px" alt="Maßstabsleiste" src="<? echo $this->img['scalebar']; ?>">
 						<div id="lagebezeichnung" style="display:none"></div>
 					</td>

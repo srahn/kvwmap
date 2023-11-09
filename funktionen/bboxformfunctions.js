@@ -1,6 +1,8 @@
+/**
+ * Diese Ã¼bergibt die Weltkoordinaten der BBox, die sie mit pixel2weltkoord() berechnen lÃ¤sst an die
+ * Formularfelder der Metadatenbbox
+ */
 function setBBoxFromMap(pathx,pathy,pixsize,minx,miny,westbl,eastbl,southbl,northbl) {
-	// Diese übergibt die Weltkoordinaten der BBox, die sie mit pixel2weltkoord() berechnen lässt an die
-	// Formularfelder der Metadatenbbox
 	x=pathx.split(","); y=pathy.split(",");
 	if (x.length<2) {	
 		alert('Ziehen Sie vorher ein Rechteck im Kartenfenster auf!');
@@ -21,8 +23,10 @@ function setBBoxFromMap(pathx,pathy,pixsize,minx,miny,westbl,eastbl,southbl,nort
 	}
 }
 
+/**
+ * Diese Funktion rechnet die Koordinaten der BBox von Bildkoordinaten in Welt-Koordinaten um 
+ */
 function pixel2weltkoord(pix,minwelt,scale) {
-	//  Diese Funktion rechnet die Koordinaten der BBox von Bildkoordinaten in Welt-Koordinaten um 
 	welt=pix*scale+minwelt;
 	return welt;
 }

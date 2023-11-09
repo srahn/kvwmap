@@ -15,6 +15,23 @@ input {
 	font-size: <? echo $font_size_factor * 15; ?>px
 }
 
+.alerts-border {
+	border: 2px #ff0000 dotted;
+	animation: borderblink 0.8s;
+	animation-iteration-count: 5;
+}
+
+@keyframes borderblink { 50% { border-color:#fff ; }  }
+
+.validation-error-msg-div {
+	background-color: #eee;
+	float: left;
+	width: 390px;
+	padding: 5px;
+	color: red;
+	border-radius: 5px;
+}
+
 #form-titel {
 	font-family: SourceSansPro3;
 
@@ -117,8 +134,8 @@ input {
 }
 
 body {	
-	font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;
-	BACKGROUND:white;
+	/*font-family: SourceSansPro1, Arial, Verdana, Helvetica, sans-serif;*/
+	BACKGROUND: white;
 	margin:0px;
 
 	font-size: <? echo $font_size_factor * 15; ?>px;
@@ -127,6 +144,19 @@ body {
 #gui-table {
 	width: 900px;
 	margin: auto;
+}
+
+#copyrights_div table td {
+	vertical-align: top;
+	padding: 4px;
+}
+
+#copyrights_div table td:first-of-type {
+	max-width: 300px;
+}
+
+#copyrights_div table td:nth-of-type(2) {
+	max-width: 500px;
 }
 
 .notification-box {
@@ -340,8 +370,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"], input[type="float"] {
-
+input[type="text"], input[type="float"], input[type="number"] {
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
@@ -374,6 +403,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	font-weight: normal;
 }
 
 span[data-tooltip]::before {
@@ -405,17 +435,17 @@ span[data-tooltip]:hover::after {
 }
 
 
-.image-select {
+.custom-select {
 	background-color: #e9e9ed;
   position: relative;
-  width: 250px;
+  /*width: 250px;*/
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
 	margin: 3px 3px 3px 0;
 }
 
-.image-select .dropdown {
+.custom-select .dropdown {
 	z-index: 10000;
 	color: black;
   list-style: none;
@@ -425,13 +455,13 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 }
 
-.image-select img {
+.custom-select img {
   display: inline-block;
   width: 30px;
 	margin-right: 5px;
 }
 
-.image-select .placeholder {
+.custom-select .placeholder {
 	width: 100%;
   display: flex;
   align-items: center;
@@ -439,12 +469,12 @@ span[data-tooltip]:hover::after {
   position: relative;
 }
 
-.image-select .placeholder.editable{
+.custom-select .placeholder.editable{
   cursor: pointer;
 }
 
-.image-select .placeholder.editable::before,
-.image-select .placeholder.editable::after {
+.custom-select .placeholder.editable::before,
+.custom-select .placeholder.editable::after {
   content: "";
   display: inline-block;
   height: 2px;
@@ -454,17 +484,17 @@ span[data-tooltip]:hover::after {
   right: 0;
 }
 
-.image-select .placeholder.editable::before {
+.custom-select .placeholder.editable::before {
   transform: rotate(45deg);
   right: 20px;
 }
 
-.image-select .placeholder.editable::after {
+.custom-select .placeholder.editable::after {
   transform: rotate(-45deg);
   right: <? echo $font_size_factor * 15; ?>px;
 }
 
-.image-select.active .dropdown {
+.custom-select.active .dropdown {
   display: flex;
   flex-direction: column;
   box-shadow: 1px 1px 6px 1px #ddd;
@@ -472,25 +502,26 @@ span[data-tooltip]:hover::after {
   top: 1px;
   right: 0;
   left: 0;
-  min-width: 200px;
+  /*min-width: 200px;*/
 	max-height: 400px;
 	overflow-y: auto;
 	margin: 0;
 }
 
-.image-select .dropdown li {
+.custom-select .dropdown li {
   display: flex;
   align-items: center;
   background-color: #fff;
   padding: 3px;
+	margin-bottom: 0;
   cursor: pointer;
 }
 
-.image-select .dropdown li:not(:last-child) {
+.custom-select .dropdown li:not(:last-child) {
   border-bottom: 1px solid #cdcdcd;
 }
 
-.image-select .dropdown li:hover {
+.custom-select .dropdown li.selected {
   background-color: #e0e0e6;
 }
 
@@ -507,6 +538,10 @@ span[data-tooltip]:hover::after {
 
 .table_border_collapse>tbody>tr>td{
 	border:	1px solid #C3C7C3;
+}
+
+.styleFormField {
+	width: 87px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
@@ -1278,7 +1313,7 @@ a.menuered:hover {
 
 #header{
 	height: <? echo ($size['header']['height'] - 2); ?>px;
-	border: 1px solid; 
+	border: 1px solid;
 	border-color: #ffffff #cccccc #bbbbbb;
 }
 
@@ -1455,7 +1490,7 @@ a.menuered:hover {
 	position: relative;
 }
 
-.drawingOrderFormDropZone{
+.dropZone{
 	position: relative;
 	z-index: 1000;
 	margin: 0;
@@ -1463,39 +1498,39 @@ a.menuered:hover {
 	width: 100%;
 }
 
-.drawingOrderFormDropZone.ready{
+.dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 24px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.drawingOrderFormDropZone.over{
+.dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
-.drawingOrderFormLayer{
+.dragObject{
 	background-color: #f6f6f6;
 	box-shadow: 1px 1px 4px #aaa;
 	z-index: 100;
 	margin: 3 0 0 15;
 	padding: 2 2 2 3;
-	height: 16px;
+	height: 23px;
 	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
 }
 
-.drawingOrderFormLayer:hover{
+.dragObject:hover{
 	background-color: #fcfcfc;
 }
 
-.drawingOrderFormLayer.dragging{
+.dragObject.dragging{
 	box-shadow: 3px 3px 6px #aaa;
 }
 
-.drawingOrderFormLayer.picked{
+.dragObject.picked{
 	visibility: hidden;
 	height: 0px;
 	margin: 0 0 0 0;
@@ -1504,7 +1539,7 @@ a.menuered:hover {
 	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
 }
 
-.drawingOrderFormLayer.over{
+.dragObject.over{
 	border: 1px dashed #000;
 }
 
@@ -1779,7 +1814,7 @@ a:hover .preview_image{
 
 	font-size: <? echo $font_size_factor * 17; ?>px;
 	font-family: SourceSansPro2;
-	margin: -300px 0 0 -100px;
+	margin: -300px 0 0 -220px;
 	padding: 10px;
 	text-align: center;
 	line-height: 20px;
@@ -1812,8 +1847,8 @@ a:hover .preview_image{
 	float: left;
 	margin-left: 20px;
 	padding: 0px;
-	max-width: 480px;
 	text-align: left;
+	width: 90%;
 }
 
 .dstable{
@@ -1986,6 +2021,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border: 1px solid grey;
 	border-collapse: collapse;
 	margin: 2px 2px 2px 0;
+}
+
+.gle_neu_link {
+	text-align: right;
 }
 
 .subForm:not(:empty){
@@ -2606,7 +2645,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .attribute-editor-table td {
-	padding-right: 2px
+	padding-right: 2px;
 }
 
 #neuer_datensatz_button {
@@ -2614,6 +2653,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: relative;
 	text-align: right;
 	margin-right: 8px;
+}
+
+.scrolltable {
+	position: relative;
 }
 
 .scrolltable thead, .scrolltable tbody {
@@ -2627,7 +2670,14 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .scrolltable_header{
 	position: absolute;
-	top: 5px;
+	top: -30px;
+	padding-left: 5px;
+}
+
+.scrolltable_footer{
+	position: absolute;
+	bottom: -30px;
+	padding-left: 5px;
 }
 
 .toggle_fa_off i{
@@ -2660,6 +2710,18 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .green {
 	color: green;
+}
+
+.orange {
+	color: orange;
+}
+
+.blue {
+	color: blue;
+}
+
+.white {
+	color: white;
 }
 
 .yellow {
@@ -2698,4 +2760,61 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: #666;
 	margin-top: 8px;
 	font-size: 110%
+}
+
+#nds_titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
+#nds_titel p {
+	margin: 0px 0px -32px 0px;
+}
+#nds_formular {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+.nds_select  {
+	display: flex;
+	width: 500px;
+	margin: 0px 0px 10px 0px;
+}
+.nds_select select {
+	height: 25px;
+	width: 360px;
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+.nds_select div:first-child {
+	margin-right: 10px;
+	align-self: center;
+	width: 50px;
+}
+#nds_submit {
+	display:flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	margin-bottom: 15px;
+}
+#nds_submit>div {
+	display: flex;
+	align-items: center;
+}
+#nds_submit input {
+	margin-right: 5px;
+}
+#nds_submit input[type="checkbox"] {
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-left: 15px;
+}
+#nds_submit span {
+	margin: auto;
+	margin-left: 3px;
+}
+
+#nds_edit #dataset_operations {
+	display: none;
 }

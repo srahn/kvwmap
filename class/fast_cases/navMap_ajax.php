@@ -311,14 +311,31 @@ class GUI {
 				}
 
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
-				$sql.=$subquery;
-				$sql.=') AS fooForMaxLayerExtent) as foo';
+				$sql = '
+					SELECT 
+						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
+						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
+						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
+						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
+					FROM (
+						SELECT 
+							st_transform(
+								st_setsrid(
+									st_extent(' . $this->attributes['the_geom'] . '), 
+									' . $layer[0]['epsg_code'] . '
+								), 
+								'.$this->user->rolle->epsg_code.'
+							) AS extent 
+						FROM (
+							SELECT 
+								' . $subquery . '
+						) AS fooForMaxLayerExtent
+					) as foo';
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
 				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
 			}break;
 			
@@ -518,16 +535,7 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection', 
-				replace_params(
-					$layerset['connection'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
-			);
+			$layer->set('connection', $layerset['connection']);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -899,17 +907,7 @@ class GUI {
 
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
-					$layer->set(
-						'connection',
-						replace_params(
-							$layerset[$i][connection],
-							rolle::$layer_params,
-							$this->user->id,
-							$this->Stelle->id,
-							rolle::$hist_timestamp,
-							$this->user->rolle->language
-						)
-					);
+					$layer->set('connection',	$layerset[$i][connection]);
 					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
@@ -951,6 +949,7 @@ class GUI {
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
@@ -1171,7 +1170,10 @@ class GUI {
           }
         }
 				$this->layerset = $layerset;
-        $this->map=$map;
+				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
+					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+				}
+				$this->map = $map;
 				$this->reference_map = $reference_map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;
@@ -1184,7 +1186,18 @@ class GUI {
     } # end of switch loadMapSource
     return 1;
   }
-	
+
+		/**
+	 * Return a drawing order with default layers to top
+	 */
+	function get_default_layers_top_drawing_order($num_layers, $num_default_layers) {
+		$drawing_order = range($num_default_layers, $num_layers - 1);
+		foreach(range(0, $num_default_layers - 1) AS $order) {
+			$drawing_order[] = $order;
+		}
+		return $drawing_order;
+	}
+
 	function list_subgroups($groupid){
 		if($groupid != ''){
 			$group = $this->groupset[$groupid];
@@ -1212,7 +1225,7 @@ class GUI {
       	$klasse->set('status', MS_OFF);
       }
       $klasse -> set('template', $layerset['template']);
-      $klasse -> setexpression($classset[$j]['Expression']);
+      $klasse -> setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
       if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
         $klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
@@ -2353,7 +2366,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -2372,7 +2385,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -2418,7 +2431,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -2555,7 +2568,7 @@ class rolle {
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
     while ($rs = $this->database->result->fetch_assoc()) {
       $groups[]=$rs;
     }
@@ -2692,7 +2705,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -2754,7 +2767,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
 			$layer[]=$rs;
@@ -2839,6 +2852,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -3504,7 +3518,6 @@ class db_mapObj{
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
-			$attributes['alias'][$attributes['name'][$i]] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
 			$attributes['alias_polish'][$i] = $rs['alias_polish'];
@@ -3696,7 +3709,7 @@ class db_mapObj{
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,

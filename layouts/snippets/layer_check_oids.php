@@ -330,7 +330,7 @@ $result = $this->database->execSQL($query);
 	}	
 	.scrolltable_header {
     position: absolute;
-    top: 5px;
+    top: -25px;
     height: 31px;
     border-left: 1px solid #555;
     padding: 5px 0 0 5px;

@@ -17,6 +17,11 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
+		if (class_exists('GUI') AND !empty(GUI::$messages)) {
+			foreach(GUI::$messages as $message) {
+				$errors[] = $message['msg'];
+			}
+		}
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
@@ -39,19 +44,6 @@ register_shutdown_function(function () {
 	}
 });
 
-# Error-Handling
-// function CustomErrorHandler($errno, $errstr, $errfile, $errline){
-	// global $errors;
-	// if (!(error_reporting() & $errno)) {		// This error code is not included in error_reporting
-		// return;
-	// }
-	// $errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	// http_response_code(500);
-	// include_once('layouts/snippets/general_error_page.php');
-	// /* Don't execute PHP internal error handler */
-	// return true;
-// }
-
 function CustomErrorHandler($severity, $message, $filename, $lineno) {
 	if (!(error_reporting() & $severity)) {		// This error code is not included in error_reporting
 		return;
@@ -71,7 +63,7 @@ include('config.php');
 # Session
 if(!isset($_SESSION)){
 	$maxlifetime = 0;
-	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
@@ -278,23 +270,36 @@ function go_switch($go, $exit = false) {
 				if ($GUI->formvars['hist_timestamp'] != '') {
 					rolle::$hist_timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $GUI->formvars['hist_timestamp'])->format('Y-m-d H:i:s');
 				}
+				if ($GUI->formvars['layer_params'] != '') {
+					rolle::$layer_params = array_merge(rolle::$layer_params, $GUI->formvars['layer_params']);
+				}
 				$GUI->loadMap('DataBase');
-				$format = ($GUI->formvars['only_postgis_layer'] ? 'png' : 'jpeg');
+				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
-				$GUI->mime_type='image/' . $format;
+				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
-			} break;			
-			
+			} break;
+
 			case 'write_mapserver_templates' : {
+				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');
-				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
-				foreach ($layers as $layer) {
-					echo $layer->get('Name') . '<br>';
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
+			case 'write_mapserver_templates_Erzeugen' : {
+				$GUI->checkCaseAllowed('write_mapserver_templates');
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				foreach ($GUI->layers as $layer) {
 					$layer->write_mapserver_templates('Formular');
 				}
-			}break;			
-			
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
 				$GUI->saveDrawmode();
@@ -690,14 +695,39 @@ function go_switch($go, $exit = false) {
 				$GUI->getlayerfromgroup();
 			} break;
 
+			/**
+			 * Erzeugt für Layer mit selected_layer_id aus dessen maintable ein
+			 * Data-Statement, welches im Layereditor angezeigt wird.
+			 */
 			case 'get_generic_layer_data_sql' : {
-				if ($GUI->user->id != 3) {
-					$GUI->checkCaseAllowed($go);
-				}
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize(['selected_layer_id' => 'int']);
+				$result = $GUI->get_generic_layer_data_sql($GUI->formvars['selected_layer_id']);
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
+			} break;
+
+			/**
+			 * Dieser Anwendungsfall ist nicht im Layereditor eingebunden.
+			 * Er wird für den Layer mit der selected_layer_id aus dessen 
+			 * maintable ein neues Data-Statement abgeleitet und dem Attribut Data
+			 * zugeordnet. Kann für automatische Erstellung von Data verwendet werden.
+			 */
+			case 'set_generic_layer_data_sql' : {
+				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->sanitize(['selected_layer_id' => 'int']);
 				$result = $GUI->get_generic_layer_data_sql();
+				if ($result['generic_layer_data_sql']['success']) {
+					$result['layer']->update(
+						array(
+							'Data' => $result['generic_layer_data_sql']['data_sql']
+						),
+						false
+					);
+					$result['generic_layer_data_sql']['msg'] .= ' wurde erfolgreich für den Layer mit ID ' . $result['layer']->get($result['layer']->identifier) . ' eingetragen.';
+				}
 				header('Content-Type: application/json; charset=utf-8');
-				echo utf8_decode(json_encode($result));
+				echo utf8_decode(json_encode($result['generic_layer_data_sql']));
 			} break;
 
 			case 'exportWMC' :{
@@ -724,6 +754,11 @@ function go_switch($go, $exit = false) {
 			case 'zoomto_dataset' : {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
+			}break;
+			
+			case 'create_auto_classes_for_rollenlayer' : {
+				$GUI->sanitize(['layer_options_open' => 'int']);
+				$GUI->create_auto_classes_for_rollenlayer();
 			}break;
 
 			# PointEditor
@@ -1183,6 +1218,16 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('SHP_Import');
 				$GUI->shp_import_speichern();
 			} break;
+			
+			case 'import_rollenlayer_into_layer' : {
+				$GUI->import_rollenlayer_into_layer();
+				$GUI->output();
+			} break;
+			
+			case 'import_rollenlayer_into_layer_importieren' : {
+				$GUI->import_rollenlayer_into_layer_importieren();
+				$GUI->output();
+			} break;			
 
 			case 'Daten_Import' : {
 				$GUI->daten_import();
@@ -1202,7 +1247,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
 				$GUI->sanitize([
 					'selected_layer_id' => 'int',
 					'layer_name' => 'text',
@@ -1327,6 +1372,67 @@ function go_switch($go, $exit = false) {
 			case 'neuer_Layer_Datensatz_speichern' : {
 				$GUI->check_csrf_token();
 				$GUI->neuer_Layer_Datensatz_speichern();
+			} break;
+
+
+			case 'layer_charts_Anzeigen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int'
+				]);
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Editor' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'id' => 'int'
+				]);
+				$GUI->layer_chart_editor();
+			} break;
+
+			case 'layer_chart_Speichern' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int',
+					'title' => 'text',
+					'aggregate_function' => 'text',
+					'value_attribute_label' => 'text',
+					'value_attribute_name' => 'text',
+					'label_attribute_name' => 'text'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
+				if ($GUI->formvars['id'] != '' AND $chart->get_id() == '') {
+					$result = array(
+						'success' => false,
+						'err_msg' => 'Das Layer-Diagramm mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
+					);
+				}
+				else {
+					$result = $GUI->layer_chart_Speichern($chart);
+				}
+				if ($result['success']) {
+					$GUI->add_message('notice', $result['msg']);
+				}
+				else {
+					$GUI->add_message('error', $result['err_msg']);
+				}
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Loeschen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$response = $GUI->layer_chart_Loeschen();
+				header('Content-Type: application/json');
+				echo json_encode($response);
 			} break;
 
 			case 'generisches_sachdaten_diagramm' : {
@@ -1492,7 +1598,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompletenessAll' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				$GUI->checkClassCompletenessAll();
+				$GUI->check_class_completenesses();
 			} break;
 
 			case 'Attributeditor' : {
@@ -1774,24 +1880,44 @@ function go_switch($go, $exit = false) {
 				header('location: index.php');
 			} break;
 
+			case 'datasources_anzeigen' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_anzeigen();
+			} break;
+
+			case 'datasources_create' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_create();
+			} break;
+
+			case 'datasources_update' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_update();
+			} break;
+
+			case 'datasources_delete' : {
+				$GUI->checkCaseAllowed('Layer_Anzeigen');
+				$GUI->datasources_delete();
+			} break;
+
 			case 'connections_anzeigen' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
 				$GUI->connections_anzeigen();
 			} break;
 
-			case 'connection_create' : {
+			case 'connections_create' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_create();
+				$GUI->connections_create();
 			} break;
 
-			case 'connection_update' : {
+			case 'connections_update' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_update();
+				$GUI->connections_update();
 			} break;
 
-			case 'connection_delete' : {
+			case 'connections_delete' : {
 				$GUI->checkCaseAllowed('Layer_Anzeigen');
-				$GUI->connection_delete();
+				$GUI->connections_delete();
 			} break;
 
 			case 'cronjobs_anzeigen' : {
@@ -1857,6 +1983,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap();
 				$GUI->saveMap('');
 				$GUI->output();
+			} break;
+			
+			case "get_copyrights" : {
+				echo $GUI->get_copyrights();
 			} break;
 
 			case "tooltip_query" : {
@@ -1961,7 +2091,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Query for all notifications and show it in a list
+			*	Query for all notifications and show it in a list
 			*/
 			case 'notifications_anzeigen' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -1969,7 +2099,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Show notifications form to create or update notification
+			*	Show notifications form to create or update notification
 			*/
 			case 'notification_formular' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -1978,7 +2108,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				create or update a user notification
+			*	create or update a user notification
 			*/
 			case 'put_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -1993,7 +2123,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete the notification for user
+			*	delete the notification for user
 			*/
 			case 'delete_user2notification' : {
 				$GUI->sanitize(['notification_id' => 'int']);
@@ -2001,7 +2131,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete a notification
+			*	delete a notification
 			*/
 			case 'delete_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2010,7 +2140,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				query notifications that has to be shown for the current user
+			*	query notifications that has to be shown for the current user
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();

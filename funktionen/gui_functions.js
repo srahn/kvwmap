@@ -22,6 +22,7 @@ var current_date = new Date().toLocaleString().replace(',', '');;
 var new_hist_timestamp;
 var loc = window.location.href.toString().split('index.php')[0];
 var mapimg0, mapimg3, mapimg4;
+var compare_clipping = false;
 
 window.onbeforeunload = function(){
 	document.activeElement.blur();
@@ -191,6 +192,17 @@ function ahahDone(url, targets, req, actions) {
 			//alert(target.value);
 		}
 	}
+}
+
+function enforceMinMax(el) {
+  if (el.value != '') {
+    if (parseInt(el.value) < parseInt(el.min)) {
+      el.value = el.min;
+    }
+    if (parseInt(el.value) > parseInt(el.max)) {
+      el.value = el.max;
+    }
+  }
 }
 
 function delete_user2notification(notification_id) {
@@ -446,7 +458,7 @@ function resizemap2window(){
 * @param string confim_value The Value that will be send with the callback function wenn the message ist confirmed
 * @param string callback The name of the function called when the user confirmd the message
 */
-function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancle_button_value = 'Abbrechen') {
+function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_value, callback, confirm_button_value = 'Ja', cancel_button_value = 'Abbrechen', width = null) {
 	//console.log('Show Message: %o: ', messages);
 	//console.log('function message with callback: %o: ', callback);
 	confirm_value = confirm_value || 'ok';
@@ -458,6 +470,9 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 	else {
 		msgBoxDiv.html('');
+	}
+	if (width != null) {
+		msgBoxDiv.css('maxWidth', width);
 	}
 	if (document.getElementById('messages') == null) {
     msgBoxDiv.append('<div id="messages"></div>');
@@ -517,7 +532,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		}
 		if (msg.type == 'confirm' && root.document.getElementById('message_confirm_button') == null) {
 			msgBoxDiv.append('<input id="message_confirm_button" type="button" onclick="root.$(\'#message_box\').hide();' + (callback ? callback + '(' + confirm_value + ')' : '') + '" value="' + confirm_button_value + '" style="margin: 10px 0px 0px 0px;">');
-			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancle_button_value + '" style="margin: 0px 0px -6px 8px;">');
+			msgBoxDiv.append('<input id="message_cancle_button" type="button" onclick="root.$(\'#message_box\').hide();" value="' + cancel_button_value + '" style="margin: 0px 0px -6px 8px;">');
 		}
 	});
 	
@@ -706,7 +721,7 @@ function formdata2urlstring(formdata){
 	return url;
 }
 
-function set_hist_timestamp() {
+function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();	
@@ -717,6 +732,28 @@ function set_hist_timestamp() {
 	mapimg3 = mapimg.cloneNode();
 	mapimg4 = mapimg.cloneNode();
 	mapimg0 = mapimg.cloneNode();
+	mapimg3.setAttribute('id', 'mapimg3');
+	mapimg4.setAttribute('id', 'mapimg4');
+	mapimg0.setAttribute('id', 'mapimg0');
+	mapimg0.setAttribute('onload', 'top.pass_preloaded_img()');
+	movegroup.insertBefore(mapimg0, mapimg);
+	movegroup.insertBefore(mapimg4, cartesian);
+	movegroup.insertBefore(mapimg3, mapimg4);
+}
+
+function pass_preloaded_img(){
+	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
+}
+
+function compare_view_for_layer(layer_id){
+	compare_clipping = true;
+	add_split_mapimgs();
+	get_map(mapimg3, 'not_layer_id=' + layer_id);
+	mapimg4.setAttribute("clip-path", 'url(#compare_clipper)');
+}
+
+function set_hist_timestamp() {
+	add_split_mapimgs();
 	if (hist_timestamp != '') {
 		var scroll = 2720;
 		new_hist_timestamp = structuredClone(hist_timestamp);
@@ -726,32 +763,23 @@ function set_hist_timestamp() {
 		new_hist_timestamp = new Date();
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
-	mapimg3.setAttribute('id', 'mapimg3');
-	mapimg4.setAttribute('id', 'mapimg4');
-	mapimg0.setAttribute('id', 'mapimg0');
-	mapimg0.setAttribute('onload', 'top.pass_preloaded_img()');
-	movegroup.insertBefore(mapimg0, mapimg);
-	movegroup.insertBefore(mapimg4, cartesian);
-	movegroup.insertBefore(mapimg3, mapimg4);
-	mapimg3.setAttribute("href", loc + 'index.php?go=getMap&no_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
-	mapimg4.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
+	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
 }
 
-function pass_preloaded_img(){
-	mapimg4.setAttribute('href', mapimg0.getAttribute('href'));
-}
-
-function get_map(){
-	svgdoc = document.SVG.getSVGDocument();	
-	var mapimg0 = svgdoc.getElementById("mapimg0");
+function get_map_hist(){
 	var nht = structuredClone(new_hist_timestamp);
 	nht.setMonth(nht.getMonth() + parseInt(document.GUI.hist_timestamp3.value));
 	let ts = nht.toLocaleString().replace(',', '');
 	document.GUI.hist_timestamp2.value = ts;
-	mapimg0.setAttribute("href", loc + 'index.php?go=getMap&only_postgis_layer=1&current_date=' + current_date + '&hist_timestamp=' + ts);
+	get_map(mapimg0, 'only_postgis_layer=1&hist_timestamp=' + ts);
+}
+
+function get_map(img, filter){
+	img.setAttribute("href", loc + 'index.php?go=getMap&' + filter + '&current_date=' + current_date);
 }
 
 function get_map_ajax(postdata, code2execute_before, code2execute_after){
@@ -759,6 +787,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	top.startwaiting();
 	svgdoc = document.SVG.getSVGDocument();
 	$('#hist_timestamp_form').hide();
+	svgdoc.getElementById("mapimg0")?.remove();
 	svgdoc.getElementById("mapimg3")?.remove();
 	svgdoc.getElementById("mapimg4")?.remove();
 	// nix
@@ -887,6 +916,58 @@ function overlay_link(data, start, target){
 		}
 	}
 }
+
+
+function toggle_custom_select(id) {
+	var custom_select_div = document.getElementById('custom_select_' + id);
+	if (custom_select_div.classList.contains('active')) {
+			custom_select_div.classList.remove('active');
+	 } else {
+		 custom_select_div.classList.add('active');
+	 }
+}
+
+function custom_select_register_keydown(){
+	document.onkeydown = custom_select_keydown;
+}
+
+function custom_select_keydown(evt){
+	var selected_option = document.querySelector('.custom-select.active li.selected');
+	switch (evt.keyCode) {
+		case 38 : {
+			selected_option.previousElementSibling.onmouseenter();
+		}break;
+		case 40 : {
+			selected_option.nextElementSibling.onmouseenter();
+		}break;
+		case 13 : {
+			selected_option.onclick();
+		}break;
+	}
+}
+
+function custom_select_hover(option) {
+	var custom_select_div = option.closest('.custom-select');
+	option.scrollIntoView({behavior: "smooth", block: "nearest"});
+	custom_select_div.querySelector('li.selected').classList.remove('selected');
+	option.classList.add('selected');
+}
+
+function custom_select_click(option) {
+	var custom_select_div = option.closest('.custom-select');
+	var field = custom_select_div.querySelector('input');
+	custom_select_hover(option);
+	field.value = option.dataset.value;
+	if (custom_select_div.querySelector('.placeholder img')) {
+		custom_select_div.querySelector('.placeholder img').src = option.querySelector('img').src;
+	}
+	custom_select_div.querySelector('.placeholder span').innerHTML = option.querySelector('span').innerHTML;
+	if (field.onchange) {
+		field.onchange();
+	}
+	toggle_custom_select(field.id);
+}
+
 
 function datecheck(value){
 	dateElements = value.split('.');
@@ -1240,11 +1321,11 @@ function toggleDrawingOrderForm(){
 var dragSrcEl = null;
 
 function handleDragStart(e){
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	dragSrcEl = e.target;
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
     dropzone.classList.add('ready');
   });
-	dragSrcEl = e.target;
   if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
 	dragSrcEl.classList.add('dragging');
 	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
@@ -1281,7 +1362,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = document.querySelectorAll('#drawingOrderForm .drawingOrderFormDropZone');
+	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });
@@ -1433,6 +1514,14 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 	else if (selClass.value == '2'){
 		selImg.src="graphics/outline"+height+".jpg";
 	}
+}
+
+function showCopyrights(header){
+	message([{
+			'type': 'info',
+			'msg': '<h2 style="padding: 4px 4px 10px 4px">' + header + '</h2><div id="copyrights_div"></div>'
+	}], 1000, 2000, null, null, null, 'Ja', 'Abbrechen', 800);
+	root.ahah('index.php', 'go=get_copyrights', new Array(root.document.getElementById('copyrights_div')), new Array('sethtml'));
 }
 
 function showMapParameter(epsg_code, width, height, l) {
@@ -1635,12 +1724,14 @@ function copyToClipboard(text) {
 		document.body.appendChild(textarea);
 		textarea.select();
 		try {
-				return document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			let result = document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			message([{ type: 'notice', msg: text + ' in die Zwischenablage kopiert'}], 500, 1000);
+			return result;
 		} catch (ex) {
-				console.warn("Copy to clipboard failed.", ex);
-				return false;
+			console.warn("Copy to clipboard failed.", ex);
+			return false;
 		} finally {
-				document.body.removeChild(textarea);
+			document.body.removeChild(textarea);
 		}
 	}
 }

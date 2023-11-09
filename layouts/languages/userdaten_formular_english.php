@@ -48,4 +48,7 @@
 	$strLayerDataImportAllowedLabel = 'Data-Import in layers';
 	$strLayerDataImportAllowedCheckboxText = 'Permission to create new Records by data-import.';
 	$strArchived = "archived";
+	$strAgreementAccepted = "Terms of use";
+	$strAgreementAcceptedText = "agreed";
+	$strAgreementAcceptedDescription = "If the option is set, the user has agreed to the terms of use. If the checkbox is cleared, the user must agree to the terms of use again when logging in.";
 ?>

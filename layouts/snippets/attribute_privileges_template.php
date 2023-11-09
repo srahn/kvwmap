@@ -13,7 +13,12 @@
 	}
 ?>
 
-<td class="apt-main-td">
+<td id="stellen_td_<? echo $this->stelle->id; ?>" class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
+														echo 'unterstelle';
+														if ($this->formvars['unterstellen_ausblenden']) {
+															echo ' hidden';
+														}
+													} ?>">
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
 		<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
@@ -22,21 +27,55 @@
 		<span class="fetter px16"><? echo $strDefaultPrivileges; ?></span>
 		<? } ?>
 	</div>
-	<? echo $parent_privileges_checkbox; ?>
+	<? 
+		echo $parent_privileges_checkbox; 
+
+		$layer_access_options = array(
+			'0' => array(
+				'output' => $strReadAndEdit,
+				'color' => '#ff735a'
+			),
+			'1' => array(
+				'output' => $strCreateNewRecords,
+				'color' => '#eeee39'
+			),
+			'2' => array(
+				'output' => $strCreateAndDelete,
+				'color' => '#9ae394'
+			)
+		);
+
+		$layer_export_options = array(
+			'0' => array(
+				'output' => $strNoExport,
+				'color' => '#ff735a'
+			),
+			'2' => array(
+				'output' => $strOnlyData,
+				'color' => '#eeee39'
+			),
+			'1' => array(
+				'output' => $strDataAndGeom,
+				'color' => '#9ae394'
+			)
+		);
+	?>
 	<div class="apt-layerzugriffsrechte">
 		<span class="fett"><? echo $strLayerAccessPrivileges; ?></span><br>
-		<select name="privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
-			<option <? if($this->layer[0]['privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strReadAndEdit; ?></option>
-			<option <? if($this->layer[0]['privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strCreateNewRecords; ?></option>
-			<option <? if($this->layer[0]['privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strCreateAndDelete; ?></option>
+		<select name="privileg<? echo $this->stelle->id; ?>" style="background-color: <? echo $layer_access_options[$this->layer[0]['privileg']]['color']; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+			foreach($layer_access_options AS $value => $option) {
+				$selected = (strval($this->layer[0]['privileg']) === strval($value) ? ' selected' : '');	?>
+				<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>	<?
+			}	?>
 		</select>		
 	</div>
 	<div class="apt-layerexportrechte">
 		<span class="fett"><? echo $strLayerExportPrivileges; ?></span><br>
-		<select name="export_privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
-			<option <? if($this->layer[0]['export_privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strNoExport; ?></option>						  			
-				<option <? if($this->layer[0]['export_privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strOnlyData; ?></option>
-				<option <? if($this->layer[0]['export_privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strDataAndGeom; ?></option>
+		<select name="export_privileg<? echo $this->stelle->id; ?>" style="background-color: <? echo $layer_export_options[$this->layer[0]['export_privileg']]['color']; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+			foreach($layer_export_options AS $value => $option) {
+				$selected = (strval($this->layer[0]['export_privileg']) === strval($value) ? ' selected' : '');	?>
+				<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>	<?
+			}	?>
 		</select>		
 	</div>
 <? 
@@ -46,6 +85,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 			<tr>
 				<td><span class="fett">Attribut</span></td>
 				<td><span class="fett">Privileg</span></td>
+				<td style="padding: 0"></td>
 				<td><span class="fett">Tooltip</span></td>
 			</tr>
 <?
@@ -74,28 +114,31 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 				<td>
 <?
 			$privilege_options = array(
-				array(
-					'value' => '',
+				'' => array(
 					'output' => $strNoAccess,
+					'color' => '#ff735a'
 				),
-				array(
-					'value' => '0',
+				'0' => array(
 					'output' => $strRead,
+					'color' => '#eeee39'
 				),
-				array(
-					'value' => '1',
+				'1' => array(
 					'output' => $strEdit,
+					'color' => '#9ae394'
 				)
 			);
 ?>
-					<select style="width:100px" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"  <? echo $disabled; ?>>
-<?
-			foreach($privilege_options AS $option) {
-				$selected = ($this->attributes_privileges[$this->attributes['name'][$i]] == $option['value'] ? ' selected' : '');
-?>
-			<option value="<? echo $option['value']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>
-<?			} ?>
-				</select>
+					<select class="<? echo ($this->stelle->id == ''? 'default_' : ''); ?>privileg_<? echo $this->attributes['name'][$i]; ?>" style="width:100px; background-color: <? echo $privilege_options[$this->attributes_privileges[$this->attributes['name'][$i]]]['color']; ?>" name="privileg_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>" onchange="this.setAttribute('style', 'width: 100px;' + this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+						foreach($privilege_options AS $value => $option) {
+							$selected = (strval($this->attributes_privileges[$this->attributes['name'][$i]]) === strval($value) ? ' selected' : '');	?>
+							<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>
+<?					} ?>
+					</select>
+				</td>
+				<td style="padding: 0">
+<? 		if ($this->stelle->id == '') { ?>
+					<a href="javascript:set_all_for_attribute('<? echo $this->attributes['name'][$i]; ?>');" title="<? echo $strUseForAllStellen; ?>"><i class="fa fa-sign-out" style="font-size: 20px"></i></a>
+<? 		} ?>
 				</td>
 				<td style="text-align: center;">
 					<input type="checkbox" name="tooltip_<? echo $this->attributes['name'][$i].'_'.$this->stelle->id; ?>"&nbsp; <? echo $disabled; ?>
@@ -106,7 +149,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 			<tr height="50px" valign="middle">
 				<td><? if($this->formvars['stelle'] != 'a'){ ?>Alle<? } ?></td>
 				<td>
-					<select style="width:100px" name="" onchange="set_all('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);"  <? echo $disabled; ?>>
+					<select style="width:100px" name="" onchange="set_all_for_stelle('<? echo $attributenames; ?>', '<? echo $this->stelle->id; ?>', this.value);"  <? echo $disabled; ?>>
 						<option value=""> - <? echo $this->strChoose; ?> - </option>
 						<option value=""><? echo $strNoAccess; ?></option>
 						<option value="0"><? echo $strRead; ?></option>

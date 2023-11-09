@@ -25,13 +25,20 @@
 											9 => 'WFS'];
 	
 	$first = $nextfirst = '';
-	$has_sync_layer = array_reduce(
-		$this->layerdaten['sync'],
-		function($has_sync, $layerdaten) {
-			return $has_sync OR $layerdaten;
-		},
-		0
-	);
+	$has_sync_layer = false;
+	if (
+		array_key_exists('sync', $this->layerdaten) AND
+		is_array($this->layerdaten['sync']) AND
+		count($this->layerdaten['sync']) > 0
+	) {
+		$has_sync_layer = array_reduce(
+			$this->layerdaten['sync'],
+			function($has_sync, $layerdaten) {
+				return $has_sync OR $layerdaten;
+			},
+			0
+		);
+	}
 	$has_shared_layer = array_reduce(
 		$this->layerdaten['shared_from'],
 		function($has_shared, $layerdaten) {
@@ -68,28 +75,21 @@
 					if (count($this->layerdaten['ID']) == 0) {
 						$this->add_message('info', $strNoLayers);
 					}
-					else { ?>
+					else {
+						$switch_to_order = ($this->formvars['order'] == 'Name' ? 'Alias' : 'Name');
+						$alias_first = $this->formvars['order'] == 'Alias';
+						?>
 						<table width="100%" border="0" cellspacing="0" cellpadding="2">
 							<tr>
 								<th>&nbsp;</th>
 								<th align="left">
 									<a href="index.php?go=Layer_Anzeigen&order=Layer_ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a>
-								</th><?
-								if ($this->formvars['order'] == "Name") { ?>
-									<th align="left">
-										<a href="index.php?go=Layer_Anzeigen&order=Alias&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?>&nbsp;[<?php echo $this->strAlias; ?>]</a>
-									</th><?
-								}
-								if ($this->formvars['order'] != "Alias" AND $this->formvars['order'] != "Name") { ?>
-									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
-										<?php echo $this->strName; ?>&nbsp;[<?php echo $this->strAlias; ?>]</a>
-									</th><?
-								}
-								if ($this->formvars['order'] == "Alias") { ?>
-									<th align="left"><a href="index.php?go=Layer_Anzeigen&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
-										<?php echo $this->strAlias; ?>&nbsp;[<?php echo $this->strName; ?>]</a>
-									</th><?
-								} ?>
+								</th>
+								<th align="left">
+									<a href="index.php?go=Layer_Anzeigen&order=<? echo $switch_to_order; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
+										<?php echo ($alias_first ? $this->strAlias : $this->strName); ?>&nbsp;[<?php echo ($alias_first ? $this->strName : $this->strAlias); ?>]
+									</a>
+								</th>
 								<th align="left">
 									<a href="index.php?go=Layer_Anzeigen&order=connectiontype&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strConnectionType; ?></a>
 								</th>
@@ -176,15 +176,15 @@
 										<td>
 											<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->layerdaten['ID'][$i]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>">
 												<?php
-													if ($this->formvars['order']!="Alias") {
-														echo $this->layerdaten['Bezeichnung'][$i];
-														if ($this->layerdaten['alias'][$i]) {
-															echo '&nbsp;['.$this->layerdaten['alias'][$i].']';
-														}
-													}
-													if ($this->formvars['order']=="Alias") {
-														echo $this->layerdaten['alias'][$i].'&nbsp;['.$this->layerdaten['Bezeichnung'][$i].']';
-													} ?>
+													echo layer_name_with_alias(
+														$this->layerdaten['Bezeichnung'][$i],
+														$this->layerdaten['alias'][$i],
+														array(
+															'alias_first' => $alias_first,
+															'delimiter' => '&nbsp;',
+															'brace_type' => 'sharp'
+														)
+													); ?>
 											</a>
 										</td>
 										<td><?php echo $connectiontypes[$this->layerdaten['connectiontype'][$i]]; ?></td>

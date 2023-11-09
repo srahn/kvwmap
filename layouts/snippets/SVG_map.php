@@ -277,8 +277,8 @@ $svg='<?xml version="1.0"?>
 	var last_x = 0;
 	freehand_measuring = false;
 	var measured_distance = 0;
-	var new_distance = 0,
-			dragVectors = [{
+	var new_distance = 0;
+	var	dragVectors = [{
 					\'x0\': 0,
 					\'y0\': 0,
 					\'dx\': 0,
@@ -856,6 +856,9 @@ function mouse_move(evt){
 	top.coords_anzeige(evt, null);
 	if(doing == "ppquery"){
 		hidetooltip(evt);
+	}
+	if (top.compare_clipping) {
+		document.getElementById(\'compare_clipper_rect\').setAttribute(\'width\', evt.clientX);
 	}
 }		
 

@@ -359,7 +359,8 @@ else {
 					<td colspan="3">          Antragsnummer<br>
   					<input type="text" name="suchstammnr" value="<?php echo $this->formvars['suchstammnr']; ?>" size="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<?php echo ANTRAGSNUMMERMAXLENGTH; ?>">
 						<a href="#" class="toggle_fa_off" title="von-bis-Suche" onclick="toggleBetweenSearch(this, GUI.suchstammnr2);"><i class="fa fa-step-backward"></i> <i class="fa fa-step-forward"></i></a>
-						<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">
+						<input type="text" <? if($this->formvars['suchstammnr2'] == '')echo 'style="display: none"'; ?> name="suchstammnr2" value="<? echo $this->formvars['suchstammnr2']; ?>" size="<? echo ANTRAGSNUMMERMAXLENGTH; ?>" maxlength="<? echo ANTRAGSNUMMERMAXLENGTH; ?>">&nbsp;
+						<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
  					</td>
 				</tr>
 				<? if(NACHWEIS_PRIMARY_ATTRIBUTE == 'stammnr'){ ?>
@@ -398,7 +399,8 @@ else {
 			  </tr>
 				<tr>
 					<td colspan="3">Bemerkung:<br>
-						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">
+						<input type="text" name="suchbemerkung" size="29" value="<? echo $this->formvars['suchbemerkung']; ?>">&nbsp;
+						<span style="--left: none" data-tooltip="Zur nicht exakten Suche können die Platzhalter % (beliebig viele Zeichen) und _ (ein Zeichen) verwendet werden."></span>
 					</td>
 				</tr>
       </table>

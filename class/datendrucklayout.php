@@ -507,6 +507,21 @@ class ddl {
 						} break;
 
 						default : {
+							$value = $this->result[$i][$attributes['name'][$j]];
+							$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
+							$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
+							$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
+							$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
+							$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
+							$label = $this->layout['elements'][$attributes['name'][$j]]['label'];
+							$margin = $this->layout['elements'][$attributes['name'][$j]]['margin'];
+							$pagecount = count($this->pdf->objects['3']['info']['pages']);
+
+							if ($label != '') {
+								$label_x = $x;
+								$x = $x + $margin;
+							}
+
 							if ($this->page_overflow) {
 								# es gab vorher einen Seitenüberlauf durch ein Sublayout -> zu alter Seite zurückkehren
 								$this->pdf->reopenObject($this->record_startpage);
@@ -516,16 +531,15 @@ class ddl {
 								$this->layout['elements'][$attributes['name'][$j]]['fontsize'] > 0 OR
 								$attributes['form_element_type'][$j] == 'Dokument'
 							) {
-								$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
-								#### relative Positionierung über Offset-Attribut ####
+								#### relative Positionierung über Offset-Attribut #
 								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
-								if ($offset_attribute != '') {
-									# es ist ein offset_attribute gesetzt
+								if ($offset_attribute != '') {		# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
-									if ($offset_value != ''){
-										# Offset wurde auch schon bestimmt, relative y-Position berechnen
-										# Seitenüberläufe berücksichtigen
-										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);
+									if ($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
+										if ($this->layout['dont_print_empty'] AND $value == '') {
+											$y = 0;
+										}
+										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
 									}
 									else {
 										#$remaining_attributes[] = $attributes['name'][$j];	# Offset wurde noch nicht bestimmt, Attribut merken und überspringen
@@ -539,11 +553,8 @@ class ddl {
 									# zurück zur ersten Seite bei seitenweisem Typ und allen absolut positionierten Attributen, wenn erforderlich
 									#$this->pdf->reopenObject($this->pdf->getFirstPageId());
 								}
-								#### relative Positionierung über Offset-Attribut ####
-								$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
-								$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
-
-								$pagecount = count($this->pdf->objects['3']['info']['pages']);
+								# relative Positionierung über Offset-Attribut ####
+								
 								if ($this->layout['type'] == 1 AND $offset_attribute == '' AND $pagecount > 1) {
 									# ab der 2. Seite sollen die forlaufenden absolut positionierten Elemente oben auf der Seite beginnen
 									$y = $y + $this->initial_yoffset;
@@ -567,13 +578,14 @@ class ddl {
 										$this->maxy = $y;
 									}
 								}
-
-								$width = $this->layout['elements'][$attributes['name'][$j]]['width'];
-								$border = $this->layout['elements'][$attributes['name'][$j]]['border'];
 								
+								if ($label != '' AND !($this->layout['dont_print_empty'] AND $value == '')) {
+									$this->putText($label, $zeilenhoehe, NULL, $label_x, $y, $offsetx, $border);
+								}
+
 								if (substr($attributes['type'][$j], 0, 1) == '_') {
 									# Array
-									$values = json_decode($this->result[$i][$attributes['name'][$j]]);
+									$values = json_decode($value);
 									$x2 = $x;
 									$y2 = $miny_array = $y;
 									for ($v = 0; $v < @count($values); $v++) {
@@ -608,7 +620,6 @@ class ddl {
 								}
 								else {
 									# normal
-									$value = $this->result[$i][$attributes['name'][$j]];
 									if ($attributes['form_element_type'][$j] == 'Dokument') {
 										$y = $this->putImage($value, $j, $x, $y, $offsetx, $width, $preview);
 									}
@@ -784,37 +795,69 @@ class ddl {
 	}
 	
 
-	function putImage($dokumentpfad, $j, $x, $y, $offsetx, $width, $preview){
-		if($width == '')$width = 50;
-		if(substr($dokumentpfad, 0, 4) == 'http'){
+	function putImage($dokumentpfad, $j, $x, $y, $offsetx, $width, $preview) {
+		if ($width == '') {
+			$width = 50;
+		}
+		if (substr($dokumentpfad, 0, 4) == 'http') {
 			$file = file_get_contents($dokumentpfad);
 			$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
 			file_put_contents($dokumentpfad, $file);
 		}
 		$pfadteil = explode('&original_name=', $dokumentpfad);
 		$dateiname = $pfadteil[0];
-		if($dateiname == $this->attributes['alias'][$j] AND $preview)$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png';		// als Platzhalter im Editor
-		if($dateiname != '' AND file_exists($dateiname)){
+		if ($dateiname == $this->attributes['alias'][$j] AND $preview) {
+			$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png'; # als Platzhalter im Editor
+		}
+		if ($dateiname != '' AND file_exists($dateiname)) {
 			$dateinamensteil = pathinfo($dateiname);
-			if(in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))){
-				$new_filename = IMAGEPATH.$dateinamensteil['filename'].'.jpg';
-				exec(IMAGEMAGICKPATH.'convert '.$dateiname.' -background white -flatten '.$new_filename);
-				$size = getimagesize($new_filename);
-				$ratio = $size[1]/$size[0];
-				$height = $ratio*$width;
-				$x = $x + $offsetx;
-				$y = $y - $height;
-				$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
-				if ($this->layout['maxx'] < ($x + $width)){
-					$this->layout['maxx'] = ($x + $width);			# maximaler x-Wert für Spaltenanordnung
+			if (in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+				$new_filename = IMAGEPATH . $dateinamensteil['filename'] . '.jpg';
+				if (!file_exists($new_filename)) {
+					$command = IMAGEMAGICKPATH . 'convert "' . $dateiname . '" -background white -flatten "' . $new_filename . '"';
+					#echo 'Kommando zum konvertieren der Bilddatei: ' . $command;
+					exec($command, $result, $status);
+					#echo '<br>Result of command: ' . print_r($command, true) . ' status: ' . $status;
+				}
+
+				if (file_exists($new_filename)) {
+					$size = getimagesize($new_filename);
+					$ratio = $size[1] / $size[0];
+					$height = $ratio * $width;
+					$x = $x + $offsetx;
+					$y = $y - $height;
+					if ($y < $this->layout['margin_bottom']) {
+						$nextpage = $this->getNextPage($this->pdf->currentContents);
+						if ($nextpage != NULL) {
+							$this->pdf->reopenObject($nextpage);
+						}
+						else {
+							$this->pdf->ezNewPage();
+							$this->miny[$this->pdf->currentContents] = $this->layout['height'];
+							$this->maxy = 800;
+							if($this->layout['type'] == 2)$this->offsety = 50;
+							$this->page_overflow = true;
+						}
+						$y = $this->layout['height'] - $this->layout['margin_top'] - 20 - $height;
+					}
+					$this->pdf->addJpegFromFile($new_filename, $x, $y, $width);
+					if ($this->layout['maxx'] < ($x + $width)){
+						$this->layout['maxx'] = ($x + $width);			# maximaler x-Wert für Spaltenanordnung
+					}
+				}
+				else {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler beim hinzufügen der Datei ' . $dateiname . ' zum Drucklayout. Die Datei ' . $new_filename . ' konnte nicht erzeugt oder gefunden werden!'
+					);
 				}
 			}
 		}
 		return $y;
 	}
-	
+
 	function putText($text, $fontsize, $width, $x, $y, $offsetx, $border = false, $type = 'running'){	
-		if($y < $this->layout['margin_bottom']){
+		if($y < $this->pdf->ez['bottomMargin']){
 			$nextpage = $this->getNextPage($this->pdf->currentContents);
 			if($nextpage != NULL){
 				$this->pdf->reopenObject($nextpage);
@@ -836,7 +879,7 @@ class ddl {
 		else{							# linksbündig
 			$x = $x + $offsetx;
 			if($width != ''){
-				$right = $this->layout['width'] - $width - $x + 20;
+				$right = $this->layout['width'] - $width - $x;
 				$just = 'full';
 			}
 			else{
@@ -1442,13 +1485,16 @@ class ddl {
 	}
 
 	function save_layout($formvars, $attributes, $_files, $stelle_id){
-    if($formvars['name']){
-    	if($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-      $sql = "INSERT INTO `datendrucklayouts`";
-      $sql .= " SET `name` = '".$formvars['name']."'";
-      $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
-			$sql .= ", `format` = '".$formvars['format']."'";
-  		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
+    if ($formvars['name']) {
+    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
+			$sql = "
+				INSERT INTO
+					`datendrucklayouts`
+				SET
+					`name` = '" . $formvars['name'] . "',
+					`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
+					`format` = '" . $formvars['format'] . "'";
+			if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
       else $sql .= ", `bgposy` = NULL";
@@ -1477,6 +1523,7 @@ class ddl {
 			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
+			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
@@ -1498,21 +1545,26 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-			for($i = 0; $i < count($attributes['name']); $i++){
-				if($formvars['font_'.$attributes['name'][$i]] == 'NULL')$formvars['font_'.$attributes['name'][$i]] = NULL;
-				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".$lastddl_id;
-				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
-				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
-				else $sql.= " ,offset_attribute = NULL";
-				if($formvars['width_'.$attributes['name'][$i]])$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-				else $sql.= " ,width = NULL";
-				if($formvars['border_'.$attributes['name'][$i]])$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-				else $sql.= " ,border = NULL";
-				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-				else $sql.= " ,fontsize = NULL";
+			for ($i = 0; $i < count($attributes['name']); $i++){
+				if ($formvars['font_'.$attributes['name'][$i]] == 'NULL') {
+					$formvars['font_'.$attributes['name'][$i]] = NULL;
+				}
+				$sql = "
+					REPLACE INTO
+						ddl_elemente
+					SET
+						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
+						name = '"							. $attributes['name'][$i] . "',
+						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
+						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
+						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
+						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
+						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
+						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
+						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
+				";
 				#echo $sql;
         $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
         $this->database->execSQL($sql,4, 1);
@@ -1614,12 +1666,16 @@ class ddl {
   
   function update_layout($formvars, $attributes, $_files){
   	$_files = $_FILES;
-    if($formvars['name']){
-    	if($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
-      $sql = "UPDATE `datendrucklayouts`";
-      $sql .= " SET `name` = '".$formvars['name']."'";
-      $sql .= ", `layer_id` = ".(int)$formvars['selected_layer_id'];
-			$sql .= ", `format` = '".$formvars['format']."'";
+    if ($formvars['name']){
+    	if ($formvars['font_date'] == 'NULL')$formvars['font_date'] = NULL;
+				$sql = "
+					UPDATE
+						`datendrucklayouts`
+					SET
+						`name` = '".$formvars['name'] . "',
+						`layer_id` = " . (int)$formvars['selected_layer_id'] . ",
+						`format` = '" . $formvars['format'] . "'
+				";
   		if($formvars['bgposx'])$sql .= ", `bgposx` = ".(int)$formvars['bgposx'];
   		else $sql .= ", `bgposx` = NULL";
       if($formvars['bgposy'])$sql .= ", `bgposy` = ".(int)$formvars['bgposy'];
@@ -1649,6 +1705,7 @@ class ddl {
 			$sql .= ", `margin_bottom` = ".(int)$formvars['margin_bottom'];
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
+			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
@@ -1668,29 +1725,32 @@ class ddl {
       $lastddl_id = $this->database->mysqli->insert_id;
 
 			for($i = 0; $i < count($attributes['name']); $i++){
-				$sql = "REPLACE INTO ddl_elemente SET ddl_id = ".(int)$formvars['aktivesLayout'];
-				$sql.= " ,name = '".$attributes['name'][$i]."'";
-				$sql.= " ,xpos = ".(float)$formvars['posx_'.$attributes['name'][$i]];
-				$sql.= " ,ypos = ".(float)$formvars['posy_'.$attributes['name'][$i]];
-				if($formvars['offset_attribute_'.$attributes['name'][$i]])$sql.= " ,offset_attribute = '".$formvars['offset_attribute_'.$attributes['name'][$i]]."'";
-				else $sql.= " ,offset_attribute = NULL";
-				if($formvars['width_'.$attributes['name'][$i]] != '')$sql.= " ,width = ".(int)$formvars['width_'.$attributes['name'][$i]];
-				else $sql.= " ,width = NULL";
-				if($formvars['border_'.$attributes['name'][$i]] != '')$sql.= " ,border = ".(int)$formvars['border_'.$attributes['name'][$i]];
-				else $sql.= " ,border = NULL";
-				$sql.= " ,font = '".$formvars['font_'.$attributes['name'][$i]]."'";
-				if($formvars['fontsize_'.$attributes['name'][$i]])$sql.= " ,fontsize = ".(int)$formvars['fontsize_'.$attributes['name'][$i]];
-				else $sql.= " ,fontsize = NULL";
+				$sql = "
+					REPLACE INTO
+						ddl_elemente
+					SET
+						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
+						name = '"							. $attributes['name'][$i] . "',
+						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
+						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
+						label = "							. ($formvars['label_'			. $attributes['name'][$i]] ? "'" . $formvars['label_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						margin = "						. ($formvars['margin_'		. $attributes['name'][$i]] ? $formvars['margin_'		. $attributes['name'][$i]] : 'NULL') . ",
+						offset_attribute = "	. ($formvars['offset_attribute_' . $attributes['name'][$i]] ? "'" . $formvars['offset_attribute_' . $attributes['name'][$i]] . "'" : 'NULL') . ",
+						width = "							. ($formvars['width_'			. $attributes['name'][$i]] ? $formvars['width_'			. $attributes['name'][$i]] : 'NULL') . ",
+						border = "						. ($formvars['border_'		. $attributes['name'][$i]] ? $formvars['border_'		. $attributes['name'][$i]] : 'NULL') . ",
+						font = "							. ($formvars['font_'			. $attributes['name'][$i]] ? "'" . $formvars['font_'			. $attributes['name'][$i]] . "'" : 'NULL') . ",
+						fontsize = "					. ($formvars['fontsize_'	. $attributes['name'][$i]] ? $formvars['fontsize_'	. $attributes['name'][$i]] : 'NULL') . "
+				";
 				#echo $sql;
-        $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
-        $this->database->execSQL($sql,4, 1);
+				$this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
+				$this->database->execSQL($sql,4, 1);
 			}
 			$sql = "DELETE FROM ddl_elemente WHERE ((xpos IS NULL AND ypos IS NULL) OR (xpos = 0 AND ypos = 0)) AND ddl_id = ".(int)$formvars['aktivesLayout'];
 			#echo $sql;
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < @count($formvars['text']); $i++){
+      for ($i = 0; $i < @count($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;

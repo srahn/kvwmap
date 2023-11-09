@@ -4,6 +4,7 @@
 	$this->strHelp = "Hilfe";
 	$this->strID = "ID";
 	$this->strName = "Name";
+	$this->strCancleInput = "Änderungen verwerfen?";
 	$this->strChoose = "Auswahl";
 	$this->strChange = 'Ändern';
 	$this->strChangeTitle = 'Änderungen Speichern';
@@ -23,7 +24,7 @@
 	$this->TaskChangeWarning = "Sie sind nicht berechtigt zur Ausführung der Funktion in dieser Stelle.";
 	$this->strButtonBack = "Zurück";	
 	$this->strCancel = "Abbrechen";
-  $this->strCreate = "Anlegen";
+	$this->strCreate = "Anlegen";
 	$this->strSend = "Senden";
 	$this->strSearch = "Suchen";
 	$this->strAddToOwnQueries = "zu eigenen Abfragen hinzufügen";
@@ -32,8 +33,8 @@
 	$this->strReset = 'Zurücksetzen';
 	$this->strResetTitle = 'Setzt alle Werte zurück auf die vorhigen';
 	$this->strSaveMapViewCommittMassage = "Kartenausschnitt wurde gespeichert";
-	$this->strCoordinates  =  'Koordinaten';
-	$this->strCoordinate  =  'Koordinate';
+	$this->strCoordinates = 'Koordinaten';
+	$this->strCoordinate = 'Koordinate';
 	$this->strCoordinateReferenceSystem = 'Koordinatenreferenzsystem';
 	$this->strAlias = "Alias";
 	$this->strMapScale = "Maßstab";
@@ -93,5 +94,8 @@
 	$this->strVersion = 'Version';
 	$this->strComment = 'Kommentar';
 	$this->strDataImport = 'Daten-Import';
+	$this->strDataExport = 'Daten-Export';
 	$this->strAutoDelete = 'automatisch löschen';
+	$this->strCompareView = 'Vergleichsansicht';
+	$this->strAutoClassify = 'klassifizieren nach';
 ?>

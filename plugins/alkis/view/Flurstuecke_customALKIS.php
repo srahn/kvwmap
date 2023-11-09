@@ -876,7 +876,7 @@ hide_versions = function(flst){
 												</a><?php
 											} ?>
 
-											<div class="fstanzeigehover">
+											<div id="auszugselector_div" class="fstanzeigehover">
 												&nbsp;&nbsp;
 												Auszug:
 												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
@@ -929,7 +929,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td valign="bottom">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+      <table id="flurstueck_export_options_div" width="100%" border="0" cellspacing="0" cellpadding="2">
     <tr>
       <td colspan="2">
         <? echo '<img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0">'; ?>

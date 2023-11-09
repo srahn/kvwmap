@@ -282,17 +282,7 @@ class GUI {
 
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
-					$layer->set(
-						'connection',
-						replace_params(
-							$layerset[$i][connection],
-							rolle::$layer_params,
-							$this->user->id,
-							$this->Stelle->id,
-							rolle::$hist_timestamp,
-							$this->user->rolle->language
-						)
-					);
+					$layer->set('connection',	$layerset[$i][connection]);
 					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
@@ -334,6 +324,7 @@ class GUI {
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+				$num_default_layers = $map->numlayers;
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
@@ -489,6 +480,9 @@ class GUI {
 				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
 				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
 				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
+				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
+				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
+				
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
@@ -520,7 +514,10 @@ class GUI {
           }
         }
 				$this->layerset = $layerset;
-        $this->map=$map;
+				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
+					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+				}
+				$this->map = $map;
 				$this->reference_map = $reference_map;
 				if (MAPSERVERVERSION >= 600 ) {
 					$this->map_scaledenom = $map->scaledenom;
@@ -533,6 +530,17 @@ class GUI {
     } # end of switch loadMapSource
     return 1;
   }
+
+		/**
+	 * Return a drawing order with default layers to top
+	 */
+	function get_default_layers_top_drawing_order($num_layers, $num_default_layers) {
+		$drawing_order = range($num_default_layers, $num_layers - 1);
+		foreach(range(0, $num_default_layers - 1) AS $order) {
+			$drawing_order[] = $order;
+		}
+		return $drawing_order;
+	}
 
 	function list_subgroups($groupid){
 		$subgroups = '';
@@ -666,16 +674,7 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection',
-				replace_params(
-					$layerset['connection'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
-			);
+			$layer->set('connection',	$layerset['connection']);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -1566,7 +1565,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
 		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return $ret;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->data = $rs;
@@ -1681,6 +1680,7 @@ class rolle {
 			$this->singlequery=$rs['singlequery'];
 			$this->querymode=$rs['querymode'];
 			$this->geom_edit_first=$rs['geom_edit_first'];
+			$this->dataset_operations_position = $rs['dataset_operations_position'];
 			$this->immer_weiter_erfassen = $rs['immer_weiter_erfassen'];
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
@@ -2201,7 +2201,9 @@ class db_mapObj {
 				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
 				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
-				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . "
+				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
+				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') . 
+				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
@@ -2230,8 +2232,8 @@ class db_mapObj {
 				$rs['alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
-			);			
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			);
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -2448,7 +2450,9 @@ class db_mapObj {
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
+				($this->nurLayerID ? " AND l.id = " . -($this->nurLayerID) : '') . 
+				($this->nichtLayerID ? " AND l.id != " . -($this->nichtLayerID) : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
