@@ -9051,13 +9051,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layerset[0]['oid'] == '' AND @count($attributes['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['oid'] = $attributes['pk'][0];
 				}
-
-				if($this->formvars['selected_layer_id'] > 0){			# bei Rollenlayern nicht
-					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
-				}
-				else {
-					$newpath = $path;
-				}
+				$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $attributes);
 
 		    # weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
 		   	# $attributes = $mapDB->add_attribute_values($attributes, $layerdb, NULL, true); kann weg, weils weiter unten steht
@@ -9715,7 +9709,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 					$path = $mapdb->getPath($this->formvars['selected_layer_id']);
 					$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-
 
 					$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 
@@ -15264,13 +15257,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$path = $layerset[$i]['pfad'];
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
-							if ($layerset[$i]['Layer_ID'] > 0) {
-								# bei Rollenlayern nicht
-								$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
-							}
-							else {
-								$newpath = $path;
-							}
+
+							$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges, $layerset[$i]['attributes']);
 
 							# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)  ---> steht weiter unten
 
@@ -17548,9 +17536,7 @@ class db_mapObj{
 		);
 		$privileges = $stelle->get_attributes_privileges($layerset['Layer_ID']);
 		$layerset['attributes'] = $this->read_layer_attributes($layerset['Layer_ID'], $layerdb, $privileges['attributenames']);
-		if($layerset['Layer_ID'] > 0){			# bei Rollenlayern nicht
-			$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
-		}
+		$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
