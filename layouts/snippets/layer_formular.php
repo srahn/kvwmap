@@ -637,7 +637,7 @@
 								</select>
 						</td>
 					</tr>
-					<tr style="display: none">
+					<tr>
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerCharts; ?></th>
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
