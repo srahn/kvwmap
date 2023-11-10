@@ -32,7 +32,7 @@ if ($anzLayer==0) {
 }
 	
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
-<div id="contentdiv" style="width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
+<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 
@@ -233,34 +233,6 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[0]['sql']).'">
 						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
 						<input name="search" type="hidden" value="true">';
-/*		Hidden Felder zum Speichern der Suchparameter (die können evtl. weg, da jetzt immer get_last_query verwendet wird)
-			echo '		
-  					<input name="selected_layer_id" type="hidden" value="'.$this->formvars['selected_layer_id'].'">
-  					<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
-					<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->qlayerset[0]['sql'].'">';
-
-  		if(is_array($this->qlayerset[0]['attributes']['all_table_names'])){
-  			foreach($this->qlayerset[0]['attributes']['all_table_names'] as $tablename){
-		    	if(value_of($this->formvars, 'value_'.$tablename.'_oid')){
-		      	echo '<input name="value_'.$tablename.'_oid" type="hidden" value="'.$this->formvars['value_'.$tablename.'_oid'].'">';
-		      }
-		    }
-  		}
-			$prefix = '';
-			for($m = 0; $m <= $this->formvars['searchmask_count']; $m++){
-				if($m > 0){
-					$prefix = $m.'_';
-					echo '<input name="boolean_operator_'.$m.'" type="hidden" value="'.$this->formvars['boolean_operator_'.$m].'">';
-				}
-				for($j = 0; $j < count($this->qlayerset[0]['attributes']['type']); $j++){
-					echo '
-						<input name="'.$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						<input name="'.$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'value2_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-						<input name="'.$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j].'" type="hidden" value="'.$this->formvars[$prefix.'operator_'.$this->qlayerset[0]['attributes']['name'][$j]].'">
-					';
-				}
-			}
-*/
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
 				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';
 	  	}
@@ -312,3 +284,15 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
+<input type="hidden" name="gle_scrollposition" value="<? echo $this->formvars['gle_scrollposition']; ?>">
+
+<script type="text/javascript">
+	if (enclosingForm.gle_scrollposition.value > 0) {
+		if (enclosingForm.name == 'GUI2') {
+			document.body.scrollTop = enclosingForm.gle_scrollposition.value;
+		}
+		else {
+			document.getElementById('contentdiv').scrollTop = enclosingForm.gle_scrollposition.value;
+		}
+	}
+</script>
