@@ -89,23 +89,8 @@ class Notification extends MyObject {
 		return $results;
 	}
 
-	function clean_up_stellen_filter() {
-		$this->set(
-			'stellen_filter',
-			trim(
-				str_replace(
-					',,',
-					',',
-					str_replace(
-						' ',
-						'',
-						$this->get('stellen_filter')
-					)
-				),
-				','
-			)
-		);
-		$this->set('stellen_filter', str_replace(' ', '', $this->get('stellen_filter')));
+	function create_stellen_filter() {
+		$this->set('stellen_filter', $this->get_stellen_filter());
 	}
 
 	public static function find_by_id($gui, $id) {

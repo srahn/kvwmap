@@ -3231,7 +3231,7 @@ echo '			</table>
 		$this->notification = new Notification($this);
 		#$this->notification->setKeysFromFormvars($this->formvars);
 		$this->notification->data = formvars_strip($this->formvars, $this->notification->getKeys(), 'keep');
-		$this->notification->clean_up_stellen_filter();
+		$this->notification->create_stellen_filter();
 		$results = $this->notification->validate();
 		if (empty($results)) {
 			$results = (value_of($this->formvars, 'id') != '' ? $this->notification->update_with_users()[0] : $this->notification->create_with_users()[0]);
