@@ -165,8 +165,13 @@ class Notification extends MyObject {
 		return $notification->find_where($where, 'veroeffentlichungsdatum, id');
 	}
 
-	function get_stellen() {
-
+	function get_stellen_filter() {
+		$stellen_ids = [];
+		$stellen_ids = explode(',', $this->get('stellen_filter'));
+		foreach($stellen_ids as $stelle_id) {
+			$stellen_ids = array_merge($stellen_ids, $this->gui->Stelle->getChildren($stelle_id, '', 'only_ids', true));
+		}
+		return implode(',', $stellen_ids);
 	}
 
 	/*
