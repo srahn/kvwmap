@@ -68,7 +68,7 @@ class User2Notification extends MyObject {
 			WHERE
 				true
 				" . (empty($notification->get('user_filter')) ? '' : 'AND user_id IN (' . $notification->get('user_filter') . ')') . "
-				" . (empty($notification->get('stellen_filter')) ? '' : 'AND stelle_id IN (' . $notification->get('stellen_filter') . ')') . "
+				" . (empty($notification->get('stellen_filter')) ? '' : 'AND stelle_id IN (' . $notification->get_stellen_filter() . ')') . "
 		";
 		$user2notification->gui->database->execSQL($sql);
 		if ($user2notification->gui->database->success) {
