@@ -76,7 +76,7 @@
 	$strWMSFormat = "Dạng WMS*";
 	$strWMSName = "TênWMS";
 	$strWMSServerVersion = "Phiên bản máy chủ WMS*";
-	$strWriteMapserverTemplates = "Write MapServer Templates";
-	$strWriteMapserverTemplatesHelp = "If this option is selected, a related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";
-
+	$strWriteMapserverTemplatesOption1 = "derive fom data statement";
+	$strWriteMapserverTemplatesOption2 = "derive from maintable";
+	$strWriteMapserverTemplatesHelp = "If this option is selected, a data statement or main table related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The generic approach that based on the main table create additional descriptive attributes for codelists and enumerations with text including also descriptions and codespaces if exists. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";
 ?>

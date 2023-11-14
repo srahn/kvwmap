@@ -1,22 +1,23 @@
 <?php
-  $strCornerPoint="Eckpunkte bearbeiten";
-  $strCutByPolygon="Freihandpolygon ausschneiden";
-  $strDrawPolygon="Freihandpolygon hinzuf\u00fcgen";
-  $strDrawLine="Linie hinzuf\u00fcgen";
-  $strDelete="alles l\u00f6schen";
-  $strDelLine="Linien l\u00f6schen";
-  $strSplitLine="Linien teilen";
-	$strSplitPolygon="Polygone teilen";
-  $strUndo="R\u00fcckg\u00e4ngig";
-  $strSetPosition="Position setzen";
-  $strSetGPSPosition="GPS Position \u00fcbernehmen";
-	$strGPSFollow="GPS-Verfolgungsmodus";
-  $strRuler="Streckenmessung";
-  $strBuffer="Puffer hinzuf\u00fcgen";
-	$strSpecialBuffer="Puffer erweitern";
-	$strBufferedLine="gepufferte Linie hinzuf\u00fcgen";
-	$strParallelPolygon="einseitig gepufferte Linie erzeugen";
-  $strMoveGeometry="Geometrie verschieben";
-	$strReverse="Linienrichtung drehen";
-	$strEditOther="anderes Objekt bearbeiten";
-?>  
+	$strBuffer = "Puffer hinzuf\u00fcgen";
+	$strBufferedLine = "gepufferte Linie hinzuf\u00fcgen";
+	$strCornerPoint = "Eckpunkte bearbeiten. Punkte Löschen mit Doppelklick.";
+	$strCutByPolygon = "Freihandpolygon ausschneiden";
+	$strDelete = "alles l\u00f6schen";
+	$strDelLine = "Linien l\u00f6schen";
+	$strDrawLine = "Linie hinzuf\u00fcgen";
+	$strDrawPolygon = "Freihandpolygon hinzuf\u00fcgen";
+	$strEditOther = "anderes Objekt bearbeiten";
+	$strPunktfang = "Punktfang";
+	$strGPSFollow = "GPS-Verfolgungsmodus";
+	$strMoveGeometry = "Geometrie verschieben";
+	$strParallelPolygon = "einseitig gepufferte Linie erzeugen";
+	$strReverse = "Linienrichtung drehen";
+	$strRuler = "Streckenmessung";
+	$strSetGPSPosition = "GPS Position \u00fcbernehmen";
+	$strSetPosition = "Position setzen";
+	$strSpecialBuffer = "Puffer erweitern";
+	$strSplitLine = "Linien teilen";
+	$strSplitPolygon = "Polygone teilen";
+	$strUndo = "R\u00fcckg\u00e4ngig";
+?>

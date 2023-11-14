@@ -86,4 +86,9 @@
 	$strRedlineFontFamily = "Fontfamilie";
 	$strRedlineFontSize = "Textgröße";
 	$strRedlineFontWeight = "Schriftschnitt";
+	$strDatasetOperationsPosition = "Position der Datensatzfunktionen";
+	$strDatasetOperationsPositionUnten = "unter den Datensätzen";
+	$strDatasetOperationsPositionOben = "über den Datensätzen";
+	$strDatasetOperationsPositionBeide = "unter und über den Datensätzen";
+	$strHintDatasetOperationsPosition = "Legen Sie fest ob die Funktionen für die ausgewählten Datensätze über oder unter den Datensätzen angezeigt werden sollen.";
 ?>

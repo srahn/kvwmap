@@ -23,39 +23,13 @@
 
 <style>
 	body {
-	  color: #000000;
-	  background-color: #FFFBF5;
-	  font-family: Verdana;
-	  font-size: 12px;
-	  text-align: justify;
-	  margin-left: 10px;
-	  margin-right: 10px;
-	}
-
-	.green {
-		color: green;
-	}
-
-	.orange {
-		color: orange;
-	}
-
-	.red {
-		color: red;
-	}
-
-	.blue {
-		color: blue;
-	}
-
-	.white {
-		color: white;
-	}
-
-	.error_msg {
-		color: #FF3333;
-		font-size: 14;
-		font-weight: bold;
+		color: #000000;
+		background-color: #FFFBF5;
+		font-family: Verdana;
+		font-size: 12px;
+		text-align: justify;
+		margin-left: 10px;
+		margin-right: 10px;
 	}
 
 	table { 

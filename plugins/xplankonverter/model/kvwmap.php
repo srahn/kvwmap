@@ -144,7 +144,10 @@
 					$gml_extractor->insert_into_bereich($bereichtable, $konvertierung_id, $GUI->user->id);
 
 					# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
-					$konvertierung->insert_textabschnitte($gml_extractor);
+					$result = $konvertierung->insert_textabschnitte($gml_extractor);
+					if (!$result['success']) {
+						$GUI->add_message('error', $result['msg']);
+					}
 
 					# Inserts regeln for each possible class loaded with GMLAS
 					//$gml_extractor->insert_all_regeln_into_db();
@@ -168,6 +171,7 @@
 				$konvertierung_id = $old_dataset['konvertierung_id'];
 				#echo '<p>Lösche Konvertierung mit Id: ' . $konvertierung_id;
 				$konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+
 				$konvertierung->destroy();
 			} break;
 
@@ -256,15 +260,17 @@
 		return $forbidden;
 	};
 
-	$GUI->xplankonverter_get_xplan_layers = function() use ($GUI) {
+	$GUI->xplankonverter_get_xplan_layers = function($planart) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
 		# ToDo pk: Hier prüfen ob die richtigen layer abgefragt werden, weil die Namen geändert wurden.
 		$layers = Layer::find($GUI, "
 				(
 					(
 						`schema` LIKE 'xplan_gml' AND
-						LOWER(`Name`) NOT LIKE '%_textabschnitt' AND
-						LOWER(`Name`) NOT LIKE '%_begruendungabschnitt'
+						LOWER(`Name`) NOT LIKE '%\_textabschnitt' AND
+						LOWER(`Name`) NOT LIKE '%\_begruendungabschnitt' AND
+						LOWER(`Name`) NOT LIKE '%_aendert'" .
+						($planart == 'FP-Plan' ? " AND LOWER(`Name`) NOT LIKE 'rp\_%'" : '') . "
 					) OR
 					(
 						`schema` LIKE 'xplankonverter' AND
@@ -273,7 +279,7 @@
 				) AND
 				`Datentyp` IN (0, 1, 2) AND
 				`connectiontype` = 6
-		", 'alias');
+		", 'drawingorder');
 		$xplan_layers = array_map(
 			function ($layer) {
 				return array(
@@ -282,7 +288,8 @@
 					'alias' => $layer->get('alias'),
 					'Datentyp' =>$layer->get('Datentyp'),
 					'schema' => $layer->get('schema'),
-					'maintable' => $layer->get('maintable')
+					'maintable' => $layer->get('maintable'),
+					'geom_column' => $layer->get('geom_column')
 				);
 			},
 			$layers
@@ -291,12 +298,12 @@
 	};
 
 	/**
-		This function save the uploaded file on the server, test if it is a zip file
-		and if it contain the correkt files. After this the files will be validated
-		at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
-		If both files are valid, it creates a konvertierung, saves the validation reports,
-		moves the data to uploaded_gml diretory, removes the tmp_dir and
-		finish with success and a success message.
+	 * This function save the uploaded file on the server, test if it is a zip file
+	 * and if it contain the correkt files. After this the files will be validated
+	 * at XPlanung-Leitstelle. It removes uploaded files and returns messages in error case.
+	 * If both files are valid, it creates a konvertierung, saves the validation reports,
+	 * moves the data to uploaded_gml diretory, removes the tmp_dir and
+	 * finish with success and a success message.
 	*/
 	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
 		$success = false;
@@ -342,7 +349,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => 'Die Datei ' . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und Einzelfassungen in einer Zip-Datei hoch.'
+				'msg' => 'Die Datei ' . $upload_file['name'] . ' ist keine Zip-Datei. Laden Sie die Zusammenzeichnung und ggf. Geltungsbereiche in einer Zip-Datei hoch.'
 			);
 		}
 
@@ -358,6 +365,11 @@
 			);
 		}
 
+
+		#TODO: Hier kann man die hochgeladenen Datei ggf. noch umbenennen in Zusammenzeichnung.gml falls die anders heißt
+		# Aber wie rausbekommen wie die Zusammenzeichnung heißt. Vorerst bleibt es bei der Konvention dass die Datei
+		# Zusammenzeichnung.gml heißen muss.
+
 		$konvertierung = new Konvertierung($GUI); # Create empty Konvertierungsobjekt
 
 		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
@@ -367,13 +379,17 @@
 		}
 
 		if (file_exists($tmp_dir . 'Einzelfassungen.gml')) {
-      $result_einzelfassungen = $konvertierung->xplanvalidator($tmp_dir . 'Einzelfassungen.gml');
-      if (!$result_einzelfassungen['success']) {
-        return $result_einzelfassungen;
-      }
-      $msg .= ' und Einzelfassung';
-    }
-    $msg .= ' valide.';
+			rename($tmp_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
+		}
+
+		if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
+			$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
+			if (!$result_geltungsbereiche['success']) {
+				return $result_geltungsbereiche;
+			}
+			$msg .= ' und Geltungsbereiche';
+		}
+		$msg .= ' valide.';
 
 		# Hochgeladene Zusammenzeichnung hat Prüfung im XPlanValidator bestanden
 		# Create Konvertierung and get konvertierung_id
@@ -394,9 +410,9 @@
 		rename($tmp_dir, $konvertierung->get_file_path('uploaded_xplan_gml'));
 
 		$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
-		# Der Validierungsreport der Einzelfassungen wird nicht gespeichert, weil es nur einen pro Konvertierung geben kann und für die Einzelfassungen
+		# Der Validierungsreport der Geltungsbereiche wird nicht gespeichert, weil es nur einen Report pro Konvertierung geben kann und für die Geltungsbereiche
 		# auch nichts weiter interessantes drin stehen dürfte, weil ja keine Fachdaten drin sind.
-		#$result = $konvertierung->save_validation_report('Einzelfassungen', $result_einzelfassungen['report']);
+		#$result = $konvertierung->save_validation_report('Geltungsbereiche', $result_geltungsbereiche['report']);
     if (!$result['success']) {
       return $result;
     }
@@ -447,41 +463,54 @@
 		);
 	};
 
-	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers) use ($GUI) {
-		$planartAbk = substr($GUI->formvars['planart'], 0, 2);
-		$planartkuerzel = $GUI->formvars['planart'][0];
+	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers, $ows_onlineresource) use ($GUI) {
+		global $admin_stellen;
 
-		$GUI->ows_onlineresource = URL . 'ows/' . strtolower($planartkuerzel) . 'plaene/';
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
 		# Setze Metadaten
-		$bb = $GUI->Stelle->MaxGeorefExt;
-		$GUI->map->set('name', 'Flaechennutzungsplaene Niedersachsen');
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$bb = $admin_stelle->MaxGeorefExt;
+		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
-    $GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-    $GUI->map->setMetaData("ows_abstract", 'Zusammenzeichnungen und Geltungsbereiche der Flächennutzungspläne der Kommunen des Landes Niedersachsen. Letzte Aktualisierung: ' . date('d.m.Y'));
-    $GUI->map->setMetaData("ows_onlineresource", $GUI->ows_onlineresource);
-		$GUI->map->setMetaData("ows_service_onlineresource", $GUI->ows_onlineresource);
+		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('d.m.Y'));
+		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$GUI->map->web->set('header', 'templates/header.html');
+		$GUI->map->web->set('footer', 'templates/footer.html');
 
 		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
 		$result = $xp_plan->get_layers_with_content($xplan_layers);
 		if (! $result['success']) {
 			return $result;
 		}
+		$GUI->service_layers = $result['layers_with_content'];
 
-		$GUI->layers_with_content = $result['layers_with_content'];
-
-		$GUI->layernames_with_content = array_keys($GUI->layers_with_content);
-		#echo '<br>pk layernames_with_content: ' . print_r($GUI->layernames_with_content, true);
+		$GUI->service_layernames = array_keys($GUI->service_layers);
+		#echo '<br>pk service_layernames: ' . print_r($GUI->service_layernames, true);
 
 		$layers_to_remove = array();
+
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);
-			if (in_array($layer->name, $GUI->layernames_with_content)) {
+			if (in_array($layer->name, $GUI->service_layernames)) {
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
+				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+				if ($layerObj->get('write_mapserver_templates') == 'generic') {
+					# Set generic Data sql for layer
+					$result = $layerObj->get_generic_data_sql();
+					if ($result['success']) {
+						$layer->set('data', $result['data_sql']);
+					}
+					else {
+						$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+						return $result;
+					}
+				}
 			}
 			else {
 				$GUI->map->removeLayer($i);
@@ -490,14 +519,15 @@
 		}
 		return array(
 			'success' => true,
-			'mapfile' => 'zusammenzeichnung.map'
+			'mapfile' => MAPFILENAME . '.map'
 		);
 	};
 
 	/**
-		Erzeugt die Metadatendokumente des Geodatensatzes und der Dienste, die alle Pläne des xplan_gml-Schemas
-		der Planart $GUI->formvars['planart'] enthalten
-	*/
+	 * Erzeugt die Metadatendokumente des Geodatensatzes und der Dienste, die alle Pläne des xplan_gml-Schemas
+	 * der Planart $GUI->formvars['planart'] enthalten
+	 * @param array $md metadata Metadatenobjekt aus dem plugin metadata mit vorgegebenen Werten für Metadaten
+	 */
 	$GUI->xplankonverter_create_metadata_documents = function($md) use ($GUI) {
 		global $admin_stellen;
 		$current_time = time();
@@ -555,13 +585,11 @@
     );
   };
 
-	# ToDo pk: Adresse to_email und cc_email von peter.korduan... auf richtige ändern und mit Betroffenen testen
 	$GUI->xplankonverter_send_notification = function($msg) use ($GUI) {
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'info@testportal-plandigital.de';
-#		$to_email = 'petra.wilken-janssen@arl-we.niedersachsen.de';
-		$to_email = 'peter.korduan@gdi-service.de';
-#		$cc_email = 'peter.korduan@gdi-service.de';
+		$to_email = 'petra.wilken-janssen@arl-we.niedersachsen.de';
+		$cc_email = 'peter.korduan@gdi-service.de';
 		$reply_email = null;
 		$subject = 'Fehler in Plandigital';
 		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";

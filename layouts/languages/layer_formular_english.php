@@ -28,6 +28,10 @@
 	$strDefaultValues = "Default-Values for Usergroup-Assignment";
 	$strDelete = "Delete";
 	$strDescribtion = "Short Description";
+	$strDuplicateFromLayerId  =  'Von Layer duplizieren';
+	$strDuplicateFromLayerIdHelp  =  'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen, Datentyp und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Eine Vollständige Liste aller nicht übertragenen Attribute findet sich in der Funktion updateLayer() der Klasse db_mapObj Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Query und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
+	$strDuplicateTableFieldsCloseTitle  =  'Schließe Felder zum duplizieren von Layereinstellungen.';
+	$strDuplicateTableFieldsOpenTitle  =  'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strDocument_path = "Document Path";
 	$strDocument_url = "Document URL";
 	$strDrawingOrder = "drawingorder";
@@ -112,5 +116,7 @@
 	$strWMSName = "WMS-name";
 	$strWMSServerVersion = "WMS-serverversion*";
 	$strWriteMapserverTemplates = "Write MapServer Templates";
-	$strWriteMapserverTemplatesHelp = "If this option is selected, a related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";
+	$strWriteMapserverTemplatesOption1 = "derive fom data statement";
+	$strWriteMapserverTemplatesOption2 = "derive from maintable";
+	$strWriteMapserverTemplatesHelp = "If this option is selected, a data statement or main table related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The generic approach that based on the main table create additional descriptive attributes for codelists and enumerations with text including also descriptions and codespaces if exists. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";
 ?>

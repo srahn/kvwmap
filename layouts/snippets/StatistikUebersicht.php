@@ -388,7 +388,7 @@ function popup(id){
 <!--					<br>
 						<table align="center" width="400" height="300" border="1" cellpadding="1" cellspacing="1">
 						  <tr>
-						    <td align="center" bordercolor="#000000" bgcolor="#FFFFFF" ><?php include ('chart.php'); ?></td>
+						    <td align="center" bordercolor="#000000" bgcolor="#FFFFFF" ><?php #include ('chart.php'); ?></td>
 						  </tr>
 						</table>
 

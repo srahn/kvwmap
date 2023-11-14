@@ -28,14 +28,15 @@
 		"></i>
 		<div id="user_options" class="user-options">
 			<div class="user-options-header">
-				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>
+				<? echo $this->loggedInAs; ?>: <?php echo $this->user->login_name; ?>&nbsp;
+				<span data-tooltip="<? echo $this->user->Vorname . ' ' . $this->user->Name . '&#xa;' . $this->user->organisation . '&#xa' . $this->user->email . '&#xa;Tel.: ' . $this->user->phon . '&#xa;'; ?>"></span>
 			</div>
 			<div class="user-options-section-header">
 				<i class="fa fa-tasks options-button"></i><? echo $this->inWorkingGroup; ?>:
 			</div><?php
 			$this->user->Stellen = $this->user->getStellen(0);
 			if (count($this->user->Stellen['ID']) > 21) { ?>
-				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value" style="margin: 0px 3px 0px 6px"><?
+				<select onchange="window.location.href='index.php?Stelle_ID=' + this.value + '&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value" style="margin: 0px 3px 0px 6px"><?
 					foreach (array_keys($this->user->Stellen['ID']) AS $id) {
 						echo '
 							<option value="' . $this->user->Stellen['ID'][$id] . '"' . ($this->user->Stellen['ID'][$id] == $this->user->stelle_id ? ' selected' : '') . '>' .

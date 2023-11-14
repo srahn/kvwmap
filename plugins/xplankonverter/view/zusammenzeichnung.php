@@ -1,4 +1,5 @@
 <?
+	$xplan_version = '5.4';
 /* Beispiel für einen Aufruf
 	https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan
 	Process steps xplankonverter
@@ -32,8 +33,53 @@
 		</ul><?
 	}
 	else {
-		$zusammenzeichnung_exists = (count($this->zusammenzeichnungen['published']) > 0);
-		$zusammenzeichnung = ($zusammenzeichnung_exists ? $this->zusammenzeichnungen['published'][0] : '');
+		$zusammenzeichnung_exists = false;
+		$layers_with_content = array();
+
+		if (count($this->zusammenzeichnungen['published']) > 0) {
+			$zusammenzeichnung = $this->zusammenzeichnungen['published'][0];
+			$zusammenzeichnung_exists = true;
+		}
+		else if (count($this->zusammenzeichnungen['draft']) > 0) {
+			$zusammenzeichnung = $this->zusammenzeichnungen['draft'][0];
+			$zusammenzeichnung_exists = true;
+		}
+		if ($zusammenzeichnung_exists) {
+			if ($zusammenzeichnung->plan === false) {
+				$this->add_message('error', 'Die Zusammenzeichnung ' . $zusammenzeichnung->get('id') . ' hat keinen zugeordneten Plan!');
+				$plandaten = array(
+					'name' => $zusammenzeichnung->get('bezeichnung'),
+					'aktualitaet' => 'Die gefundene Zusammenzeichnung hat keinen zugeordneten Plan',
+					'gml_id' => '',
+					'first_ags' => 'keine Angaben',
+					'first_gemeinde_name' => 'keine Angaben',
+					'nummer' => '',
+					'rechtsstand' => '0'
+				);
+			}
+			else {
+				$zusammenzeichnung->plan->get_center_coord();
+				$plandaten = array(
+					'name' => $zusammenzeichnung->plan->get('name'),
+					'aktualitaet' => $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet),
+					'gml_id' => $zusammenzeichnung->plan->get('gml_id'),
+					'first_ags' => $zusammenzeichnung->plan->get_first_ags(),
+					'first_gemeinde_name' => $zusammenzeichnung->plan->get_first_gemeinde_name(),
+					'nummer' => $zusammenzeichnung->plan->get('nummer'),
+					'rechtsstand' => $zusammenzeichnung->plan->get('rechtsstand')
+				);
+
+				$result = $zusammenzeichnung->plan->get_layers_with_content(
+						$this->xplankonverter_get_xplan_layers($zusammenzeichnung->get('planart')),
+						$zusammenzeichnung->get($zusammenzeichnung->identifier)
+				);
+				if (! $result['success']) {
+					$this->add_message('error', $result['msg']);
+				}
+				$layers_with_content = $result['layers_with_content'];
+			}
+		}
+
 		function get_rechtsstand($rechtsstand) {
 			global $GUI;
 			$sql = "
@@ -59,7 +105,7 @@
 			);
 
 			function show_upload_zusammenzeichnung(msg) {
-				if (confirm('Prüfen Sie ob Ihre Dienstmetadaten auf dem aktuellen Stand sind. Bei Abbruch leiten wir sie zum Eingabeformular weiter. Wollen Sie wirklich mit dem Hochladen beginnen?')) {
+				if (confirm('Prüfen Sie ob Ihre Dienstmetadaten auf dem aktuellen Stand sind. Wählen Sie "Abbrechen" und Sie werden zu den Dienstmetadaten weitergeleitet.')) {
 					$('#zusammenzeichnung, #keine_zusammenzeichnung').hide();
 					$('#upload_zusammenzeichnung_msg').html(msg);
 					$('#neue_zusammenzeichnung').show();
@@ -126,7 +172,25 @@
 				background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
 			}
 
-      .margin-right {
+
+			.class-th {
+				text-align: center;
+				font-weight: bold;
+				font-size: 15px;
+				padding: 2px;
+				background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
+			}
+
+			.class-th:hover {
+				background: linear-gradient(#DAE4EC 0%, #adc7da 100%);
+			}
+
+			.class-td {
+				background: #c6cde1;
+				padding: 2px;
+			}
+
+			.margin-right {
         margin-right: 30px
       }
 
@@ -214,52 +278,59 @@
 		<div id="neue_zusammenzeichnung" class="centered_div hidden">
 			<div
 				id="upload_zusammenzeichnung_div"
-				ondrop="console.log('ondrop'); zz.upload_zusammenzeichnung(event)"
+				ondrop="zz.upload_zusammenzeichnung(event)"
 				ondragover="$(this).addClass('dragover');"
 				ondragleave="$(this).removeClass('dragover')"
 			>
 				<span id="upload_zusammenzeichnung_msg"></span>
-			</div><p>
+			</div><p><?
+			if ($this->user->id == 3) { ?>
+				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
+			} ?>
 			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()">
 			<div id="upload_result_msg_div" class="hidden"></div>
 		</div><?
 
-		if ($zusammenzeichnung_exists) {
-			$zusammenzeichnung->plan->get_center_coord(); ?>
+		if ($zusammenzeichnung_exists) { ?>
 			<div id="zusammenzeichnung" class="centered_div">
-				Stand: <? echo $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet); ?>
+				Stand: <? echo $plandaten['aktualitaet']; ?>
+				<? if ($zusammenzeichnung->art == 'draft') {
+					?> <span class="red">Noch keine Dienste veröffentlicht!</a> <!--a href="#">jetzt veröffentlichen</a//--><?
+				} ?>
 				<div id="plandaten_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-right head_icon" aria-hidden="true"></i>Plandaten
 				</div>
 				<div id="plandaten_div" class="content_div">
 					<table>
 						<tr>
-							<td>Name:</td><td><? echo $zusammenzeichnung->plan->get('name'); ?><td>
+							<td>Name:</td><td><? echo $plandaten['name']; ?><td>
 						</tr>
 						<tr>
-							<td>Nummer:</td><td><? echo $zusammenzeichnung->plan->get('nummer'); ?><td>
+							<td>Nummer:</td><td><? echo $plandaten['nummer']; ?><td>
 						</tr>
 						<tr>
-							<td>GML-ID:</td><td><? echo $zusammenzeichnung->plan->get('gml_id'); ?><td>
+							<td>GML-ID:</td><td><? echo $plandaten['gml_id']; ?><td>
 						</tr>
 						<tr>
-							<td>Gemeinde:</td><td><? echo $zusammenzeichnung->plan->get_first_gemeinde_name(); ?> (<? echo $zusammenzeichnung->plan->get_first_ags(); ?>)<td>
+							<td>Gemeinde:</td><td><? echo $plandaten['first_gemeinde_name']; ?> (<? echo $plandaten['first_gemeinde_ags']; ?>)<td>
 						</tr>
 						<tr>
-							<td>Rechtsstand:</td><td><? echo get_rechtsstand($zusammenzeichnung->plan->get('rechtsstand')); ?> (<? echo $zusammenzeichnung->plan->get('rechtsstand'); ?>)<td>
+							<td>Rechtsstand:</td><td><? echo get_rechtsstand($plandaten['rechtsstand']); ?> (<? echo $plandaten['rechtsstand']; ?>)<td>
 						</tr>
 						<tr>
-							<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet); ?><td>
+							<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $plandaten['aktualitaet']; ?><td>
 						</tr>
 						<tr>
 							<td>Konvertierung ID:</td><td><? echo $zusammenzeichnung->get_id(); ?><td>
 						</tr>
 						<tr>
 							<td align="center"><!--img src="<? #querymap oder Kartenauszug ?>"//--></td>
-							<td>
-								<a title="Details zum Plan im Sachdatenformular anzeigen." href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Plandetails anzeigen</a><br>
-								<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><br>
-								<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a>
+							<td><?
+								if ($zusammenzeichnung->plan != false) { ?>
+									<a title="Details zum Plan im Sachdatenformular anzeigen." href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Plandetails anzeigen</a><br>
+									<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><br>
+									<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a><?
+								} ?>
 							</td>
 						</tr>
 					</table>
@@ -282,7 +353,7 @@
 							<td>Ergebnisse der internen Konvertierung:</td><td><a href="index.php?go=xplankonverter_validierungsergebnisse&page=zusammenzeichnung&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Anzeigen</a><td>
 						</tr>
 						<tr>
-							<td>Erzeugte XPlanGML-Datei:</td><td><a href="index.php?go=xplankonverter_download_xplan_gml&page=zusammenzeichnung&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> Download</a><td>
+							<td>Erzeugte XPlanGML-Datei in Version <?php echo $xplan_version; ?>:</td><td><a href="index.php?go=xplankonverter_download_xplan_gml&page=zusammenzeichnung&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> Download</a><td>
 						</tr>
 					</table>
 				</div>
@@ -346,6 +417,37 @@
 							<td>
 						</tr>
 					</table>
+				</div>
+				<div id="class_completeness_head" class="head_div" onclick="toggle_head(this)">
+					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Planzeichen (Objektklassen)
+				</div>
+				<div id="class_completeness_div" class="content_div hidden"><?php
+					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+          foreach($layers_with_content AS $layer) {
+						$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
+						$this->formvars['layer_id'] = $layer['id'];
+						$classes = $mapDB->read_Classes($layer['id']);
+						$class_completeness_result .= '<table id="class_expressions_layer_' . $layer['id'] . '" style="display: none">
+							<th class="class-th" style="width: 30%">Klasse</th>
+							<th class="class-th" style="width: 70%">Definition</th>' . implode(
+								'',
+								array_map(
+									function($class) {
+										return '
+											<tr>
+												<td class="class-td">' . $class['Name'] . '</td>
+												<td class="class-td">' . $class['Expression'] . '</td>
+											</tr>
+										';
+									},
+									$classes
+								)
+							) . '
+						</table>';
+						$result = $this->check_class_completeness();
+						$class_completeness_result .= $result['html'];
+					}
+					echo $class_completeness_result; ?>
 				</div><?
 				if (count($this->zusammenzeichnungen['archived']) > 0) { ?>
 					<div id="alte_staende_head" class="head_div" onclick="toggle_head(this)">
@@ -383,113 +485,7 @@
 			</div><?
 		} ?>
 		<script>
-			/*
-			const process = {
-				'upload_zusammenzeichnung' : {
-					'nr' : 1,
-					'msg' : 'Hochladen der Zusammenzeichnung auf den Server'
-				},
-				'validate_zusammenzeichnung' : {
-					'nr' : 2,
-					'msg' : 'Validierung der hochgeladenen GML-Datei mit dem XPlanValidator'
-				},
-				'import_zusammenzeichnung' : {
-					'nr' : 3,
-					'msg' : 'Importieren der GML-Datei in die Portaldatenbank'
-				},
-				'convert_zusammenzeichnung' : {
-					'nr' : 4,
-					'msg' : 'Konvertierung der Plandaten in die Version 5.4'
-				},
-				'create_gml_file' : {
-					'nr' : 5,
-					'msg' : 'Erzeugen der GML-Datei in Version 5.4'
-				},
-				'create_geoweb_service' : {
-					'nr' : 6,
-					'msg' : 'Erzeugen des GeoWeb-Dienstes für den Plan'
-				},
-				'create_service_metadata' : {
-					'nr' : 7,
-					'msg' : 'Anlegen der Metadaten für den Dienst'
-				}
-			}
-			*/
-
-			/*
-			function ajax_file_upload(file_obj) {
-				if (file_obj != undefined) {
-					var form_data = new FormData();
-					form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
-					form_data.append('upload_file', file_obj);
-					var xhttp = new XMLHttpRequest();
-					xhttp.open("POST", "index.php", true);
-					xhttp.onload = function(event) {
-						if (xhttp.status == 200) {
-							try {
-								response = JSON.parse(this.responseText);
-								if (!Array.isArray(response.msg)) { response.msg = [response.msg]; }
-								if (!response.success) {
-									confirm_step('upload_zusammenzeichnung', false);
-									message([{ type: 'error', msg: response.msg}]);
-								}
-								else {
-									const zusammenzeichnung_id = parseInt(response.zusammenzeichnung_id);
-									if (isNaN(zusammenzeichnung_id)) {
-										confirm_step('upload_zusammenzeichnung', false);
-										message([{ type: 'error', msg: 'Der Upload hat keine gültige ID der Zusammenzeichnung zurück geliefert.'}]);
-									}
-									else {
-										confirm_step('upload_zusammenzeichnung', true);
-										validate_zusammenzeichnung();
-									}
-								}
-							} catch (err) {
-								if (this.responseText.indexOf('<input id="login_name"') > 0) {
-									window.location = 'index.php';
-								}
-								//show_upload_zusammenzeichnung('Neue Version der Zusammenzeichnung hier reinziehen.');
-								$('#upload_zusammenzeichnung_msg').removeClass('blink');
-								$('#upload_zusammenzeichnung_div').removeClass('dragover');
-								message([{ type: 'error', msg: 'Fehler beim Hochladen der Zusammenzeichnung!<p>' + err + ' ' + this.responseText }]);
-							}
-						}
-						else {
-							message([{ type: 'error', msg: 'Fehler ' + xhttp.status + ' aufgetreten beim Versuch die Datei hochzuladen! ' + this.responseText }]);
-						}
-						//$('#upload_result_msg_div').show();
-					}
-
-			//			show_upload_zusammenzeichnung('Zusammenzeichnung wird verarbeitet');
-					$('#sperr_div').show();
-					$('#sperr_div').html('\
-						<div id="upload_zusammenzeichnung_progress_div" class="xplankonverter-upload-zusammenzeichnung-div">\
-							<h2 style="margin-bottom: 20px; float:left">Neue Zusammenzeichnung</h2>\
-							<i class="fa fa-times" aria-hidden="true" style="float: right; margin: -5"></i>\
-						</div>\
-					');
-					next_step('upload_zusammenzeichnung');
-			//			$('#upload_zusammenzeichnung_msg').addClass('blink');
-					xhttp.send(form_data);
-				}
-			}
-
-			function next_step(step) {
-				$('#upload_zusammenzeichnung_progress_div').append('\
-					<div id="upload_zusammenzeichnung_step_' + process[step].nr + '" style="float:left">' + process[step].msg + '</div>\
-					<div id="upload_zusammenzeichnung_step_confirm_' + process[step].nr + '" style="float: right"></div>\
-					<div style="clear: both"></div>\
-				');
-			}
-
-			function confirm_step(step, success) {
-				$('#upload_zusammenzeichnung_step_' + process[step].nr).addClass(success ? 'green' : 'red');
-				$('#upload_zusammenzeichnung_step_confirm_' + process[step].nr).html('<i class="fa fa-' + (success ? 'check green' : 'times red') + '" aria-hidden="true" ></i>');
-			}
-			*/
-
 			function toggle_head(head_div) {
-				console.log('toggle_head');
 				$(head_div).children().toggleClass('fa-caret-down fa-caret-right');
 				$(head_div).next().toggle();
 			}
@@ -505,13 +501,6 @@
 				e.preventDefault();
 			},false);
 
-
-			/*
-			function upload_zusammenzeichnung(event) {
-				fileobj = event.dataTransfer.files[0];
-				ajax_file_upload(fileobj);
-			}
-			*/
 			/**
 			* ToDo wird die Funktion gebaucht?
 			*/

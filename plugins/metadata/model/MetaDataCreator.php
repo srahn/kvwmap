@@ -175,6 +175,13 @@ class MetaDataCreator {
 					<gmd:citedResponsibleParty>
 						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 					</gmd:citedResponsibleParty>
+					<gmd:identifier>
+						<gmd:MD_Identifier>
+							<gmd:code>
+								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_downloadservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
+							</gmd:code>
+						</gmd:MD_Identifier>
+					</gmd:identifier>
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
@@ -388,7 +395,7 @@ class MetaDataCreator {
 	" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
-		<gco:DateTime>2023-02-15T14:44:53</gco:DateTime>
+		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<srv:SV_ServiceIdentification>
@@ -410,6 +417,13 @@ class MetaDataCreator {
 					<gmd:citedResponsibleParty>
 						" . $this->getResponsibleParty('ows_content', 'owner') . "
 					</gmd:citedResponsibleParty>
+					<gmd:identifier>
+						<gmd:MD_Identifier>
+							<gmd:code>
+								<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_viewservice_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
+							</gmd:code>
+						</gmd:MD_Identifier>
+					</gmd:identifier>
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
@@ -649,8 +663,7 @@ class MetaDataCreator {
 						<gmd:identifier>
 							<gmd:MD_Identifier>
 								<gmd:code>
-									<gco:CharacterString>
-									" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
+									<gco:CharacterString>" . METADATA_CATALOG . "/srv/api/records/" . $this->md->get('uuids')['metadata_dataset_uuid'] . "/formatters/xml?approved=true</gco:CharacterString>
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>

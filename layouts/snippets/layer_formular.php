@@ -1,6 +1,9 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
+	include(LAYOUTPATH . $language_file);
+	include(PLUGINS . 'mobile/' . $language_file);
+	include(PLUGINS . 'portal/' . $language_file);
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -9,6 +12,36 @@
 			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
 	}
+
+	function showGruppenEditor(gruppeId, layerId) {
+		location.href = 'index.php?go=Layergruppe_Editor&selected_group_id=' + gruppeId + '&selected_layer_id=' + layerId + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+	}
+
+	function create_generic_data_sql(layer_id) {
+		$('#waitingdiv').show();
+		$.ajax({
+			url: 'index.php',
+			data: {
+				go : 'get_generic_layer_data_sql',
+				selected_layer_id: layer_id,
+				csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
+			},
+			complete: function () {
+				$('#waitingdiv').hide();
+			},
+			error: function(jqXHR, textStatus, errorThrown) {
+				message([{ type: 'error', msg: jqXHR + ' ' + textStatus + ' ' + errorThrown}]);
+			},
+			success: function(response) {
+				if (response.success) {
+					message([{ type: 'info', msg : 'SQL für Haupttabelle:<br><textarea style="width: 450px; height: 450px">' + response.data_sql + '</textarea>' }]);
+				}
+				else {
+					message([{ type: 'error', msg : response.msg}]);
+				}
+			}
+		});
+}
 
 	function updateConnection(){
 		if(document.getElementById('connectiontype').value == 6){
@@ -25,6 +58,18 @@
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
 			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
+			if (getMapURL.toLowerCase().indexOf('version') == -1){
+				getMapURL += '&version=' + document.GUI.wms_server_version.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('format') == -1){
+				getMapURL += '&format=' + document.GUI.wms_format.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('layers') == -1){
+				getMapURL += '&layers=' + document.GUI.wms_name.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('styles') == -1){
+				getMapURL += '&styles=';
+			}
 			document.getElementById('test_img').src = getMapURL;
 			document.getElementById('test_img').style.display='block';
 			document.getElementById('test_link').href=getCapabilitiesURL;
@@ -271,11 +316,12 @@
 								1,																			# size
 								'',																			# style
 								'',			# onchange
-								'',		# id
+								'gruppe-select',												# id
 								'',																			# multiple
 								'',																			# class
 								'-- ' . $this->strPleaseSelect . ' --'	# first option
 							); ?>
+							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
 					</tr>
 					<tr>
@@ -368,10 +414,10 @@
 										if($this->formvars['epsg_code'] == $epsg_code['srid'])echo 'selected ';
 										echo ' value="'.$epsg_code['srid'].'">'.$epsg_code['srid'].': '.$epsg_code['srtext'].'</option>';
 									}
-									?>							
+									?>
 								</select>
 						</td>
-					</tr>		
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strPath; ?></th>
 						<td colspan=2 valign="top" style="border-bottom:1px solid #C3C7C3">
@@ -380,14 +426,18 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strData; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<?php echo $strData; ?>
+						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;
 							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."></span>
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strMaintable; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+							<?php echo $strMaintable; ?> <a title="Zeige SELECT-Statement für <? echo $strMaintable; ?>" href="javascript:create_generic_data_sql(<? echo $this->formvars['selected_layer_id']; ?>);"><img src="graphics/autogen.png"></a>
+						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="maintable" type="text" value="<?php echo $this->formvars['maintable']; ?>" size="50" maxlength="100">&nbsp;
 							<span data-tooltip="Die Haupttabelle ist diejenige der im Query-SQL-Statement abgefragten Tabellen, die die ID-Spalte liefern soll. Nur auf dieser Tabelle finden Schreiboperationen statt.&#xa;&#xa;Die Haupttabelle muss eine eindeutige ID-Spalte besitzen, welche allerdings nicht im SQL angegeben werden muss.&#xa;&#xa;Ist das Feld Haupttabelle leer, wird der Name der Haupttabelle automatisch eingetragen. Bei einer Layerdefinition über mehrere Tabellen hinweg kann es sein, dass kvwmap die falsche Tabelle als Haupttabelle auswählt. In diesem Fall kann hier händisch die gewünschte Tabelle eingetragen werden. Achtung: Wenn die Tabellennamen im Query-SQL geändert werden, muss auch der Eintrag im Feld Haupttabelle angepasst werden!"></span>
@@ -399,7 +449,7 @@
 							<input name="oid" type="text" value="<?php echo $this->formvars['oid']; ?>" size="36" maxlength="100">&nbsp;
 							<span data-tooltip="Hier muss die Spalte aus der Haupttabelle angegeben werden, mit der die Datensätze identifiziert werden können (z.B. der Primärschlüssel oder die oid)."></span>
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strSchema; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -418,7 +468,7 @@
 								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">&nbsp;
 								<span data-tooltip="<? echo $strSelectionTypeHelp; ?>"></span>
 						</td>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTileIndex; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -503,12 +553,12 @@
 							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">&nbsp;
 							<span data-tooltip="Wendet eine Prozessierungsanweisung für den Layer an.&#xa;Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"></span>
 						</td>
-					</tr>					
+					</tr>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
-						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><a name="query_parameter" style="color: black"><?php echo $strQueryParameters; ?></a></th>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
@@ -562,7 +612,7 @@
 							); ?>
 						</td>
 					</tr>
-					<? } ?>					
+					<? } ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -587,12 +637,29 @@
 								</select>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerCharts; ?></th>
+						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<div style="float: left; width: 95%"><?
+								include_once(CLASSPATH . 'Layer.php');
+								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']); ?>
+								<ul><?
+								foreach($this->layer->charts AS $chart) { ?>
+									<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+								} ?>
+								</ul>
+							</div>
+							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
+								<i class="fa fa-pencil" aria-hidden="true" style="margin-top: 5px; margin-left: 5px"></i>
+							</a>
+						</td>
+					</tr>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
-					</tr>	
+					</tr>
 					<tr>
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -660,8 +727,19 @@
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWriteMapserverTemplates; ?></th>
-						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="write_mapserver_templates" type="checkbox" value="1"<? echo ($this->formvars['write_mapserver_templates'] ? ' checked' : ''); ?>>&nbsp;
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?php
+							echo FormObject::createSelectField(
+								'write_mapserver_templates',
+								array(array('value' => 'data', 'output' => $strWriteMapserverTemplatesOption1), array('value' => 'generic', 'output' => $strWriteMapserverTemplatesOption2)),
+								$this->formvars['write_mapserver_templates'],
+								1,
+								'width: auto',
+								'',
+								'',
+								'',
+								'',
+								$this->strPleaseSelect
+							); ?>&nbsp;
 							<span data-tooltip="<?php echo $strWriteMapserverTemplatesHelp; ?>"></span>
 						</td>
 					</tr>
@@ -757,12 +835,42 @@
 						</td>
 					</tr>
 
-				</table>
+				</table><?
+				if ($this->plugin_loaded('mobile')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_mobile_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $str_mobile_vector_tile_url; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="vector_tile_url" type="text" value="<?php echo $this->formvars['vector_tile_url']; ?>" size="50" maxlength="255">&nbsp;
+								<span data-tooltip="<? echo $str_mobile_vector_tile_url_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				}
+				if ($this->plugin_loaded('portal')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_portal_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><a name="cluster_option"></a><?php echo $str_portal_cluster_option; ?></th>
+							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="cluster_option" type="checkbox" value="1"<?php if ($this->formvars['cluster_option']) echo ' checked'; ?>>&nbsp;
+								<span data-tooltip="<?php echo $str_portal_cluster_option_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				} ?>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strAdministrative; ?></th>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -811,7 +919,7 @@
 						</tr><?
 					} ?>
 				</table>
-		</div>
+			</div>
 		
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
@@ -845,7 +953,7 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="transparency" type="text" value="<?php echo $this->formvars['transparency']; ?>" size="50" maxlength="3">
+							<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 95%">
 					</td>
 				</tr>
 				<tr>
@@ -898,7 +1006,7 @@
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strrequires; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 						$group_layer_options = array();
-						foreach ($this->grouplayers['ID'] AS $index => $grouplayer_id) {
+						foreach (($this->grouplayers['ID'] ?: []) AS $index => $grouplayer_id) {
 							$group_layer_options[] = array(
 								'value' => $grouplayer_id,
 								'output' => $this->grouplayers['Bezeichnung'][$index]
@@ -935,7 +1043,7 @@
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>

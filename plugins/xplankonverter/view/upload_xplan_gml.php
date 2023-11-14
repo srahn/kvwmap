@@ -44,7 +44,7 @@
 							'</li><li>',
 							array_map(
 								function($doc_file) {
-									return  '<b>' . $doc_file['upload_file_name'] + '</b><br><a href="' . $this->plan_layerset['document_url'] . $doc_file['store_file_name'] . '">
+									return  '<b>' . $doc_file['upload_file_name'] . '</b><br><a href="' . $this->plan_layerset['document_url'] . $doc_file['store_file_name'] . '">
 										<img src="' . $this->plan_layerset['document_url'] . $doc_file['thumb_file_name'] . '" width="100" name="' . $doc_file['file_name'] . '" onmouseover="' . $doc_file['file_name'] . '.width=\'800\';" onmouseout="' . $doc_file['file_name'] . '.width=\'100\'"></a>';
 								},
 								$this->response['doc_files']

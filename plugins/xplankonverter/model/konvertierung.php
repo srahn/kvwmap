@@ -27,6 +27,7 @@ class Konvertierung extends PgObject {
 		'INSPIRE_GML_ERSTELLUNG_ERR' => 'INSPIRE-GML-Erstellung abgebrochen'
 	);
 	static $write_debug = false;
+	static $art = '';
 
 	function __construct($gui) {
 		parent::__construct($gui, Konvertierung::$schema, Konvertierung::$tableName);
@@ -36,10 +37,8 @@ class Konvertierung extends PgObject {
 		return strtolower(str_replace('-', '_', $planart));
 	}
 
-	function create_geoweb_service($xplan_layers) {
+	function create_geoweb_service($xplan_layers, $ows_onlineresource) {
 		$gui = $this->gui;
-		$planartkuerzel = $this->plan->planartAbk[0];
-		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $planartkuerzel . 'plan/';
 
 		$gui->class_load_level = 2;
 		$gui->loadMap('DataBase');
@@ -48,10 +47,13 @@ class Konvertierung extends PgObject {
 		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
-		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
+		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft' . $this->plan->get($this->plan_attribut_aktualitaet));
+		# Hier die Variante wo die Bezeichnung des Datums aus dem Attributnamen der Aktualität entnommen wird:
+		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$gui->map->web->set('header', '../templates/header.html');
+		$gui->map->web->set('footer', '../templates/footer.html');
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
 		# Und setze bei den anderen die Templates
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
@@ -70,6 +72,16 @@ class Konvertierung extends PgObject {
 			if (in_array($layer->name, $layernames_with_content)) {
 				$layer->set('header', '../templates/' . $layer->name . '_head.html');
 				$layer->set('template', '../templates/' . $layer->name . '_body.html');
+				# Set Data sql for layer
+				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
+				$result = $layerObj->get_generic_data_sql();
+				if ($result['success']) {
+					$layer->set('data', $result['data_sql']);
+				}
+				else {
+					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+					return $result;
+				}
 			}
 			else {
 				$gui->map->removeLayer($i);
@@ -78,7 +90,7 @@ class Konvertierung extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'mapfile' => $this->get('stelle_id') . '/zusammenzeichnung.map'
+			'mapfile' => $this->get('stelle_id') . '/' . MAPFILENAME. '.map'
 		);
 	}
 
@@ -224,9 +236,14 @@ class Konvertierung extends PgObject {
 		}
 	}
 
+	/**
+	 * Fragt die Zusammenzeichnungen der Stelle und Planart ab und teilt sie ein in 
+	 * entwurf (draft), veröffentlicht (pubished), archiviert (archived) und fehlerhaft (faulty)
+	 */
 	public static function find_zusammenzeichnungen($gui, $planart, $plan_class, $plan_attribut_aktualitaet) {
 		$zusammenzeichnungen = array(
 			'published' => array(),
+			'draft' => array(),
 			'archived' => array(),
 			'faulty' => array()
 		);
@@ -246,17 +263,37 @@ class Konvertierung extends PgObject {
 				k.planart = '" . $planart . "'
 			ORDER BY p." . $plan_attribut_aktualitaet . " DESC
 		";
-		#echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
+		if ($gui->user->id == 3) {
+			# echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
+		}
+
 		$konvertierung->debug->show('find_zusammenzeichnungen sql: ' . $sql, false);
 		$query = pg_query($konvertierung->database->dbConn, $sql);
 		while ($konvertierung->data = pg_fetch_assoc($query)) {
-			$konvertierung->plan = null;
+			$konvertierung->plan = false;
 			$konvertierung->get_plan();
-			$zusammenzeichnungen[($konvertierung->get('veroeffentlicht') == 't' ? 'published' : 'faulty')][] = clone $konvertierung;
+			if ($konvertierung->get('veroeffentlicht') == 't') {
+				$konvertierung->art = 'published';
+			}
+			elseif (
+				$konvertierung->plan === false OR
+				(
+					$konvertierung->get('error_id') AND
+					$konvertierung->get('error_id') > 0)
+				) {
+				$konvertierung->art = 'faulty';
+			}
+			else {
+				$konvertierung->art = 'draft';
+			}
+			$zusammenzeichnungen[$konvertierung->art][] = clone $konvertierung;
 		}
 		if (file_exists(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id)) {
 			$zusammenzeichnungen['archived'] = glob(XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $gui->Stelle->id . '/Zusammenzeichnung_*');
 			rsort($zusammenzeichnungen['archived'],  SORT_STRING);
+		}
+		if ($gui->user->id == 3) {
+			#echo 'z: ' . print_r(array_map(function($z) { return array_map(function($x) { return $x->data['id']; }, $z); }, $zusammenzeichnungen), true); exit;
 		}
 		return $zusammenzeichnungen;
 	}
@@ -268,59 +305,70 @@ class Konvertierung extends PgObject {
 		if (!file_exists($zip_path)) {
 			mkdir($zip_path, 0775, true);
 		}
+
 		$archive = new ZipArchive();
+
 		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
 			return array(
 				'success' => false,
 				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
 			);
 		}
+
 		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
 		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv"
-			);
-		}
-		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
-		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
-		if ($geodata_metadata_file === FALSE) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Lesen der Metadatendatei von " . $geodata_metadata_url
-			);
+			try {
+				$archive->close();
+			}
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
+				);
+			}
 		}
 
-		#add it to the zip
-		$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
-		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
-			);
+		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
+		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
+		if ($geodata_metadata_file !== FALSE) {
+			#add it to the zip
+			$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
+			if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+				try {
+					$archive->close();
+				}
+				catch (Exception $e) {
+					return array(
+						'success' => false,
+						'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
+					);
+				}
+			}
 		}
 
 		try {
+			$this->destroy();
 			$archive->close();
 		}
 		catch (Exception $e) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
-			);
+			if ($archive->numFiles > 0) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
+				);
+			}
+			else {
+				return array(
+					'success' => true,
+					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
+				);
+			}
 		}
-
-		$this->destroy();
-
-		return array(
-			'success' => true,
-			'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
-		);
 	}
 
 	/**
-		Anlegen einer Konvertierung
-	*/
+	 *Anlegen einer Konvertierung
+	 */
 	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
@@ -767,7 +815,12 @@ class Konvertierung extends PgObject {
 		return $regeln;
 	}
 
+	/**
+	 * Return plan of konvertierung, query first from database if not already asigned to plan attribute 
+	 * return false if not found, else plan
+	 */
 	function get_plan() {
+		#echo 'Frage Plan für Konvertierung ' . $this->get($this->identifier) . ' ab.';
 		if (!$this->plan) {
 			$this->debug->show('get_plan with planart: ' . $this->get('planart') . ' for konvertierung: ' . $this->get($this->identifier), Konvertierung::$write_debug);
 			$plan = new XP_Plan($this->gui, $this->get('planart'));
@@ -1259,19 +1312,19 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layerGroup = new MyObject($this->gui, 'u_groups');
+			$layer_group = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
-				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
-				$layerGroup->create(array(
+				$layer_group = $layer_group->find_by('Gruppenname', 'XPlanung');
+				$layer_group->create(array(
 					'Gruppenname' => 'XPlanung'
 				));
 			}
 			else {
-				$layerGroup->create(array(
+				$layer_group->create(array(
 					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
-			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get($this->identifier));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layer_group->get($this->identifier));
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
@@ -1369,7 +1422,7 @@ class Konvertierung extends PgObject {
 			$validierung->konvertierung_id = $this->get($this->identifier);
 			if ($validierung->regel_existiert($regeln)) {
 				$success = true;
-				foreach($regeln AS $regel) {
+				foreach ($regeln AS $regel) {
 					$result = $regel->validate($this);
 					if (!$result) {
 						$success = false;
@@ -1421,8 +1474,8 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-		This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
-		and write the report in xplankonverter database tables
+	*	This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
+	*	and write the report in xplankonverter database tables
 	*/
 	function xplanvalidator($gml_file) {
 		$pathinfo = pathinfo($gml_file);
@@ -1439,7 +1492,7 @@ class Konvertierung extends PgObject {
 						'name=' . $pathinfo['basename'] . '&' .
 						'skipSemantisch=false' . '&' .
 						'skipGeometrisch=false' . '&' .
-						'skipFlaechenschluss=false' . '&' .
+						'skipFlaechenschluss=true' . '&' .
 						'skipGeltungsbereich=false';
 
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
@@ -1752,9 +1805,9 @@ class Konvertierung extends PgObject {
 	}
 
 	/*
-	* Entfernt alles was mit der Konvertierung zusammenhängt und
-	* löscht sich am Ende selbst.
-	*/
+	 * Entfernt alles was mit der Konvertierung zusammenhängt und
+	 * löscht sich am Ende selbst.
+	 */
 	function destroy() {
 		$this->debug->show('Lösche Konvertierung', Konvertierung::$write_debug);
 
@@ -1768,7 +1821,8 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
-			$regel->konvertierung = $regel->get_konvertierung();
+			# Wozu hier die Konvertierung holen wenn die Regel danach gelöscht wird?
+			#$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 
@@ -1810,11 +1864,13 @@ class Konvertierung extends PgObject {
 	}
 
 	function insert_textabschnitte($gml_extractor) {
-		# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
+		# Inserts all existing Textabschnitte if they exist (no regel as potential link to plan)
 		$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
-		foreach($textabschnitte as $textabschnitt) {
-			if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
-				$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+		foreach ($textabschnitte as $textabschnitt) {
+			if (strpos($textabschnitt, $this->plan->planartAbk) !== false) {
+				if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
+					$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+				}
 			}
 		}
 		return array(
@@ -1964,13 +2020,11 @@ class Konvertierung extends PgObject {
 		return $rs['email_arl'];
 	}
 
-	# ToDo pk: Adresse to_email und cc_email von peter.korduan... auf richtige ändern und mit Betroffenen testen
 	function send_notification($msg) {
 		$from_name = 'XPlan-Server PlanDigital';
 		$from_email = 'info@testportal-plandigital.de';
-#		$to_email = $this->get_arl_email();
-		$to_email = 'peter.korduan@gdi-service.de';
-		$cc_email = null;
+		$to_email = $this->get_arl_email();
+		$cc_email = 'peter.korduan@gdi-service.de';
 		$reply_email = null;
 		$subject = 'Update in Plandigital';
 		$message 	= "Sehr geehrte Damen und Herren,\r\n\r\n";
@@ -1982,7 +2036,7 @@ class Konvertierung extends PgObject {
 		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
 			return array(
 				'success' => true,
-				'msg' => 'Benachrichtigung versendet.'
+				'msg' => 'Benachrichtigung an den Systemadministrator versendet. Nach Behebung des Fehlers erhalten Sie eine Mitteilung per E-Mail'
 			);
 		}
 		else {

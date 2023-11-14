@@ -530,7 +530,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?>m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
+														<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?> m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_gr > 0) {
@@ -538,7 +538,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?>m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
+														<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?> m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_agr > 0) {
@@ -546,7 +546,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?>m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
+														<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?> m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_gra > 0) {
@@ -554,7 +554,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?>m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
+														<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?> m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
 													</tr>
 											<?	} ?>
 											</table>
@@ -876,7 +876,7 @@ hide_versions = function(flst){
 												</a><?php
 											} ?>
 
-											<div class="fstanzeigehover">
+											<div id="auszugselector_div" class="fstanzeigehover">
 												&nbsp;&nbsp;
 												Auszug:
 												<select style="width: 130px" onchange="this.options[this.selectedIndex].onchange();this.selectedIndex=0">
@@ -929,7 +929,7 @@ hide_versions = function(flst){
   </tr>
   <tr>
     <td valign="bottom">
-      <table width="100%" border="0" cellspacing="0" cellpadding="2">
+      <table id="flurstueck_export_options_div" width="100%" border="0" cellspacing="0" cellpadding="2">
     <tr>
       <td colspan="2">
         <? echo '<img src="'.GRAPHICSPATH.'pfeil_unten-rechts.gif" width="10" height="20" border="0">'; ?>

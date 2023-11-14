@@ -41,6 +41,7 @@ class GUI {
 		echo '<br>' . $msg;
 	}
 }
+$GUI = new GUI(NULL, NULL, NULL);
 
 output_header();
 
@@ -221,6 +222,13 @@ function install() {
 			CREATE EXTENSION IF NOT EXISTS postgis
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
+		Entferne Superuser Recht<br>		<?php
+		$sql = "
+			ALTER USER " . $pgsqlKvwmapDb->user . " WITH NOSUPERUSER;
+		";
+		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+		
 		Ergänze bzw. korrigiere EPSG-Codes für MV<br><?php
 		$sql = "
 			UPDATE
@@ -403,7 +411,7 @@ function show_constants() { ?>
 	</table><?php
 }
 
-/*
+/**
 * Testet ob es schon eine mysql-Datenbank gibt
 */
 function mysql_exists($mysqlKvwmapDb) { ?>
@@ -411,7 +419,7 @@ function mysql_exists($mysqlKvwmapDb) { ?>
 	return $mysqlKvwmapDb->open();
 }
 
-/*
+/**
 * Testet ob es schon eine kvwmapdb gibt
 */
 function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
@@ -428,7 +436,7 @@ function kvwmapdb_exists($mysqlRootDb, $mysqlKvwmapDb) { ?>
 	return (mysqli_num_rows($mysqlRootDb->result) > 0);
 }
 
-/*
+/**
 * Installiert kvwmap-Datenbank
 */
 function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
@@ -485,7 +493,7 @@ function install_kvwmapdb($mysqlRootDb, $mysqlKvwmapDb) {
 	}
 }
 
-/*
+/**
 * Testet ob die postgre Datenbank auf PostgreSQL-Server läuft
 */
 function postgres_exists($pgsqlPostgresDb) { ?>
@@ -493,7 +501,7 @@ function postgres_exists($pgsqlPostgresDb) { ?>
 	return $pgsqlPostgresDb->open();
 }
 
-/*
+/**
 * Testet ob die kvwmap Datenbank auf PostgreSQL-Server läuft
 */
 
@@ -511,7 +519,7 @@ function kvwmapsp_exists($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 	return (pg_num_rows($ret[1]) > 0);
 }
 
-/*
+/**
 * Installiert PostGIS-Datenbank
 */
 function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
@@ -525,7 +533,9 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 		WITH
 			SUPERUSER
 			LOGIN
-			PASSWORD '" . $pgsqlKvwmapDb->passwd . "'
+			PASSWORD '" . $pgsqlKvwmapDb->passwd . "';
+			
+		GRANT SET ON PARAMETER log_min_messages TO " . $pgsqlKvwmapDb->user . ";
 	";
 	$pgsqlPostgresDb->execSQL($sql, 0, 1); ?>
 	
@@ -548,7 +558,7 @@ function install_kvwmapsp($pgsqlPostgresDb, $pgsqlKvwmapDb) { ?>
 	}
 }
 
-/*
+/**
 * 
 */
 function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
@@ -575,7 +585,7 @@ function migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb) {
 	}
 }
 
-/*
+/**
 * Prüft ob schon eine Admin stelle in kvwmapdb existiert
 */
 function admin_stelle_exists($mysqlKvwmapDb) {
@@ -591,7 +601,7 @@ function admin_stelle_exists($mysqlKvwmapDb) {
 	return (mysqli_num_rows($mysqlKvwmapDb->result) > 0) ? true : false;
 }
 
-/*
+/**
 * Trägt alle Einstellungen für eine Admin-Stelle in MySQL-Datenbank von kvwmap ein.
 */
 function install_admin_stelle($mysqlKvwmapDb) {

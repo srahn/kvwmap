@@ -201,6 +201,12 @@ function setScale(select){
 	.navigation-selected div{
 		color: #111;
 	}
+	#selected_style_div {
+		width: 213px;
+	}
+	.fa-clipboard:hover {
+		cursor: pointer;
+	}
 </style>
 
 <table>

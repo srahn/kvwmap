@@ -34,7 +34,7 @@
 	$strDuplicateCriterion  =  'Unterscheidungskriterium';
 	$strDuplicateCriterionHelp  =  'Dieser Ausdruck ersetzt den Parameter $duplicate_criterion in Query und Data, falls dort vorhanden, zur Unterscheidung dieses Layers vom Original und anderen Layern, die vom gleichen Original dupliziert wurden.';
 	$strDuplicateFromLayerId  =  'Von Layer duplizieren';
-	$strDuplicateFromLayerIdHelp  =  'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Query und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
+	$strDuplicateFromLayerIdHelp  =  'ID des Originallayers von dem dieser Layer dupliziert wurde. Wird der Originallayer im Editor geändert, werden dessen Einstellungen (außer Layer ID, von Layer duplizieren, Unterscheidungskriterium, Gruppe, Alias, Name, Namen in anderen Sprachen, Datentyp und alle Defaulteinstellungen für die Stellenzuweisung) auf diesen Layer übertragen. Eine Vollständige Liste aller nicht übertragenen Attribute findet sich in der Funktion updateLayer() der Klasse db_mapObj Geben Sie ein Unterscheidungskriterium ein und platzieren Sie es in Query und Data um die Unterschiede zwischen den Duplikaten zu definieren, z.B. ein unterschiedlicher Ausdruck in der WHERE Klausel. Diese Funktion kann verwendet werden, wenn man den gleichen Layer mehrmals haben möchte nur mit unterschiedlichen Namen, Gruppe und Filter';
 	$strDuplicateTableFieldsCloseTitle  =  'Schließe Felder zum duplizieren von Layereinstellungen.';
 	$strDuplicateTableFieldsOpenTitle  =  'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strEpsgCode = "Epsg-code";
@@ -53,6 +53,7 @@
 	$strLabelMinScale = "Labelminscale";
 	$strLabelRequires = "Labelrequires";
 	$strLayer = "Layer";
+	$strLayerCharts = "Diagramme";
 	$strLayerID = "Layer ID*";
 	$strLegend = "Legende";
 	$strLegendGraphic = "Legendengrafik";
@@ -118,5 +119,7 @@
 	$strWMSName = "WMS-Name/Typename";
 	$strWMSServerVersion = "OWS-Serverversion*";
 	$strWriteMapserverTemplates = "Schreibe MapServer Templates";
-	$strWriteMapserverTemplatesHelp = "Wenn die Option gesetzt ist, wird für den Layer jeweils beim Speichern eine zum Data-Statement passende MapServer Header und Template Datei in das Verzeichnis " . WMS_MAPFILE_PATH . "templates/ geschreiben. Der Pfad zum templates Ordner kann in der Konstante WMS_MAPFILE_PATH angepasst werden. Ist das Verzeichnis noch nicht vorhanden wird es angelegt. Der Dateiname setzt sich zusammen aus dem Layernamen sowie dem Zusatz _head.html bzw. _body.html. Ist die Datei schon vorhanden, wird sie überschrieben. Als Layername wird der Name der beim Speichern eingestellten Sprache genommen.";
+	$strWriteMapserverTemplatesOption1 = "von Data-Statement ableiten";
+	$strWriteMapserverTemplatesOption2 = "von Haupttabelle ableiten";
+	$strWriteMapserverTemplatesHelp = "Wenn die Option gesetzt ist, wird für den Layer jeweils beim Speichern eine zum Data-Statement oder Haupttabelle passende MapServer Header und Template Datei in das Verzeichnis " . WMS_MAPFILE_PATH . "templates/ geschreiben. Der generische Ansatz der auf der Haupttabelle basiert, erzeugt zu Codelisten und Enumerations, wie sie für XPlanung und im AAA-Modell verwendet werden, jeweils Attribute mit Textausgabe in der auch die Beschreibungen und ggf. der Codespace enthalten sind. Der Pfad zum templates Ordner kann in der Konstante WMS_MAPFILE_PATH angepasst werden. Ist das Verzeichnis noch nicht vorhanden wird es angelegt. Der Dateiname setzt sich zusammen aus dem Layernamen sowie dem Zusatz _head.html bzw. _body.html. Ist die Datei schon vorhanden, wird sie überschrieben. Als Layername wird der Name der beim Speichern eingestellten Sprache genommen.";
 ?>

@@ -1,4 +1,4 @@
-<?php
+<?
 	$this->activateAllClasses = "activate classes";
 	$this->activatelayer = "Activate layer";
 	$this->activatequery = "Activate query";
@@ -25,7 +25,7 @@
 	$this->strAnd = "and";
 	$this->strArchive = "Archive";
 	$this->strAsteriskRequired = "Fields marked with an asterisk * are required";
-	$this->strAsteriskRequired = 'Fields with * are mandatory';
+	$this->strAutoClassify = 'classify by';
 	$this->strAutoDelete = 'auto delete';
 	$this->strBuffer = "Buffer";
 	$this->strButtonBack = "Back";
@@ -35,7 +35,7 @@
 	$this->strChoose = "Choose";
 	$this->strColor = "Draw Color";
 	$this->strComment = 'Comment';
-	$this->strComment = 'Comment';
+	$this->strCompareView = 'Comparison View';
 	$this->strConnect = "Connect";
 	$this->strCoordinate = 'Coordinate';
 	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
@@ -78,7 +78,7 @@
 	$this->strSaveMapViewCommittMassage = "Mapview is saved";
 	$this->strSchema = "Schema";
 	$this->strSearch = "Search";
-	$this->strSecurityReason = "This page can not be displayed for security reasons! Make a note of the full URL and try to relogin if you have an account to the system. If this does not help to make the page accessable, please contact your adminstrator stating the full URL.";
+	$this->strSecurityReason = "This page can not be displayed for security reasons! To continue, click on the link below. If you have problems, please contact your adminstrator.";
 	$this->strSend = "Send";
 	$this->strSettings = "Settings";
 	$this->strShareRollenlayer = "Share Layer";

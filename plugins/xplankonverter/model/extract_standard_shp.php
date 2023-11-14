@@ -188,6 +188,8 @@ class Standard_shp_extractor {
 
 		$regel .= $select_regel;
 		$regel .= "FROM " . $schema . "." . $shape . " shp ";
+		$regel .= " WHERE (gehoertzub IS NULL OR lower(gehoertzub) = '" . $this->bereich_gml_id  . "' OR lower(gehoertzub) = 'gml_" . $this->bereich_gml_id  . "') ";
+		# filter for bereich, shapes without filled bereich will be added to all bereiche
 
 		return $regel;
 	}

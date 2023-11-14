@@ -1,4 +1,4 @@
-<?php
+<?
 	$this->activateAllClasses = "Klassen aktivieren";
 	$this->activatelayer = "Dieses Thema sichtbar schalten";
 	$this->activatequery = "Dieses Thema abfragbar schalten";
@@ -24,22 +24,25 @@
 	$this->strAlias = "Alias";
 	$this->strAnd = "und";
 	$this->strArchive = "Archivieren";
-	$this->strAsteriskRequired = "Werte mit * mussen eingetragen werden";
 	$this->strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
+	$this->strAutoClassify = 'klassifizieren nach';
 	$this->strAutoDelete = 'automatisch löschen';
 	$this->strBuffer = "Puffer";
 	$this->strButtonBack = "Zurück";	
 	$this->strCancel = "Abbrechen";
+	$this->strCancleInput = "Änderungen verwerfen?";
 	$this->strChange = 'Ändern';
 	$this->strChangeTitle = 'Änderungen Speichern';
 	$this->strChoose = "Auswahl";
 	$this->strColor = "Farbe";
 	$this->strComment = 'Kommentar';
+	$this->strCompareView = 'Vergleichsansicht';
 	$this->strConnect = "Verbinden";
-	$this->strCoordinate  =  'Koordinate';
+	$this->strCoordinate = 'Koordinate';
 	$this->strCoordinateReferenceSystem = 'Koordinatenreferenzsystem';
-	$this->strCoordinates  =  'Koordinaten';
+	$this->strCoordinates = 'Koordinaten';
 	$this->strCreate = "Anlegen";
+	$this->strDataExport = 'Daten-Export';
 	$this->strDataImport = 'Daten-Import';
 	$this->strDelete = "Löschen";
 	$this->strDeleteWarningMessage = "Wollen Sie wirklich Löschen?";
@@ -77,7 +80,7 @@
 	$this->strSaveMapViewCommittMassage = "Kartenausschnitt wurde gespeichert";
 	$this->strSchema = "Schema";
 	$this->strSearch = "Suchen";
-	$this->strSecurityReason = "Diese Seite kann aus Sicherheitsgründen nicht angezeigt werden! Merken Sie sich die vollständige URL und versuchen Sie sich, wenn Sie einen Zugang zum System haben, sich neu anzumelden. Sollte das nicht helfen diese Seite aufrufbar zu machen, wenden Sie sich unter Angabe der vollständigen URL an Ihren Administrator.";
+	$this->strSecurityReason = "Diese Seite kann aus Sicherheitsgründen nicht angezeigt werden. Um fortzufahren, klicken Sie auf den unten stehenden Link. Falls Sie Schwierigkeiten haben, wenden Sie sich an Ihren Administrator.";
 	$this->strSend = "Senden";
 	$this->strSettings = "Einstellungen";
 	$this->strShareRollenlayer = "Layer freigeben";
