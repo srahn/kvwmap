@@ -697,7 +697,7 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-	function saveLegendRoleParameters(){
+	function save_legend_role_parameters() {
 		# Scrollposition der Legende wird gespeichert
   	$this->user->rolle->setScrollPosition($this->formvars['scrollposition']);
     # Änderungen in den Gruppen werden gesetzt
@@ -711,8 +711,8 @@ class GUI {
 	}
 
   function neuLaden() {
-		$this->saveLegendRoleParameters();
-		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		$this->save_legend_role_parameters();
+		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->set_selected_button($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
 		if($this->formvars['delete_rollenlayer'] != ''){
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
@@ -1557,52 +1557,52 @@ class GUI {
   }
 
   function navMap($cmd) {
-    switch ($cmd) {
+		switch ($cmd) {
       case "previous" : {
-#        $this->user->rolle->setSelectedButton('previous');
+#        $this->user->rolle->set_selected_button('previous');
         $this->setPrevMapExtent($this->user->rolle->last_time_id);
       } break;
       case "next" : {
-#        $this->user->rolle->setSelectedButton('next');
+#        $this->user->rolle->set_selected_button('next');
         $this->setNextMapExtent($this->user->rolle->last_time_id);
       } break;
       case "zoomin" : {
-        $this->user->rolle->setSelectedButton('zoomin');
+        $this->user->rolle->set_selected_button('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
 			case "zoomin_wheel" : {
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
       case "zoomout" : {
-        $this->user->rolle->setSelectedButton('zoomout');
+        $this->user->rolle->set_selected_button('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
       } break;
       case "recentre" : {
-        $this->user->rolle->setSelectedButton('recentre');
+        $this->user->rolle->set_selected_button('recentre');
         $this->zoomMap(1);
       } break;
       // case "jump_coords" : {
-        // $this->user->rolle->setSelectedButton('recentre');
+        // $this->user->rolle->set_selected_button('recentre');
         // $this->zoomMap(1);
       // } break;
       case "pquery" : {
-        $this->user->rolle->setSelectedButton('pquery');
+        $this->user->rolle->set_selected_button('pquery');
         $this->queryMap();
       } break;
       case "touchquery" : {
-        $this->user->rolle->setSelectedButton('touchquery');
+        $this->user->rolle->set_selected_button('touchquery');
         $this->queryMap();
       } break;
       case "ppquery" : {
-        $this->user->rolle->setSelectedButton('ppquery');
+        $this->user->rolle->set_selected_button('ppquery');
         $this->queryMap();
       } break;
       case "polygonquery" : {
-        $this->user->rolle->setSelectedButton('polygonquery');
+        $this->user->rolle->set_selected_button('polygonquery');
         $this->queryMap();
       } break;
       case "Full_Extent" : {
-        $this->user->rolle->setSelectedButton('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
+        $this->user->rolle->set_selected_button('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
         $this->setFullExtent();
       } break;
       default : {
@@ -2900,12 +2900,12 @@ class rolle {
 		}
 	}
 
-  function setSelectedButton($selectedButton) {
+  function set_selected_button($selectedButton) {
     $this->selectedButton=$selectedButton;
     # Eintragen des aktiven Button
     $sql ='UPDATE rolle SET selectedButton="'.$selectedButton.'"';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:rolle.php class:rolle->setSelectedButton - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+    $this->debug->write("<p>file:rolle.php class:rolle->set_selected_button - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }

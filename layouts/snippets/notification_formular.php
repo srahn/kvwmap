@@ -83,9 +83,7 @@ include_once(CLASSPATH . 'FormObject.php');
 	<tr>
 		<th align="right" style="border-bottom:1px solid #C3C7C3"><? echo $strLabel_notification; ?>*</th>
 		<td style="border-bottom:1px solid #C3C7C3">
-			<textarea id="notification" name="notification" cols="80" rows="10" placeholder="<? echo $strPlaceholder_notification; ?>"><?
-				echo $this->notification->get('notification'); ?>
-			</textarea>
+			<textarea id="notification" name="notification" cols="80" rows="10" placeholder="<? echo $strPlaceholder_notification; ?>"><?	echo $this->notification->get('notification'); ?></textarea>
 		</td>
 	</tr>
 	<tr>
