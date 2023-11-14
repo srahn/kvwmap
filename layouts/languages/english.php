@@ -90,7 +90,7 @@
 	$this->strSchema = "Schema";
 	$this->strTableName = "Tablename";
 	$this->strLayerGroup = "Layer group";
-	$this->strSecurityReason = "This page can not be displayed for security reasons! Make a note of the full URL and try to relogin if you have an account to the system. If this does not help to make the page accessable, please contact your adminstrator stating the full URL.";
+	$this->strSecurityReason = "This page can not be displayed for security reasons! To continue, click on the link below. If you have problems, please contact your adminstrator.";
 	$this->strVersion = 'Version';
 	$this->strComment = 'Comment';
 	$this->strDataImport = 'Data Import';

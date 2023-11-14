@@ -3523,7 +3523,7 @@ echo '			</table>
 		) {
 			# return 405 http status code
 			header($_SERVER['SERVER_PROTOCOL'] . ' 405 Method Not Allowed');
-			echo $this->strSecurityReason . ' => <a href="' . URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION . 'index.php?go=logout">Login</a>';
+			echo $this->strSecurityReason . '<br><br>=> <a href="' . URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION . 'index.php">Fortfahren</a>';
 			exit;
 		}
 	}
