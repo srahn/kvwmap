@@ -1016,7 +1016,7 @@
 					new Array(document.getElementById(\'subform' . $layer_id . '_' . $k . '_' . $j . '\')),
 					new Array(\'sethtml\')
 				)';
-				$subform_div = '<td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
+				$subform_div = '</tr><tr><td><div style="display:inline" id="subform' . $layer_id . '_' . $k . '_' . $j . '"></div></td>';
 			}
 			else {
 				$href = 'index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $subform_layer_id . '&csrf_token=' . $_SESSION['csrf_token'];
