@@ -2400,6 +2400,14 @@ function sanitize(&$value, $type) {
 			$value = (int) $value;
 		} break;
 
+		case 'int_csv' : {
+			$value = explode(',', $value);
+			foreach ($value AS &$single_value) {
+				sanitize($single_value, 'int');
+			}
+			$value = implode(',', $value);
+		} break;
+
 		case 'numeric' :
 		case '_numeric' :
 		case 'float8' :
