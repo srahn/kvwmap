@@ -202,7 +202,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
         <td align="center"><a href="index.php?go=zoomtojagdbezirk&oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>&nummer=<? echo $this->jagdbezirke[$i]['id'] ?>">zur Karte</a></td>
         <td align="center">
         	<? if($this->Stelle->isFunctionAllowed('Jagdkataster')){ ?>
-					<a href="index.php?go=jagdkatastereditor&oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>">Geometrie bearbeiten</a>
+					<a href="index.php?go=jagdkatastereditor&oid=<? echo $this->jagdbezirke[$i][$this->jagdkataster->oid_column]; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Geometrie bearbeiten</a>
 					<? } ?>
 				</td>
       </tr>
