@@ -5205,7 +5205,7 @@ echo '			</table>
 				if ($this->point['pointx'] != '') {
 					$this->formvars['loc_x'] = $this->point['pointx'];
 					$this->formvars['loc_y'] = $this->point['pointy'];
-					$this->formvars['angle'] = $this->point['angle'];
+					$this->formvars['angle'] = $value = str_replace('.', ',', $this->point['angle']);
 					$rect = ms_newRectObj();
 					$rect->minx = $this->point['pointx'] - 100;
 					$rect->maxx = $this->point['pointx'] + 100;
@@ -5235,6 +5235,9 @@ echo '			</table>
 	}
 
 	function PointEditor_Senden() {
+		$this->sanitize([
+			'angle' => 'float'
+		], true);
 		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -5407,6 +5410,9 @@ echo '			</table>
 	}
 
 	function LineEditor_Senden() {
+		$this->sanitize([
+			'linelength' => 'float'
+		], true);
 		include_(CLASSPATH . 'lineeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -5519,6 +5525,9 @@ echo '			</table>
 	}
 
 	function PolygonEditor_Senden(){
+		$this->sanitize([
+			'area' => 'float'
+		], true);
 		include_(CLASSPATH . 'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
