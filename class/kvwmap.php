@@ -2677,50 +2677,50 @@ echo '			</table>
   function navMap($cmd) {
     switch ($cmd) {
       case "previous" : {
-#        $this->user->rolle->setSelectedButton('previous');
+#        $this->user->rolle->set_selected_button('previous');
         $this->setPrevMapExtent($this->user->rolle->last_time_id);
       } break;
       case "next" : {
-#        $this->user->rolle->setSelectedButton('next');
+#        $this->user->rolle->set_selected_button('next');
         $this->setNextMapExtent($this->user->rolle->last_time_id);
       } break;
       case "zoomin" : {
-        $this->user->rolle->setSelectedButton('zoomin');
+        $this->user->rolle->set_selected_button('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
 			case "zoomin_wheel" : {
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
       case "zoomout" : {
-        $this->user->rolle->setSelectedButton('zoomout');
+        $this->user->rolle->set_selected_button('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
       } break;
       case "recentre" : {
-        $this->user->rolle->setSelectedButton('recentre');
+        $this->user->rolle->set_selected_button('recentre');
         $this->zoomMap(1);
       } break;
       // case "jump_coords" : {
-        // $this->user->rolle->setSelectedButton('recentre');
+        // $this->user->rolle->set_selected_button('recentre');
         // $this->zoomMap(1);
       // } break;
       case "pquery" : {
-        $this->user->rolle->setSelectedButton('pquery');
+        $this->user->rolle->set_selected_button('pquery');
         $this->queryMap();
       } break;
       case "touchquery" : {
-        $this->user->rolle->setSelectedButton('touchquery');
+        $this->user->rolle->set_selected_button('touchquery');
         $this->queryMap();
       } break;
       case "ppquery" : {
-        $this->user->rolle->setSelectedButton('ppquery');
+        $this->user->rolle->set_selected_button('ppquery');
         $this->queryMap();
       } break;
       case "polygonquery" : {
-        $this->user->rolle->setSelectedButton('polygonquery');
+        $this->user->rolle->set_selected_button('polygonquery');
         $this->queryMap();
       } break;
       case "Full_Extent" : {
-        $this->user->rolle->setSelectedButton('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
+        $this->user->rolle->set_selected_button('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
         $this->setFullExtent();
       } break;
       default : {
@@ -2802,9 +2802,9 @@ echo '			</table>
 	function zoom2coord() {
 		# Funktion zum Zoomen auf eine Punktkoordinate oder einen Kartenausschnitt; Koordinaten sind Weltkoordinaten
 		$corners = explode(';', $this->formvars['INPUT_COORD']);
-		$lo = explode(',', $corners[0]);
-		$minx = (float) $lo[0];
-		$miny = (float) $lo[1];
+		$lu = explode(',', $corners[0]);
+		$minx = (float) $lu[0];
+		$miny = (float) $lu[1];
 		if (count($corners) == 1) { # Zoom auf Punktkoordinate
 			$oPixelPos = ms_newPointObj();
 			if ($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code) {
@@ -6204,7 +6204,7 @@ echo '			</table>
 		$this->selectable_scales = array_reverse($selectable_scales);
 		$saved_scale = $this->reduce_mapwidth(10);
 		$this->main = "druckausschnittswahl.php";
-		$this->Document=new Document($this->database);
+		$this->Document = new Document($this->database);
 		# aktuellen Kartenausschnitt laden + zeichnen!
 		$this->noMinMaxScaling = $this->formvars['no_minmax_scaling'];
 		if ($this->formvars['neuladen']) {
@@ -6226,77 +6226,83 @@ echo '			</table>
 			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
 		}
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
-    # aktuelles Layout laden
-    if($this->formvars['angle'] == ''){
-      $this->formvars['angle'] = 0;
-    }
-    if($this->formvars['aktiverRahmen']){
-      $this->Document->save_active_frame($this->formvars['aktiverRahmen'], $this->user->id, $this->Stelle->id);
-    }
-    $frameid = $this->Document->get_active_frameid($this->user->id, $this->Stelle->id);
-		$this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $frameid);
-
-		if($this->user->rolle->epsg_code == 4326){
-			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-			$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-			$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+		if (count($this->Document->frames) == 0) {
+			$this->main = 'map.php';
+			$this->add_message('warning', $this->strNoMapPrintFrame);
 		}
-		else{
-			$this->meter_pro_einheit = 1;
-		}
-		if($this->user->rolle->print_scale != 'auto')$this->formvars['printscale'] = $this->user->rolle->print_scale;
-		if($this->formvars['printscale'] == ''){			# einen geeigneten Druckmaßstab berechnen
-			$dx = $this->map->extent->maxx-$this->map->extent->minx;
-			$dy = $this->map->extent->maxy-$this->map->extent->miny;
-			$cal_scale_height = $dy * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapheight"];
-			$cal_scale_width = $dx * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapwidth"];
-			if($cal_scale_width > $cal_scale_height)$cal_scale = $cal_scale_height;
-			else $cal_scale = $cal_scale_width;
-			foreach($this->selectable_scales as $scale){
-				if($cal_scale > $scale){
-					$this->formvars['printscale'] = $scale;
-					break;
+		else {
+			# aktuelles Layout laden
+			if($this->formvars['angle'] == ''){
+				$this->formvars['angle'] = 0;
+			}
+			if($this->formvars['aktiverRahmen']){
+				$this->Document->save_active_frame($this->formvars['aktiverRahmen'], $this->user->id, $this->Stelle->id);
+			}
+			$frameid = $this->Document->get_active_frameid($this->user->id, $this->Stelle->id);
+			$this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $frameid);
+	
+			if($this->user->rolle->epsg_code == 4326){
+				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
+				$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+			}
+			else{
+				$this->meter_pro_einheit = 1;
+			}
+			if($this->user->rolle->print_scale != 'auto')$this->formvars['printscale'] = $this->user->rolle->print_scale;
+			if($this->formvars['printscale'] == ''){			# einen geeigneten Druckmaßstab berechnen
+				$dx = $this->map->extent->maxx-$this->map->extent->minx;
+				$dy = $this->map->extent->maxy-$this->map->extent->miny;
+				$cal_scale_height = $dy * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapheight"];
+				$cal_scale_width = $dx * $this->meter_pro_einheit / 0.00035277 / $this->Document->activeframe[0]["mapwidth"];
+				if($cal_scale_width > $cal_scale_height)$cal_scale = $cal_scale_height;
+				else $cal_scale = $cal_scale_width;
+				foreach($this->selectable_scales as $scale){
+					if($cal_scale > $scale){
+						$this->formvars['printscale'] = $scale;
+						break;
+					}
 				}
 			}
+	
+			# alle Druckausschnitte der Rolle laden
+			$this->Document->ausschnitte = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, NULL);
+			# Ausschnitt laden
+			if($this->formvars['go'] == 'Druckausschnitt_laden' AND $this->formvars['druckausschnitt'] != ''){
+				$this->Document->ausschnitt = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, $this->formvars['druckausschnitt']);
+				# Druckrahmen setzen
+				$this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $this->Document->ausschnitt[0]['frame_id']);
+				# Extent setzen
+				$width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
+				$height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
+				$rect= ms_newRectObj();
+				$rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
+				$rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
+				$rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
+				$rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
+				if($this->Document->ausschnitt[0]['epsg_code'] != '' AND $this->Document->ausschnitt[0]['epsg_code'] != $this->user->rolle->epsg_code){
+					$projFROM = ms_newprojectionobj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
+					$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+					$rect->project($projFROM, $projTO);
+				}
+				if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
+				else $rand = 10;
+				$this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
+				if(MAPSERVERVERSION >= 600 ) {
+					$this->map_scaledenom = $this->map->scaledenom;
+				}
+				else {
+					$this->map_scaledenom = $this->map->scale;
+				}
+				# Position setzen
+				$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $rect->minx + $width/2;
+				$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $rect->miny + $height/2;
+				# Druckmaßstab setzen
+				$this->formvars['printscale'] = $this->Document->ausschnitt[0]['print_scale'];
+				# Drehwinkel setzen
+				$this->formvars['angle'] = $this->Document->ausschnitt[0]['angle'];
+			}
 		}
-
-    # alle Druckausschnitte der Rolle laden
-    $this->Document->ausschnitte = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, NULL);
-    # Ausschnitt laden
-    if($this->formvars['go'] == 'Druckausschnitt_laden' AND $this->formvars['druckausschnitt'] != ''){
-      $this->Document->ausschnitt = $this->Document->load_ausschnitte($this->Stelle->id, $this->user->id, $this->formvars['druckausschnitt']);
-      # Druckrahmen setzen
-      $this->Document->activeframe = $this->Document->load_frames($this->Stelle->id, $this->Document->ausschnitt[0]['frame_id']);
-      # Extent setzen
-      $width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
-      $height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
-      $rect= ms_newRectObj();
-      $rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
-      $rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
-      $rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
-      $rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
-			if($this->Document->ausschnitt[0]['epsg_code'] != '' AND $this->Document->ausschnitt[0]['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = ms_newprojectionobj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
-				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-				$rect->project($projFROM, $projTO);
-			}
-      if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
-			else $rand = 10;
-      $this->map->setextent($rect->minx-$rand,$rect->miny-$rand,$rect->maxx+$rand,$rect->maxy+$rand);
-	    if(MAPSERVERVERSION >= 600 ) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
-      # Position setzen
-			$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $rect->minx + $width/2;
-			$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $rect->miny + $height/2;
-      # Druckmaßstab setzen
-      $this->formvars['printscale'] = $this->Document->ausschnitt[0]['print_scale'];
-      # Drehwinkel setzen
-      $this->formvars['angle'] = $this->Document->ausschnitt[0]['angle'];
-    }
 
     # Wenn Navigiert werden soll, wird eine eventuell schon gesetzte Position
     # in Weltkoordinaten umgerechnet und danach wieder zurück.
@@ -7019,26 +7025,36 @@ echo '			</table>
 			'printscale' => 'int',
 			'angle' => 'int',
 			'aktiverRahmen' => 'int',
-			'legend_extra' => 'int'
+			'legend_extra' => 'int',
+			'selected_layer_ids' => 'int_csv',
 		]);
 		$Document = new Document($this->database);
 		$this->Docu = $Document;
 		$this->Docu->activeframe = $this->Docu->load_frames(NULL, $frame_id);
-
 		if ($this->Docu->activeframe[0]['dhk_call'] != ''){
 			global $GUI;
-			include_once(PLUGINS.'alkis/model/kvwmap.php');
+			include_once(PLUGINS . 'alkis/model/kvwmap.php');
 			$output = $this->ALKIS_Kartenauszug($this->Docu->activeframe[0], $this->formvars);
 		}
-		else{
+		else {
+			$selected_layer_ids = explode(',', $this->formvars['selected_layer_ids']);
+			if (count($selected_layer_ids) > 0) {
+				foreach ($selected_layer_ids AS $selected_layer_id) {
+					if ($selected_layer_id > 0) {
+						$this->formvars['thema' . $selected_layer_id] = 1;
+					}
+				}
+				$this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id);
+			}
+
 			# Abfrage der aktuellen Karte
 			if ($this->formvars['post_map_factor']) {
 				$this->map_factor = $this->formvars['post_map_factor'];
 			}
-			elseif($this->formvars['map_factor'] != '') {
+			elseif ($this->formvars['map_factor'] != '') {
 				$this->map_factor = $this->formvars['map_factor'];
 			}
-			else{
+			else {
 				$this->map_factor = MAPFACTOR;
 			}
 
@@ -7046,11 +7062,21 @@ echo '			</table>
 			if ($this->formvars['loadmapsource']){
 				$this->loadMap($this->formvars['loadmapsource']);
 			}
-			else{
+			else {
 				$this->loadMap('DataBase');
 			}
+			if ($this->formvars['INPUT_COORD'] != '') {
+				$corners = explode(';', $this->formvars['INPUT_COORD']);
+				$lu = sanitize(explode(',', $corners[0]), 'float');
+				$ro = sanitize(explode(',', $corners[1]), 'float');
+				$this->formvars['INPUT_COORD'] = implode(',', $lu) . ';' . implode(',', $ro);
+				if ($this->formvars['epsg_code'] == '') {
+					$this->formvars['epsg_code'] = $this->user->rolle->epsg_code;
+				}
+				$this->zoom2coord();
+			}
 			# Karte
-			if($this->map->selectOutputFormat('jpeg_print') == 1){
+			if ($this->map->selectOutputFormat('jpeg_print') == 1){
 				$this->map->selectOutputFormat('jpeg');
 			}
 			if ($fast == true) {
@@ -7062,7 +7088,7 @@ echo '			</table>
 				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
 				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
 			}
-			elseif($this->user->rolle->print_scale != 'auto') {
+			elseif ($this->user->rolle->print_scale != 'auto') {
 				$this->user->rolle->savePrintScale($this->formvars['printscale']);
 			}
 			#echo $this->formvars['center_x'].'<br>';
@@ -13546,8 +13572,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function connections_anzeigen() {
-		include_once(CLASSPATH . 'Connection.php');
-		$this->myobjects = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->class = 'Connection';
+		include_once(CLASSPATH . "{$this->class}.php");
+		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'myobject.php';
 		$this->output();
 	}
@@ -13571,8 +13598,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 	
 	function datasources_anzeigen() {
-		include_once(CLASSPATH . 'DataSource.php');
-		$this->myobjects = DataSource::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->class = 'DataSource';
+		include_once(CLASSPATH . "{$this->class}.php");
+		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'myobject.php';
 		$this->output();
 	}
@@ -13878,7 +13906,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->output();
   }
 
-	function saveLegendRoleParameters(){
+	function save_legend_role_parameters(){
 		# Scrollposition der Legende wird gespeichert
   	$this->user->rolle->setScrollPosition(value_of($this->formvars, 'scrollposition'));
     # Änderungen in den Gruppen werden gesetzt
@@ -13896,12 +13924,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'selected_rollenlayer_id' => 'int',
 			'delete_rollenlayer_type' => 'text'
 		]);
-		$this->saveLegendRoleParameters();
+		$this->save_legend_role_parameters();
 		if (
 			in_array(value_of($this->formvars, 'last_button'), array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery'))
 		) {
 			// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
-			$this->user->rolle->setSelectedButton($this->formvars['last_button']);
+			$this->user->rolle->set_selected_button($this->formvars['last_button']);
 		}
 		if (value_of($this->formvars, 'delete_rollenlayer') != '') {
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);

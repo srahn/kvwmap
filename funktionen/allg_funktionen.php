@@ -2485,6 +2485,14 @@ function sanitize(&$value, $type, $removeTT = false) {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
 
+		case 'int_csv' : {
+			$value = explode(',', $value);
+			foreach ($value AS &$single_value) {
+				sanitize($single_value, 'int');
+			}
+			$value = implode(',', $value);
+		} break;
+
 		case 'numeric' :
 		case 'float4' :
 		case 'float8' :

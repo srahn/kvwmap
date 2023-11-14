@@ -2,6 +2,8 @@
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
+include_once(CLASSPATH . 'DataSource.php');
+
 class Layer extends MyObject {
 
 	static $write_debug = false;
@@ -106,6 +108,16 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
+	function get_datasource() {
+		if (!empty($this->get('datasource'))) {
+			return null;
+		}
+		else {
+			$datasource = DataSource::find_by_id($this->gui, $this->get('datasource'));
+			return $datasource->get('beschreibung') ?? $this->get('datasource');
+		}
+	}
+
 	function get_layer_attributes() {
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
@@ -114,6 +126,7 @@ class Layer extends MyObject {
 		);
 		return $layer_attributes;
 	}
+
 	function get_layer_charts() {
 		$obj = new LayerChart($this->gui);
 		$layer_charts = $obj->find_where(
@@ -532,12 +545,12 @@ l.Name AS sub_layer_name
 	function get_baselayer_options() {
 		if (strpos($this->get('Data'), '{') === 0) {
 			$data = json_decode($this->get('Data'));
-			$data->options->attribution = $this->get('datasource');
+			$data->options->attribution = $this->get_datasource();
 			return $data->options;
 		}
 		else {
 			return (Object) array(
-				'attribution' => $this->get('datasource')
+				'attribution' => $this->get_datasource()
 			);
 		}
 	}
@@ -649,7 +662,7 @@ l.Name AS sub_layer_name
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
-			'contactOrganisation' => $this->get('datasource'),
+			'contactOrganisation' => $this->get_datasource(),
 			'contactPersonName' => $this->get('dataowner_name'),
 			'contactEMail' => $this->get('dataowner_email'),
 			'contactPhon' => $this->get('dataowner_tel'),
