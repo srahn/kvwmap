@@ -13546,8 +13546,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
 	function connections_anzeigen() {
-		include_once(CLASSPATH . 'Connection.php');
-		$this->myobjects = Connection::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->class = 'Connection';
+		include_once(CLASSPATH . "{$this->class}.php");
+		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'myobject.php';
 		$this->output();
 	}
@@ -13571,8 +13572,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 	
 	function datasources_anzeigen() {
-		include_once(CLASSPATH . 'DataSource.php');
-		$this->myobjects = DataSource::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->class = 'DataSource';
+		include_once(CLASSPATH . "{$this->class}.php");
+		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'myobject.php';
 		$this->output();
 	}
