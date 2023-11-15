@@ -44,7 +44,7 @@
 		return $output;
 	}
 
-	function attribute_name($layer_id, $attributes, $j, $k, $fontsize, $sort_links = true) {
+	function attribute_name($layer_id, $attributes, $j, $k, $sort_links = true) {
 		$datapart = '<table ';
 		if($attributes['group'][0] != '' AND $attributes['arrangement'][$j+1] != 1 AND $attributes['arrangement'][$j] != 1 AND $attributes['labeling'][$j] != 1)$datapart .= 'width="200px"';
 		else $datapart .= 'width="100%"';
@@ -58,10 +58,10 @@
 				substr($attributes['type'][$j], 0, 1) == '_'
 			)
 		) {
-			$datapart .= '<a style="font-size: '.$fontsize.'px" title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
+			$datapart .= '<a title="Sortieren nach '.$attributes['alias'][$j].'" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layer_id.');">'.$attributes['alias'][$j].'</a>';
 		}
 		else {
-			$datapart .= '<span style="font-size: '.$fontsize.'px;">'.$attributes['alias'][$j].'</span>';
+			$datapart .= '<span>'.$attributes['alias'][$j].'</span>';
 		}
 		if ($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 			$datapart .= '<span title="Eingabe erforderlich">*</span>';
@@ -92,7 +92,7 @@
 		return $cal;
 	}
 
-	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $fontsize, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL, $e = NULL){
+	function attribute_value(&$gui, $layer, $attributes, $j, $k, $dataset, $size, $select_width, $change_all = false, $onchange = NULL, $field_name = NULL, $field_id = NULL, $field_class = NULL, $e = NULL){
 		$datapart = '';
 		$after_attribute = '';
 		global $strShowPK;
@@ -156,7 +156,7 @@
 				if(is_array($elements[$e]) OR is_object($elements[$e]))$elements[$e] = json_encode($elements[$e]);		# ist ein Array oder Objekt (also entweder ein Array-Typ oder ein Datentyp) und wird zur Übertragung wieder encodiert
 				$dataset2[$attributes2['name'][$j]] = $elements[$e];
 				$datapart .= '<div id="div_'.$id.'_'.$e.'" style="margin: 5px; display: '.($e==-1 ? 'none' : 'block').'"><table class="gle_arrayelement_table" cellpadding="0" cellspacing="0"><tr><td style="height: 22px">';
-				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class, $e);
+				$datapart .= attribute_value($gui, $layer, $attributes2, $j, $k, $dataset2, $size, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id.' '.$old_field_class, $e);
 				$datapart .= '</td>';
 				if($attributes['privileg'][$j] == '1' AND !$lock[$k]){
 					$datapart .= '
@@ -215,7 +215,7 @@
 								</tr>
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
@@ -224,7 +224,7 @@
 							$datapart .= '
 								<tr>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" colspan="2" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>
 							';
@@ -240,7 +240,7 @@
 										</table>
 									</td>
 									<td id="value_'.$layer_id.'_'.$type_attributes['name'][$e].'_'.$k.'" class="gle_attribute_value">
-										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $fontsize, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
+										' . attribute_value($gui, $layer, $type_attributes, $e, $k, $dataset2, $tsize, $select_width, $change_all, $onchange2, $id.'_'.$e, $id.'_'.$e, $id) . '
 									</td>
 								</tr>';
 						}
@@ -274,7 +274,6 @@
 					style="
 						border: 0px;
 						background-color: transparent;
-						font-size: ' . $fontsize . 'px;
 					"
 					size="' . $size1 . '"
 					type="text"
@@ -287,7 +286,7 @@
 					id="' . $layer_id . '_' . $attributes['name'][$j] . '_' . $k . '"
 					onchange="' . $onchange.'"
 					title="'.$attributes['alias'][$j] . '"
-					style="' . $select_width . 'font-size: ' . $fontsize.'px"
+					style="' . $select_width . '"
 					name="' . $fieldname . '"
 				>';
 				if ($attributes['nullable'][$j] != '0' OR $gui->new_entry == true) {
@@ -314,7 +313,7 @@
 						$datapart .= ' readonly style="display: none"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="width: 100%;font-size: '.$fontsize.'px"';
+						$datapart .= ' tabindex="1" style="width: 100%;"';
 					}
 					$datapart .= ' rows="3" name="'.$fieldname.'">' . htmlspecialchars($value) . '</textarea>';
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != ''){
@@ -330,7 +329,7 @@
 							$datapart .= htmlspecialchars($value);
 						}
 						else{								// zeilenweise
-							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3; font-size: '.$fontsize.'px;"><pre>' . $value . '</pre></div>';
+							$datapart .= '<div class="readonly_text" style="padding: 0 0 0 3;"><pre>' . $value . '</pre></div>';
 						}
 					}
 				}break;
@@ -346,7 +345,7 @@
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 
 				case 'Auswahlfeld_Bild' : {
@@ -363,7 +362,7 @@
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+					$datapart .= Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 				
 				case 'Farbauswahl' : {
@@ -388,7 +387,6 @@
 							style=" 
 								display: ' . ($attribute_privileg == '0' ? 'none' : 'block') . ';
 								width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
-								font-size: ' . $fontsize . 'px;
 							"
 							' . ($attribute_privileg == '0' ? ' readonly' : ' tabindex="1"') . '
 						>';
@@ -409,7 +407,6 @@
 										text-align: center;
 										min-width: 55px;
 										width: ' . (array_key_exists('width', $form_element_options) ? $form_element_options['width'] : '100%') . ';
-										font-size: ' . $fontsize . 'px;
 										background-color: ' . $angezeigter_value . ';
 										border: 1px solid gray;
 									"
@@ -446,11 +443,11 @@
 					else{
 						$enum_output = $attributes['enum_output'][$j][$k];
 					}					
-					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+					$datapart .= Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_output, $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $change_all, $size, $onchange, $field_class);
 				} break;
 
 				case 'Autovervollständigungsfeld_zweispaltig' : {
-					$datapart .= Autovervollstaendigungsfeld_zweiSpaltig($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+					$datapart .= Autovervollstaendigungsfeld_zweiSpaltig($layer_id, $name, $j, $alias, $fieldname, $value, $attributes['enum_output'][$j][$k], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $change_all, $size, $onchange, $field_class);
 				} break;
 				
 				case 'Radiobutton' : {
@@ -492,7 +489,7 @@
 					else{								// zeilenweise
 						$maxwidth = $size * 8;
 						$minwidth = $size * 4;
-						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">' . htmlspecialchars($value) . '</div>';
+						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px;">' . htmlspecialchars($value) . '</div>';
 					}
 					$datapart .= '</td>';
 					if($gui->new_entry != true){
@@ -553,11 +550,11 @@
 						switch ($attributes['form_element_type'][$key]){
 							case 'Autovervollständigungsfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
-								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+								$datapart .= Autovervollstaendigungsfeld($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $change_all, $size, $onchange, $field_class);
 							}break;
 							case 'Autovervollständigungsfeld zweispaltig' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
-								$datapart .= Autovervollstaendigungsfeld_zweispaltig($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $fontsize, $change_all, $size, $onchange, $field_class);
+								$datapart .= Autovervollstaendigungsfeld_zweispaltig($layer_id, $name_, $index, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $attributes['enum_output'][$index][$k], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $change_all, $size, $onchange, $field_class);
 							}break;
 							case 'Auswahlfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
@@ -571,10 +568,10 @@
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
 								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
-								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class);
+								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
-								$datapart .= '<input class="'.$field_class.'" style="font-size: '.(0.9*$fontsize).'px';
+								$datapart .= '<input class="'.$field_class.'" style="';
 								if($attributes['privileg'][$name_] == '0' OR $lock[$k]){
 									$datapart .= ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 								}
@@ -592,7 +589,7 @@
 					else{								// zeilenweise
 						$maxwidth = $size * 8;
 						$minwidth = $size * 4;
-						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px; font-size: '.$fontsize.'px;">'.htmlspecialchars($value).'</div>';
+						$datapart .= '<div style="padding: 0 0 0 3; min-width: '.$minwidth.'px; max-width:'.$maxwidth.'px;">'.htmlspecialchars($value).'</div>';
 					}
 					$datapart .= '</td><td align="right" valign="top">';
 					if($gui->new_entry != true){
@@ -601,7 +598,7 @@
 							if($attributes['no_new_window'][$j] != true){
 								$datapart .= 	' target="_blank"';
 							}
-							$datapart .= 	' style="font-size: '.$fontsize.'px"><span>'.$strShowFK.'</span></a>';
+							$datapart .= 	' ><span>'.$strShowFK.'</span></a>';
 						}
 					}
 					$datapart .= '</td></tr></table>';
@@ -655,7 +652,7 @@
 				}break;
 
 				case 'Time': {
-					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+					$datapart .= '<input class="'.$field_class.'" readonly style="padding: 0 0 0 3;border:0px;background-color:transparent;"';
 					$datapart .= ' size="16" type="text" name="'.$fieldname.'" value="' . htmlspecialchars($value) . '">';
 				}break;
 
@@ -734,7 +731,7 @@
 
 				case 'Link': {
 					if ($attribute_privileg != '0' OR $lock[$k]) {
-						$datapart .= '<input class="' . $field_class . '" tabindex="1" onchange="' . $onchange . '" id="' . $layer_id . '_' . $name . '_' . $k . '" style="font-size: ' . $fontsize . 'px" size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
+						$datapart .= '<input class="' . $field_class . '" tabindex="1" onchange="' . $onchange . '" id="' . $layer_id . '_' . $name . '_' . $k . '" size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 					}
 					else {
 						$datapart .= '<input class="' . $field_class . '" onchange="' . $onchange . '" type="hidden" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
@@ -746,7 +743,7 @@
 						else {
 							$target = 'root';
 						}
-						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" style="font-size: ' . $fontsize . 'px" href="' . htmlspecialchars(add_csrf($value)) . '">';
+						$datapart .= '<div class="formelement-link"><a class="link" target="' . $target . '" href="' . htmlspecialchars(add_csrf($value)) . '">';
 						if ($attributes['options'][$j] != '') {
 							$datapart .= $attributes['options'][$j];
 						}
@@ -829,7 +826,6 @@
 								tabindex="1"
 								target="' . $link_target . '"
 								class="dynamicLink"
-								style="font-size: ' . $fontsize . 'px"
 								onclick="' . $onclick . '"
 								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
@@ -839,7 +835,7 @@
 				
 				case 'mailto': {
 					if ($value!='') {
-						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" style="font-size: '.$fontsize.'px" href="mailto:' . htmlspecialchars($value) . '">';
+						$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" href="mailto:' . htmlspecialchars($value) . '">';
 						if($attributes['options'][$j] != ''){
 							$datapart .= $attributes['options'][$j];
 						}
@@ -849,7 +845,7 @@
 						$datapart .= '</a><br>';
 					}
 					if($attribute_privileg != '0' OR $lock[$k]){
-						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" style="font-size: '.$fontsize.'px" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
+						$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}else{
 						$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 					}
@@ -859,10 +855,7 @@
 					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.' custom_area" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					}
-					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}break;
@@ -871,10 +864,7 @@
 					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					}
-					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}break;
@@ -883,10 +873,7 @@
 					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_angle" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					}
-					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					$datapart .= ' size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}break;
@@ -896,10 +883,10 @@
 					$value = tausenderTrenner($value);
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \'Zahl\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
+						$datapart .= ' tabindex="1" style="width: 100%;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
@@ -913,10 +900,7 @@
 				case 'ExifLatLng': {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_latlng" ';
 					if ($attribute_privileg == '0' OR $lock[$k]) {
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"';
-					}
-					else {
-						$datapart .= ' style="font-size: ' . $fontsize . 'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="'.htmlspecialchars($value) . '">';
 				}break;
@@ -924,10 +908,7 @@
 				case 'ExifRichtung': {
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_richtung" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if ($attribute_privileg == '0' OR $lock[$k]) {
-						$datapart .= ' readonly style="border:0px;background-color:transparent;font-size: '.$fontsize.'px;"';
-					}
-					else{
-						$datapart .= ' style="font-size: '.$fontsize.'px;"';
+						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
 					}
 					$datapart .= ' size="' . $size . '" type="text" name="' . $fieldname . '" value="' . htmlspecialchars($value) . '">';
 				}break;
@@ -938,7 +919,7 @@
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
+						$datapart .= ' tabindex="1" style="width: 100%;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
@@ -950,7 +931,7 @@
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0' OR $lock[$k]){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
+						$datapart .= '<div class="readonly_text">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}
 				} break;
 
@@ -960,7 +941,7 @@
 						$datapart .= ' readonly style="display:none;"';
 					}
 					else{
-						$datapart .= ' tabindex="1" style="width: 100%; font-size: '.$fontsize.'px;"';
+						$datapart .= ' tabindex="1" style="width: 100%;"';
 					}
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
@@ -975,7 +956,7 @@
 					$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
 					if($attribute_privileg == '0'){ // nur lesbares Attribut
 						$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
-						$datapart .= '<div class="readonly_text" style="font-size: '.$fontsize.'px;">' . htmlspecialchars($angezeigter_value) . '</div>';
+						$datapart .= '<div class="readonly_text">' . htmlspecialchars($angezeigter_value) . '</div>';
 					}
 					if($attribute_privileg > '0' AND $attributes['options'][$j] != '' AND strpos($attributes['options'][$j], 'require') === false){		# bei <requires> oder <required by> nicht
 						if(strtolower(substr($attributes['options'][$j], 0, 6)) == 'select') {
@@ -991,7 +972,7 @@
 		return $datapart.$after_attribute;
 	}
 
-	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class){
+	function Autovervollstaendigungsfeld($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $change_all, $size, $onchange, $field_class){
 		$element_id = $layer_id . '_' . $name . '_' . $k;
 		if (strpos($fieldname, $element_id) !== false) {		# bei Array-Typen der Fall
 			$element_id = $fieldname;
@@ -1055,8 +1036,8 @@
 									}
 								"' .
 								(($privileg == '0' OR $lock)
-									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
-									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
+									? ' readonly style="border:0px;background-color:transparent;"'
+									: ' tabindex="1" '
 								) . '
 								size="' . $size . '"
 								type="text"
@@ -1096,7 +1077,7 @@
 		return $datapart;
 	}
 
-	function Autovervollstaendigungsfeld_zweispaltig($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $fontsize, $change_all, $size, $onchange, $field_class) {
+	function Autovervollstaendigungsfeld_zweispaltig($layer_id, $name, $j, $alias, $fieldname, $value, $output, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $change_all, $size, $onchange, $field_class) {
 		$element_id = $layer_id . '_' . $name . '_' . $k;
 		$dataparts = array();
 
@@ -1159,8 +1140,8 @@
 									}
 								"' .
 								(($privileg == '0' OR $lock)
-									? ' readonly style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;"'
-									: ' tabindex="1" style="font-size: ' . $fontsize . 'px;"'
+									? ' readonly style="border:0px;background-color:transparent;"'
+									: ' tabindex="1" '
 								) . '
 								size="' . $size . '"
 								type="text"
@@ -1199,7 +1180,7 @@
 		return $datapart;
 	}
 
-	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if (!is_array($req)) {
 			$req = array();
 		}
@@ -1211,7 +1192,7 @@
 					break;
 				}
 			}
-			$datapart .= '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;font-size: ' . $fontsize . 'px;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
+			$datapart .= '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
 			$datapart .= '<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
@@ -1220,7 +1201,7 @@
 			if($change_all){
 				$onchange = 'change_all('.$layer_id.', '.$k.', \''.$layer_id.'_'.$name.'\');';
 			}
-			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'font-size: '.$fontsize.'px"';
+			$datapart .= '<select class="' . $field_class . '" tabindex="1" title="'.$alias.'" style="'.$select_width.'"';
 			if($req_by != ''){
 				$onchange = 'update_require_attribute(this, \''.$req_by.'\', '.$k.','.$layer_id.', new Array(\''.implode("','", $attributenames).'\'));'.$onchange;
 			}
@@ -1256,7 +1237,7 @@
 		return $datapart;
 	}
 	
-	function Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $fontsize, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+	function Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if (!is_array($req)) {
 			$req = array();
 		}
@@ -1271,7 +1252,7 @@
 		$datapart .= '<div class="custom-select" id="custom_select_' . $layer_id . '_' . $name . '_' . $k . '">';
 		if ($privileg == '0') {
 			$datapart .= '
-				<div class="placeholder" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
+				<div class="placeholder" title="' . $alias . '" style="' . $select_width . '">
 					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
 					<span>' . $auswahlfeld_output . '</span>
 					<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
@@ -1291,7 +1272,7 @@
 							 id="' . $layer_id . '_' . $name . '_' . $k . '" 
 							 name="' . $fieldname . '"
 							 value="' . $value . '">
-				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . 'font-size: ' . $fontsize . 'px">
+				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . '">
 					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
 					<span>' . $auswahlfeld_output . '</span>
 				</div>

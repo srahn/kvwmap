@@ -1,10 +1,8 @@
 <tr>
 	<td colspan="2"><?php $maxRows = ($this->formvars['anzahl'] > MAXQUERYROWS ? $this->formvars['anzahl'] : MAXQUERYROWS); ?>
 		<i><? echo $layer['Name']; ?></i>:
-		<a
-			style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px"
-			href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);"
-		><span id="sellectDatasetsLinkText"><?
+		<a href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
+			<span id="sellectDatasetsLinkText"><?
 			if ($layer['count'] > $maxRows) {
 				echo $strSelectAllShown;
 			} else {

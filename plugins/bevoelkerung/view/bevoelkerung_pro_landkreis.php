@@ -66,7 +66,7 @@ function change_orderby(attribute, layer_id){
 			$this->qlayerset[$i]['attributes']['alias'][$j] = $this->qlayerset[$i]['attributes']['name'][$j];
 		}
 		if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
-			echo '<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a></td>';
+			echo '<td><a title="'.$this->qlayerset[$i]['attributes']['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$this->qlayerset[$i]['attributes']['name'][$j].'\', '.$this->qlayerset[$i]['Layer_ID'].');"><b>'.$this->qlayerset[$i]['attributes']['alias'][$j].'</b></a></td>';
 		}
 	}
 ?></tr>
@@ -83,10 +83,7 @@ function change_orderby(attribute, layer_id){
 							echo ' maxlength="'.$this->qlayerset[$i]['attributes']['length'][$j].'"';
 						}
 						if($this->qlayerset[$i]['attributes']['privileg'][$j] == '0' OR $lock[$k]){
-							echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#ffffff; border: none"';
-						}
-						else{
-							echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+							echo ' readonly style="background-color:#ffffff; border: none"';
 						}
 						if($j > 0)echo ' size="7"';else echo ' size="20"';
 						echo ' type="text" name="'.$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j].';'.$this->qlayerset[$i]['attributes']['type'][$j].'" id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]]).'">';

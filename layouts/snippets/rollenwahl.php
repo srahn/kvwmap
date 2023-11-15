@@ -674,15 +674,6 @@ if ($this->Fehlermeldung!='') {
 								</tr>
 								<tr>
 									<td class="rollenwahl-option-header">
-										<? echo $strFontSizeGLE; ?>:
-									</td>
-									<td class="rollenwahl-option-data">
-										<input name="fontsize_gle" type="text" value="<? echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2">&nbsp;
-										<span data-tooltip="<? echo $strHintFontSizeGLE; ?>"></span>
-									</td>
-								</tr>
-								<tr>
-									<td class="rollenwahl-option-header">
 										<? echo $strTooltipQuery; ?>:
 									</td>
 									<td  class="rollenwahl-option-data">
