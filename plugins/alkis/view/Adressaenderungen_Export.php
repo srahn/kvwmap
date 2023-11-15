@@ -4,14 +4,6 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 }
 ?>
 <table border="0" cellspacing="2" cellpadding="0">
-	<? if($this->filename != ''){ ?>
-	<tr> 
-		<td>&nbsp;</td>
-  </tr>
-  <tr> 
-		<td>Export-Datei erzeugt:&nbsp;<a target="_blank" href="<? echo $this->filename; ?>">herunterladen</a></td>
-  </tr>
-  <? } ?>
 	<tr> 
 		<td>&nbsp;</td>
   </tr>
