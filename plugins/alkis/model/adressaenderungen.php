@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fï¿½r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -103,13 +103,13 @@ class adressaenderungen {
   }
 
   function delete_old_entries(){
-		#herrenlose neue Anschriften löschen
+		#herrenlose neue Anschriften lï¿½schen
 		$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id NOT IN ";
 		$sql.= "(SELECT ax_anschrift_temp.gml_id FROM alkis.ax_anschrift_temp, alkis.ax_person_temp WHERE ax_person_temp.hat = ax_anschrift_temp.gml_id)";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql, 4, 0);
 		
-		# übernommene Anschriften abfragen
+		# ï¿½bernommene Anschriften abfragen
 		$sql = "SELECT ax_anschrift_temp.gml_id ";
 		$sql.= "FROM alkis.ax_anschrift_temp, alkis.ax_anschrift ";
     $sql.= " WHERE ((ax_anschrift_temp.ort_post IS NULL AND (ax_anschrift.ort_post IS NULL OR ax_anschrift.ort_post = '')) OR ax_anschrift_temp.ort_post = ax_anschrift.ort_post)";
@@ -122,15 +122,15 @@ class adressaenderungen {
     while($rs = pg_fetch_array($ret[1])){
       $uebernommene_anschriften[] = $rs['gml_id'];
     }
-		if(count($uebernommene_anschriften) > 0){
-			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# übernommene Anschriften löschen
+		if(@count($uebernommene_anschriften) > 0){
+			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# ï¿½bernommene Anschriften lï¿½schen
 			#echo $sql.'<br>';
 			$ret = $this->database->execSQL($sql, 4, 0);
-			$sql = "DELETE FROM alkis.ax_person_temp WHERE hat IN ('".implode("','", $uebernommene_anschriften)."')";						# die Einträge in ax_person_temp mit neuen übernommenen Anschriften löschen
+			$sql = "DELETE FROM alkis.ax_person_temp WHERE hat IN ('".implode("','", $uebernommene_anschriften)."')";						# die Eintrï¿½ge in ax_person_temp mit neuen ï¿½bernommenen Anschriften lï¿½schen
 			#echo $sql.'<br>';
 			$ret = $this->database->execSQL($sql, 4, 0);
 		}
-		$sql = "DELETE FROM alkis.ax_person_temp ";																																			# die Einträge in ax_person_temp mit alten übernommenen Anschriften löschen
+		$sql = "DELETE FROM alkis.ax_person_temp ";																																			# die Eintrï¿½ge in ax_person_temp mit alten ï¿½bernommenen Anschriften lï¿½schen
 		if(POSTGRESVERSION >= '810')$sql.="USING alkis.ax_person ";
 		$sql.= "WHERE ax_person_temp.gml_id = ax_person.gml_id AND ax_person_temp.hat = ANY(ax_person.hat)";
 		#echo $sql.'<br>';
@@ -145,7 +145,7 @@ class adressaenderungen {
 			$fp = fopen(IMAGEPATH.'/'.$filename, 'w');
 			$currenttime=date('Y-m-d_H_i_s',time());
 			fwrite($fp, $this->predata.chr(10));
-      for($i = 0; $i < count($this->personen); $i++){
+      for($i = 0; $i < @count($this->personen); $i++){
         $data = '<wfsext:Replace vendorId="AdV" safeToIgnore="false">
 				<AX_Person gml:id="'.$this->personen[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->personen[$i]['gml_id'].'</gml:identifier>
@@ -175,7 +175,7 @@ class adressaenderungen {
 			</wfsext:Replace>'.chr(10);
         fwrite($fp, $data);
       }
-			for($i = 0; $i < count($this->anschriften); $i++){
+			for($i = 0; $i < @count($this->anschriften); $i++){
         $data = '<wfs:Insert>
 				<AX_Anschrift gml:id="'.$this->anschriften[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->anschriften[$i]['gml_id'].'</gml:identifier>
