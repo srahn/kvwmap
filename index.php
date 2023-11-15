@@ -799,8 +799,12 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten anzeigen
 			case 'Sachdaten' : {
-				if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
-				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
+				if ($GUI->formvars['CMD'] != '') {
+					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
+				}
+				if ($GUI->formvars['legendtouched']) {
+					$GUI->save_legend_role_parameters();
+				}
 				$GUI->queryMap();
 			}break;
 
@@ -1255,7 +1259,7 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				if (!$GUI->user->is_gast()) {
+				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};
 				$GUI->daten_export_exportieren();

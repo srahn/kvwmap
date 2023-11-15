@@ -75,7 +75,7 @@
 							$attributes['alias'][$j] = $attributes['name'][$j];
 						}
 						echo '<table width="100%"><tr><td>';
-						echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color: #222222;" title="'.$attributes['tooltip'][$j].'">'.$attributes['alias'][$j].'</span>';
+						echo '<span style="color: #222222;" title="'.$attributes['tooltip'][$j].'">'.$attributes['alias'][$j].'</span>';
 						if($attributes['nullable'][$j] == '0' AND $attributes['privileg'][$j] != '0'){
 							echo '<span title="Eingabe erforderlich">*</span>';
 						}
@@ -89,7 +89,7 @@
 								echo '<input readonly style="background-color:#e8e3da;" size="6" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 							}
 							else{
-		  					echo '<select title="'.$attributes['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+		  					echo '<select title="'.$attributes['alias'][$j].'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 								for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
 									echo '<option ';
 									if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
@@ -105,10 +105,10 @@
 									case 'Textfeld' : {
 										echo '<textarea cols="23" onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+											echo ' readonly style="border:0px;background-color:transparent;font-family:arial,verdana,helvetica,sans-serif;"';
 										}
 										else{
-											echo ' style="font-family:arial,verdana,helvetica,sans-serif;font-size: '.$this->user->rolle->fontsize_gle.'px"';
+											echo ' style="font-family:arial,verdana,helvetica,sans-serif;"';
 										}
 										echo ' rows="2" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">'.$layer['shape'][$k][$attributes['name'][$j]].'</textarea>';
 									}break;
@@ -133,12 +133,12 @@
 													}
 												}
 											}
-                      echo '<input readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
+                      echo '<input readonly style="border:0px;background-color:transparent;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
                       $auswahlfeld_output = '';
                       $auswahlfeld_output_laenge = '';
 										}
 										else{
-											echo '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'font-size: '.$this->user->rolle->fontsize_gle.'px"';
+											echo '<select title="'.$attributes['alias'][$j].'" style="'.$select_width.'"';
 											if($attributes['name'][$j] == 'gebietstyp_s'){
 												echo 'onchange="update_gebietstyp();update_require_attribute(\''.$attributes['req_by'][$j].'\', '.$k.','.$layer['Layer_ID'].', new Array(\''.implode("','", $attributes['name']).'\'));set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" ';												
 											}
@@ -184,7 +184,7 @@
 									}break;
 
 									case 'SubFormPK' : {
-										echo '<input style="font-size: '.$this->user->rolle->fontsize_gle.'px"';
+										echo '<input ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="background-color:#e8e3da;"';
 										}
@@ -200,7 +200,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													echo 	' target="_blank"';
 												}
-												echo 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strShowPK.'</a>&nbsp;';
+												echo 	' >'.$strShowPK.'</a>&nbsp;';
 											}
 											if($attributes['subform_layer_privileg'][$j] > 0){
 												echo '|&nbsp;<a href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz&selected_layer_id='.$attributes['subform_layer_id'][$j];
@@ -212,7 +212,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													echo 	' target="_blank"';
 												}
-												echo 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strNewPK.'</a>';
+												echo 	' >'.$strNewPK.'</a>';
 											}
 										}
 									}break;
@@ -224,7 +224,7 @@
 											if($dataset[$attribute_foreign_keys[$f]] == ''){
 												$dataset[$attribute_foreign_keys[$f]] = $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar'];
 											}
-											echo '<input style="font-size: '.(0.9*$this->user->rolle->fontsize_gle).'px';
+											echo '<input style="';
 											if($attributes['privileg'][$attribute_foreign_keys[$f]] == '0' OR $lock[$k]){
 												echo ';background-color:transparent;border:0px;display:none;background-color:#e8e3da;" readonly ';
 											}
@@ -237,7 +237,7 @@
 											}
 											$this->form_field_names .= $layer['Layer_ID'].';'.$attributes['real_name'][$attribute_foreign_keys[$f]].';'.$attributes['table_name'][$attribute_foreign_keys[$f]].';'.$dataset[$attributes['table_name'][$attribute_foreign_keys[$f]].'_oid'].';TextFK;0;varchar|';
 										}
-										echo '<input style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px"';
+										echo '<input style="border:0px;background-color:transparent;"';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
 											echo ' readonly style="background-color:#e8e3da;"';
 										}
@@ -253,7 +253,7 @@
 												if($attributes['no_new_window'][$j] != true){
 													echo 	' target="_blank"';
 												}
-												echo 	' style="font-size: '.$this->user->rolle->fontsize_gle.'px">'.$strShowFK.'</a>';
+												echo 	' >'.$strShowFK.'</a>';
 											}
 										}
 									}break;
@@ -319,7 +319,7 @@
 									}break;
 
 									case 'Time': {
-										echo '<input readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+										echo '<input readonly style="border:0px;background-color:transparent;"';
 										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 									}break;
 
@@ -347,7 +347,7 @@
 
 										}
 										if($attributes['privileg'][$j] != '0' AND !$lock[$k]){
-											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="43" type="file" onchange="this.title=this.value;" accept="image/*" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 										}
 										else{
 											echo '&nbsp;';
@@ -356,7 +356,7 @@
 
 									case 'Link': {
 										if ($layer['shape'][$k][$attributes['name'][$j]]!='') {
-											echo '<a class="link" target="_blank" style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
+											echo '<a class="link" target="_blank" href="'.$layer['shape'][$k][$attributes['name'][$j]].'">';
 											if($attributes['options'][$j] != ''){
 												echo $attributes['options'][$j];
 											}
@@ -366,7 +366,7 @@
 											echo '</a><br>';
 										}
 										if($attributes['privileg'][$j] != '0' OR $lock[$k]){
-											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" style="font-size: '.$this->user->rolle->fontsize_gle.'px" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
+											echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" size="61" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 										}else{
 											echo '<input type="hidden" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 										}
@@ -400,7 +400,7 @@
 										else{
 											echo '<a ';
 											if($explosion[2] != 'no_new_window'){echo 'target="_blank"';}
-											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px" href="'.$href.'">';
+											echo ' href="'.$href.'">';
 											echo $alias;
 											echo '</a><br>';
 										}
@@ -409,10 +409,7 @@
 									case 'Fläche': {
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" class="custom_area" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#e8e3da;"';
-										}
-										else{
-											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+											echo ' readonly style="background-color:#e8e3da;"';
 										}
 										echo ' size="'.$size.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.htmlspecialchars($layer['shape'][$k][$attributes['name'][$j]]).'">';
 									}break;
@@ -422,10 +419,7 @@
 										$value = tausenderTrenner($layer['shape'][$k][$attributes['name'][$j]]);
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
-										}
-										else{
-											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+											echo ' readonly style="border:0px;background-color:transparent;"';
 										}
 										if($attributes['name'][$j] == 'lock'){
 											echo ' type="hidden"';
@@ -440,10 +434,7 @@
 										$value = $layer['shape'][$k][$attributes['name'][$j]];
 										echo '<input onchange="set_changed_flag(document.GUI.changed_'.$layer['Layer_ID'].'_'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].')" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$attributes['alias'][$j].'" ';
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-											echo ' readonly style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;"';
-										}
-										else{
-											echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+											echo ' readonly style="border:0px;background-color:transparent;"';
 										}
 										if($attributes['name'][$j] == 'lock'){
 											echo ' type="hidden"';
@@ -513,16 +504,16 @@
 	<?
 									if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=PolygonEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
 	<?
 									} elseif($geomtype == 'POINT') {
 	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=PointEditor&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
 	<?
 				    				}
 				    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 	?>
-				    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
+				    					<a href="index.php?go=LineEditor&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>&selected_layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strEditGeom; ?></a>
 	<?
 				    				}
 	?>
@@ -546,16 +537,16 @@
 <?
 								if($geomtype == 'POLYGON' OR $geomtype == 'MULTIPOLYGON' OR $geomtype == 'GEOMETRY'){
 ?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomtoPolygon&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
 <?
 								} elseif($geomtype == 'POINT') {
 ?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomtoPoint&dimension=<? echo $dimension; ?>&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&tablename=<? echo $tablename; ?>&columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
 <?
 			    				}
 			    				elseif($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 ?>
-			    					<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
+			    					<a href="index.php?go=zoomToLine&oid=<?php echo $layer['shape'][$k][$tablename.'_oid']; ?>&layer_tablename=<? echo $tablename; ?>&layer_columnname=<? echo $columnname; ?>&layer_id=<? echo $layer['Layer_ID'];?>"><? echo $strMapZoom; ?></a>
 <?
 			    				}
 ?>

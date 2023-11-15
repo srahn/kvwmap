@@ -187,6 +187,7 @@ class spatial_processor {
     	$rs[0] = $rs[0]/10000;
     	$rs[0] = round($rs[0],1);
     }
+		$rs[0] = str_replace('.', ',', $rs[0]);
     return $rs[0].'█'.$rs[0];
   }
   
@@ -199,6 +200,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
+		$rs[0] = str_replace('.', ',', $rs[0]);
     return $rs[0].'█'.$rs[0];
   }
 	

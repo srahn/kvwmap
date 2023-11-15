@@ -5,9 +5,12 @@
 	# Variablensubstitution
 	$layer = $this->qlayerset[$i];
 	$layer_id = $layer['Layer_ID'];
-	if($this->currentform == 'document.GUI2')$size = 40;
-	else $size = 61;
-	$linksize = $this->user->rolle->fontsize_gle - 1;
+	if ($this->currentform == 'document.GUI2') {
+		$size = 40;
+	}
+	else {
+		$size = 61;
+	}
 	$select_width = '';
 ?>
 
@@ -167,8 +170,8 @@
 			<? } ?>
 			  <tbody class="gle">
 <?		$trans_oid = explode('|', $layer['shape'][$k]['lock']);
-			if($layer['shape'][$k]['lock'] == 'bereits übertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
-				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits übertragen und kann nicht bearbeitet werden.</span></td></tr>';
+			if($layer['shape'][$k]['lock'] == 'bereits ï¿½bertragen' OR $trans_oid[1] != '' AND $layer['shape'][$k][$layer['maintable'].'_oid'] == $trans_oid[1]){
+				echo '<tr><td colspan="2" align="center"><span class="red">Dieser Datensatz wurde bereits ï¿½bertragen und kann nicht bearbeitet werden.</span></td></tr>';
 				$lock[$k] = true;
 			}
 			for($j = 0; $j < count($layer['attributes']['name']); $j++){
@@ -236,7 +239,7 @@
 						}
 						echo '</td></tr></table>';
 						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')).'><div id="formelement">';
-						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname);
+						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 						if($layer['attributes']['privileg'][$j] >= '0' AND !($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
 							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 						}
@@ -258,7 +261,7 @@
 					else{
 						$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 					}
-					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){		# wenn die nï¿½chste Gruppe anders ist, Tabelle schliessen
 						echo '</table></td></tr>';
 					}
 				}
@@ -321,7 +324,7 @@
 						else{		# bei WFS-Layern
 ?>						<table cellspacing="0" cellpadding="0">
 								<tr>
-									<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+									<td style="padding: 0 0 0 5;"><a href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 								</tr>
 							</table>
 <?															
@@ -366,7 +369,7 @@
 			<table width="100%" border="0" cellspacing="4" cellpadding="0">
 				<tr>
 					<td colspan="2">
-						<i><? echo $layer['Name'] ?></i>:&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
+						<i><? echo $layer['Name'] ?></i>:&nbsp;<a href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
 						<? if ($layer['count'] > MAXQUERYROWS) {
 						    echo $strSelectAllShown;
 						   } else {
@@ -424,7 +427,7 @@
 				</tr>
 				<tr style="display:none">
 					<td height="23" colspan="3">
-						&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+						&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 					</td>
 				</tr>
 				<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">
@@ -462,7 +465,7 @@
 								</td>
 								<td>
 									<select style="width:133px" name="chartvalue_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-										<option value="">--- Bitte Wählen ---</option>
+										<option value="">--- Bitte Wï¿½hlen ---</option>
 										<?
 										for($j = 0; $j < count($layer['attributes']['name']); $j++){
 											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
@@ -479,7 +482,7 @@
 								</td>
 								<td>
 									<select style="width:133px" name="chartsplit_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-										<option value="">--- Bitte Wählen ---</option>
+										<option value="">--- Bitte Wï¿½hlen ---</option>
 										<?
 										for($j = 0; $j < count($layer['attributes']['name']); $j++){
 											if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){

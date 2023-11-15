@@ -1591,7 +1591,8 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function rotate_point_direction(){
-		angle = 360 - enclosingForm.angle.value;
+		angle = 360 - enclosingForm.angle.value.replace(",", ".");
+		console.log(angle);
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");

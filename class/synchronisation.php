@@ -86,6 +86,18 @@ class synchro {
 			'pending' => 'bilder'
 		)
 	);
+	public $Stelle;
+	public $user;
+	public $database;
+	public $count;
+	public $commands;
+	public $trans_id;
+	public $result;
+	public $newcount;
+	public $oldcount;
+	public $already_exported_layers;
+	public $already_imported_layers;
+	public $imagecount;
 
 	function __construct($stelle, $user, $database) {
 		$this->Stelle = $stelle;
@@ -224,6 +236,7 @@ class synchro {
 
 	function import_layer_table_data($mapDB, $attributes, $layerdb, $layer_id, $layername, $withimages, $username, $passwort) {
 		$this->already_imported_layers[] = $layer_id;
+		$layername = $layername ?? $layer_id;
 		# erst alle neuen Datensätze
 		$sql = "SELECT * FROM ".$attributes['all_table_names'][0];
 		//for($j = 1; $j < count($attributes['all_table_names']); $j++) {
@@ -249,7 +262,7 @@ class synchro {
 					$new_image = fopen($filename, 'w');
 					fwrite($new_image, $image_string);
 					fclose($new_image);
-					$rs[key($rs)] = $filename.'&original_name='.$layername.'_'.$i.'.'.$datei_erweiterung;
+					$rs[key($rs)] = $filename . '&original_name=' . $layername . '_' . $i . '.' . $datei_erweiterung;
 				}
 				if($k > 0) {
 					fwrite($fp, '~');
@@ -321,7 +334,7 @@ class synchro {
 				if(!in_array($subform[0], $this->already_imported_layers)) {
 					$subform_layer = $subform[0];
 					$attributes = $mapDB->read_layer_attributes($subform_layer, $layerdb, NULL);
-					if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $subform_layer, $withimages, $username, $passwort)) {
+					if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $subform_layer, '', $withimages, $username, $passwort)) {
 						$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$subform_layer.".sql ".$this->database->dbName;
 					}
 				}
@@ -344,8 +357,16 @@ class synchro {
 	* 	- liefert die Deltas und Sync-Daten zurück
 	*/
 	function sync($client_id, $username, $schema_name, $table_name, $client_time, $last_client_version, $client_deltas) {
+		$this->database->gui->deblog->write('client_id: ' . $client_id);
+		$this->database->gui->deblog->write('username: ' . $username);
+		$this->database->gui->deblog->write('schema_name: ' . $schema_name);
+		$this->database->gui->deblog->write('table_name: ' . $table_name);
+		$this->database->gui->deblog->write('client_time: ' . $client_time);
+		$this->database->gui->deblog->write('last_client_version: ' . $last_client_version);
+		$this->database->gui->deblog->write('client_deltas: ' . print_r($client_deltas, true));
 		$pull_from_version = $last_client_version + 1;
 		$client_pushed_deltas = count($client_deltas->rows) > 0;
+		$log = '';
 
 		if (!$client_pushed_deltas) {
 			# Because client sent no deltas, request for new deltas starting with pull_from_version in server database before creating a synchronization in sync table
@@ -467,6 +488,7 @@ class synchro {
 				COMMIT;
 			";
 			$log .= $sql;
+			$this->database->gui->deblog->write('Sync with sql: ' . $sql);
 			#echo '<br>Sql: ' . $sql;
 			$this->database->debug->write("SQL der Transaktion für die Synchronisation: " . $sql, 4);
 			$res = $this->database->execSQL($sql, 0, 1, true);
@@ -475,6 +497,7 @@ class synchro {
 					'success' => false,
 					'err_msg' => 'Fehler bei der Synchronisation auf dem Server. ' . $res[1]
 				);
+				$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
 				return $result;
 			}
 		}
@@ -503,6 +526,7 @@ class synchro {
 			ORDER BY version;
 		";
 		$log .= $sql;
+		$this->database->gui->deblog->write('Frage deltas vom Server ab mit sql: ' . $sql);
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {
@@ -510,6 +534,7 @@ class synchro {
 				'success' => false,
 				'err_msg' => 'Fehler bei der Synchronisation auf dem Server. ' . $res[1]
 			);
+			$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
 			return $result;
 		}
 		$deltas = array();
@@ -532,6 +557,7 @@ class synchro {
 				pull_from_version = " . $pull_from_version . "
 		";
 		$log.=$sql;
+		$this->database->gui->deblog->write('Frage Daten der Synchronisation ab: ' . $sql);
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
 		if ($res[0]) {
@@ -540,6 +566,7 @@ class synchro {
 				'success' => false,
 				'err_msg' => 'Fehler bei der Syncronisation auf dem Server. ' . $res[1]
 			);
+			$this->database->gui->deblog->write('Fehler bei Abfrage: ' . $res[1]);
 			return $result;
 		}
 		$sync_data = array();
@@ -554,7 +581,7 @@ class synchro {
 			'deltas' => $deltas,
 			'log'	=> $log
 		);
-
+		$this->database->gui->deblog->write('Result von sync: ' . print_r($result, true));
 		return $result;
 	}
 }

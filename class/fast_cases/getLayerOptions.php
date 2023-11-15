@@ -948,7 +948,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -967,7 +967,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -1015,7 +1015,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -1031,7 +1031,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4);
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
 		}
 		else{
@@ -1133,7 +1133,7 @@ class rolle {
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
@@ -1181,7 +1181,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1332,7 +1331,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -1642,35 +1641,11 @@ class db_mapObj {
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(
-			'if_empty_use_query' => false,
-			'use_generic_data_sql' => false
+			'if_empty_use_query' => false
 		);
 		$options = array_merge($default_options, $options);
 		global $language;
-		include_once(CLASSPATH . 'Layer.php');
-		$layerObj = Layer::find_by_id($this->GUI, $layer_id);
-		if ($options['use_generic_data_sql']) {
-			$options = array(
-				'attributes' => array(
-					'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-					'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-					'where' => array('k.stelle_id = ' . $this->GUI->user->rolle->stelle_id)
-				),
-				'geom_attribute' => 'position',
-				'geom_type_filter' => true
-			);
-			$result = $layerObj->get_generic_data_sql($options);
-			if ($result['success']) {
-				$data = $result['data_sql'];
-			}
-			else {
-				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
-				return $result;
-			}
-		}
-		else {
-			$data = str_replace('$scale', '1000', $this->getData($layer_id));
-		}
+		$data = str_replace('$scale', '1000', $this->getData($layer_id));
 
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
@@ -1695,7 +1670,7 @@ class db_mapObj {
 			return $this->getPathAttributes($database, $path);
 		}
 		else {
-			$this->GUI->add_message('waring', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
+			$this->GUI->add_message('warning', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
 			return NULL;
 		}
 	}

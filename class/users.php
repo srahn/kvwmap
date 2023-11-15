@@ -320,7 +320,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -1171,7 +1171,6 @@ class user {
 					, maxx = " . $newExtent['maxx'] . "
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
-					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
 					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'

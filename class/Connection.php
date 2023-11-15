@@ -1,63 +1,87 @@
 <?php
 include_once(CLASSPATH . 'MyObject.php');
 class Connection extends MyObject {
-
 	static $write_debug = false;
+	static $title = array(
+		'german' => 'Datenbankverbindungen',
+		'english' => 'Database connections',
+		'low_german' => 'Datenbankvebindungen'
+	);
+	static $table_name = 'connections';
+	static $attributes = array(
+		[
+			'attribute' => 'id',
+			'alias'			=> array(
+				'german'		=> 'ID',
+				'english' => 'ID',
+				'low_german' => 'ID'
+			),
+			'type'			=> 'text',
+			'privileg'	=> '',
+			'size'			=> 2
+		],
+		[
+			'attribute' => 'name',
+			'alias'			=> array(
+				'german'		=> 'Bezeichnung',
+				'english' => 'Name',
+				'low_german' => 'Bezeichnung'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 40
+		],
+		[
+			'attribute' => 'host',
+			'alias'			=> array(
+				'german' => 'Host',
+				'english' => 'Host'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 8
+		],
+		[
+			'attribute' => 'port',
+			'alias'			=> array(
+				'german' => 'Port',
+				'english' => 'Port'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 5
+		],
+		[
+			'attribute' => 'dbname',
+			'alias'			=> array(
+				'german' => 'Datenbankname'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 10
+		],
+		[
+			'attribute' => 'user',
+			'alias'			=> array(
+				'german' => 'Nutzername'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 15
+		],
+		[
+			'attribute' => 'password',
+			'alias'			=> array(
+				'Passwort'
+			),
+			'type'			=> 'password',
+			'privileg'	=> 'editable',
+			'size'			=> 12
+		],
+	);
 
 	function __construct($gui) {
 		parent::__construct($gui, 'connections');
-		$this->alias = 'Datenbankverbindungen';
-		$this->attributes = array(
-			[
-				'attribute' => 'id',
-				'alias'			=> 'ID',
-				'type'			=> 'text',
-				'privileg'	=> '',
-				'size'			=> 2
-			],
-			[
-				'attribute' => 'name',
-				'alias'			=> 'Bezeichnung',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 40
-			],
-			[
-				'attribute' => 'host',
-				'alias'			=> 'Host',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 8
-			],
-			[
-				'attribute' => 'port',
-				'alias'			=> 'Port',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 5
-			],
-			[
-				'attribute' => 'dbname',
-				'alias'			=> 'Datenbankname',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 10
-			],
-			[
-				'attribute' => 'user',
-				'alias'			=> 'Nutzername',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 15
-			],
-			[
-				'attribute' => 'password',
-				'alias'			=> 'Passwort',
-				'type'			=> 'password',
-				'privileg'	=> 'editable',
-				'size'			=> 12
-			],
-		);
 		$this->validations = array(
 			array(
 				'attribute' => 'name',

@@ -502,15 +502,7 @@
 				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
-					$options = array(
-						'attributes' => array(
-							'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-							'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id')
-						),
-						'geom_attribute' => 'position',
-						'geom_type_filter' => true
-					);
-					$result = $layerObj->get_generic_data_sql($options);
+					$result = $layerObj->get_generic_data_sql();
 					if ($result['success']) {
 						$layer->set('data', $result['data_sql']);
 					}
