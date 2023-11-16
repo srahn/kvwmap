@@ -507,7 +507,9 @@ class ddl {
 						} break;
 
 						default : {
+							$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 							$value = $this->result[$i][$attributes['name'][$j]];
+							$value_offset_attribute = $this->result[$i][$offset_attribute];
 							$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
 							$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 							$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
@@ -532,11 +534,10 @@ class ddl {
 								$attributes['form_element_type'][$j] == 'Dokument'
 							) {
 								#### relative Positionierung über Offset-Attribut #
-								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if ($offset_attribute != '') {		# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
 									if ($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
-										if ($this->layout['dont_print_empty'] AND $value == '') {
+										if ($this->layout['dont_print_empty'] AND $value_offset_attribute == '') {
 											$y = 0;
 										}
 										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
