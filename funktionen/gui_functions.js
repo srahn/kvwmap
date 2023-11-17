@@ -439,6 +439,13 @@ function resizemap2window(){
 	}
 }
 
+function fetchMessageFromURL(url) {
+  fetch(url)
+   .then(response => response.json())
+   .then(data => message([{'type':'notice','msg': data.header}, {'type':'info', 'msg': data.body}]))    	
+   .catch(error => message([{'type': 'error', 'msg' : error}]));
+}
+
 /*
 * Function create content to show messages of different types
 * in div message_box
