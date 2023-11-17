@@ -4,12 +4,6 @@
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
-	<style>
-		table.tgle td{
-			font-size: <? echo $this->user->rolle->fontsize_gle; ?>px;
-		}
-	</style>
-
 	<script>
 		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 	</script>

@@ -11,9 +11,12 @@ $visibility = '';
 $dataset_operation_position = $this->user->rolle->dataset_operations_position;
 # Variablensubstitution
 $layer = $this->qlayerset[$i];
-if($this->currentform == 'document.GUI2')$size = 40;
-else $size = 61;
-$linksize = $this->user->rolle->fontsize_gle - 1;
+if ($this->currentform == 'document.GUI2') {
+	$size = 40;
+}
+else {
+	$size = 61;
+}
 $select_width = ''; 
 if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 	$layer['Name'] = $layer['alias'];
@@ -223,7 +226,7 @@ if ($doit == true) {
 										if($layer['attributes']['labeling'][$j] != 2){
 											$cell['properties'] = 'class="gle-attribute-name"';
 											$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-											$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, (value_of($this->formvars, 'printversion') == '' AND $anzObj > 1) ? true : false);
+											$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, (value_of($this->formvars, 'printversion') == '' AND $anzObj > 1) ? true : false);
 											if($nl AND $layer['attributes']['labeling'][$j] != 1){
 												$next_row['contains_attribute_names'] = true;
 												$next_row['cells'][] = $cell;
@@ -247,7 +250,7 @@ if ($doit == true) {
 										if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
 
 										######### Attributwert #########
-										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
+										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 										$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j]));
 										if ($nl){
@@ -352,7 +355,7 @@ if ($doit == true) {
 													<table cellspacing="0" cellpadding="0">
 														<tr>
 															<td style="padding: 0 0 0 5;">
-																<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img	src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																<a href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img	src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 															</td>
 														</tr>
 													</table><?

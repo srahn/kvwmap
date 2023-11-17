@@ -15,7 +15,6 @@
   $strVietnamese="wietnamski"; 
   $strZoomFactor="skala pomniejszania i powi&#281;kszania"; 
   $strButtonNext="dalej"; 
-  $strFontSizeGLE="rozmiar tekstu GLE"; 
   $strHighlight="suwak jasno&#347;ci"; 
   $strPlatt="dialekt dolnoniemiecki"; 
   $strSearchColor="wynik - kolor";
@@ -25,7 +24,7 @@
 	$strHintVisuallyImpaired="W przypadku wybrania tej opcji, powierzchnia, a prace zostaną uproszczone w trybie odczytu. Ustawienie to nadaje się w szczególności dla osób niedowidzących. Jest jednak pewne funkcje są ukryte.";
 	$strShowMapFunctions="Show map functions bar";
 	$strHintShowMapFunctions="Uncheck this field to hide the menu bar below the map with the options to save map image, store properties and max map extent.";
-	$strRedlineTextOptions = "Feetext options";
+	$strRedlineTextOptions = "Freetext options";
 	$strRedlineTextColor = "Text color";
 	$strRedlineFontFamily = "Font family";
 	$strRedlineFontSize = "Font size";

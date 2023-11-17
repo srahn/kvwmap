@@ -25,7 +25,6 @@
 	$strVietnamese="Vietnamesisch";
 	$strZoomFactor="Zoomfaktor";
 	$strButtonNext="Weiter";
-	$strFontSizeGLE="GLE-Textgröße";
 	$strTooltipQuery="Objekt-Schnellinfo";
 	$strPlatt="Plattdeutsch";
 	$strSearchColor="eigene Abfragen/Import-Farbe";
@@ -74,7 +73,6 @@
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
 	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
 	$strHintUploadOnlyFileMetadata="Beim Hochladen von Dokumenten werden zunächst nur die Metadaten Dateiname, Änderungszeit und Dateigröße hochgeladen und gespeichert. Die Dateien selbst werden noch nicht hochgeladen. Als Vorschaubilder erscheinen dann nur Hinweise, dass die Dateien noch fehlen. Die Dateien können nachträglich hochgeladen werden, entweder über den Menüpunkt Dateien nachträglich hochladen oder bei ausgeschalteter Option einzeln im Sachdatenformular. Die Zuordnung der im Menü 'Daten nachträglich hochladen' hochgeladenen Dateien zu den Metadaten funktioniert nur, wenn es der selbe kvwmap-Nutzer macht, der auch die Metadaten hochgeladen hat und sich der Dateiname, die Dateigröße und das Änderungsdatum nicht zwischenzeitlich geändert haben.";
-	$strHintFontSizeGLE="Wählen Sie die Schriftgröße der Texte in der Sachdatenanzeige";
 	$strHintTooltipQuery="Wenn Sie diese Option auswählen, können Sie die Maus über ein Objekt eines abfragbaren Themas halten und erhalten eine kurze Information dazu.";
 	$strHinthist_timestamp="Wenn Sie hier ein Datum eingeben, werden ALKIS-Objekte in der Karte mit diesem historischen Stand dargestellt. Abfragen auf Flurstücke liefern ebenfalls Ergebnisse zu diesem historischen Stand.";
 	$strHintMenueButtons="Wenn Sie diese Option auswählen, werden oft verwendete Menüpunkte als separate Schaltfläche über dem Menü angezeigt.";

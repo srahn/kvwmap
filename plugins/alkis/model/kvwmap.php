@@ -1138,7 +1138,14 @@
     $adressaenderungen->read_anschriften();
 		$adressaenderungen->read_personen();
     $GUI->filename = $adressaenderungen->export_into_file();
-    $GUI->export_Adressaenderungen();
+    if ($GUI->filename != '') { 
+      ob_end_clean();
+      header('Content-type: application/octet-stream');
+      header("Content-disposition:	attachment; filename=" . basename($GUI->filename));
+      header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+      header('Pragma: public');
+      readfile($GUI->filename);
+    }
   };
 	
 	$GUI->export_flurst_csv = function() use ($GUI){

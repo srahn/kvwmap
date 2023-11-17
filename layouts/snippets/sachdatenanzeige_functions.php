@@ -282,7 +282,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var type;
 		values = new Array();
 		field_infos = field.name.split(';');
-		datatype = field_infos[6].replace('_', '');
+		datatype = field_infos[6]?.replace('_', '');
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
 			if (elements[i].classList[0] == id)	{

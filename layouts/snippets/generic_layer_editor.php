@@ -221,11 +221,11 @@ if ($doit == true) { ?>
 											echo 'width="100%"';
 											echo '><tr><td>';
 											if($this->formvars['printversion'] == '' AND $layer['attributes']['form_element_type'][$j] != 'SubFormPK' AND $layer['attributes']['form_element_type'][$j] != 'SubFormEmbeddedPK'){
-												echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
+												echo '<a title="Sortieren nach '.$layer['attributes']['alias'][$j].'" href="javascript:change_orderby(\''.$layer['attributes']['name'][$j].'\', '.$layer['Layer_ID'].');">
 																'.$layer['attributes']['alias'][$j].'</a>';
 											}
 											else{
-												echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+												echo '<span style="color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
 											}
 											if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
 												echo '<span title="Eingabe erforderlich">*</span>';
@@ -298,7 +298,7 @@ if ($doit == true) { ?>
 								if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 									echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}
-								echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle);
+								echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width);
 								echo '<div onmousedown="resizestart(document.getElementById(\'column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '\'), \'col_resize\');" style="position: absolute; transform: translate(4px); top: 0px; right: 0px; height: 100%; width: 8px; cursor: e-resize;"></div>';
 								echo '</td>';
 								if($layer['attributes']['privileg'][$j] >= '0'){
@@ -349,7 +349,7 @@ if ($doit == true) { ?>
 								else{		# bei WFS-Layern
 		?>						<table cellspacing="0" cellpadding="0">
 										<tr>
-											<td style="padding: 0 0 0 5;"><a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
+											<td style="padding: 0 0 0 5;"><a href="javascript:zoom2object('go=zoom2wkt&wkt=<? echo $layer['shape'][$k]['geom']; ?>&epsg=<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 										</tr>
 									</table>
 		<?															
@@ -434,7 +434,7 @@ if ($doit == true) { ?>
 											echo '<table ';
 											echo 'width="100%";';
 											echo '><tr><td>';
-											echo '<span style="font-size: '.$this->user->rolle->fontsize_gle.'px; color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
+											echo '<span style="color:#222222;">'.$layer['attributes']['alias'][$j].'</span>';
 											if($layer['attributes']['nullable'][$j] == '0' AND $layer['attributes']['privileg'][$j] != '0'){
 												echo '<span title="Eingabe erforderlich">*</span>';
 											}
@@ -480,7 +480,7 @@ if ($doit == true) { ?>
 													if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 														echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 													}
-													echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, true);
+													echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, true);
 												}
 												echo '</td>';
 											}
@@ -534,7 +534,7 @@ if ($doit == true) { ?>
 							</tr>
 							<tr style="display:none">
 								<td height="23" colspan="3">
-									&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+									&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 								</td>
 							</tr>
 							<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">

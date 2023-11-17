@@ -1190,6 +1190,10 @@ a.menuered:hover {
 	background-image: url(<? echo GRAPHICSPATH; ?>nicht_mehr_merken.png);
 }
 
+.url_dataset{
+	background-image: url(<? echo GRAPHICSPATH; ?>url_dataset.png);
+}
+
 .datensatz_loeschen{
 	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_loeschen.png);
 }

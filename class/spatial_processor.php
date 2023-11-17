@@ -200,6 +200,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
+		$rs[0] = str_replace('.', ',', $rs[0]);
     return $rs[0].'█'.$rs[0];
   }
 	

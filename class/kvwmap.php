@@ -5205,7 +5205,7 @@ echo '			</table>
 				if ($this->point['pointx'] != '') {
 					$this->formvars['loc_x'] = $this->point['pointx'];
 					$this->formvars['loc_y'] = $this->point['pointy'];
-					$this->formvars['angle'] = $this->point['angle'];
+					$this->formvars['angle'] = $value = str_replace('.', ',', $this->point['angle']);
 					$rect = ms_newRectObj();
 					$rect->minx = $this->point['pointx'] - 100;
 					$rect->maxx = $this->point['pointx'] + 100;
@@ -5235,6 +5235,9 @@ echo '			</table>
 	}
 
 	function PointEditor_Senden() {
+		$this->sanitize([
+			'angle' => 'float'
+		], true);
 		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -5407,6 +5410,9 @@ echo '			</table>
 	}
 
 	function LineEditor_Senden() {
+		$this->sanitize([
+			'linelength' => 'float'
+		], true);
 		include_(CLASSPATH . 'lineeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -5519,6 +5525,9 @@ echo '			</table>
 	}
 
 	function PolygonEditor_Senden(){
+		$this->sanitize([
+			'area' => 'float'
+		], true);
 		include_(CLASSPATH . 'polygoneditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
@@ -14480,12 +14489,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     # Liste der Formularelementnamen, die betroffen sind in der Reihenfolge,
     # wie die Spalten in der Abfrage
     $select =  "nZoomFactor,gui, CASE WHEN auto_map_resize = 1 THEN 'auto' ELSE CONCAT(nImageWidth,'x',nImageHeight) END AS mapsize";
-    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, fontsize_gle, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
+    $select .= ",CONCAT(minx,' ',miny,',',maxx,' ',maxy) AS newExtent, epsg_code, tooltipquery, runningcoords, showmapfunctions, showlayeroptions, showrollenfilter, menu_auto_close, menue_buttons, DATE_FORMAT(hist_timestamp,'%d.%m.%Y %T') as hist_timestamp";
     $from = "rolle";
     $where = "stelle_id='+this.form.Stelle_ID.value+' AND user_id=" . $this->user->id;
     $StellenFormObj->addJavaScript(
 			"onchange",
-			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,fontsize_gle,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
+			"$('#sign_in_stelle').show(); " . ((array_key_exists('stelle_angemeldet', $_SESSION) AND $_SESSION['stelle_angemeldet'] === true) ? "ahah('index.php','go=getRow&select=".urlencode($select)."&from=" . $from."&where=" . $where."',new Array(nZoomFactor,gui,mapsize,newExtent,epsg_code,tooltipquery,runningcoords,showmapfunctions,showlayeroptions,showrollenfilter,menu_auto_close,menue_buttons,hist_timestamp));" : "")
 			. ((value_of($this->formvars, 'show_layer_parameter')) ? "ahah('index.php','go=getLayerParamsForm&stelle_id='+document.GUI.Stelle_ID.value, new Array(document.getElementById('layer_parameters_div')), new Array('sethtml'))" : "")
 		);
     #echo URL.APPLVERSION."index.php?go=getRow&select=".urlencode($select)."&from=" . $from."&where=stelle_id=3 AND user_id=7";
@@ -15420,9 +15429,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 							if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
 								foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
-									$disabled_class_filter[] = '(' . mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) . ')';
+									$disabled_class_filter[] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
 								}
-								$filter .= " AND NOT (" . implode(' OR ', $disabled_class_filter) . ")";
+								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter) . "), true)";
 							}							
 							if($this->formvars['CMD'] == 'touchquery'){
 								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {

@@ -40,4 +40,5 @@
  $strNewDataset="neuen Datensatz anlegen";
  $strToBottom="nach unten";
  $strShowAllSeparat="alle separat anzeigen";
+ $strCreateDatasetLink="Link auf Datensatz";
 ?>

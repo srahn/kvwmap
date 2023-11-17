@@ -722,7 +722,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];

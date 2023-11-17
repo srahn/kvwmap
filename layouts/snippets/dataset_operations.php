@@ -72,7 +72,7 @@
 						</tr>
 						<tr style="display:none">
 							<td height="23" colspan="3">
-								&nbsp;&nbsp;&bull;&nbsp;<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
+								&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
 							</td>
 						</tr>
 						<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">

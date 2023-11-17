@@ -454,7 +454,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1670,7 +1669,6 @@ class rolle {
 					`language`,
 					`hidemenue`,
 					`hidelegend`,
-					`fontsize_gle`,
 					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
@@ -1717,7 +1715,6 @@ class rolle {
 					`language`,
 					`hidemenue`,
 					`hidelegend`,
-					`fontsize_gle`,
 					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
