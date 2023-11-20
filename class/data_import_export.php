@@ -361,7 +361,7 @@ class data_import_export {
 					if ($adjustments) {
 						$sql = $this->rename_reserved_attribute_names($schema, $table);
 					}				
-					$sql = "
+					$sql .= "
 						SELECT
 							replace(geometrytype(the_geom), 'MULTI', '') as geometrytype,
 							max(st_srid(the_geom)) as epsg,
