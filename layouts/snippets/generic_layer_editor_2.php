@@ -174,7 +174,10 @@ if ($doit == true) {
 								$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
 							}				
 				
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
+							if (
+									$layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1) or 
+									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]
+								) {		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
@@ -285,7 +288,10 @@ if ($doit == true) {
 								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" class="attr_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 								$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1)){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+							if (
+									$layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1) or 
+									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j+1]
+								){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 								echo output_table($table);
 								unset($table);
 								$table = array();
