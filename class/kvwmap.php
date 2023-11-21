@@ -15434,6 +15434,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter) . "), true)";
 							}							
 							if($this->formvars['CMD'] == 'touchquery'){
+								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
 									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
 								}
