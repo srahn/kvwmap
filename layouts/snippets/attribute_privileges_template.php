@@ -13,7 +13,7 @@
 	}
 ?>
 
-<td id="stellen_td_<? echo $this->stelle->id; ?>" <? if (array_key_exists('stellen_visibility', $this->formvars) AND !in_array($this->stelle->id, $this->formvars['stellen_visibility'])){echo 'style="display: none"';} ?> class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
+<td id="stellen_td_<? echo $this->stelle->id; ?>" <? if ($this->stelle->id != '' AND array_key_exists('stellen_visibility', $this->formvars) AND !in_array($this->stelle->id, $this->formvars['stellen_visibility'])){echo 'style="display: none"';} ?> class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
 			echo 'unterstelle';
 			if ($this->formvars['unterstellen_ausblenden']) {
 				echo ' hidden';
