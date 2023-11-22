@@ -1303,7 +1303,7 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
+	left: 0;
 	top: 1;
 }
 
@@ -1358,6 +1358,10 @@ a.menuered:hover {
 
 #mapimage{
 	position: relative;
+}
+
+#mapbuttons {
+	padding-left: 1px;
 }
 
 #showcoords, #showmeasurement{
