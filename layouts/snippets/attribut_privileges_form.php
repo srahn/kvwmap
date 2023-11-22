@@ -288,7 +288,7 @@ function update_stellen_visibility(){
 				<div style="flex-grow: 2; text-align: center; position: relative">
 					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
 						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
-						<select name="stellen_visibility[]" id="stellen_visibility" style="height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 1000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 							<option value="">- alle -</option>
 							<?
 							for($i = 0; $i < count($this->stellen['ID']); $i++){
