@@ -83,14 +83,20 @@ function toggle_unterstellen(){
 }
 
 function update_stellen_visibility(){
-	var options = document.getElementById('stellen_visibility').options;
-	for (var i=1; i < options.length; i++) {
-		var td = document.getElementById('stellen_td_' + options[i].value);
-    if (options[0].selected || options[i].selected) {
-      td.style.display = '';
+	var stellen = document.getElementById('stellen_visibility');
+	if (stellen.value != '') {
+		document.getElementById('stellendiv').classList.add('filtered');
+	}
+	else {
+		document.getElementById('stellendiv').classList.remove('filtered');
+	}
+	for (var i=1; i < stellen.options.length; i++) {
+		var td = document.getElementById('stellen_td_' + stellen.options[i].value);
+    if (stellen.options[i].selected) {
+      td.classList.add('visible');
     }
 		else {
-			td.style.display = 'none';
+			td.classList.remove('visible');
 		}
   }
 }
@@ -181,6 +187,12 @@ function update_stellen_visibility(){
 	.apt-attributname:hover {
 		width: auto;
 		outline: 1px solid #ccc;
+	}
+	#stellendiv.filtered td.apt-main-td {
+		display: none;
+	}
+	#stellendiv.filtered td.apt-main-td.visible {
+		display: revert;
 	}
 	</style>
 
@@ -327,7 +339,7 @@ function update_stellen_visibility(){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" class="apf-template-div" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?
