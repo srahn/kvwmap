@@ -617,7 +617,7 @@ class Nachweis {
     }
   # Testen der Fortfuehrung
     if(NACHWEIS_SECONDARY_ATTRIBUTE == 'fortfuehrung'){
-    	if($fortfuehrung == '' OR $fortfuehrung < 1860 OR $fortfuehrung > date('Y')){
+    	if($fortfuehrung == '' OR $fortfuehrung > date('Y')){
 	      $errmsg.='Bitte geben Sie das Fortführungsjahr korrekt ein! <br>';
 	    }
     }
