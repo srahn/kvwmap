@@ -1786,7 +1786,7 @@ class ALKIS {
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
 									$row = $row - 12;
-									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+									$sondereigentum = 'verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
 										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
 										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');
@@ -1874,7 +1874,7 @@ class ALKIS {
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
 									$row = $row - 12;
-									$sondereigentum = 'verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+									$sondereigentum = 'verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
 									while(strlen($sondereigentum) > 60){
 										$positionkomma=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), ",", 0, 'utf8');
 										$positionleerzeichen=mb_strrpos(mb_substr($sondereigentum,0,60,'utf8'), " ", 0, 'utf8');

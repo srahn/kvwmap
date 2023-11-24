@@ -782,7 +782,7 @@ hide_versions = function(flst){
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 											if($flst->Buchungen[$b]['sondereigentum'] != ''){
-												$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+												$BestandStr.='<br><br>verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
 											} ?>
 											<tr>
 												<td class="fett">Buchung:</td>
