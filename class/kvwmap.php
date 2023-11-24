@@ -2543,12 +2543,26 @@ echo '			</table>
 				if($dbStyle['rangeitem'] != '') {
 					$style->updateFromString("STYLE RANGEITEM " . $dbStyle['rangeitem']." END");
 				}
-        if ($dbStyle['offsetx']!='') {
-          $style->set('offsetx', $dbStyle['offsetx']);
-        }
-        if ($dbStyle['offsety']!='') {
-          $style->set('offsety', $dbStyle['offsety']);
-        }
+				$offset_attribute = false;
+				if (!is_numeric($dbStyle['offsetx'] ?: 0)){
+					$dbStyle['offsetx'] = '[' . $dbStyle['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbStyle['offsety'] ?: 0)){
+					$dbStyle['offsety'] = '[' . $dbStyle['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$style->updateFromString("STYLE offset " . ($dbStyle['offsetx'] ?: '0') . " " . ($dbStyle['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbStyle['offsetx']!='') {
+						$style->set('offsetx', $dbStyle['offsetx']);
+					}
+					if ($dbStyle['offsety']!='') {
+						$style->set('offsety', $dbStyle['offsety']);
+					}
+				}
       } # Ende Schleife für mehrere Styles
 
       # setzen eines oder mehrerer Labels
@@ -2663,11 +2677,25 @@ echo '			</table>
 						}break;
 					}
 				}
-				if ($dbLabel['offsetx']!='') {
-					$label->offsetx = $dbLabel['offsetx'];
+				$offset_attribute = false;
+				if (!is_numeric($dbLabel['offsetx'] ?: 0)){
+					$dbLabel['offsetx'] = '[' . $dbLabel['offsetx'] . ']';
+					$offset_attribute = true;
 				}
-				if ($dbLabel['offsety']!='') {
-					$label->offsety = $dbLabel['offsety'];
+				if (!is_numeric($dbLabel['offsety'] ?: 0)){
+					$dbLabel['offsety'] = '[' . $dbLabel['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$label->updateFromString("LABEL offset " . ($dbLabel['offsetx'] ?: '0') . " " . ($dbLabel['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbLabel['offsetx']!='') {
+						$label->set('offsetx', $dbLabel['offsetx']);
+					}
+					if ($dbLabel['offsety']!='') {
+						$label->set('offsety', $dbLabel['offsety']);
+					}
 				}
 				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label
@@ -4565,10 +4593,6 @@ echo '			</table>
 									$min = '0';
 									$max = '100';
 									$onkeyup = 'enforceMinMax(this)';
-								} break;
-								
-								case 'offsetx' : case 'offsety' : { 
-									$type = 'number';
 								} break;
 								
 								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { 
@@ -20722,8 +20746,8 @@ class db_mapObj{
       if(value_of($style, 'width')){$sql.= ", width = '" . $style['width']."'";}
       if(value_of($style, 'minwidth')){$sql.= ", minwidth = '" . $style['minwidth']."'";}
       if(value_of($style, 'maxwidth')){$sql.= ", maxwidth = '" . $style['maxwidth']."'";}
-			if(value_of($style, 'offsetx')){$sql.= ", offsetx = " . $style['offsetx'];}
-			if(value_of($style, 'offsety')){$sql.= ", offsety = " . $style['offsety'];}
+			if(value_of($style, 'offsetx')){$sql.= ", offsetx = '" . $style['offsetx'] . "'";}
+			if(value_of($style, 'offsety')){$sql.= ", offsety = '" . $style['offsety'] . "'";}
 			if(value_of($style, 'polaroffset')){$sql.= ", polaroffset = '" . $style['polaroffset']."'";}
 			if(value_of($style, 'pattern')){$sql.= ", pattern = '" . $style['pattern']."'";}
 			if(value_of($style, 'geomtransform')){$sql.= ", geomtransform = '" . $style['geomtransform']."'";}
