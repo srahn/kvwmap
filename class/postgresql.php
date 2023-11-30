@@ -1042,9 +1042,9 @@ FROM
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = pg_quote($tablename.pg_field_name($ret[1], 0));
+          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', ' . pg_quote($tablename.pg_field_name($ret[1], $j));
+            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
           }
           $query = str_replace(trim($column[$i]), $columns, $query);
         }

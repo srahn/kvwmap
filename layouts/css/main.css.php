@@ -333,7 +333,7 @@ form {
 }
 
 .hidden{
-	display: none;
+	display: none !important;
 }
 
 ul{

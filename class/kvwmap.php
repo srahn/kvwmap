@@ -557,7 +557,7 @@ class GUI {
 									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 								}
 							}
-							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['export_privileg']){
 								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
 							}
 						}
@@ -2063,7 +2063,6 @@ echo '			</table>
 
 	
 	function loadlayer($map, $layerset) {
-		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
@@ -16248,6 +16247,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$links = '';
+					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
