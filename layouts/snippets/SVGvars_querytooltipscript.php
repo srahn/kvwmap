@@ -224,9 +224,15 @@ $SVGvars_querytooltipscript .= '
 			var lines = text.split("##");
 			for(l = 0; l < lines.length; l++){
 				if(lines[l].slice(0, 6) == "xlink:"){
+					url = lines[l].slice(6);
 					link = document.getElementById("link0").cloneNode(true);
-					link.setAttribute("onclick", "window.parent.open(\'"+lines[l].slice(6)+"\', \'_blank\')");
-					var nodText = document.createTextNode(basename(lines[l].slice(6)));
+					if (url.substring(0, 4) == "http") {
+						link.setAttribute("onclick", "window.parent.open(\'" + url + "\', \'_blank\')");
+					}
+					else {
+						link.setAttribute("onclick", "window.parent.location.href = \'" + url + "\'");
+					}
+					var nodText = document.createTextNode(basename(url));
 					link.appendChild(nodText);
 					links.push(link);
 					continue;
