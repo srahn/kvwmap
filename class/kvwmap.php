@@ -16193,6 +16193,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$links = '';
+					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
