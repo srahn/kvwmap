@@ -2252,37 +2252,38 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: flex-start;
+	width: 580px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .fstanzeigehover{
-								position: relative;
-								float: left;
-								margin: auto;
-								visibility: visible;
-								line-height: 30px;
+	position: relative;
+	float: left;
+	margin: auto;
+	visibility: visible;
+	line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.4);
+	background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		flex-wrap: wrap;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .flexcontainer2{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		align-items:stretch;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	align-items:stretch;
 }
 
 .map-right{
