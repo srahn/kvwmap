@@ -400,7 +400,8 @@ if (!$show_login_form) {
 					$GUI->debug->write('Passwort ist nicht abgelaufen.', 4);
 					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
 					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
-					#$go = 'Stelle_waehlen';
+					$go = 'Stelle_waehlen';
+					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 					# login case 14
 				}
 			}
