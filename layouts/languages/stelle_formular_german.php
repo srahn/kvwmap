@@ -72,4 +72,6 @@
   $strShowSharedLayersDescription = 'Wenn diese Einstellung gesetzt ist, werden Layer, die von Nutzern mit dem Recht Rollenlayer für andere freizugeben dieser Stelle zugewiesen und für alle Nutzer dieser Stelle als Layer angezeigt. In der Legende werden diese Layer kenntlich gemacht und in den Optionen des Layers angezeigt welcher Nutzer den Layer freigegeben hat.';
   $strResetPasswordText = "Text beim Passwort zurücksetzen";
   $strResetPasswordTextDescription = 'Hier kann ein alternativer Text angegeben werden, der für Nutzer dieser Stelle beim Zurücksetzen des Passworts in der Email verwendet werden soll. Der Text muss den Platzhalter $link enthalten, der für den Link zur Passwortvergabe verwendet wird.';
+  $strInvitationText = "Einladungstext";
+  $strInvitationTextDescription = 'Hier kann ein alternativer Text angegeben werden, der für Nutzer dieser Stelle in der Einladungsmail verwendet werden soll. Der Text muss den Platzhalter $link enthalten, der für den Link zur Registrierung verwendet wird.';
 ?>

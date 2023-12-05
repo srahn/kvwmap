@@ -185,7 +185,7 @@ class stelle {
 				`ows_contentvoicephone`,
 				`ows_contentfacsimile`,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
 			FROM
 				stelle s
 			WHERE
@@ -257,6 +257,7 @@ class stelle {
 		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
 		$this->reset_password_text = $rs['reset_password_text'];
+		$this->invitation_text = $rs['invitation_text'];
 	}
 
   function checkClientIpIsOn() {
@@ -490,6 +491,7 @@ class stelle {
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`reset_password_text` = '" . $stellendaten['reset_password_text'] . "',
+				`invitation_text` = '" . $stellendaten['invitation_text'] . "',				
 				`comment` = '" . $stellendaten['comment'] . "'				
 		";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
@@ -588,6 +590,7 @@ class stelle {
 				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
 				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
 				`reset_password_text` = '" . $stellendaten['reset_password_text'] . "',
+				`invitation_text` = '" . $stellendaten['invitation_text'] . "',
 				`comment` = '" . $stellendaten['comment'] . "'
 			WHERE
 				ID = " . $this->id . "

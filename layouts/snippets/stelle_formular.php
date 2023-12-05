@@ -1171,7 +1171,17 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<textarea name="reset_password_text" colls="30" rows="10"><? echo $this->formvars['reset_password_text']; ?></textarea>
 						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strResetPasswordTextDescription; ?>"></span>
 					</td>
-				</tr>				
+				</tr>
+
+				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strInvitationText; ?>
+					</th>
+					<td colspan="2" valign="top" align="left" style="border-bottom:1px solid #C3C7C3">
+						<textarea name="invitation_text" colls="30" rows="10"><? echo $this->formvars['invitation_text']; ?></textarea>
+						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strInvitationTextDescription; ?>"></span>
+					</td>
+				</tr>
 
 				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">

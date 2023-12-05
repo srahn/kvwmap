@@ -12753,6 +12753,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
 			$this->formvars['version'] = $this->stellendaten['version'];
 			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
+			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
 			$where = 'ID != '.$this->formvars['selected_stelle_id'];
 
