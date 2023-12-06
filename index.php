@@ -755,11 +755,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
 			}break;
-			
-			case 'create_auto_classes_for_rollenlayer' : {
-				$GUI->sanitize(['layer_options_open' => 'int']);
-				$GUI->create_auto_classes_for_rollenlayer();
-			}break;
 
 			# PointEditor
 			case 'PointEditor' : {
