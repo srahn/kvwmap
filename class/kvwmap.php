@@ -590,7 +590,7 @@ class GUI {
 													<span>' . $this->strAutoClassify . ':</span>
 												</td>
 												<td>
-													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
 															$index = $query_attributes['indizes'][$attributes[$i]['name']];
@@ -866,22 +866,43 @@ echo '			</table>
 			$this->user->rolle->setRollenLayerName($this->formvars);
 			$this->user->rolle->setRollenLayerAutoDelete($this->formvars);
 			$this->user->rolle->setBuffer($this->formvars);
-			# bei Bedarf Label anlegen
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
+			$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
+			# automatische Klassifizierung
+			if ($auto_class_attribute = $this->formvars['klass_'.$this->formvars['selected_layer_id']]) {
+				$this->formvars['selected_layer_id'] = $this->formvars['layer_options_open'];
+				$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
+				$this->GenerischeSuche_Suchen();
+				$result= $this->qlayerset[0]['shape'];
+				# alte Klassen löschen
+				$old_classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
+				for($i = 0; $i < count($old_classes); $i++){
+					$dbmap->delete_Class($old_classes[$i]['Class_ID']);
+				}
+				for ($i = 0; $i < count($result); $i++) {
+					foreach ($result[$i] As $key => $value) {
+						if ($auto_class_attribute === $key) {
+							$classes[$value] = $value;
+						}
+					}
+				}
+				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['Datentyp'], $this->database);
+			}
+			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
 				if (!empty($classes[0]['Style'])) {
 					$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
 				}
-				if($classes[0]['Label'] == NULL){
-					$empty_label = new stdClass();
-					$empty_label->font = 'arial';
-					$empty_label->size = '8';
-					$empty_label->minsize = '6';
-					$empty_label->maxsize = '10';
-					$empty_label->position = '6';
-					$new_label_id = $mapDB->new_Label($empty_label);
-					$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
+				foreach ($classes as $class) {	# bei Bedarf Label anlegen
+					if ($class['Label'] == NULL){
+						$empty_label = new stdClass();
+						$empty_label->font = 'arial';
+						$empty_label->size = '8';
+						$empty_label->minsize = '6';
+						$empty_label->maxsize = '10';
+						$empty_label->position = '6';
+						$new_label_id = $dbmap->new_Label($empty_label);
+						$dbmap->addLabel2Class($class['Class_ID'], $new_label_id, 0);
+					}
 				}
 			}
 		}
@@ -5607,7 +5628,6 @@ echo '			</table>
 		$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
 		$this->GenerischeSuche_Suchen();
 		$result= $this->qlayerset[0]['shape'];
-		$attributes = $this->qlayerset[0]['attributes'];
 		# alte Klassen löschen
 		$this->classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){

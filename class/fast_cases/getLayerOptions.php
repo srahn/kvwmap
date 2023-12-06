@@ -514,7 +514,7 @@ class GUI {
 													<span>' . $this->strAutoClassify . ':</span>
 												</td>
 												<td>
-													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
 															$index = $query_attributes['indizes'][$attributes[$i]['name']];
