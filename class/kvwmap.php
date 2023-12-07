@@ -868,7 +868,7 @@ echo '			</table>
 			$this->user->rolle->setBuffer($this->formvars);
 			$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
 			# automatische Klassifizierung
-			if ($auto_class_attribute = $this->formvars['klass_'.$this->formvars['selected_layer_id']]) {
+			if ($auto_class_attribute = $this->formvars['klass_' . $this->formvars['layer_options_open']]) {
 				$this->formvars['selected_layer_id'] = $this->formvars['layer_options_open'];
 				$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
 				$this->GenerischeSuche_Suchen();
