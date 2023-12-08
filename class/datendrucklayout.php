@@ -1904,7 +1904,7 @@ class ddl {
 			$where_clauses[] = 'd.id = ' . $ddl_id;
 		}
 		if ($layer_id) {
-			$where_clauses[] = "d.layer_id = " . $layer_id;
+			$where_clauses[] = "(d.layer_id = " . $layer_id . " OR d.layer_id = l.duplicate_from_layer_id)";
 		}
 		if ($types != NULL) {
 			$where_clauses[] = "d.type IN (" . implode(", ", $types) . ")";
@@ -1918,6 +1918,7 @@ class ddl {
 			FROM
 				datendrucklayouts d LEFT JOIN
 				ddl2stelle d2s ON d.id = d2s.ddl_id
+				" . ($layer_id ? 'LEFT JOIN layer l ON l.Layer_ID = ' . $layer_id : '') . "
 			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY
