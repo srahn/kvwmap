@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fÃ¼r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -25,7 +25,7 @@
 # peter.korduan@gdi-service.de                                    #
 # stefan.rahn@gdi-service.de                                      #
 ###################################################################
-#  kataster.php  Klassenbibliothek für Klassen zum Kataster       #
+#  kataster.php  Klassenbibliothek fÃ¼r Klassen zum Kataster       #
 ###################################################################
 # Liste der Klassen:
 #########################
@@ -119,9 +119,9 @@ class adresse {
     $this->dbConn=$dbConn;
   }
 	
-  function getFlurstKennzListe() {
+  function getFlurstKennzListe($exclude_lmh_gml_ids = '') {
     # liefert FlurstKennz zur Adressangaben aus dem ALB Bestand
-    $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl,$this->StrassenSchl,$this->HausNr);
+    $ret=$this->database->getFlurstKennzListeByGemSchlByStrSchl($this->GemeindeSchl, $this->StrassenSchl, $this->HausNr, $exclude_lmh_gml_ids);
     if ($ret[0]) {
       $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
       return 0;
@@ -145,17 +145,17 @@ class adresse {
   function getHausNrListe($GemID,$StrID,$HausNr,$extent,$order) {
     # 2006-01-11 pk
     # Funktion liefert die Hausnummern zu einer GemID, StrID Kombination
-    # und bei Bedarf auch im angegebenen extent zurück
+    # und bei Bedarf auch im angegebenen extent zurÃ¼ck
     $PolygonWKTString=rectObj2WKTPolygon($extent);
     $HausNrListe=$this->database->getHausNrListe($GemID,$StrID);
-    # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array für die Listen zurück
+    # liefert ein Array mit HausNr und Nr_Quelle jeweils mit einem Array fÃ¼r die Listen zurÃ¼ck
     return $HausNrListe;
   }
   
 	function getStrNamefromID($GemID,$StrID) {
     $ret=$this->database->getStrNameByID($GemID,$StrID);
     if ($ret[0]==0 AND @count($ret[1])>0) {
-      # liefert die erste gefundene Strasse zurück
+      # liefert die erste gefundene Strasse zurÃ¼ck
       return $ret[1];
     }
     else {
@@ -337,7 +337,7 @@ class grundbuch {
       $ret[1]='Fehler bei der Datenbank abfrage<br>'.$ret[1];
     }
     else {
-      # Zuordnen der Gemeinde und Gemarkungsnamen zu den Flurstücken.
+      # Zuordnen der Gemeinde und Gemarkungsnamen zu den FlurstÃ¼cken.
       $buchungen=$ret[1];
       $anzBuchungen=count($buchungen);
       for($i=0;$i<$anzBuchungen;$i++) {
@@ -358,7 +358,7 @@ class grundbuch {
 
   function grundbuchblattSuchParameterPruefen() {
     if ($this->Bezirk=='' OR $this->Bezirk==0) {
-      $errmsg.='<br>Die Nummer für Bezirk ist leer.';
+      $errmsg.='<br>Die Nummer fÃ¼r Bezirk ist leer.';
     }
     if (strlen($this->Bezirk)<5) {
       $errmsg.='<br>Die Bezirksnummer ist keine 6 Zeichen lang.';
@@ -547,7 +547,7 @@ class flurstueck {
 						$Eigentuemer .= '<br>'.$anschrift['bestimmungsland'];
 					}	
 					$Eigentuemer .= '</td>';
-					# Adressänderungen
+					# AdressÃ¤nderungen
 					if($adressAenderungen){
 						$Eigentuemer .= '<td style="padding-left: 30px">';
 						$adressaenderungen =  $eigentuemer->getAdressaenderungen($eigentuemer->gml_id);
@@ -608,8 +608,8 @@ class flurstueck {
 	}
 	
 	function orderEigentuemer($gml_id, &$Eigentuemerliste, $order){
-		# Diese funktion durchläuft den Rechtsverhältnisbaum und vergibt für jeden Eigentümer eine order, die sich fortlaufend erhöht.
-		# Anschliessend kann man die Eigentümerliste an Hand dieser order sortieren und erhält damit eine lineare Liste ohne Verschachtelung.
+		# Diese funktion durchlÃ¤uft den RechtsverhÃ¤ltnisbaum und vergibt fÃ¼r jeden EigentÃ¼mer eine order, die sich fortlaufend erhÃ¶ht.
+		# Anschliessend kann man die EigentÃ¼merliste an Hand dieser order sortieren und erhÃ¤lt damit eine lineare Liste ohne Verschachtelung.
 		$Eigentuemerliste[$gml_id]->order = $order;
 		if($Eigentuemerliste[$gml_id]->children != ''){
 			foreach($Eigentuemerliste[$gml_id]->children as $child){
@@ -621,7 +621,7 @@ class flurstueck {
 		
 	function getSonstigesrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getSonstigesrecht Abfrage des Sonstigesrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getSonstigesrecht Abfrage des Sonstigesrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql = "
 			SELECT
 				round(
@@ -661,7 +661,7 @@ class flurstueck {
 	
 	function getDenkmalschutzrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getDenkmalschutzrecht Abfrage des Denkmalschutzrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getDenkmalschutzrecht Abfrage des Denkmalschutzrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql = "
 			SELECT
 				round(
@@ -702,7 +702,7 @@ class flurstueck {
 	
 	function getBauBodenrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getBauBodenrecht Abfrage des BauBodenrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getBauBodenrecht Abfrage des BauBodenrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql = "
 			SELECT distinct
 				round(
@@ -744,7 +744,7 @@ class flurstueck {
 		
 	function getNaturUmweltrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getNaturUmweltrecht Abfrage des NaturUmweltrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getNaturUmweltrecht Abfrage des NaturUmweltrechts zum FlurstÃ¼ck<br>".$sql,4);
     $sql ="
 			SELECT
 				round(
@@ -783,7 +783,7 @@ class flurstueck {
 	
 	function getSchutzgebiet() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getSchutzgebiet Abfrage des Schutzgebiets zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getSchutzgebiet Abfrage des Schutzgebiets zum FlurstÃ¼ck<br>".$sql,4);
 		$sql ="
 			SELECT
 				round(
@@ -825,7 +825,7 @@ class flurstueck {
 	
 	function getWasserrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getWasserrecht Abfrage des Wasserrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getWasserrecht Abfrage des Wasserrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql ="
 			SELECT
 				round(
@@ -891,7 +891,7 @@ class flurstueck {
 	
 	function getStrassenrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getStrassenrecht Abfrage des Strassenrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getStrassenrecht Abfrage des Strassenrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql ="
 			SELECT
 				round(
@@ -931,7 +931,7 @@ class flurstueck {
 		
 	function getForstrecht() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getForstrecht Abfrage des Forstrechts zum FlurstÃ¼ck<br>".$sql,4);
 		$sql = "
 			SELECT 
 				round(
@@ -971,7 +971,7 @@ class flurstueck {
 	
 	function getStrittigeGrenze() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getStrittigeGrenze Abfrage der strittigen Grenzen zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getStrittigeGrenze Abfrage der strittigen Grenzen zum FlurstÃ¼ck<br>".$sql,4);
 		$sql ="
 			SELECT 
 				bf.gml_id
@@ -996,12 +996,12 @@ class flurstueck {
 
   function getKlassifizierung() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Klassifizierungen zum Flurstück<br>".$sql,4);
+    $this->debug->write("<br>kataster.php->flurstueck->getKlassifizierung Abfrage der Klassifizierungen zum FlurstÃ¼ck<br>".$sql,4);
 		$sql ="
 			SELECT 
 				amtlicheflaeche, 
 				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
-				sum(fl_geom), 
+				sum(fl_geom) as fl_geom, 
 				flstflaeche, 
 				n.wert, 
 				objart, 
@@ -1188,7 +1188,7 @@ class flurstueck {
 
   function getBuchungen($Bezirk,$Blatt,$hist_alb = false, $without_temporal_filter = false){
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum Flurstück auf dem Grundbuch<br>",4);
+    $this->debug->write("<br>kataster.php->flurstueck->getBuchungen Abfrage der Buchungen zum FlurstÃ¼ck auf dem Grundbuch<br>",4);
     #$ret=$this->database->getBuchungen($this->FlurstKennz);
     $ret=$this->database->getBuchungenFromGrundbuch($this->FlurstKennz,$Bezirk,$Blatt,$hist_alb, $this->fiktiv, NULL, $without_temporal_filter);
     return $ret[1];
@@ -1196,7 +1196,7 @@ class flurstueck {
 
   function getGrundbuecher($without_temporal_filter = false, $fiktiv = false) {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das Flurstück gebucht ist<br>",4);
+    $this->debug->write("<br>kataster.php->flurstueck->getGrundbuecher Abfrage der Angaben zum Grundbuch auf dem das FlurstÃ¼ck gebucht ist<br>",4);
 		if (rolle::$hist_timestamp != '') {
 			$sql = 'SET enable_mergejoin = OFF;';
 		}
@@ -1238,7 +1238,7 @@ class flurstueck {
       $Eigentuemerliste[0] = new eigentuemer($Grundbuch,"");
       return $Eigentuemerliste;
     }
-    $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der Flurstücksdaten aus dem ALK Bestand:<br>",4);
+    $this->debug->write("<p>kataster flurstueck->getEigentuemerliste Abfragen der FlurstÃ¼cksdaten aus dem ALK Bestand:<br>",4);
     $ret=$this->database->getEigentuemerliste($this->FlurstKennz,$Bezirk,$Blatt,$BVNR,$without_temporal_filter);
     if ($ret[0] AND DBWRITE) {
       $Grundbuch = new grundbuch("","",$this->debug);
@@ -1259,6 +1259,13 @@ class flurstueck {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<br>kataster.php flurstuecke->getForstamt: ".$sql,4);
     $ret=$this->database->getForstamt($this->FlurstKennz);
+    return $ret[1];
+  }
+
+  function getFinanzamt() {
+    if ($this->FlurstKennz=="") { return 0; }
+    $this->debug->write("kataster.php->flurstueck->getFinanzamt Abfrage des Finanzamtes zum FlurstÃ¼ck<br>".$sql,4);
+    $ret=$this->database->getFinanzamt($this->FlurstKennz);
     return $ret[1];
   }
 
@@ -1289,16 +1296,16 @@ class flurstueck {
 
   function getLage() {
     $ret=$this->database->getLage($this->FlurstKennz);
-    $this->debug->write("<br>kataster.php flurstueck->getLage() Abfrage der Lagebezeichnung zum Flurstück:",4);
+    $this->debug->write("<br>kataster.php flurstueck->getLage() Abfrage der Lagebezeichnung zum FlurstÃ¼ck:",4);
     return $ret[1];
   }
 
   function getAdresse() {
-    $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum Flurstück:",4);
+    $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum FlurstÃ¼ck:",4);
 		$ret=$this->database->getStrassen($this->FlurstKennz);
     $Strassen=$ret[1];
     for ($i=0; $i < @count($Strassen);$i++) {
-      $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum Flurstück:",4);
+      $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum FlurstÃ¼ck:",4);
       $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
       $HausNr=$ret[1];
       natsort($HausNr);
@@ -1395,13 +1402,13 @@ class flurstueck {
 	
 	function getVersionen() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<p>kataster flurstueck->getVersionen (vom Flurstück):<br>",4);
+    $this->debug->write("<p>kataster flurstueck->getVersionen (vom FlurstÃ¼ck):<br>",4);
 		$this->readALB_Data($this->FlurstKennz, true, 'ogc_fid');
-		$Grundbuecher=$this->getGrundbuecher(true);							# die Grundbücher ohne zeitlichen Filter abfragen
+		$Grundbuecher=$this->getGrundbuecher(true);							# die GrundbÃ¼cher ohne zeitlichen Filter abfragen
 		$Buchungen=$this->getBuchungen(NULL,NULL,false, true);	# die Buchungen ohne zeitlichen Filter abfragen
 		for($b=0; $b < count($Buchungen); $b++){
 			$buchungsstelle_gml_ids[] = $Buchungen[$b]['gml_id'];
-			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr'], true);		# die Eigentümer ohne zeitlichen Filter abfragen
+			$Eigentuemerliste = $this->getEigentuemerliste($Buchungen[$b]['bezirk'],$Buchungen[$b]['blatt'],$Buchungen[$b]['bvnr'], true);		# die EigentÃ¼mer ohne zeitlichen Filter abfragen
 			foreach($Eigentuemerliste as $eigentuemer){
 				$namensnummer_gml_ids[] = $eigentuemer->n_gml_id;
 				$person_gml_ids[] = $eigentuemer->gml_id;
@@ -1414,7 +1421,7 @@ class flurstueck {
 		$versionen= array_merge($versionen, $this->database->getVersionen('ax_person', $person_gml_ids, $flst_beginnt));
 		# sortieren
 		usort($versionen, function($a, $b){return DateTime::createFromFormat('d.m.Y H:i:s', $a['beginnt']) > DateTime::createFromFormat('d.m.Y H:i:s', $b['beginnt']);});
-		# gleiche beginnts rausnehmen, Anlässe zusammenfassen
+		# gleiche beginnts rausnehmen, AnlÃ¤sse zusammenfassen
 		for($i = 0; $i < count($versionen); $i++){
 			if($unique_versionen[$versionen[$i]['beginnt']]['endet'] == '' OR $unique_versionen[$versionen[$i]['beginnt']]['endet'] > $versionen[$i]['endet'])$unique_versionen[$versionen[$i]['beginnt']]['endet'] = $versionen[$i]['endet'];
 			$unique_versionen[$versionen[$i]['beginnt']]['anlass'][] = $versionen[$i]['anlass'];
@@ -1427,7 +1434,7 @@ class flurstueck {
 	
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
+    $this->debug->write("<p>kataster flurstueck->getNachfolger (vom FlurstÃ¼ck):<br>",4);
 		$sql = "SELECT 
 							DISTINCT ON (nachfolger) nachfolger, c.endet 
 						FROM (
@@ -1442,8 +1449,8 @@ class flurstueck {
 						ORDER BY nachfolger, c.endet DESC";
     $queryret=$this->database->execSQL($sql, 4, 0);
     if (!$queryret[0]) {      
-			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet FROM (";		# der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
+			if(pg_num_rows($queryret[1]) == 0){		# kein FortfÃ¼hrungsfall unter ALKIS -> Suche in ALB-Historie
+				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet FROM (";		# der CASE ist dazu da, damit immer nur die jÃ¼ngste Version eines FlurstÃ¼cks gefunden wird
 				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '" . $this->FlurstKennz . "') as foo ";
 				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
 				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
@@ -1464,11 +1471,11 @@ class flurstueck {
 
   function getVorgaenger() {
     if ($this->FlurstKennz=="") { return 0; }
-    $this->debug->write("<p>kataster flurstueck->getVorgaenger (vom Flurstück):<br>",4);
+    $this->debug->write("<p>kataster flurstueck->getVorgaenger (vom FlurstÃ¼ck):<br>",4);
 		$sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
     $queryret=$this->database->execSQL($sql, 4, 0);
     if(!$queryret[0]) {
-			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
+			if(pg_num_rows($queryret[1]) == 0){			# kein VorgÃ¤nger unter ALKIS -> Suche in ALB-Historie
 				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
 				$sql.= "WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
 				$sql.= $this->database->build_temporal_filter(array('f'));
@@ -1488,10 +1495,10 @@ class flurstueck {
   }
 
   function readALB_Data($FlurstKennz, $without_temporal_filter = false, $oid_column) {
-    $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom Flurstück)",4);
+    $this->debug->write("<p>kataster.php flurstueck->readALB_Data (vom FlurstÃ¼ck)",4);
     $ret=$this->database->getALBData($FlurstKennz, $without_temporal_filter, $oid_column);
     if ($ret[0] AND DBWRITE) {
-      $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-Flurstücksdaten';
+      $errmsg ='<p>kvwmap readALB_Data Abfragen der ALB-FlurstÃ¼cksdaten';
       $errmsg.='in line: '.__LINE__.'<br>'.$ret[1];
       return $errmsg;
     }
@@ -1551,7 +1558,9 @@ class flurstueck {
     $this->Amtsgerichte = $this->getAmtsgerichte(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();
-		if($this->Nachfolger != '')$this->Status = 'H';
+		if ($this->Nachfolger != '' OR $this->hist_alb) {
+			$this->Status = 'H';
+		}
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
   }
@@ -1582,7 +1591,7 @@ class flurstueck {
     	}
       $ret=$this->database->getNamen($formvars, $ganze_gemkg_ids, $eingeschr_gemkg_ids, $ganze_flur_ids, $eingeschr_flur_ids);
       if ($ret[0]) {
-        $ret[1]='<br>Fehler bei der Abfrage der Eigentümernamen.'.$ret[1];
+        $ret[1]='<br>Fehler bei der Abfrage der EigentÃ¼mernamen.'.$ret[1];
       }
     }
     return $ret;

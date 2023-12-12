@@ -29,6 +29,12 @@ function send(){
 			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 	}
+	if(document.GUI.fortfuehrung.value != '' && document.GUI.fortfuehrung.value < 1850){
+		conf = confirm('Achtung, das Fortführungsjahr liegt vor 1850.\nTrotzdem Speichern?');
+		if(conf != true){
+			return;
+		}
+	}
 	if(document.GUI.datum.value != ''){
 		if(!datecheck(document.GUI.datum.value)){
 			alert('Das Datum muss im Format TT.MM.JJJJ angegeben werden.');

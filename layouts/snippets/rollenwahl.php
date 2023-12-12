@@ -312,6 +312,7 @@ if ($this->Fehlermeldung!='') {
 											<div title="<? echo $strInfoInPolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo polygonquery($strInfoInPolygon); ?></svg></div><input type="checkbox" name="polyquery" value="1" <? if($this->user->rolle->polyquery){echo 'checked="true"';} ?>>&nbsp;
 											<br>
 											<div title="<? echo $strRuler; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo dist($strRuler); ?></svg></div><input type="checkbox" name="measure" value="1" <? if($this->user->rolle->measure){echo 'checked="true"';} ?>>&nbsp;
+											<div title="<? echo $strPunktfang; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo punktfang($strPunktfang); ?></svg></div><input type="checkbox" name="punktfang" value="1" <? if($this->user->rolle->punktfang){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreePolygon; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freepolygon($strFreePolygon); ?></svg></div><input type="checkbox" name="freepolygon" value="1" <? if($this->user->rolle->freepolygon){echo 'checked="true"';} ?>>&nbsp;
 											<div title="<? echo $strFreeText; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freetext($strFreeText); ?></svg></div><input type="checkbox" name="freetext" value="1" <? if($this->user->rolle->freetext){echo 'checked="true"';} ?> onchange="$('#freeTextOptionsDiv').toggle();">&nbsp;
 											<div title="<? echo $strFreeArrow; ?>"><svg xmlns="http://www.w3.org/2000/svg" width="36" height="36"><? $last_x = 0; echo freearrow($strFreeArrow); ?></svg></div><input type="checkbox" name="freearrow" value="1" <? if($this->user->rolle->freearrow){echo 'checked="true"';} ?>>&nbsp;
@@ -669,15 +670,6 @@ if ($this->Fehlermeldung!='') {
 											value="1"<?
 											echo ($this->user->rolle->upload_only_file_metadata == '1' ? ' checked="true"' : ''); ?>
 										>&nbsp;<span data-tooltip="<? echo $strHintUploadOnlyFileMetadata; ?>"></span>
-									</td>
-								</tr>
-								<tr>
-									<td class="rollenwahl-option-header">
-										<? echo $strFontSizeGLE; ?>:
-									</td>
-									<td class="rollenwahl-option-data">
-										<input name="fontsize_gle" type="text" value="<? echo $this->user->rolle->fontsize_gle; ?>" size="2" maxlength="2">&nbsp;
-										<span data-tooltip="<? echo $strHintFontSizeGLE; ?>"></span>
 									</td>
 								</tr>
 								<tr>

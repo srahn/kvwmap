@@ -3,6 +3,18 @@
 class MyObject {
 
 	static $write_debug = false;
+	public $gui;
+	public $debug;
+	public $database;
+	public $stelle_id;
+	public $tableName;
+	public $identifier;
+	public $identifier_type;
+	public $field_types;
+	public $data;
+	public $has_many;
+	public $children_ids;
+	public $validations;
 
 	function __construct($gui, $tableName, $identifier = 'id', $identifier_type = 'integer') {
 		$this->gui = $gui;
@@ -15,6 +27,11 @@ class MyObject {
 		$this->children_ids = array();
 		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 		$this->validations = array();
+		if (!empty($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$this->$key = array();
+			}
+		}
 		$this->field_types = array(
 			MYSQLI_TYPE_DECIMAL => 'MYSQLI_TYPE_DECIMAL',
 			MYSQLI_TYPE_NEWDECIMAL => 'MYSQLI_TYPE_NEWDECIMAL',
@@ -85,6 +102,12 @@ class MyObject {
 	* @ return this object with the record in data or empty array if not found
 	*/
 	function find_by($attribute, $value) {
+		if (empty($attribute)) {
+			$attribute = $this->identifer;
+		}
+		if (empty($value)) {
+			$value = $this->get_id();
+		}
 		$sql = "
 			SELECT
 				*
@@ -170,9 +193,10 @@ class MyObject {
 			FROM
 				`" . $this->tableName . "`
 			" . $where .
-			($order != '' ? " ORDER BY " .$q.implode($q.', '.$q, $orders).$q.($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
+			($order != '' ? " ORDER BY " . $q . implode($q . ', ' . $q, $orders) . $q . ($sort_direction == 'DESC' ? ' DESC' : ' ASC') : "") . "
 		";
 		$this->debug->show('mysql find_where sql: ' . $sql, MyObject::$write_debug);
+		$this->debug->write('mysql find_where sql: ' . $sql);
 		$this->database->execSQL($sql);
 		$result = array();
 		while ($this->data = $this->database->result->fetch_assoc()) {
@@ -181,10 +205,12 @@ class MyObject {
 		return $result;
 	}
 
-	/*
-	* Search for a records in the database by the given sql clause
-	* @ return all found objects
-	*/
+	/**
+	 * 
+	 * Function searching for records in the database by the given sql clause
+	 * @param Array $params: Array with select, from, where and order parts of sql.
+	 * @return Array $results: All found objects.
+	 */
 	function find_by_sql($params, $hierarchy_key = NULL) {
 		$sql = "
 			SELECT
@@ -283,6 +309,10 @@ class MyObject {
 		$this->debug->show('mysql exists sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		return $this->database->result->num_rows > 0;
+	}
+
+	function get_id() {
+		return $this->get($this->identifier);
 	}
 
 	function getAttributes() {
@@ -438,8 +468,9 @@ class MyObject {
 		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
 
 		$results = array();
-		if (!empty($data))
+		if (!empty($data)) {
 			$this->data = $data;
+		}
 
 		$sql = "
 			INSERT INTO `" . $this->tableName . "` (
@@ -558,7 +589,8 @@ class MyObject {
 		$err_msg = $this->database->errormessage;
 		$results[] = array(
 			'success' => ($err_msg == ''),
-			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
+			'err_msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql),
+			'msg' => ($err_msg == '' ? '' : $err_msg . ' Aufgetreten bei SQL: ' . $sql)
 		);
 		return $results;
 	}
@@ -592,12 +624,21 @@ class MyObject {
 
 	public function validate($on = '') {
 		$results = array();
-		foreach($this->validations AS $validation) {
-			$results[] = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+		foreach ($this->validations AS $key => $validation) {
+			$result = $this->validates($validation['attribute'], $validation['condition'], $validation['description'], $validation['option'], $on);
+			$this->validations[$key]['validated'] = true;
+			if (empty($result)) {
+				$this->validations[$key]['valid'] = true;
+			}
+			else {
+				$this->validations[$key]['valid'] = false;
+				$this->validations[$key]['result'] = $result['msg'];
+			}
+			$results[] = $result;
 		}
 
 		$messages = array();
-		foreach ($results AS $key => $result) {
+		foreach ($results AS $result) {
 			if (!empty($result)) {
 				$messages[] = $result;
 			}
@@ -683,7 +724,9 @@ class MyObject {
 	}
 
 	function validate_not_null($key, $msg = '') {
-		if ($msg == '') $msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		if ($msg == '') {
+			$msg = "Der Parameter <i>{$key}</i> darf nicht leer sein.";
+		}
 
 		return ($this->get($key) != '' ? '' : $msg);
 	}
@@ -759,14 +802,23 @@ class MyObject {
 	}
 
 	function as_form_html() {
+		$attributes_html = array_map(
+			function ($attribute) {
+				return $attribute->as_form_html();
+			},
+			$this->getAttributes()
+		);
+
+		if (!empty($this->has_many) AND is_array($this->has_many)) {
+			foreach ($this->has_many AS $key => $relation) {
+				$many_attribut = new MyAttribute($this->debug, $key, 'fk', $this->$key, array(), $key, $relation);
+				array_push($attributes_html, $many_attribut->as_form_html());
+			}
+		}
+
 		$html = implode(
 			"<div class=\"clear\"></div>",
-			array_map(
-				function ($attribute) {
-					return $attribute->as_form_html();
-				},
-				$this->getAttributes()
-			)
+			$attributes_html
 		);
 		return $html;
 	}

@@ -530,7 +530,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?>m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
+														<td colspan="3">Ackerland gesamt: <? echo round($flaeche_a); ?> m², EMZ <? echo $emzges_a; ?>, BWZ <? echo $BWZ_a; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_gr > 0) {
@@ -538,7 +538,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?>m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
+														<td colspan="3">Grünland gesamt: <? echo round($flaeche_gr); ?> m², EMZ <? echo $emzges_gr; ?>, BWZ <? echo $BWZ_gr; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_agr > 0) {
@@ -546,7 +546,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?>m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
+														<td colspan="3">Acker-Grünland gesamt: <? echo round($flaeche_agr); ?> m², EMZ <? echo $emzges_agr; ?>, BWZ <? echo $BWZ_agr; ?></td>
 													</tr>
 											<?	}
 											if ($emzges_gra > 0) {
@@ -554,7 +554,7 @@ hide_versions = function(flst){
 													?>
 													<tr>
 														<td></td>
-														<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?>m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
+														<td colspan="3">Grünland-Acker gesamt: <? echo round($flaeche_gra); ?> m², EMZ <? echo $emzges_gra; ?>, BWZ <? echo $BWZ_gra; ?></td>
 													</tr>
 											<?	} ?>
 											</table>
@@ -782,7 +782,7 @@ hide_versions = function(flst){
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 											if($flst->Buchungen[$b]['sondereigentum'] != ''){
-												$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+												$BestandStr.='<br><br>verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
 											} ?>
 											<tr>
 												<td class="fett">Buchung:</td>
@@ -864,6 +864,8 @@ hide_versions = function(flst){
 													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;

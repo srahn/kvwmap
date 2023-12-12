@@ -53,12 +53,19 @@ class XP_Object extends PgObject {
 				{$this->tableName}.gehoertzubereich AS bereiche_gml_ids,
 				ST_AsGML(
 					3,
-					ST_Reverse(
+					CASE WHEN ST_GeometryType({$this->tableName}.position) LIKE 'ST_CurvePolygon' THEN
 						ST_Transform(
 							CASE WHEN ST_NumGeometries({$this->tableName}.position) = 1 THEN ST_GeometryN({$this->tableName}.position, 1) ELSE {$this->tableName}.position END,
 							{$this->konvertierung->get('output_epsg')}
 						)
-					),
+					ELSE
+						ST_Reverse(
+							ST_Transform(
+								CASE WHEN ST_NumGeometries({$this->tableName}.position) = 1 THEN ST_GeometryN({$this->tableName}.position, 1) ELSE {$this->tableName}.position END,
+								{$this->konvertierung->get('output_epsg')}
+							)
+						)
+					END,
 					{$this->konvertierung->get('geom_precision')},
 					0,
 					null,

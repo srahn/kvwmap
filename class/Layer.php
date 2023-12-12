@@ -1,13 +1,41 @@
 <?php
+include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'LayerAttribute.php');
+include_once(CLASSPATH . 'LayerChart.php');
+include_once(CLASSPATH . 'DataSource.php');
+
 class Layer extends MyObject {
 
 	static $write_debug = false;
+	public $geometry_types;
+	public $geom_column;
+	public $attributes;
+	public $charts;
+	public $table_alias;
 
 	function __construct($gui) {
+		$this->gui = $gui;
+		$this->has_many = array(
+			"attributes" => array(
+				"alias" => 'Attribute',
+				"table" => 'layer_attributes',
+				"vorschau" => 'name',
+				"pk" => 'layer_id, name',
+				"fk" => 'layer_id'
+			),
+			"charts" => array(
+				"alias" => 'Diagramme',
+				"table" => 'layer_charts',
+				"vorschau" => 'title',
+				"pk" => 'id',
+				"fk" => 'layer_id'
+			)
+		);
 		parent::__construct($gui, 'layer');
 		$this->stelle_id = $gui->stelle->id;
 		$this->identifier = 'Layer_ID';
 		$this->geometry_types = array('Point', 'LineString', 'Polygon');
+		$this->geom_column = 'geom';
 	}
 
 	public static	function find($gui, $where, $order = '') {
@@ -16,8 +44,13 @@ class Layer extends MyObject {
 	}
 
 	public static	function find_by_id($gui, $id) {
-		$layer = new Layer($gui);
-		return $layer->find_by('Layer_ID', $id);
+		$obj = new Layer($gui);
+		$layer = $obj->find_by('Layer_ID', $id);
+		if ($layer->get_id() != '') {
+			$layer->attributes = $layer->get_layer_attributes();
+			$layer->charts = $layer->get_layer_charts();
+		}
+		return $layer;
 	}
 
 	public static	function find_by_name($gui, $name) {
@@ -75,7 +108,51 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
-	function get_maintable_attributes() {
+	function get_datasource() {
+		if (!empty($this->get('datasource'))) {
+			return null;
+		}
+		else {
+			$datasource = DataSource::find_by_id($this->gui, $this->get('datasource'));
+			return $datasource->get('beschreibung') ?? $this->get('datasource');
+		}
+	}
+
+	function get_layer_attributes() {
+		$obj = new LayerAttribute($this->gui);
+		$layer_attributes = $obj->find_where(
+			$this->has_many['attributes']['fk'] . ' = ' . $this->get_id(),
+			'order'
+		);
+		return $layer_attributes;
+	}
+
+	function get_layer_charts() {
+		$obj = new LayerChart($this->gui);
+		$layer_charts = $obj->find_where(
+			$this->has_many['charts']['fk'] . ' = ' . $this->get_id(),
+			'title'
+		);
+		return $layer_charts;
+	}
+
+	/**
+	 * Function returning array of stelle_id's
+	 * where layer belongs to in table used_layer.
+	 */
+	function get_stellen() {
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		$used_layers = Layer2Stelle::find($this->gui, "Layer_ID = " . $this->get_id());
+		$stellen_ids = array_map(
+			function($used_layer) {
+				return $used_layer->get('Stelle_ID');
+			},
+			$used_layers
+		);
+		return $stellen_ids;
+	}
+
+	function get_maintable_attributes($layerdb) {
 		$sql = "
 			SELECT
 				attr.table_schema,
@@ -115,8 +192,6 @@ class Layer extends MyObject {
 				attr.att_name
 		";
 		#echo 'SQL zur Abfrage der Attribute: ' . $sql;
-		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		if (!$ret['success']) {
 			return array(
@@ -126,7 +201,7 @@ class Layer extends MyObject {
 		}
 
 		while ($attr = pg_fetch_assoc($ret['query'])) {
-			$this->maintable_attributes[] = $attr;
+			$this->maintable_attributes[$attr['att_name']] = $attr;
 		}
 
 		return array(
@@ -136,12 +211,170 @@ class Layer extends MyObject {
 		);
 	}
 
-	/*
-	* Diese Funktion legt vom aktuellen layer Objekt einen neuen Layer an
-	* mit der übergebenen Layergruppe sowie alle seine zugehörigen Klassen und layer_attributes.
-	* Vom Layer verwendete Styles und Labels werden wiederverwendet.
-	* @return Layer Das kopierte Layerobjekt
-	*/
+	/**
+	 * This function check if the stellen, where the layer belongs to,
+	 * have given menue_or_functions
+	 * @param Array $menue_or_functions: The array with the go resp. function_names
+	 * @return Array $msg: An Array of messages when conditions not matches.
+	 */
+	function has_sync_functions($functions) {
+		include_once(CLASSPATH . 'Menue.php');
+		include_once(CLASSPATH . 'Funktion.php');
+		$msg = array();
+		$stellen_ids = $this->get_stellen();
+		foreach ($functions AS $function) {
+			$menues = Menue::find($this->gui, "links LIKE '%go=" . $function . "%'");
+			$funktionen = Funktion::find($this->gui, "bezeichnung = '" . $function . "'");
+			if (count($menues) == 0 AND count($funktionen) == 0) {
+				$msg[] = "Die Funktion '" . $function . "' ist für die Synchronisation von Layern notwendig. Sie konnte weder in den Menüs noch den Funktionen gefunden werden. Bitte Menü oder Funktion anlegen und den Stellen, in denen der zu synchronisierende Layer ist, zuordnen.";
+			}
+			else {
+				foreach($stellen_ids AS $stelle_id) {
+					$menues2stelle = array();
+					$funktionen2stelle = array();	
+					if (count($menues) > 0) {
+						include_once(CLASSPATH . 'Menue2Stelle.php');
+						$menues2stelle = Menue2Stelle::find($this->gui, "stelle_id = " . $stelle_id . " AND menue_id = " . $menues[0]->get_id());
+					}
+					if (count($funktionen) > 0) {
+						include_once(CLASSPATH . 'Funktion2Stelle.php');
+						$funktionen2stelle = Funktion2Stelle::find($this->gui, "stelle_id = " . $stelle_id . " AND funktion_id = " . $funktionen[0]->get_id());
+					}
+					if (count($menues2stelle) == 0 AND count($funktionen2stelle) == 0) {
+						$msg[] = "Die Funktion '" . $function . "' muss in einem Menü oder als Funktion der Stelle ID: " . $stelle_id . " zugewiesen sein damit der Layer '" . $this->get('Name') . "' synchronisiert werden kann!";
+					}
+				}
+			}
+		}
+		return $msg;
+	}
+
+	/**
+	 * Function check if layer have the necessary attributes, there type and dependencies.
+	 * @param Array $attributes: The array with attributes that have to be checked.
+	 * @return Array $msg: An Array of messages when conditions not matches.
+	 */
+	function has_sync_attributes($attributes) {
+		# ToDo: implement
+		$msg = array();
+		return $msg;
+	}
+
+	/**
+	 * Function check if layer has $id as primary key in main table and
+	 * is set as oid in layer definition.
+	 * @param text $id: Name of the unique id for the sync layer.
+	 * @return Array $msg: An Array of messages when condition not maches.
+	 */
+	function has_sync_id($id) {
+		# ToDo: implement
+		$msg = array();
+		return $msg;
+	}
+
+	/**
+	 * Function check if coupled sub_layers are in symc mode
+	 */
+	function get_none_synced_sub_layers($id) {
+		$sql = "
+		SELECT DISTINCT
+			la.layer_id,
+			la.name attribute_name,
+			SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+l.Name AS sub_layer_name
+		FROM
+			`layer_attributes` la JOIN
+			`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+			`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id LEFT JOIN
+			`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+		WHERE
+			la.layer_id = " . $id . " AND
+			la.form_element_type = 'SubFormEmbeddedPK' AND
+			l.Layer_ID IS NOT NULL AND
+			l.sync != '1' AND
+			las.privileg = '1'
+		";
+		#echo '<br>SQL to find coupled sub_layer that are not in sync mode: ' . $sql;
+		$this->database->execSQL($sql);
+		$not_synced_sub_layers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$not_synced_sub_layers[] = $rs;
+		}
+		return $not_synced_sub_layers;
+	}
+
+	/**
+	 * find coupled sublayer that not exists.
+	 * TODO: Muss eigentlich
+	 *       beim Speichern der options,
+	 *       beim Ändern der Layer-ID,
+	 *       und Löschen von Layern geprüft werden
+	 */
+	function get_missing_sublayers($id) {
+		$sql = "
+			SELECT DISTINCT
+				la.name attribute_name,
+				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+				l.Name AS layer_name
+			FROM
+				`layer_attributes` la LEFT JOIN
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID
+			WHERE
+				la.layer_id = " . $id . " AND
+				la.visible = 1 AND
+				la.form_element_type = 'SubFormEmbeddedPK' AND
+				l.Layer_ID IS NULL
+		";
+		#echo '<br>SQL to find coupled sublayer that not exists: ' . $sql;
+		$this->database->execSQL($sql);
+		$sublayers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$sublayers[] = $rs;
+		}
+		return $sublayers;
+	}
+
+	/**
+	 * find coupled sublayer that are not in same stelle
+	 * TODO: Muss eigentlich
+	 *       beim Ändern der Zugehörigkeit zu Stellen geprüft werden
+	 */
+	function get_missing_sub_layers_in_stellen($id) {
+		$sql = "
+			SELECT DISTINCT
+				la.name AS attribute_name,
+				SUBSTRING_INDEX(la.options, ',', 1) AS sub_layer_id,
+				l.Name AS layer_name,
+				ul.Stelle_ID AS stelle_id,
+				s.Bezeichnung AS stelle_bezeichnung
+			FROM
+				`layer_attributes` la JOIN
+				`layer` l ON SUBSTRING_INDEX(la.options, ',', 1) = l.Layer_ID JOIN
+				`used_layer` ul ON la.layer_id = ul.Layer_ID JOIN
+				`layer_attributes2stelle` las ON la.name = las.attributename AND la.layer_id = las.layer_id AND ul.Stelle_ID = las.stelle_id JOIN 
+				`stelle` s ON ul.Stelle_ID = s.ID LEFT JOIN
+				`used_layer` ul2 ON ul.Stelle_ID = ul2.Stelle_ID AND SUBSTRING_INDEX(la.options, ',', 1) = ul2.Layer_ID
+			WHERE
+				la.layer_id = " . $id. " AND
+				la.form_element_type = 'SubFormEmbeddedPK' AND
+				ul2.Stelle_ID IS NULL AND
+				ul2.Layer_ID IS NULL
+		";
+		#echo '<br>SQL to find sublayer that are not in same stelle: ' . $sql;
+		$this->database->execSQL($sql);
+		$sublayers = array();
+		while ($rs = $this->database->result->fetch_assoc()) {
+			$sublayers[] = $rs;
+		}
+		return $sublayers;
+	}
+
+	/**
+	 * Diese Funktion legt vom aktuellen layer Objekt einen neuen Layer an
+	 * mit der übergebenen Layergruppe sowie alle seine zugehörigen Klassen und layer_attributes.
+	 * Vom Layer verwendete Styles und Labels werden wiederverwendet.
+	 * @return Layer Das kopierte Layerobjekt
+	 */
 	function copy($attributes) {
 		$success = true;
 		$this->debug->show('<p>Clone Templatelayer: ' . $this->get($this->identifier), Layer::$write_debug);
@@ -290,13 +523,20 @@ class Layer extends MyObject {
 			$layerAttributes->$key = $value;
 		}
 		$classes = LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'));
-		$legendgraphic = URL . APPLVERSION . (count($classes) > 0 ? $classes[0]->get('legendgraphic') : 'graphics/leer.gif');
+		if ($this->get('icon') != '') {
+			$legendgraphic = $this->get('icon');
+		}
+		elseif (count($classes) > 0) {
+			$legendgraphic = $classes[0]->get('legendgraphic');
+		}
+		else {
+			$legendgraphic = 'graphics/leer.gif';
+		}
 		$layerdef = (Object) array(
-			'img' => $this->get('icon'),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'options' => $this->get_baselayer_options(),
 			'shortLabel' => $this->get('Name'),
-			'img' => $legendgraphic,
+			'img' => URL . APPLVERSION . $legendgraphic,
 			'url' => $this->get_baselayer_url()
 		);
 		return $layerdef;
@@ -305,12 +545,12 @@ class Layer extends MyObject {
 	function get_baselayer_options() {
 		if (strpos($this->get('Data'), '{') === 0) {
 			$data = json_decode($this->get('Data'));
-			$data->options->attribution = $this->get('datasource');
+			$data->options->attribution = $this->get_datasource();
 			return $data->options;
 		}
 		else {
 			return (Object) array(
-				'attribution' => $this->get('datasource')
+				'attribution' => $this->get_datasource()
 			);
 		}
 	}
@@ -422,7 +662,7 @@ class Layer extends MyObject {
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
-			'contactOrganisation' => $this->get('datasource'),
+			'contactOrganisation' => $this->get_datasource(),
 			'contactPersonName' => $this->get('dataowner_name'),
 			'contactEMail' => $this->get('dataowner_email'),
 			'contactPhon' => $this->get('dataowner_tel'),
@@ -490,13 +730,29 @@ class Layer extends MyObject {
 		$layer_id = $this->get($this->identifier);
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($layer_id, '');
-		$all_data_attributes = $mapDB->getDataAttributes(
-			$layerdb,
-			$layer_id,
-			array(
-				'use_generic_data_sql' => ($this->get('write_mapserver_templates') == 'generic')
-			)
-		);
+
+		if ($this->get('write_mapserver_templates') == 'generic') {
+			$result = $this->get_generic_data_sql();
+			if ($result['success']) {
+				$data = $result['data_sql'];
+			}
+			else {
+				$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+				return $result;
+			}
+			$select = $mapDB->getSelectFromData($data);
+			if ($layerdb->schema != '') {
+				$select = str_replace($layerdb->schema . '.', '', $select);
+			}
+			$ret = $layerdb->getFieldsfromSelect($select);
+			if ($ret[0]) {
+				$this->gui->add_message('error', $ret[1]);
+			}
+			$all_data_attributes = $ret[1];
+		}
+		else {
+			$all_data_attributes = $mapDB->getDataAttributes($layerdb, $layer_id, []);
+		}
 
 		$data_attributes = array_filter(
 			array_slice($all_data_attributes, 0, -2),
@@ -543,8 +799,8 @@ class Layer extends MyObject {
 			fclose($fp);
 
 			$fp = fopen($template_dir . $this->get_name() . '_body.html', "w");
-			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html';
-			fwrite($fp, $this->get_wms_template_body($data_attribute_names, $ansicht));
+			#if ($this->gui->user->id == 3) echo $template_dir . $this->get_name() . '_body.html' . 'oid-Spalte: ' . $this->get('oid');
+			fwrite($fp, $this->get_wms_template_body($this->get_name('alias'), $data_attribute_names, $ansicht));
 			fclose($fp);
 		}
 	}
@@ -574,8 +830,7 @@ class Layer extends MyObject {
 			border: 1px solid #cccccc;
 			padding: 5px;
 		}
-</style>
-<h2>" . $layer_name . "</h2>";
+</style>";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
 <table>
@@ -592,11 +847,13 @@ class Layer extends MyObject {
 		return $html;
 	}
 
-	function get_wms_template_body($attributes, $ansicht = 'Tabelle') {
-		$html = "<!-- MapServer Template -->";
+	function get_wms_template_body($layer_name, $attributes, $ansicht = 'Tabelle') {
+		$html = "<!-- MapServer Template -->
+  <h2>" . $layer_name . "</h2>
+  Objekt: [item name=" . $this->get('oid') . " escape=none]";
 		if ($ansicht == 'Tabelle') {
 			$html .= "
-	<tr>";
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">";
 			foreach ($attributes AS $attribute) {
 				$html .= "
 		<th>
@@ -611,7 +868,7 @@ class Layer extends MyObject {
 <table>";
 			foreach ($attributes AS $attribute) {
 				$html .= "
-	<tr>
+	<tr style=\"display: [item name=" . $attribute['name'] . " nullformat=none]\">
 		<th align=\"left\">" . $attribute['alias'] . "</th>
 		<td>[item name=" . $attribute['name'] . " escape=none]</td>
 	</tr>";
@@ -623,47 +880,43 @@ class Layer extends MyObject {
 	}
 
   function get_table_alias() {
-    return mb_substr($this->get('schema'), 0, 1) . mb_substr($this->get('maintable') , 0, 1);
+    return $this->table_alias;
   }
 
 	/**
 	* Liefert an Hand des schema und maintable ein data-Statement wie es vom MapServer genutzt wird mit den dazugehörigen Attributen der Datentypen, Aufzählungen, CodeListen mit oder ohne Array.
 	* Hier ein Beispiel für die Attriubte noch ohne Aufspreizung auf Unterattribute von Typen, Arrays etc.
-	 position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.fp_landwirtschaft.aufschrift, xplan_gml.fp_landwirtschaft.created_at, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.detailliertezweckbestimmung)) AS detailliertezweckbestimmung, xplan_gml.fp_landwirtschaft.ebene, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.endebedingung), false) AS endebedingung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.externereferenz), true) AS externereferenz, xplan_gml.fp_landwirtschaft.flaechenschluss, xplan_gml.fp_landwirtschaft.flussrichtung, xplan_gml.fp_landwirtschaft.gehoertzubereich, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.gesetzlichegrundlage)) AS gesetzlichegrundlage, xplan_gml.fp_landwirtschaft.gliederung1, xplan_gml.fp_landwirtschaft.gliederung2, xplan_gml.fp_landwirtschaft.gml_id, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hatgenerattribut), true) AS hatgenerattribut, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hoehenangabe), true) AS hoehenangabe, xplan_gml.fp_landwirtschaft.konvertierung_id, xplan_gml.fp_landwirtschaft.nordwinkel, xplan_gml.fp_landwirtschaft.position, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtscharakter), 'xplan_gml', 'fp_rechtscharakter', false) AS rechtscharakter, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtsstand), 'xplan_gml', 'xp_rechtsstand', false) AS rechtsstand, xplan_gml.fp_landwirtschaft.refbegruendunginhalt, xplan_gml.fp_landwirtschaft.reftextinhalt, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.spezifischepraegung)) AS spezifischepraegung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.startbedingung), false) AS startbedingung, xplan_gml.fp_landwirtschaft.text, xplan_gml.fp_landwirtschaft.updated_at, xplan_gml.fp_landwirtschaft.user_id, xplan_gml.fp_landwirtschaft.uuid, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchflaeche, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchspe, xplan_gml.fp_landwirtschaft.wirddargestelltdurch, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.zweckbestimmung), 'xplan_gml', 'xp_zweckbestimmunglandwirtschaft', true) AS zweckbestimmung from xplan_gml.fp_landwirtschaft JOIN xplankonverter.konvertierungen ON xplan_gml.fp_landwirtschaft.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
+	* position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.fp_landwirtschaft.aufschrift, xplan_gml.fp_landwirtschaft.created_at, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.detailliertezweckbestimmung)) AS detailliertezweckbestimmung, xplan_gml.fp_landwirtschaft.ebene, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.endebedingung), false) AS endebedingung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.externereferenz), true) AS externereferenz, xplan_gml.fp_landwirtschaft.flaechenschluss, xplan_gml.fp_landwirtschaft.flussrichtung, xplan_gml.fp_landwirtschaft.gehoertzubereich, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.gesetzlichegrundlage)) AS gesetzlichegrundlage, xplan_gml.fp_landwirtschaft.gliederung1, xplan_gml.fp_landwirtschaft.gliederung2, xplan_gml.fp_landwirtschaft.gml_id, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hatgenerattribut), true) AS hatgenerattribut, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hoehenangabe), true) AS hoehenangabe, xplan_gml.fp_landwirtschaft.konvertierung_id, xplan_gml.fp_landwirtschaft.nordwinkel, xplan_gml.fp_landwirtschaft.position, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtscharakter), 'xplan_gml', 'fp_rechtscharakter', false) AS rechtscharakter, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtsstand), 'xplan_gml', 'xp_rechtsstand', false) AS rechtsstand, xplan_gml.fp_landwirtschaft.refbegruendunginhalt, xplan_gml.fp_landwirtschaft.reftextinhalt, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.spezifischepraegung)) AS spezifischepraegung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.startbedingung), false) AS startbedingung, xplan_gml.fp_landwirtschaft.text, xplan_gml.fp_landwirtschaft.updated_at, xplan_gml.fp_landwirtschaft.user_id, xplan_gml.fp_landwirtschaft.uuid, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchflaeche, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchspe, xplan_gml.fp_landwirtschaft.wirddargestelltdurch, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.zweckbestimmung), 'xplan_gml', 'xp_zweckbestimmunglandwirtschaft', true) AS zweckbestimmung from xplan_gml.fp_landwirtschaft JOIN xplankonverter.konvertierungen ON xplan_gml.fp_landwirtschaft.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
 	* Die Abfrage der Attribute erfolgt in der Funktion get_maintable_attributes
 	*/
-	function get_generic_data_sql($options = array()) {
-		$default_options = array(
-			'attributes' => array(
-				'select' => array(),
-				'from' => array(),
-				'where' => array()
-			),
-			'geom_attribute' => 'geom',
-			'geom_type_filter' => false
-		);
-		$options = array_merge($default_options, $options);
-		$attributes = $options['attributes'];
-		$geom_attribute = $options['geom_attribute'];
-		$geom_type_filter = $options['geom_type_filter'];
-
+	function get_generic_data_sql() {
 		include_once(CLASSPATH . 'Enumeration.php');
 		include_once(CLASSPATH . 'DataType.php');
 		include_once(CLASSPATH . 'CodeList.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
+
+		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
+		$data_attributes = $mapDB->getDataAttributes($layerdb, $this->get($this->identifier));
+		$data = str_replace('$scale', '1000', $mapDB->getData($this->get($this->identifier)));
+		$this->table_alias = $data_attributes[0]['table_alias_name'];
+
 		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
-		$ret = $this->get_maintable_attributes();
+		$ret = $this->get_maintable_attributes($layerdb);
 		if (!$ret['success']) {
 			return $ret;
+		}
+		foreach($data_attributes as $data_attribute) {
+			# bereits im Data vorhandene Attribute weglassen
+			if (is_array($data_attribute) AND array_key_exists($data_attribute['real_name'], $ret['maintable_attributes'])) {
+				unset($ret['maintable_attributes'][$data_attribute['real_name']]);
+			}
 		}
 
 		foreach ($ret['maintable_attributes'] AS $attr) {
 			switch($this->get_attribute_type($attr)) {
 				case 'Enumeration' : {
 					$formatter_objekt = new Enumeration($this->gui);
-				} break;
-				case 'Enumeration with table' : {
-					$formatter_objekt = new Enumeration($this->gui, 'enum_' . $attr['typname']);
 				} break;
 				case 'CodeList' : {
 					$formatter_objekt = new CodeList($this->gui);
@@ -681,64 +934,40 @@ class Layer extends MyObject {
 			}
 			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
 			$sql = $formatter_objekt->get_generic_select($this, $attr);
+			#echo '<br>attr: ' . $attr['att_name'] . ' type: ' . $this->get_attribute_type($attr) . ' sql: ' . $sql['select'];
 			foreach(array('select', 'from', 'where') AS $key) {
 				if (array_key_exists($key, $sql) AND $sql[$key] != '') {
 					$attributes[$key][] = $sql[$key];
 				}
 			}
-
-			if ($attr['typname'] == 'geometry') {
-				$geom_attribute = $attr['att_name'];
-				if ($geom_type_filter) {
-					$attributes['where'][] = "ST_GeometryType(" . $this->get_table_alias() . "." . $geom_attribute . ") LIKE 'ST_%" . $this->geometry_types[$this->get('Datentyp')] . "'";
-				}
-			}
 		}
 
-		$data_sql = $geom_attribute . " from (
-  select
-    " . implode(",
-    ", $attributes['select']) . "
-  from
-    " . $this->get('schema') . "." . $this->get('maintable') . " AS " . $this->get_table_alias()
-		. (count($attributes['from']) > 0 ? "
-    " . implode("
-    ", $attributes['from']) : '') . (count($attributes['where']) > 0 ? "
-  where
-    " . implode(" AND
-    ", $attributes['where']) : '') . "
-) as foo using unique " . $this->get('oid') . " using srid=" . $this->get('epsg_code');
+		# neue Attribute ins Data einfügen
+		$pos = stripos($data, 'from', stripos($data, 'select'));
+		if ($pos !== false) {
+			$data = substr_replace(
+				$data, 
+				', ' . implode(', ', $attributes['select']) . ' from', 
+				$pos, 
+				strlen('from')
+			);
+		}
 
 		return array(
 			'success' => true,
 			'msg' => $msg,
-			'data_sql' => $data_sql
+			'data_sql' => $data
 		);
-	}
+	}	
 
-	function enum_table_exists($table_name) {
-		$sql = "
-			SELECT EXISTS (
-				SELECT FROM 
-					pg_tables
-				WHERE 
-					schemaname = 'xplan_gml' AND 
-					tablename	= 'enum_" . $typname . "'
-			);
-		";
-		$ret = $this->gui->pgdatabase->execSQL($sql, 4, 1, true);
-		$rs = pg_fetch_array($ret[1]);
-		return $rs[0] == 't';
-	}
-
-	function codelist_table_exists($typname) {
+	function codelist_table_exists($typname, $schema) {
 		$sql = "
 			SELECT
 				count(*) = 3
 			FROM 
 				information_schema.columns
 			WHERE 
-				table_schema = 'xplan_gml' AND 
+				table_schema = '" . $schema . "' AND 
 				table_name	= '" . $typname . "' AND
 				column_name IN ('id', 'value', 'codespace')
 		";
@@ -748,12 +977,13 @@ class Layer extends MyObject {
 		return $rs[0] == 't';
 	}
 
-	function datatype_table_exists($typname) {
+	function datatype_table_exists($typname, $schema) {
 		$sql = "
 			SELECT EXISTS (
 				SELECT FROM 
 					pg_type
 				WHERE
+					typnamespace = '" . $schema . "'::regnamespace AND 
 					typname	= '" . $typname . "'
 			)
 		";
@@ -763,13 +993,13 @@ class Layer extends MyObject {
 		return $rs[0] == 't';
 	}
 
-	function tabletype_table_exists($typname) {
+	function tabletype_table_exists($typname, $schema) {
 		$sql = "
 			SELECT EXISTS (
 				SELECT FROM 
 					pg_tables
 				WHERE 
-					schemaname = 'xplan_gml' AND 
+					schemaname = '" . $schema . "' AND 
 					tablename	= '" . $typname . "'
 			);
 		";
@@ -781,22 +1011,18 @@ class Layer extends MyObject {
 	function get_attribute_type($def) {
 		$type = 'normal';
 		if ($def['typcategory'] == 'E') {
-			if ($this->enum_table_exists($def['typname'])) {
-				#extent select to query wert and beschreibung
-				$type = 'Enumeration with table';
-			}
 			$type = 'Enumeration';
 		}
 		if ($def['dtd_table_name'] != '') {
-			if ($this->codelist_table_exists($def['typname'])) {
+			if ($this->codelist_table_exists($def['typname'], $def['table_schema'])) {
 				$type = 'CodeList';
 			}
 			else {
-				if ($this->datatype_table_exists($def['typname'])) {
+				if ($this->datatype_table_exists($def['typname'], $def['table_schema'])) {
 					$type = 'DataType';
 				}
 				else {
-					if ($this->tabletype_table_exists($def['typname'])) {
+					if ($this->tabletype_table_exists($def['typname'], $def['table_schema'])) {
 						$type = 'TableType';
 					}
 				}

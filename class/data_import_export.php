@@ -262,22 +262,21 @@ class data_import_export {
 			return array($custom_table);
 		}
 		else {
+			$geometrytype = $pgdatabase->get_geom_type($schemaname, 'the_geom', $tablename);
 			if ($adjustments) {
 				$this->adjustGeometryType($pgdatabase, $schemaname, $tablename, $epsg);
 				$sql = "
 					SELECT convert_column_names('" . $schemaname . "', '" . $tablename . "');
 					" . $this->rename_reserved_attribute_names($schemaname, $tablename);
+				$ret = $pgdatabase->execSQL($sql,4, 0);
 			}
-			$sql .= "
-				SELECT geometrytype(the_geom) AS geometrytype FROM " . pg_quote($schemaname) . "." . pg_quote($tablename) . " LIMIT 1;
-			";
 			$ret = $pgdatabase->execSQL($sql,4, 0);
 			if ($ret[0]) {
 				$custom_table['error'] = $ret;
 			}
 			else {
 				$rs = pg_fetch_assoc($ret[1]);
-				$custom_table['datatype'] = geometrytype_to_datatype($rs['geometrytype']);
+				$custom_table['datatype'] = geometrytype_to_datatype($geometrytype);
 				$custom_table['tablename'] = $tablename;
 			}
 			return array($custom_table);
@@ -362,13 +361,13 @@ class data_import_export {
 					if ($adjustments) {
 						$sql = $this->rename_reserved_attribute_names($schema, $table);
 					}				
-					$sql = "
+					$sql .= "
 						SELECT
 							replace(geometrytype(the_geom), 'MULTI', '') as geometrytype,
 							max(st_srid(the_geom)) as epsg,
 							count(*)
 						FROM
-							" . $schema . "." . $table . "
+							" . $schema . ".\"" . $table . "\"
 						GROUP BY replace(geometrytype(the_geom), 'MULTI', '')
 					";
 					$ret = $database->execSQL($sql,4, 0);
@@ -935,7 +934,7 @@ class data_import_export {
 		if ($options != NULL) {
 			$command.= $options;
 		}
-		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
+		$command .= ' -oo ENCODING=' . $encoding . ' -f PostgreSQL -dim XY -lco GEOMETRY_NAME=the_geom -lco launder=NO -lco FID=' . $this->unique_column . ' -lco precision=NO ' . ($multi? '-nlt PROMOTE_TO_MULTI' : '') . ' -nln ' . $tablename . ($epsg ? ' -a_srs EPSG:' . $epsg : '');
 		if ($sql != NULL) {
 			$command .= ' -sql \'' . $sql . '\'';
 		}
@@ -947,15 +946,23 @@ class data_import_export {
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
-			curl_close($ch);
 			$result = json_decode($output);
 			$ret = $result->exitCode;
-			if ($ret != 0) {
-				$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+			if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+				# nochmal mit anderem Encoding versuchen
+				$url = str_replace(['UTF-8', 'LATIN1', 'utf8alt', 'latin1alt'], ['utf8alt', 'latin1alt', 'LATIN1', 'UTF-8'], $url);
+				curl_setopt($ch, CURLOPT_URL, $url);
+				$output = curl_exec($ch);
+				$result = json_decode($output);
+				$ret = $result->exitCode;
+				if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
+				}
 			}
+			curl_close($ch);
 		}
 		else {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
@@ -978,53 +985,66 @@ class data_import_export {
 		}
 		return $ret;
 	}
-	
+
 	function ogrinfo($importfile) {
-		$command = ' -q -nogeomtype "' . $importfile . '"';;
+		$command = ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : '') . ' "' . $importfile . '"';
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo 'url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
-			curl_setopt($ch,CURLOPT_CONNECTTIMEOUT,300);
+			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
 			curl_close($ch);
 			$result = json_decode($output);
 		}
 		else {
+			$path_parts = pathinfo($importfile);
+			$errorfile = $path_parts['filename'] . '.err';
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogrinfo ' . $command;
-			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
+			$command .= ' 2> ' . IMAGEPATH . $errorfile;
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
+			$result = new stdClass();
 			$result->stdout = $output;
-			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
+			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
-				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $tablename . '.err" target="_blank">Fehlerprotokoll</a>'; 
+				$result->stderr = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br><a href="' . IMAGEURL . $errorfile . '" target="_blank">Fehlerprotokoll</a>'; 
 			}
 		}
 		return $result;
 	}
-	
+
 	function ogr_get_layers($importfile){
 		$result = $this->ogrinfo($importfile);
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
+			return array();
 		}
 		else {
-			$layers = explode("\r\n", $result->stdout);
-			array_pop($layers);
+			if (is_array($result->stdout)) {
+				$layers = $result->stdout;
+			}
+			else {
+				$layers = explode("\r\n", $result->stdout);
+				array_pop($layers);
+			}
 			array_walk($layers, function(&$value, $key){
 				$value = explode(': ', $value)[1];
 			});
 			return $layers;
 		}
 	}
-		
-	function adjustGeometryType($database, $schema, $table, $epsg){
+	
+	/**
+	 * Wenn alle Geometrien nur eine Geometrie beinhalten macht die passt die Funktion
+	 * den Geometrietyp auf single an (Entfernt ST_Multi von GeometryType)
+	 */
+	function adjustGeometryType($database, $schema, $table, $epsg) {
 		$sql = "
 			SELECT count(*) FROM " . $schema . "." . $table . " WHERE ST_NumGeometries(the_geom) > 1
 		";
@@ -1033,7 +1053,7 @@ class data_import_export {
 			$rs = pg_fetch_row($ret[1]);
 			if ($rs[0] == 0) {
 				$sql = "
-					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " LIMIT 1 
+					SELECT replace(ST_GeometryType(the_geom), 'ST_Multi', '') FROM " . $schema . "." . $table . " WHERE the_geom IS NOT NULL LIMIT 1 
 				";
 				$ret = $database->execSQL($sql,4, 0);
 				if (!$ret[0]) {
@@ -1045,7 +1065,7 @@ class data_import_export {
 				}
 			}
 		}
-	}	
+	}
 
 	function getEncoding($dbf) {
 		$folder = dirname($dbf);
@@ -1059,17 +1079,18 @@ class data_import_export {
 			unlink($folder . '/test.csv');
 		}
 		#echo '<br>output: ' . $output[0];
-		if (strpos($output[0], 'UTF') !== false) 			$encoding = 'UTF-8';
-		if (strpos($output[0], 'ISO-8859') !== false) $encoding = 'LATIN1';
-		if (strpos($output[0], 'ASCII') !== false) 		$encoding = 'LATIN1';
+		$encoding = 'LATIN1';
+		if (strpos($output[0], 'UTF') !== false) {
+			$encoding = 'UTF-8';
+		}
 		#echo '<br>encoding: ' . $encoding;
 		return $encoding;
 	}
 
-	function create_csv($result, $attributes, $groupnames){
+	function create_csv($result, $attributes, $groupnames) {
 		# Gruppennamen in die erste Zeile schreiben
-		if($groupnames != ''){
-			foreach($result[0] As $key => $value){
+		if ($groupnames != ''){
+			foreach ($result[0] AS $key => $value){
 				$i = $attributes['indizes'][$key];
 				if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 					$groupname = explode(';', $attributes['group'][$i]);
@@ -1087,7 +1108,7 @@ class data_import_export {
     if(substr($attributes['name'][0], 0, 2) == 'ID'){
       $attributes['name'][0] = str_replace('ID', 'id', $attributes['name'][0]);
     }
-    foreach($result[0] As $key => $value){
+    foreach($result[0] AS $key => $value){
 			$i = $attributes['indizes'][$key];
     	if($attributes['type'][$i] != 'geometry' AND $attributes['name'][$i] != 'lock'){
 	      if($attributes['alias'][$i] != ''){
@@ -1230,6 +1251,7 @@ class data_import_export {
 			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
 			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
 		}
+		// TODO hier checken ob oid und maintable abgefragt werden konnten und valide sind.
 		if ($layerset[0]['connectiontype'] == 9) {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			mkdir(IMAGEPATH . $folder, 0777);
@@ -1479,11 +1501,20 @@ class data_import_export {
 					} break;
 
 					case 'CSV' : {
-						while ($rs=pg_fetch_assoc($ret[1])){
+						$result = array();
+						while ($rs = pg_fetch_assoc($ret[1])){
 							$result[] = $rs;
 						}
-						$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
-						$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						# Bugfix 3.5.64: Fehlerbehebung liefert bei leeren Tabellen nur leere csv
+						# ToDo: statt dessen sollte wenigstens die Kopfzeile mit geliefert werden.
+						# create_csv dahingehend verbessern, dass Kopfzeile auch ohne result erzeugt werden kann.
+						if (count($result) == 0) {
+							$csv = '';
+						}
+						else {
+							$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
+							$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+						}
 						$exportfile = $exportfile.'.csv';
 						$fp = fopen($exportfile, 'w');
 						fwrite($fp, $csv);

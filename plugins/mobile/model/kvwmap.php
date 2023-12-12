@@ -95,7 +95,7 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
@@ -122,6 +122,7 @@
 	};
 
 	$GUI->mobile_sync = function() use ($GUI) {
+		$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
 		include_once(CLASSPATH . 'synchronisation.php');
 		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -141,9 +142,14 @@
 		}
 
 		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+		$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
+		$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+		$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
 		move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+		$GUI->deblog->write('Run function mobile_sync_parameter_valide');
 
 		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
+		$GUI->deblog->write('Client Delta sync parameter result: ' . print_r($result, true));
 		if ($result['success']) {
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
@@ -279,7 +285,7 @@
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
-				"alias" => $attr['alias'][$value],
+				"alias" => $attr['alias'][$key],
 				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],
 				"type" => $attr['type'][$key],
@@ -290,6 +296,7 @@
 				"privilege" => $attr['privileg'][$key],
 				"default" => $attr['default'][$key]
 			);
+
 		}
 		return $attributes;
 	};
@@ -318,6 +325,57 @@
 		);
 	};
 
+	/**
+	 * Function prepare table for layer synchronisation.
+	 * It calls the function mobile_create_sync_table
+	 * if table public.syncs does not exists
+	 * @param $layerdb Database where the layer table resists
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_prepare_sync_table = function($layerdb, $sync) use ($GUI) {
+		$sql = "
+			SELECT EXISTS (
+				SELECT 1
+				FROM information_schema.tables 
+				WHERE 
+					table_schema = 'public' AND
+					table_name = 'syncs'
+			) AS table_exists
+		";
+
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+
+		$rs = pg_fetch_assoc($ret[1]);
+		if ($sync == 1 AND $rs['table_exists'] == 'f') {
+			$GUI->mobile_create_sync_table($layerdb);
+		}
+	};
+
+		/**
+	 * Function create table for layer synchronisation.
+	 * @param $layerdb Database where the layer table resists
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_create_sync_table = function($layerdb) use ($GUI) {
+		$sql = "
+			CREATE TABLE IF NOT EXISTS public.syncs (
+				id serial NOT NULL PRIMARY KEY,
+				client_id character varying,
+				username character varying,
+				schema_name character varying,
+				table_name character varying,
+				client_time timestamp without time zone,
+				pull_from_version integer,
+				pull_to_version integer,
+				push_from_version integer,
+				push_to_version integer
+			);
+		";
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+	};
+
 	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
@@ -333,16 +391,14 @@
 		";
 		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
-
-		# ToDo create Table syncs if not exists
+		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
 
 		$rs = pg_fetch_assoc($ret[1]);
-		if ($rs['table_exists'] == 't' and $sync == 0) {
+		if ($rs['table_exists'] == 't' AND $sync == 0) {
 			$GUI->mobile_drop_layer_sync($layerdb, $layer);
 		}
 
-		if ($rs['table_exists'] == 'f' and $sync == 1) {
+		if ($rs['table_exists'] == 'f' AND $sync == 1) {
 			$GUI->mobile_create_layer_sync($layerdb, $layer);
 		}
 	};
@@ -381,9 +437,6 @@
 				created_at timestamp without time zone NOT NULL DEFAULT (now())::timestamp without time zone,
 				username character varying,
 				CONSTRAINT " . $layer->get('maintable') . "_deltas_pkey PRIMARY KEY (version)
-			)
-			WITH (
-				OIDS=TRUE
 			);
 
 			--
@@ -400,7 +453,6 @@
 					search_path_schema TEXT;
 					version_column TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--raise notice '_query: %', _query;
@@ -499,7 +551,6 @@
 					search_path_schema TEXT;
 					version_column TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--raise notice '_query: %', _query;
@@ -578,7 +629,6 @@
 					part TEXT;
 					search_path_schema TEXT;
 				BEGIN
-					SET datestyle to 'German';
 					_query := current_query();
 
 					--RAISE NOTICE 'Current Query unverändert: %', _query;
@@ -628,6 +678,53 @@
 			return 0;
 		}
 		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+	};
+
+	/**
+	 * Function check if layer is valid for synchronisation
+	 * - Check for assignments to stelle and functions and access rights
+	 * - Check for necessary attributes
+	 * - Check the data statement for function calls not allowed for sqlite
+	 * @param $layerdb Database where the layer table resists
+	 * @param $layer_id The ID of the layer that has to be validate for sync
+	 * @param $sync Switch if Synchronisation ist on or off
+	 */
+	$GUI->mobile_validate_layer_sync = function($layerdb, $layer_id, $sync) use ($GUI) {
+		if ($sync == 1) {
+			include_once(CLASSPATH . 'synchronisation.php');
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($GUI, $layer_id);
+
+			$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+
+			$results = $layer->has_sync_attributes(synchro::NECESSARY_ATTRIBUTES);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+
+			$results = $layer->has_sync_id(synchro::NECESSARY_ID);
+			foreach ($results AS $result) {
+				$GUI->add_message('warning', $result);
+			}
+
+			$results = $layer->get_missing_sublayers($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
+			}
+
+			$results = $layer->get_missing_sub_layers_in_stellen($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') fehlt in Stelle ' . $l['stelle_bezeichnung'] . ' (' . $l['stelle_id'] . ')!');
+			}
+	
+			$results = $layer->get_none_synced_sub_layers($layer_id);
+			foreach ($results AS $l) {
+				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') ist nicht im sync Modus!');
+			}
+		}
 	};
 
 	/*

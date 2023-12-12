@@ -490,7 +490,7 @@ INSERT INTO u_styles2classes (
 					}
 					else {
 						$field = $this->result->fetch_field_direct($i);
-						if (!in_array($field->type, [252, 253, 254]) AND $rs[$i] == '') {
+						if ($rs[$i] === null) {
 							$insert .= "NULL";
 						} else{
 							$insert .= "'".$this->mysqli->real_escape_string($rs[$i])."'";
@@ -548,8 +548,12 @@ INSERT INTO u_styles2classes (
 	function open() {
 		$this->debug->write("<br>MySQL Verbindung öffnen mit Host: " . $this->host . " User: " . $this->user . " Datenbbank: " . $this->dbName, 4);
 		$this->mysqli = mysqli_init();
-		$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
-	  $this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		try {
+			$ret = $this->mysqli->real_connect($this->host, $this->user, $this->passwd, $this->dbName, 3306, null, MYSQLI_CLIENT_FOUND_ROWS);
+			$this->debug->write("<br>MySQL VerbindungsID: " . $this->mysqli->thread_id, 4);
+		} catch (Exception $e) {
+			throw new ErrorException('Verbindung zur MySQL fehlgeschlagen', 0, NULL, $e->getFile(), $e->getLine());
+		}
 		$this->debug->write("<br>MySQL Fehlernummer: " . mysqli_connect_errno(), 4);
 		$this->debug->write("<br>MySQL Fehler: " . mysqli_connect_error(), 4);
 		return $ret;

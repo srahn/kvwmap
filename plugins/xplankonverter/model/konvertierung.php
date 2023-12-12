@@ -37,10 +37,8 @@ class Konvertierung extends PgObject {
 		return strtolower(str_replace('-', '_', $planart));
 	}
 
-	function create_geoweb_service($xplan_layers) {
+	function create_geoweb_service($xplan_layers, $ows_onlineresource) {
 		$gui = $this->gui;
-		$planartkuerzel = $this->plan->planartAbk[0];
-		$ows_onlineresource = URL . 'ows/' . $this->get('stelle_id') . '/' . $planartkuerzel . 'plan/';
 
 		$gui->class_load_level = 2;
 		$gui->loadMap('DataBase');
@@ -49,10 +47,13 @@ class Konvertierung extends PgObject {
 		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
-		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
+		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft' . $this->plan->get($this->plan_attribut_aktualitaet));
+		# Hier die Variante wo die Bezeichnung des Datums aus dem Attributnamen der Aktualität entnommen wird:
+		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$gui->map->web->set('header', '../templates/header.html');
+		$gui->map->web->set('footer', '../templates/footer.html');
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
 		# Und setze bei den anderen die Templates
 		$result = $this->plan->get_layers_with_content($xplan_layers, $this->get($this->identifier));
@@ -73,16 +74,7 @@ class Konvertierung extends PgObject {
 				$layer->set('template', '../templates/' . $layer->name . '_body.html');
 				# Set Data sql for layer
 				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
-				$options = array(
-					'attributes' => array(
-						'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-						'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-						'where' => array('k.stelle_id = ' . $gui->user->rolle->stelle_id)
-					),
-					'geom_attribute' => 'position',
-					'geom_type_filter' => true
-				);
-				$result = $layerObj->get_generic_data_sql($options);
+				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
 				}
@@ -98,7 +90,7 @@ class Konvertierung extends PgObject {
 		}
 		return array(
 			'success' => true,
-			'mapfile' => $this->get('stelle_id') . '/zusammenzeichnung.map'
+			'mapfile' => $this->get('stelle_id') . '/' . MAPFILENAME. '.map'
 		);
 	}
 
@@ -283,7 +275,12 @@ class Konvertierung extends PgObject {
 			if ($konvertierung->get('veroeffentlicht') == 't') {
 				$konvertierung->art = 'published';
 			}
-			elseif ($konvertierung->get('error_id') AND $konvertierung->get('error_id') > 0) {
+			elseif (
+				$konvertierung->plan === false OR
+				(
+					$konvertierung->get('error_id') AND
+					$konvertierung->get('error_id') > 0)
+				) {
 				$konvertierung->art = 'faulty';
 			}
 			else {
@@ -308,59 +305,70 @@ class Konvertierung extends PgObject {
 		if (!file_exists($zip_path)) {
 			mkdir($zip_path, 0775, true);
 		}
+
 		$archive = new ZipArchive();
+
 		if ($archive->open($zip_path . $zip_file, (ZipArchive::CREATE | ZipArchive::OVERWRITE)) !== true) {
 			return array(
 				'success' => false,
 				'msg' => "Kann Zip-Archiv " . $zip_path . $zip_file . " nicht anlegen"
 			);
 		}
+
 		$archive->addGlob($this->get_file_path('uploaded_xplan_gml') . '*.gml');
 		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv"
-			);
-		}
-		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
-		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
-		if ($geodata_metadata_file === FALSE) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Lesen der Metadatendatei von " . $geodata_metadata_url
-			);
+			try {
+				$archive->close();
+			}
+			catch (Exception $e) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Hinzufügen der hochgeladenen Dateien aus Verzeichnis " . $this->get_file_path('uploaded_xplan_gml') . " in das Archiv."
+				);
+			}
 		}
 
-		#add it to the zip
-		$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
-		if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
-			);
+		$geodata_metadata_url = METADATA_CATALOG . '/srv/api/records/' . $this->get('metadata_dataset_uuid') . '/formatters/xml?approved=true';
+		$geodata_metadata_file = @file_get_contents($geodata_metadata_url);
+		if ($geodata_metadata_file !== FALSE) {
+			#add it to the zip
+			$archive->addFromString('Metadaten.xml', $geodata_metadata_file);
+			if ($zipArchive->status != ZIPARCHIVE::ER_OK) {
+				try {
+					$archive->close();
+				}
+				catch (Exception $e) {
+					return array(
+						'success' => false,
+						'msg' => "Fehler beim Hinzufügen der Metadatendatei von " . $geodata_metadata_url . " in das Archiv"
+					);
+				}
+			}
 		}
 
 		try {
+			$this->destroy();
 			$archive->close();
 		}
 		catch (Exception $e) {
-			return array(
-				'success' => false,
-				'msg' => "Fehler beim schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
-			);
+			if ($archive->numFiles > 0) {
+				return array(
+					'success' => false,
+					'msg' => "Fehler beim Schließen des Archivs" . $zip_path . $zip_file . ": " . $e->getMessage()
+				);
+			}
+			else {
+				return array(
+					'success' => true,
+					'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
+				);
+			}
 		}
-
-		$this->destroy();
-
-		return array(
-			'success' => true,
-			'msg' => 'ZIP-Archiv ' . $zusammenzeichnung_zip . ' erfolgreich angelegt und Konvertierung gelöscht.'
-		);
 	}
 
 	/**
-		Anlegen einer Konvertierung
-	*/
+	 *Anlegen einer Konvertierung
+	 */
 	function create($anzeige_name = '', $epsg_code = '', $input_epsg_code = '', $planart = '', $stelle_id = '', $user_id = '') {
 		$sql = "
 			INSERT INTO " . $this->schema . "." . $this->tableName . " (
@@ -1304,19 +1312,19 @@ class Konvertierung extends PgObject {
 		$this->debug->show('Konvertierung create_layer_group layer_type: ' . $layer_type, Konvertierung::$write_debug);
 		$layer_group_id = $this->get(strtolower($layer_type) . '_layer_group_id');
 		if (empty($layer_group_id)) {
-			$layerGroup = new MyObject($this->gui, 'u_groups');
+			$layer_group = new MyObject($this->gui, 'u_groups');
 			if ($layer_type == 'GML') {
-				$layerGroup = $layerGroup->find_by('Gruppenname', 'XPlanung');
-				$layerGroup->create(array(
+				$layer_group = $layer_group->find_by('Gruppenname', 'XPlanung');
+				$layer_group->create(array(
 					'Gruppenname' => 'XPlanung'
 				));
 			}
 			else {
-				$layerGroup->create(array(
+				$layer_group->create(array(
 					'Gruppenname' => $this->get('bezeichnung') . ' ' . $layer_type
 				));
 			}
-			$this->set(strtolower($layer_type) . '_layer_group_id', $layerGroup->get($this->identifier));
+			$this->set(strtolower($layer_type) . '_layer_group_id', $layer_group->get($this->identifier));
 			$this->update();
 		}
 		return $this->get(strtolower($layer_type) . '_layer_group_id');
@@ -1414,7 +1422,7 @@ class Konvertierung extends PgObject {
 			$validierung->konvertierung_id = $this->get($this->identifier);
 			if ($validierung->regel_existiert($regeln)) {
 				$success = true;
-				foreach($regeln AS $regel) {
+				foreach ($regeln AS $regel) {
 					$result = $regel->validate($this);
 					if (!$result) {
 						$success = false;
@@ -1466,8 +1474,8 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-		This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
-		and write the report in xplankonverter database tables
+	*	This function validate a XPlanGML-File against the XPlanValidator at https://www.xplanungsplattform.de/xplan-validator/
+	*	and write the report in xplankonverter database tables
 	*/
 	function xplanvalidator($gml_file) {
 		$pathinfo = pathinfo($gml_file);
@@ -1797,9 +1805,9 @@ class Konvertierung extends PgObject {
 	}
 
 	/*
-	* Entfernt alles was mit der Konvertierung zusammenhängt und
-	* löscht sich am Ende selbst.
-	*/
+	 * Entfernt alles was mit der Konvertierung zusammenhängt und
+	 * löscht sich am Ende selbst.
+	 */
 	function destroy() {
 		$this->debug->show('Lösche Konvertierung', Konvertierung::$write_debug);
 
@@ -1813,7 +1821,8 @@ class Konvertierung extends PgObject {
 			bereich_gml_id IS NULL
 		");
 		foreach($regeln AS $regel) {
-			$regel->konvertierung = $regel->get_konvertierung();
+			# Wozu hier die Konvertierung holen wenn die Regel danach gelöscht wird?
+			#$regel->konvertierung = $regel->get_konvertierung();
 			$regel->destroy();
 		}
 
@@ -1855,11 +1864,13 @@ class Konvertierung extends PgObject {
 	}
 
 	function insert_textabschnitte($gml_extractor) {
-		# Inserts all existing Textabschnitte if they exist(no regel as potential link to plan)
+		# Inserts all existing Textabschnitte if they exist (no regel as potential link to plan)
 		$textabschnitte = array("bp_textabschnitt", "fp_textabschnitt", "so_textabschnitt", "rp_textabschnitt", "lp_textabschnitt");
-		foreach($textabschnitte as $textabschnitt) {
-			if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
-				$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+		foreach ($textabschnitte as $textabschnitt) {
+			if (strpos($textabschnitt, $this->plan->planartAbk) !== false) {
+				if ($gml_extractor->check_if_table_exists_in_schema($textabschnitt, 'xplan_gmlas_' . $this->get($this->identifier))) {
+					$gml_extractor->insert_into_textabschnitt($textabschnitt, $this->get($this->identifier), $this->gui->user->id);
+				}
 			}
 		}
 		return array(

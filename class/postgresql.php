@@ -520,7 +520,7 @@ FROM
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
-				#header('error: true');	// damit ajax-Requests das auch mitkriegen
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
 			}
 		}
 		return $ret;
@@ -612,11 +612,12 @@ FROM
 	}
 
 	function get_table_alias_names($query_plan){
+		$table_alias_names = [];
 		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
-			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_alias = str_replace([' ', chr(10), chr(13)], '', get_first_word_after($table_info[$i], ':aliasname', ' ', ':'));
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			if($table_oid AND $table_alias != 'unnamed_join'){
+			if($table_oid AND !array_key_exists($table_oid, $table_alias_names) AND $table_alias != 'unnamed_join'){
 				$table_alias_names[$table_oid] = $table_alias;
 			}
 		}
@@ -993,12 +994,11 @@ FROM
 			#-- search_path ist zwar gesetzt, aber nur auf custom_shapes, daher ist das Schema der Tabelle erforderlich
 			$sql = "
 				SELECT coalesce(
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
-					,  
 					(select type from geometry_columns WHERE 
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
-					 f_geometry_column = '" . $geomcolumn . "')
+					 f_geometry_column = '" . $geomcolumn . "'),
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " where " . $geomcolumn . " IS NOT NULL limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -1017,6 +1017,7 @@ FROM
 	}
   
   function eliminate_star($query, $offset){
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
@@ -1041,9 +1042,9 @@ FROM
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
+          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
+            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
           }
           $query = str_replace(trim($column[$i]), $columns, $query);
         }
@@ -1392,7 +1393,7 @@ FROM
 		return $rs;
 	}
   
-  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl, $StrassenSchl, $HausNr, $exclude_lmh_gml_ids) {
 		if ($HausNr != '') {
 			$adressen = explode(', ', $HausNr);
 			foreach($adressen as $adresse){
@@ -1412,6 +1413,9 @@ FROM
 			}
 			$adressfilter = "(l.gemeinde, l.lage, l.kreis) IN (" . implode(', ', $adr) . ")";
 		}
+		if ($exclude_lmh_gml_ids != '') {
+			$adressfilter .= " AND gml_id NOT IN (" . $exclude_lmh_gml_ids . ")";
+		}
   	$sql = "
 			SELECT 
 				f.flurstueckskennzeichen as flurstkennz
@@ -1429,7 +1433,7 @@ FROM
 																			$adressfilter . 
 																			$this->build_temporal_filter(array('l')) . "
 																		)";
-		if ($HausNr == '') {
+		if ($HausNr == '' AND $exclude_lmh_gml_ids == '') {
 			$sql .= "
 				OR f.zeigtauf && ARRAY	(
 																	SELECT 
@@ -1936,7 +1940,7 @@ FROM
 			}
 			$sql.=")";
 		}
-		$sql.= $this->build_temporal_filter(array('p', 'anschrift', 'n', 'g', 'b'));
+		$sql.= $this->build_temporal_filter(array('f', 'p', 'anschrift', 'n', 'g', 'b'));
 		if ($formvars['alleiniger_eigentuemer']) {
 			$sql.= "
 				AND NOT EXISTS (
@@ -1947,7 +1951,7 @@ FROM
 						JOIN alkis.ax_namensnummer n2 ON n2.istbestandteilvon = g2.gml_id 
 						JOIN alkis.ax_person p2 ON n2.benennt = p2.gml_id AND p2.gml_id != p.gml_id
 					WHERE 
-						f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an) " .
+						(f.istgebucht = s2.gml_id OR f.gml_id = ANY(s2.verweistauf) OR f.istgebucht = ANY(s2.an)) " .
 						$this->build_temporal_filter(array('p2', 'n2', 'g2', 's2')) . "
 				)";
 		}
@@ -2565,10 +2569,12 @@ FROM
 			  min(st_xmin(env)) AS minx, 
 			  max(st_xmax(env)) AS maxx,
 			  min(st_ymin(env)) AS miny, 
-			  max(st_ymax(env)) AS maxy
+			  max(st_ymax(env)) AS maxy,
+				'''' || array_to_string(array_agg(gml_ids), ''',''') || '''' as gml_ids
 			FROM
 			  alkis.ax_gebaeude g,
-			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env
+			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env,
+				unnest(g.zeigtauf) as gml_ids
 			WHERE
 			  g.zeigtauf && ARRAY (
 			  SELECT
@@ -2589,11 +2595,8 @@ FROM
 			$rs = pg_fetch_assoc($ret[1]);
 			if ($rs['minx'] == 0) {
 				$ret[0] = 1;
-				$ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
 			}
-			else {
-				$ret[1] = $rs;
-			}
+			$ret[1] = $rs;
 		}
 		return $ret;
 	}

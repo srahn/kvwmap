@@ -8,6 +8,7 @@
 	$strDrawLine = "Linie hinzuf\u00fcgen";
 	$strDrawPolygon = "Freihandpolygon hinzuf\u00fcgen";
 	$strEditOther = "anderes Objekt bearbeiten";
+	$strPunktfang = "Punktfang";
 	$strGPSFollow = "GPS-Verfolgungsmodus";
 	$strMoveGeometry = "Geometrie verschieben";
 	$strParallelPolygon = "einseitig gepufferte Linie erzeugen";
@@ -19,4 +20,5 @@
 	$strSplitLine = "Linien teilen";
 	$strSplitPolygon = "Polygone teilen";
 	$strUndo = "R\u00fcckg\u00e4ngig";
+	$strCircle = "Kreis hinzuf\u00fcgen";
 ?>

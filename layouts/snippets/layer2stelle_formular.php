@@ -62,7 +62,7 @@ else {
 		  	<tr>
 		    	<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTransparency; ?></th>
 		    	<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-		      		<input name="transparency" type="text" value="<?php echo $this->formvars['transparency']; ?>" size="25" maxlength="100">
+		      		<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 193px">
 		  		</td>
 		  	</tr>
 		  	<tr>

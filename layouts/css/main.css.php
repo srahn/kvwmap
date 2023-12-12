@@ -15,6 +15,23 @@ input {
 	font-size: <? echo $font_size_factor * 15; ?>px
 }
 
+.alerts-border {
+	border: 2px #ff0000 dotted;
+	animation: borderblink 0.8s;
+	animation-iteration-count: 5;
+}
+
+@keyframes borderblink { 50% { border-color:#fff ; }  }
+
+.validation-error-msg-div {
+	background-color: #eee;
+	float: left;
+	width: 390px;
+	padding: 5px;
+	color: red;
+	border-radius: 5px;
+}
+
 #form-titel {
 	font-family: SourceSansPro3;
 
@@ -316,7 +333,7 @@ form {
 }
 
 .hidden{
-	display: none;
+	display: none !important;
 }
 
 ul{
@@ -353,8 +370,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"], input[type="float"] {
-
+input[type="text"], input[type="float"], input[type="number"] {
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
@@ -387,6 +403,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	font-weight: normal;
 }
 
 span[data-tooltip]::before {
@@ -523,6 +540,10 @@ span[data-tooltip]:hover::after {
 	border:	1px solid #C3C7C3;
 }
 
+.styleFormField {
+	width: 87px;
+}
+
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
 	height: calc(100vh - 210px);
 	overflow-y: scroll;
@@ -613,6 +634,7 @@ select {
 
 select option{
 	font-family: SourceSansPro1,arial;
+	padding: 2px;
 }
 
 textarea {
@@ -1168,6 +1190,10 @@ a.menuered:hover {
 	background-image: url(<? echo GRAPHICSPATH; ?>nicht_mehr_merken.png);
 }
 
+.url_dataset{
+	background-image: url(<? echo GRAPHICSPATH; ?>url_dataset.png);
+}
+
 .datensatz_loeschen{
 	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_loeschen.png);
 }
@@ -1277,7 +1303,7 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
+	left: 0;
 	top: 1;
 }
 
@@ -1332,6 +1358,10 @@ a.menuered:hover {
 
 #mapimage{
 	position: relative;
+}
+
+#mapbuttons {
+	padding-left: 1px;
 }
 
 #showcoords, #showmeasurement{
@@ -1826,6 +1856,7 @@ a:hover .preview_image{
 	margin-left: 20px;
 	padding: 0px;
 	text-align: left;
+	width: 90%;
 }
 
 .dstable{
@@ -1904,6 +1935,32 @@ thead.gle th {
 	background-color: <? echo BG_GLEATTRIBUTE; ?>;
 }
 
+.gle_arrayelement_table {
+	width: 100%;
+	margin: 10px 0;
+}
+
+.gle_datatype_table {
+	width: 100%;
+	table-layout: auto;
+	border: 1px solid #bbb;
+	border-bottom: none;
+	border-collapse: collapse;
+	border-left: 3px solid #555;
+}
+
+.gle_datatype_table td.gle_attribute_name {
+	width: 10%;
+	background-clip: padding-box;
+	padding: 3px 2px;
+	vertical-align: top;
+	background-color: <? echo BG_GLEATTRIBUTE; ?>;
+}
+
+.gle_attribute_value, .gle_attribute_name {
+	border: 1px solid #bbb;
+}
+
 .gle-attribute-name {
 	height: 32px;
 	position: relative;
@@ -1972,6 +2029,10 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	border: 1px solid grey;
 	border-collapse: collapse;
 	margin: 2px 2px 2px 0;
+}
+
+.gle_neu_link {
+	text-align: right;
 }
 
 .subForm:not(:empty){
@@ -2191,37 +2252,38 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: flex-start;
+	width: 580px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .fstanzeigehover{
-								position: relative;
-								float: left;
-								margin: auto;
-								visibility: visible;
-								line-height: 30px;
+	position: relative;
+	float: left;
+	margin: auto;
+	visibility: visible;
+	line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.4);
+	background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		flex-wrap: wrap;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .flexcontainer2{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		align-items:stretch;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	align-items:stretch;
 }
 
 .map-right{
@@ -2707,4 +2769,61 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: #666;
 	margin-top: 8px;
 	font-size: 110%
+}
+
+#nds_titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
+#nds_titel p {
+	margin: 0px 0px -32px 0px;
+}
+#nds_formular {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+.nds_select  {
+	display: flex;
+	width: 500px;
+	margin: 0px 0px 10px 0px;
+}
+.nds_select select {
+	height: 25px;
+	width: 360px;
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+.nds_select div:first-child {
+	margin-right: 10px;
+	align-self: center;
+	width: 50px;
+}
+#nds_submit {
+	display:flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	margin-bottom: 15px;
+}
+#nds_submit>div {
+	display: flex;
+	align-items: center;
+}
+#nds_submit input {
+	margin-right: 5px;
+}
+#nds_submit input[type="checkbox"] {
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-left: 15px;
+}
+#nds_submit span {
+	margin: auto;
+	margin-left: 3px;
+}
+
+#nds_edit #dataset_operations {
+	display: none;
 }

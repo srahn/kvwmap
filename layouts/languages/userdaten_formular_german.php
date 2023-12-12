@@ -11,8 +11,8 @@
 	$strDeactiveLayer = 'deaktivieren';
 	$strForeName = 'Vorname';
 	$strGenerateSecurePassword = 'Sicheres Passwort generieren';
-	$strInvitationBody1 = 'Einladung%20f%C3%BCr%20WebGIS%20Nutzer';
-	$strInvitationBody2 = 'Sie werden von der Anwendung auf ' . URL . APPLVERSION . ' aufgefordert ein neues Passwort für kvwmap einzugeben';
+	$strInvitationBody1 = 'Wichtiger Hinweis für';
+	$strInvitationBody2 = 'Sie werden von der Anwendung auf ' . URL . '/' . APPLVERSION . ' aufgefordert ein neues Passwort für kvwmap einzugeben';
 	$strInvitationBody3 = 'Führen Sie dazu bitte folgenden Link aus';
 	$strInvitationBody4 = 'und vergeben dort ein neues Passwort';
 	$strInvitationBody5 = 'Mit freundlichen Grüßen';
@@ -48,4 +48,7 @@
 	$strLayerDataImportAllowedLabel = 'Daten-Import in Themen';
 	$strLayerDataImportAllowedCheckboxText = 'Darf neue Datensätze über den Daten-Import erzeugen.';	
 	$strArchived = "archiviert";
+	$strAgreementAccepted = "Nutzungshinweis";
+	$strAgreementAcceptedText = "zugestimmt";
+	$strAgreementAcceptedDescription = "Wenn die Option gesetzt ist, hat der Nutzer den Nutzungsbedingungen zugestimmt. Wenn die Checkbox geleert wird, muss der Nutzer den Nutzungsbedingungen beim Anmelden erneut zustimmen.";
 ?>

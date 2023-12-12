@@ -401,6 +401,7 @@ if (!$show_login_form) {
 					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
 					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
 					$go = 'Stelle_waehlen';
+					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 					# login case 14
 				}
 			}
@@ -866,13 +867,13 @@ function set_session_vars($formvars) {
 }
 
 /**
-	Here we switch from the old md5 to the new sha1 password encryption method.
-	The new password reside in the new attribut password (with d at the end)
-	This function set the password in attribut password with method sha1
-	when password match with md5 method in attribut passwort.
-	This function is to prepare the use of sha1 password encryption in kvwmap
-	If any user have been switched to the new sha1 method, this function and as well
-	the attribut passwort (with t at the end) will become useless and can be removed.
+*	Here we switch from the old md5 to the new sha1 password encryption method.
+*	The new password reside in the new attribut password (with d at the end)
+*	This function set the password in attribut password with method sha1
+*	when password match with md5 method in attribut passwort.
+*	This function is to prepare the use of sha1 password encryption in kvwmap
+*	If any user have been switched to the new sha1 method, this function and as well
+*	the attribut passwort (with t at the end) will become useless and can be removed.
 */
 function prepare_sha1($login_name, $password) {
 	global $GUI;

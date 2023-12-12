@@ -769,7 +769,7 @@ nav > ul > li > ul > li:hover > ul {
 .edit-veroeffentlichungsdatum-div {
 	display: none;
 	width: 50%;
-	height: 30%;
+	/*height: 30%;*/
 	padding: 20px;
 	background-color: #cfdde8;
 	position: absolute;

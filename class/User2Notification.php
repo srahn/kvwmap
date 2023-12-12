@@ -32,13 +32,13 @@ class User2Notification extends MyObject {
 		);
 	}
 
-	public static function delete_user2notifications($gui, $notification_id) {
+	public static function delete_user2notifications($gui, $notification) {
 		$user2notification = new User2Notification($gui);
 		$sql = "
 			DELETE FROM
 				user2notifications
 			WHERE
-				notification_id = " . $notification_id . "
+				notification_id = " . $notification->get_id() . "
 		";
 		$user2notification->gui->database->execSQL($sql);
 		if ($user2notification->database->success) {
@@ -56,18 +56,19 @@ class User2Notification extends MyObject {
 		return $result;
 	}
 
-	public static function create_user2notifications($gui, $notification_id, $user_id = NULL) {
+	public static function create_user2notifications($gui, $notification) {
 		$user2notification = new User2Notification($gui);
 		$sql = "
 			INSERT INTO user2notifications (user_id, notification_id)
 			SELECT DISTINCT
 				user_id,
-				" . $notification_id . " AS notification_id
+				" . $notification->get_id() . " AS notification_id
 			FROM
 				rolle r
 			WHERE
 				true
-				" . ($user_id != NULL ? ' AND user_id = ' . $user_id : '') . "
+				" . (empty($notification->get('user_filter')) ? '' : 'AND user_id IN (' . $notification->get('user_filter') . ')') . "
+				" . (empty($notification->get('stellen_filter')) ? '' : 'AND stelle_id IN (' . $notification->get('stellen_filter') . ')') . "
 		";
 		$user2notification->gui->database->execSQL($sql);
 		if ($user2notification->gui->database->success) {
@@ -87,10 +88,10 @@ class User2Notification extends MyObject {
 		return $result;
 	}
 
-	public static function update_notification($gui, $notification_id) {
+	public static function update_notification($gui, $notification) {
 		$results = array();
-		$results[] = User2Notification::delete_user2notifications($gui, $notification_id);
-		$results[] = User2Notification::create_user2notifications($gui, $notification_id);
+		$results[] = User2Notification::delete_user2notifications($gui, $notification);
+		$results[] = User2Notification::create_user2notifications($gui, $notification);
 		return $results;
 	}
 

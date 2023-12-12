@@ -42,7 +42,7 @@
 			<xsl:text>http://inspire.ec.europa.eu/codelist/HILUCSValue/</xsl:text>
 		</xsl:variable>
 		<xsl:variable name="identifier_namespace">
-			<xsl:text>ni</xsl:text>
+			<xsl:text>mv</xsl:text>
 		</xsl:variable>
 		<xsl:variable name="registry">
 			<xsl:text>https://registry.gdi-de.org/id/de.</xsl:text>
@@ -52,7 +52,7 @@
 		<wfs:FeatureCollection>
 			<!-- includes schemaLocations from xsl namespace-->
 			<xsl:copy-of select="document('')/*/@xsi:schemaLocation"/>
-			<xsl:attribute name="timeStamp">2016-11-07T10:16:04+02:00</xsl:attribute>
+			<xsl:attribute name="timeStamp">2023-06-29T10:16:04+02:00</xsl:attribute>
 			<!-- Funktion current-dateTime() funktioniert nur mit XSLT 2.0, für XSL 1.0 sind Erweiterungen notwendig-->
 			<!-- Funktion lässt sich auch mit XSLT 2.0 nicht durch Konverter wie EA Processor oder Online-Konverter aufrufen -->
 			<!-- Zählt Anzahl FeatureMember die Plan, TextAbschnitt oder Objekt in XPlanGML abbilden und auf INSPIRE PLU mappen-->
@@ -60,7 +60,7 @@
 				<xsl:value-of select="count(xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Abgrabung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Aufschuettung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Bodenschaetze|xplan:XPlanAuszug/gml:featureMember/xplan:FP_BebauungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_KeineZentrAbwasserBeseitigung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AnpassungKlimawandel|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gemeinbedarf|xplan:XPlanAuszug/gml:featureMember/xplan:FP_SpielSportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gruen|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:FP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_SchutzPflegeEntwicklung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Kennzeichnung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_NutzunhgsbeschraenkungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_PrivilegiertesVorhaben|xplan:XPlanAuszug/gml:featureMember/xplan:FP_TextlicheDarstellungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VorbehalteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_ZentralerVersorgungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbgrabungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AufschuettungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BodenschaetzeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RekultivierungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BaugebietsTeilFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Bauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BebauungsArt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BesondererNutzungszweckFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Dachform|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FirstrichtungsLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FoerdungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GebaeudeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenZuordnung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenAusschlussFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NichtUeberbaubareGrundstuecksflaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_PersGruppenBestimmteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RegelungVergnuegungsstaetten|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpezielleBauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UeberbaubareGrundstuecksFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_ErhaltungsBereichFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinbedarfsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpielSportanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GruenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KleintierhaltungFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AnpflanzungBindungErhaltung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EingriffsBereich|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FestsetzungNachLandesrecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FreiFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_HoehenMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KennzeichnungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NutzungsartenGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TextlicheFestsetzungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Veraenderungssperre|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Wegerecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Immissionsschutz|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TechnischeMassnahmenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BereichOhneEinAusfahrLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtPunkt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtsbereichLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Strassenkoerper|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerkehrsflaecheBesondererZweckbestimmung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GewaesserFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WasserwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Bodenschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Denkmalschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Forstrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Luftverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Schienenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Strassenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Wasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietNaturschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietSonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietWasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gebiet|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gewaesser)" />
 			</xsl:attribute>
 			<xsl:attribute name="numberReturned">
-				<xsl:value-of select="count(xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Abgrabung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Aufschuettung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Bodenschaetze|xplan:XPlanAuszug/gml:featureMember/xplan:FP_BebauungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_KeineZentrAbwasserBeseitigung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AnpassungKlimawandel|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gemeinbedarf|xplan:XPlanAuszug/gml:featureMember/xplan:FP_SpielSportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gruen|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:FP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_SchutzPflegeEntwicklung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Kennzeichnung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_NutzunhgsbeschraenkungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_PrivilegiertesVorhaben|xplan:XPlanAuszug/gml:featureMember/xplan:FP_TextlicheDarstellungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VorbehalteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_ZentralerVersorgungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbgrabungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AufschuettungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BodenschaetzeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RekultivierungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BaugebietsTeilFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Bauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BebauungsArt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BesondererNutzungszweckFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Dachform|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FirstrichtungsLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FoerdungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GebaeudeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenZuordnung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenAusschlussFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NichtUeberbaubareGrundstuecksflaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_PersGruppenBestimmteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RegelungVergnuegungsstaetten|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpezielleBauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UeberbaubareGrundstuecksFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_ErhaltungsBereichFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinbedarfsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpielSportanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GruenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KleintierhaltungFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AnpflanzungBindungErhaltung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EingriffsBereich|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FestsetzungNachLandesrecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FreiFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_HoehenMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KennzeichnungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NutzungsartenGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TextlicheFestsetzungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Veraenderungssperre|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Wegerecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Immissionsschutz|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TechnischeMassnahmenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BereichOhneEinAusfahrLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtPunkt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtsbereichLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Strassenkoerper|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerkehrsflaecheBesondererZweckbestimmung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GewaesserFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WasserwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Bodenschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Denkmalschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Forstrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Luftverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Schienenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Strassenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Wasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietNaturschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietSonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietWasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gebiet|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gewaesser)" />
+				<xsl:value-of select="count(xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Abgrabung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Aufschuettung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Bodenschaetze|xplan:XPlanAuszug/gml:featureMember/xplan:FP_BebauungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_KeineZentrAbwasserBeseitigung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AnpassungKlimawandel|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gemeinbedarf|xplan:XPlanAuszug/gml:featureMember/xplan:FP_SpielSportanlage|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gruen|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:FP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:Entwicklung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Kennzeichnung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_NutzunhgsbeschraenkungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_PrivilegiertesVorhaben|xplan:XPlanAuszug/gml:featureMember/xplan:FP_TextlicheDarstellungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VorbehalteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:FP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:FP_ZentralerVersorgungsbereich|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Strassenverkehr|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Gewaesser|xplan:XPlanAuszug/gml:featureMember/xplan:FP_Wasserwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbgrabungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AufschuettungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BodenschaetzeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RekultivierungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BauLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BaugebietsTeilFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Bauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BebauungsArt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BesondererNutzungszweckFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Dachform|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FirstrichtungsLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FoerdungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GebaeudeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenZuordnung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenAusschlussFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NichtUeberbaubareGrundstuecksflaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_PersGruppenBestimmteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RegelungVergnuegungsstaetten|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpezielleBauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UeberbaubareGrundstuecksFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_ErhaltungsBereichFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinbedarfsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpielSportanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GruenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KleintierhaltungFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AnpflanzungBindungErhaltung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EingriffsBereich|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FestsetzungNachLandesrecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FreiFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_HoehenMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KennzeichnungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NutzungsartenGrenze|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TextlicheFestsetzungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Veraenderungssperre|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Wegerecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Immissionsschutz|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TechnischeMassnahmenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BereichOhneEinAusfahrLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtPunkt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EinfahrtsbereichLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Strassenkoerper|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerkehrsflaecheBesondererZweckbestimmung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GewaesserFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WasserwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Bodenschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Denkmalschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Forstrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Luftverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Schienenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Strassenverkehrsrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Wasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietNaturschutzrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietSonstigesRecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_SchutzgebietWasserrecht|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gebiet|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Grenze|xplan:XPlanAuszug/gml:featureMember/xplan:SO_Gewaesser)" />
 			</xsl:attribute>
 
 
@@ -106,20 +106,22 @@
 						</xsl:otherwise>
 					</xsl:choose>
 					<!-- levelOfSpatialPlan-->
+					<!-- all local for BP -->
+					
 					<xsl:choose>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=1000 or 
-                                        xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=4000 or
-                                        xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=5000">
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10000 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10001 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10002 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=3000 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=3100 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=4000 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40000 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40001 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40002 or
+																				xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=5000 or
+                                        xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=7000">
 							<plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/local"/>
-						</xsl:when>
-						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=2000">
-							<plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/supraLocal"/>
-						</xsl:when>
-						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=3000">
-							<plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/infraRegional"/>
-						</xsl:when>
-						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=9999">
-							<plu:levelOfSpatialPlan xlink:href="http://inspire.ec.europa.eu/codelist/LevelOfSpatialPlanValue/other"/>
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:message terminate="yes">
@@ -165,43 +167,43 @@
 					<!-- Für planTypeName sobald Listen von GDI-De bereitgestellt werden, Verweis auf diese (sollen auf nationaler Ebene festgelegt werden) -->
 					<xsl:choose>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=1000">
-							<plu:planTypeName xlink:href="6_Bebauungsplan"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_Bebauungsplan"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10000">
-							<plu:planTypeName xlink:href="6_3_EinfacherBPlan"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_3_EinfacherBPlan"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10001">
-							<plu:planTypeName xlink:href="6_1_QualifizierterBPlan"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_1_QualifizierterBPlan"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=10002">
-							<plu:planTypeName xlink:href="6_Bebauungsplan"/><!-- Bebauungsplan zur Wohnraumversorgung doesn't exist in GDI-registry yet, therefore placeholder-->
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_Bebauungsplan"/><!-- Bebauungsplan zur Wohnraumversorgung doesn't exist in GDI-registry yet, therefore placeholder-->
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=3000">
-							<plu:planTypeName xlink:href="6_2_VorhabenbezogenerBPlan"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_2_VorhabenbezogenerBPlan"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=3100">
-							<plu:planTypeName xlink:href="6_5_VorhabenUndErschliessungsplan"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_5_VorhabenUndErschliessungsplan"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=4000">
-							<plu:planTypeName xlink:href="7_InnenbereichsSatzung"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/7_InnenbereichsSatzung"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40000">
-							<plu:planTypeName xlink:href="7_1_KlarstellungsSatzung"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/7_1_KlarstellungsSatzung"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40001">
-							<plu:planTypeName xlink:href="7_2_EntwicklungsSatzung"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/7_2_EntwicklungsSatzung"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=40002">
-							<plu:planTypeName xlink:href="7_3_ErgaenzungsSatzung"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/7_3_ErgaenzungsSatzung"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=5000">
-							<plu:planTypeName xlink:href="8_AussenbereichsSatzung"/>
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/8_AussenbereichsSatzung"/>
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=7000">
-							<plu:planTypeName xlink:href="6_Bebauungsplan"/><!-- OeffentlicheBauvorschrift doesn't exist in GDI-registry yet, therefore placeholder-->
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_Bebauungsplan"/><!-- OeffentlicheBauvorschrift doesn't exist in GDI-registry yet, therefore placeholder-->
 						</xsl:when>
 						<xsl:when test="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Plan/xplan:planArt=9999">
-							<plu:planTypeName xlink:href="6_Bebauungsplan"/><!-- Sonstiger Bebauungsplan doesn't exist in GDI-registry yet, therefore placeholder-->
+							<plu:planTypeName xlink:href="https://registry.gdi-de.org/codelist/de.xleitstelle.inspire_plu/PlanTypeNameValue/6_Bebauungsplan"/><!-- Sonstiger Bebauungsplan doesn't exist in GDI-registry yet, therefore placeholder-->
 						</xsl:when>
 						<xsl:otherwise>
 							<xsl:message terminate="yes">
@@ -5322,8 +5324,9 @@
 					</xsl:otherwise>
 				</xsl:choose>
 			</xsl:for-each>
+
 			<!-- BP SupplementaryRegulation and ZoningElement (selected values) -->
-			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:BP_Wegerecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerEntsorgung">
+			<xsl:for-each select="xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbgrabungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AufschuettungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BodenschaetzeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RekultivierungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BaugebietsTeilFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Bauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BesondererNutzungszweckFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FoerdungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GebaeudeFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinschaftsanlagenZuordnung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenAusschlussFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NebenanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_NichtUeberbaubareGrundstuecksflaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_PersGruppenBestimmteFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_RegelungVergnuegungsstaetten|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpezielleBauweise|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UeberbaubareGrundstuecksFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_ErhaltungsBereichFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GemeinbedarfsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SpielSportanlagenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GruenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KleintierhaltungFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Landwirtschaft|xplan:XPlanAuszug/gml:featureMember/xplan:BP_LandwirtschaftsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WaldFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AnpflanzungBindungErhaltung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AusgleichsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_EingriffsBereich|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_SchutzPflegeEntwicklungsMassnahme|xplan:XPlanAuszug/gml:featureMember/xplan:BP_AbstandsMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FestsetzungNachLandesrecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_FreiFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GenerischesObjekt|xplan:XPlanAuszug/gml:featureMember/xplan:BP_HoehenMass|xplan:XPlanAuszug/gml:featureMember/xplan:BP_KennzeichnungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TextlicheFestsetzungsFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_UnverbindlicheVormerkung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Veraenderungssperre|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Wegerecht|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Immissionsschutz|xplan:XPlanAuszug/gml:featureMember/xplan:BP_TechnischeMassnahmenFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerEntsorgung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_BereichOhneEinAusfahrLinie|xplan:XPlanAuszug/gml:featureMember/xplan:BP_Strassenkoerper|xplan:XPlanAuszug/gml:featureMember/xplan:BP_VerkehrsflaecheBesondererZweckbestimmung|xplan:XPlanAuszug/gml:featureMember/xplan:BP_GewaesserFlaeche|xplan:XPlanAuszug/gml:featureMember/xplan:BP_WasserwirtschaftsFlaeche" >
 				<!-- Wählt ZoningElement oder SupplementaryRegulation aus-->
 				<xsl:choose>
 					<xsl:when test="child::xplan:flaechenschluss='true'">
@@ -5371,6 +5374,153 @@
 								<!-- hilucsLandUse-->
 								<!-- Mapping auf HILUCS-->
 								<xsl:choose>
+									<xsl:when test="self::xplan:BP_BodenschaetzeFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'1_3_MiningAndQuarrying')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_RekultivierungsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AbstandsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BaugebietsTeilFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Bauweise">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BesondererNutzungszweckFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Dachform">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FoerdungsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GebaeudeFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinschaftsanlagenFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinschaftsanlagenZuordnung">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NebenanlagenAusschlussFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NebenanlagenFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NichtUeberbaubareGrundstuecksflaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_PersGruppenBestimmteFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_RegelungVergnuegungsstaetten">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SpezielleBauweise">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_UeberbaubareGrundstuecksFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_ErhaltungsBereichFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinbedarfsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SpielSportanlagenFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GruenFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_KleintierhaltungFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Landwirtschaft">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_LandwirtschaftsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_WaldFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AnpflanzungBindungErhaltung">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AusgleichsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AusgleichsMassnahme">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_EingriffsBereich">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SchutzPflegeEntwicklungsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SchutzPflegeEntwicklungsMassnahme">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AbstandsMass">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FestsetzungNachLandesrecht">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FreiFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GenerischesObjekt">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_HoehenMass">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_KennzeichnungsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_TextlicheFestsetzungsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_UnverbindlicheVormerkung">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Veraenderungssperre">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Wegerecht">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Immissionsschutz">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_TechnischeMassnahmenFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BereichOhneEinAusfahrLinie">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Strassenkoerper">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_VerkehrsflaecheBesondererZweckbestimmung">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GewaesserFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_WasserwirtschaftsFlaeche">
+										<plu:hilucsLandUse xlink:href="{concat($hilucs,'6_6_NotKnownUse')}"/>
+									</xsl:when>
 									<xsl:when test="self::xplan:BP_VerEntsorgung">
 										<xsl:if test="child::xplan:zweckbestimmung=1000">
 											<plu:hilucsLandUse xlink:href="{concat($hilucs,'2_4_EnergyProduction')}"/>
@@ -6188,6 +6338,194 @@
 								<!--supplementaryRegulation-->
 								<!-- Mapping auf HSRCL-->
 								<xsl:choose>
+									<xsl:when test="self::xplan:BP_AbgrabungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_7_RawMaterials')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AufschuettungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BodenschaetzeFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_7_RawMaterials')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_RekultivierungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AbstandsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BauGrenze">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BauLinie">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BaugebietsTeilFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Bauweise">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BebauungsArt">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BesondererNutzungszweckFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Dachform">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FirstrichtungsLinie">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FoerdungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_3_Mining')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GebaeudeFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinschaftsanlagenFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinschaftsanlagenZuordnung">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NebenanlagenAusschlussFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NebenanlagenFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NichtUeberbaubareGrundstuecksflaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_PersGruppenBestimmteFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_RegelungVergnuegungsstaetten">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SpezielleBauweise">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_UeberbaubareGrundstuecksFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_ErhaltungsBereichFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'9_1_RestrictedActivities')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GemeinbedarfsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_3_Services')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SpielSportanlagenFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_3_Recreation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GruenFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_3_Recreation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_KleintierhaltungFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_3_Recreation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Landwirtschaft">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_5_Agriculture')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_LandwirtschaftsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_5_Agriculture')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_WaldFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_2_Forest')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AnpflanzungBindungErhaltung">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AusgleichsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AusgleichsMassnahme">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_EingriffsBereich">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SchutzPflegeEntwicklungsFlaeche">
+									<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'3_HeritageProtection')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_SchutzPflegeEntwicklungsMassnahme">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'3_HeritageProtection')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_AbstandsMass">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FestsetzungNachLandesrecht">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_FreiFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GenerischesObjekt">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_HoehenMass">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_KennzeichnungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'2_RiskExposure')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_NutzungsartenGrenze">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_TextlicheFestsetzungsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_UnverbindlicheVormerkung">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Veraenderungssperre">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'10_OtherSupplementaryRegulation')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Immissionsschutz">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'1_1_NoiseManagementZone')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_TechnischeMassnahmenFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'6_RegulationsOnBuildings')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_BereichOhneEinAusfahrLinie">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_1_Road')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_EinfahrtPunkt">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_1_Road')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_EinfahrtsbereichLinie">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_1_Road')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_Strassenkoerper">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_1_Road')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_VerkehrsflaecheBesondererZweckbestimmung">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_1_4_OtherNetworkInfrastructure')}"/>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_GewaesserFlaeche">
+										<xsl:if test="child::xplan:zweckbestimmung=1000">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_1_3_9_HarborActivities')}"/>
+										</xsl:if>
+										<xsl:if test="child::xplan:zweckbestimmung=10000">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+										</xsl:if>
+										<xsl:if test="child::xplan:zweckbestimmung=1100">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+										</xsl:if>
+										<xsl:if test="child::xplan:zweckbestimmung=1200">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+										</xsl:if>
+										<xsl:if test="child::xplan:zweckbestimmung=9999">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+										</xsl:if>
+										<xsl:if test="not(child::xplan:zweckbestimmung)">
+											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+										</xsl:if>
+									</xsl:when>
+									<xsl:when test="self::xplan:BP_WasserwirtschaftsFlaeche">
+										<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_2_9_Water')}"/>
+									</xsl:when>
 									<xsl:when test="self::xplan:BP_VerEntsorgung">
 										<xsl:if test="child::xplan:zweckbestimmung=1000">
 											<plu:supplementaryRegulation xlink:href="{concat($hsrcl,'7_3_2_Supply')}"/>

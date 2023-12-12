@@ -1,6 +1,9 @@
 <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
+	include(LAYOUTPATH . $language_file);
+	include(PLUGINS . 'mobile/' . $language_file);
+	include(PLUGINS . 'portal/' . $language_file);
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -8,6 +11,10 @@
 		if(event.layerX > 300){
 			location.href = 'index.php?go=Stelleneditor&selected_stelle_id=' + option_obj.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 		}
+	}
+
+	function showGruppenEditor(gruppeId, layerId) {
+		location.href = 'index.php?go=Layergruppe_Editor&selected_group_id=' + gruppeId + '&selected_layer_id=' + layerId + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 
 	function create_generic_data_sql(layer_id) {
@@ -51,6 +58,18 @@
 		if (document.getElementById('connectiontype').value == 7) {
 			getCapabilitiesURL=document.getElementById('connection').value+'&service=WMS&request=GetCapabilities';		
 			getMapURL = document.getElementById('connection').value+'&SERVICE=WMS&REQUEST=GetMap&srs=EPSG:<?php echo $this->formvars['epsg_code']; ?>&BBOX=<?php echo $this->user->rolle->oGeorefExt->minx; ?>,<?php echo $this->user->rolle->oGeorefExt->miny; ?>,<?php echo $this->user->rolle->oGeorefExt->maxx; ?>,<?php echo $this->user->rolle->oGeorefExt->maxy; ?>&WIDTH=<?php echo $this->user->rolle->nImageWidth; ?>&HEIGHT=<?php echo $this->user->rolle->nImageHeight; ?>';
+			if (getMapURL.toLowerCase().indexOf('version') == -1){
+				getMapURL += '&version=' + document.GUI.wms_server_version.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('format') == -1){
+				getMapURL += '&format=' + document.GUI.wms_format.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('layers') == -1){
+				getMapURL += '&layers=' + document.GUI.wms_name.value;
+			}
+			if (getMapURL.toLowerCase().indexOf('styles') == -1){
+				getMapURL += '&styles=';
+			}
 			document.getElementById('test_img').src = getMapURL;
 			document.getElementById('test_img').style.display='block';
 			document.getElementById('test_link').href=getCapabilitiesURL;
@@ -297,11 +316,12 @@
 								1,																			# size
 								'',																			# style
 								'',			# onchange
-								'',		# id
+								'gruppe-select',												# id
 								'',																			# multiple
 								'',																			# class
 								'-- ' . $this->strPleaseSelect . ' --'	# first option
 							); ?>
+							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
 					</tr>
 					<tr>
@@ -533,12 +553,12 @@
 							<input name="processing" type="text" value="<?php echo $this->formvars['processing']; ?>" size="50" maxlength="255">&nbsp;
 							<span data-tooltip="Wendet eine Prozessierungsanweisung für den Layer an.&#xa;Die unterstützten Anweisungen hängen vom Layertyp und dem verwendeten Treiber ab. Es gibt Anweisungen für Attribute, Connection Pooling, OGR Styles und Raster. siehe Beschreibung zum Layerattribut PROCESSING unter: http://www.mapserver.org/mapfile/layer.html. Mehrere Prozessinganweisungen werden hier eingegeben getrennt durch Semikolon. z.B. CHART_SIZE=60;CHART_TYPE=pie für die Darstellung eines Tortendiagramms des Typs MS_LAYER_CHART"></span>
 						</td>
-					</tr>					
+					</tr>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
-						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strQueryParameters; ?></th>
+						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><a name="query_parameter" style="color: black"><?php echo $strQueryParameters; ?></a></th>
 					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strIdentifierText; ?></th>
@@ -592,7 +612,7 @@
 							); ?>
 						</td>
 					</tr>
-					<? } ?>					
+					<? } ?>
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -617,12 +637,29 @@
 								</select>
 						</td>
 					</tr>
+					<tr>
+						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerCharts; ?></th>
+						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
+							<div style="float: left; width: 95%"><?
+								include_once(CLASSPATH . 'Layer.php');
+								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']); ?>
+								<ul><?
+								foreach($this->layer->charts AS $chart) { ?>
+									<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+								} ?>
+								</ul>
+							</div>
+							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
+								<i class="fa fa-pencil" aria-hidden="true" style="margin-top: 5px; margin-left: 5px"></i>
+							</a>
+						</td>
+					</tr>
 				</table>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
-					</tr>	
+					</tr>
 					<tr>
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -798,12 +835,42 @@
 						</td>
 					</tr>
 
-				</table>
+				</table><?
+				if ($this->plugin_loaded('mobile')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_mobile_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $str_mobile_vector_tile_url; ?></th>
+							<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="vector_tile_url" type="text" value="<?php echo $this->formvars['vector_tile_url']; ?>" size="50" maxlength="255">&nbsp;
+								<span data-tooltip="<? echo $str_mobile_vector_tile_url_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				}
+				if ($this->plugin_loaded('portal')) { ?>
+					<br>
+					<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
+						<tr align="center">
+							<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3">Plugin <?php echo $str_portal_plugin_name; ?></th>
+						</tr>
+						<tr>
+							<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><a name="cluster_option"></a><?php echo $str_portal_cluster_option; ?></th>
+							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="cluster_option" type="checkbox" value="1"<?php if ($this->formvars['cluster_option']) echo ' checked'; ?>>&nbsp;
+								<span data-tooltip="<?php echo $str_portal_cluster_option_help; ?>"></span>
+							</td>
+						</tr>
+					</table><?
+				} ?>
 				<br>
 				<table border="0" cellspacing="0" cellpadding="3" style="width:100%; border:1px solid #bbb">
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strAdministrative; ?></th>
-					</tr>					
+					</tr>
 					<tr>
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strStatus; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -852,7 +919,7 @@
 						</tr><?
 					} ?>
 				</table>
-		</div>
+			</div>
 		
 		<div id="stellenzuweisung" style="background-color: #f8f8f9;">
 			<table border="0" cellspacing="0" cellpadding="3" style="width: 100%; border:1px solid #bbb">
@@ -886,7 +953,7 @@
 				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="transparency" type="text" value="<?php echo $this->formvars['transparency']; ?>" size="50" maxlength="3">
+							<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 95%">
 					</td>
 				</tr>
 				<tr>

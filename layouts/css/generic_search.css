@@ -1,0 +1,426 @@
+/*
+--- Variablen für Suche Selects und Links --- 
+--- Diese Variablen können in der eigenen custom-CSS überschrieben werden! ---
+*/
+.generic_search_defaults {
+	--auswahl-select-width: 360;				/* Breite der Selects */
+	--auswahl-default-margin: 5;				/* Standard-Abstand zwischen den Elementen und zum Rand */
+	--auswahl-default-border: 1px solid #CCC;	/* Standard-Farbe für Ränder */
+	--el-default-border: 1px solid #777;		/* Standard-Farbe für Ränder der Selects */
+	--auswahl-default-box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;	/* Standard-Shadow für Rahmen */
+}
+
+.gsm_tabelle_defaults {
+	--tabelle-td-height: 30;					/* Zeilenhöhe für Gruppennamen und Attributzeilen. Achtung: min-height: 24px! */
+	--tabelle-td-height-padding: 6; 			/* Gesamt-Padding (oben plus unten) für Elemente in Attributzeilen. Achtung: tabelle-td-height minus tabelle-td-height-padding muss größer min-height: 24px sein! */
+	--tabelle-td-first-width: 300;				/* Breite 1. Spalte */
+	--tabelle-td-second-width: 90;				/* Breite 2. Spalte. Achtung: min-width: 90px! */
+	--tabelle-td-third-width: 300;				/* Breite letzte Spalte */
+	--tabelle-default-margin: 5;				/* Standard-Abstand zwischen den Elementen und zum Rand */
+	--tabelle-default-box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;	/* Standard-Shadow für Rahmen */
+	--tabelle-default-border: 1px solid #b4b4b4;	/* Standard-Farbe für Ränder der Tabelle */
+	--el-default-border: 1px solid #777;		/* Standard-Farbe für Ränder der Elemente */
+}
+
+#gs_titel, div[name="titel"] {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin: 20px 0 0 0;
+	height: 20px;
+	cursor: default;
+}
+#gs_loader {
+	display: none;
+}
+#gs_searchmasks {
+	margin: 0px 20px;
+}
+#gs_undoder {
+	max-width: 750px;
+	text-align: left;
+	margin: 20px;
+	display: flex;
+	align-items: center;
+}
+#gs_anzahl_treffer {
+	margin-bottom: 10px;
+	cursor: default;
+}
+#gs_suchen {
+	margin-bottom: 40px;
+}
+.gs_sucht_opac {
+	background-color: rgba(255,255,255,0.4);
+	position: absolute;
+	top: 0;
+	height: 100%;
+	width: 100%;
+	display: none;
+}
+
+.generic_search {
+	margin: 40px 0;
+}
+#gsl_formular {
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	cursor: default;
+	display: grid;
+	grid-template-columns: 1fr calc(50% + 180px);
+	grid-template-rows: auto;
+	grid-template-areas:
+	  "gruppen gruppenselect"
+	  "layer layerselect"
+	  ". suchen";
+	gap: calc(var(--auswahl-default-margin) * 2 * 1px) calc(var(--auswahl-default-margin) * 1px);
+	align-items: center;
+}
+.gsl_gruppe_waehlen_name {
+	grid-area: gruppen;
+}
+.gsl_gruppe_waehlen_select {
+	grid-area: gruppenselect;
+}
+.gsl_layer_waehlen_name {
+	grid-area: layer;
+}
+.gsl_layer_waehlen_select {
+	grid-area: layerselect;
+}
+.gsl_gruppe_waehlen_name, .gsl_layer_waehlen_name {
+	justify-self: end;
+}
+.gsl_gruppe_waehlen_select, .gsl_layer_waehlen_select {
+	justify-self: start;
+}
+#gsl_formular select {
+	border-radius: 2px;
+	border: var(--el-default-border);
+	padding-left: 5px;
+}
+.gsl_gruppe_waehlen select {
+	height: 25px;
+	width: calc(var(--auswahl-select-width) * 1px);
+}
+.gsl_layer_waehlen select {
+	height: 35px;
+	width: calc(var(--auswahl-select-width) * 1px);
+}
+#gsl_abfrage_speichern_form, #gsl_abfrage_laden_form {
+	display: none;
+}
+#gsl_abfrage_speichern_form, #gsl_abfrage_laden_form {
+	position: absolute;
+	margin-top: 5px;
+	padding: 10px;
+	display: none;
+	border: var(--auswahl-default-border);
+	background-color: #E6E6E6;
+	box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.3);
+	z-index: 1;
+}
+#gsl_abfrage_speichern_form {
+	flex-direction: column;
+	width: 260px;
+	left: calc(50% - 130px);
+}
+#gsl_abfrage_laden_form {
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: center;
+	align-items: center;
+	gap: 0 5px;
+	left: calc(50% - 170px);
+}
+#gsl_abfrage_speichern_form input[type="text"], #gsl_abfrage_laden_form select, #gsl_suche_raeumlich_params select {
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+	height: 25px;
+	}
+#gsl_abfrage_speichern_form input[type="text"] {
+	width: 100%;
+}
+#gsl_abfrage_laden_form select {
+	width: 260px;
+	background-color: #fff;
+}
+#gsl_abfrage_laden_form input, #gsl_abfrage_laden_form a {
+	margin-left: 5px;
+}
+#gsl_suche_speichern {
+	grid-area: suchen;
+	display: flex;
+	flex-direction: column;
+	gap: 5px 0;
+	margin-top: 30px;
+}
+#gsl_suche_speichern>div {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 17px;
+}
+#gsl_suche_speichern a {
+	cursor: pointer;	
+}
+.gsl_suche_raeumlich_x {
+	position: absolute;
+	margin-left: var(--auswahl-default-margin);
+	margin-top: -2px;
+	padding: 0;
+	display: inline-block;
+	width: 17px;
+	height: 17px;
+	font-size: 17px;
+	font-weight: bold;
+	background: #fff;
+	color: #f21e28;
+	border: 2px solid #555;
+	border-radius: 50%;
+}
+.gsl_suche_raeumlich_tooltip {
+	visibility: hidden;
+	position: absolute;
+	width: 100px;
+	margin: -45px 0 0 50px;
+	background-color: #fbfaf4;
+	color: #333;
+	text-align: center;
+	padding: 3px 0;
+	border: 1px solid #CCC;
+	border-radius: 4px;
+	z-index: 1;
+	font-size: 80%;
+}
+#gsl_suche_speichern a:hover .gsl_suche_raeumlich_tooltip {
+  visibility: visible;
+}
+.gsl_suche_raeumlich_map {
+	margin: 30px 10px 0 10px;
+	padding: 20px;
+	border:  var(--auswahl-default-border);
+	box-shadow: var(--auswahl-default-box-shadow);
+}
+#gsl_suche_raeumlich_params {
+	display: flex;
+	flex-direction:row;
+	align-items: center;
+	height: 40px;
+}
+.gsl_suche_raeumlich_param {
+	display: flex;
+	flex-direction:row;
+	align-items: center;
+	gap: 0 calc(var(--auswahl-default-margin) * 1px);
+}
+#gsl_suche_raeumlich_params>div:not(:last-child) {
+	margin-right: 10px;
+}
+#gsl_suche_raeumlich_params>div:last-child {
+	position: absolute;
+	right: 30px;
+}
+.gsl_suche_raeumlich_param input[type="checkbox"] {
+	margin: auto;
+}
+#gsl_suchhinweise {
+	max-width: 750px;
+	margin: 0 20px 20px 20px;
+	text-align: left;
+}
+
+.gsm_undoder {
+	margin: 0 0 30px 0px;
+	display: flex;
+	align-items: center;
+	flex-wrap: nowrap;
+}
+span[data-tooltip] {
+	margin-left: 5px;
+}
+.gsm_tabelle {
+	border-collapse: collapse;
+	cursor: default;
+	margin: 0;
+	padding: 0;
+	width: calc((var(--tabelle-td-first-width) + var(--tabelle-td-second-width) + var(--tabelle-td-third-width) + (4 * var(--tabelle-default-margin)) + 2) * 1px);
+}
+.gsm_tabelle_ueberschrift {
+	display: grid;
+	grid-template-columns: 1fr <?php if (!$this->user->rolle->visually_impaired) { ?>calc(var(--tabelle-td-second-width) * 1px) <? } ?>1fr;
+	gap: 0 calc(var(--tabelle-default-margin) * 1px);
+	height: 30px;
+	font-family: SourceSansPro2;
+}
+.gsm_tabelle_td_first {
+	min-width: calc(var(--tabelle-td-first-width) * 1px);
+	margin-left: calc(var(--tabelle-default-margin) * 1px);
+	overflow-wrap: anywhere;
+}
+.gsm_tabelle_td_second {
+	min-width: 90px;
+}
+.gsm_tabelle_td_third {
+	min-width: calc(var(--tabelle-td-third-width) * 1px);
+	margin-right: calc(var(--tabelle-default-margin) * 1px);
+	gap: 0 calc(var(--tabelle-default-margin) * 1px);
+}
+.gsm_tabelle_ueberschrift .gsm_tabelle_td_third>div:nth-child(2) {
+	text-align: end;
+}
+.gsm_tabelle_gruppe {
+	border-collapse: collapse;
+	border: var(--tabelle-default-border);
+	box-shadow: var(--tabelle-default-box-shadow);
+	margin-bottom: calc(var(--tabelle-default-margin) * var(--tabelle-td-height) / 10 * 1px);
+	padding: 0 0 calc(var(--tabelle-td-height-padding) * 1px / 2) 0;
+}
+.gsm_tabelle_attribute {
+	display: grid;
+	grid-template-columns: 1fr <?php if (!$this->user->rolle->visually_impaired) { ?>calc(var(--tabelle-td-second-width) * 1px) <? } ?>1fr;
+	min-height: 24px;
+	height: calc(var(--tabelle-td-height) * 1px);
+	gap: 0 calc(var(--tabelle-default-margin) * 1px);
+}
+.gsm_tabelle_attribute:hover {
+	background-color: #DAE4EC;
+	opacity: 1;
+}
+.gsm_tabelle_attribute>div {
+	min-height: 24px;
+	height: inherit;
+}	
+.gsm_tabelle_td_first, 
+.gsm_tabelle_td_second, 
+.gsm_tabelle_td_third {
+	position: relative;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-wrap: nowrap;
+	padding: 0;
+	text-align: start;
+}
+.gsm_tabelle_gruppe_name {
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	gap: 0 calc(var(--tabelle-default-margin) * 1px);
+	margin: -1px -1px calc(var(--tabelle-td-height-padding) * 1px / 2) -1px;
+	padding: 0 0 0 calc(var(--tabelle-default-margin) * 1px);
+	min-height: 24px;
+	height: calc(var(--tabelle-td-height) * 1px);
+	border: var(--tabelle-default-border);
+	background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);;
+	cursor: pointer;
+	font-family: SourceSansPro2;
+	font-size: 1.1em;
+}
+.gsm_tabelle_gruppe_name>div:first-child {
+	width: 12px;
+	height: 12px;
+	border: var(--el-default-border);
+	background: #fff;
+	line-height: 11px;
+	color: #333;
+}
+.gsm_tabelle_gruppe_zu {
+	border: 1px solid #fff;
+	padding: 0;
+	height: calc(var(--tabelle-td-height) * 1px);
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select {
+	width: 100%;
+	min-height: 24px;
+	height: calc(100% - (var(--tabelle-td-height-padding) * 1px));
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select, 
+.gsm_tabelle_attribute .gsm_tabelle_td_third > select {
+	border-radius: 2px;
+	border: var(--el-default-border);
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select {
+	background: auto;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select option {
+	background: #fff;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_second select option[disabled="true"] {
+	background: #f5f5f5;
+	color: #aaa;
+}
+.gsm_tabelle_td_third>div,
+.gsm_default_input {
+		position: relative;
+		width: 100%;
+}
+.gsm_tabelle_td_third .GP {
+	display: flex;
+	align-items: stretch;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third select:not(.suggests) {
+	appearance: none;
+	position: relative;
+	width: 100%;
+	min-height: 24px;
+	height: calc(100% - (var(--tabelle-td-height-padding) * 1px));
+	border: var(--el-default-border);
+	cursor: pointer;
+	line-height: normal !important;
+	background-color: #fff;
+	scrollbar-width: thin;
+}
+.gsm_tabelle_td_third select option {
+	min-height: 24px;
+	height: calc(calc(var(--tabelle-td-height) * 1px) - calc(var(--tabelle-td-height-padding) * 1px) - 2px);
+	padding: 0 0.5em;
+	margin: 0;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-content: center;
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third table, 
+#autofeld_zweispaltig_auswahl_und_suggest_div, 
+.gsm_tabelle_attribute .gsm_tabelle_td_third input {
+	height: 100%;
+	width: 100%;
+}
+.gsm_default_input {
+	position: relative;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: nowrap;
+	gap: 0 5px;
+}
+.gsm_default_input>div:nth-child(2) {
+	display: none;
+}
+.gsm_default_input>div,
+.gsm_default_input input {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+.gsm_default_input input {
+	border: var(--el-default-border);
+}
+.gsm_tabelle_attribute .gsm_tabelle_td_third>div:not(.gsm_tabelle_kalender) {
+	min-height: 24px;
+	height: calc(100% - (var(--tabelle-td-height-padding) * 1px));
+}
+.gsm_tabelle_kalender {
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	height: 14px;
+	padding: calc((calc(var(--tabelle-td-height) * 1px) - calc(var(--tabelle-td-height-padding) * 1px) - 14px - 2px) / 2) 3px;
+	background: #eee;
+	cursor: pointer;
+}
+.gsm_tabelle_kalender img {
+	position: relative;
+}

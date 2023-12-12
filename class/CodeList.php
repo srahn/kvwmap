@@ -10,7 +10,8 @@ class CodeList extends MyObject {
 
 	function get_generic_select($layer, $attr) {
 		return array(
-			'select' => '(' . $layer->get_table_alias() . '.' . $attr['att_name'] . '' . ($attr['is_array'] == 't' ? '[1]' : '') . ').id AS ' . $attr['att_name'] . '_id,
+			'select' => 'gdi_codelist_extract_ids(' . $layer->get_table_alias() . '.' . $attr['att_name'] . ', false) AS ' . $attr['att_name'] . ',
+    gdi_codelist_extract_ids(' . $layer->get_table_alias() . '.' . $attr['att_name'] . ', true) AS ' . $attr['att_name'] . '_id,
     gdi_codelist_json_to_text(to_json(' . $layer->get_table_alias() . '.' . $attr['att_name'] . ')) AS ' . $attr['att_name'] . '_text',
 			'from' => ''
 		);

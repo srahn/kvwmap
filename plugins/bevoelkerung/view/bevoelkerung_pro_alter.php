@@ -71,7 +71,7 @@ function change_orderby(attribute, layer_id){
 			$attributes['alias'][$j] = $attributes['name'][$j];
 		}
 		if($attributes['name'][$j] != 'nr' AND $attributes['type'][$j] != 'geometry'){
-			echo '<td><a style="font-size: '.$this->user->rolle->fontsize_gle.'px" title="'.$attributes['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layerId.');"><b>'.$attributes['alias'][$j].'</b></a></td>';
+			echo '<td><a title="'.$attributes['tooltip'][$j].'" style="color: #6c6c6c;" href="javascript:change_orderby(\''.$attributes['name'][$j].'\', '.$layerId.');"><b>'.$attributes['alias'][$j].'</b></a></td>';
 		}
 	}
 ?></tr>
@@ -94,10 +94,7 @@ function change_orderby(attribute, layer_id){
 							echo ' maxlength="'.$attributes['length'][$j].'"';
 						}
 						if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-							echo ' readonly style="font-size: '.$this->user->rolle->fontsize_gle.'px;background-color:#ffffff; border: none"';
-						}
-						else{
-							echo ' style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+							echo ' readonly style="background-color:#ffffff; border: none"';
 						}
 						if($attributes['name'][$j] == 'gruppe')echo ' size="5"';
 						if($attributes['name'][$j] == 'geschlecht')echo ' size="20"'; 

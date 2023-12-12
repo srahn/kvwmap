@@ -17,6 +17,11 @@ register_shutdown_function(function () {
 	$err = error_get_last();
 	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
 		ob_end_clean();
+		if (class_exists('GUI') AND !empty(GUI::$messages)) {
+			foreach(GUI::$messages as $message) {
+				$errors[] = $message['msg'];
+			}
+		}
 		if (! is_null($err)) {
 				$errors[] = '<b>' . $err['message'] . '</b><br> in Datei ' . $err['file'] . '<br>in Zeile '. $err['line'];
 		}
@@ -58,7 +63,7 @@ include('config.php');
 # Session
 if(!isset($_SESSION)){
 	$maxlifetime = 0;
-	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
@@ -250,12 +255,12 @@ function go_switch($go, $exit = false) {
 					$GUI->loadMap('DataBase');
 					$GUI->navMap($GUI->formvars['CMD']);
 				}
+				$GUI->drawMap();
 				$GUI->saveMap('');
 				if (!in_array($GUI->formvars['CMD'], ['next', 'previous'])) {
 					$currenttime=date('Y-m-d H:i:s',time());
 					$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				}
-				$GUI->drawMap();
 				$GUI->mime_type='map_ajax';
 				$GUI->output();
 			} break;
@@ -272,19 +277,29 @@ function go_switch($go, $exit = false) {
 				$format = (($GUI->formvars['only_postgis_layer'] OR ($GUI->formvars['only_layer_id'] AND $GUI->layerset['layer_ids'][$GUI->formvars['only_layer_id']]['Datentyp'] != 3)) ? 'png' : 'jpeg');
 				$GUI->map->selectOutputFormat($format);
 				$GUI->drawMap(true);
-				$GUI->mime_type='image/' . $format;
+				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
-			} break;			
-			
+			} break;
+
 			case 'write_mapserver_templates' : {
+				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');
-				$layers = Layer::find($GUI, "write_mapserver_templates = '1'");
-				foreach ($layers as $layer) {
-					echo $layer->get('Name') . '<br>';
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
+			case 'write_mapserver_templates_Erzeugen' : {
+				$GUI->checkCaseAllowed('write_mapserver_templates');
+				include_once(CLASSPATH . 'Layer.php');
+				$GUI->layers = Layer::find($GUI, "write_mapserver_templates IS NOT NULL");
+				foreach ($GUI->layers as $layer) {
 					$layer->write_mapserver_templates('Formular');
 				}
-			}break;			
-			
+				$GUI->main = 'write_mapserver_templates.php';
+				$GUI->output();
+			} break;
+
 			case 'saveDrawmode' : {
 				$GUI->sanitize(['always_draw' => 'boolean']);
 				$GUI->saveDrawmode();
@@ -393,6 +408,9 @@ function go_switch($go, $exit = false) {
 
 			case 'setHistTimestamp' : {
 				$GUI->setHistTimestamp();
+				$GUI->loadMap('DataBase');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'setLanguage' : {
@@ -611,8 +629,8 @@ function go_switch($go, $exit = false) {
 					'style_width' => 'text',
 					'style_minwidth' => 'int',
 					'style_maxwidth' => 'int',
-					'style_offsetx' => 'int',
-					'style_offsety' => 'int',
+					'style_offsetx' => 'text',
+					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
 					'style_pattern' => 'text',
 					'style_geomtransform' => 'text',
@@ -737,11 +755,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
 			}break;
-			
-			case 'create_auto_classes_for_rollenlayer' : {
-				$GUI->sanitize(['layer_options_open' => 'int']);
-				$GUI->create_auto_classes_for_rollenlayer();
-			}break;
 
 			# PointEditor
 			case 'PointEditor' : {
@@ -781,8 +794,12 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten anzeigen
 			case 'Sachdaten' : {
-				if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
-				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
+				if ($GUI->formvars['CMD'] != '') {
+					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
+				}
+				if ($GUI->formvars['legendtouched']) {
+					$GUI->save_legend_role_parameters();
+				}
 				$GUI->queryMap();
 			}break;
 
@@ -1022,7 +1039,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnitt_loeschen' : {
 				$GUI->check_csrf_token();
-				$GUI-sanitize(['druckausschnitt' => 'int']);
+				$GUI->sanitize(['druckausschnitt' => 'int']);
 				$GUI->druckausschnitt_löschen($GUI->formvars['loadmapsource']);
 			} break;
 
@@ -1229,7 +1246,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'Daten_Export_Exportieren' : {
-				# ToDo hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
+				//TODO hier auch sql_* sanitizen. Das ist aber ein Problem, weil der Wert aus einem vollständigem SQL besteht und nicht einfach aus Argumenten
 				$GUI->sanitize([
 					'selected_layer_id' => 'int',
 					'layer_name' => 'text',
@@ -1237,7 +1254,7 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				if (!$GUI->user->is_gast()) {
+				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};
 				$GUI->daten_export_exportieren();
@@ -1354,6 +1371,67 @@ function go_switch($go, $exit = false) {
 			case 'neuer_Layer_Datensatz_speichern' : {
 				$GUI->check_csrf_token();
 				$GUI->neuer_Layer_Datensatz_speichern();
+			} break;
+
+
+			case 'layer_charts_Anzeigen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int'
+				]);
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Editor' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'id' => 'int'
+				]);
+				$GUI->layer_chart_editor();
+			} break;
+
+			case 'layer_chart_Speichern' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int',
+					'title' => 'text',
+					'aggregate_function' => 'text',
+					'value_attribute_label' => 'text',
+					'value_attribute_name' => 'text',
+					'label_attribute_name' => 'text'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
+				if ($GUI->formvars['id'] != '' AND $chart->get_id() == '') {
+					$result = array(
+						'success' => false,
+						'err_msg' => 'Das Layer-Diagramm mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
+					);
+				}
+				else {
+					$result = $GUI->layer_chart_Speichern($chart);
+				}
+				if ($result['success']) {
+					$GUI->add_message('notice', $result['msg']);
+				}
+				else {
+					$GUI->add_message('error', $result['err_msg']);
+				}
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Loeschen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$response = $GUI->layer_chart_Loeschen();
+				header('Content-Type: application/json');
+				echo json_encode($response);
 			} break;
 
 			case 'generisches_sachdaten_diagramm' : {
@@ -2012,7 +2090,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Query for all notifications and show it in a list
+			*	Query for all notifications and show it in a list
 			*/
 			case 'notifications_anzeigen' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2020,7 +2098,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				Show notifications form to create or update notification
+			*	Show notifications form to create or update notification
 			*/
 			case 'notification_formular' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2029,7 +2107,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				create or update a user notification
+			*	create or update a user notification
 			*/
 			case 'put_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2044,7 +2122,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete the notification for user
+			*	delete the notification for user
 			*/
 			case 'delete_user2notification' : {
 				$GUI->sanitize(['notification_id' => 'int']);
@@ -2052,7 +2130,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				delete a notification
+			*	delete a notification
 			*/
 			case 'delete_notification' : {
 				$GUI->checkCaseAllowed('notifications_anzeigen');
@@ -2061,7 +2139,7 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			/**
-				query notifications that has to be shown for the current user
+			*	query notifications that has to be shown for the current user
 			*/
 			case 'get_user_notifications' : {
 				$GUI->get_user_notifications();

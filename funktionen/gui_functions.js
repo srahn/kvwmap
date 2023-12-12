@@ -194,6 +194,17 @@ function ahahDone(url, targets, req, actions) {
 	}
 }
 
+function enforceMinMax(el) {
+  if (el.value != '') {
+    if (parseInt(el.value) < parseInt(el.min)) {
+      el.value = el.min;
+    }
+    if (parseInt(el.value) > parseInt(el.max)) {
+      el.value = el.max;
+    }
+  }
+}
+
 function delete_user2notification(notification_id) {
 	let formData = new FormData();
 	formData.append('go', 'delete_user2notification');
@@ -426,6 +437,13 @@ function resizemap2window(){
 	else{
 		ahah('index.php', params, new Array(''), new Array(''));																								// ansonsten nur die neue Mapsize setzen
 	}
+}
+
+function fetchMessageFromURL(url) {
+  fetch(url)
+   .then(response => response.json())
+   .then(data => message([{'type':'notice','msg': data.header}, {'type':'info', 'msg': data.body}]))    	
+   .catch(error => message([{'type': 'error', 'msg' : error}]));
 }
 
 /*
@@ -1532,19 +1550,23 @@ function showMapParameter(epsg_code, width, height, l) {
 	}]);
 }
 
-function showExtentURL(epsg_code) {
-	var gui = document.GUI,
-			msg = " \
+function showURL(params, headline) {
+	var msg = " \
 				<div style=\"text-align: left\"> \
-					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
-					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI.match(/.*\//)+"index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+					<h2>" + headline + "</h2><br> \
+					<input id=\"url\" style=\"width: 350px\" type=\"text\" value=\"" + document.baseURI.match(/.*\//) + 'index.php?' + params + "\"><br> \
 				</div> \
 			";
 	message([{
 			'type': 'info',
 			'msg': msg
 	}]);
-	document.getElementById('extenturl').select();
+	document.getElementById('url').select();
+}
+
+function showExtentURL(epsg_code) {
+	var gui = document.GUI;
+	showURL("go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code, 'URL des aktuellen Kartenausschnitts');
 }
 
 function toFixed(value, precision) {
@@ -1713,12 +1735,14 @@ function copyToClipboard(text) {
 		document.body.appendChild(textarea);
 		textarea.select();
 		try {
-				return document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			let result = document.execCommand("copy");	//Security exception may be thrown by some browsers.
+			message([{ type: 'notice', msg: text + ' in die Zwischenablage kopiert'}], 500, 1000);
+			return result;
 		} catch (ex) {
-				console.warn("Copy to clipboard failed.", ex);
-				return false;
+			console.warn("Copy to clipboard failed.", ex);
+			return false;
 		} finally {
-				document.body.removeChild(textarea);
+			document.body.removeChild(textarea);
 		}
 	}
 }

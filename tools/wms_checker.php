@@ -18,9 +18,9 @@ $credentials = '../credentials.php';		# Pfad zur credentials.php (von tools aus 
 $config = '../config.php';		# Pfad zur config.php (von tools aus kann er so bleiben)
 $bbox = array("left" => 11.85321, "bottom" => 53.96559, "right" => 11.93711, "top" => 54.01517);		# BBox, mit der die Test-Requests gemacht werden
 
-define('DBWRITE',false);
+define('DBWRITE',true);
 
-/*
+/**
 * Die Funktion liefert das erste Word, welches nach $word in $str gefunden wird.
 * Über die optionalen Parameter $delim1 und $delim2 kann man die Trennzeichen vor und nach dem Wort angeben.
 * Wenn der optionale Parameter $last true ist, wird das letzte Vorkommen des Wortes verwendet.
@@ -35,8 +35,10 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 	}
 }
 
-/*
-* @params(string) $request ein getMap Request von dem der Status geprüft werden soll 
+/**
+ * checkStatus
+ * 
+* @param string $request ein getMap Request von dem der Status geprüft werden soll 
 * gibt einen array mit 2 elementen zurück das erste element ist entweder true
 *(abfrage war erfolgreich) oder false(d.h. abfrage war nicht erfolgreich) und das zweite
 * ist wenn der erste wert false ist eine kurze Info was falsch ist.
@@ -47,7 +49,7 @@ function checkStatus($request, $username, $password){
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-  curl_setopt($ch, CURLOPT_TIMEOUT,3);
+  curl_setopt($ch, CURLOPT_TIMEOUT, 7);
 	curl_setopt($ch, CURLOPT_VERBOSE, 1);
 	curl_setopt($ch, CURLOPT_HEADER, 1);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
@@ -118,8 +120,8 @@ $userDb->user = MYSQL_USER;
 $userDb->passwd = MYSQL_PASSWORD;															
 $userDb->dbName = MYSQL_DBNAME;
 $userDb->open();
-$query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 
+$query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';
 $with_layer_id = '';
@@ -132,17 +134,33 @@ $without_layer_id = '';
 if ($without_layer_id != '') {
 	$query .= '	AND Layer_ID NOT IN (' . $without_layer_id . ')';
 }
-
 #echo '<br>get layer with sql: ' . $query;
-$result = $userDb->execSQL($query);
+$userDb->execSQL($query);
+$result = $userDb->result;
 
-while($line = $userDb->result->fetch_assoc()){
+$params = [];
+$sql = "
+  SELECT
+    `key`, 
+    `default_value`
+  FROM
+    layer_parameter";
+$userDb->execSQL($sql);
+$ret = $userDb->result;
+while ($line = $ret->fetch_assoc()){
+  $params[$line['key']] = $line['default_value'];
+}
+
+while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
   }
   catch(Exception $e) {
     $extent = new rectObj();
-  }		
+  }
+  foreach($params AS $key => $value){
+    $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
+  }
   $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   $wgsProjection = ms_newprojectionobj("init=epsg:4326");
   $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);
