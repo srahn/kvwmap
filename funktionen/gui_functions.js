@@ -920,11 +920,14 @@ function overlay_link(data, start, target){
 
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
-	if (custom_select_div.classList.contains('active')) {
-			custom_select_div.classList.remove('active');
-	 } else {
-		 custom_select_div.classList.add('active');
-	 }
+	var dropdown = custom_select_div.querySelector('.dropdown');
+	custom_select_div.classList.toggle('active');	 
+	if (dropdown.getBoundingClientRect().bottom > 900) {
+		dropdown.classList.add('upward');
+	}
+	else {
+		dropdown.classList.remove('upward');
+	}
 }
 
 function custom_select_register_keydown(){
