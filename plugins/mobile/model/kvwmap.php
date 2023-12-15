@@ -271,12 +271,12 @@
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
-			if ($attr['enum_value'][$key]) {
+			if ($attr['enum'][$key]) {
 				$attr['options'][$key] = array();
-				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+				foreach($attr['enum'][$key] AS $enum_key => $enum) {
 					$attr['options'][$key][] = array(
-						'value' => $attr['enum_value'][$key][$enum_key],
-						'output' => $attr['enum_output'][$key][$enum_key]
+						'value' => $enum_key,
+						'output' => $enum['output']
 					);
 				}
 			}

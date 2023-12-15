@@ -251,14 +251,8 @@
 			$id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)
 		}
 		if ($attributes['constraints'][$j] != '' AND !in_array($attributes['constraints'][$j], array('PRIMARY KEY', 'UNIQUE'))) {
-			if ($attributes['privileg'][$j] == '0' OR $lock[$k]) {
-				$output_value = $value;
-				if (is_array($attributes['enum_value'][$j]) AND count($attributes['enum_value'][$j]) > 0) {
-					$enum_index = array_search($value, $attributes['enum_value'][$j]);
-					if ($enum_index !== false) {
-						$output_value = $attributes['enum_output'][$j][$enum_index];
-					}
-				}
+			if ($attributes['privileg'][$j] == '0') {
+				$output_value = $attributes['enum'][$j][$value]['output'];
 				$size1 = 1.3 * strlen($output_value);
 				$datapart .= '<input
 					class="' . $field_class . '"
@@ -284,11 +278,11 @@
 				if ($attributes['nullable'][$j] != '0' OR $gui->new_entry == true) {
 					$datapart .= '<option value="">-- '.$gui->strPleaseSelect.' --</option>';
 				}
-				for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
+				foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 					$datapart .= '<option'
-						. ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]] ? ' selected' : '')
-						. ' value="' . $attributes['enum_value'][$j][$e] . '">'
-							. $attributes['enum_output'][$j][$e]
+						. ($enum_key== $dataset[$attributes['name'][$j]] ? ' selected' : '')
+						. ' value="' . $enum_key . '">'
+							. $enum['output']
 						. '</option>';
 				}
 				$datapart .= '</select>';
@@ -327,34 +321,27 @@
 				}break;
 
 				case 'Auswahlfeld' : {
-					if(is_array($attributes['dependent_options'][$j])){
-						$enum_value = $attributes['enum_value'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-						$enum_output = $attributes['enum_output'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+					if (is_array($attributes['dependent_options'][$j])) {
+						$enum = $attributes['enum'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					}
 					else{
-						$enum_value = $attributes['enum_value'][$j];
-						$enum_output = $attributes['enum_output'][$j];
+						$enum = $attributes['enum'][$j];
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 
 				case 'Auswahlfeld_Bild' : {
-					if(is_array($attributes['dependent_options'][$j])){
-						# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-						$enum_value = $attributes['enum_value'][$j][$k];
-						$enum_output = $attributes['enum_output'][$j][$k];
-						$enum_image = $attributes['enum_image'][$j][$k];
+					if (is_array($attributes['dependent_options'][$j])) {
+						$enum = $attributes['enum'][$j][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 					}
 					else{
-						$enum_value = $attributes['enum_value'][$j];
-						$enum_output = $attributes['enum_output'][$j];
-						$enum_image = $attributes['enum_image'][$j];
+						$enum = $attributes['enum'][$j];
 					}
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
-					$datapart .= Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+					$datapart .= Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
 				} break;
 				
 				case 'Farbauswahl' : {
@@ -443,19 +430,17 @@
 				} break;
 				
 				case 'Radiobutton' : {
-					$enum_value = $attributes['enum_value'][$j];
-					$enum_output = $attributes['enum_output'][$j];
 					if($change_all){
 						$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
 					}						
-					for($e = 0; $e < count($enum_value); $e++){
+					foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 						$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 						$datapart .= ' onchange="'.$onchange.'" ';
-						if ($enum_value[$e] == $value) {
+						if ($enum_key == $value) {
 							$datapart .= 'checked ';
 						}
 						$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
-						$datapart .= 'value="'.$enum_value[$e].'"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">'.$enum_output[$e].'</label>';
+						$datapart .= 'value="' . $enum_key . '"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
 						if(!$attributes['horizontal'][$j] OR (is_numeric($attributes['horizontal'][$j]) AND($e+1) % $attributes['horizontal'][$j] == 0))$datapart .= '<br>';
 					}
 				}break;				
@@ -551,16 +536,14 @@
 							case 'Auswahlfeld' : {
 								if($attributes['subform_layer_privileg'][$index] != '0')$gui->editable = $layer_id;
 								if(is_array($attributes['dependent_options'][$index])){
-									$enum_value = $attributes['enum_value'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-									$enum_output = $attributes['enum_output'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+									$enum = $attributes['enum'][$index][$k];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 								}
 								else{
-									$enum_value = $attributes['enum_value'][$index];
-									$enum_output = $attributes['enum_output'][$index];
+									$enum = $attributes['enum'][$index];
 								}
 								if($attributes['nullable'][$index] != '0')$strPleaseSelect = $gui->strPleaseSelect;
 								$onchange = 'set_changed_flag(this, \'changed_'.$layer_id.'_'.$oid.'\');';
-								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum_value, $enum_output, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
+								$datapart .= Auswahlfeld($layer_id, $name_, $j, $attributes['alias'][$name_], $fieldname_[$f], $dataset[$name_], $enum, $attributes['req_by'][$index], $attributes['req'][$index], $attributes['name'], $attributes['privileg'][$name_], $k, $oid, $attributes['subform_layer_id'][$index], $attributes['subform_layer_privileg'][$index], $attributes['embedded'][$index], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class);
 							}break;
 							default : {
 								$datapart .= '<input class="'.$field_class.'" style="';
@@ -1172,19 +1155,14 @@
 		return $datapart;
 	}
 
-	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+	function Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enums, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if (!is_array($req)) {
 			$req = array();
 		}
-		if($privileg == '0' OR $lock){
-			for($e = 0; $e < @count($enum_value); $e++){
-				if($enum_value[$e] == $value){
-					$auswahlfeld_output = $enum_output[$e];
-					$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-					break;
-				}
-			}
-			$datapart .= '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
+		if ($privileg == '0') {
+			$auswahlfeld_output = $enums[$value]['output'];
+			$auswahlfeld_output_laenge = strlen($auswahlfeld_output) + 1;
+			$datapart = '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
 			$datapart .= '<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
@@ -1201,12 +1179,12 @@
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
-			for($e = 0; $e < @count($enum_value); $e++){
+			foreach ($enums as $enum_key => $enum) {
 				$datapart .= '<option ';
-				if($enum_value[$e] == $value){
+				if ($enum_key == $value) {
 					$datapart .= 'selected ';
 				}
-				$datapart .= 'value="'.$enum_value[$e].'">'.$enum_output[$e].'</option>';
+				$datapart .= 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
 			}
 			$datapart .= '</select>';
 			if($subform_layer_id != ''){
@@ -1229,18 +1207,12 @@
 		return $datapart;
 	}
 	
-	function Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enum_value, $enum_output, $enum_image, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
+	function Auswahlfeld_Bild($layer_id, $name, $j, $alias, $fieldname, $value, $enums, $req_by, $req, $attributenames, $privileg, $k, $oid, $subform_layer_id, $subform_layer_privileg, $embedded, $lock, $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $datatype_id = ''){
 		if (!is_array($req)) {
 			$req = array();
 		}
-		for($e = 0; $e < @count($enum_value); $e++){
-			if($enum_value[$e] == $value){
-				$auswahlfeld_output = $enum_output[$e];
-				$auswahlfeld_image = $enum_image[$e];
-				$auswahlfeld_output_laenge = strlen($auswahlfeld_output)+1;
-				break;
-			}
-		}
+		$auswahlfeld_output = $enums[$value]['output'];
+		$auswahlfeld_image = $enums[$value]['image'];
 		$datapart .= '<div class="custom-select" id="custom_select_' . $layer_id . '_' . $name . '_' . $k . '">';
 		if ($privileg == '0') {
 			$datapart .= '
@@ -1250,7 +1222,6 @@
 					<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
 				</div>';
 			$auswahlfeld_output = '';
-			$auswahlfeld_output_laenge = '';
 		}
 		else {
 			if ($change_all) {
@@ -1270,11 +1241,11 @@
 				</div>
 				<div style="position:relative">
 					<ul class="dropdown" id="dropdown">';
-			for($e = 0; $e < @count($enum_value); $e++){
+			foreach($enums as $enum_key => $enum) {
 				$datapart .= '
-						<li class="item" data-value="' . $enum_value[$e] . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
-							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum_image[$e])) . '">
-							<span>' . $enum_output[$e] . '</span>
+						<li class="item" data-value="' . $enum_key . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
+							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">
+							<span>' . $enum['output'] . '</span>
 						</li>';
 			}
 			$datapart .= '</ul></div>';

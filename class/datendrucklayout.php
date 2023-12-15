@@ -941,27 +941,13 @@ class ddl {
 		}
 		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
-				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-					for($e = 0; $e < @count($this->attributes['enum_value'][$j][$i]); $e++){
-						if($this->attributes['enum_value'][$j][$i][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$i][$e];
-							break;
-						}
-						else $output = $value;
-					}
+				if (is_array($this->attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+					$enum = $this->attributes['enum'][$j][$i];
 				}
 				else{
-					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-						if($this->attributes['enum_value'][$j][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$e];
-							break;
-						}
-						else $output = $value;
-					}
+					$enum = $this->attributes['enum'][$j];
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = $value;
-				}
+				$output = $enum[$value]['output'] ?: $value;
 			}break;
 			case 'Autovervollständigungsfeld' : {
 				if(@count($this->attributes['enum_output'][$j]) == 0){	
@@ -970,17 +956,19 @@ class ddl {
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			case 'Radiobutton' : {
-				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-					if($this->attributes['enum_value'][$j][$e] == $value){
+				foreach ($this->attributes['enum'][$j] as $enum_key => $enum) {
+					if ($enum_key == $value) {
 						$output .= '<box><b> X </b></box>  ';
 					}
-					else $output .= '<box>    </box>  ';
-					$output .= $this->attributes['enum_output'][$j][$e].'   ';
+					else {
+						$output .= '<box>    </box>  ';
+					}
+					$output .= $enum['output'] . '   ';
 					if(!$this->attributes['horizontal'][$j] OR (is_numeric($this->attributes['horizontal'][$j]) AND ($e+1) % $this->attributes['horizontal'][$j] == 0)){
 						$output .= chr(10).chr(10);
 					}
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
+				if (count($this->attributes['enum'][$j]) == 0){	
 					$output = $value;
 				}			
 			}break;			

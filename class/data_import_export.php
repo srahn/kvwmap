@@ -1132,19 +1132,12 @@ class data_import_export {
 					else{
 						if($attributes['form_element_type'][$j] == 'Auswahlfeld'){
 							if(is_array($attributes['dependent_options'][$j])){
-								$enum_value = $attributes['enum_value'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-								$enum_output = $attributes['enum_output'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+								$enum = $attributes['enum'][$j][$i];		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
 							}
 							else{
-								$enum_value = $attributes['enum_value'][$j];
-								$enum_output = $attributes['enum_output'][$j];
+								$enum = $attributes['enum'][$j];
 							}
-							for($o = 0; $o < @count($enum_value); $o++){
-								if($value == $enum_value[$o]){
-									$value = $enum_output[$o];
-									break;
-								}
-							}
+							$value = $enum[$value]['output'];
 						}
 						else{
 							if($attributes['form_element_type'][$j] == 'Autovervollständigungsfeld'){

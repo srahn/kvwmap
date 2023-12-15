@@ -112,13 +112,12 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 					</div>
 <?
 					if (!$this->user->rolle->visually_impaired) {
-						if(is_array($this->attributes['enum_value'][$i][0])){
-							$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
-							$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+						if (is_array($this->attributes['enum'][$i][0])) {
+							$this->attributes['enum'][$i] = $this->attributes['enum'][$i][0];
 						}
 						$output_not_numeric = false;
-						for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){
-							if(!is_numeric($this->attributes['enum_output'][$i][$o])) {
+						foreach ($this->attributes['enum'][$i] as $enum){
+							if (!is_numeric($enum['output'])) {
 								$output_not_numeric = true;
 							}
 						}
@@ -145,9 +144,9 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							<option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($operator == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
 							<option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($operator == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
 							<? if($this->attributes['type'][$i] != 'geometry'){ ?>
-							<option title="<? echo $strInHint; ?>" value="IN" <? if (@count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+							<option title="<? echo $strInHint; ?>" value="IN" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
 								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
-							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (@count($this->attributes['enum_value'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
+							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
 								<? }
 							}
 						} ?>
@@ -176,19 +175,17 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
 							<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
 <? 
-							if(is_array($this->attributes['enum_value'][$i][0])){
-								$this->attributes['enum_value'][$i] = $this->attributes['enum_value'][$i][0];
-								$this->attributes['enum_output'][$i] = $this->attributes['enum_output'][$i][0];
+							if (is_array($this->attributes['enum'][$i][0])){
+								$this->attributes['enum'][$i] = $this->attributes['enum'][$i][0];
 							}
-							for($o = 0; $o < @count($this->attributes['enum_value'][$i]); $o++){	?>
-								<option  
-<? 
+							foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
+								<option  <? 
 								if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
 									$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);																																																																																															 
 								}
-								if (in_array($this->attributes['enum_value'][$i][$o], $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $this->attributes['enum_value'][$i][$o] != '') {
+								if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $enum_key != '') {
 									echo 'selected';
-								} ?> value="<? echo $this->attributes['enum_value'][$i][$o]; ?>" title="<? echo $this->attributes['enum_output'][$i][$o]; ?>"><? echo $this->attributes['enum_output'][$i][$o]; ?></option><? echo "\n";
+								} ?> value="<? echo $enum_key; ?>" title="<? echo $enum['output']; ?>"><? echo $enum['output']; ?></option><? echo "\n";
 							}
 ?>
 							</select>
