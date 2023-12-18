@@ -339,9 +339,15 @@ class Gml_extractor {
 		$version = '5.1'; //default
 		$lines = file($this->gml_location);
 		$matched_ns_str;
+		$xml_bracket_is_opened = false;
 		foreach ($lines as $lineNumber => $line) {
-			if (strpos($line, 'XPlanAuszug') === false) {
+			if (strpos($line, 'XPlanAuszug') === false and $xml_bracket_is_opened == false) {
 				continue;
+			}
+			# to also match formatted multiline XPlanAuszug
+			$xml_bracket_is_opened = true;
+			if (strpos($line, '>') !== false) {
+				$xml_bracket_is_opened = false;
 			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
 			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
@@ -354,14 +360,13 @@ class Gml_extractor {
 				break; #found it
 			}
 			else {
-				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
-				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
+				#$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
+				#$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
 				#$GUI->add_message('warning', $msg);
 				#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
 				#$GUI->output();
-				#echo 'Could not find XPlanAuszug. XPlan-file is not valid';
+				#echo 'Could not find XPlanAuszug. XPlan-file is not valid.<br>';
 			}
-			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
 		#echo $matched_ns_str[1] . '<br>';
 
@@ -912,6 +917,7 @@ class Gml_extractor {
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
+				array_to_json(gmlas.bundesland::xplan_gml.xp_bundeslaender[]) AS bundesland,
 				gmlas.internalid AS internalid,
 				gmlas.beschreibung AS beschreibung,
 				gmlas.kommentar AS kommentar,

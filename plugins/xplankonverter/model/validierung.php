@@ -422,7 +422,7 @@ class Validierung extends PgObject {
 		# TODO In PostGIS 2.5 and higher, consider using one of the new variable precision functions instead
 		# e.g. ST_AsText with precision, ST_QuantizeCoordinates
 		# or build a custom ST_Within (and ST_Intersection?) variant, that utilizes the relevant equivalency distance
-		$tolerance_meters = '0.001';
+		$tolerance_meters = '0.002';
 		
 		if($sourcetype != 'gmlas') {
 			# replaces only first occurence to allow later subqueries
@@ -572,7 +572,7 @@ class Validierung extends PgObject {
 		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
 
 		# Tolerance and buffer, see comment in geom_within_plan
-		$tolerance_meters = '0.001';
+		$tolerance_meters = '0.002';
 		# gid zur eindeutigen Identifizierung des Datensatzes (nicht bei gmlas) sowie within und distance zum select hinzufügen
 		# replace only first instance, not potential following subqueries
 		$sql = substr_replace(

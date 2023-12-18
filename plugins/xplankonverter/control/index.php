@@ -74,11 +74,18 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_zusammenzeichnung
 */
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
-	$GUI->xplog = new LogFile(
-		XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '') . '/xplankonverter.log',
+	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
+	if (!file_exists($xplankonverter_file_path)) {
+		mkdir($xplankonverter_file_path, 0777);
+		$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
+		return false;
+	}
+	$xplankonverter_logfile = $xplankonverter_file_path . '/xplankonverter.log';
+	$GUI->xlog = new LogFile(
+		$xplankonverter_logfile,
 		'text',
 		'xplankonverter',
-		'xplankonverter Logfile',
+		'',
 		true
 	);
 	function isInStelleAllowed($stelle, $requestStelleId) {
@@ -246,7 +253,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		}
 
 		$GUI->debug->write('send_error: ' . $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg'], 4, false);
-		$GUI->xplog->write('error: ' . $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg']);
+		$GUI->write_xlog($msg . '<br>' . $msg_zusatz . '<br>' . $result['msg']);
 
 		header('Content-Type: application/json');
 		echo json_encode(array(
@@ -334,6 +341,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 
 function go_switch_xplankonverter($go) {
 	global $GUI;
+	$GUI->write_xlog('go = ' . $go . ' aus.' . ($GUI->formvars['konvertierung_id'] ? ' (konvertierung_id: ' . $GUI->formvars['konvertierung_id'] . ')' : ''));
 	switch ($go) {
 		/**
 		 * Check if objects falling into defined classes
@@ -1052,7 +1060,7 @@ function go_switch_xplankonverter($go) {
 		* je nach dem ob eine Konvertierung-ID übergeben wurde oder nicht
 		*/
 		case 'xplankonverter_create_geoweb_service' : {
-			$GUI->xplog->write('case xplankonverter_create_geoweb_service gestartet.');
+			$GUI->write_xlog('case xplankonverter_create_geoweb_service gestartet.');
 			$GUI->data = array(
 				'success' => true,
 				'msg' => 'Landesdienst erfolgreich angelegt.'
@@ -1066,14 +1074,14 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);	
+			$GUI->xplan_layers = $GUI->xplankonverter_get_xplan_layers($GUI->formvars['planart']);
 			if ($konvertierung_id == '') {
-				$GUI->xplog->write('Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml');
+				$GUI->write_xlog('Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml');
 
 				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . '/' . $GUI->plan_abk_plural);
 				if (! $result['success']) {
 					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
-					$GUI->xplog->write('error: ' . $msg);
+					$GUI->write_xlog('error: ' . $msg);
 					$GUI->data = array(
 						'success' => false,
 						'msg' => $msg
@@ -1083,11 +1091,11 @@ function go_switch_xplankonverter($go) {
 				else {
 					$result = $GUI->write_mapfile($result['mapfile'], $GUI->plan_abk_plural);
 					if (!$result['success']) {
-						$GUI->xplog->write('error: ' . $result['msg']);
+						$GUI->write_xlog('error: ' . $result['msg']);
 						$GUI->data = $result;
 						$GUI->add_message('error', $result['msg']);
 					}
-					$GUI->xplog->write('mafile: ' . $result['mapfile'] . ' geschrieben.');
+					$GUI->write_xlog('mafile: ' . $result['mapfile'] . ' geschrieben.');
 				}
 				$GUI->main = '../../plugins/xplankonverter/view/show_service_data.php';
 				$GUI->output();
@@ -1104,7 +1112,7 @@ function go_switch_xplankonverter($go) {
 					break;
 				}
 
-				$GUI->xplog->write('Erzeugt den Geowebservice für einen einzelnen Plan der Stelle ' . $GUI->Stelle->id);
+				$GUI->write_xlog('Erzeugt den Geowebservice für den Plan "' . $GUI->konvertierung->plan->get('name') . '" der Stelle ' . $GUI->Stelle->id);
 				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
 				if (!$result['success']) {
 					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
@@ -1604,8 +1612,6 @@ function go_switch_xplankonverter($go) {
 		*/
 		# ToDo pk:
 		# - E-Mail Versand umstellen auf ARL
-		# + Prüfen ob die Landesdienst-Metadaten geupdated sind.
-		# + Prüfen ob die Metadaten geupdated sind
 		# + Bei Erfolg fehlgeschlagene Upload-Versuche löschen.
 		# + Video für Upload
 		case 'xplankonverter_replace_zusammenzeichnung' : {
@@ -1631,7 +1637,7 @@ function go_switch_xplankonverter($go) {
 				$GUI,
 				$GUI->konvertierung->get('planart'),
 				$GUI->konvertierung->plan_class,
-				$GUI->konvertierung->plan_attribut_aktualitaet
+				$GUI->konvertierung->get_plan_attribut_aktualitaet()
 			);
 
 			if (count($zusammenzeichnungen['published']) > 0) {
@@ -1643,7 +1649,7 @@ function go_switch_xplankonverter($go) {
 				}
 			}
 
-			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->plan->get($new_konvertierung->plan_attribut_aktualitaet) . "'"));
+			$result = $new_konvertierung->update_attr(array('error_id = NULL', 'veroeffentlicht = true', "veroeffentlichungsdatum = '" . $new_konvertierung->get_aktualitaetsdatum() . "'"));
 			if (!$result['success']) {
 				send_error($result['msg']);
 				break;
@@ -2172,6 +2178,18 @@ function go_switch_xplankonverter($go) {
 			echo json_encode($response);
 		} break;
 
+		case 'xplankonverter_test' : {
+			// $konvertierung_id = $GUI->formvars['konvertierung_id'];
+			// $GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+			// $GUI->konvertierung->get_plan();
+			// if ($GUI->konvertierung->get_aktualitaetsdatum() == '') {
+			// 	echo 'Der Plan '. $GUI->konvertierung->get('bezeichnung') . ' (konvertierung_id: ' . $GUI->konvertierung->get_id() . ', gml_id: ' . $GUI->konvertierung->plan->get('gml_id') . ') hat kein ' . ucfirst($GUI->plan_attribut_aktualitaet) . ' und kein ' . ucfirst($GUI->konvertierung->get_plan_attribut_aktualitaet()) . '. Das muss im XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden.';
+			// }
+			// else {
+			// 	echo 'Aktualitätsdatum: ' . $GUI->konvertierung->get_aktualitaetsdatum();
+			// }
+		} break;
+
 		case 'xplankonverter_create_plaene' : {
 			header('Content-Type: application/json');
 			$success = false;
@@ -2222,10 +2240,10 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			if ($GUI->konvertierung->plan->get($GUI->plan_attribut_aktualitaet) == '') {
+			if ($GUI->konvertierung->get_aktualitaetsdatum() == '') {
 				$GUI->konvertierung->set('error_id', 6);
-				$GUI->konvertierung->update();
-				send_error('Der Plan hat kein Wirksamkeitsdatum. Das muss im XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden.');
+				send_error('Der Plan '. $GUI->konvertierung->get('bezeichnung') . ' (konvertierung_id: ' . $GUI->konvertierung->get_id() . ', gml_id: ' . $GUI->konvertierung->plan->get('gml_id') . ') hat kein ' . ucfirst($GUI->plan_attribut_aktualitaet) . ' und kein ' . ucfirst($GUI->konvertierung->get_plan_attribut_aktualitaet()) . '. Das muss im XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden. get_aktualitaetsdatum(): ' . $GUI->konvertierung->get_aktualitaetsdatum() . ' aktualitätsattribut: ' . $GUI->konvertierung->plan_attribut_aktualitaet . 'datum: ' .
+				$GUI->konvertierung->plan->get($GUI->konvertierung->plan_attribut_aktualitaet) . ' wirksamkeitsdatum: ' . $GUI->konvertierung->plan->get('wirksamkeitsdatum') . 'aenderungenbisdatum: ' . $GUI->konvertierung->plan->get('aenderungenbisdatum'));
 				break;
 			}
 
@@ -2466,8 +2484,8 @@ function go_switch_xplankonverter($go) {
 			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
-	if (!$GUI->goNotExecutedInPlugins AND !empty($GUI->xplog)) {
-		$GUI->xplog->close();
+	if (!$GUI->goNotExecutedInPlugins AND !empty($GUI->xlog)) {
+		$GUI->xlog->close();
 	};
 }
 

@@ -50,6 +50,21 @@ class XP_Plan extends PgObject {
 	}
 
 	/**
+	 * Function extract regionalschlüssel from first gemeinde if exists.
+	 * @return 12 stelliger Regionalschlüssel or null if not exists
+	 */
+	function get_regionalschluessel() {
+		$schl = $this->get('gemeinde');
+		if (!empty($schl)) {
+			$parts = explode(',', $schl);
+			if (count($parts) > 1 AND !empty($parts[1])) {
+				return $parts[1];
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Return names of layer that have content from the plan
 	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
 	 */

@@ -1,5 +1,5 @@
 <?php
-	global $supportedLanguages;
+global $supportedLanguages;
 	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
 	include(LAYOUTPATH . $language_file);
 	include(PLUGINS . 'mobile/' . $language_file);

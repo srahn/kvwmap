@@ -469,16 +469,28 @@
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
-		$GUI->xplog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+		#$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$bb = $admin_stelle->MaxGeorefExt;
 		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
 		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
-		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('d.m.Y'));
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht der einzelnen Zusammenzeichnungen der Flächennutzungspläne)');
 		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_contactorganization", $admin->stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+		$GUI->map->setMetaData("ows_contactperson", $admin->stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+		$GUI->map->setMetaData("ows_contactposition", $admin->stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+		$GUI->map->setMetaData("ows_contactelectronicmailaddress", $admin->stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+		$GUI->map->setMetaData("ows_contactvoicetelephone", $admin->stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+		$GUI->map->setMetaData("ows_contactfacsimiletelephone", $admin->stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+		$GUI->map->setMetaData("ows_stateorprovince", $admin->stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+		$GUI->map->setMetaData("ows_address", $admin->stelle->ows_contactaddress ?: OWS_ADDRESS);
+		$GUI->map->setMetaData("ows_postcode", $admin->stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+		$GUI->map->setMetaData("ows_city", $admin->stelle->ows_contactcity ?: OWS_CITY);
+		$GUI->map->setMetaData("ows_country", OWS_COUNTRY);
 		$GUI->map->web->set('header', 'templates/header.html');
 		$GUI->map->web->set('footer', 'templates/footer.html');
 
@@ -489,8 +501,7 @@
 		}
 		$GUI->service_layers = $result['layers_with_content'];
 		$GUI->service_layernames = array_keys($GUI->service_layers);
-		$GUI->xplog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
-
+		#$GUI->xplog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
 		$layers_to_remove = array();
 
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
@@ -519,6 +530,9 @@
 						$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
 						return $result;
 					}
+				}
+				else {
+					$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layerObj->get('data')));
 				}
 			}
 			else {
@@ -567,6 +581,13 @@
 		$md->set('date_title', 'Datum');
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
+		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
+
+		$md->set('id_abstract', array(
+			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
 		$md->set('service_layer_name', umlaute_umwandeln($admin_stelle->get('Bezeichnung')));
@@ -574,6 +595,7 @@
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $plan_object->tableName . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
 		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
+		$md->set('geographicIdentifier', '');
 
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(

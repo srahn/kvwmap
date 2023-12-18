@@ -166,7 +166,7 @@ class Zusammenzeichnung {
       $('#sperr_div').html('\
         <div class="xplankonverter-upload-zusammenzeichnung-div">\
           <div id="upload_zusammenzeichnung_progress_div">\
-            <h2 style="margin-bottom: 20px; float: left;">Neue Zusammenzeichnung <span id="konvertierung_id_span" style="display:none"></span></h2>\
+            <h2 style="margin-bottom: 20px; float: left; line-height: 1;">Neue Zusammenzeichnung <span id="konvertierung_id_span" style="display:none"></span></h2>\
             <i class="fa fa-times" aria-hidden="true" style="float:right; margin: -5px;" onclick="cancel_upload_zusammenzeichnung()"></i>\
             <div style="clear: both"></div>\
           </div>\
@@ -222,7 +222,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('import_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown }]);
       }
     })
   }
@@ -262,7 +262,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('create_plaene', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result }]);
       }
     })
   }
@@ -280,24 +280,24 @@ class Zusammenzeichnung {
       method: 'POST',
       body: formData
     })
-    .then(response => response.text())
-    .then(text => {
-      try {
-        const result = JSON.parse(text);
-        if (result.success) {
-          //console.log('Response reindex_gml_ids: %o', result);
-          this.confirm_step('reindex_gml_ids', 'ok');
-          this.import_reindexed_zusammenzeichnung('reindexed_xplan_gml');
-        }
-        else {
+      .then(response => response.text())
+      .then(text => {
+        try {
+          const result = JSON.parse(text);
+          if (result.success) {
+            //console.log('Response reindex_gml_ids: %o', result);
+            this.confirm_step('reindex_gml_ids', 'ok');
+            this.import_reindexed_zusammenzeichnung('reindexed_xplan_gml');
+          }
+          else {
+            this.confirm_step('reindex_gml_ids', 'error');
+            message([{ type: 'error', msg: 'Fehler beim Umenennen der GML-ID\'s.<br>' + result.msg }]);
+          }
+        } catch (err) {
           this.confirm_step('reindex_gml_ids', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Umenennen der GML-ID\'s.<br>' + result.msg }]);
+          message([{ type: 'error', msg: 'Fehler beim Parsen des Ergebnisses von xplankonverter_reindex_gml_id.<br>' + result.msg }]);
         }
-      } catch(err) {
-        this.confirm_step('reindex_gml_ids', 'error');
-        message([{ type: 'error', msg: 'Fehler beim Parsen des Ergebnisses von xplankonverter_reindex_gml_id.<br>' + result.msg }]);
-      }
-    });
+      });
   }
 
   import_reindexed_zusammenzeichnung = () => {
@@ -321,9 +321,9 @@ class Zusammenzeichnung {
           this.create_plaene();
         }
         else {
-            this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
-            console.error(result.msg);
-            message([{ type: 'error', msg: 'Fehler beim Import der reindizierten Zusammenzeichnung.<br>' + result.msg }]);
+          this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
+          console.error(result.msg);
+          message([{ type: 'error', msg: 'Fehler beim Import der reindizierten Zusammenzeichnung.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -380,11 +380,11 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
         if (result.success) {
-            this.confirm_step('gml_generieren', 'ok');
-            this.create_geoweb_service();
-         } else {
-            this.confirm_step('gml_generieren', 'error');
-            message([{ type: 'error', msg: 'Fehler beim Erzeugen der GML-Datei in Zielversion.<br>' + result.msg }]);
+          this.confirm_step('gml_generieren', 'ok');
+          this.create_geoweb_service();
+        } else {
+          this.confirm_step('gml_generieren', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der GML-Datei in Zielversion.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -410,12 +410,12 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
         if (result.success) {
-            this.confirm_step('create_geoweb_service', 'ok');
-            this.create_metadata();
+          this.confirm_step('create_geoweb_service', 'ok');
+          this.create_metadata();
         }
         else {
-         this.confirm_step('create_geoweb_service', 'error');
-         message([{ type: 'error', msg: 'Fehler beim Erzeugen der GeoWeb-Dienste.<br>' + result.msg }]);
+          this.confirm_step('create_geoweb_service', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der GeoWeb-Dienste.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -446,18 +446,18 @@ class Zusammenzeichnung {
         }
         else {
           this.confirm_step('create_metadata', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten in Zielversion.<br>' + result.msg }]);
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten für den Plan.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('create_metadata', 'error');
-/*
-  Das ist die Meldung die in dem Step zurück kommt und deshalb einen parseerror auslößt.
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-    {"success":true,"msg":"Metadaten \u00fcber Daten und Dienste erfolgreich in das Metainformationssystem hochgeladen."}
- */
+        /*
+          Das ist die Meldung die in dem Step zurück kommt und deshalb einen parseerror auslößt.
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+            {"success":true,"msg":"Metadaten \u00fcber Daten und Dienste erfolgreich in das Metainformationssystem hochgeladen."}
+         */
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
@@ -545,7 +545,7 @@ class Zusammenzeichnung {
         }
         else {
           this.confirm_step('check_class_completeness', 'error');
-          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data}]);
+          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -583,7 +583,7 @@ class Zusammenzeichnung {
         }
         catch (err) {
           this.confirm_step('replace_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>Konnte Antwort vom Server nicht auswerten: ' + response + ' ' + err}]);
+          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>Konnte Antwort vom Server nicht auswerten: ' + response + ' ' + err }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
@@ -597,9 +597,10 @@ class Zusammenzeichnung {
   next_step = (step) => {
     //console.log('next_step %o', step);
     this.lfdNrStep++;
+    $('.num-steps').html(this.lfdNrStep);
     $('#upload_zusammenzeichnung_progress_div').append(`\
       <div class="step">\
-        <div id="upload_zusammenzeichnung_step_${this.process[step].nr}" style="float:left; font-weight: bold">Schritt ${this.lfdNrStep} von ${this.numSteps} ${this.process[step].msg}</div>\
+        <div id="upload_zusammenzeichnung_step_${this.process[step].nr}" style="float:left; font-weight: bold">Schritt ${this.lfdNrStep} von <span class="numSteps">${this.numSteps}</span> ${this.process[step].msg}</div>\
         <div id="upload_zusammenzeichnung_step_confirm_${this.process[step].nr}" style="float: right"><i class="fa fa-spinner fa-spin" aria-hidden="true" ></i></div>\
         <div style="clear: both"></div>\
         <div id="xplankonverter-step-description-${this.process[step].nr}" class="xplankonverter-step-description"></div>\
@@ -611,7 +612,7 @@ class Zusammenzeichnung {
   confirm_step = (step, success) => {
     //console.log('confirm_step: %o', this.process[step]);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
-    $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success]  + '" aria-hidden="true" ></i>');
+    $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
     if (!success) {
       $('#upload_zusammenzeichnung_msg').removeClass('blink');
       $('#upload_zusammenzeichnung_div').removeClass('dragover');

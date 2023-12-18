@@ -61,7 +61,7 @@
 				$zusammenzeichnung->plan->get_center_coord();
 				$plandaten = array(
 					'name' => $zusammenzeichnung->plan->get('name'),
-					'aktualitaet' => $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet),
+					'aktualitaet' => $zusammenzeichnung->get_aktualitaetsdatum(),
 					'gml_id' => $zusammenzeichnung->plan->get('gml_id'),
 					'first_ags' => $zusammenzeichnung->plan->get_first_ags(),
 					'first_gemeinde_name' => $zusammenzeichnung->plan->get_first_gemeinde_name(),
@@ -258,7 +258,7 @@
             foreach ($this->zusammenzeichnungen['faulty'] AS $konvertierung) {
               if ($konvertierung->plan) {
                 $list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_FP_PLAENE_LAYER_ID . "&value_plan_gml_id=" . $konvertierung->plan->get('gml_id') . "&operator_plan_gml_id==&csrf_token=" . $_SESSION['csrf_token'];
-                $list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->plan->get('wirksamkeitsdatum')} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
+                $list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->get_aktualitaetsdatum()} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
               }
               else {
                 $list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID . "&value_konvertierung_id=" . $konvertierung->get_id() . "&operator_konvertierung_id==&csrf_token=" . $_SESSION['csrf_token'];
@@ -287,7 +287,26 @@
 			if ($this->user->id == 3) { ?>
 				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
 			} ?>
-			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()">
+			<p style="margin-bottom: 8px;">Die hoch zu ladenden Daten müssen folgende Eigenschaften aufweisen:</p>
+			<div style="
+				text-align: left;
+				margin-left: 157px;
+				width: 75%;
+				margin-bottom: 20px;
+			">
+				<ul style="
+					color: black;
+					margin: 0px;
+					padding: 0px;
+					list-style: circle;
+				">
+					<li>Die Daten müssen in einem ZIP-Archiv abgelegt sein.</li>
+					<li>Die GML-Datei im ZIP-Archiv muss die Dateibezeichnung "Zusammenzeichnung.gml" aufweisen.</li>
+					<li>Es kann eine GML-Datei mit Geltungsbereichen von Änderungsplänen enthalten sein. Sie muss "Geltungsbereiche.gml" heißen.</li>
+					<li>Die Zusammenzeichnung eines FNP muss ein Datum im Attribut wirksamkeitsdatum oder aenderungenbisdatum beinhalten.</li>
+				</ul>
+			</div>
+			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()" style="margin-bottom: 20px">
 			<div id="upload_result_msg_div" class="hidden"></div>
 		</div><?
 
@@ -361,36 +380,42 @@
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Dienst
 				</div>
 				<div id="dienst_div" class="content_div hidden">
-					<table>
+					<table style="width: 100%">
 						<tr>
-							<td>Metadaten über den Geodatensatz:</td><td><?
+							<td style="border-right: 0px solid gray">Metadaten über den Geodatensatz:</td>
+							<td style="border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_dataset_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Geodatensatz runterladen" target="metadata" href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_dataset_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
+							<td rowspan="3" style="border-bottom: solid 1px gray;">
+								<a href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Metadaten aktualisieren" target="metadata">Metadaten aktualisieren</a>
+							</td>
 						</tr>
 						<tr>
-							<td>Metadaten über den Darstellungsdienst (WMS):</td><td><?
+							<td style="border-right: 0px solid gray">Metadaten über den Darstellungsdienst (WMS):</td>
+							<td style="border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_viewservice_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Darstellungsdienst runterladen" target="metadata" href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_viewservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 						<tr>
-							<td>Metadaten über Downloaddienst (WFS):</td><td><?
+							<td style="border-bottom: solid 1px gray; border-right: 0px solid gray">Metadaten über Downloaddienst (WFS):</td>
+							<td style="border-bottom: solid 1px gray; border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_downloadservice_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Downloaddienst runterladen" target="metadata"href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_downloadservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 						<tr>
 							<td>Capabilities zum WMS:</td>
@@ -402,7 +427,10 @@
 								else { ?>
 									<a title="Capabilities zum WMS runterladen" target="metadata" href="<?php echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
+							<td rowspan="2">
+								&nbsp;
+							</td>
 						</tr>
 						<tr>
 							<td>Capabilities zum WFS:</td>
@@ -414,16 +442,19 @@
 								else { ?>
 									<a title="Capabilities zum WFS runterladen" target="metadata" href="<? echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 					</table>
 				</div>
 				<div id="class_completeness_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Planzeichen (Objektklassen)
 				</div>
-				<div id="class_completeness_div" class="content_div hidden"><?php
+				<div id="class_completeness_div" class="content_div hidden" style="text-align: center; padding: 20px">
+					<input type="button" name="load_class_completeness" value="Lade Objektklassen"/>
+					<?php
+/*
 					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-          foreach($layers_with_content AS $layer) {
+					foreach($layers_with_content AS $layer) {
 						$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
 						$this->formvars['layer_id'] = $layer['id'];
 						$classes = $mapDB->read_Classes($layer['id']);
@@ -447,7 +478,8 @@
 						$result = $this->check_class_completeness();
 						$class_completeness_result .= $result['html'];
 					}
-					echo $class_completeness_result; ?>
+					echo $class_completeness_result;
+					*/ ?>
 				</div><?
 				if (count($this->zusammenzeichnungen['archived']) > 0) { ?>
 					<div id="alte_staende_head" class="head_div" onclick="toggle_head(this)">

@@ -16,4 +16,5 @@ tools/copy_kvwmap_config.json
 vendor/
 robots.txt
 .idea
+.vscode/
 *.iml

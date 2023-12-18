@@ -206,7 +206,7 @@ class stelle {
 		$this->ows_updatesequence = $rs['ows_updatesequence'];
 		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
@@ -421,6 +421,37 @@ class stelle {
 		return $rs;
 	}
 
+	/**
+	 * Query stellendaten with getstellendaten from database
+	 * and complete organization, person and emailaddress for content from contact
+	 * and for distribution from content if they are empty
+	 * @return array associative array with values of stelle
+	 */
+	function getstellendaten_full_contact() {
+		$stellendaten = $this->getstellendaten();
+		if (empty($stellendaten['ows_contentorganization'])) {
+			$stellendaten['ows_contentorganization'] = $stellendaten['ows_contactorganization'];
+		}
+		if (empty($stellendaten['ows_distributionorganization'])) {
+			$stellendaten['ows_distributionorganization'] = $stellendaten['ows_contactorganization'];
+		}
+
+		if (empty($stellendaten['ows_contentperson'])) {
+			$stellendaten['ows_contentperson'] = $stellendaten['ows_contactperson'];
+		}
+		if (empty($stellendaten['ows_distributionperson'])) {
+			$stellendaten['ows_distributionperson'] = $stellendaten['ows_contactperson'];
+		}
+
+		if (empty($stellendaten['ows_contentemailaddress'])) {
+			$stellendaten['ows_contentemailaddress'] = $stellendaten['ows_contactemailaddress'];
+		}
+		if (empty($stellendaten['ows_distributionemailaddress'])) {
+			$stellendaten['ows_distributionemailaddress'] = $stellendaten['ows_contactemailaddress'];
+		}
+		return $stellendaten;
+	}
+
 	function NeueStelleAnlegen($stellendaten) {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
@@ -472,7 +503,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
@@ -570,7 +601,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
 				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
@@ -636,7 +667,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "'
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "
 		";

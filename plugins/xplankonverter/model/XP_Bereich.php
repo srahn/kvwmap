@@ -54,6 +54,23 @@ class XP_Bereich extends PgObject {
 		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
 		pg_query($this->database->dbConn, $sql);
 	}
+	
+		/**
+	 * Löscht alle dem Bereich zugehörigen Präsentationsobjekte
+	 */
+	function destroy_associated_praesentationsobjekte() {
+		# also deletes by konvertierung_id as gehoertzubereich does not necessarily have to be set
+		$sql = "
+			DELETE FROM
+				xplan_gml.xp_abstraktespraesentationsobjekt
+			WHERE
+				gehoertzubereich = '" . $this->get('gml_id') . "'
+			OR
+				konvertierung_id = '" . $this->get('konvertierung_id') . "'
+		";
+		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
 
 	/**
 	 * Löscht die Zuordnungen von Objekten des Bereiches zu Textabschnitten
@@ -85,6 +102,7 @@ class XP_Bereich extends PgObject {
 		}
 		$this->destroy_objekt_zu_textabschnitte();
 		$this->destroy_associated_objekte();
+		$this->destroy_associated_praesentationsobjekte();
 		$this->delete();
 	}
 }
