@@ -260,6 +260,7 @@
 			"table_name" => $layerset['maintable'],
 			"schema_name" => $layerset['schema'],
 			"document_path" => $layerset['document_path'],
+                        "vector_tile_url" => $layerset['vector_tile_url'], 
 			"privileg" => $layerset['privileg'],
 			"drawingorder" => $layerset['drawingorder'],
 			"sync" => $layerset['sync']
