@@ -18,4 +18,5 @@
 	$strSingleGeoms = "Einzelgeometrien abfragen";
 	$strWithin = "nur innenliegend";
 	$strExportSettings = 'Export-Einstellungen';
+	$strFilename = "Dateiname";
 ?>

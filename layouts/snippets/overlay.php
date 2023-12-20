@@ -3,7 +3,7 @@
 		<title><? echo $this->titel ?: TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
-	<body nload="activate_overlay();">
+	<body onload="activate_overlay();">
 		<script type="text/javascript">
 			root = window.opener;
 			if(typeof(root.stopwaiting) == "function"){

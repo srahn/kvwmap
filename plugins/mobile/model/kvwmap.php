@@ -262,26 +262,27 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"Point", "Line", "Polygon"
 	);
 
-	$layer = array(
-		"id" => $layerset['Layer_ID'],
-		"title" => $layerset['Name'],
-		"alias" => $layerset['alias'],
-		"id_attribute" => $layerset['oid'],
-		"name_attribute" => $layerset['labelitem'],
-		"classitem" => $layerset['classitem'],
-		"transparency" => $layerset['transparency'],
-		"geometry_attribute" => $attributes['the_geom'],
-		"geometry_type" => $geometry_types[$layerset['Datentyp']],
-		"table_name" => $layerset['maintable'],
-		"schema_name" => $layerset['schema'],
-		"document_path" => $layerset['document_path'],
-		"privileg" => $layerset['privileg'],
-		"drawingorder" => $layerset['drawingorder'],
-		"sync" => $layerset['sync']
-	);
-	# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
-	return $layer;
-};
+		$layer = array(
+			"id" => $layerset['Layer_ID'],
+			"title" => $layerset['Name'],
+			"alias" => $layerset['alias'],
+			"id_attribute" => $layerset['oid'],
+			"name_attribute" => $layerset['labelitem'],
+			"classitem" => $layerset['classitem'],
+			"transparency" => $layerset['transparency'],
+			"geometry_attribute" => $attributes['the_geom'],
+			"geometry_type" => $geometry_types[$layerset['Datentyp']],
+			"table_name" => $layerset['maintable'],
+			"schema_name" => $layerset['schema'],
+			"document_path" => $layerset['document_path'],
+			"vector_tile_url" => $layerset['vector_tile_url'], 
+			"privileg" => $layerset['privileg'],
+			"drawingorder" => $layerset['drawingorder'],
+			"sync" => $layerset['sync']
+		);
+		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
+		return $layer;
+	};
 
 $GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 	$attributes = array();
@@ -857,8 +858,9 @@ $GUI->mobile_delete_images = function ($layer_id, $images) use ($GUI) {
 		}
 	}
 
-	return array(
-		"success" => true,
-		"msg" => implode(', ', $msg)
-	);
-};
+		return array(
+			"success" => true,
+			"msg" => implode(', ', $msg)
+		);
+	};
+?>

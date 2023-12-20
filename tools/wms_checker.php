@@ -120,8 +120,8 @@ $userDb->user = MYSQL_USER;
 $userDb->passwd = MYSQL_PASSWORD;															
 $userDb->dbName = MYSQL_DBNAME;
 $userDb->open();
-$query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 
+$query = "SELECT * FROM `layer` WHERE connectiontype = 7";
 # nur bestimmte Layer einschließen
 #$with_layer_id = '1,2,3,4';
 $with_layer_id = '';
@@ -134,10 +134,22 @@ $without_layer_id = '';
 if ($without_layer_id != '') {
 	$query .= '	AND Layer_ID NOT IN (' . $without_layer_id . ')';
 }
-
 #echo '<br>get layer with sql: ' . $query;
 $userDb->execSQL($query);
 $result = $userDb->result;
+
+$params = [];
+$sql = "
+  SELECT
+    `key`, 
+    `default_value`
+  FROM
+    layer_parameter";
+$userDb->execSQL($sql);
+$ret = $userDb->result;
+while ($line = $ret->fetch_assoc()){
+  $params[$line['key']] = $line['default_value'];
+}
 
 while($line = $result->fetch_assoc()){
   try{
@@ -145,7 +157,10 @@ while($line = $result->fetch_assoc()){
   }
   catch(Exception $e) {
     $extent = new rectObj();
-  }		
+  }
+  foreach($params AS $key => $value){
+    $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
+  }
   $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   $wgsProjection = ms_newprojectionobj("init=epsg:4326");
   $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);

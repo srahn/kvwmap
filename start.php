@@ -401,6 +401,7 @@ if (!$show_login_form) {
 					$GUI->add_message('error', $permission['errmsg'] . '<br>' . $permission['reason']);
 					$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
 					$go = 'Stelle_waehlen';
+					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 					# login case 14
 				}
 			}

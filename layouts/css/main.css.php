@@ -333,7 +333,7 @@ form {
 }
 
 .hidden{
-	display: none;
+	display: none !important;
 }
 
 ul{
@@ -453,6 +453,41 @@ span[data-tooltip]:hover::after {
   display: none;
 	border: 1px solid #bbb;
 	border-radius: 2px;
+	box-shadow: 1px 1px 6px 1px #ddd;
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
+	max-height: 400px;
+	overflow-y: auto;
+	margin: 0;
+}
+
+.custom-select .dropdown.upward {
+	top: auto;
+	bottom: 24px;
+}
+
+.custom-select.active .dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-select .dropdown li {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 3px;
+	margin-bottom: 0;
+  cursor: pointer;
+}
+
+.custom-select .dropdown li:not(:last-child) {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.custom-select .dropdown li.selected {
+  background-color: #e0e0e6;
 }
 
 .custom-select img {
@@ -492,37 +527,6 @@ span[data-tooltip]:hover::after {
 .custom-select .placeholder.editable::after {
   transform: rotate(-45deg);
   right: <? echo $font_size_factor * 15; ?>px;
-}
-
-.custom-select.active .dropdown {
-  display: flex;
-  flex-direction: column;
-  box-shadow: 1px 1px 6px 1px #ddd;
-  position: absolute;
-  top: 1px;
-  right: 0;
-  left: 0;
-  /*min-width: 200px;*/
-	max-height: 400px;
-	overflow-y: auto;
-	margin: 0;
-}
-
-.custom-select .dropdown li {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  padding: 3px;
-	margin-bottom: 0;
-  cursor: pointer;
-}
-
-.custom-select .dropdown li:not(:last-child) {
-  border-bottom: 1px solid #cdcdcd;
-}
-
-.custom-select .dropdown li.selected {
-  background-color: #e0e0e6;
 }
 
 
@@ -1303,7 +1307,7 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
+	left: 0;
 	top: 1;
 }
 
@@ -1358,6 +1362,10 @@ a.menuered:hover {
 
 #mapimage{
 	position: relative;
+}
+
+#mapbuttons {
+	padding-left: 1px;
 }
 
 #showcoords, #showmeasurement{
@@ -2248,37 +2256,38 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: flex-start;
+	width: 580px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .fstanzeigehover{
-								position: relative;
-								float: left;
-								margin: auto;
-								visibility: visible;
-								line-height: 30px;
+	position: relative;
+	float: left;
+	margin: auto;
+	visibility: visible;
+	line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.4);
+	background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		flex-wrap: wrap;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .flexcontainer2{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		align-items:stretch;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	align-items:stretch;
 }
 
 .map-right{

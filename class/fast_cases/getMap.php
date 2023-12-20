@@ -557,7 +557,6 @@ class GUI {
 	}
 
 	function loadlayer($map, $layerset) {
-		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
@@ -1035,12 +1034,26 @@ class GUI {
 				if($dbStyle['rangeitem'] != '') {
 					$style->updateFromString("STYLE RANGEITEM " . $dbStyle['rangeitem']." END");
 				}
-        if ($dbStyle['offsetx']!='') {
-          $style->set('offsetx', $dbStyle['offsetx']);
-        }
-        if ($dbStyle['offsety']!='') {
-          $style->set('offsety', $dbStyle['offsety']);
-        }
+        $offset_attribute = false;
+				if (!is_numeric($dbStyle['offsetx'] ?: 0)){
+					$dbStyle['offsetx'] = '[' . $dbStyle['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbStyle['offsety'] ?: 0)){
+					$dbStyle['offsety'] = '[' . $dbStyle['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$style->updateFromString("STYLE offset " . ($dbStyle['offsetx'] ?: '0') . " " . ($dbStyle['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbStyle['offsetx']!='') {
+						$style->set('offsetx', $dbStyle['offsetx']);
+					}
+					if ($dbStyle['offsety']!='') {
+						$style->set('offsety', $dbStyle['offsety']);
+					}
+				}
       } # Ende Schleife für mehrere Styles
 
       # setzen eines oder mehrerer Labels
@@ -1155,11 +1168,25 @@ class GUI {
 						}break;
 					}
 				}
-				if ($dbLabel['offsetx']!='') {
-					$label->offsetx = $dbLabel['offsetx'];
+				$offset_attribute = false;
+				if (!is_numeric($dbLabel['offsetx'] ?: 0)){
+					$dbLabel['offsetx'] = '[' . $dbLabel['offsetx'] . ']';
+					$offset_attribute = true;
 				}
-				if ($dbLabel['offsety']!='') {
-					$label->offsety = $dbLabel['offsety'];
+				if (!is_numeric($dbLabel['offsety'] ?: 0)){
+					$dbLabel['offsety'] = '[' . $dbLabel['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$label->updateFromString("LABEL offset " . ($dbLabel['offsetx'] ?: '0') . " " . ($dbLabel['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbLabel['offsetx']!='') {
+						$label->set('offsetx', $dbLabel['offsetx']);
+					}
+					if ($dbLabel['offsety']!='') {
+						$label->set('offsety', $dbLabel['offsety']);
+					}
 				}
 				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label

@@ -490,7 +490,7 @@ INSERT INTO u_styles2classes (
 					}
 					else {
 						$field = $this->result->fetch_field_direct($i);
-						if (!in_array($field->type, [252, 253, 254]) AND $rs[$i] == '') {
+						if ($rs[$i] === null) {
 							$insert .= "NULL";
 						} else{
 							$insert .= "'".$this->mysqli->real_escape_string($rs[$i])."'";

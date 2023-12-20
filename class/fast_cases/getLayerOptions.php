@@ -481,7 +481,7 @@ class GUI {
 									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 								}
 							}
-							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['export_privileg']){
 								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
 							}
 						}
@@ -514,7 +514,7 @@ class GUI {
 													<span>' . $this->strAutoClassify . ':</span>
 												</td>
 												<td>
-													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
 															$index = $query_attributes['indizes'][$attributes[$i]['name']];

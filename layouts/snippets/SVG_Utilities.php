@@ -794,6 +794,7 @@
 				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
 				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
+					if(enclosingForm.last_doing2.value == "add_circle")enclosingForm.last_button.value = "buffer3";
 					if(enclosingForm.last_doing2.value == "add_parallel_polygon")enclosingForm.last_button.value = "buffer2";
 					if(enclosingForm.last_doing2.value == "subtract_polygon")enclosingForm.last_button.value = "pgon_subtr0";
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
@@ -1012,6 +1013,13 @@
 				enclosingForm.secondpoly.value = "true";
 				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
 			break;
+			case "add_circle":
+				applypolygons();
+				addlinepoint_second(world_x, world_y);
+				enclosingForm.firstpoly.value = "true";
+				enclosingForm.secondpoly.value = "true";
+				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			break;			
 			case "add_parallel_polygon":
 				addlinepoint_second(world_x, world_y);
 				if(pathx_second.length > 1){
@@ -2383,6 +2391,22 @@ function mouseup(evt){
 				applypolygons();
 			}
 		}
+
+		function add_circle(){
+			enclosingForm.last_doing.value = "add_circle";
+			enclosingForm.bufferwidth.value = prompt("Kreisradius in Metern:", enclosingForm.bufferwidth.value);
+			if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
+				enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
+			}
+			else{
+				if(enclosingForm.newpathwkt.value != ""){
+					enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+				}
+			}
+		  if(enclosingForm.secondpoly.value == "true"){
+				applypolygons();
+			}
+		}		
 		
 		function add_parallel_polygon(){
 			enclosingForm.last_doing.value = "add_parallel_polygon";			
@@ -4006,7 +4030,7 @@ $measurefunctions = '
     return $flurstquerybuttons;
   }
   
-  function bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon){
+  function bufferbuttons($strBuffer, $strBufferedLine, $strCircle, $strParallelPolygon){
   	global $last_x;
     $bufferbuttons = '
       <g id="buffer_add" transform="translate('.$last_x.' 0)">
@@ -4032,6 +4056,17 @@ $measurefunctions = '
 				</g>
       </g>';
 			$last_x += 36;
+			$bufferbuttons .= '
+      <g id="add_circle" transform="translate('.$last_x.' 0)">
+        <rect id="buffer3" onmouseover="show_tooltip(\''.$strCircle.'\',evt.clientX,evt.clientY)" onmousedown="add_circle();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<circle cx="503" cy="281"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="242" cy="389"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="337" cy="577"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="462" cy="486"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+				</g>
+      </g>';
+			$last_x += 36;			
 		$bufferbuttons .= '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
         <rect id="buffer2" onmouseover="show_tooltip(\''.$strParallelPolygon.'\',evt.clientX,evt.clientY)" onmousedown="add_parallel_polygon();hide_tooltip();highlightbyid(\'buffer2\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>

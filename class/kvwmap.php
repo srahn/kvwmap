@@ -557,7 +557,7 @@ class GUI {
 									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 								}
 							}
-							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['queryable']){
+							if (in_array($layer[0]['connectiontype'], [MS_POSTGIS, MS_WFS]) AND $layer[0]['export_privileg']){
 								echo '<li><a href="index.php?go=Daten_Export&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataExport . '</a></li>';
 							}
 						}
@@ -590,7 +590,7 @@ class GUI {
 													<span>' . $this->strAutoClassify . ':</span>
 												</td>
 												<td>
-													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '" onchange="document.GUI.go.value = \'create_auto_classes_for_rollenlayer\';document.GUI.submit();">
+													<select style="width: 110px" name="klass_' . $this->formvars['layer_id'] . '">
 														<option value=""> - </option>';
 														for ($i = 0; $i < count($attributes)-2; $i++){
 															$index = $query_attributes['indizes'][$attributes[$i]['name']];
@@ -866,22 +866,43 @@ echo '			</table>
 			$this->user->rolle->setRollenLayerName($this->formvars);
 			$this->user->rolle->setRollenLayerAutoDelete($this->formvars);
 			$this->user->rolle->setBuffer($this->formvars);
-			# bei Bedarf Label anlegen
-			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-			$classes = $mapDB->read_Classes($this->formvars['layer_options_open']);
+			$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
+			# automatische Klassifizierung
+			if ($auto_class_attribute = $this->formvars['klass_' . $this->formvars['layer_options_open']]) {
+				$this->formvars['selected_layer_id'] = $this->formvars['layer_options_open'];
+				$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
+				$this->GenerischeSuche_Suchen();
+				$result= $this->qlayerset[0]['shape'];
+				# alte Klassen löschen
+				$old_classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
+				for($i = 0; $i < count($old_classes); $i++){
+					$dbmap->delete_Class($old_classes[$i]['Class_ID']);
+				}
+				for ($i = 0; $i < count($result); $i++) {
+					foreach ($result[$i] As $key => $value) {
+						if ($auto_class_attribute === $key) {
+							$classes[$value] = $value;
+						}
+					}
+				}
+				$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['Datentyp'], $this->database);
+			}
+			$classes = $dbmap->read_Classes($this->formvars['layer_options_open']);
 			if (!empty($classes)) {
 				if (!empty($classes[0]['Style'])) {
 					$this->user->rolle->setStyle($classes[0]['Style'][0]['Style_ID'], $this->formvars);
 				}
-				if($classes[0]['Label'] == NULL){
-					$empty_label = new stdClass();
-					$empty_label->font = 'arial';
-					$empty_label->size = '8';
-					$empty_label->minsize = '6';
-					$empty_label->maxsize = '10';
-					$empty_label->position = '6';
-					$new_label_id = $mapDB->new_Label($empty_label);
-					$mapDB->addLabel2Class($classes[0]['Class_ID'], $new_label_id, 0);
+				foreach ($classes as $class) {	# bei Bedarf Label anlegen
+					if ($class['Label'] == NULL){
+						$empty_label = new stdClass();
+						$empty_label->font = 'arial';
+						$empty_label->size = '8';
+						$empty_label->minsize = '6';
+						$empty_label->maxsize = '10';
+						$empty_label->position = '6';
+						$new_label_id = $dbmap->new_Label($empty_label);
+						$dbmap->addLabel2Class($class['Class_ID'], $new_label_id, 0);
+					}
 				}
 			}
 		}
@@ -2063,7 +2084,6 @@ echo '			</table>
 
 	
 	function loadlayer($map, $layerset) {
-		$this->Stelle->useLayerAliases = 0;
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
 		$layer = ms_newLayerObj($map);
 		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
@@ -2543,12 +2563,26 @@ echo '			</table>
 				if($dbStyle['rangeitem'] != '') {
 					$style->updateFromString("STYLE RANGEITEM " . $dbStyle['rangeitem']." END");
 				}
-        if ($dbStyle['offsetx']!='') {
-          $style->set('offsetx', $dbStyle['offsetx']);
-        }
-        if ($dbStyle['offsety']!='') {
-          $style->set('offsety', $dbStyle['offsety']);
-        }
+				$offset_attribute = false;
+				if (!is_numeric($dbStyle['offsetx'] ?: 0)){
+					$dbStyle['offsetx'] = '[' . $dbStyle['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbStyle['offsety'] ?: 0)){
+					$dbStyle['offsety'] = '[' . $dbStyle['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$style->updateFromString("STYLE offset " . ($dbStyle['offsetx'] ?: '0') . " " . ($dbStyle['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbStyle['offsetx']!='') {
+						$style->set('offsetx', $dbStyle['offsetx']);
+					}
+					if ($dbStyle['offsety']!='') {
+						$style->set('offsety', $dbStyle['offsety']);
+					}
+				}
       } # Ende Schleife für mehrere Styles
 
       # setzen eines oder mehrerer Labels
@@ -2663,11 +2697,25 @@ echo '			</table>
 						}break;
 					}
 				}
-				if ($dbLabel['offsetx']!='') {
-					$label->offsetx = $dbLabel['offsetx'];
+				$offset_attribute = false;
+				if (!is_numeric($dbLabel['offsetx'] ?: 0)){
+					$dbLabel['offsetx'] = '[' . $dbLabel['offsetx'] . ']';
+					$offset_attribute = true;
 				}
-				if ($dbLabel['offsety']!='') {
-					$label->offsety = $dbLabel['offsety'];
+				if (!is_numeric($dbLabel['offsety'] ?: 0)){
+					$dbLabel['offsety'] = '[' . $dbLabel['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$label->updateFromString("LABEL offset " . ($dbLabel['offsetx'] ?: '0') . " " . ($dbLabel['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbLabel['offsetx']!='') {
+						$label->set('offsetx', $dbLabel['offsetx']);
+					}
+					if ($dbLabel['offsety']!='') {
+						$label->set('offsety', $dbLabel['offsety']);
+					}
 				}
 				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label
@@ -4567,10 +4615,6 @@ echo '			</table>
 									$onkeyup = 'enforceMinMax(this)';
 								} break;
 								
-								case 'offsetx' : case 'offsety' : { 
-									$type = 'number';
-								} break;
-								
 								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { 
 									$type = 'text';
 									$copy = true;
@@ -5584,7 +5628,6 @@ echo '			</table>
 		$this->formvars['no_output'] = true;		# damit der Aufruf von output() verhindert wird
 		$this->GenerischeSuche_Suchen();
 		$result= $this->qlayerset[0]['shape'];
-		$attributes = $this->qlayerset[0]['attributes'];
 		# alte Klassen löschen
 		$this->classes = $dbmap->read_Classes($this->formvars['selected_layer_id']);
 		for($i = 0; $i < count($this->classes); $i++){
@@ -10729,7 +10772,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						#-----Polygoneditor und Linieneditor---#
 						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
-						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
+						if ($this->formvars['chosen_layer_id'] AND $privileges[$this->qlayerset[0]['attributes']['the_geom']] == 1) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
 								include_once (CLASSPATH.'polygoneditor.php');
 								$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
@@ -10780,7 +10823,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					elseif ($this->geomtype == 'POINT') {
 						#-----Pointeditor-----#
-						if ($this->formvars['chosen_layer_id']) {			# für neuen Datensatz verwenden -> Geometrie abfragen
+						if ($this->formvars['chosen_layer_id'] AND $privileges[$this->qlayerset[0]['attributes']['the_geom']] == 1) {			# für neuen Datensatz verwenden -> Geometrie abfragen
 							include_once (CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
 							$this->point = $pointeditor->getpoint($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->angle_attribute);
@@ -12729,6 +12772,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
 			$this->formvars['version'] = $this->stellendaten['version'];
+			$this->formvars['reset_password_text'] = $this->stellendaten['reset_password_text'];
+			$this->formvars['invitation_text'] = $this->stellendaten['invitation_text'];
 			$this->formvars['comment'] = $this->stellendaten['comment'];
 			$where = 'ID != '.$this->formvars['selected_stelle_id'];
 
@@ -15434,6 +15479,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter) . "), true)";
 							}							
 							if($this->formvars['CMD'] == 'touchquery'){
+								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
 									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
 								}
@@ -16222,6 +16268,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$links = '';
+					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
@@ -20721,8 +20769,8 @@ class db_mapObj{
       if(value_of($style, 'width')){$sql.= ", width = '" . $style['width']."'";}
       if(value_of($style, 'minwidth')){$sql.= ", minwidth = '" . $style['minwidth']."'";}
       if(value_of($style, 'maxwidth')){$sql.= ", maxwidth = '" . $style['maxwidth']."'";}
-			if(value_of($style, 'offsetx')){$sql.= ", offsetx = " . $style['offsetx'];}
-			if(value_of($style, 'offsety')){$sql.= ", offsety = " . $style['offsety'];}
+			if(value_of($style, 'offsetx')){$sql.= ", offsetx = '" . $style['offsetx'] . "'";}
+			if(value_of($style, 'offsety')){$sql.= ", offsety = '" . $style['offsety'] . "'";}
 			if(value_of($style, 'polaroffset')){$sql.= ", polaroffset = '" . $style['polaroffset']."'";}
 			if(value_of($style, 'pattern')){$sql.= ", pattern = '" . $style['pattern']."'";}
 			if(value_of($style, 'geomtransform')){$sql.= ", geomtransform = '" . $style['geomtransform']."'";}

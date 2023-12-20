@@ -1065,15 +1065,9 @@ class ddl {
 			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
 			$this->i_on_page++;
-			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 
+			# beim Untereinander-Typ oder eingebettet-Typ wenn Datensätze nicht durch Seitenumbruch 
 			# unterbrochen werden dürfen, eine Transaktion starten um evtl. bei einem Seitenüberlauf zurückkehren zu können
-			if (
-				$this->layout['type'] != 0 AND
-				(
-					!$layout_with_sublayout OR
-					$this->layout['no_record_splitting']
-				)
-			) {
+			if ($this->layout['type'] != 0 AND $this->layout['no_record_splitting']) {
 				$this->pdf->transaction('start');
 				$this->transaction_start_pageid = $this->pdf->currentContents;
 				$this->transaction_start_y = $this->miny[$this->pdf->currentContents];
@@ -1205,17 +1199,9 @@ class ddl {
 			$this->remaining_lines = $this->add_lines($offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
 
-			if (
-				$this->layout['type'] != 0 AND
-				(
-					!$layout_with_sublayout OR
-					$this->layout['no_record_splitting']
-				)
-			) {
-				# Ein listenförmiges Layout hat einen Seitenüberlauf verursacht und in diesem gibt es entweder
-				# keine weiteren Sublayouts an deren Datensätzen man den Seitenumbruch durchführen könnte oder 
-				# das Unterbrechen von Datensätzen ist nicht gewollt. Deshalb wird bis zum Beginn des letzten 
-				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
+			if ($this->layout['type'] != 0 AND $this->layout['no_record_splitting']) {
+				# Ein listenförmiges Layout hat einen Seitenüberlauf verursacht und das Unterbrechen von Datensätzen ist nicht gewollt. 
+				# Deshalb wird bis zum Beginn des letzten Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if ($this->page_overflow != false) {
 					$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
@@ -1918,7 +1904,7 @@ class ddl {
 			$where_clauses[] = 'd.id = ' . $ddl_id;
 		}
 		if ($layer_id) {
-			$where_clauses[] = "d.layer_id = " . $layer_id;
+			$where_clauses[] = "(d.layer_id = " . $layer_id . " OR d.layer_id = l.duplicate_from_layer_id)";
 		}
 		if ($types != NULL) {
 			$where_clauses[] = "d.type IN (" . implode(", ", $types) . ")";
@@ -1932,6 +1918,7 @@ class ddl {
 			FROM
 				datendrucklayouts d LEFT JOIN
 				ddl2stelle d2s ON d.id = d2s.ddl_id
+				" . ($layer_id ? 'LEFT JOIN layer l ON l.Layer_ID = ' . $layer_id : '') . "
 			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY

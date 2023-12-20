@@ -92,12 +92,12 @@ function update_format(){
 	if(document.GUI.export_format.value == 'CSV'){
 		document.getElementById('coord_div').style.display = 'none';
 		document.getElementById('geom_div').style.display = 'none';
-		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.visibility = 'visible';		
+		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.display = '';		
 	}
 	else{
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
-		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.visibility = 'hidden';
+		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.display = 'none';
 		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
@@ -395,6 +395,11 @@ $j=0;
 					<table cellspacing="7">
 						<tr>
 							<td>
+								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo umlaute_umwandeln($this->data_import_export->layerdaten['Bezeichnung'][$selectindex]); ?>">
+							</td>
+						</tr>
+						<tr>
+							<td>
 								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
 						</tr><?
@@ -403,11 +408,9 @@ $j=0;
 								<td>
 									<div id="groupnames_div" style="<?
 										if ($this->formvars['export_format'] != 'CSV'){
-											echo 'visibility:hidden';
+											echo 'display: none';
 										}
-										else {
-											echo 'visibility:visible';
-										} ?>"><input type="checkbox" name="export_groupnames" <? if ($this->formvars['export_groupnames'] == 1)echo 'checked'; ?>> <? echo $strExportGroupnames; ?>
+										 ?>"><input type="checkbox" name="export_groupnames" <? if ($this->formvars['export_groupnames'] == 1)echo 'checked'; ?>> <? echo $strExportGroupnames; ?>
 									</div>
 								</td>
 							</tr><?
@@ -466,7 +469,6 @@ $j=0;
   </tr>
 </table>
 
-<input type="hidden" name="layer_name" value="<? echo umlaute_umwandeln($this->data_import_export->layerdaten['Bezeichnung'][$selectindex]); ?>">
 <input type="hidden" name="selectstring_save" value="<? echo $this->data_import_export->formvars['selectstring_save'] ?>">
 <input type="hidden" name="client_epsg" value="<? echo $this->user->rolle->epsg_code ?>">
 <input type="hidden" name="go" value="Daten_Export">
