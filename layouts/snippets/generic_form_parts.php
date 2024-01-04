@@ -330,6 +330,9 @@
 					if($attributes['nullable'][$j] != '0')$strPleaseSelect = '-';
 					if($gui->new_entry == true)$strPleaseSelect = '-- '.$gui->strPleaseSelect.' --';
 					$datapart .= Auswahlfeld($layer_id, $name, $j, $alias, $fieldname, $value, $enum, $attributes['req_by'][$j], $attributes['req'][$j], $attributes['name'], $attribute_privileg, $k, $oid, $attributes['subform_layer_id'][$j], $attributes['subform_layer_privileg'][$j], $attributes['embedded'][$j], $lock[$k], $select_width, $strPleaseSelect, $change_all, $onchange, $field_class, $attributes['datatype_id'][$j]);
+					if ($field_id == NULL) {
+						$gui->result_values[$layer_id][$name][$value] = $enum[$value]['output'];
+					}
 				} break;
 
 				case 'Auswahlfeld_Bild' : {
@@ -940,6 +943,9 @@
 						else{
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
+					}
+					if ($field_id == NULL) {
+						$gui->result_values[$layer_id][$name][$value] = $value;
 					}
 				}
 			}

@@ -398,6 +398,15 @@ if ($doit == true) { ?>
 												output_statistic($statistic);
 											}
 										} ?></div>
+										<div><? 
+											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+												echo '<select>';
+												foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
+													echo '<option value="' . $value . '">' . $output . '</option>';
+												}
+												echo '</select>';
+											} ?>
+										</div>
 									</td><?
 								}
 							} ?>
