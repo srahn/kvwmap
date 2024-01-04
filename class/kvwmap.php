@@ -5271,6 +5271,25 @@ echo '			</table>
 			return;
 		}
 		else {
+			# Before Update trigger
+			if (!empty($layerset[0]['trigger_function'])) {
+				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
+				if ($layerset[0]['oid'] == 'oid'){
+					$oid_sql = 'oid,';
+				}
+				$sql_old = "
+					SELECT ".
+						$oid_sql." *
+					FROM
+						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
+					WHERE
+						" . $where_condition;
+				#echo '<br>sql before update: ' . $sql_old; #pk
+				$ret = $layerdb->execSQL($sql_old, 4, 1);
+				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
+				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+			}
+
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 			$ret = $pointeditor->eintragenPunkt(
 				$this->formvars['loc_x'],
@@ -5282,6 +5301,10 @@ echo '			</table>
 				$this->get_auto_attribute_kvps()
 			);
 			if ($ret['success']) {
+				# After Update trigger
+				if (!empty($layerset[0]['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+				}
 				$this->add_message('notice', 'Eintrag erfolgreich!');
 				if ($ret['info_msg']) {
 					$this->add_message('info', $ret['info_msg']);
@@ -5448,6 +5471,25 @@ echo '			</table>
 			return;
 		}
 		else {
+			# Before Update trigger
+			if (!empty($layerset[0]['trigger_function'])) {
+				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
+				if ($layerset[0]['oid'] == 'oid'){
+					$oid_sql = 'oid,';
+				}
+				$sql_old = "
+					SELECT ".
+						$oid_sql." *
+					FROM
+						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
+					WHERE
+						" . $where_condition;
+				#echo '<br>sql before update: ' . $sql_old; #pk
+				$ret = $layerdb->execSQL($sql_old, 4, 1);
+				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
+				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+			}
+
 			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 			$ret = $lineeditor->eintragenLinie(
 				$this->formvars['newpathwkt'],
@@ -5462,6 +5504,10 @@ echo '			</table>
 				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
+				# After Update trigger
+				if (!empty($layerset[0]['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+				}
 				$this->formvars['newpath'] = "";
 				$this->formvars['newpathwkt'] = "";
 				$this->formvars['pathwkt'] = "";
@@ -5566,6 +5612,25 @@ echo '			</table>
 			return;
 		}
 		else {
+			# Before Update trigger
+			if (!empty($layerset[0]['trigger_function'])) {
+				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
+				if ($layerset[0]['oid'] == 'oid'){
+					$oid_sql = 'oid,';
+				}
+				$sql_old = "
+					SELECT ".
+						$oid_sql." *
+					FROM
+						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
+					WHERE
+						" . $where_condition;
+				#echo '<br>sql before update: ' . $sql_old; #pk
+				$ret = $layerdb->execSQL($sql_old, 4, 1);
+				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
+				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+			}
+
 			$umring = $this->formvars['newpathwkt'];
 			$ret = $polygoneditor->eintragenFlaeche(
 				$umring, $this->formvars['oid'],
@@ -5579,6 +5644,10 @@ echo '			</table>
 				$this->formvars['no_load'] = 'true';
 			}
 			else { # eintrag erfolgreich
+				# After Update trigger
+				if (!empty($layerset[0]['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+				}
 				$this->formvars['newpath']="";
 				$this->formvars['newpathwkt']="";
 				$this->formvars['pathwkt']="";
