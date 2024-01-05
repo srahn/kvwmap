@@ -1179,4 +1179,29 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}		
 	}
 
+	filter_results = function(attribute_class, select){
+		var options = select.selectedOptions;
+		var values = Array.from(options).map(({ value }) => value);
+		var fields = document.querySelectorAll('.gle_attribute_value .' + attribute_class);
+		if (values[0] != ''){
+			select.previousElementSibling.style.color = 'gray';
+		}
+		else {
+			select.previousElementSibling.style.color = '#bfbfbf';
+		}
+		[].forEach.call(fields, function (field){
+			var tr = field.closest('tr');
+			if (values[0] != '' && !values.includes(field.value)) {
+				tr.style.display = 'none';
+				tr.classList.add(attribute_class);
+			}
+			else {
+				tr.classList.remove(attribute_class);
+				if (tr.className == '') {
+					tr.style.display = '';
+				}
+			}
+		});
+	}
+
 </script>

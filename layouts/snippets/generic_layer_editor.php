@@ -162,7 +162,8 @@ if ($doit == true) { ?>
 		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
-					<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
+					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
+						<thead>
 						<? # Gruppennamen
 							if($layer['attributes']['group'][0] != ''){
 								echo '<tr><td style="border:none"></td><td style="border:none"></td>';
@@ -250,6 +251,8 @@ if ($doit == true) { ?>
 							if($has_geom)echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
 					  ?>
 					  </tr>
+					</thead>
+					<tbody>
 		<?
 			for ($k; $k<$anzObj; $k++) {
 				$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
@@ -398,18 +401,31 @@ if ($doit == true) { ?>
 												output_statistic($statistic);
 											}
 										} ?></div>
-										<div><? 
-											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
-												echo '<select>';
-												foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
-													echo '<option value="' . $value . '">' . $output . '</option>';
-												}
-												echo '</select>';
-											} ?>
-										</div>
 									</td><?
 								}
 							} ?>
+						</tr>
+
+						<tr id="result_filter_tr">
+							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
+							<?
+							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
+								$column_name = $this->qlayerset[$i]['attributes']['name'][$j]; ?>
+								<td style="border: none; position: relative; padding: 0">
+									<div class="gle_result_filter">
+										<? 
+										if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+											echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
+														<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
+															<option value="">alle</option>';
+											foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
+												echo '<option value="' . $value . '">' . $output . '</option>';
+											}
+											echo '</select>';
+										} ?>
+									</div>
+								</td><?
+								} ?>
 						</tr>
 
 		<?
@@ -500,6 +516,7 @@ if ($doit == true) { ?>
 						</tr>
 			
 			<?  } ?>
+						</tbody>
 					</table>
 				</td>
 			</tr>
@@ -622,6 +639,11 @@ if ($doit == true) { ?>
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
 		<script type="text/javascript">
+			var filter_tr = document.getElementById('result_filter_tr')
+			var filter_parent = filter_tr.parentNode;
+			filter_parent.removeChild(filter_tr);
+			filter_parent.insertBefore(filter_tr, filter_parent.firstChild);
+
 			var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 			[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
 		</script>

@@ -2022,11 +2022,18 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .gle1_table{
-		border-collapse: collapse;
+	border-collapse: collapse;
+	position: relative;
+}
+
+.gle1_table>thead>tr>td{
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle1_table>tbody>tr>td{
-		border: 1px solid grey;
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle_datatype_table{
@@ -2084,6 +2091,24 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 5px 1px;
 	background: #e3e3e3;
 	border-radius: 2px;
+}
+
+.gle_result_filter {
+	position: absolute; 
+	top: -17px;
+	right: 4px;
+  z-index: 1000;
+	text-align: right;
+}
+
+.gle_result_filter .value_list {
+	max-height: 250px; 
+	scrollbar-width: thin;
+	display: none;
+}
+
+.gle_result_filter:hover .value_list {
+	display: block;
 }
 
 .calendar {
