@@ -406,7 +406,7 @@ if ($doit == true) { ?>
 							} ?>
 						</tr>
 
-						<tr id="result_filter_tr">
+						<tr class="result_filter_tr">
 							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
 							<?
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -639,10 +639,12 @@ if ($doit == true) { ?>
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
 		<script type="text/javascript">
-			var filter_tr = document.getElementById('result_filter_tr')
-			var filter_parent = filter_tr.parentNode;
-			filter_parent.removeChild(filter_tr);
-			filter_parent.insertBefore(filter_tr, filter_parent.firstChild);
+			var filter_trs = document.querySelectorAll('.result_filter_tr');
+			[].forEach.call(filter_trs, function(filter_tr){
+				var filter_parent = filter_tr.parentNode;
+				filter_parent.removeChild(filter_tr);
+				filter_parent.insertBefore(filter_tr, filter_parent.firstChild);
+			});			
 
 			var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 			[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
