@@ -76,7 +76,7 @@ class rolle {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
-		
+
 		# Abfragen der Layer in der Rolle
 		if ($language != 'german') {
 			$name_column = "
@@ -84,16 +84,14 @@ class rolle {
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
-		}
-		else {
+		} else {
 			$name_column = "l.Name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
 				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
-			}
-			else {
+			} else {
 				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
 			$privilegfk = ",
@@ -114,9 +112,9 @@ class rolle {
 
 		$sql = "
 			SELECT " .
-				$name_column . ",
+			$name_column . ",
 				l.Layer_ID,
-				l.alias, Datentyp, Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
@@ -156,30 +154,32 @@ class rolle {
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID LEFT JOIN
+				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID= " . $this->stelle_id . " AND
-				r2ul.User_ID= " . $this->user_id .
-				$layer_name_filter . "
+				ul.Stelle_ID = " . $this->stelle_id . " AND
+				r2ul.User_ID = " . $this->user_id .
+			$layer_name_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
-		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			return 0;
+		}
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
-			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
-				if($rs['Filter'] == ''){
-					$rs['Filter'] = '('.$rs['rollenfilter'].')';
-				}
-				else {
-					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['Filter'] == '') {
+					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+				} else {
+					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -191,7 +191,7 @@ class rolle {
 				);
 			}
 			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}

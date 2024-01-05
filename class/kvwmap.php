@@ -34,8 +34,11 @@
 class GUI {
 
 	var $alert;
+	var $group_has_active_layers;
 	var $gui;
+	var $layerset;
 	var $layout;
+	var $sorted_layerset;
 	var $style;
 	var $mime_type;
 	var $menue;
@@ -17115,6 +17118,9 @@ class db_mapObj{
 	var $db;
 	var $OhneRequires;
 	var $disabled_classes;
+	var $script_name;
+	var $GUI;
+	var $rolle;
 
 	function __construct($Stelle_ID, $User_ID) {
 		global $debug;
@@ -17246,10 +17252,11 @@ class db_mapObj{
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, rl.`rollenfilter`,
 				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
+				ul.`group_id`,
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.Datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -17280,15 +17287,14 @@ class db_mapObj{
 				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				u_rolle2used_layer AS rl,
-				used_layer AS ul,
-				layer AS l LEFT JOIN
-				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				used_layer AS ul JOIN
+				layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
-				l.Layer_ID = ul.Layer_ID AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
 				l.Datentyp != 5 AND 
 				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
@@ -17307,7 +17313,7 @@ class db_mapObj{
 			ORDER BY
 				drawingorder
 		";
-		#echo '<br>SQL zur Abfrage der Layer: ' . $sql;
+		// echo '<br>SQL zur Abfrage der Layer: ' . $sql; exit;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { 
@@ -18853,11 +18859,25 @@ class db_mapObj{
 	}
 
 	function deleteRollenFilter(){
-		$sql = 'UPDATE u_rolle2used_layer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
+		$sql = "
+			UPDATE
+				u_rolle2used_layer
+			SET
+				rollenfilter = NULL
+			WHERE
+				user_id = " . $this->User_ID . "
+		";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
-		$sql = 'UPDATE rollenlayer SET rollenfilter = NULL WHERE user_id = '.$this->User_ID;
+		$sql = "
+			UPDATE
+				rollenlayer
+			SET
+				rollenfilter = NULL
+			WHERE
+				user_id = " . $this->User_ID . "
+		";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenFilter:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
