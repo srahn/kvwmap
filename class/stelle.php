@@ -1907,6 +1907,7 @@ class stelle {
 	// }
 
 	function getqueryablePostgisLayers($privileg, $export_privileg = NULL, $no_subform_layers = false, $layer_id = NULL){
+		global $language;
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
 		$language_layer_name = "Name" . $language_postfix;
 		# nicht editierbare SubformFKs ausschliessen
@@ -1920,17 +1921,17 @@ class stelle {
 			FROM
 				(
 					SELECT
-						layer.Layer_ID,
+						l.Layer_ID,
 						CASE WHEN l.`" . $language_layer_name . "` != '' THEN l.`" . $language_layer_name . "` ELSE l.`Name` END AS Name,
-						layer.alias,
-						used_layer.export_privileg,
+						l.alias,
+						ul.export_privileg,
 						form_element_type as subformfk,
 						las.privileg as privilegfk
 					FROM
 						layer l LEFT JOIN
 						used_layer ul ON l.Layer_ID = ul.Layer_ID LEFT JOIN
 						u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-						layer_attributes AS la ON la.layer_id = ul.Layer_ID AND l.form_element_type = 'SubformFK' LEFT JOIN
+						layer_attributes AS la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' LEFT JOIN
 						layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',',  -1)
 					WHERE
 						ul.stelle_id = " . $this->id . " AND
