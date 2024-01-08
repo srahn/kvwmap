@@ -1185,7 +1185,7 @@
 			if($datatype_id != '')$datapart .= ' data-datatype_id="'.$datatype_id.'" ';
 			$datapart .= 'id="'.$layer_id.'_'.$name.'_'.$k.'" name="'.$fieldname.'">';
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
-			foreach ($enums as $enum_key => $enum) {
+			foreach ($enums ?: [] as $enum_key => $enum) {
 				$datapart .= '<option ';
 				if ($enum_key == $value) {
 					$datapart .= 'selected ';
@@ -1247,7 +1247,7 @@
 				</div>
 				<div style="position:relative">
 					<ul class="dropdown" id="dropdown">';
-			foreach($enums as $enum_key => $enum) {
+			foreach($enums ?: [] as $enum_key => $enum) {
 				$datapart .= '
 						<li class="item" data-value="' . $enum_key . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
 							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">
