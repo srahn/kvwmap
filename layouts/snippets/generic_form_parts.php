@@ -1187,7 +1187,7 @@
 			if($strPleaseSelect)$datapart .= '<option value="">'.$strPleaseSelect.'</option>';
 			foreach ($enums ?: [] as $enum_key => $enum) {
 				$datapart .= '<option ';
-				if ($enum_key == $value) {
+				if ($value != NULL AND $enum_key == $value) {
 					$datapart .= 'selected ';
 				}
 				$datapart .= 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
