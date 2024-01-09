@@ -808,6 +808,9 @@
 								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
 						}
+						if ($field_id == NULL) {
+							$gui->result_values[$layer_id][$name][$value] = $value;
+						}
 					}
 				} break;
 				
