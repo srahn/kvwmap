@@ -2102,7 +2102,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .gle_result_filter .value_list {
-	max-height: 250px; 
+	max-height: 250px;
+	max-width: 250px;
 	scrollbar-width: thin;
 	display: none;
 }
