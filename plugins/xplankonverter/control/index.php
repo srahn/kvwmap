@@ -341,7 +341,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 
 function go_switch_xplankonverter($go) {
 	global $GUI;
-	$GUI->write_xlog('go = ' . $go . ' aus.' . ($GUI->formvars['konvertierung_id'] ? ' (konvertierung_id: ' . $GUI->formvars['konvertierung_id'] . ')' : ''));
+	$GUI->write_xlog('go=' . $go . ' ' . ($GUI->formvars['konvertierung_id'] ? ' (konvertierung_id: ' . $GUI->formvars['konvertierung_id'] . ')' : ''));
 	switch ($go) {
 		/**
 		 * Check if objects falling into defined classes
@@ -429,6 +429,74 @@ function go_switch_xplankonverter($go) {
 				'num_unclassified' => $num_unclassified
 			);
 			echo json_encode($result);
+		} break;
+
+		case 'xplankonverter_show_class_completenesses' : {
+			header('Content-Type: application/json');
+			$success = false;
+			$msg = [];
+
+			$konvertierung_id = $GUI->formvars['konvertierung_id'];
+
+			# Prüfen ob konvertierung_id angegeben wurde und der upload in der Stelle erlaubt ist
+			if ($konvertierung_id == '') {
+				send_error('Fehler bei der Überprüfung der Vollständigkeit der Klassifizierung!<p>Keine Konvertierung-ID angegeben.', false, false);
+				break;
+			}
+
+			$GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
+			if ($GUI->konvertierung->get('id') == '') {
+				send_error("Die Konvertierung mit id: ${konvertierung_id} konnte in der Datenbank nicht gefunden werden.");
+				break;
+			}
+
+			if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
+				send_error("Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
+					Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
+					Sie befinden sich aber in Stelle ID= {$GUI->Stelle->id}<br>
+					Melden Sie sich mit einem anderen Benutzer an."
+				);
+				break;
+			}
+
+			if ($GUI->konvertierung->plan) {
+				$result = $GUI->konvertierung->plan->get_layers_with_content(
+					$GUI->xplankonverter_get_xplan_layers($GUI->konvertierung->get('planart')),
+					$GUI->konvertierung->get_id()
+				);
+				if (! $result['success']) {
+					send_error('Fehler bei der Abfrage der Planlayer mit Inhalten!<br>' . $result['msg']);
+					break;
+				}
+
+				$layers_with_content = $result['layers_with_content'];
+				$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+				foreach($layers_with_content AS $layer) {
+					$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
+					$GUI->formvars['layer_id'] = $layer['id'];
+					$classes = $mapDB->read_Classes($layer['id']);
+					$class_completeness_result .= '<table id="class_expressions_layer_' . $layer['id'] . '" style="display: none">
+						<th class="class-th" style="width: 30%">Klasse</th>
+						<th class="class-th" style="width: 70%">Definition</th>' . implode(
+							'',
+							array_map(
+								function($class) {
+									return '
+										<tr>
+											<td class="class-td">' . $class['Name'] . '</td>
+											<td class="class-td">' . $class['Expression'] . '</td>
+										</tr>
+									';
+								},
+								$classes
+							)
+						) . '
+					</table>';
+					$result = $GUI->check_class_completeness();
+					$class_completeness_result .= $result['html'];
+				}
+			}
+			echo $class_completeness_result;
 		} break;
 
 		/**
@@ -2179,15 +2247,7 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		case 'xplankonverter_test' : {
-			// $konvertierung_id = $GUI->formvars['konvertierung_id'];
-			// $GUI->konvertierung = Konvertierung::find_by_id($GUI, 'id', $konvertierung_id);
-			// $GUI->konvertierung->get_plan();
-			// if ($GUI->konvertierung->get_aktualitaetsdatum() == '') {
-			// 	echo 'Der Plan '. $GUI->konvertierung->get('bezeichnung') . ' (konvertierung_id: ' . $GUI->konvertierung->get_id() . ', gml_id: ' . $GUI->konvertierung->plan->get('gml_id') . ') hat kein ' . ucfirst($GUI->plan_attribut_aktualitaet) . ' und kein ' . ucfirst($GUI->konvertierung->get_plan_attribut_aktualitaet()) . '. Das muss im XPlan-GML angepasst werden. Anschließend kann der Plan erneut hochgeladen werden.';
-			// }
-			// else {
-			// 	echo 'Aktualitätsdatum: ' . $GUI->konvertierung->get_aktualitaetsdatum();
-			// }
+
 		} break;
 
 		case 'xplankonverter_create_plaene' : {

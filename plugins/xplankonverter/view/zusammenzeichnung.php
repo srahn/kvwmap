@@ -115,6 +115,22 @@
 				}
 			}
 
+			function show_class_completenesses(konvertierung_id) {
+				let url = `index.php?go=xplankonverter_show_class_completenesses&konvertierung_id=${konvertierung_id}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`;
+				$('#sperr_div, #waitingdiv').show();
+				fetch(url)
+					.then(response => response.text())
+					.then((data) => {
+						let e = document.createElement('div');
+						e.innerHTML = data;
+						document.getElementById('class_completeness_div').prepend(e);
+						$('#sperr_div, #waitingdiv').hide();
+					})
+					.catch((error) => {
+						message('error', 'Fehler bei der Abfrage der Vollständigkeit der Styles für die Klassen der Layer!');
+						$('#sperr_div, #waitingdiv').hide();
+					});
+			}
 		</script>
 		<h2 style="margin-top: 15px; margin-bottom: 10px">Zusammenzeichnung <?php echo $this->plan_title; ?> <? echo $this->Stelle->Bezeichnung; ?></h2>
 		<style>
@@ -450,7 +466,8 @@
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Planzeichen (Objektklassen)
 				</div>
 				<div id="class_completeness_div" class="content_div hidden" style="text-align: center; padding: 20px">
-					<input type="button" name="load_class_completeness" value="Lade Objektklassen"/>
+					<p>
+					<input type="button" name="load_class_completeness" value="Lade Objektklassen" onclick="show_class_completenesses(<? echo $zusammenzeichnung->get_id(); ?>)"/>
 					<?php
 /*
 					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);

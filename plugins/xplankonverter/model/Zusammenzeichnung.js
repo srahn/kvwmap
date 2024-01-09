@@ -156,7 +156,7 @@ class Zusammenzeichnung {
         }
         else {
           this.confirm_step('upload_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler ' + xhttp.status + ' aufgetreten beim Versuch die Datei hochzuladen! ' + event.target.responseText }]);
+          message([{ type: 'error', msg: 'Fehler "' + xhttp.status + '" aufgetreten beim Versuch die Datei hochzuladen! ' + event.target.responseText }]);
         }
         //$('#upload_result_msg_div').show();
       }
@@ -359,7 +359,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('convert_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch den Zusammenzeichnung zu konvertieren! Fehlerart: ' + errorThrown }]);
+        message([{ type: 'error', msg: 'Fehler "' + textStatus + '" aufgetreten beim Versuch die Zusammenzeichnung zu konvertieren! Fehlerart: ' + errorThrown }]);
       }
     })
   }

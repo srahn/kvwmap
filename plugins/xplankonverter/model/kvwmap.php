@@ -532,7 +532,7 @@
 					}
 				}
 				else {
-					$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layerObj->get('data')));
+					$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layer->data));
 				}
 			}
 			else {

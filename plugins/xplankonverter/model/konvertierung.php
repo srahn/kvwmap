@@ -1466,12 +1466,6 @@ class Konvertierung extends PgObject {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		// Set die Planvalidierung durchgeführt wird, führt diese Meldung in die Irre und kann weggelassen werden.
-		// ToDo: Ggf. wird der Hinweis als Validierungsergebnis gespeichert, dann wird er auch angezeigt.
-		#if (count($bereiche) == 0) {
-		#	$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
-		#}
-
 		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 			$validierung->konvertierung_id = $this->get($this->identifier);
