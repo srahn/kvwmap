@@ -209,7 +209,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
+											echo '<td style="position: relative; outline: 1px solid grey;" id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
@@ -409,23 +409,25 @@ if ($doit == true) { ?>
 						<tr class="result_filter_tr">
 							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
 							<?
-							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
-								$column_name = $this->qlayerset[$i]['attributes']['name'][$j]; ?>
-								<td style="border: none; position: relative; padding: 0">
-									<div class="gle_result_filter">
-										<? 
-										if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
-											echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
-														<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
-															<option value="">alle</option>';
-											foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
-												echo '<option value="' . $value . '">' . $output . '</option>';
-											}
-											echo '</select>';
-										} ?>
-									</div>
-								</td><?
-								} ?>
+							for ($j = 0; $j < count($layer['attributes']['name']); $j++){
+								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) {
+									$column_name = $this->qlayerset[$i]['attributes']['name'][$j]; ?>
+									<td style="border: none; position: relative; padding: 0">
+										<div id="result_filter_<? echo $layer['Layer_ID'] . '_' . $column_name; ?>" class="gle_result_filter">
+											<? 
+											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+												echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
+															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
+																<option value="">alle</option>';
+												foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
+													echo '<option value="' . $value . '">' . $output . '</option>';
+												}
+												echo '</select>';
+											} ?>
+										</div>
+									</td><?
+								}
+							} ?>
 						</tr>
 
 		<?
@@ -639,11 +641,11 @@ if ($doit == true) { ?>
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
 		<script type="text/javascript">
-			var filter_trs = document.querySelectorAll('.result_filter_tr');
-			[].forEach.call(filter_trs, function(filter_tr){
-				var filter_parent = filter_tr.parentNode;
-				filter_parent.removeChild(filter_tr);
-				filter_parent.insertBefore(filter_tr, filter_parent.firstChild);
+			var filters = document.querySelectorAll('.gle_result_filter');
+			[].forEach.call(filters, function(filter){
+				var column_id = filter.id.replace('result_filter', 'column');
+				filter.parentNode.removeChild(filter);
+				document.getElementById(column_id).appendChild(filter);
 			});			
 
 			var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
