@@ -1835,7 +1835,12 @@ class stelle {
 				$sql .=' AND Gruppe = '.$group_id;
 			}
 		}
-		$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
+		if ($this->useLayerAliases) {
+			$sql .= " ORDER BY COALESCE(NULLIF(alias, ''), Name)";
+		}
+		else {
+			$sql .= " ORDER BY Name";
+		}
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryableVectorLayers - Lesen der abfragbaren VektorLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);		
