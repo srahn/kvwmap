@@ -289,6 +289,9 @@
 			}
 		}
 		else {
+			if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8'])) {
+				$value = str_replace('.', ',', $value);
+			}
 			switch ($attributes['form_element_type'][$j]){
 				case 'Textfeld' : {
 					$datapart .= '<textarea class="'.$field_class.'" title="'.$alias.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" id="'.$layer_id.'_'.$name.'_'.$k.'" cols="'.$size.'" onchange="'.$onchange.'"';
@@ -808,9 +811,6 @@
 								href="' . urlencode2(add_csrf($href)) . '"
 							>' . $alias . '</a><br>';
 						}
-						if ($field_id == NULL) {
-							$gui->result_values[$layer_id][$name][$value] = $value;
-						}
 					}
 				} break;
 				
@@ -833,7 +833,6 @@
 				} break;
 
 				case 'Fläche': {
-					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.' custom_area" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
@@ -842,7 +841,6 @@
 				}break;
 				
 				case 'Länge': {
-					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_length" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
@@ -851,7 +849,6 @@
 				}break;
 				
 				case 'Winkel': {
-					$value = str_replace('.', ',', $value);
 					$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" id="custom_angle" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 					if($attribute_privileg == '0' OR $lock[$k]){
 						$datapart .= ' readonly style="border:0px;background-color:transparent;"';
@@ -927,10 +924,7 @@
 					if($name == 'lock'){
 						$datapart .= ' type="hidden"';
 					}
-					if (in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
-						$value = str_replace('.', ',', $value);
-					}
-					elseif ($attributes['length'][$j]) {
+					if (!in_array($attributes['type'][$j], ['numeric', 'float4', 'float8', 'int2', 'int4', 'int8'])) {
 						$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 					}				
 					if($size)$datapart .= ' size="'.$size.'"';
@@ -947,11 +941,11 @@
 							$datapart .= '&nbsp;<a title="Eingabewerkzeug verwenden" href="javascript:openCustomSubform('.$layer_id.', \''.$name.'\', new Array(\''.implode("','", $attributes['name']).'\'), \''.$layer_id.'_'.$name.'_'.$k.'\', '.$k.');"><img src="'.GRAPHICSPATH.'autogen.png"></a>';
 						}
 					}
-					if ($field_id == NULL) {
-						$gui->result_values[$layer_id][$name][$value] = $value;
-					}
 				}
 			}
+		}
+		if ($attributes['form_element_type'][$j] != 'Auswahlfeld' AND $field_id == NULL) {
+			$gui->result_values[$layer_id][$name][$value] = $value;
 		}
 		return $datapart.$after_attribute;
 	}
