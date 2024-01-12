@@ -1454,6 +1454,11 @@ class data_import_export {
 						$err = $this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
 					} break;
 
+					case 'GPX' : {
+						$exportfile = $exportfile.'.gpx';
+						$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb);
+					} break;
+
 					case 'GML' : {
 						$err = $this->ogr2ogr_export($sql, 'GML', $exportfile.'.xml', $layerdb);
 						$zip = true;
