@@ -7,14 +7,10 @@
 -- Server-Version: 10.7.1-MariaDB-1:10.7.1+maria~focal
 -- PHP-Version: 7.4.27
 
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-START TRANSACTION;
-SET time_zone = "+00:00";
-
 --
 -- Datenbank: `kvwmapdb`
 --
-
+BEGIN;
 -- --------------------------------------------------------
 
 --
@@ -118,7 +114,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (12, 'LOGIN', 'SNIPPETS', 'login.php', 'login.php\r\n', 'string', 'Layout', '', 1, 3),
 (13, 'LAYER_ERROR_PAGE', 'SNIPPETS', 'layer_error_page.php', 'Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets\r\n', 'string', 'Layout', '', 1, 3),
 (14, 'AGREEMENT_MESSAGE', 'CUSTOM_PATH', '', 'Seite mit der Datenschutzerklärung, die einmalig beim Login angezeigt wird\r\nz.B. custom/ds_gvo.htm', 'string', 'Layout', '', 1, 2),
-(15, 'CUSTOM_STYLE', 'CUSTOM_PATH', 'layouts/custom.php', 'hier kann eine eigene css-Datei angegeben werden\r\n', 'string', 'Layout', '', 1, 2),
+(15, 'CUSTOM_STYLE', 'CUSTOM_PATH', '', 'hier kann eine eigene css-Datei angegeben werden\r\n', 'string', 'Layout', '', 1, 2),
 (16, 'ZOOM2COORD_STYLE_ID', '', '3244', 'hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden\r\n', 'string', 'Layout', '', 1, 2),
 (17, 'ZOOM2POINT_STYLE_ID', '', '3244', '', 'string', 'Layout', '', 1, 2),
 (18, 'GLEVIEW', '', '2', 'Schalter für eine zeilen- oder spaltenweise Darstellung der Attribute im generischen Layereditor  # Version 1.6.5\r\n', 'numeric', 'Layout', '', 1, 2),
@@ -255,10 +251,10 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (150, 'OWS_CONTACTELECTRONICMAILADDRESS', '', 'stefan.rahn@gdi-service.de', 'An Stelle von WMS_CONTACTELECTRONICMAILADDRESS\r\nWMT_MS_Capabilities/Service/ContactInformation/ContactElectronicMailAddress\r\nWCS_Capabilities/Service/contactInfo/address/eletronicMailAddress\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
 (151, 'OWS_SRS', '', 'EPSG:25832 EPSG:25833 EPSG:5650 EPSG:4326', 'An Stelle von WMS_SRS\r\nWMT_MS_Capabilities/Capability/Layer/SRS\r\nWMT_MS_Capabilities/Capability/Layer/Layer[*]/SRS\r\nWFS_Capabilities/FeatureTypeList/FeatureType[*]/SRS\r\nunless differently defined in LAYER object\r\nif you are setting > 1 SRS for WMS, you need to define \"wms_srs\" and \"wfs_srs\"\r\nseperately because OGC:WFS only accepts one OUTPUT SRS\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
 (152, 'WFS_SRS', '', 'EPSG:25833', '', 'string', 'OWS-METADATEN', '', 1, 2),
-(153, 'METADATA_AUTH_LINK', '', 'http://berg.preagro.de:8088/geonetwork/srv/en/xml.user.login?username=admin&password=!admin!', 'URL zum Authentifizieren am CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(154, 'METADATA_ONLINE_RESOURCE', '', 'http://berg.preagro.de:8088/geonetwork/srv/en/csw', 'URL zum CSW-Server\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(155, 'METADATA_EDIT_LINK', '', 'http://berg:8088/geonetwork/srv/en/metadata.edit?id=', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
-(156, 'METADATA_EDIT_LINK', '', 'http://berg:8088/geonetwork/srv/en/metadata.edit?id=', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(153, 'METADATA_AUTH_LINK', '', '', 'URL zum Authentifizieren am CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(154, 'METADATA_ONLINE_RESOURCE', '', '', 'URL zum CSW-Server\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(155, 'METADATA_EDIT_LINK', '', '', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
+(156, 'METADATA_EDIT_LINK', '', '', 'URL zum Editieren von Metadaten im CSW-Metadatensystem\r\n', 'string', 'z CSW-Metadatensystem', '', 1, 2),
 (157, 'LOGIN_AGREEMENT', 'SNIPPETS', 'login_agreement.php', 'PHP-Seite, welche die Agreement-Message anzeigt', 'string', 'Layout', NULL, 1, 3),
 (158, 'LOGIN_NEW_PASSWORD', 'SNIPPETS', 'login_new_password.php', 'PHP-Seite, auf der man ein neues Passwort vergeben kann', 'string', 'Layout', NULL, 1, 3),
 (159, 'LOGIN_REGISTRATION', 'SNIPPETS', 'login_registration.php', 'PHP-Seite, auf der man sich registrieren kann', 'string', 'Layout', NULL, 1, 3),
@@ -1058,26 +1054,6 @@ CREATE TABLE `migrations` (
 --
 
 INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
-('anliegerbeitraege', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('bauleitplanung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('baumfaellantrag', 'mysql', '2014-09-12_16-33-22_layer.sql'),
-('baumfaellantrag', 'mysql', '2018-09-18_10-27-35_config.php'),
-('baumfaellantrag', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('bevoelkerung', 'mysql', '2014-09-12_16-33-22_layer.sql'),
-('bevoelkerung', 'mysql', '2014-09-12_16-33-22_menues.sql'),
-('bevoelkerung', 'mysql', '2018-09-18_10-35-21_config.php'),
-('bodenrichtwerte', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('fortfuehrungslisten', 'mysql', '2016-12-01_19-38-00_layer.sql'),
-('fortfuehrungslisten', 'mysql', '2016-12-01_19-42-00_menue.sql'),
-('fortfuehrungslisten', 'postgresql', '2016-12-01_15-27-00_schema_fortfuehrungslisten.sql'),
-('fortfuehrungslisten', 'postgresql', '2016-12-01_15-28-00_ff_auftraege.sql'),
-('fortfuehrungslisten', 'postgresql', '2016-12-01_15-28-59_ff_faelle.sql'),
-('fortfuehrungslisten', 'postgresql', '2016-12-01_19-30-20_aa_anlassart.sql'),
-('fortfuehrungslisten', 'postgresql', '2017-01-02_18-17-00_an_pruefen.sql'),
-('fortfuehrungslisten', 'postgresql', '2017-01-06_16-26-00_lfdnr_pruefen.sql'),
-('fortfuehrungslisten', 'postgresql', '2017-01-06_17-19-00_auftragsdatei_pruefen.sql'),
-('fortfuehrungslisten', 'postgresql', '2017-01-11_15-17-57_nachweis_sperren.sql'),
-('jagdkataster', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
 ('kvwmap', 'mysql', '2014-09-12_16-33-22_Version2.0.sql'),
 ('kvwmap', 'mysql', '2014-11-07_11-37-59_layer_attributes_Autovervollstaendigungsfeld.sql'),
 ('kvwmap', 'mysql', '2014-11-24_10-29-21_druckrahmen_lage_gemeinde_flurst.sql'),
@@ -1334,55 +1310,8 @@ INSERT INTO `migrations` (`component`, `type`, `filename`) VALUES
 ('kvwmap', 'mysql', '2023-12-08_11-22-35_config_OWERRIDE_LANGUAGE_VARS.sql'),
 ('kvwmap', 'mysql', '2023-12-08_11-25-56_create_custom_language_and_ccs_readme_files.php'),
 ('kvwmap', 'mysql', '2024-01-01_19-39-23_add_used_layer_group_id.sql'),
-('kvwmap', 'mysql', '2024-01-08_17-52-40_add_primary_key_user2notifications.sql'),
-('kvwmap', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('kvwmap', 'postgresql', '2015-05-06_08-47-01_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2015-05-28_14-07-36_bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2015-05-29_09-33-07_bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2017-04-28_14-42-46_Bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2017-04-28_14-49-32_Bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2017-05-03_09-08-07_Bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2017-05-03_12-13-08_Bug_st_area_utm.sql'),
-('kvwmap', 'postgresql', '2017-05-15_15-28-45_spatial_ref_sys_srs_params.sql'),
-('kvwmap', 'postgresql', '2018-02-08_11-30-00_rename_if_exisits.sql'),
-('kvwmap', 'postgresql', '2018-02-20_20-36-34_add_func_replace_line_feeds.sql'),
-('kvwmap', 'postgresql', '2018-02-20_20-42-06_add_func_insert_str_before_and_after.sql'),
-('kvwmap', 'postgresql', '2018-03-08_14-10-31_uko_polygon_dateiname.sql'),
-('kvwmap', 'postgresql', '2018-07-20_10-22-56_add_filter_rings_function.sql'),
-('kvwmap', 'postgresql', '2018-10-21_09-10-12_line_interpolate_functions.sql'),
-('kvwmap', 'postgresql', '2018-11-14_16-17-17_fix_line_interpolate_functions.sql'),
-('kvwmap', 'postgresql', '2019-02-04_14-26-51_bug_st_length_utm.sql'),
-('kvwmap', 'postgresql', '2019-02-14_15-49-15_function_extend_line.sql'),
-('kvwmap', 'postgresql', '2019-02-14_15-54-35_func_gdi_lineinterpolatepointwithoffset.sql'),
-('kvwmap', 'postgresql', '2019-02-14_15-57-39_func_linelocatepointwithoffset.sql'),
-('kvwmap', 'postgresql', '2019-04-24_11-34-36_convert_column_names.sql'),
-('kvwmap', 'postgresql', '2019-04-25_17-02-24_bug_convert_column_names.sql'),
-('kvwmap', 'postgresql', '2019-11-12_10-34-27_bug_convert_column_names.sql'),
-('kvwmap', 'postgresql', '2020-01-13_11-23-26_drop_uko_polygon.sql'),
-('kvwmap', 'postgresql', '2020-04-02_22-12-42_add_function_normalize_geometry.sql'),
-('kvwmap', 'postgresql', '2020-11-13_10-12-13_change_filter_rings_function.sql'),
-('kvwmap', 'postgresql', '2020-11-17_10-19-40_change_filter_rings_function.sql'),
-('kvwmap', 'postgresql', '2021-11-11_15-26-30_function_gdi_MakeValidPolygons.sql'),
-('kvwmap', 'postgresql', '2022-05-18_11-37-14_u_polygon.sql'),
-('kvwmap', 'postgresql', '2022-05-31_11-59-17_id_for_q_notizen.sql'),
-('kvwmap', 'postgresql', '2022-06-27_12-24-31_add_function_in_date_ranges.sql'),
-('kvwmap', 'postgresql', '2022-08-09_14-28-05_convert_column_names.sql'),
-('kvwmap', 'postgresql', '2022-08-31_18-20-37_add_get_deltas_function.sql'),
-('kvwmap', 'postgresql', '2022-10-14_13-04-07_update_gdi_normalize_geometry.sql'),
-('kvwmap', 'postgresql', '2022-11-25_12-31-24_privilege_backup.sql'),
-('kvwmap', 'postgresql', '2023-05-22_18-53-17_json_to_text_functions.sql'),
-('mobile', 'mysql', '2022-11-02_15-47-18_add_functions_for_mobile.sql'),
-('mobile', 'postgresql', '2018-02-20_20-24-45_add_syncs_table.sql'),
-('nachweisverwaltung', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('probaug', 'postgresql', '2014-09-12_16-33-22_Version2.0.sql'),
-('xplankonverter', 'mysql', '2018-07-18_14-43-53_menues.sql'),
-('xplankonverter', 'mysql', '2018-09-18_16-46-55_config.php'),
-('xplankonverter', 'mysql', '2019-05-07_14-21-08_add_show_upload_shapes_constante.sql'),
-('xplankonverter', 'mysql', '2020-07-15_11-32-59_make_xplan_fachlayer_queryable.sql'),
-('xplankonverter', 'postgresql', '2017-03-03_12-11-00_Version1.0.sql'),
-('xplankonverter', 'postgresql', '2017-03-03_12-11-01_schema_xplanuml.sql'),
-('xplankonverter', 'postgresql', '2017-03-03_12-11-02_schema_xplankonverter.sql'),
-('xplankonverter', 'postgresql', '2017-03-03_12-11-03_schema_xplangml.sql');
+('kvwmap', 'mysql', '2024-01-08_17-52-40_add_primary_key_user2notifications.sql');
+
 
 -- --------------------------------------------------------
 
@@ -1743,7 +1672,7 @@ CREATE TABLE `stelle` (
 --
 
 INSERT INTO `stelle` (`ID`, `Bezeichnung`, `Bezeichnung_low-german`, `Bezeichnung_english`, `Bezeichnung_polish`, `Bezeichnung_vietnamese`, `start`, `stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `minzoom`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`, `ows_namespace`, `ows_title`, `wms_accessconstraints`, `ows_abstract`, `ows_contactperson`, `ows_contactorganization`, `ows_contactemailaddress`, `ows_contactposition`, `ows_contactvoicephone`, `ows_contactfacsimile`, `ows_contactaddress`, `ows_contactpostalcode`, `ows_contactcity`, `ows_contactadministrativearea`, `ows_contentorganization`, `ows_contentemailaddress`, `ows_distributionperson`, `ows_updatesequence`, `ows_distributionposition`, `ows_distributionvoicephone`, `ows_distributionfacsimile`, `ows_distributionaddress`, `ows_distributionpostalcode`, `ows_distributioncity`, `ows_distributionadministrativearea`, `ows_contentperson`, `ows_contentposition`, `ows_contentvoicephone`, `ows_contentfacsimile`, `ows_contentaddress`, `ows_contentpostalcode`, `ows_contentcity`, `ows_contentadministrativearea`, `ows_geographicdescription`, `ows_distributionorganization`, `ows_distributionemailaddress`, `ows_fees`, `ows_srs`, `protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `show_shared_layers`, `version`, `reset_password_text`, `invitation_text`, `comment`) VALUES
-(1, 'Administration', NULL, NULL, NULL, NULL, '0000-00-00', '0000-00-00', -174807, 5230803, 537558, 6170173, 8, 25833, 10, '1', '30', 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', '0', '0', '1', 6, '1', '', 0, NULL, NULL, 0, '1.0.0', '', '', 'Test 2');
+(1, 'Administration', NULL, NULL, NULL, NULL, '0000-00-00', '0000-00-00', -174807, 5230803, 537558, 6170173, 8, 25833, 3  , '1', '30', 'Logo_GDI-Service_200x47.png', '', NULL, 'gdi', 'kvwmap-Demo Server', 'keine', 'Demoversion eines Web Service zur Bereitstellung von Geodaten aus den Bereichen des Katasters, der Landkreise', 'Peter Korduan', 'GDI-Service Rostock', 'peter.korduan@gdi-service.de', 'Geschäftsführer', '+49 381 403 44444', '+49 381 3378 9527', 'Friedrichstraße 16', '18057', 'Rostock', 'Mecklenburg-Vorpommern', '21', '22', '33', NULL, '34', '35', '36', '37', '38', '39', '3.10', '24', '25', '26', '27', '28', '29', '2.10', '2.11', '23', '31', '32', 'für Testzwecke frei', 'EPSG:25832 EPSG:25833 EPSG:4326 EPSG:2398', '0', '0', '1', 6, '1', '', 0, NULL, NULL, 0, '1.0.0', '', '', 'Test 2');
 
 -- --------------------------------------------------------
 
@@ -2516,8 +2445,8 @@ CREATE TABLE `u_rolle2used_layer` (
 --
 
 INSERT INTO `u_rolle2used_layer` (`user_id`, `stelle_id`, `layer_id`, `aktivStatus`, `queryStatus`, `gle_view`, `showclasses`, `logconsume`, `transparency`, `drawingorder`, `labelitem`, `geom_from_layer`, `rollenfilter`) VALUES
-(1, 1, 1, '1', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL),
-(1, 1, 2, '0', '0', 1, 1, '', NULL, NULL, NULL, 0, NULL);
+(1, 1, 1, '1', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL),
+(1, 1, 2, '0', '0', 1, 1, '0', NULL, NULL, NULL, 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -3434,4 +3363,5 @@ ALTER TABLE `u_rolle2used_layer`
 --
 ALTER TABLE `zwischenablage`
   ADD CONSTRAINT `zwischenablage_ibfk_1` FOREIGN KEY (`user_id`,`stelle_id`) REFERENCES `rolle` (`user_id`, `stelle_id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
 COMMIT;
