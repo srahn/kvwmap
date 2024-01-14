@@ -35,6 +35,15 @@ class database {
   var $blocktransaction;
 	var $success;
 	var $errormessage;
+	var $gui;
+	var $defaultloglevel;
+	var $defaultlogfile;
+	var $type;
+	var $host;
+	var $user;
+	var $passwd;
+	var $dbName;
+	var $result;
 
 	function __construct($open = false) {
 		global $debug;

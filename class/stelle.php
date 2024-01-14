@@ -1952,7 +1952,12 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
+		else {
+			$layer = array(
+				'ID' => array(),
+				'Bezeichnung' => array(),
+				'export_privileg' => array()
+			);
 			while($rs=$this->database->result->fetch_array()) {
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
@@ -1964,7 +1969,7 @@ class stelle {
 				$layer['export_privileg'][]=$rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
-			if($layer['Bezeichnung'] != NULL){
+			if (count($layer['Bezeichnung']) > 0) {
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
 				$layer['Bezeichnung'] = $sorted_arrays['array'];

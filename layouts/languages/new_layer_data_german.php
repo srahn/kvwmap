@@ -1,9 +1,9 @@
 <?php
-$strLayer="Thema";
-$strPleaseSelect="---------Bitte auswählen---------";
-$strSave="Speichern";
-$strtitle="Erfassung eines neuen Datensatzes";
-$strCancel="Abbrechen";
-$strCreateAnotherOne = "und einen weiteren Datensatz erfassen";
-  
-?>  
+  $strCancel = 'Abbrechen';
+  $strCreateAnotherOne = 'und einen weiteren Datensatz erfassen'; 
+  $strLayer = 'Thema';
+  $strNoLayer = 'Es sind noch keine PostGIS-Layer vorhanden.';
+  $strPleaseSelect = '---------Bitte auswählen---------';
+  $strSave = 'Speichern';
+  $strTitle = 'Erfassung eines neuen Datensatzes';
+?>

@@ -273,7 +273,8 @@ function install() {
 			WHERE
 				srid = 31969;
 
-/*			INSERT INTO
+			/*
+			INSERT INTO
 				spatial_ref_sys (srid, auth_name, auth_srid, srtext, proj4text)
 			VALUES (
 				35833,
@@ -287,9 +288,23 @@ function install() {
 				325833,
 				'PROJCS[\"ETRS89/UTM 33N RW+3500000 Brandenburg\",GEOGCS[\"ETRS89\",DATUM[\"European_Terrestrial_Reference_System_1989\",SPHEROID[\"GRS 1980\",6378137,298.257222101,AUTHORITY[\"EPSG\",\"7019\"]],AUTHORITY[\"EPSG\",\"6258\"]],PRIMEM[\"Greenwich\",0,AUTHORITY[\"EPSG\",\"8901\"]],UNIT[\"degree\",0.01745329251994328,AUTHORITY[\"EPSG\",\"9122\"]],AUTHORITY[\"EPSG\",\"4258\"]],PROJECTION[\"Transverse_Mercator\"],PARAMETER[\"latitude_of_origin\",0],PARAMETER[\"central_meridian\",15],PARAMETER[\"scale_factor\",0.9996],PARAMETER[\"false_easting\",3500000],PARAMETER[\"false_northing\",0],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AUTHORITY[\"EPSG\",\"325833\"]]',
 				'+proj=tmerc +towgs84=0,0,0 +lat_0=0 +lon_0=15 +k=0.9996 +x_0=3500000 +y_0=0 +ellps=GRS80 +units=m +no_defs <>'
-				)*/
+				)
+			*/
 		";
 		$pgsqlKvwmapDb->execSQL($sql, 0, 1); ?>
+
+		<h1>Lege MariaDB Tabellen und Inhalte für die Administration an.</h1><?
+		$mysql_install_file = LAYOUTPATH . 'db/mysql/data/mysql_install.sql';
+		$sql = file_get_contents($mysql_install_file);
+		$result = $mysqlKvwmapDb->exec_commands($sql, NULL, NULL, false, true);
+		if (!$result['success']) {
+			?>Fehler beim Ausführen der Datei <?php echo $mysql_install_file; ?><br><?
+			echo $result[1];
+			exit;
+		}
+		else { ?>
+			Datei <? echo $mysql_install_file; ?> erfolgreich ausgeführt.<?php
+		} ?>
 
 		<h1>Migrationen für kvwmap Schemas in MySQL und PostgreSQL ausführen</h1><?php
 		#
@@ -297,37 +312,53 @@ function install() {
 		#
 		migrate_databases($mysqlKvwmapDb, $pgsqlKvwmapDb);
 
-		#
-		# Richte eine Stelle für einen Administrator ein, wenn noch keine existiert.
-		#
-		if (admin_stelle_exists($mysqlKvwmapDb)) { ?>
-			Adminstelle ist schon eingerichtet.<br><?php
-		}
-		else {
-			$success = install_admin_stelle($mysqlKvwmapDb); ?><br>
-			Setze kvwmap init Password...<?php
-			$sql = "
-				UPDATE connections
-				SET password = '" . POSTGRES_PASSWORD . "'
-				WHERE id = 1
-			";
-			$mysqlKvwmapDb->execSQL($sql, 0, 1);
-		} ?><br>
-		...fertig<p><?php
-
 		if (file_exists('credentials.php')) { ?>
 			credentials.php existiert schon.<?php
 		}
 		else { ?>
 			Lege credentials.php Datei an ...<?php
 			file_put_contents('credentials.php', "<?php
-	define('MYSQL_HOST', 'mysql');
-	define('MYSQL_USER', 'kvwmap');
-	define('MYSQL_PASSWORD', '" . MYSQL_PASSWORD . "');
-	define('MYSQL_DBNAME', 'kvwmapdb');
-	define('MYSQL_HOSTS_ALLOWED', '" . MYSQL_HOSTS_ALLOWED . "');
-?>"); ?><br>
+			define('MYSQL_HOST', 'mysql');
+			define('MYSQL_USER', 'kvwmap');
+			define('MYSQL_PASSWORD', '" . MYSQL_PASSWORD . "');
+			define('MYSQL_DBNAME', 'kvwmapdb');
+			define('MYSQL_HOSTS_ALLOWED', '" . MYSQL_HOSTS_ALLOWED . "');?>"); ?><br>
 			... fertig<p><?php
+		}
+
+		?>Setze Password für Postgres Nutzer "kvwmap" in MariaDB connections table...<?php
+		$sql = "
+			UPDATE connections
+			SET password = '" . POSTGRES_PASSWORD . "'
+			WHERE id = 1
+		";
+		$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+		if ($ret['success']) { ?>
+			... fertig<?
+		}
+		else {?>
+			<br>Fehler beim Einstellen des Passwortes für Nutzer <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+			$error = true;
+			echo $mysqlKvwmapDb->errormessage;
+		}
+
+		?>Setze Password für kvwmap Nutzer "kvwmap" in MariaDB Tabelle user...<?php
+		$sql = "
+			UPDATE
+				user
+			SET
+				passwort = MD5('" . KVWMAP_INIT_PASSWORD . "')
+			WHERE
+				login_name = 'kvwmap'
+		";
+		$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
+		if ($ret['success']) { ?>
+			... fertig<?
+		}
+		else { ?>
+			Fehler beim Einstellen des Passwortes für user <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
+			$error = true;
+			echo $mysqlKvwmapDb->errormessage;
 		}
 
 		if (file_exists('config.php')) { ?>
@@ -347,7 +378,19 @@ function install() {
 		Schließe Verbindung zur Datenbank: <?php echo $pgsqlPostgresDb->dbName; ?><br><?php
 		$pgsqlPostgresDb->close(); ?>
 		Schließe Verbindung zur Datenbank: <?php echo $pgsqlKvwmapDb->dbName; ?><br><?php
-		$pgsqlKvwmapDb->close();
+		$pgsqlKvwmapDb->close(); ?>
+
+		<h1>Installation abgeschlossen</h1><?
+		if ($error) { ?>
+			Während der Installation sind Fehler aufgetreten. Vor dem Anmelden bei kvwmap müssen diese behoben werden.<?php
+		}
+		else { ?>
+			Sie können sich jetzt mit folgenden Nutzerdaten bei kvwmap anmelden.<br>
+			Nutzername: <? echo $mysqlKvwmapDb->user; ?><br>
+			Passwort: <?php echo KVWMAP_INIT_PASSWORD; ?><br>
+			<br>
+			<a href="index.php">Login</a><?php
+		}
 	}
 }
 
@@ -601,41 +644,6 @@ function admin_stelle_exists($mysqlKvwmapDb) {
 	return (mysqli_num_rows($mysqlKvwmapDb->result) > 0) ? true : false;
 }
 
-/**
-* Trägt alle Einstellungen für eine Admin-Stelle in MySQL-Datenbank von kvwmap ein.
-*/
-function install_admin_stelle($mysqlKvwmapDb) {
-	$filepath = LAYOUTPATH . 'db/mysql/data/mysql_install_admin.sql';
-	$queryret = $mysqlKvwmapDb->exec_commands(file_get_contents($filepath), NULL, NULL);
-	if ($queryret[0]) { 
-		echo $queryret[1]; ?>
-		Fehler beim Ausführen der Datei: <?php echo $filepath; ?><br><?php
-		return false;
-	}
-	
-	$sql = "
-		UPDATE
-			user
-		SET
-			passwort = MD5('" . KVWMAP_INIT_PASSWORD . "')
-		WHERE
-			login_name = 'kvwmap'
-		";
-	$ret = $mysqlKvwmapDb->execSQL($sql, 0, 1);
-	if ($ret[0]) { ?>
-		Fehler beim Einstellen des Passwortes für user <?php echo $mysqlKvwmapDb->user; ?> in der Datenbank <?php echo $mysqlKvwmapDb->dbName; ?><br><?php
-		return false;
-	}
-	
-	?>Daten zur Einrichtung der Stelle Administration erfolgreich eingelesen.<br>
-	Sie können sich jetzt mit folgenden Nutzerdaten bei kvwmap anmelden.<br>
-	Nutzername: kvwmap<br>
-	Passwort: <?php echo KVWMAP_INIT_PASSWORD; ?><br>
-	<br>
-	<a href="index.php">Login</a><?php
-	return true;
-}
-
 function settings() { ?>
 	<h1>Installation von kvwmap</h1>
 	Mit diesem Script wird der Datenbanknutzer sowie die MySQL Nutzerdatenbank kvwmap und die PostgreSQL Geo-Datenbank kvwmapsp angelegt.<br>
@@ -689,6 +697,4 @@ function settings() { ?>
 		</table>
 	</form>
 	<?php
-}
-
-?>
+} ?>
