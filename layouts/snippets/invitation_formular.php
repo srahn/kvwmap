@@ -43,21 +43,21 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?csrf_token=<? echo $_SESSION['csrf_token']; ?>&go=Einladungen_Anzeigen#invitation_<?php echo $this->invitation->get(Invitation::$identifier); ?>'">&nbsp;<?php
-						if ($this->invitation->get(Invitation::$identifier) != '') { ?>
+						<input value="zurück" title="Zeigt die ganze Liste an." type="button" name="go" onclick="document.location.href='index.php?csrf_token=<? echo $_SESSION['csrf_token']; ?>&go=Einladungen_Anzeigen#invitation_<?php echo $this->invitation->get_id(); ?>'">&nbsp;<?php
+						if ($this->invitation->get_id() != '') { ?>
 							<input value="Ändern" title="Änderungen Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="Zurücksetzen" title="Setzt alle Werte zurück auf die vorigen." type="reset" name="reset1">&nbsp;
-							<input type="hidden" name="selected_invitation_id" value="<?php echo  $this->invitation->get(Invitation::$identifier); ?>"><?php
+							<input type="hidden" name="selected_invitation_id" value="<?php echo  $this->invitation->get_id(); ?>"><?php
 						}
 						else { ?>
 							<input value="Speichern" title="Speichern" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Speichern')">&nbsp;
-							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Einladung_Editor&selected_invitation_id=<?php echo  $this->invitation->get(Invitation::$identifier); ?>'">&nbsp;<?
+							<input value="Zurücksetzen" title="Setzt die Werte zurück auf den letzten Stand." type="button" onclick="document.location.href='index.php?go=Einladung_Editor&selected_invitation_id=<?php echo  $this->invitation->get_id(); ?>'">&nbsp;<?
 						} ?>
 				  </td>
 			  </tr>
 			</table>
 			<input type="hidden" name="go" value="Einladung">
-			<input type="hidden" name="selected_invitation_id" value="<? echo  $this->invitation->get(Invitation::$identifier); ?>">
+			<input type="hidden" name="selected_invitation_id" value="<? echo  $this->invitation->get_id(); ?>">
 		</div>
 	</div>
 </div>

@@ -65,7 +65,7 @@ class XP_Bereich extends PgObject {
 			USING
 				xplan_gml." . $this->planartAbk . "_objekt o
 			WHERE
-				ta." . $this->planartAbk . "_objekt_gml_id = o.gml_id
+				ta." . $this->planartAbk . "_objekt_gml_id::uuid = o.gml_id
 				AND o.gehoertzubereich = '" . $this->get($this->identifier) . "'
 		";
 		#echo '<br>SQL zum Löschen der Zuordnungen der Objekte des Bereiches ' . $this->get($this->identifier) . ' zu den Textabschnitten:' . $sql;

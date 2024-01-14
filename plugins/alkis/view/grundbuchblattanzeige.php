@@ -88,10 +88,10 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 								<td>
 									<? if($this->buchungen[$i]['sondereigentum'] != ''){
 											if($this->buchungen[$i]['auftplannr'] != ''){?>
-									verbunden mit Sondereigentum "<? echo $this->buchungen[$i]['sondereigentum']; ?>" Nr. "<? echo $this->buchungen[$i]['auftplannr']; ?>" laut Aufteilungsplan.
+									verbunden mit Sondereigentum an <? echo $this->buchungen[$i]['sondereigentum']; ?>. Nr. <? echo $this->buchungen[$i]['auftplannr']; ?> laut Aufteilungsplan.
 									<? 	}
 											else{	?>
-									Sondereigentum "<? echo $this->buchungen[$i]['sondereigentum']; ?>"
+									Sondereigentum an <? echo $this->buchungen[$i]['sondereigentum']; ?>
 									<? 	}
 										}	?>
 									<? if($this->buchungen[$i]['buchungstext'] != '')echo nl2br($this->buchungen[$i]['buchungstext']); ?>

@@ -4,8 +4,7 @@ class LayerStyle extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'styles');
-		$this->identifier = 'Style_ID';
+		parent::__construct($gui, 'styles', 'Style_ID');
 	}
 
 	public static	function find_by_id($gui, $by, $id) {

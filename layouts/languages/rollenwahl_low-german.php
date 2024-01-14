@@ -20,7 +20,6 @@
   $strVietnamese="Vietnameesch";
   $strZoomFactor="Zoomfakter";
   $strButtonNext="Wieter";
-  $strFontSizeGLE="GLE-Textgrött";
   $strTooltipQuery="Objekt-Schnellinfo";
   $strPlatt="Plattdüütsch";
   $strSearchColor="Faarf van de Sökergebnis";
@@ -67,7 +66,6 @@
 	$strHintNewDatasetOrder="Sök ut, ob biem Bifaaten nieg Daten de Geometrie-Editor boben or ünern bi de Tüüchdaten sien sall.";
 	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
 	$strHintUploadOnlyFileMetadata="Beim Hochladen von Dokumenten werden zunächst nur die Metadaten Dateiname, Änderungszeit und Dateigröße hochgeladen und gespeichert. Die Dateien selbst werden noch nicht hochgeladen. Als Vorschaubilder erscheinen dann nur Hinweise, dass die Dateien noch fehlen. Die Dateien können nachträglich hochgeladen werden, entweder über den Menüpunkt Dateien nachträglich hochladen oder bei ausgeschalteter Option einzeln im Sachdatenformular. Die Zuordnung der im Menü 'Daten nachträglich hochladen' hochgeladenen Dateien zu den Metadaten funktioniert nur, wenn es der selbe kvwmap-Nutzer macht, der auch die Metadaten hochgeladen hat und sich der Dateiname, die Dateigröße und das Änderungsdatum nicht zwischenzeitlich geändert haben.";
-	$strHintFontSizeGLE="Sök de Grött de Schrift in de Tüüchdatenanzeich.";
 	$strHintTooltipQuery="Wenn Sie diese Option auswählen, können Sie die Maus über ein Objekt eines abfragbaren Themas halten und erhalten eine kurze Information dazu.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
 	$strHintMenueButtons="Sökst du disse Opschoon ut, warrn fake bruken  Spiespuenkte as egens  Knoop över de Spies anwiest.";

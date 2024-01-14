@@ -102,6 +102,12 @@ class MyObject {
 	* @ return this object with the record in data or empty array if not found
 	*/
 	function find_by($attribute, $value) {
+		if (empty($attribute)) {
+			$attribute = $this->identifer;
+		}
+		if (empty($value)) {
+			$value = $this->get_id();
+		}
 		$sql = "
 			SELECT
 				*

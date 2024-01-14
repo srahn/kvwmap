@@ -3,33 +3,50 @@ include_once(CLASSPATH . 'MyObject.php');
 class DataSource extends MyObject {
 
 	static $write_debug = false;
+	static $title = array(
+		'german' => 'Quellenangabe',
+		'english' => 'Datasource',
+		'low_german' => 'Quellenangaben'
+	);
+	static $table_name = 'datasources';
+	static $attributes = array(
+		[
+			'attribute'	=> 'id',
+			'alias'			=> array(
+				'german'		=> 'ID',
+				'english' => 'ID',
+				'low_german' => 'ID'
+			),
+			'type'			=> 'text',
+			'privileg'	=> '',
+			'size'			=> 2
+		],
+		[
+			'attribute'	=> 'name',
+			'alias'			=> array(
+				'german'		=> 'Name',
+				'english' => 'Name',
+				'low_german' => 'Name'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 20
+		],
+		[
+			'attribute'	=> 'beschreibung',
+			'alias'			=> array(
+				'german'		=> 'Beschreibung',
+				'english' => 'Description',
+				'low_german' => 'Beschreibung'
+			),
+			'type'			=> 'text',
+			'privileg'	=> 'editable',
+			'size'			=> 40
+		]
+	);
 
 	function __construct($gui) {
 		parent::__construct($gui, 'datasources');
-		$this->identifier = 'id';
-		$this->attributes = array(
-			[
-				'attribute'	=> 'id',
-				'alias'			=> 'ID',
-				'type'			=> 'text',
-				'privileg'	=> '',
-				'size'			=> 2
-			],
-			[
-				'attribute'	=> 'name',
-				'alias'			=> 'Name',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 20
-			],
-			[
-				'attribute'	=> 'beschreibung',
-				'alias'			=> 'Beschreibung',
-				'type'			=> 'text',
-				'privileg'	=> 'editable',
-				'size'			=> 40
-			]
-		);
 		$this->validations = array(
 			array(
 				'attribute' => 'beschreibung',

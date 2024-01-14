@@ -629,8 +629,8 @@ function go_switch($go, $exit = false) {
 					'style_width' => 'text',
 					'style_minwidth' => 'int',
 					'style_maxwidth' => 'int',
-					'style_offsetx' => 'int',
-					'style_offsety' => 'int',
+					'style_offsetx' => 'text',
+					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
 					'style_pattern' => 'text',
 					'style_geomtransform' => 'text',
@@ -755,11 +755,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
 			}break;
-			
-			case 'create_auto_classes_for_rollenlayer' : {
-				$GUI->sanitize(['layer_options_open' => 'int']);
-				$GUI->create_auto_classes_for_rollenlayer();
-			}break;
 
 			# PointEditor
 			case 'PointEditor' : {
@@ -799,8 +794,12 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten anzeigen
 			case 'Sachdaten' : {
-				if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
-				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
+				if ($GUI->formvars['CMD'] != '') {
+					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
+				}
+				if ($GUI->formvars['legendtouched']) {
+					$GUI->save_legend_role_parameters();
+				}
 				$GUI->queryMap();
 			}break;
 
@@ -1255,7 +1254,7 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				if (!$GUI->user->is_gast()) {
+				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};
 				$GUI->daten_export_exportieren();
