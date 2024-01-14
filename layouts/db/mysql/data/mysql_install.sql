@@ -224,7 +224,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (123, 'LOG_CONSUME_ACTIVITY', '', '1', 'Einstellungen zur Speicherung der Zugriffe\r\n', 'numeric', 'Logging', '', 1, 2),
 (124, 'POSTGRES_HOST', '', 'pgsql', '', 'string', 'Datenbanken', '', 1, 2),
 (125, 'POSTGRES_USER', '', 'kvwmap', '', 'string', 'Datenbanken', '', 1, 2),
-(126, 'POSTGRES_PASSWORD', '', 'Columbidae_Taube1', '', 'password', 'Datenbanken', '', 1, 2),
+(126, 'POSTGRES_PASSWORD', '', '***********', '', 'password', 'Datenbanken', '', 1, 2),
 (127, 'POSTGRES_DBNAME', '', 'kvwmapsp', '', 'string', 'Datenbanken', '', 1, 2),
 (128, 'MAPFILENAME', '', 'kvwmap', '', 'string', 'OWS-METADATEN', '', 1, 2),
 (129, 'WMS_MAPFILE_REL_PATH', '', 'ows/', 'Voreinstellungen für Metadaten zu Web Map Services (WMS-Server)\r\n', 'string', 'OWS-METADATEN', '', 1, 2),
@@ -308,7 +308,7 @@ CREATE TABLE `connections` (
 --
 
 INSERT INTO `connections` (`id`, `name`, `host`, `port`, `dbname`, `user`, `password`) VALUES
-(1, 'kvwmapsp', 'pgsql', 5432, 'kvwmapsp', 'kvwmap', 'Columbidae_Taube1');
+(1, 'kvwmapsp', 'pgsql', 5432, 'kvwmapsp', 'kvwmap', '************');
 
 -- --------------------------------------------------------
 
