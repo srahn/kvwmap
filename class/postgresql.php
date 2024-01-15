@@ -45,6 +45,7 @@ class pgdatabase {
 	var $version = POSTGRESVERSION;
 	var $connection_id;
 	var $error;
+	var $dbName;
 
 	function __construct() {
 		global $debug;

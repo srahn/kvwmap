@@ -35,6 +35,15 @@ class database {
   var $blocktransaction;
 	var $success;
 	var $errormessage;
+	var $gui;
+	var $defaultloglevel;
+	var $defaultlogfile;
+	var $type;
+	var $host;
+	var $user;
+	var $passwd;
+	var $dbName;
+	var $result;
 
 	function __construct($open = false) {
 		global $debug;
@@ -595,14 +604,22 @@ INSERT INTO u_styles2classes (
 						}
 						#echo '<br>exec sql: ' . $query_to_execute;
 						$ret = $this->execSQL($query_to_execute, 0, 0, $suppress_err_msg);
-						if ($ret[0] == 1) {
+						if (!$ret['success']) {
 							return $ret;
 						}
 					}
 				}
 			}
+			return array(
+				0 => 0,
+				'success' => true
+			);
 		}
-		return array(0);
+		return array(
+			0 => 1,
+			1 => 'In Funktion exec_commands auszuführender commands_string ist leer!',
+			'success' => false
+		);
 	}
 
   function begintransaction() {

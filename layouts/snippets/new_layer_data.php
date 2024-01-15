@@ -13,23 +13,24 @@
 <? } ?>
 
 <div id="nds_titel">
-	<p><?php echo $strtitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
+	<p><?php echo $strTitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
 </div>
-<div id="nds_formular" <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>>
+<div id="nds_formular" <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>><?php
+	if (count($this->layerdaten['ID']) == 0) {
+		?><p><?php echo $strNoLayer;
+	} ?>
 	<div class="nds_select">
 		<div><?php echo $strLayer; ?></div>
 		<div>
-			<select size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-				<option value=""><?php echo $strPleaseSelect; ?></option>
-<?
-				for($i = 0; $i < count($this->layerdaten['ID']); $i++){    			
+			<select size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if (count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+				<option value=""><?php echo $strPleaseSelect; ?></option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
 					echo '<option';
 					if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
 						echo ' selected';
 					}
 					echo ' value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
-				}
-?>			
+				} ?>
 			</select>
 		</div>
 	</div>	
