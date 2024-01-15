@@ -8712,11 +8712,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 
+		$stellen_ids = ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array());
+		for ($i = 0; $i < count($stellen_ids); $i++) {
+			$stelle = new stelle($stellen_ids[$i], $this->database);
+			$stelle->updateLayerParams();
+		}
+
 		if ($this->formvars['stellenzuweisung'] == 1 AND !$duplicate) {
       # Stellenzuweisung
   		$stellen = $this->addLayersToStellen(
         array($formvars['selected_layer_id']),
-        ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array()),
+        $stellen_ids,
   			NULL,
   			$formvars['assign_default_values']
       );
@@ -8774,7 +8780,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
 					$this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
 				}
-				$stelle->updateLayerParams();
 				$this->already_assigned_stellen[$stellen_ids[$i]] = true;
 				# Kindstellen
 				$children = $stelle->getChildren($stellen_ids[$i], " ORDER BY Bezeichnung", 'only_ids', false);
