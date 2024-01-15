@@ -1522,7 +1522,16 @@ echo '			</table>
 
 	function get_legend_graphics($layer){
 		$output = '';
-		$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+		$url = $layer['connection'];
+		$pos = strpos(strtolower($layer['connection']), 'styles=');
+		if ($pos !== false) {
+			$stylesection = substr($layer['connection'], $pos + 7);
+			$pos = strpos($stylesection, '&');
+			if ($pos !== false) {
+				$stylesection = substr($stylesection, 0, $pos);
+			}
+		}
+		$styles = explode(',', $stylesection);
 		if (strpos(strtolower($url), 'format') === false) {
 			$url .= '&format=image/png';
 		}
@@ -1542,7 +1551,7 @@ echo '			</table>
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}
