@@ -1298,56 +1298,58 @@ class stelle {
 				`postlabelcache`,
 				`requires`
 			)";
-			# Einstellungen von der Elternstelle übernehmen
-			$sql = "INSERT INTO used_layer " . $insert . "
-				SELECT
-					'" . $this->id . "',
-					'" . $layer_ids[$i] . "',
-					queryable,
-					use_geom,
-					drawingorder, 
-					legendorder, 
-					minscale, 
-					maxscale, 
-					symbolscale, 
-					offsite, 
-					transparency, 
-					filter,
-					template, 
-					header,
-					footer,
-					`privileg`,
-					`export_privileg`,
-					postlabelcache,
-					requires
-				FROM
-					used_layer as l,
-					stellen_hierarchie
-				WHERE
-					(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
-					layer_id = " . $layer_ids[$i] . " AND
-					stelle_id = parent_id AND
-					child_id = " . $this->id . "
-				ON DUPLICATE KEY UPDATE 
-					queryable = l.queryable, 
-					use_geom = l.use_geom, 
-					drawingorder = l.drawingorder, 
-					legendorder = l.legendorder, 
-					minscale = l.minscale, 
-					maxscale = l.maxscale, 
-					symbolscale = l.symbolscale, 
-					offsite = l.offsite, 
-					transparency = l.transparency, 
-					template = l.template, 
-					postlabelcache = l.postlabelcache,
-					`privileg` = l.`privileg`,
-					`export_privileg` = l.`export_privileg`,
-					requires = l.requires";
-			#echo $sql.'<br><br>';
-			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			if ($this->database->mysqli->affected_rows == 0) {
+			if (!$assign_default_values) {
+				# Einstellungen von der Elternstelle übernehmen
+				$sql = "INSERT INTO used_layer " . $insert . "
+					SELECT
+						'" . $this->id . "',
+						'" . $layer_ids[$i] . "',
+						queryable,
+						use_geom,
+						drawingorder, 
+						legendorder, 
+						minscale, 
+						maxscale, 
+						symbolscale, 
+						offsite, 
+						transparency, 
+						filter,
+						template, 
+						header,
+						footer,
+						`privileg`,
+						`export_privileg`,
+						postlabelcache,
+						requires
+					FROM
+						used_layer as l,
+						stellen_hierarchie
+					WHERE
+						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						layer_id = " . $layer_ids[$i] . " AND
+						stelle_id = parent_id AND
+						child_id = " . $this->id . "
+					ON DUPLICATE KEY UPDATE 
+						queryable = l.queryable, 
+						use_geom = l.use_geom, 
+						drawingorder = l.drawingorder, 
+						legendorder = l.legendorder, 
+						minscale = l.minscale, 
+						maxscale = l.maxscale, 
+						symbolscale = l.symbolscale, 
+						offsite = l.offsite, 
+						transparency = l.transparency, 
+						template = l.template, 
+						postlabelcache = l.postlabelcache,
+						`privileg` = l.`privileg`,
+						`export_privileg` = l.`export_privileg`,
+						requires = l.requires";
+				#echo $sql.'<br><br>';
+				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			}
+			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
 				$sql = "INSERT " . (!$assign_default_values ? "IGNORE" : "") . " INTO used_layer " . $insert . "
 					SELECT
