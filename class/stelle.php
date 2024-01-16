@@ -1298,6 +1298,7 @@ class stelle {
 	function copyLayerfromStelle($layer_ids, $alte_stelle_id){
 		# kopieren der Layer von einer Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
+			# usedlayer
 			$columns = '
 				`Layer_ID`, 
 				`queryable`, 
@@ -1335,10 +1336,52 @@ class stelle {
 					Layer_ID = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			# Layerattributrechte mitkopieren
-			$sql ='INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ';
-			$sql.='SELECT layer_id, attributename, '.$this->id.', privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$alte_stelle_id.' AND layer_id = '.$layer_ids[$i];
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+
+			# Layerattributrechte
+			$sql = '
+				INSERT IGNORE INTO layer_attributes2stelle (
+					layer_id, 
+					attributename, 
+					stelle_id, 
+					privileg, 
+					tooltip)
+				SELECT 
+					layer_id, 
+					attributename, 
+					'.$this->id.', 
+					privileg, 
+					tooltip 
+				FROM 
+					layer_attributes2stelle 
+				WHERE 
+					stelle_id = '.$alte_stelle_id.' AND 
+					layer_id = '.$layer_ids[$i];
+			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+
+			#  u_attributfilter2used_layer
+			$sql = '
+				INSERT IGNORE INTO u_attributfilter2used_layer (
+					`Stelle_ID`, 
+					`Layer_ID`, 
+					`attributname`, 
+					`attributvalue`, 
+					`operator`, 
+					`type`)
+				SELECT
+					'.$this->id.', 
+					`Layer_ID`, 
+					`attributname`, 
+					`attributvalue`, 
+					`operator`, 
+					`type`
+				FROM 
+				u_attributfilter2used_layer 
+				WHERE 
+					stelle_id = '.$alte_stelle_id.' AND 
+					layer_id = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
