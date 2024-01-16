@@ -1298,8 +1298,8 @@ class stelle {
 	function copyLayerfromStelle($layer_ids, $alte_stelle_id){
 		# kopieren der Layer von einer Stelle
 		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` )';
-			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
+			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg`, `export_privileg`)';
+			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg`, `export_privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
