@@ -857,7 +857,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
-		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
+		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
