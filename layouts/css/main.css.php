@@ -2096,7 +2096,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .gle_result_filter {
 	position: absolute; 
 	top: 2px;
-	right: 4px;
+	right: 2px;
   z-index: 1000;
 	text-align: right;
 }
