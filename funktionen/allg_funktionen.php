@@ -1237,6 +1237,7 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('*', '_', $name);
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
+	$name = str_replace('#', '_', $name);
 	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
@@ -2482,6 +2483,14 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'boolean':
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
+		} break;
+
+		case 'int_csv' : {
+			$value = explode(',', $value);
+			foreach ($value AS &$single_value) {
+				sanitize($single_value, 'int');
+			}
+			$value = implode(',', $value);
 		} break;
 
 		case 'numeric' :

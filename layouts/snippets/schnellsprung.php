@@ -11,11 +11,11 @@
 		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
 		$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 		$attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
-		# wenn Attributname/Wert-Paare übergeben wurden, diese im Formular einsetzen
+		# wenn Attributname/Wert-Paare ï¿½bergeben wurden, diese im Formular einsetzen
 		for($i = 0; $i < count($attributes['name']); $i++){
 			$qlayerset['shape'][0][$attributes['name'][$i]] = $this->formvars['value_'.$attributes['name'][$i]];
 		}
-		# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
+		# weitere Informationen hinzufï¿½gen (Auswahlmï¿½glichkeiten, usw.)
 		$attributes = $mapdb->add_attribute_values($attributes, $layerdb, $qlayerset['shape'], true, $this->Stelle->id);	
 	
 		for($i = 0; $i < count($attributes['name']); $i++){
@@ -35,13 +35,17 @@
 								?> 
 									id="value_<?php echo $attributes['name'][$i]; ?>" name="value_<?php echo $attributes['name'][$i]; ?>"><?echo "\n"; ?>
 										<option value="">-- <? echo $this->strPleaseSelect; ?> --</option><?php echo "\n";
-										if(is_array($attributes['enum_value'][$i][0])){
-											$attributes['enum_value'][$i] = $attributes['enum_value'][$i][0];
-											$attributes['enum_output'][$i] = $attributes['enum_output'][$i][0];
+										if (is_array($attributes['enum'][$i][0])){
+											$attributes['enum'][$i] = $attributes['enum'][$i][0];
 										}
-									for($o = 0; $o < count($attributes['enum_value'][$i]); $o++){
+									foreach ($attributes['enum'][$i] as $enum_key => $enum){
 										?>
-										<option <? if($this->formvars['value_'.$attributes['name'][$i]] == $attributes['enum_value'][$i][$o]){ echo 'selected';} ?> value="<?php echo $attributes['enum_value'][$i][$o]; ?>"><?php echo $attributes['enum_output'][$i][$o]; ?></option><?php echo "\n";
+										<option <? 
+											if ($this->formvars['value_'.$attributes['name'][$i]] == $enum_key) {
+												echo 'selected';
+											} ?> 
+											value="<?php echo $enum_key; ?>"><?php echo $enum['output']; ?>
+										</option><?php echo "\n";
 									} ?>
 									</select>
 									<input size="9" id="value2_<?php echo $attributes['name'][$i]; ?>" name="value2_<?php echo $attributes['name'][$i]; ?>" type="hidden" value="<?php echo $this->formvars['value2_'.$attributes['name'][$i]]; ?>">

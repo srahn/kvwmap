@@ -509,6 +509,8 @@ class GUI {
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$links = '';
+					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
           for($j = 0; $j < count($attributes['name']); $j++){
             if($attributes['tooltip'][$j]){
@@ -536,20 +538,10 @@ class GUI {
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$k][$value]['output'];
 											}
 											else{
-												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$value]['output'];
 											}
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $auswahlfeld_output;
@@ -557,13 +549,7 @@ class GUI {
 											$attribcount++;
 										} break;
 										case 'Radiobutton': {
-											$radiobutton_output = '';
-											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-												if($attributes['enum_value'][$j][$e] == $value){
-													$radiobutton_output = $attributes['enum_output'][$j][$e];
-													break;
-												}
-											}
+											$radiobutton_output = $attributes['enum'][$j][$value]['output'];
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $radiobutton_output;
 											$output .= '##';
@@ -1057,7 +1043,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -1076,7 +1062,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -1122,7 +1108,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -1145,7 +1131,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -1216,7 +1202,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1361,7 +1346,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -1418,7 +1403,7 @@ class rolle {
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
@@ -2018,8 +2003,10 @@ class db_mapObj{
 				$attributes['constraints'][$i] != '' AND
 				!in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
 			) {	# das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
-				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
-				$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+				$explosion = explode("','", trim($attributes['constraints'][$i], "'"));
+				foreach ($explosion as $option) {
+					$attributes['enum'][$i][$option]['output'] = $option;
+				}
 			}
 			if ($withvalues == true) {
 				$attributes['options'][$i] = replace_params(
@@ -2038,8 +2025,10 @@ class db_mapObj{
 							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {
 								# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
-								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+								$explosion = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
 								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
@@ -2055,7 +2044,7 @@ class db_mapObj{
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 										}
-										elseif ($further_options[$k] == 'embedded') {
+										elseif (trim($further_options[$k]) == 'embedded') {
 											# Subformular soll embedded angezeigt werden
 											$attributes['embedded'][$i] = true;
 										}
@@ -2140,12 +2129,13 @@ class db_mapObj{
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
 												return 0;
 											}
-											$attributes['enum_value'][$i][$k] = array();
+											$attributes['enum'][$i][$k] = array();
 											while ($rs = pg_fetch_array($ret[1])) {
-												$attributes['enum_value'][$i][$k][] = $rs['value'];
-												$attributes['enum_output'][$i][$k][] = $rs['output'];
-												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
-												$attributes['enum_image'][$i][$k][] = value_of($rs, 'image');
+												$attributes['enum'][$i][$k][$rs['value']] = [
+													'output' 	=> $rs['output'],
+													'oid'			=> $rs['oid'],
+													'image'		=> value_of($rs, 'image')
+												];
 											}
 										}
 									}
@@ -2162,10 +2152,11 @@ class db_mapObj{
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
-										$attributes['enum_value'][$i][] = $rs['value'];
-										$attributes['enum_output'][$i][] = $rs['output'];
-										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
-										$attributes['enum_image'][$i][] = value_of($rs, 'image');
+										$attributes['enum'][$i][$rs['value']] = [
+											'output' 	=> $rs['output'],
+											'oid'			=> $rs['oid'],
+											'image'		=> value_of($rs, 'image')
+										];
 										if ($requires_options != '') {
 											$attributes['enum_requires_value'][$i][] = $rs['requires'];
 										}
@@ -2231,8 +2222,10 @@ class db_mapObj{
 							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen
 							$attributes['options'][$i] = $optionen[0];
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
-								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+								$explosion = explode(',', str_replace("'", "", $attributes['options'][$i]));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
@@ -2240,8 +2233,7 @@ class db_mapObj{
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {
-										$attributes['enum_value'][$i][] = $rs['value'];
-										$attributes['enum_output'][$i][] = $rs['output'];
+										$attributes['enum'][$i][$rs['value']]['output'] = $rs['output'];
 									}
 								}
 							}

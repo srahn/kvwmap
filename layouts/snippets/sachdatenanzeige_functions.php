@@ -281,12 +281,20 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var name;
 		var type;
 		values = new Array();
+		field_infos = field.name.split(';');
+		datatype = field_infos[6]?.replace('_', '');
 		elements = document.getElementsByClassName(id);
 		for (i = 0; i < elements.length; i++) {
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
 				type = elements[i].type;
+				if (['int', 'int4', 'int8'].includes(datatype)) {
+					value = parseInt(value);
+				}
+				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
+					value = parseFloat(value);
+				}
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
@@ -304,7 +312,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 							value = 'null';
 						}
 						else {
-							if (['{', '['].indexOf(value.substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
+							if (['{', '['].indexOf(String(value).substring(0,1)) == -1) {		// wenn value kein Array oder Objekt
 								value = '"' + value + '"';
 							}
 						}
@@ -358,7 +366,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var remove_element = document.getElementById('div_'+remove_element_id);
 		getFileAttributesInArray(remove_element);
 		outer_div.removeChild(remove_element);
-		buildJSONString(fieldname, false);
+		buildJSONString(fieldname, true);
 	}
 	
 	moveArrayElement = function(fieldname, element_id, direction){
@@ -849,7 +857,8 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
-		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
+		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
@@ -1148,12 +1157,13 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	set_changed_flag = function(field, flag_name) {
-		if (field.type != 'file') {
+		// rausgenommen wegen Problem mit Radiobuttons
+		/*if (field.type != 'file') {
 			var same_fields = document.querySelectorAll('[name="' + field.name + '"]');
 			[].forEach.call(same_fields, function (same_field) {
 				same_field.value = field.value;	// alle gleichen Felder auf den selben Wert setzen, falls der gleiche Datensatz im GLE nochmal vorkommt (durch Subforms)
 			});
-		}
+		}*/
 		var flags = document.querySelectorAll('[name="' + flag_name + '"]');
 		[].forEach.call(flags, function (flag){
 			if(flag != undefined){
@@ -1168,6 +1178,38 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		if(button && button.style.display == 'none'){
 			button.style.display = '';
 		}		
+	}
+
+	filter_results = function(attribute_class, select){
+		var options = select.selectedOptions;
+		var values = Array.from(options).map(({ value }) => value);
+		var fields = document.querySelectorAll('.gle_attribute_value .' + attribute_class);
+		var value;
+		if (values[0] != '#all#'){
+			select.previousElementSibling.style.color = 'gray';
+		}
+		else {
+			select.previousElementSibling.style.color = '#bfbfbf';
+		}
+		[].forEach.call(fields, function (field){
+			if (field.type == 'checkbox' && !field.checked) {
+				value = 'f';
+			}
+			else {
+				value = field.value;
+			}
+			var tr = field.closest('tr');
+			if (values[0] != '#all#' && !values.includes(value)) {
+				tr.style.display = 'none';
+				tr.classList.add(attribute_class);
+			}
+			else {
+				tr.classList.remove(attribute_class);
+				if (tr.className == '') {
+					tr.style.display = '';
+				}
+			}
+		});
 	}
 
 </script>

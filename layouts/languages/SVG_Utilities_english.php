@@ -15,4 +15,5 @@
 	$strMoveGeometry="move geometry";
 	$strReverse="change line orientation";
 	$strEditOther="edit other object";
+  $strCircle = "add circle";
 ?>  

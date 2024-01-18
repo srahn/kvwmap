@@ -9,6 +9,7 @@
   $strSetPosition="ustaw pozycję"; 
   $strSetGPSPosition="wstaw pozycję GPS"; 
   $strRuler="pomiar odległości"; 
-  $strBuffer="dodaj bufor"; 
+  $strBuffer="dodaj bufor";
+  $strCircle = "add circle";
   
 ?>  

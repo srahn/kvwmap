@@ -83,14 +83,20 @@ function toggle_unterstellen(){
 }
 
 function update_stellen_visibility(){
-	var options = document.GUI.stellen_visibility.options;
-	for (var i=1; i < options.length; i++) {
-		var td = document.getElementById('stellen_td_' + options[i].value);
-    if (options[0].selected || options[i].selected) {
-      td.style.display = '';
+	var stellen = document.getElementById('stellen_visibility');
+	if (stellen.value != '') {
+		document.getElementById('stellendiv').classList.add('filtered');
+	}
+	else {
+		document.getElementById('stellendiv').classList.remove('filtered');
+	}
+	for (var i=1; i < stellen.options.length; i++) {
+		var td = document.getElementById('stellen_td_' + stellen.options[i].value);
+    if (stellen.options[i].selected) {
+      td.classList.add('visible');
     }
 		else {
-			td.style.display = 'none';
+			td.classList.remove('visible');
 		}
   }
 }
@@ -181,6 +187,12 @@ function update_stellen_visibility(){
 	.apt-attributname:hover {
 		width: auto;
 		outline: 1px solid #ccc;
+	}
+	#stellendiv.filtered td.apt-main-td {
+		display: none;
+	}
+	#stellendiv.filtered td.apt-main-td.visible {
+		display: revert;
 	}
 	</style>
 
@@ -276,12 +288,12 @@ function update_stellen_visibility(){
 				<div style="flex-grow: 2; text-align: center; position: relative">
 					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
 						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
-						<select name="stellen_visibility" style="height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 1000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
 							<option value="">- alle -</option>
 							<?
 							for($i = 0; $i < count($this->stellen['ID']); $i++){
 								echo '<option value="'.$this->stellen['ID'][$i].'" ';
-								if($this->formvars['stelle'] == $this->stellen['ID'][$i]){
+								if (in_array($this->stellen['ID'][$i], $this->formvars['stellen_visibility'] ?: [])){
 									echo 'selected';
 								}
 								echo '>'.$this->stellen['Bezeichnung'][$i].'</option>';
@@ -327,7 +339,7 @@ function update_stellen_visibility(){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" class="apf-template-div" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?

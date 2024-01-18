@@ -14,6 +14,15 @@ function sanitize(&$value, $type) {
 	return $value;
 }
 
+function replace_params_link($str, $params, $layer_id) {
+	if (is_array($params)) {
+		foreach($params AS $key => $value){
+			$str = str_replace('$'.$key, '<a href="javascript:void(0)" onclick="getLayerOptions(' . $layer_id .  ')">' . $value . '</a>', $str);
+		}
+	}
+	return $str;
+}
+
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
@@ -219,6 +228,11 @@ class GUI {
 		}
 	}
 
+	function plugin_loaded($plugin) {
+		global $kvwmap_plugins;
+		return in_array($plugin, $kvwmap_plugins);
+	}
+
 	function resizeMap2Window() {
 		global $sizes;
 
@@ -335,7 +349,7 @@ class GUI {
 
 				# Abfragen der Layerausdehnung
 				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+				if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
 			}break;
 			
@@ -697,7 +711,7 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-	function saveLegendRoleParameters(){
+	function save_legend_role_parameters() {
 		# Scrollposition der Legende wird gespeichert
   	$this->user->rolle->setScrollPosition($this->formvars['scrollposition']);
     # Änderungen in den Gruppen werden gesetzt
@@ -711,8 +725,8 @@ class GUI {
 	}
 
   function neuLaden() {
-		$this->saveLegendRoleParameters();
-		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->setSelectedButton($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
+		$this->save_legend_role_parameters();
+		if(in_array($this->formvars['last_button'], array('zoomin', 'zoomout', 'recentre', 'pquery', 'touchquery', 'ppquery', 'polygonquery')))$this->user->rolle->set_selected_button($this->formvars['last_button']);		// das ist für den Fall, dass ein Button schon angeklickt wurde, aber die Aktion nicht ausgeführt wurde
 		if($this->formvars['delete_rollenlayer'] != ''){
 			$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
@@ -1392,9 +1406,6 @@ class GUI {
           }
         }
 
-        if (MAPSERVERVERSION < 500 AND $dbStyle['sizeitem']!='') {
-          $style->set('sizeitem', $dbStyle['sizeitem']);
-        }
         if ($dbStyle['color']!='') {
           $RGB=explode(" ",$dbStyle['color']);
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
@@ -1424,12 +1435,26 @@ class GUI {
 				if($dbStyle['rangeitem'] != '') {
 					$style->updateFromString("STYLE RANGEITEM ".$dbStyle['rangeitem']." END");
 				}
-        if ($dbStyle['offsetx']!='') {
-          $style->set('offsetx', $dbStyle['offsetx']);
-        }
-        if ($dbStyle['offsety']!='') {
-          $style->set('offsety', $dbStyle['offsety']);
-        }
+        $offset_attribute = false;
+				if (!is_numeric($dbStyle['offsetx'] ?: 0)){
+					$dbStyle['offsetx'] = '[' . $dbStyle['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbStyle['offsety'] ?: 0)){
+					$dbStyle['offsety'] = '[' . $dbStyle['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$style->updateFromString("STYLE offset " . ($dbStyle['offsetx'] ?: '0') . " " . ($dbStyle['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbStyle['offsetx']!='') {
+						$style->set('offsetx', $dbStyle['offsetx']);
+					}
+					if ($dbStyle['offsety']!='') {
+						$style->set('offsety', $dbStyle['offsety']);
+					}
+				}
       } # Ende Schleife für mehrere Styles
 
       # setzen eines oder mehrerer Labels
@@ -1545,11 +1570,25 @@ class GUI {
 						}break;
 					}
 				}
-				if ($dbLabel['offsetx']!='') {
-					$label->offsetx = $dbLabel['offsetx'];
+				$offset_attribute = false;
+				if (!is_numeric($dbLabel['offsetx'] ?: 0)){
+					$dbLabel['offsetx'] = '[' . $dbLabel['offsetx'] . ']';
+					$offset_attribute = true;
 				}
-				if ($dbLabel['offsety']!='') {
-					$label->offsety = $dbLabel['offsety'];
+				if (!is_numeric($dbLabel['offsety'] ?: 0)){
+					$dbLabel['offsety'] = '[' . $dbLabel['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$label->updateFromString("LABEL offset " . ($dbLabel['offsetx'] ?: '0') . " " . ($dbLabel['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbLabel['offsetx']!='') {
+						$label->set('offsetx', $dbLabel['offsetx']);
+					}
+					if ($dbLabel['offsety']!='') {
+						$label->set('offsety', $dbLabel['offsety']);
+					}
 				}
 				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label
@@ -1557,52 +1596,52 @@ class GUI {
   }
 
   function navMap($cmd) {
-    switch ($cmd) {
+		switch ($cmd) {
       case "previous" : {
-#        $this->user->rolle->setSelectedButton('previous');
+#        $this->user->rolle->set_selected_button('previous');
         $this->setPrevMapExtent($this->user->rolle->last_time_id);
       } break;
       case "next" : {
-#        $this->user->rolle->setSelectedButton('next');
+#        $this->user->rolle->set_selected_button('next');
         $this->setNextMapExtent($this->user->rolle->last_time_id);
       } break;
       case "zoomin" : {
-        $this->user->rolle->setSelectedButton('zoomin');
+        $this->user->rolle->set_selected_button('zoomin');
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
 			case "zoomin_wheel" : {
         $this->zoomMap($this->user->rolle->nZoomFactor);
       } break;
       case "zoomout" : {
-        $this->user->rolle->setSelectedButton('zoomout');
+        $this->user->rolle->set_selected_button('zoomout');
         $this->zoomMap($this->user->rolle->nZoomFactor*-1);
       } break;
       case "recentre" : {
-        $this->user->rolle->setSelectedButton('recentre');
+        $this->user->rolle->set_selected_button('recentre');
         $this->zoomMap(1);
       } break;
       // case "jump_coords" : {
-        // $this->user->rolle->setSelectedButton('recentre');
+        // $this->user->rolle->set_selected_button('recentre');
         // $this->zoomMap(1);
       // } break;
       case "pquery" : {
-        $this->user->rolle->setSelectedButton('pquery');
+        $this->user->rolle->set_selected_button('pquery');
         $this->queryMap();
       } break;
       case "touchquery" : {
-        $this->user->rolle->setSelectedButton('touchquery');
+        $this->user->rolle->set_selected_button('touchquery');
         $this->queryMap();
       } break;
       case "ppquery" : {
-        $this->user->rolle->setSelectedButton('ppquery');
+        $this->user->rolle->set_selected_button('ppquery');
         $this->queryMap();
       } break;
       case "polygonquery" : {
-        $this->user->rolle->setSelectedButton('polygonquery');
+        $this->user->rolle->set_selected_button('polygonquery');
         $this->queryMap();
       } break;
       case "Full_Extent" : {
-        $this->user->rolle->setSelectedButton('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
+        $this->user->rolle->set_selected_button('zoomin');   # um anschliessend wieder neu zoomen zu koennen!
         $this->setFullExtent();
       } break;
       default : {
@@ -2366,7 +2405,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -2385,7 +2424,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -2431,7 +2470,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -2568,7 +2607,7 @@ class rolle {
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
     while ($rs = $this->database->result->fetch_assoc()) {
       $groups[]=$rs;
     }
@@ -2705,7 +2744,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -2767,7 +2806,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
 			$layer[]=$rs;
@@ -2837,7 +2876,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -2900,12 +2938,12 @@ class rolle {
 		}
 	}
 
-  function setSelectedButton($selectedButton) {
+  function set_selected_button($selectedButton) {
     $this->selectedButton=$selectedButton;
     # Eintragen des aktiven Button
     $sql ='UPDATE rolle SET selectedButton="'.$selectedButton.'"';
     $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:rolle.php class:rolle->setSelectedButton - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+    $this->debug->write("<p>file:rolle.php class:rolle->set_selected_button - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
     $this->database->execSQL($sql,4, $this->loglevel);
     return 1;
   }
@@ -3625,7 +3663,7 @@ class db_mapObj{
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
 		global $language;
 
-		if($language != 'german') {
+		if ($language != 'german') {
 			$name_column = "
 			CASE
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
@@ -3633,23 +3671,25 @@ class db_mapObj{
 			END AS Name";
 			$group_column = '
 			CASE
-				WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'`
+				WHEN `Gruppenname_' . $language . '` IS NOT NULL THEN `Gruppenname_' . $language . '`
 				ELSE `Gruppenname`
 			END AS Gruppenname';
 		}
-		else{
+		else {
 			$name_column = "l.Name";
 			$group_column = 'Gruppenname';
 		}
 
 		$sql = "
 			SELECT DISTINCT
+				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, rl.`rollenfilter`,
 				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
+				ul.`group_id`,
 				l.Layer_ID," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, l.Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.Datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -3660,23 +3700,36 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function, l.sync,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
-				g.id, ".$group_column.", g.obergruppe, g.order
+				l.kurzbeschreibung,
+				l.datasource,
+				l.dataowner_name,
+				l.dataowner_email,
+				l.dataowner_tel,
+				l.uptodateness,
+				l.updatecycle,
+				g.id,
+				" . $group_column . ",
+				g.obergruppe,
+				g.order
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
 				u_rolle2used_layer AS rl,
-				used_layer AS ul,
-				layer AS l LEFT JOIN
-				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				used_layer AS ul JOIN
+				layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
 				rl.stelle_id = ul.Stelle_ID AND
 				rl.layer_id = ul.Layer_ID AND
-				l.Layer_ID = ul.Layer_ID AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
+				l.Datentyp != 5 AND 
 				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
@@ -3684,21 +3737,29 @@ class db_mapObj{
 				($this->nurAufgeklappteLayer ? " AND (rl.aktivStatus != '0' OR gr.status != '0' OR ul.requires != '')" : '') .
 				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
-				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') . "
+				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
+				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
+				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
+				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
+				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') . 
+				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
-		#echo '<br>SQL zur Abfrage der Layer: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>",4);
+		// echo '<br>SQL zur Abfrage der Layer: ' . $sql; exit;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		if (!$this->db->success) { 
+			echo err_msg($this->script_name, __LINE__, $sql); 
+			return 0;
+		}
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
 		while ($rs = $ret['result']->fetch_assoc()) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == ''){
+				if ($rs['Filter'] == '') {
 					$rs['Filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
@@ -3709,6 +3770,11 @@ class db_mapObj{
 				$rs['alias'] = $rs['Name'];
 			}
 			$rs['id'] = $i;
+			$rs['alias_link'] = replace_params_link(
+				$rs['alias'],
+				rolle::$layer_params,
+				$rs['Layer_ID']
+			);			
 			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
@@ -3737,8 +3803,12 @@ class db_mapObj{
 			if ($rs['requires'] != '') {
 				# requires-Array füllen
 				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+				if ($rs['queryable']) {
+					# wenn der untergeordnete Layer queryable ist, wird queryable auch beim übergeordneten gesetzt, damit die Checkbox in der Legende erscheint
+					$layer['layer_ids'][$rs['requires']]['queryable'] = $rs['queryable'];
+				}
 			}
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i];		# damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
 		return $layer;

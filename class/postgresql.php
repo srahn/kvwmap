@@ -45,6 +45,7 @@ class pgdatabase {
 	var $version = POSTGRESVERSION;
 	var $connection_id;
 	var $error;
+	var $dbName;
 
 	function __construct() {
 		global $debug;
@@ -615,7 +616,7 @@ FROM
 		$table_alias_names = [];
 		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
-			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_alias = str_replace([' ', chr(10), chr(13)], '', get_first_word_after($table_info[$i], ':aliasname', ' ', ':'));
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
 			if($table_oid AND !array_key_exists($table_oid, $table_alias_names) AND $table_alias != 'unnamed_join'){
 				$table_alias_names[$table_oid] = $table_alias;
@@ -1042,9 +1043,9 @@ FROM
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
+          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
+            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
           }
           $query = str_replace(trim($column[$i]), $columns, $query);
         }

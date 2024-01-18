@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fï¿½r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 #
@@ -62,7 +62,7 @@ class adressaenderungen {
 	<geaenderteObjekte>
 		<wfs:Transaction version="1.0.0" service="WFS">';
 	
-		$this->postdata = '<verarbeitungsart>2000</verarbeitungsart>
+		$this->postdata = '	<verarbeitungsart>2000</verarbeitungsart>
 	<geometriebehandlung>false</geometriebehandlung>
 	<mitTemporaeremArbeitsbereich>true</mitTemporaeremArbeitsbereich>
 	<mitObjektenImFortfuehrungsgebiet>true</mitObjektenImFortfuehrungsgebiet>
@@ -81,8 +81,15 @@ class adressaenderungen {
   }
 	
 	function read_personen(){
-    $sql = "SELECT a.gml_id, beginnt, nachnameoderfirma, anrede, vorname, geburtsname, geburtsdatum, namensbestandteil, akademischergrad, b.hat ";
-    $sql.= "FROM alkis.ax_person a, alkis.ax_person_temp b WHERE a.gml_id = b.gml_id";
+    $sql = "
+			SET datestyle TO ISO, DMY;
+			SELECT
+				a.gml_id, beginnt, nachnameoderfirma, anrede, vorname, geburtsname, geburtsdatum, namensbestandteil, akademischergrad, b.hat
+			FROM 
+				alkis.ax_person a, 
+				alkis.ax_person_temp b 
+			WHERE 
+				a.gml_id = b.gml_id";
     #echo $sql;
     $ret = $this->database->execSQL($sql, 4, 0);
     while($rs = pg_fetch_array($ret[1])){
@@ -103,13 +110,13 @@ class adressaenderungen {
   }
 
   function delete_old_entries(){
-		#herrenlose neue Anschriften löschen
+		#herrenlose neue Anschriften lï¿½schen
 		$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id NOT IN ";
 		$sql.= "(SELECT ax_anschrift_temp.gml_id FROM alkis.ax_anschrift_temp, alkis.ax_person_temp WHERE ax_person_temp.hat = ax_anschrift_temp.gml_id)";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql, 4, 0);
 		
-		# übernommene Anschriften abfragen
+		# ï¿½bernommene Anschriften abfragen
 		$sql = "SELECT ax_anschrift_temp.gml_id ";
 		$sql.= "FROM alkis.ax_anschrift_temp, alkis.ax_anschrift ";
     $sql.= " WHERE ((ax_anschrift_temp.ort_post IS NULL AND (ax_anschrift.ort_post IS NULL OR ax_anschrift.ort_post = '')) OR ax_anschrift_temp.ort_post = ax_anschrift.ort_post)";
@@ -122,15 +129,15 @@ class adressaenderungen {
     while($rs = pg_fetch_array($ret[1])){
       $uebernommene_anschriften[] = $rs['gml_id'];
     }
-		if(count($uebernommene_anschriften) > 0){
-			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# übernommene Anschriften löschen
+		if(@count($uebernommene_anschriften) > 0){
+			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# ï¿½bernommene Anschriften lï¿½schen
 			#echo $sql.'<br>';
 			$ret = $this->database->execSQL($sql, 4, 0);
-			$sql = "DELETE FROM alkis.ax_person_temp WHERE hat IN ('".implode("','", $uebernommene_anschriften)."')";						# die Einträge in ax_person_temp mit neuen übernommenen Anschriften löschen
+			$sql = "DELETE FROM alkis.ax_person_temp WHERE hat IN ('".implode("','", $uebernommene_anschriften)."')";						# die Eintrï¿½ge in ax_person_temp mit neuen ï¿½bernommenen Anschriften lï¿½schen
 			#echo $sql.'<br>';
 			$ret = $this->database->execSQL($sql, 4, 0);
 		}
-		$sql = "DELETE FROM alkis.ax_person_temp ";																																			# die Einträge in ax_person_temp mit alten übernommenen Anschriften löschen
+		$sql = "DELETE FROM alkis.ax_person_temp ";																																			# die Eintrï¿½ge in ax_person_temp mit alten ï¿½bernommenen Anschriften lï¿½schen
 		if(POSTGRESVERSION >= '810')$sql.="USING alkis.ax_person ";
 		$sql.= "WHERE ax_person_temp.gml_id = ax_person.gml_id AND ax_person_temp.hat = ANY(ax_person.hat)";
 		#echo $sql.'<br>';
@@ -145,8 +152,8 @@ class adressaenderungen {
 			$fp = fopen(IMAGEPATH.'/'.$filename, 'w');
 			$currenttime=date('Y-m-d_H_i_s',time());
 			fwrite($fp, $this->predata.chr(10));
-      for($i = 0; $i < count($this->personen); $i++){
-        $data = '<wfsext:Replace vendorId="AdV" safeToIgnore="false">
+      for($i = 0; $i < @count($this->personen); $i++){
+        $data = '			<wfsext:Replace vendorId="AdV" safeToIgnore="false">
 				<AX_Person gml:id="'.$this->personen[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->personen[$i]['gml_id'].'</gml:identifier>
 					<lebenszeitintervall>
@@ -159,23 +166,24 @@ class adressaenderungen {
 							<advStandardModell>DLKM</advStandardModell>
 						</AA_Modellart>
 					</modellart>
-					<anlass>050100</anlass>';
-				if($this->personen[$i]['nachnameoderfirma'])$data.= '<nachnameOderFirma>'.$this->personen[$i]['nachnameoderfirma'].'</nachnameOderFirma>';
-				if($this->personen[$i]['anrede'])$data.= '<anrede>'.$this->personen[$i]['anrede'].'</anrede>';
-				if($this->personen[$i]['vorname'])$data.= '<vorname>'.$this->personen[$i]['vorname'].'</vorname>';
-				if($this->personen[$i]['geburtsname'])$data.= '<geburtsname>'.$this->personen[$i]['geburtsname'].'</geburtsname>';
-				if($this->personen[$i]['geburtsdatum'])$data.= '<geburtsdatum>'.$this->personen[$i]['geburtsdatum'].'</geburtsdatum>';
-				if($this->personen[$i]['namensbestandteil'])$data.= '<namensbestandteil>'.$this->personen[$i]['namensbestandteil'].'</namensbestandteil>';
-				if($this->personen[$i]['akademischergrad'])$data.= '<akademischerGrad>'.$this->personen[$i]['akademischergrad'].'</akademischerGrad>';
-				$data.= '<hat xlink:href="urn:adv:oid:'.$this->personen[$i]['hat'].'"/>
+					<anlass>050100</anlass>
+';
+				if($this->personen[$i]['nachnameoderfirma'])$data.= '					<nachnameOderFirma>'.$this->personen[$i]['nachnameoderfirma'] . "</nachnameOderFirma>\n";
+				if($this->personen[$i]['anrede'])$data.= '					<anrede>'.$this->personen[$i]['anrede'] . "</anrede>\n";
+				if($this->personen[$i]['vorname'])$data.= '					<vorname>'.$this->personen[$i]['vorname'] . "</vorname>\n";
+				if($this->personen[$i]['geburtsname'])$data.= '					<geburtsname>'.$this->personen[$i]['geburtsname'] . "</geburtsname>\n";
+				if($this->personen[$i]['geburtsdatum'])$data.= '					<geburtsdatum>'.$this->personen[$i]['geburtsdatum'] . "</geburtsdatum>\n";
+				if($this->personen[$i]['namensbestandteil'])$data.= '					<namensbestandteil>'.$this->personen[$i]['namensbestandteil'] . "</namensbestandteil>\n";
+				if($this->personen[$i]['akademischergrad'])$data.= '					<akademischerGrad>'.$this->personen[$i]['akademischergrad'] . "</akademischerGrad>\n";
+				$data.= '					<hat xlink:href="urn:adv:oid:'.$this->personen[$i]['hat'].'"/>
 				</AX_Person>
 				<ogc:Filter>
-					<ogc:FeatureId fid="'.$this->personen[$i]['gml_id'].str_replace(':', '', str_replace('-', '', $this->personen[$i]['beginnt'])).'" />
+					<ogc:FeatureId fid="'.$this->personen[$i]['gml_id'].str_replace([' ', ':', '-'], ['T', '', ''], $this->personen[$i]['beginnt']).'Z" />
 				</ogc:Filter>
 			</wfsext:Replace>'.chr(10);
         fwrite($fp, $data);
       }
-			for($i = 0; $i < count($this->anschriften); $i++){
+			for($i = 0; $i < @count($this->anschriften); $i++){
         $data = '<wfs:Insert>
 				<AX_Anschrift gml:id="'.$this->anschriften[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->anschriften[$i]['gml_id'].'</gml:identifier>
@@ -189,26 +197,50 @@ class adressaenderungen {
 							<advStandardModell>DLKM</advStandardModell>
 						</AA_Modellart>
 					</modellart>
-					<anlass>050100</anlass>';
-					$data.= '<ort_Post>'.$this->anschriften[$i]['ort_post'].'</ort_Post>';
-					$data.= '<postleitzahlPostzustellung>'.$this->anschriften[$i]['postleitzahlpostzustellung'].'</postleitzahlPostzustellung>';
-					if($this->anschriften[$i]['ortsteil'])$data.= '<ortsteil>'.$this->anschriften[$i]['ortsteil'].'</ortsteil>';
-					$data.= '<strasse>'.$this->anschriften[$i]['strasse'].'</strasse>';
-					$data.= '<hausnummer>'.$this->anschriften[$i]['hausnummer'].'</hausnummer>';
-				$data.= '
+					<anlass>050100</anlass>
+					<ort_Post>'.$this->anschriften[$i]['ort_post'].'</ort_Post>
+					<postleitzahlPostzustellung>'.$this->anschriften[$i]['postleitzahlpostzustellung'].'</postleitzahlPostzustellung>';
+					if($this->anschriften[$i]['ortsteil'])$data.= '					<ortsteil>'.$this->anschriften[$i]['ortsteil'] . "</ortsteil>\n";
+					$data .= '<strasse>'.$this->anschriften[$i]['strasse'].'</strasse>
+					<hausnummer>'.$this->anschriften[$i]['hausnummer'].'</hausnummer>
+					<qualitaetsangaben>
+						<AX_DQOhneDatenerhebung>
+							<herkunft>
+								<gmd:LI_Lineage>
+									<gmd:processStep>
+										<gmd:LI_ProcessStep>
+											<gmd:description>
+												<AX_LI_ProcessStep_OhneDatenerhebung_Description>Erhebung</AX_LI_ProcessStep_OhneDatenerhebung_Description>
+											</gmd:description>
+											<gmd:processor>
+												<gmd:CI_ResponsibleParty>
+													<gmd:organisationName>
+														<gco:CharacterString>Benutzerverwaltung</gco:CharacterString>
+													</gmd:organisationName>
+													<gmd:role>
+														<gmd:CI_RoleCode codeList="http://schemas.opengis.net/iso/19139/20070417/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="processor">processor</gmd:CI_RoleCode>
+													</gmd:role>
+												</gmd:CI_ResponsibleParty>
+											</gmd:processor>
+										</gmd:LI_ProcessStep>
+									</gmd:processStep>
+								</gmd:LI_Lineage>
+							</herkunft>
+						</AX_DQOhneDatenerhebung>
+					</qualitaetsangaben>
 				</AX_Anschrift>
 			</wfs:Insert>'.chr(10);
         fwrite($fp, $data);
       }
-			$antragsnummer = '</wfs:Transaction>
-			</geaenderteObjekte>
+			$antragsnummer = '		</wfs:Transaction>
+	</geaenderteObjekte>
 	<profilkennung>mvaaa</profilkennung>
 	<antragsnummer>'.$this->auftragsnummer.'</antragsnummer>
 	<auftragsnummer>'.$this->auftragsnummer.'_'.$currenttime.'</auftragsnummer>';
 			fwrite($fp, $antragsnummer.chr(10));
 			fwrite($fp, $this->postdata.chr(10));
 			$this->update_auftragsnummer($this->auftragsnummer);
-      return TEMPPATH_REL.$filename;
+      return IMAGEPATH . $filename;
     }
   }
 
