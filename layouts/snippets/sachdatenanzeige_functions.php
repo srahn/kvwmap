@@ -1184,6 +1184,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		var options = select.selectedOptions;
 		var values = Array.from(options).map(({ value }) => value);
 		var fields = document.querySelectorAll('.gle_attribute_value .' + attribute_class);
+		var value;
 		if (values[0] != '#all#'){
 			select.previousElementSibling.style.color = 'gray';
 		}
@@ -1191,8 +1192,14 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			select.previousElementSibling.style.color = '#bfbfbf';
 		}
 		[].forEach.call(fields, function (field){
+			if (field.type == 'checkbox' && !field.checked) {
+				value = 'f';
+			}
+			else {
+				value = field.value;
+			}
 			var tr = field.closest('tr');
-			if (values[0] != '#all#' && !values.includes(field.value)) {
+			if (values[0] != '#all#' && !values.includes(value)) {
 				tr.style.display = 'none';
 				tr.classList.add(attribute_class);
 			}

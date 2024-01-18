@@ -423,6 +423,9 @@
 				$datapart .= 'value="t" name="'.$fieldname.'"';
 				if ($value == 't') $datapart .= 'checked=true';
 				$datapart .= '>';
+				if ($field_id == NULL) {
+					$gui->result_values[$layer_id][$name][$value] = ['t' => 'ja', 'f' => 'nein'][$value];
+				}
 			}break;
 
 			case 'SubFormPK' : {
@@ -904,7 +907,7 @@
 				}
 			}
 		}
-		if ($attributes['form_element_type'][$j] != 'Auswahlfeld' AND $field_id == NULL) {
+		if (!in_array($attributes['form_element_type'][$j], ['Auswahlfeld', 'Checkbox']) AND $field_id == NULL) {
 			$gui->result_values[$layer_id][$name][$value] = $value;
 		}
 		return $datapart.$after_attribute;
