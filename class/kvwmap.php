@@ -16993,6 +16993,9 @@ class db_mapObj{
 	var $db;
 	var $OhneRequires;
 	var $disabled_classes;
+	var $script_name;
+	var $GUI;
+	var $rolle;
 
 	function __construct($Stelle_ID, $User_ID) {
 		global $debug;
@@ -17947,12 +17950,11 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false, $with_requires_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
-			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
@@ -18035,13 +18037,18 @@ class db_mapObj{
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
 									if ($all_options) {
 										# alle Auswahlmöglichkeiten -> where abschneiden
+										foreach ($attributes['name'] as $attributename) {
+											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
 										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 									}
 									else {
 										if ($query_result != NULL) {
 											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
-												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
+												if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 												}
 											}
@@ -18103,12 +18110,7 @@ class db_mapObj{
 									}
 								}
 								elseif ($attributes['options'][$i] != '') {
-									if ($requires_options != '') {
-										$sql = $requires_options;
-									}
-									else {
-										$sql = $attributes['options'][$i];
-									}
+									$sql = $attributes['options'][$i];
 									$sql = str_replace('$stelleid', $stelle_id, $sql);
 									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
@@ -18118,9 +18120,7 @@ class db_mapObj{
 										$attributes['enum_output'][$i][] = $rs['output'];
 										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
 										$attributes['enum_image'][$i][] = value_of($rs, 'image');
-										if ($requires_options != '') {
-											$attributes['enum_requires_value'][$i][] = $rs['requires'];
-										}
+										$attributes['enum_requires_value'][$i][] = $rs['requires'];
 									}
 								}
 							}
@@ -19848,7 +19848,15 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
 			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
+				$replaced_default = replace_params(
+					$rs['default'],
+					rolle::$layer_params,
+					$this->GUI->user->id,
+					$this->GUI->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->GUI->rolle->language
+				);
+				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
