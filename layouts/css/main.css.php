@@ -2857,3 +2857,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #nds_edit #dataset_operations {
 	display: none;
 }
+
+#gemkgschl-name-Trennerwort-div {
+	display: none;
+	margin-left: 10px;
+}

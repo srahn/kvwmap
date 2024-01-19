@@ -698,9 +698,9 @@
 		else {
 			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
 		}
-    if(@count($GemkgListe['GemkgID']) > 0){
+		if(@count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
-      if($FlurID == '' OR $FlurID == '-1'){
+      if ($FlurID === 0 OR $FlurID == '-1') {
 				if($GUI->formvars['ALK_Suche'] == 1){
 					$GUI->loadMap('DataBase');
 					$GUI->zoomToALKGemarkung($GemkgID,10);
