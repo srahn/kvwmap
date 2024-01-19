@@ -80,7 +80,7 @@
 										<td class="gle-attribute-name" style="height: auto">
 										<? if ($layer['attributes']['labeling'][$j] != 2) { ?>
 											<a href="javascript:reload_subform_list('<? echo $this->formvars['targetobject']; ?>', 1, '', '', '&orderby<? echo $layer['Layer_ID']; ?>=<? echo $layer['attributes']['name'][$j]; ?>')" title="Sortieren nach <? echo $layer['attributes']['name'][$j]; ?>"><?
-												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, $this->user->rolle->fontsize_gle, false); ?>
+												echo attribute_name($layer['Layer_ID'], $layer['attributes'], $j, 0, false); ?>
 											</a>
 										<? } ?>
 										</td><?
@@ -114,7 +114,7 @@
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
 											<td <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
-												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, $this->user->rolle->fontsize_gle, false, NULL, NULL, NULL, $this->subform_classname); ?>
+												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname); ?>
 											</td><?
 										}
 									}
@@ -151,7 +151,7 @@
 		echo $neu_link;
 		
 		if ($this->formvars['list_edit']) {
-			echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+			echo '&nbsp;<a tabindex="1" class="show_all_button buttonlink" href="javascript:void(0);" onclick="overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
 			for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 				echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
 				echo '&operator_'.$this->formvars['attributenames'][$p].'==';
@@ -179,23 +179,12 @@
 							switch ($attributes['form_element_type'][$j]) {
 								case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : case 'Radiobutton' : {
 									if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for ($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++) {
-											if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$k][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$k][$e];
-												break;
-											}
-										}
+										$enum = $attributes['enum'][$j][$k][$dataset[$attributes['name'][$j]]];
 									}
 									else {
-										for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
-											if ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$e];
-												break;
-											}
-										}
-									} 
+										$enum = $attributes['enum'][$j][$dataset[$attributes['name'][$j]]];
+									}
+									$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">&nbsp;' : '') . $enum['output'];
 								} break;
 								
 								case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{
@@ -249,10 +238,10 @@
 								<td'. get_td_class_or_style(array($dataset[$attributes['style']], 'subFormListItem')) . '>'.($preview_link != ''? $preview_link.'</td><td valign="top">' : '');
 								
 				if ($this->formvars['embedded'] == 'true') {
-					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;" href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>';
+					echo '<a href="javascript:void(0);" onclick="checkForUnsavedChanges(event);if (document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\').innerHTML == \'\')ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$layer['Layer_ID'].'&value_'.$layer['maintable'].'_oid='.$dataset[$layer['maintable'].'_oid'].'&embedded=true&subform_link=true&fromobject=subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'&targetobject='.$this->formvars['targetobject'].'&reload='.$this->formvars['reload'].'&attribute_privileg='.$this->formvars['attribute_privileg'].'\', new Array(document.getElementById(\'subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'\'), \'\'), new Array(\'sethtml\', \'execute_function\'));clearsubforms(\''.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].'\');">'.implode(' ', $output).'</a><div class="subForm" id="subform'.$this->formvars['targetlayer_id'].'_'.$layer['Layer_ID'].$this->formvars['count'].'_'.$k.'"></div></td>';
 				}
 				else {
-					echo '<a style="font-size: '.$this->user->rolle->fontsize_gle.'px;"';
+					echo '<a ';
 									if ($this->formvars['no_new_window'] != true) {
 										echo 	' target="_blank"';
 									}
@@ -272,7 +261,7 @@
 							echo '<a tabindex="1" id="edit_list_'.$this->formvars['targetobject'].'" class="list_edit_button buttonlink" href="javascript:void(0);" onclick="checkForUnsavedChanges(event); reload_subform_list(\''.$this->formvars['targetobject'].'\', 1)"><span>'.$strShowAll.'</span></a>';
 						}
 						else{		# alle separat anzeigen
-							echo '&nbsp;<a tabindex="1" style="font-size: '.$linksize.'px;" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
+							echo '&nbsp;<a tabindex="1" class="show_all_button buttonlink" href="javascript:overlay_link(\'go=Layer-Suche_Suchen&selected_layer_id='.$this->formvars['selected_layer_id'];
 							for($p = 0; $p < count($this->formvars['attributenames']); $p++){
 								echo '&value_'.$this->formvars['attributenames'][$p].'='.$this->formvars['values'][$p];
 								echo '&operator_'.$this->formvars['attributenames'][$p].'==';

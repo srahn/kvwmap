@@ -1548,7 +1548,9 @@ class flurstueck {
     $this->Amtsgerichte = $this->getAmtsgerichte(); 
     $this->Vorgaenger=$this->getVorgaenger();	
     $this->Nachfolger=$this->getNachfolger();
-		if($this->Nachfolger != '')$this->Status = 'H';
+		if ($this->Nachfolger != '' OR $this->hist_alb) {
+			$this->Status = 'H';
+		}
     # Abfragen der Nutzungen
     $this->Nutzung=$this->getNutzung();
   }

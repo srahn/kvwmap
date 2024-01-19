@@ -79,7 +79,7 @@ $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
 $buttons_fs .= boxbuttons();
 $buttons_fs .= flurstquerybuttons();
-$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strParallelPolygon);
+$buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strCircle, $strParallelPolygon);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
 global $last_x;
 $svg .= '<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>';

@@ -23,7 +23,6 @@
 	$strVietnamese="Vietnamese";
 	$strZoomFactor="Zoom Factor";
 	$strButtonNext="Next";
-	$strFontSizeGLE="GLE-Fontsize";
 	$strTooltipQuery="Quick-Info";
 	$strPlatt="Lower German";
 	$strSearchColor="Result/Import-Color";
@@ -71,7 +70,6 @@
 	$strHintNewDatasetOrder="Choose whether you want to edit the geometry or the attributes first, when you are recording a new dataset.";
 	$strAlwaysCreateNext="Keeps the form open to capute the next data set right after save one.";
 	$strHintUploadOnlyFileMetadata="When you upload documents in a formular only there metadata filename, modification date and file size will be upload and saved to the server. The files itself will not be uploaded so far. As preview images a hint will occure, that the files are still missing. The files can be uploaded later. Therefore you use the menue 'Upload belated files' or with this option off in the data formulars. The assignment of the belated uploaded files to there metadata works only if it has been done by the same user that uploaded also the metadata and the filename, file size and modification date not has been changed.";
-	$strHintFontSizeGLE="Choose the font size in the data display.";
 	$strHintTooltipQuery="If you activate this option, you will get a short Information about an object of your requested theme if you hover it with the mouse.";
 	$strHinthist_timestamp="If you insert a calendar date, the ALKIS objects will be shown in the map with this historical timestamp. Requests on cadastral parcels will also provide results with this historical timestamp.";
 	$strMapTools="Maptools";
@@ -81,7 +79,7 @@
 	$strHintPrintScale="If you activate the first option, a suitable printing scale will be calculated automatically. On the second option, the last used printing scale is used.";
 	$strShowRollenFilter="Show Layer Filter";
 	$strHintShowRollenFilter="If you activate this option, you are able to set a filter in the layer-options.";
-	$strRedlineTextOptions = "Feetext options";
+	$strRedlineTextOptions = "Freetext options";
 	$strRedlineTextColor = "Text color";
 	$strRedlineFontFamily = "Font family";
 	$strRedlineFontSize = "Font size";

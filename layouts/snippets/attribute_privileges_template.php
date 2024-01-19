@@ -13,12 +13,19 @@
 	}
 ?>
 
-<td id="stellen_td_<? echo $this->stelle->id; ?>" class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
-														echo 'unterstelle';
-														if ($this->formvars['unterstellen_ausblenden']) {
-															echo ' hidden';
-														}
-													} ?>">
+<td id="stellen_td_<? echo $this->stelle->id; ?>" 
+	class="apt-main-td 
+		<? 	if ($this->layer[0]['used_layer_parent_id'] != '') {
+					echo 'unterstelle';
+					if ($this->formvars['unterstellen_ausblenden']) {
+						echo ' hidden';
+					}
+				}
+				if ($this->stelle->id != '' AND array_key_exists('stellen_visibility', $this->formvars) AND in_array($this->stelle->id, $this->formvars['stellen_visibility'])){
+					echo ' visible';
+				}
+		?>"
+>
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
 		<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>

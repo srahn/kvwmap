@@ -1,4 +1,4 @@
-<html>
+<html style="scroll-behavior: smooth">
 	<head>
 		<title><? echo $this->titel ?: TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
@@ -18,6 +18,7 @@
 				}
 		<? } ?>
 			}
+			document.addEventListener("scroll", (event) => {enclosingForm.gle_scrollposition.value = document.scrollingElement.scrollTop});
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->

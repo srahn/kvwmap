@@ -89,23 +89,8 @@ class Notification extends MyObject {
 		return $results;
 	}
 
-	function clean_up_stellen_filter() {
-		$this->set(
-			'stellen_filter',
-			trim(
-				str_replace(
-					',,',
-					',',
-					str_replace(
-						' ',
-						'',
-						$this->get('stellen_filter')
-					)
-				),
-				','
-			)
-		);
-		$this->set('stellen_filter', str_replace(' ', '', $this->get('stellen_filter')));
+	function create_stellen_filter() {
+		$this->set('stellen_filter', $this->get_stellen_filter());
 	}
 
 	public static function find_by_id($gui, $id) {
@@ -165,8 +150,13 @@ class Notification extends MyObject {
 		return $notification->find_where($where, 'veroeffentlichungsdatum, id');
 	}
 
-	function get_stellen() {
-
+	function get_stellen_filter() {
+		$stellen_ids = [];
+		$stellen_ids = explode(',', $this->get('stellen_filter'));
+		foreach($stellen_ids as $stelle_id) {
+			$stellen_ids = array_merge($stellen_ids, $this->gui->Stelle->getChildren($stelle_id, '', 'only_ids', true));
+		}
+		return implode(',', $stellen_ids);
 	}
 
 	/*

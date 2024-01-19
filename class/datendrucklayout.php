@@ -507,7 +507,9 @@ class ddl {
 						} break;
 
 						default : {
+							$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 							$value = $this->result[$i][$attributes['name'][$j]];
+							$value_offset_attribute = $this->result[$i][$offset_attribute];
 							$zeilenhoehe = $this->layout['elements'][$attributes['name'][$j]]['fontsize'];
 							$y = $this->layout['elements'][$attributes['name'][$j]]['ypos'];
 							$x = $this->layout['elements'][$attributes['name'][$j]]['xpos'];
@@ -532,11 +534,10 @@ class ddl {
 								$attributes['form_element_type'][$j] == 'Dokument'
 							) {
 								#### relative Positionierung über Offset-Attribut #
-								$offset_attribute = $this->layout['elements'][$attributes['name'][$j]]['offset_attribute'];
 								if ($offset_attribute != '') {		# es ist ein offset_attribute gesetzt
 									$offset_value = $this->layout['offset_attributes'][$offset_attribute];
 									if ($offset_value != ''){		# Offset wurde auch schon bestimmt, relative y-Position berechnen
-										if ($this->layout['dont_print_empty'] AND $value == '') {
+										if ($this->layout['dont_print_empty'] AND $value_offset_attribute == '') {
 											$y = 0;
 										}
 										$y = $this->handlePageOverflow($offset_attribute, $offset_value, $y);		# Seitenüberläufe berücksichtigen
@@ -940,27 +941,13 @@ class ddl {
 		}
 		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
-				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-					for($e = 0; $e < @count($this->attributes['enum_value'][$j][$i]); $e++){
-						if($this->attributes['enum_value'][$j][$i][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$i][$e];
-							break;
-						}
-						else $output = $value;
-					}
+				if (is_array($this->attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+					$enum = $this->attributes['enum'][$j][$i];
 				}
 				else{
-					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-						if($this->attributes['enum_value'][$j][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$e];
-							break;
-						}
-						else $output = $value;
-					}
+					$enum = $this->attributes['enum'][$j];
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = $value;
-				}
+				$output = $enum[$value]['output'] ?: $value;
 			}break;
 			case 'Autovervollständigungsfeld' : {
 				if(@count($this->attributes['enum_output'][$j]) == 0){	
@@ -969,17 +956,19 @@ class ddl {
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			case 'Radiobutton' : {
-				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-					if($this->attributes['enum_value'][$j][$e] == $value){
+				foreach ($this->attributes['enum'][$j] as $enum_key => $enum) {
+					if ($enum_key == $value) {
 						$output .= '<box><b> X </b></box>  ';
 					}
-					else $output .= '<box>    </box>  ';
-					$output .= $this->attributes['enum_output'][$j][$e].'   ';
+					else {
+						$output .= '<box>    </box>  ';
+					}
+					$output .= $enum['output'] . '   ';
 					if(!$this->attributes['horizontal'][$j] OR (is_numeric($this->attributes['horizontal'][$j]) AND ($e+1) % $this->attributes['horizontal'][$j] == 0)){
 						$output .= chr(10).chr(10);
 					}
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
+				if (count($this->attributes['enum'][$j]) == 0){	
 					$output = $value;
 				}			
 			}break;			
@@ -1064,15 +1053,9 @@ class ddl {
 			}
 			$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
 			$this->i_on_page++;
-			# beim Untereinander-Typ oder eingebettet-Typ ohne Sublayouts oder wenn Datensätze nicht durch Seitenumbruch 
+			# beim Untereinander-Typ oder eingebettet-Typ wenn Datensätze nicht durch Seitenumbruch 
 			# unterbrochen werden dürfen, eine Transaktion starten um evtl. bei einem Seitenüberlauf zurückkehren zu können
-			if (
-				$this->layout['type'] != 0 AND
-				(
-					!$layout_with_sublayout OR
-					$this->layout['no_record_splitting']
-				)
-			) {
+			if ($this->layout['type'] != 0 AND $this->layout['no_record_splitting']) {
 				$this->pdf->transaction('start');
 				$this->transaction_start_pageid = $this->pdf->currentContents;
 				$this->transaction_start_y = $this->miny[$this->pdf->currentContents];
@@ -1204,17 +1187,9 @@ class ddl {
 			$this->remaining_lines = $this->add_lines($offsetx, 'running');
 			################# fortlaufende Freitexte schreiben ###############
 
-			if (
-				$this->layout['type'] != 0 AND
-				(
-					!$layout_with_sublayout OR
-					$this->layout['no_record_splitting']
-				)
-			) {
-				# Ein listenförmiges Layout hat einen Seitenüberlauf verursacht und in diesem gibt es entweder
-				# keine weiteren Sublayouts an deren Datensätzen man den Seitenumbruch durchführen könnte oder 
-				# das Unterbrechen von Datensätzen ist nicht gewollt. Deshalb wird bis zum Beginn des letzten 
-				# Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
+			if ($this->layout['type'] != 0 AND $this->layout['no_record_splitting']) {
+				# Ein listenförmiges Layout hat einen Seitenüberlauf verursacht und das Unterbrechen von Datensätzen ist nicht gewollt. 
+				# Deshalb wird bis zum Beginn des letzten Datensatzes zurückgerollt und die Seite vorher umgebrochen, so dass sauber zwischen 2 Datensätzen 
 				# und nicht innerhalb eines Datensatzes getrennt wird.
 				if ($this->page_overflow != false) {
 					$lastpage = end($this->pdf->objects['3']['info']['pages']) + 1;
@@ -1917,7 +1892,7 @@ class ddl {
 			$where_clauses[] = 'd.id = ' . $ddl_id;
 		}
 		if ($layer_id) {
-			$where_clauses[] = "d.layer_id = " . $layer_id;
+			$where_clauses[] = "(d.layer_id = " . $layer_id . " OR d.layer_id = l.duplicate_from_layer_id)";
 		}
 		if ($types != NULL) {
 			$where_clauses[] = "d.type IN (" . implode(", ", $types) . ")";
@@ -1931,6 +1906,7 @@ class ddl {
 			FROM
 				datendrucklayouts d LEFT JOIN
 				ddl2stelle d2s ON d.id = d2s.ddl_id
+				" . ($layer_id ? 'LEFT JOIN layer l ON l.Layer_ID = ' . $layer_id : '') . "
 			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY

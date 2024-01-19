@@ -782,7 +782,7 @@ hide_versions = function(flst){
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 											if($flst->Buchungen[$b]['sondereigentum'] != ''){
-												$BestandStr.='<br><br>verbunden mit Sondereigentum "'.$flst->Buchungen[$b]['sondereigentum'].'" Nr. "'.$flst->Buchungen[$b]['auftplannr'].'" laut Aufteilungsplan.';
+												$BestandStr.='<br><br>verbunden mit Sondereigentum an '.$flst->Buchungen[$b]['sondereigentum'].'. Nr. '.$flst->Buchungen[$b]['auftplannr'].' laut Aufteilungsplan.';
 											} ?>
 											<tr>
 												<td class="fett">Buchung:</td>
@@ -864,6 +864,8 @@ hide_versions = function(flst){
 													$zoomlink = 'ZoomToFlst&FlurstKennz='.$flst->FlurstKennz; 
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
+													&nbsp;&nbsp;
+													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;

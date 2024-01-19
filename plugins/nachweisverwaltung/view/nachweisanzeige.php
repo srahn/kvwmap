@@ -261,7 +261,7 @@ function save_bearbeitungshinweis(id){
 <? 
 	function build_order_links($orderstring, $richtung){
 		if($orderstring != ''){
-			$orderaliases = array('flurid' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
+			$orderaliases = array('gemarkung' => 'Gemarkung', 'flur' => 'Flur', 'stammnr' => 'Antragsnr.', 'rissnummer' => 'Rissnr.', 'art' => 'Dokumentart', 'blattnummer' => 'Blattnr.', 'datum' => 'Datum', 'fortfuehrung' => 'Fortfuehrung', 'vermst' => 'Vermstelle', 'gueltigkeit' => 'Gueltigkeit', 'geprueft' => 'geprueft', 'format' => 'Format');
 			$orders = explode(',', $orderstring);
 			foreach($orders as $order){
 				$orderlinks[] = '<a href="javascript:remove_from_order(\''.$order.'\');" title="'.$orderaliases[$order].' aus Sortierung entfernen">'.$orderaliases[$order].'</a>';
@@ -427,16 +427,27 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   <tr>
     <td bgcolor="<? echo BG_FORM ?>"><?
 	 if ($this->nachweis->erg_dokumente > 0) { ie_check();?>
-		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1282px" border="0" cellspacing="0" cellpadding="0">
+		<table id="nachweisanzeige_ergebnis" class="<? if (!ie_check()){ ?>scrolltable <? } ?>nw_treffer_table" style="width: 1302px" border="0" cellspacing="0" cellpadding="0">
 			<thead>
         <tr style="outline: 1px solid grey;" bgcolor="#FFFFFF"> 
           <th height="40" style="width: 80"><div align="center"><span class="fett">Auswahl</span></div></th>
-          <th style="width:45"><span class="fett">ID</span></th>
-			<? if(strpos($this->formvars['order'], 'flurid') === false){ ?>
-				<th align="center" style="width: 80"><a href="javascript:add_to_order('flurid');" title="nach individueller Nummer sortieren"><span class="fett">Flur</span></a></th>
-			<? }else{echo '<th align="center" style="width: 80"><span class="fett">Flur</span></th>';} ?>
+          <th style="width:45"><span class="fett">ID</span></th> <?
 			
-      <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){			
+			if (strpos($this->formvars['order'], 'gemarkung') === false){ ?>
+				<th align="center" style="width: 60"><a href="javascript:add_to_order('gemarkung');" title="nach Gemarkung sortieren"><span class="fett">Gemkg</span></a></th> <? 
+			} 
+			else { ?>
+				<th align="center" style="width: 60"><span class="fett">Gemkg</span></th> <?
+			}
+
+			if (strpos($this->formvars['order'], 'flur') === false){ ?>
+				<th align="center" style="width: 40"><a href="javascript:add_to_order('flur');" title="nach Flur sortieren"><span class="fett">Flur</span></a></th> <? 
+			} 
+			else { ?>
+				<th align="center" style="width: 40"><span class="fett">Flur</span></th> <?
+			}
+			
+      if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){			
 				if(strpos($this->formvars['order'], 'stammnr') === false){ ?>
 					<th align="center" style="width: 90"><a href="javascript:add_to_order('stammnr');" title="nach Antragsnr. sortieren"><span class="fett">Antragsnr.</span></a></th>
 				<? }else{echo '<th align="center" style="width: 90"><span class="fett">Antragsnr.</span></th>';}
@@ -543,8 +554,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 						</div>
 					</div>
           </td>
-          <td style="width: 45"><? echo $this->nachweis->Dokumente[$i]['id']; ?></td>
-          <td style="width: 80"><div align="center"><? echo $this->formvars['flurid']=$this->nachweis->Dokumente[$i]['flurid']; ?></div></td>
+          <td style="width: 45"><div align="center"><? echo $this->nachweis->Dokumente[$i]['id']; ?></div></td>
+          <td style="width: 60"><div align="center"><? echo $this->formvars['gemarkung']=$this->nachweis->Dokumente[$i]['gemarkung']; ?></div></td>
+					<td style="width: 40"><div align="center"><? echo $this->formvars['flur']=$this->nachweis->Dokumente[$i]['flur']; ?></div></td>
           <? if(NACHWEIS_PRIMARY_ATTRIBUTE != 'rissnummer'){ ?>  
           <td style="width: 90"><div align="center"><? echo $this->formvars['stammnr']=$this->nachweis->Dokumente[$i]['stammnr']; ?></div></td>
 					<td style="width: 70"><div align="center"><? echo $this->formvars['blattnummer']=str_pad($this->nachweis->Dokumente[$i]['blattnummer'],BLATTNUMMERMAXLENGTH,'0',STR_PAD_LEFT); ?></div></td>

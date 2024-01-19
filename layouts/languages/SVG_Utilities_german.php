@@ -20,4 +20,5 @@
 	$strSplitLine = "Linien teilen";
 	$strSplitPolygon = "Polygone teilen";
 	$strUndo = "R\u00fcckg\u00e4ngig";
+	$strCircle = "Kreis hinzuf\u00fcgen";
 ?>

@@ -11,9 +11,12 @@ $visibility = '';
 $dataset_operation_position = $this->user->rolle->dataset_operations_position;
 # Variablensubstitution
 $layer = $this->qlayerset[$i];
-if($this->currentform == 'document.GUI2')$size = 40;
-else $size = 61;
-$linksize = $this->user->rolle->fontsize_gle - 1;
+if ($this->currentform == 'document.GUI2') {
+	$size = 40;
+}
+else {
+	$size = 61;
+}
 $select_width = ''; 
 if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
 	$layer['Name'] = $layer['alias'];
@@ -144,7 +147,7 @@ if ($doit == true) {
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
 										$z = 100;
 										foreach ($layer['attributes']['tabs'] as $t => $tab) {
-											$tabname = str_replace(' ', '_', $tab);
+											$tabname = umlaute_umwandeln($tab);
 											echo '<div style="z-index: ' . $z . '" class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 											$z--;
 										}
@@ -174,7 +177,10 @@ if ($doit == true) {
 								$layer['shape'][$k][$layer['attributes']['name'][$j]] = $this->formvars[$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j]];
 							}				
 				
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1)){		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
+							if (
+									$layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j-1) or 
+									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j-1]
+								) {		# wenn die vorige Gruppe anders ist, Tabelle beginnen								
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if(value_of($explosion, 1) != '')$collapsed = true;else $collapsed = false;
 								$groupname = $explosion[0];
@@ -182,7 +188,7 @@ if ($doit == true) {
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
-									$tabname = str_replace(' ', '_', $layer['attributes']['tab'][$j]);
+									$tabname = umlaute_umwandeln($layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
 										$visibility = 'style="visibility: collapse"';
 									}
@@ -223,7 +229,7 @@ if ($doit == true) {
 										if($layer['attributes']['labeling'][$j] != 2){
 											$cell['properties'] = 'class="gle-attribute-name"';
 											$cell['id'] = 'name_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
-											$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, $this->user->rolle->fontsize_gle, (value_of($this->formvars, 'printversion') == '' AND $anzObj > 1) ? true : false);
+											$cell['content'] = attribute_name($layer['Layer_ID'], $layer['attributes'], $j, $k, (value_of($this->formvars, 'printversion') == '' AND $anzObj > 1) ? true : false);
 											if($nl AND $layer['attributes']['labeling'][$j] != 1){
 												$next_row['contains_attribute_names'] = true;
 												$next_row['cells'][] = $cell;
@@ -247,7 +253,7 @@ if ($doit == true) {
 										if ($select_width2 == '') $select_width2 = 'max-width: 600px;';
 
 										######### Attributwert #########
-										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2, $this->user->rolle->fontsize_gle);
+										$cell['content'] = attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 										$cell['id'] = 'value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k;
 										$cell['properties'] = get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j]));
 										if ($nl){
@@ -285,7 +291,10 @@ if ($doit == true) {
 								$invisible_attributes[$layer['Layer_ID']][] = '<input type="hidden" id="' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k . '" class="attr_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'" readonly="true" value="'.htmlspecialchars($layer['shape'][$k][$layer['attributes']['name'][$j]]).'">';
 								$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 							}
-							if($layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1)){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
+							if (
+									$layer['attributes']['group'][$j] != value_of($layer['attributes']['group'], $j+1) or 
+									$layer['attributes']['tab'][$j] != $layer['attributes']['tab'][$j+1]
+								){		# wenn die nächste Gruppe anders ist, Tabelle schliessen
 								echo output_table($table);
 								unset($table);
 								$table = array();
@@ -352,7 +361,7 @@ if ($doit == true) {
 													<table cellspacing="0" cellpadding="0">
 														<tr>
 															<td style="padding: 0 0 0 5;">
-																<a style="font-size: <? echo $this->user->rolle->fontsize_gle; ?>px" href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img	src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																<a href="javascript:zoom2wkt('<? echo $layer['shape'][$k]['wfs_bbox'] ?: $layer['shape'][$k]['wfs_geom']; ?>', '<? echo $layer['epsg_code']; ?>');"><div class="button zoom_normal"><img	src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 															</td>
 														</tr>
 													</table><?

@@ -1,9 +1,16 @@
 <?php
 	global $supportedLanguages;
-	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
-	include(LAYOUTPATH . $language_file);
-	include(PLUGINS . 'mobile/' . $language_file);
-	include(PLUGINS . 'portal/' . $language_file);
+	$language_file_name = 'layer_formular_' . $this->user->rolle->language . '.php';
+
+	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'mobile/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'portal/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">

@@ -236,10 +236,10 @@
     if (@count($FlurstListe) > 1) {
 			$legendentext .= "e";
 		}
-    $legendentext .= " (".date('d.m. H:i',time())."):<br>" . $FlurstListe[0];
+    $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
     for ($i=1; $i < @count($FlurstListe); $i++) {
       $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=",<br>" . $FlurstListe[$i];
+      $legendentext.=" " . $FlurstListe[$i];
     }
    	$datastring.=") ";
 		$datastring.=") as foo using unique " . $end;
@@ -327,7 +327,7 @@
 	    $datastring.=") as foo using unique oid using srid=" . $epsg;
 	    $legendentext ="Gebäude";
 	    if ($Hausnr!='') {
-	      $legendentext.="<br>HausNr: ".str_replace(',', '<br>', $Hausnr);
+	      $legendentext.=" HausNr: ".str_replace(',', ' ', $Hausnr);
 	    }
 	    else{
 				$str = $GUI->pgdatabase->getStrNameByID($Gemeinde,$Strasse);
@@ -1138,7 +1138,14 @@
     $adressaenderungen->read_anschriften();
 		$adressaenderungen->read_personen();
     $GUI->filename = $adressaenderungen->export_into_file();
-    $GUI->export_Adressaenderungen();
+    if ($GUI->filename != '') { 
+      ob_end_clean();
+      header('Content-type: application/octet-stream');
+      header("Content-disposition:	attachment; filename=" . basename($GUI->filename));
+      header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+      header('Pragma: public');
+      readfile($GUI->filename);
+    }
   };
 	
 	$GUI->export_flurst_csv = function() use ($GUI){

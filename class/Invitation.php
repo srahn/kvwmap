@@ -46,8 +46,6 @@ class Invitation extends MyObject {
 	function mailto_text() {
 		include(LAYOUTPATH . 'languages/Invitation_' . $this->gui->user->rolle->language . '.php');
 
-		# // ToDo Den Einladungstext fertig machen mit richtigem Ansprechpartner etc.
-			#//ToDo Werte des Einladenden mit abfragen.
 		$link = URL . (substr(URL, -1) != '/' ? '/' : '') . APPLVERSION .
 			'index.php?go=logout&token=' . $this->get('token') .
 			'&email=' . $this->get('email') .
@@ -56,21 +54,24 @@ class Invitation extends MyObject {
 			'&Vorname=' . urlencode($this->get('vorname')) .
 			'&login_name=' . urlencode($this->get('loginname')) .
 			'&language=' . $this->gui->user->rolle->language;
+
+		$text = str_replace('$link', $link, $this->stelle->get('invitation_text')) ?: $strInvitationText . '
+
+		' .  $strInvitationLink . ':
+		
+		' . $link . '
+		
+		' . $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '
+		
+		' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . '
+		
+		' . $strInvitationAutomationText;
+
 		$msg = $this->get('email') . 
 '?subject=Einladung zur Registrierung bei ' . TITLE .
 '&body=' . rawurlencode($strInvitationHeader . ($this->get('anrede') == 'Herr' ? 'r' : '') . ' ' . $this->get('anrede') . ' ' . $this->get('name') . ',
 
-' . $strInvitationText . '
-
-' .  $strInvitationLink . ':
-
-' . $link . '
-
-' . $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '
-
-' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . '
-
-' . $strInvitationAutomationText);
+' . $text);
 		return $msg;
 	}
 }

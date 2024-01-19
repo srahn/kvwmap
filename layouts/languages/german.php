@@ -24,8 +24,7 @@
 	$this->strAlias = 'Alias';
 	$this->strAnd = 'und';
 	$this->strArchive = 'Archivieren';
-	$this->strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
-	$this->strAsteriskRequired = 'Werte mit * mussen eingetragen werden';
+	$this->strAsteriskRequired = 'Werte mit * müssen eingetragen werden';
 	$this->strAutoClassify = 'klassifizieren nach';
 	$this->strAutoDelete = 'automatisch löschen';
 	$this->strBuffer = 'Puffer';

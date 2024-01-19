@@ -24,7 +24,6 @@
 	$this->strAlias = 'Alias';
 	$this->strAnd = 'and';
 	$this->strArchive = 'Archive';
-	$this->strAsteriskRequired = 'Fields with * are mandatory';
 	$this->strAsteriskRequired = 'Fields marked with an asterisk * are required';
 	$this->strAutoClassify = 'classify by';
 	$this->strAutoDelete = 'auto delete';
