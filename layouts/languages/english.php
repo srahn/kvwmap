@@ -24,7 +24,7 @@
 	$this->strAlias = 'Alias';
 	$this->strAnd = 'and';
 	$this->strArchive = 'Archive';
-	$this->strAsteriskRequired = 'Fields marked with an asterisk * are required';
+	$this->strAsteriskRequired = 'Fields with * are mandatory';
 	$this->strAutoClassify = 'classify by';
 	$this->strAutoDelete = 'auto delete';
 	$this->strBuffer = 'Buffer';
@@ -35,12 +35,12 @@
 	$this->strChoose = 'Choose';
 	$this->strColor = 'Draw Color';
 	$this->strComment = 'Comment';
-	$this->strComment = 'Comment';
 	$this->strCompareView = 'Comparison View';
 	$this->strConnect = 'Connect';
 	$this->strCoordinate = 'Coordinate';
 	$this->strCoordinateReferenceSystem = 'Coordinate Reference System';
 	$this->strCoordinates = 'Coordinates';
+	$this->strCreate = 'Create';
 	$this->strDataExport = 'Data Export';
 	$this->strDataImport = 'Data Import';
 	$this->strDelete = 'Delete';
@@ -98,5 +98,4 @@
 	$this->strYes = 'Yes';
 	$this->TaskChangeWarning = 'You are not allowed to use this function in the currrent task.';
 	$this->transparency = 'Transparency';
-  $this->strCreate = 'Create';
 ?>
