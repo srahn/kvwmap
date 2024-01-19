@@ -476,8 +476,7 @@ class GUI {
 						}						
 						if ($layer[0]['queryable']) {
 							if ($layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
-								if ($this->user->layer_data_import_allowed) {
+								echo '<li><a title="'. $this->strNewDatasetTitle1 . ' ' . $layer[0]['Name'] . ' ' . $this->strCreate . ' " href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';								if ($this->user->layer_data_import_allowed) {
 									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 								}
 							}
