@@ -635,7 +635,7 @@
       if ($FlurFormObj->selected) {
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$GUI->pgdatabase);
-        if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
+        if ($FlurID == '') { $FlurID=$FlurListe['FlurID'][0]; }
 				$FlstNrListe=$FlstNr->getFlstListe($GemID, $GemkgID, $FlurID, $GemeindenStelle['eingeschr_flur'][$GemkgID][(int)$FlurID], $GUI->formvars['history_mode']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
