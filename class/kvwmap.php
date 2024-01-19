@@ -8183,10 +8183,12 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			case 1 : {		# für jeden Wert eine Klasse
         $sql = "
           SELECT DISTINCT " . $class_item."
-          FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
-
-        $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
+          FROM
+						(" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . "
+					LIMIT 100
+				";
+        $ret = $layerdb->execSQL($sql, 4, 0);
+				if ($ret['success'] == 0) { echo err_msg($PHP_SELF, __LINE__, $sql); return 0; }
 				$order = 1;
         while($rs = pg_fetch_assoc($ret[1])){
           $class['name'] = $rs[$class_item];

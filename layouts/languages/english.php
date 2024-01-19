@@ -70,6 +70,7 @@
 	$this->strNameSuffix = 'Name suffix';
 	$this->strNewDatasetTitle1 = 'New data set in layer';
 	$this->strNo = 'No';
+	$this->strOr = 'or';
 	$this->strPleaseSelect = 'Please select';
 	$this->strPrivileges = 'privileges';
 	$this->strReadable = 'Everywhere only readable';

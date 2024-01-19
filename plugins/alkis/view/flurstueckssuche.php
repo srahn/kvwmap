@@ -111,7 +111,7 @@ if ($this->Fehlermeldung!='') {
 			<input name="gemschl1" type="text" value="<? echo $this->land_schluessel; ?>" onkeyup="updateGemarkungsauswahl();">
 			<input name="gemschl2" type="text" maxlength="4" value="<? echo substr($this->formvars['GemkgID'], 2, 4); ?>" onkeyup="updateGemarkungsauswahl();" autofocus onfocus="var temp_value=this.value; this.value=''; this.value=temp_value;" tabindex="1">
 			<input name="gemschl" type="hidden" value="<? echo $this->formvars['GemkgID']; ?>">
-		</div>
+		</div><span id="gemkgschl-name-Trennerwort-span"><? echo $this->strOr; ?></span>
 	</div>
 	<div class="form_formular-input form_formular-aic">
 		<div><?php echo $strGemkgGem; ?></div>

@@ -71,6 +71,7 @@
 	$this->strNameSuffix = 'Namenszusatz';
 	$this->strNewDatasetTitle1 = 'Neuen Daten im Layer';
 	$this->strNo = 'Nein';
+	$this->strOr = 'oder';
 	$this->strPleaseSelect = 'Bitte Auswählen';
 	$this->strPrivileges = 'Rechte';
 	$this->strReadable = 'Überall nur lesbar';
