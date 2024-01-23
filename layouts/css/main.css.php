@@ -2858,7 +2858,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	display: none;
 }
 
-#gemkgschl-name-Trennerwort-div {
+#gemkgschl-name-Trennerwort-span {
 	display: none;
 	margin-left: 10px;
 }
