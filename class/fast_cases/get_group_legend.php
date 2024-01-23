@@ -1676,7 +1676,16 @@ class GUI {
 
 	function get_legend_graphics($layer){
 		$output = '';
-		$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+		$url = $layer['connection'];
+		$pos = strpos(strtolower($layer['connection']), 'styles=');
+		if ($pos !== false) {
+			$stylesection = substr($layer['connection'], $pos + 7);
+			$pos = strpos($stylesection, '&');
+			if ($pos !== false) {
+				$stylesection = substr($stylesection, 0, $pos);
+			}
+		}
+		$styles = explode(',', $stylesection);
 		if (strpos(strtolower($url), 'format') === false) {
 			$url .= '&format=image/png';
 		}
@@ -1696,10 +1705,10 @@ class GUI {
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$output .=  '<div id="lg'.$j.'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
-	}	
+	}
 
 	function check_layer_visibility(&$layer){
 		if($layer['status'] != '' OR ($this->map_scaledenom < $layer['minscale'] OR ($layer['maxscale'] > 0 AND $this->map_scaledenom > $layer['maxscale']))) {

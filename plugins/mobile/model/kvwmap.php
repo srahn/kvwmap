@@ -93,14 +93,14 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					true
 				);
 
-				# Zuordnen der Privilegien und Tooltips zu den Attributen
-				for ($j = 0; $j < count($attributes['name']); $j++) {
-					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
-					#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
-				}
-				$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true);
-				$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
+					# Zuordnen der Privilegien und Tooltips zu den Attributen
+					for ($j = 0; $j < count($attributes['name']); $j++) {
+						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
+						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
+					}
+					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
+					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
 				$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
 				$layer['classes'] = $GUI->mobile_reformat_classes($classes);
@@ -151,28 +151,33 @@ $GUI->mobile_sync = function () use ($GUI) {
 	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
 	$GUI->deblog->write('Run function mobile_sync_parameter_valide');
 
-	$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
-	$GUI->deblog->write('Client Delta sync parameter result: ' . print_r($result, true));
-	if ($result['success']) {
-		# Layer DB abfragen $layerdb = new ...
-		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
-		$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
-		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $GUI->formvars['selected_layer_id'];
-		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
-		$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
-	} else {
-		$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
-	}
-	return $result;
-};
+		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
 
-$GUI->mobile_sync_parameter_valide = function ($params) use ($GUI) {
-	$result = array(
-		"success" => true,
-		"msg" => 'Validierung durchgeführt für Parameter: ',
-		'err_msg' => ''
-	);
-	$err_msg = array();
+		if ($result['success']) {
+			$GUI->debug->write('mobile_sycn_parameter_valid', 5);
+			# Layer DB abfragen $layerdb = new ...
+			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
+			$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $GUI->formvars['selected_layer_id'];
+			$GUI->debug->write('msg: ' . $result['msg'], 5);
+			$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
+			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
+			$GUI->debug->write('sync abgeschlossen.');
+		}
+		else {
+			$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
+		}
+		return $result;
+	};
+
+	$GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
+		$result = array(
+			"success" => true,
+			"msg" => 'Validierung durchgeführt für Parameter: ',
+			'err_msg' => ''
+		);
+
+		$err_msg = array();
 
 	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
 		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
@@ -199,38 +204,45 @@ $GUI->mobile_sync_parameter_valide = function ($params) use ($GUI) {
 	}
 	$result['msg'] .= ' selected_layer_id';
 
-	if (array_key_exists('client_deltas', $params)) {
-		$deltas = $params['client_deltas'];
-		if (property_exists($deltas, 'rows')) {
-			$rows = $deltas->rows;
-			if (count($rows) > 0) {
-				$first_row = $rows[0];
-				if (array_key_exists('version', $first_row)) {
-					$version = $first_row->version;
-					if ($version == '' || $version == 0) {
-						$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+		if (array_key_exists('client_deltas', $params)) {
+			$deltas = $params['client_deltas'];
+
+			if (property_exists($deltas, 'rows')) {
+				$rows = $deltas->rows;
+				if (count($rows) > 0) {
+					$first_row = $rows[0];
+					if (property_exists($first_row, 'version')) {
+						$version = $first_row->version;
+
+						if ($version == '' || $version == 0) {
+							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+						}
 					}
-				} else {
-					$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
-				}
-				if (array_key_exists('sql', $first_row)) {
-					$sql = $first_row->sql;
-					if ($sql == '') {
-						$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
 					}
-				} else {
-					$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+					if (property_exists($first_row, 'sql')) {
+						$sql = $first_row->sql;
+						if ($sql == '') {
+							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+					}
 				}
-			} else {
-				# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
+				else {
+					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
+				}
 			}
-		} else {
-			$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+			else {
+				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+			}
 		}
-	} else {
-		$err_msg[] = 'Die Deltas wurden nicht übertragen.';
-	}
-	$result['msg'] .= ' deltas';
+		else {
+			$err_msg[] = 'Die Deltas wurden nicht übertragen.';
+		}
+		$result['msg'] .= ' deltas';
 
 	if (count($err_msg) > 0) {
 		$result['success'] = false;
@@ -284,37 +296,58 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	return $layer;
 };
 
-$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
-	$attributes = array();
-	foreach($attr['name'] AS $key => $value) {
-		if ($attr['enum'][$key]) {
-			$attr['options'][$key] = array();
-			foreach($attr['enum'][$key] AS $enum_key => $enum) {
-				$attr['options'][$key][] = array(
-					'value' => $enum_key,
-					'output' => $enum['output']
-				);
+	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
+		$attributes = array();
+		foreach($attr['name'] AS $key => $value) {
+			if ($attr['enum_value'][$key]) {
+				$attr['options'][$key] = array();
+				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+					if ($attr['req'][$key]) {
+						$attr['options'][$key][] = array(
+							'value' => $attr['enum_value'][$key][$enum_key],
+							'output' => $attr['enum_output'][$key][$enum_key],
+							'requires_value' => $attr['enum_requires_value'][$key][$enum_key]
+						);
+					}
+					else {
+						$attr['options'][$key][] = array(
+							'value' => $attr['enum_value'][$key][$enum_key],
+							'output' => $attr['enum_output'][$key][$enum_key]
+						);
+					}
+				}
+			}
+
+			$attributes[$key] = array(
+				"index" => $attr['indizes'][$value],
+				"name" => $value,
+				"real_name" => $attr['real_name'][$value],
+				"alias" => $attr['alias'][$key],
+				"group" => $attr['group'][$key],
+				"tooltip" => $attr['tooltip'][$key],
+				"type" => $attr['type'][$key],
+				"nullable" => $attr['nullable'][$key],
+				"saveable" => $attr['saveable'][$key],
+				"form_element_type" => $attr['form_element_type'][$key],
+				"options" => $attr['options'][$key],
+				"arrangement" => $attr['arrangement'][$key],
+				"labeling" => $attr['labeling'][$key],
+				"privilege" => $attr['privileg'][$key],
+				"default" => $attr['default'][$key],
+				'visible' => $attr['visible'][$key],
+				'vcheck_attribute' => $attr['vcheck_attribute'][$key],
+				'vcheck_operator' => $attr['vcheck_operator'][$key],
+				'vcheck_value' => $attr['vcheck_value'][$key]
+			);
+			if ($attr['req_by'] AND array_key_exists($key, $attr['req_by']) AND $attr['req_by'][$key] != '') {
+				$attributes[$key]['required_by'] = $attr['req_by'][$key];
+			}
+			if ($attr['req'] AND array_key_exists($key, $attr['req']) AND is_array($attr['req'][$key]) AND count($attr['req'][$key]) > 0) {
+				$attributes[$key]['requires'] = $attr['req'][$key];
 			}
 		}
-
-		$attributes[] = array(
-			"index" => $attr['indizes'][$value],
-			"name" => $value,
-			"real_name" => $attr['real_name'][$value],
-			"alias" => $attr['alias'][$key],
-			"group" => $attr['group'][$key],
-			"tooltip" => $attr['tooltip'][$key],
-			"type" => $attr['type'][$key],
-			"nullable" => $attr['nullable'][$key],
-			"saveable" => $attr['saveable'][$key],
-			"form_element_type" => $attr['form_element_type'][$key],
-			"options" => $attr['options'][$key],
-			"privilege" => $attr['privileg'][$key],
-			"default" => $attr['default'][$key]
-		);
-	}
-	return $attributes;
-};
+		return $attributes;
+	};
 
 $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
 	return array_map(

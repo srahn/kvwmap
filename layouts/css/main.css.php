@@ -2096,8 +2096,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .gle_result_filter {
 	position: absolute; 
 	top: 2px;
-	right: 4px;
-  z-index: 1000;
+	right: 2px;
+  z-index: 100;
 	text-align: right;
 }
 
@@ -2856,4 +2856,9 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 #nds_edit #dataset_operations {
 	display: none;
+}
+
+#gemkgschl-name-Trennerwort-span {
+	display: none;
+	margin-left: 10px;
 }
