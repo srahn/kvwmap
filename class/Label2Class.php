@@ -4,8 +4,7 @@ class Label2Class extends MyObject {
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_labels2classes');
-		$this->identifier = 'class_id, label_id';
+		parent::__construct($gui, 'u_labels2classes', 'class_id, label_id');
 	}
 
 	public static	function find($gui, $where) {

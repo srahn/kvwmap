@@ -7,4 +7,5 @@
   $strSetPosition="Set Position";
   $strSetGPSPosition="Set GPS Position";
   $strRuler="Ruler";
+  $strCircle = "add circle";
 ?>  

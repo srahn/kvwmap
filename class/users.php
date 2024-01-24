@@ -320,7 +320,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$this->database->success) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -674,10 +674,9 @@ class user {
 	var $language = 'german';
 
 	/**
-		Create a user object
-		if only login_name is defined, find_by login_name only
-		if login_name and password is defined, find_by login_name and password
-		if
+	 * Create a user object
+	 * if only login_name is defined, find_by login_name only
+	 * if login_name and password is defined, find_by login_name and password
 	*/
 	function __construct($login_name, $id, $database, $password = '', $archived = false) {
 		global $debug;
@@ -714,6 +713,12 @@ class user {
 		elseif (
 			$case == 'Layereditor' AND
 			$this->database->gui->go == 'Klasseneditor'
+		) {
+			return true;
+		}
+		elseif (
+			$case == 'chart_speichern' AND
+			$this->funktion == 'admin'
 		) {
 			return true;
 		}
@@ -813,6 +818,7 @@ class user {
 			$this->ips = $rs['ips'];
 		}
 		$this->funktion = $rs['Funktion'];
+		$this->debug->user_funktion = $this->funktion;
 		$this->password_setting_time = $rs['password_setting_time'];
 		$this->password_expired = $rs['password_expired'];
 		$this->userdata_checking_time = $rs['userdata_checking_time'];
@@ -1169,7 +1175,6 @@ class user {
 					, maxx = " . $newExtent['maxx'] . "
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
-					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
 					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'
@@ -1210,6 +1215,7 @@ class user {
 			if($formvars['queryradius']){$buttons .= 'queryradius,';}
 			if($formvars['polyquery']){$buttons .= 'polyquery,';}
 			if($formvars['measure']){$buttons .= 'measure,';}
+			if($formvars['punktfang']){$buttons .= 'punktfang,';}
 			if (value_of($formvars, 'freepolygon')) { $buttons .= 'freepolygon,';}
 			if (value_of($formvars, 'freearrow')) { $buttons .= 'freearrow,';}
 			if (value_of($formvars, 'freetext')) { $buttons .= 'freetext,';}
@@ -1378,10 +1384,10 @@ class user {
 			$sql.=',position="'.$userdaten['position'].'"';
 		}
 		if ($userdaten['start'] != '') {
-			$sql.=',start="'.$userdaten['start'].'"';
+			$sql.=',start="' . ($userdaten['start'] ?: '0000-00-00') . '"';
 		}
 		if ($userdaten['stop'] != '') {
-			$sql.=',stop="'.$userdaten['stop'].'"';
+			$sql.=',stop="' . ($userdaten['stop'] ?: '0000-00-00') . '"';
 		}
 		if ($userdaten['ips']!='') {
 			$sql.=',ips="'.$userdaten['ips'].'"';
@@ -1449,8 +1455,8 @@ class user {
 				`Vorname` = '" . $userdaten['vorname'] . "',
 				`login_name` = '" . $userdaten['loginname'] . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
-				`start` = '" . $userdaten['start'] . "',
-				`stop`= '" . $userdaten['stop'] . "',
+				`start` = '" . ($userdaten['start'] ?: '0000-00-00') . "',
+				`stop`= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
 				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
 				`ID` =  " . $userdaten['id'].",
 				`phon` = '" . $userdaten['phon']."',
@@ -1458,6 +1464,7 @@ class user {
 				`organisation` = '" . $userdaten['organisation']."',
 				`position` = '" . $userdaten['position']."',
 				`ips` = '" . $userdaten['ips'] . "',
+				`agreement_accepted` = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
 				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
 				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "

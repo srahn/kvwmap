@@ -51,18 +51,29 @@ class LayerAttribute extends MyObject {
 		return '';
 	}
 
-	function get_generic_select($layer, $attr) {
+	// function get_generic_select($layer, $attr) {
+	// 	# Wenn $attr['is_array'] true und keine Elemente enthalten sind nicht {} ausgeben sonder NULL
+	// 	if ($attr['is_array'] == 't') {
+	// 		# Das Attribut ist vom Typ array und wird wenn das Array leer ist als NULL sonst Kommasepariert ausgegeben.
+	// 		$select = "CASE WHEN array_length(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", 1) = 0 THEN NULL ELSE array_to_string(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", ',', '') END AS " . $attr['att_name'];
+	// 	}
+	// 	else {
+	// 		$select = $layer->get_table_alias() . '.' . $attr['att_name'];
+	// 	}
+	// 	return array(
+	// 		'select' => $select
+	// 	);
+	// }
+
+	function get_generic_select($table_alias, $attr) {
 		# Wenn $attr['is_array'] true und keine Elemente enthalten sind nicht {} ausgeben sonder NULL
-		if ($attr['is_array'] == 't') {
-			# Das Attribut ist vom Typ array und wird wenn das Array leer ist als NULL sonst Kommasepariert ausgegeben.
-			$select = "CASE WHEN array_length(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", 1) = 0 THEN NULL ELSE array_to_string(" . $layer->get_table_alias() . '.' . $attr['att_name'] . ", ',', '') END AS " . $attr['att_name'];
-		}
-		else {
-			$select = $layer->get_table_alias() . '.' . $attr['att_name'];
-		}
-		return array(
-			'select' => $select
+		$selects = array(
+			array(
+				'att_name' => $attr['att_name'],
+				'sql' => ($attr['is_array'] == 't' ? "CASE WHEN array_length(" . $table_alias . '.' . $attr['att_name'] . ", 1) = 0 THEN NULL ELSE array_to_string(" . $table_alias . '.' . $attr['att_name'] . ", ',', '') END AS " . $attr['att_name'] : $table_alias . '.' . $attr['att_name'])
+			)
 		);
+		return $selects;
 	}
 }
 ?>

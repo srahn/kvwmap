@@ -82,6 +82,25 @@ function toggle_unterstellen(){
   });
 }
 
+function update_stellen_visibility(){
+	var stellen = document.getElementById('stellen_visibility');
+	if (stellen.value != '') {
+		document.getElementById('stellendiv').classList.add('filtered');
+	}
+	else {
+		document.getElementById('stellendiv').classList.remove('filtered');
+	}
+	for (var i=1; i < stellen.options.length; i++) {
+		var td = document.getElementById('stellen_td_' + stellen.options[i].value);
+    if (stellen.options[i].selected) {
+      td.classList.add('visible');
+    }
+		else {
+			td.classList.remove('visible');
+		}
+  }
+}
+
 </script>
 
 <style>
@@ -169,6 +188,12 @@ function toggle_unterstellen(){
 		width: auto;
 		outline: 1px solid #ccc;
 	}
+	#stellendiv.filtered td.apt-main-td {
+		display: none;
+	}
+	#stellendiv.filtered td.apt-main-td.visible {
+		display: revert;
+	}
 	</style>
 
 <table style="width: 700px; margin: 0px 40px 0 40px">
@@ -219,8 +244,8 @@ function toggle_unterstellen(){
   <? if($this->layer[0]['Name'] != ''){ ?>
 	<tr>
   	<td>
-			<div class="apf-tip-magic">
-				<div class="apf-tip">
+			<div style="display: flex; justify-content: space-between">
+				<div class="apf-tip-magic" style="min-width: 200px;">
 <?					echo FormObject::createSelectField(
 						'for_attribute_privileges_selected_layer_id',
 						$layer_options,
@@ -243,7 +268,6 @@ function toggle_unterstellen(){
 						)"
 						value="Attributrechte für ausgewählten Layer übernehmen"
 					>
-					<span style="margin-left: 10px;">
 					<i
 						id="show_attribute_privileges_for_other_layer_button"
 						style="cursor: pointer" 
@@ -260,11 +284,28 @@ function toggle_unterstellen(){
 						onclick="$('#attribute_privileges_for_other_layer_button, #for_attribute_privileges_selected_layer_id, #show_attribute_privileges_for_other_layer_button, #close_attribute_privileges_for_other_layer_button').toggle();"
 					></i>
 					&nbsp;
-					<span style="float: right; --left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
-					<div style="padding-right: 20px; float: right">
-						<input type="checkbox" name="unterstellen_ausblenden" <? echo ($this->formvars['unterstellen_ausblenden'] != ''? 'checked' : ''); ?> onclick="toggle_unterstellen();"> Unterstellen ausblenden
+				</div>
+				<div style="flex-grow: 2; text-align: center; position: relative">
+					<div style="display:flex; justify-content: center; position: absolute; width: 100%;">
+						<div style="margin-top: 3px;">Stellen:&nbsp;</div>
+						<select name="stellen_visibility[]" id="stellen_visibility" style="z-index: 1000; height: 24px; max-height: 200px; scrollbar-width: thin;" multiple="true" onchange="update_stellen_visibility();" onmousedown="if(this.style.height=='24px'){this.style.height = (this.length * 22) + 6;preventDefault(event);}" onmouseleave="if(event.relatedTarget){this.style.height='24px';scrollToSelected(this);}">
+							<option value="">- alle -</option>
+							<?
+							for($i = 0; $i < count($this->stellen['ID']); $i++){
+								echo '<option value="'.$this->stellen['ID'][$i].'" ';
+								if (in_array($this->stellen['ID'][$i], $this->formvars['stellen_visibility'] ?: [])){
+									echo 'selected';
+								}
+								echo '>'.$this->stellen['Bezeichnung'][$i].'</option>';
+							}
+						?>
+						</select>
 					</div>
 				</div>
+				<div style="padding-right: 20px; float: right">
+					<input type="checkbox" name="unterstellen_ausblenden" <? echo ($this->formvars['unterstellen_ausblenden'] != ''? 'checked' : ''); ?> onclick="toggle_unterstellen();"> Unterstellen ausblenden
+				</div>
+				<span style="--left: -650px; --width: 750px" data-tooltip="Globale sowie attributive Rechte der Stelle beim Zugriff den ausgewählten Layer.&#xa;&#xa;Die eingestellten Default-Rechte werden beim erstmaligen Zuordnen eines Layers zu einer Stelle verwendet.&#xa;&#xa;Layerzugriffsrechte&#xa;Globale Privilegien auf Layerebene (globale editierende Rechte am Layer müssen durch die entsprechenden attributbezogenen Rechte aktiviert werden):&#xa;- 'lesen und bearbeiten': Mindestzugriffsrecht. Vorhandene Datensätze können gelesen und bearbeitet werden.&#xa;- 'neue Datensätze erzeugen': Datensätze können gelesen, bearbeitet und neu angelegt werden.&#xa;- 'Datensätze erzeugen und löschen': Datensätze können gelesen, bearbeitet, erzeugt und gelöscht werden.&#xa;&#xa;Layerexportrechte&#xa;- 'Export nicht erlaubt': Datensätze sind in der Sachdatenabfrage grundsätzlich sichtbar, können jedoch nicht exportiert werden.&#xa;- 'nur Sachdaten': Der Export eines Datensatzes ist nur in Nicht-Geometrie-Formate möglich.&#xa;- 'Sach- und Geometriedaten': Default. Der Export eines Datensatzes ist in alle Datenformate möglich.&#xa;&#xa;Attributbezogene Rechte:&#xa;- 'kein Zugriff': Das Attribut erscheint in der Sachdatenabfrage nicht.&#xa;- 'lesen': Das Attribut erscheint in der Sachdatenabfrage, ist aber nicht editierbar.&#xa;- 'editieren': Das Attribut erscheint in der Sachdatenabfrage und ist editierbar.&#xa;&#xa;Ist für das Geometrie-Attribut ('the_geom') das Privileg 'kein Zugriff' eingetragen, kann man nicht von der Sachdatenanzeige in die Karte auf das Objekt zoomen. Dafür muß es mindestens lesbar sein.&#xa;Damit ein Attribut in der Layer-Suche als Suchoption zur Verfügung steht, muss es mindestens lesbar sein.&#xa;&#xa;Tooltip: Inhalt des angehakten Attributs erscheint in der Karte beim Hovern über ein Objekt. Funktioniert auch mit Fotos.&#xa;&#xa;Hinweis 'Default-Rechte allen Stellen zuweisen': Je nach nach Anzahl der Stellen und Attribute kann eine sehr große Anzahl an Formularvariablen übermittelt werden. Möglicherweise muss dafür in der php.ini der Wert für max_input_vars hoch gesetzt werden."></span>
 			</div>
   	</td>
   </tr>
@@ -298,7 +339,7 @@ function toggle_unterstellen(){
 						</div>
 					<td>	
 					<td valign="top">
-						<div id="stellendiv" class="apf-template-div" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
+						<div id="stellendiv" class="apf-template-div <? if ($this->formvars['stellen_visibility'] != '') {echo 'filtered';}?>" style="width:<? echo $width; ?>px;" onscroll="document.GUI.scrollposition.value = this.scrollLeft; document.getElementById('upperscrollbar').scrollLeft=this.scrollLeft">
 							<table border="0" style="border-collapse:collapse" cellspacing="0" cellpadding="10">
 								<tr>
 							<?

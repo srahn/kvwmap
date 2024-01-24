@@ -13,12 +13,19 @@
 	}
 ?>
 
-<td class="apt-main-td <? if ($this->layer[0]['used_layer_parent_id'] != '') {
-														echo 'unterstelle';
-														if ($this->formvars['unterstellen_ausblenden']) {
-															echo ' hidden';
-														}
-													} ?>">
+<td id="stellen_td_<? echo $this->stelle->id; ?>" 
+	class="apt-main-td 
+		<? 	if ($this->layer[0]['used_layer_parent_id'] != '') {
+					echo 'unterstelle';
+					if ($this->formvars['unterstellen_ausblenden']) {
+						echo ' hidden';
+					}
+				}
+				if ($this->stelle->id != '' AND array_key_exists('stellen_visibility', $this->formvars) AND in_array($this->stelle->id, $this->formvars['stellen_visibility'])){
+					echo ' visible';
+				}
+		?>"
+>
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
 		<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
@@ -27,21 +34,55 @@
 		<span class="fetter px16"><? echo $strDefaultPrivileges; ?></span>
 		<? } ?>
 	</div>
-	<? echo $parent_privileges_checkbox; ?>
+	<? 
+		echo $parent_privileges_checkbox; 
+
+		$layer_access_options = array(
+			'0' => array(
+				'output' => $strReadAndEdit,
+				'color' => '#ff735a'
+			),
+			'1' => array(
+				'output' => $strCreateNewRecords,
+				'color' => '#eeee39'
+			),
+			'2' => array(
+				'output' => $strCreateAndDelete,
+				'color' => '#9ae394'
+			)
+		);
+
+		$layer_export_options = array(
+			'0' => array(
+				'output' => $strNoExport,
+				'color' => '#ff735a'
+			),
+			'2' => array(
+				'output' => $strOnlyData,
+				'color' => '#eeee39'
+			),
+			'1' => array(
+				'output' => $strDataAndGeom,
+				'color' => '#9ae394'
+			)
+		);
+	?>
 	<div class="apt-layerzugriffsrechte">
 		<span class="fett"><? echo $strLayerAccessPrivileges; ?></span><br>
-		<select name="privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
-			<option <? if($this->layer[0]['privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strReadAndEdit; ?></option>
-			<option <? if($this->layer[0]['privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strCreateNewRecords; ?></option>
-			<option <? if($this->layer[0]['privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strCreateAndDelete; ?></option>
+		<select name="privileg<? echo $this->stelle->id; ?>" style="background-color: <? echo $layer_access_options[$this->layer[0]['privileg']]['color']; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+			foreach($layer_access_options AS $value => $option) {
+				$selected = (strval($this->layer[0]['privileg']) === strval($value) ? ' selected' : '');	?>
+				<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>	<?
+			}	?>
 		</select>		
 	</div>
 	<div class="apt-layerexportrechte">
 		<span class="fett"><? echo $strLayerExportPrivileges; ?></span><br>
-		<select name="export_privileg<? echo $this->stelle->id; ?>" <? echo $disabled; ?>>
-			<option <? if($this->layer[0]['export_privileg'] == '0'){echo 'selected';} ?> value="0"><? echo $strNoExport; ?></option>						  			
-				<option <? if($this->layer[0]['export_privileg'] == '2'){echo 'selected';} ?> value="2"><? echo $strOnlyData; ?></option>
-				<option <? if($this->layer[0]['export_privileg'] == '1'){echo 'selected';} ?> value="1"><? echo $strDataAndGeom; ?></option>
+		<select name="export_privileg<? echo $this->stelle->id; ?>" style="background-color: <? echo $layer_export_options[$this->layer[0]['export_privileg']]['color']; ?>" onchange="this.setAttribute('style', this.options[this.selectedIndex].getAttribute('style'))" <? echo $disabled; ?>>	<?
+			foreach($layer_export_options AS $value => $option) {
+				$selected = (strval($this->layer[0]['export_privileg']) === strval($value) ? ' selected' : '');	?>
+				<option value="<? echo $value; ?>" style="background-color: <? echo $option['color']; ?>" <? echo $selected; ?> ><? echo $option['output']; ?></option>	<?
+			}	?>
 		</select>		
 	</div>
 <? 
@@ -86,11 +127,11 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 				),
 				'0' => array(
 					'output' => $strRead,
-					'color' => '#9ae394'
+					'color' => '#eeee39'
 				),
 				'1' => array(
 					'output' => $strEdit,
-					'color' => '#eeee39'
+					'color' => '#9ae394'
 				)
 			);
 ?>

@@ -53,7 +53,7 @@
 						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="layer-column">
-						' . ($GUI->layers['alias'][$i] != '' ? $GUI->layers['alias'][$i] : $GUI->layers['Bezeichnung'][$i]) . '
+						' . $GUI->layers['Name_or_alias'][$i] . '
 					</td>
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="default_drawingorder-column">
 						' . $GUI->layers['default_drawingorder'][$i] . '

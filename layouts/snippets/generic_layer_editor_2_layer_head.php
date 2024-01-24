@@ -35,20 +35,10 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 											switch ($layer['attributes']['form_element_type'][$j]) {
 												case 'Auswahlfeld' : case 'Radiobutton' : {
 													if (is_array($layer['attributes']['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j][$k]); $e++) {
-															if ($layer['attributes']['enum_value'][$j][$k][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
-																$output[$p] = $layer['attributes']['enum_output'][$j][$k][$e];
-																break;
-															}
-														}
+														$output[$p] = $layer['attributes']['enum'][$j][$k][$layer['shape'][$k][$identifier_attributes[$p]]]['output'];
 													}
 													else {
-														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j]); $e++) {
-															if ($layer['attributes']['enum_value'][$j][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
-																$output[$p] = $layer['attributes']['enum_output'][$j][$e];
-																break;
-															}
-														}
+														$output[$p] = $layer['attributes']['enum'][$j][$layer['shape'][$k][$identifier_attributes[$p]]]['output'];
 													} 
 												} break;
 												
@@ -67,11 +57,14 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 ?>				<td align="right">
 						<table cellspacing="0" cellpadding="0" class="button_background" style="border-left: 1px solid #bbb">
 							<tr><?
-								if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
-									<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><? 
-								}
-								elseif ($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0) { ?>
-									<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+								if ($layer['connectiontype'] == 6 AND $layer['Layer_ID'] > 0) {
+									if ($this->formvars['go'] == 'Zwischenablage' OR $this->formvars['go'] == 'gemerkte_Datensaetze_anzeigen'){ ?>
+										<td><a title="<? echo $strDontRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);remove_from_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button nicht_mehr_merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><? 
+									}
+									else { ?>
+										<td><a title="<? echo $strRememberDataset; ?>" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);add_to_clipboard(<? echo $layer['Layer_ID']; ?>);"><div class="button merken"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td><?
+									}	?>
+									<td><a title="<? echo $strCreateDatasetLink; ?>" href="javascript:void(0)" onclick="showURL('go=Layer-Suche_Suchen&selected_layer_id=<? echo $layer['Layer_ID']; ?>&value_<? echo $layer['maintable']; ?>_oid=<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', '<? echo $strCreateDatasetLink; ?>');"><div class="button url_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td> <?
 								}
 								if ($layer['privileg'] > '0') { ?>
 									<td><a onclick="checkForUnsavedChanges(event);" href="javascript:select_this_dataset(<? echo $layer['Layer_ID']; ?>, <? echo $k; ?>);use_for_new_dataset(<? echo $layer['Layer_ID']; ?>)" title="<? echo $strUseForNewDataset; ?>"><div class="button use_for_dataset"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>

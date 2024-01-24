@@ -612,11 +612,12 @@ FROM
 	}
 
 	function get_table_alias_names($query_plan){
+		$table_alias_names = [];
 		$table_info = explode(":eref \n         {ALIAS \n         ", $query_plan);
 		for($i = 1; $i < count($table_info); $i++){
-			$table_alias = get_first_word_after($table_info[$i], ':aliasname');
+			$table_alias = str_replace([' ', chr(10), chr(13)], '', get_first_word_after($table_info[$i], ':aliasname', ' ', ':'));
 			$table_oid = get_first_word_after($table_info[$i], ':relid');
-			if($table_oid AND $table_alias != 'unnamed_join'){
+			if($table_oid AND !array_key_exists($table_oid, $table_alias_names) AND $table_alias != 'unnamed_join'){
 				$table_alias_names[$table_oid] = $table_alias;
 			}
 		}
@@ -997,7 +998,7 @@ FROM
 					 f_table_schema IN ('" . $schema . "') and 
 					 f_table_name = '" . $tablename . "' AND 
 					 f_geometry_column = '" . $geomcolumn . "'),
-					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " limit 1)
+					(select geometrytype(" . $geomcolumn . ") FROM " . $schema . "." . pg_quote($tablename) . " where " . $geomcolumn . " IS NOT NULL limit 1)
 				) as type
 			";
 			$ret1 = $this->execSQL($sql, 4, 0);
@@ -1016,6 +1017,7 @@ FROM
 	}
   
   function eliminate_star($query, $offset){
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
   	if(substr_count(strtolower($query), ' from ') > 1){
   		$whereposition = strrpos($query, ' WHERE ');
   		$withoutwhere = substr($query, 0, $whereposition);
@@ -1040,9 +1042,9 @@ FROM
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
         	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
+          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
+            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
           }
           $query = str_replace(trim($column[$i]), $columns, $query);
         }
@@ -1391,7 +1393,7 @@ FROM
 		return $rs;
 	}
   
-  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl,$StrassenSchl,$HausNr) {
+  function getFlurstKennzListeByGemSchlByStrSchl($GemeindeSchl, $StrassenSchl, $HausNr, $exclude_lmh_gml_ids) {
 		if ($HausNr != '') {
 			$adressen = explode(', ', $HausNr);
 			foreach($adressen as $adresse){
@@ -1411,6 +1413,9 @@ FROM
 			}
 			$adressfilter = "(l.gemeinde, l.lage, l.kreis) IN (" . implode(', ', $adr) . ")";
 		}
+		if ($exclude_lmh_gml_ids != '') {
+			$adressfilter .= " AND gml_id NOT IN (" . $exclude_lmh_gml_ids . ")";
+		}
   	$sql = "
 			SELECT 
 				f.flurstueckskennzeichen as flurstkennz
@@ -1428,7 +1433,7 @@ FROM
 																			$adressfilter . 
 																			$this->build_temporal_filter(array('l')) . "
 																		)";
-		if ($HausNr == '') {
+		if ($HausNr == '' AND $exclude_lmh_gml_ids == '') {
 			$sql .= "
 				OR f.zeigtauf && ARRAY	(
 																	SELECT 
@@ -2564,10 +2569,12 @@ FROM
 			  min(st_xmin(env)) AS minx, 
 			  max(st_xmax(env)) AS maxx,
 			  min(st_ymin(env)) AS miny, 
-			  max(st_ymax(env)) AS maxy
+			  max(st_ymax(env)) AS maxy,
+				'''' || array_to_string(array_agg(gml_ids), ''',''') || '''' as gml_ids
 			FROM
 			  alkis.ax_gebaeude g,
-			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env
+			  st_envelope(st_transform(g.wkb_geometry, " . $epsgcode . ")) AS env,
+				unnest(g.zeigtauf) as gml_ids
 			WHERE
 			  g.zeigtauf && ARRAY (
 			  SELECT
@@ -2588,11 +2595,8 @@ FROM
 			$rs = pg_fetch_assoc($ret[1]);
 			if ($rs['minx'] == 0) {
 				$ret[0] = 1;
-				$ret[1] = 'Geb&auml;ude nicht in Postgres Datenbank ' . $this->dbName . ' vorhanden.';
 			}
-			else {
-				$ret[1] = $rs;
-			}
+			$ret[1] = $rs;
 		}
 		return $ret;
 	}

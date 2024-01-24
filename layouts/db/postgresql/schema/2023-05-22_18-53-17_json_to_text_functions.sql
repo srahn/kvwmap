@@ -7,7 +7,7 @@ BEGIN;
 			RETURNS text
 			LANGUAGE 'plpgsql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 			DECLARE
 				sql text;
@@ -46,7 +46,7 @@ BEGIN;
 			RETURNS text
 			LANGUAGE 'plpgsql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 			DECLARE
 				sql text;
@@ -77,7 +77,7 @@ BEGIN;
 			RETURNS text
 			LANGUAGE 'plpgsql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 	DECLARE
 		is_array boolean;
@@ -113,7 +113,7 @@ BEGIN;
 			RETURNS text
 			LANGUAGE 'sql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 			SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(json_strip_nulls(codelist)::text, '['::text, ''::text), ']', ''), '{', ''), '}', ''), '"', ''), ', ', ','), ',', ', '), ':', ': ')
 	$BODY$;
@@ -124,7 +124,7 @@ BEGIN;
 			RETURNS text
 			LANGUAGE 'plpgsql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 	DECLARE
 		is_array boolean;
@@ -160,7 +160,7 @@ BEGIN;
 			RETURNS geometry
 			LANGUAGE 'sql'
 			COST 100
-			STABLE PARALLEL UNSAFE
+			
 	AS $BODY$
 		WITH polygons AS (
 			SELECT

@@ -291,7 +291,7 @@
 			</div><?
 		} ?>
 
-		<div id="neue_zusammenzeichnung" class="centered_div hidden">
+		<div id="neue_zusammenzeichnung" class="centered_div" style="display: none">
 			<div
 				id="upload_zusammenzeichnung_div"
 				ondrop="zz.upload_zusammenzeichnung(event)"
@@ -373,7 +373,7 @@
 				<div id="dokumente_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Dokumente
 				</div>
-				<div id="dokumente_div" class="content_div hidden">
+				<div id="dokumente_div" class="content_div" style="display: none;">
 					<table>
 						<tr>
 							<td>Hochgeladene XPlanGML-Datei:</td><td><a href="index.php?go=xplankonverter_download_uploaded_xplan_gml&page=zusammenzeichnung&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>"><i class="fa fa-file-archive-o" aria-hidden="true"></i> Download</a><td>
@@ -395,7 +395,7 @@
 				<div id="dienst_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Dienst
 				</div>
-				<div id="dienst_div" class="content_div hidden">
+				<div id="dienst_div" class="content_div" style="display: none;">
 					<table style="width: 100%">
 						<tr>
 							<td style="border-right: 0px solid gray">Metadaten über den Geodatensatz:</td>
@@ -465,38 +465,9 @@
 				<div id="class_completeness_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Planzeichen (Objektklassen)
 				</div>
-				<div id="class_completeness_div" class="content_div hidden" style="text-align: center; padding: 20px">
+				<div id="class_completeness_div" class="content_div" style="display: none; text-align: center; padding-top: 20px">
 					<p>
 					<input type="button" name="load_class_completeness" value="Lade Objektklassen" onclick="show_class_completenesses(<? echo $zusammenzeichnung->get_id(); ?>)"/>
-					<?php
-/*
-					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-					foreach($layers_with_content AS $layer) {
-						$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
-						$this->formvars['layer_id'] = $layer['id'];
-						$classes = $mapDB->read_Classes($layer['id']);
-						$class_completeness_result .= '<table id="class_expressions_layer_' . $layer['id'] . '" style="display: none">
-							<th class="class-th" style="width: 30%">Klasse</th>
-							<th class="class-th" style="width: 70%">Definition</th>' . implode(
-								'',
-								array_map(
-									function($class) {
-										return '
-											<tr>
-												<td class="class-td">' . $class['Name'] . '</td>
-												<td class="class-td">' . $class['Expression'] . '</td>
-											</tr>
-										';
-									},
-									$classes
-								)
-							) . '
-						</table>';
-						$result = $this->check_class_completeness();
-						$class_completeness_result .= $result['html'];
-					}
-					echo $class_completeness_result;
-					*/ ?>
 				</div><?
 				if (count($this->zusammenzeichnungen['archived']) > 0) { ?>
 					<div id="alte_staende_head" class="head_div" onclick="toggle_head(this)">
@@ -512,7 +483,7 @@
 					<div id="faulty_head" class="head_div" onclick="toggle_head(this)">
 						<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Fehlgeschlagene Upload-Versuche
 					</div>
-					<div id="faulty_div" class="content_div hidden"><?
+					<div id="faulty_div" class="content_div" style="display: none"><?
 						foreach ($this->zusammenzeichnungen['faulty'] AS $konvertierung) {
 							if ($konvertierung->plan) {
 								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_FP_PLAENE_LAYER_ID . "&value_plan_gml_id=" . $konvertierung->plan->get('gml_id') . "&operator_plan_gml_id==&csrf_token=" . $_SESSION['csrf_token'];

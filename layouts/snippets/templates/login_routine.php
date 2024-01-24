@@ -1,7 +1,7 @@
 <?
 	# Überprüfung der Nutzerdaten
 
-	if (date('Y-m-d h:m:s', strtotime('- 1 year')) > date($GUI->user->userdata_checking_time)) {
+	if (!$GUI->user->is_gast() AND date('Y-m-d h:m:s', strtotime('- 1 year')) > date($GUI->user->userdata_checking_time)) {
 
 		$GUI->add_message('info', '
 			Guten Tag,

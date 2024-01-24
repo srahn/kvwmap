@@ -466,10 +466,86 @@
 	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers, $ows_onlineresource) use ($GUI) {
 		global $admin_stellen;
 
+		# Frage xplan_layer_with_content ab
+		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
+		$result = $xp_plan->get_layers_with_content($xplan_layers);
+		if (! $result['success']) {
+			return $result;
+		}
+
+		# Lade das MapObjekt (nur mit $LayerIds)
+		$GUI->class_load_level = 2;
+		$GUI->formvars['only_layer_ids'] = implode(', ', array_map(function($layer) { return $layer['id']; }, $result['layers_with_content']));
+		$GUI->service_layernames = array_keys($result['layers_with_content']); // set layernames array for output in view show_service_data.php
+		$stelle_id = $GUI->Stelle_ID; // speichern für späteren Gebrauch
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$GUI->Stelle_ID = $admin_stelle->id; // setze Stelle_ID von Adminstelle zur Erzeugung des MapFiles der Adminstelle
+		$GUI->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
+
+		# Setze globale Metadaten im MapObjekt des Dienstes der Adminstelle
+		#$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+		$bb = $admin_stelle->MaxGeorefExt;
+		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
+		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
+		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		#$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht der einzelnen Zusammenzeichnungen der Flächennutzungspläne)');
+		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_contactorganization", $admin->stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+		$GUI->map->setMetaData("ows_contactperson", $admin->stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+		$GUI->map->setMetaData("ows_contactposition", $admin->stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+		$GUI->map->setMetaData("ows_contactelectronicmailaddress", $admin->stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+		$GUI->map->setMetaData("ows_contactvoicetelephone", $admin->stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+		$GUI->map->setMetaData("ows_contactfacsimiletelephone", $admin->stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+		$GUI->map->setMetaData("ows_stateorprovince", $admin->stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+		$GUI->map->setMetaData("ows_address", $admin->stelle->ows_contactaddress ?: OWS_ADDRESS);
+		$GUI->map->setMetaData("ows_postcode", $admin->stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+		$GUI->map->setMetaData("ows_city", $admin->stelle->ows_contactcity ?: OWS_CITY);
+		$GUI->map->setMetaData("ows_country", OWS_COUNTRY);
+		$GUI->map->web->set('header', 'templates/header.html');
+		$GUI->map->web->set('footer', 'templates/footer.html');
+		# Setze Metadaten der Layer
+		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
+			$layer = $GUI->map->getLayer($i);
+			$layer->set('header', 'templates/' . $layer->name . '_head.html');
+			$layer->set('template', 'templates/' . $layer->name . '_body.html');
+			# Extent mit Ausdehnung von adminstelle überschreiben
+			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+
+			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+
+			if ($layerObj->get('write_mapserver_templates') == 'generic') {
+				# Set generic Data sql for layer
+				$result = $layerObj->get_generic_data_sql();
+				if ($result['success']) {
+					$layer->set('data', $result['data_sql']);
+				}
+				else {
+					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+					return $result;
+				}
+			}
+			$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layer->data));
+		}
+
+		$GUI->Stelle_ID = $stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.
+
+		return array(
+			'success' => true,
+			'mapfile' => MAPFILENAME . '.map'
+		);
+	};
+
+	$GUI->xplankonverter_create_geoweb_service_alt = function($xplan_layers, $ows_onlineresource) use ($GUI) {
+		global $admin_stellen;
+
 		$GUI->class_load_level = 2;
 		$GUI->loadMap('DataBase');
 
-		#$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+		$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$bb = $admin_stelle->MaxGeorefExt;
 		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
@@ -495,17 +571,20 @@
 		$GUI->map->web->set('footer', 'templates/footer.html');
 
 		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
+	
 		$result = $xp_plan->get_layers_with_content($xplan_layers);
 		if (! $result['success']) {
 			return $result;
 		}
+
 		$GUI->service_layers = $result['layers_with_content'];
 		$GUI->service_layernames = array_keys($GUI->service_layers);
-		#$GUI->xplog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
+		$GUI->xlog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
 		$layers_to_remove = array();
 
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);
+			#$GUI->xlog->write('gui map layer: ' . $layer->name);	
 			if (in_array($layer->name, $GUI->service_layernames)) {
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
@@ -514,15 +593,7 @@
 				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
-					$options = array(
-						'attributes' => array(
-							'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-							'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id')
-						),
-						'geom_attribute' => 'position',
-						'geom_type_filter' => true
-					);
-					$result = $layerObj->get_generic_data_sql($options);
+					$result = $layerObj->get_generic_data_sql();
 					if ($result['success']) {
 						$layer->set('data', $result['data_sql']);
 					}
@@ -538,8 +609,9 @@
 			else {
 				$GUI->map->removeLayer($i);
 				$i--;
-			}
+			}	
 		}
+
 		return array(
 			'success' => true,
 			'mapfile' => MAPFILENAME . '.map'

@@ -1,3 +1,6 @@
+<?
+	$lang = $this->user->rolle->language;
+?>
 <style>
 
 </style>
@@ -23,17 +26,17 @@
 	}
 
 	function add() {
-		var row = $('#myobjects_head').next().clone();
+		var row = $('#myobjects_head').next().clone().show();
 		$('.control').hide();
 		$('.mod').hide();
 		$('.btn-new.mod').show();
 		row.attr('id', 0);
 		row.children().html('');
 		row.children().last().html('\
-				<a id="edit_link_0" href="#" onclick="edit(this, \'<? echo $this->myobjects[0]->tableName; ?>\');" style="margin-left: 1px; display: none;" class="control"><i class="fa fa-pencil fa_lg" style="color: #b22222;" title="Ändern"></i></a>\
-				<a id="drop_link_0" href="#" onclick="drop(this, \'<? echo $this->myobjects[0]->tableName; ?>\');" style="margin-left: 5px; display: none;" class="control"><i class="fa fa-trash-o fa_lg" style="color: #b22222" title="Löschen"></i></a>\
-				<a id="save_link_0" href="#" onclick="save(this, \'<? echo $this->myobjects[0]->tableName; ?>\');" style="margin-left: 1px;" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>\
-				<a id="quit_link_0" href="#" onclick="drop(this, \'<? echo $this->myobjects[0]->tableName; ?>\');" style="margin-left: 5px;" class="mod"><i class="fa fa-times fa_lg" style="color: #b22222" title="Abbrechen"></i></a>\
+				<a id="edit_link_0" href="#" onclick="edit(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 1px; display: none;" class="control"><i class="fa fa-pencil fa_lg" style="color: #b22222;" title="Ändern"></i></a>\
+				<a id="drop_link_0" href="#" onclick="drop(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 5px; display: none;" class="control"><i class="fa fa-trash-o fa_lg" style="color: #b22222" title="Löschen"></i></a>\
+				<a id="save_link_0" href="#" onclick="save(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 1px;" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>\
+				<a id="quit_link_0" href="#" onclick="drop(this, \'<? echo $this->class::$table_name; ?>\');" style="margin-left: 5px;" class="mod"><i class="fa fa-times fa_lg" style="color: #b22222" title="Abbrechen"></i></a>\
 		');
 		$('#myobjects_head').after(row);
 		$('tr [id=0] td').each(makeEditable);
@@ -154,20 +157,37 @@
 </script>
 <table width="1000" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
   <tr>
-    <td align="center" colspan="7" style="height: 30px"><h2><? echo $this->myobjects[0]->alias; ?></h2></td>
+    <td align="center" colspan="7" style="height: 30px"><h2><? echo $this->class::$title[$lang]; ?></h2></td>
 	</tr>
 	<tr id="myobjects_head"><?
-		foreach ($this->myobjects[0]->attributes as $attribute) {
-			echo '<th>' . $attribute['alias'] . '</th>';
+		foreach ($this->class::$attributes AS $attribute) {
+			echo '<th>' . $attribute['alias'][$lang] . '</th>';
 		} ?>
 		<th width="40px">
 			<a class="btn btn-new control" href="#" onclick="add()"><i titel="Lege einen neuen Datensatz an." class="fa fa-plus" style="color: white; width: 25px"></i></a>
 			<a class="btn btn-new mod" href="#" style="display:none; background-color: gray; background-image: linear-gradient(white, gray); border: 1px solid gray; cursor: default"><i class="fa fa-plus" style="color: white; width: 25px;"></i></a>
 		</th>
-	</tr><?php
+	</tr>
+	<tr id="-1" style="display:none"><?
+		foreach ($this->class::$attributes as $attribute) { ?>
+			<td 
+				class="<? echo $attribute['privileg']; ?>" 
+				name="<? echo $attribute['attribute']; ?>" 
+				type="<? echo $attribute['type']; ?>" 
+				size="<? echo $attribute['size']; ?>"
+				value="<?php echo $attribute['alias'][$lang]; ?>"
+			><?php echo $attribute['alias'][$lang]; ?></td><?
+		} ?>
+			<td width="40px">
+				<a id="edit_link_0" href="#" onclick="edit(this, '<? echo $this->class::$table_name; ?>');" style="margin-left: 1px;" class="control"><i class="fa fa-pencil fa_lg" title="Ändern"></i></a>
+				<a id="drop_link_0" href="#" onclick="drop(this, '<? echo $this->class::$table_name; ?>');" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" title="Löschen"></i></a>
+				<a id="save_link_0" href="#" onclick="save(this, '<? echo $this->class::$table_name; ?>');" style="margin-left: 1px; display: none" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>
+				<a id="quit_link_0" href="#" onclick="quit(this, '<? echo $this->class::$table_name; ?>');" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
+			</td>
+	<tr><?
 	foreach ($this->myobjects AS $myobject) { ?>
 		<tr id="<?php echo $myobject->get('id'); ?>"><?
-			foreach ($myobject->attributes as $attribute) {
+			foreach ($myobject::$attributes as $attribute) {
 				echo '
 				<td 
 					class="' . $attribute['privileg'] . '" 
@@ -183,8 +203,8 @@
 					<a id="drop_link_' . $myobject->get('id') . '" href="#" onclick="drop(this, \'' . $myobject->tableName . '\');" style="margin-left: 5px;" class="control"><i class="fa fa-trash-o fa_lg" title="Löschen"></i></a>
 					<a id="save_link_' . $myobject->get('id') . '" href="#" onclick="save(this, \'' . $myobject->tableName . '\');" style="margin-left: 1px; display: none" class="mod"><i class="fa fa-check fa_lg" style="color: #087e08;" title="Speichern"></i></a>
 					<a id="quit_link_' . $myobject->get('id') . '" href="#" onclick="quit(this, \'' . $myobject->tableName . '\');" style="margin-left: 5px; display: none" class="mod"><i class="fa fa-times fa_lg" title="Abbrechen"></i></a>
-				</td>
-		<tr>';
+				</td>'; ?>
+		<tr><?
 	} ?>
 </table>
 <? if($this->formvars['selected_layer_id']){ ?>

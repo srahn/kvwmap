@@ -21,9 +21,10 @@ class Debugger {
 			$_SESSION = array();
 		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
-		$this->fp=fopen($this->filename,'w');
+		$this->fp = fopen($this->filename,'w');
 		$this->mime_type = $mime_type;
 		$this->level;
+		$this->user_funktion = '';
 
 		if ($this->mime_type == 'text/html') {
 			fwrite($this->fp,"<html>\n<head>\n  <title>kvwmap Debug-Datei</title>\n<META http-equiv=Content-Type content='text/html; charset=UTF-8'>\n</head>\n<body>");
@@ -58,7 +59,9 @@ class Debugger {
 	}
 
 	function show($msg, $debug = false) {
-		if ($debug) echo '<br>' . $msg;
+		if ($debug AND $this->user_funktion == 'admin') {
+			echo '<br>' . $msg;
+		}
 	}
 
 	function close() {

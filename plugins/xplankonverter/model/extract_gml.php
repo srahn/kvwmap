@@ -276,14 +276,16 @@ class Gml_extractor {
 		 #print_r($GUI->formvars);
 	}
 
+	/**
+	 * Parse the EPSG of the file $this->gml_location and return the epsg-Value
+	 * According to Konformitaetsbedingung 2.1.3.1 there needs to be a standard gml:Envelope in each valid xplan-file.
+	 * A fallback value will be provided as conformity currently cannot be validated at the moment of loading (schema could be validated with xsd-validator)
+	 * 
+	 * NOTE:
+	 * Konformitaetsbedingung 2.13.1 currently also still allows a "kurzbezeichnung" akin to ALKIS, e.g "urn:adv:crs:DE_DHDN_3GK3", where DE_DHDN_3GK3 is Gauss-Krueger Streifen 3
+	 * This method of CRS will likely become obsolete in XPlanung 6.0, and is also currently not supported with this parser (default value would be used)
+	 */
 	function get_source_srid() {
-		# Parse the EPSG of the file
-		# According to Konformitaetsbedingung 2.1.3.1 there needs to be a standard gml:Envelope in each valid xplan-file.
-		# A fallback value will be provided as conformity currently cannot be validated at the moment of loading (schema could be validated with xsd-validator)
-		
-		# NOTE:
-		# Konformitaetsbedingung 2.13.1 currently also still allows a "kurzbezeichnung" akin to ALKIS, e.g "urn:adv:crs:DE_DHDN_3GK3", where DE_DHDN_3GK3 is Gauss-Krueger Streifen 3
-		# This method of CRS will likely become obsolete in XPlanung 6.0, and is also currently not supported with this parser (default value would be used)
 		$epsg = $this->input_epsg;
 		$lines = file($this->gml_location);
 		foreach ($lines as $lineNumber => $line) {
@@ -295,9 +297,6 @@ class Gml_extractor {
 				break; #found it
 			}
 			if (preg_match('/srsName=\'([^"]+)\'/', $line, $matched_epsg_str)) {
-				break; #found it
-			}
-			if (preg_match('/srsname=\'([^"]+)\'/', $line, $matched_epsg_str)) {
 				break; #found it
 			}
 			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
@@ -339,11 +338,12 @@ class Gml_extractor {
 		$version = '5.1'; //default
 		$lines = file($this->gml_location);
 		$matched_ns_str;
-		$xml_bracket_is_opened = false;
+		$xml_bracket_is_opened = false; // check within auszug with linebreaks
 		foreach ($lines as $lineNumber => $line) {
-			if (strpos($line, 'XPlanAuszug') === false and $xml_bracket_is_opened == false) {
+			if (strpos($line, 'XPlanAuszug') === false AND $xml_bracket_is_opened == false) {
 				continue;
 			}
+			
 			# to also match formatted multiline XPlanAuszug
 			$xml_bracket_is_opened = true;
 			if (strpos($line, '>') !== false) {
@@ -512,7 +512,7 @@ class Gml_extractor {
 		$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 		$param_1                = urlencode('-f "PostgreSQL" PG:');
 		$connection_string      = urlencode('"' . $this->pgdatabase->get_connection_string() . ' SCHEMAS=' . $this->gmlas_schema . '" ');
-		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location); 
+		$param_2                = urlencode('GMLAS:' . "'" . $this->gml_location . "'" . ' -nlt CONVERT_TO_LINEAR -oo REMOVE_UNUSED_LAYERS=YES -oo XSD=' . $this->xsd_location . ' -s_srs EPSG:' . $this->input_epsg . ' -t_srs EPSG:' . $this->epsg);
 
 		$url = $gdal_container_connect . $param_1 . $connection_string . $param_2;	
 
@@ -644,8 +644,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
+				st_assvg(ST_ForceRHR(gmlas.raeumlichergeltungsbereich), 0, 8) AS newpath,
+				st_astext(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -751,8 +751,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
+				st_assvg(gmlas.raeumlichergeltungsbereich, 0, 8) AS newpath,
+				st_astext(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -851,8 +851,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
+				st_assvg(gmlas.raeumlichergeltungsbereich, 0, 8) AS newpath,
+				st_astext(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -934,8 +934,8 @@ class Gml_extractor {
 				END AS wurdegeaendertvon,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
 				gmlas.bezugshoehe AS bezugshoehe,
-				st_assvg(st_transform(gmlas.raeumlichergeltungsbereich,". $this->epsg ."), 0, 8) AS newpath,
-				st_astext(st_transform(ST_ForceRHR(gmlas.raeumlichergeltungsbereich),". $this->epsg .")) AS newpathwkt,
+				st_assvg(gmlas.raeumlichergeltungsbereich, 0, 8) AS newpath,
+				st_astext(ST_ForceRHR(gmlas.raeumlichergeltungsbereich)) AS newpathwkt,
 				CASE WHEN vm.xp_verfahrensmerkmal_vermerk IS NOT NULL OR vm.xp_verfahrensmerkmal_datum IS NOT NULL OR vm.xp_verfahrensmerkmal_signatur IS NOT NULL OR vm.xp_verfahrensmerkmal_signiert IS NOT NULL THEN
 					array_to_json(ARRAY[(vm.xp_verfahrensmerkmal_vermerk, vm.xp_verfahrensmerkmal_datum, vm.xp_verfahrensmerkmal_signatur, vm.xp_verfahrensmerkmal_signiert)]::xplan_gml.xp_verfahrensmerkmal[])
 					ELSE NULL
@@ -1033,7 +1033,7 @@ class Gml_extractor {
 				gmlas.bedeutung::xplan_gml.xp_bedeutungenbereich AS bedeutung,
 				gmlas.detailliertebedeutung AS detailliertebedeutung,
 				gmlas.erstellungsmassstab AS erstellungsmassstab,
-				ST_Multi(ST_ForceRHR(st_transform(gmlas.geltungsbereich,". $this->epsg ."))) AS geltungsbereich,
+				ST_Multi(ST_ForceRHR(gmlas.geltungsbereich)) AS geltungsbereich,
 				" . $user_id . " AS user_id,
 				" . $konvertierung_id . " AS konvertierung_id,
 				trim(leading '#gml_' FROM lower(gmlas.rasterbasis_href)) AS rasterbasis,";
@@ -1185,32 +1185,36 @@ class Gml_extractor {
 		# Textabschnitte zu Fachobjekten, Assoziation: reftextinhalt
 		$tables_with_reftextinhalt = array_filter(
 			$this->get_all_tables_in_schema($this->gmlas_schema),
-			function($table_in_schema) {
+			function ($table_in_schema) {
 				return $this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt");
 			}
 		);
-		$select_reftextinhalte = array();
-		foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
-			#$select_reftextinhalte[] = "
-			#	SELECT
-			#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
-			#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
-			#	FROM
-			#		" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
-			#";
-			$select_reftextinhalte[] = "
-				SELECT
-					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
-					trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM reftextinhalt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
-				FROM
-					" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
-			";
+		$selects_reftextinhalt = array();
+		if(!empty($table_with_reftextinhalt)) {
+			foreach ($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
+				#$select_reftextinhalte[] = "
+				#	SELECT
+				#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+				#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+				#	FROM
+				#		" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+				#";
+				$selects_reftextinhalt[] = "
+					SELECT
+						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+					FROM
+						" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+				";
+			}
 		}
+		$this->pgdatabase->gui->write_xlog('tables_with_reftextinhalt: ' . print_r($tables_with_reftextinhalt, true));
+		$this->pgdatabase->gui->write_xlog('select_reftextinhalte: ' . print_r($selects_reftextinhalt, true));
 		$sql = "
 			INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
 				" . $prefix . "_objekt_gml_id,
 				" . $prefix . "_textabschnitt_gml_id
-			) SELECT * FROM (" . implode(' UNION ', $select_reftextinhalte) . ") AS reftextinhalte
+			) SELECT * FROM (" . implode(' UNION ', $selects_reftextinhalt) . ") AS reftextinhalte
 		";
 		#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);

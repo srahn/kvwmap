@@ -187,6 +187,7 @@ class spatial_processor {
     	$rs[0] = $rs[0]/10000;
     	$rs[0] = round($rs[0],1);
     }
+		$rs[0] = str_replace('.', ',', $rs[0]);
     return $rs[0].'█'.$rs[0];
   }
   
@@ -199,6 +200,7 @@ class spatial_processor {
     else {
     	$rs = pg_fetch_array($ret[1]);
     }
+		$rs[0] = str_replace('.', ',', $rs[0]);
     return $rs[0].'█'.$rs[0];
   }
 	
@@ -326,17 +328,11 @@ class spatial_processor {
 			}break;			
 		
 			case 'add_buffered_line':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width']);
+				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width'] ?: 50);
 			}break;
 			
 			case 'add_parallel_polygon':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'], $formvars['side'], $formvars['subtract']);
+				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'] ?: 50, $formvars['side'], $formvars['subtract']);
 			}break;
 		
 			case 'split':{

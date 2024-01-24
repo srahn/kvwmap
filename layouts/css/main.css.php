@@ -333,7 +333,7 @@ form {
 }
 
 .hidden{
-	display: none;
+	display: none !important;
 }
 
 ul{
@@ -370,8 +370,7 @@ h2 {
 	margin-top: 0px;
 }
 
-input[type="text"], input[type="float"] {
-
+input[type="text"], input[type="float"], input[type="number"] {
 	font-size: <? echo $font_size_factor * 14; ?>px;
 	font-family: SourceSansPro1;
 	height: 22px;
@@ -404,6 +403,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	font-weight: normal;
 }
 
 span[data-tooltip]::before {
@@ -453,6 +453,41 @@ span[data-tooltip]:hover::after {
   display: none;
 	border: 1px solid #bbb;
 	border-radius: 2px;
+	box-shadow: 1px 1px 6px 1px #ddd;
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
+	max-height: 400px;
+	overflow-y: auto;
+	margin: 0;
+}
+
+.custom-select .dropdown.upward {
+	top: auto;
+	bottom: 24px;
+}
+
+.custom-select.active .dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-select .dropdown li {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 3px;
+	margin-bottom: 0;
+  cursor: pointer;
+}
+
+.custom-select .dropdown li:not(:last-child) {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.custom-select .dropdown li.selected {
+  background-color: #e0e0e6;
 }
 
 .custom-select img {
@@ -494,37 +529,6 @@ span[data-tooltip]:hover::after {
   right: <? echo $font_size_factor * 15; ?>px;
 }
 
-.custom-select.active .dropdown {
-  display: flex;
-  flex-direction: column;
-  box-shadow: 1px 1px 6px 1px #ddd;
-  position: absolute;
-  top: 1px;
-  right: 0;
-  left: 0;
-  /*min-width: 200px;*/
-	max-height: 400px;
-	overflow-y: auto;
-	margin: 0;
-}
-
-.custom-select .dropdown li {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  padding: 3px;
-	margin-bottom: 0;
-  cursor: pointer;
-}
-
-.custom-select .dropdown li:not(:last-child) {
-  border-bottom: 1px solid #cdcdcd;
-}
-
-.custom-select .dropdown li.selected {
-  background-color: #e0e0e6;
-}
-
 
 .select_option_link:hover{
 	background-image: url(<? echo GRAPHICSPATH; ?>pfeil_rechts.gif);
@@ -538,6 +542,10 @@ span[data-tooltip]:hover::after {
 
 .table_border_collapse>tbody>tr>td{
 	border:	1px solid #C3C7C3;
+}
+
+.styleFormField {
+	width: 87px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
@@ -630,6 +638,7 @@ select {
 
 select option{
 	font-family: SourceSansPro1,arial;
+	padding: 2px;
 }
 
 textarea {
@@ -1185,6 +1194,10 @@ a.menuered:hover {
 	background-image: url(<? echo GRAPHICSPATH; ?>nicht_mehr_merken.png);
 }
 
+.url_dataset{
+	background-image: url(<? echo GRAPHICSPATH; ?>url_dataset.png);
+}
+
 .datensatz_loeschen{
 	background-image: url(<? echo GRAPHICSPATH; ?>datensatz_loeschen.png);
 }
@@ -1294,7 +1307,7 @@ a.menuered:hover {
 	position: absolute;
 	height: calc(100% - 2px);
 	width: calc(100% - 2px);
-	left: 1;
+	left: 0;
 	top: 1;
 }
 
@@ -1349,6 +1362,10 @@ a.menuered:hover {
 
 #mapimage{
 	position: relative;
+}
+
+#mapbuttons {
+	padding-left: 1px;
 }
 
 #showcoords, #showmeasurement{
@@ -1843,6 +1860,7 @@ a:hover .preview_image{
 	margin-left: 20px;
 	padding: 0px;
 	text-align: left;
+	width: 90%;
 }
 
 .dstable{
@@ -2004,17 +2022,28 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .gle1_table{
-		border-collapse: collapse;
+	border-collapse: collapse;
+	position: relative;
+}
+
+.gle1_table>thead>tr>td{
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle1_table>tbody>tr>td{
-		border: 1px solid grey;
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle_datatype_table{
 	border: 1px solid grey;
 	border-collapse: collapse;
 	margin: 2px 2px 2px 0;
+}
+
+.gle_neu_link {
+	text-align: right;
 }
 
 .subForm:not(:empty){
@@ -2062,6 +2091,25 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 5px 1px;
 	background: #e3e3e3;
 	border-radius: 2px;
+}
+
+.gle_result_filter {
+	position: absolute; 
+	top: 2px;
+	right: 4px;
+  z-index: 1000;
+	text-align: right;
+}
+
+.gle_result_filter .value_list {
+	max-height: 250px;
+	max-width: 250px;
+	scrollbar-width: thin;
+	display: none;
+}
+
+.gle_result_filter:hover .value_list {
+	display: block;
 }
 
 .calendar {
@@ -2234,37 +2282,38 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: flex-start;
+	width: 580px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .fstanzeigehover{
-								position: relative;
-								float: left;
-								margin: auto;
-								visibility: visible;
-								line-height: 30px;
+	position: relative;
+	float: left;
+	margin: auto;
+	visibility: visible;
+	line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.4);
+	background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		flex-wrap: wrap;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .flexcontainer2{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		align-items:stretch;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	align-items:stretch;
 }
 
 .map-right{
@@ -2752,4 +2801,61 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	color: #666;
 	margin-top: 8px;
 	font-size: 110%
+}
+
+#nds_titel {
+	font-family: SourceSansPro3;
+	font-size: 20px;
+	margin-bottom: 0px;
+	margin-top: 10px;
+}
+#nds_titel p {
+	margin: 0px 0px -32px 0px;
+}
+#nds_formular {
+	margin: 40px 0px 20px 0px;
+	padding-left: 20px;
+}
+.nds_select  {
+	display: flex;
+	width: 500px;
+	margin: 0px 0px 10px 0px;
+}
+.nds_select select {
+	height: 25px;
+	width: 360px;
+	border-radius: 2px;
+	border: 1px solid #777;
+	padding-left: 5px;
+}
+.nds_select div:first-child {
+	margin-right: 10px;
+	align-self: center;
+	width: 50px;
+}
+#nds_submit {
+	display:flex;
+	flex-flow: row nowrap;
+	justify-content: center;
+	margin-bottom: 15px;
+}
+#nds_submit>div {
+	display: flex;
+	align-items: center;
+}
+#nds_submit input {
+	margin-right: 5px;
+}
+#nds_submit input[type="checkbox"] {
+	margin-top: auto;
+	margin-bottom: auto;
+	margin-left: 15px;
+}
+#nds_submit span {
+	margin: auto;
+	margin-left: 3px;
+}
+
+#nds_edit #dataset_operations {
+	display: none;
 }

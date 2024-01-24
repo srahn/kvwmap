@@ -74,13 +74,14 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_zusammenzeichnung
 */
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
+	$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
 	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
 	if (!file_exists($xplankonverter_file_path)) {
 		mkdir($xplankonverter_file_path, 0777);
 		$GUI->add_message('warning', 'Der Dateipfad ' . $xplankonverter_file_path . ' für die Konvertierung ' . $GUI->formvars['konvertierung_id'] . ' fehlte und musste neu angelegt werden.');
 		return false;
 	}
-	$xplankonverter_logfile = $xplankonverter_file_path . '/xplankonverter.log';
+	$xplankonverter_logfile = $xplankonverter_file_path . 'xplankonverter.log';
 	$GUI->xlog = new LogFile(
 		$xplankonverter_logfile,
 		'text',
@@ -88,6 +89,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		'',
 		true
 	);
+
 	function isInStelleAllowed($stelle, $requestStelleId) {
 		global $GUI;
 		if ($stelle->id == $requestStelleId) {
@@ -405,7 +407,7 @@ function go_switch_xplankonverter($go) {
 						$msg = 'Es wurde ein Objekt gefunden, welches keinem Planzeichen zugeordnet werden konnte.';
 					}
 					else {
-						$msg = 'Es wurden ' . $num_unclassified . ' Objekte gefunden, die keinem Planzeichen zugeordnet werden konnten.';
+						$msg = 'Es wurden ' . $num_unclassified . ' Objekte gefunden, die keinem Planzeichen zugeordnet werden konnten.<br>Rufen Sie die Zusammenzeichnung auf, klappen den Abschnitt "Planzeichen (Objektklassen) auf und klicken auf "Lade Objektklassen". Dort werden die Klassen angezeigt, die Objekte ohne Zuordnung enthalten und ein Link zu den Objekten. Nehmen Sie Kontakt auf mit Ihrem Dienstleister um die fehlenden Klassen zu ergänzen oder bestehende so anzupassen, dass die Objekte fachlich korrekt zugeordnet werden können.';
 					}
 
 					if (!$GUI->formvars['suppress_ticket_and_notification']) {
@@ -1146,7 +1148,7 @@ function go_switch_xplankonverter($go) {
 			if ($konvertierung_id == '') {
 				$GUI->write_xlog('Erzeugt den Geowebservice für alle Pläne im Schema xplan_gml');
 
-				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . '/' . $GUI->plan_abk_plural);
+				$result = $GUI->xplankonverter_create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->plan_abk_plural);
 				if (! $result['success']) {
 					$msg = 'Fehler beim Erzeugen des Map-Objektes, welches alle Layer des Dienstes enthält.' . $result['msg'];
 					$GUI->write_xlog('error: ' . $msg);
@@ -1181,21 +1183,24 @@ function go_switch_xplankonverter($go) {
 				}
 
 				$GUI->write_xlog('Erzeugt den Geowebservice für den Plan "' . $GUI->konvertierung->plan->get('name') . '" der Stelle ' . $GUI->Stelle->id);
-				$result = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
-				if (!$result['success']) {
-					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result['msg']);
+				$result_create_geoweb_service = $GUI->konvertierung->create_geoweb_service($GUI->xplan_layers, OWS_SERVICE_ONLINERESOURCE . $GUI->Stelle->id . '/' . $GUI->plan_abk);
+	
+				if (!$result_create_geoweb_service['success']) {
+					send_error('Fehler beim Erzeugen des Map-Objektes, welches die Layer des Dienstes der Stelle enthält. ' . $result_create_geoweb_service['msg']);
 					break;
 				}
-				$result = $GUI->write_mapfile($result['mapfile'], $GUI->Stelle->id . '/' . $GUI->plan_abk);
-				if (!$result['success']) {
-					send_error($result['msg']);
+				$result_write_mapfile = $GUI->write_mapfile($result_create_geoweb_service['mapfile'], $GUI->Stelle->id . '/' . $GUI->plan_abk);
+	
+				if (!$result_write_mapfile['success']) {
+					send_error($result_write_mapfile['msg']);
 					break;
 				}
 			}
+	
 			header('Content-Type: application/json');
 			$response = array(
 				'success' => true,
-				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $result['mapfile'] . ' erfolgreich geschrieben.'
+				'msg' => 'Map-Datei ' . WMS_MAPFILE_PATH . $result_create_geoweb_service['mapfile'] . ' erfolgreich geschrieben.'
 			);
 			echo json_encode($response);
 		} break;
@@ -1729,7 +1734,7 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$result = $new_konvertierung->send_notification("der Plan {$new_konvertierung->get('bezeichnung')} ist aktualisiert worden.\n\nDiese E-Mail ist vom Portal https://testportal-plandigital.de/kvwmap versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan\n\nIhr Team von PlanDigital");
+			$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . " ist aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_zusammenzeichnung&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
 			if (!$result['success']) {
 				send_error($result['msg']);
 				break;

@@ -374,9 +374,6 @@ class GUI {
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
-				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
-					$layerset[$i]['Name'] = $layerset[$i]['alias'];
-				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -509,14 +506,18 @@ class GUI {
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
           $attribcount = 0;
+					$links = '';
+					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
-          for($j = 0; $j < count($attributes['name']); $j++){
-            if($attributes['tooltip'][$j]){
-							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-							if(substr($attributes['type'][$j], 0, 1) == '_'){
+          for ($j = 0; $j < count($attributes['name']); $j++){
+            if ($attributes['tooltip'][$j]){
+							if ($attributes['alias'][$j] == '') {
+								$attributes['alias'][$j] = $attributes['name'][$j];
+							}
+							if (substr($attributes['type'][$j], 0, 1) == '_'){
 								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
 							}
-							else{
+							else {
 								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
 							}
 							if(is_array($values)){
@@ -536,20 +537,10 @@ class GUI {
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$k][$value]['output'];
 											}
 											else{
-												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$value]['output'];
 											}
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $auswahlfeld_output;
@@ -557,13 +548,7 @@ class GUI {
 											$attribcount++;
 										} break;
 										case 'Radiobutton': {
-											$radiobutton_output = '';
-											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-												if($attributes['enum_value'][$j][$e] == $value){
-													$radiobutton_output = $attributes['enum_output'][$j][$e];
-													break;
-												}
-											}
+											$radiobutton_output = $attributes['enum'][$j][$value]['output'];
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $radiobutton_output;
 											$output .= '##';
@@ -1057,7 +1042,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -1076,7 +1061,7 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
 		$this->MaxGeorefExt = ms_newRectObj();
@@ -1122,7 +1107,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -1145,7 +1130,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $PHP_SELF . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -1216,7 +1201,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1361,7 +1345,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
 			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
@@ -1418,7 +1402,7 @@ class rolle {
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
@@ -1995,109 +1979,191 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $only_current_enums = false){
-    # Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-    for($i = 0; $i < @count($attributes['name']); $i++){
+	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
+		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
+		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
+		for ($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
-			if(is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result, $withvalues, $stelle_id, $only_current_enums);
+			$requires_options = '';
+			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
+				$query_result2 = array();
+				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
+					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
+					@$datatype_query_result = json_decode($json, true);
+					if ($attributes['type'][$i] != $type) {
+						$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
+					}
+					$query_result2[$k] = $datatype_query_result;
+				}
+				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result2, $withvalues, $stelle_id, $only_current_enums);
 			}
-			if($attributes['options'][$i] == '' AND $attributes['constraints'][$i] != '' AND !in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))){  # das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
-				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
-      	$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
-      }
-      if($withvalues == true){
-        switch($attributes['form_element_type'][$i]){
-          # Auswahlfelder
-          case 'Auswahlfeld' : {
-            if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
-              if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode("','", trim($attributes['options'][$i], "'"));
-                $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
-              }
-              elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0];
-                # ------<required by>------
-                $req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
-                if($req_by_start > 0){
-                  $req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
-                  $req_by = trim(substr($attributes['options'][$i], $req_by_start+13, $req_by_end-$req_by_start-13));
-                  $attributes['req_by'][$i] = $req_by;    # das abhängige Attribut
-                  $attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start);    # required-Tag aus SQL entfernen
-                }
-                # ------<required by>------
-                # -----<requires>------
-                if(strpos(strtolower($attributes['options'][$i]), "<requires>") > 0){
-									if($only_current_enums){		# Ermittlung der Spalte, die als value dient
-										$explo1 = explode(' as value', strtolower($attributes['options'][$i]));
-										$attribute_value_column = array_pop(explode(' ', $explo1[0]));
+			if (
+				$attributes['options'][$i] == '' AND
+				$attributes['constraints'][$i] != '' AND
+				!in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
+			) {	# das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
+				$explosion = explode("','", trim($attributes['constraints'][$i], "'"));
+				foreach ($explosion as $option) {
+					$attributes['enum'][$i][$option]['output'] = $option;
+				}
+			}
+			if ($withvalues == true) {
+				$attributes['options'][$i] = replace_params(
+					$attributes['options'][$i],
+					rolle::$layer_params,
+					$this->user->id,
+					$stelle_id,
+					rolle::$hist_timestamp,
+					$this->user->rolle->language
+				);
+
+				switch ($attributes['form_element_type'][$i]) {
+					# Auswahlfelder
+					case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : {
+						if ($attributes['options'][$i] != '') {
+							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
+							if (strpos($attributes['options'][$i], "'") === 0) {
+								# Aufzählung wie 'wert1','wert2','wert3'
+								$explosion = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
+							}
+							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
+								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
+								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
+								# --------- weitere Optionen -----------
+								if (value_of($optionen, 1) != '') {
+									# die weiteren Optionen exploden (opt1 opt2 opt3)
+									$further_options = explode(' ', $optionen[1]);
+									for ($k = 0; $k < count($further_options); $k++) {
+										if (strpos($further_options[$k], 'layer_id') !== false) {
+											#layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
+											$attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
+											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+										}
+										elseif (trim($further_options[$k]) == 'embedded') {
+											# Subformular soll embedded angezeigt werden
+											$attributes['embedded'][$i] = true;
+										}
 									}
-                  if($query_result != NULL){
-                    for($k = 0; $k < count($query_result); $k++){
-											$options = $attributes['options'][$i];
-											foreach($attributes['name'] as $attributename){
-												if(strpos($options, '<requires>'.$attributename.'</requires>') !== false AND $query_result[$k][$attributename] != ''){
-													if($only_current_enums){	# in diesem Fall werden nicht alle Auswahlmöglichkeiten abgefragt, sondern nur die aktuellen Werte des Datensatzes (wird z.B. beim Daten-Export verwendet, da hier nur lesend zugegriffen wird und die Datenmengen sehr groß sein können)
-														$options = str_ireplace('where', 'where '.$attribute_value_column.'::text = \''.$query_result[$k][$attributes['name'][$i]].'\' AND ', $options);
-													}
-													$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);
+								}
+								# --------- weitere Optionen -----------
+								if ($attributes['subform_layer_id'][$i] != '' AND $layer['oid'] != '') {
+									 # auch die oid abfragen
+									 $attributes['options'][$i] = str_replace(' from ', ', ' . $layer['oid'] . ' as oid from ', strtolower($optionen[0]));
+								}
+								# ------------ SQL ---------------------
+								else {
+									$attributes['options'][$i] = $optionen[0];
+								}
+								# ------<required by>------
+								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
+								if ($req_by_start > 0) {
+									$req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
+									$req_by = trim(substr($attributes['options'][$i], $req_by_start + 13, $req_by_end - $req_by_start - 13));
+									$attributes['req_by'][$i] = $req_by; # das abhängige Attribut
+									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start); # required-Tag aus SQL entfernen
+								}
+								# ------<required by>------
+								# -----<requires>------
+								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+									}
+									else {
+										if ($query_result != NULL) {
+											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
+											foreach ($attributes['name'] as $attributename) {
+												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
+													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 												}
 											}
-											if(strpos($options, '<requires>') !== false){
-												#$options = '';    # wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
-												$attribute_value = $query_result[$k][$attributes['name'][$i]];
-												if($attribute_value != '')$options = "select '".$attribute_value."' as value, '".$attribute_value."' as output";
-												else $options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
+											foreach ($query_result as $k => $record) { # bei Erfassung eines neuen DS hat $k den Wert -1
+												$options = $attributes['options'][$i];
+												foreach ($attributes['req'][$i] as $attributename) {
+													if ($query_result[$k][$attributename] != '') {
+														if (is_array($query_result[$k][$attributename])) {
+															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
+														}
+														$options = str_replace('= <requires>' . $attributename.'</requires>',	" IN ('" . $query_result[$k][$attributename] . "')", $options);
+														$options = str_replace('<requires>'.$attributename.'</requires>', "'".$query_result[$k][$attributename]."'", $options);	# fallback
+													}
+												}
+												if (strpos($options, '<requires>') !== false) {
+													#$options = '';		# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden), sind die abhängigen Optionen für diesen Datensatz leer
+													$attribute_value = $query_result[$k][$attributes['name'][$i]];
+													if ($attribute_value != '') {
+														$options = "select '" . $attribute_value . "' as value, '" . $attribute_value . "' as output";
+													}
+													else {
+														$options = '';
+														# wenn in diesem Datensatz des Query-Results ein benötigtes Attribut keinen Wert hat (also nicht alle <requires>-Einträge ersetzt wurden) aber das eigentliche Attribut einen Wert hat, wird dieser Wert als value und output genommen, ansonsten sind die Optionen leer
+													}
+												}
+												$attributes['dependent_options'][$i][$k] = $options;
 											}
-											$attributes['dependent_options'][$i][$k] = $options;
-                    }
-                  }
-                  else{
-                    $attributes['options'][$i] = '';      # wenn kein Query-Result übergeben wurde, sind die Optionen leer
-                  }
-                }
-                # -----<requires>------
-                if(is_array($attributes['dependent_options'][$i])){   # mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-                  for($k = 0; $k < count($query_result); $k++){
-                    $sql = $attributes['dependent_options'][$i][$k];
-                    if($sql != ''){
-                      $ret=$database->execSQL($sql,4,0);
-                      if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-                      while($rs = pg_fetch_array($ret[1])){
-                        $attributes['enum_value'][$i][$k][] = $rs['value'];
-                        $attributes['enum_output'][$i][$k][] = $rs['output'];
-                      }
-                    }
-                  }
-                }
-                elseif($attributes['options'][$i] != ''){
-                  $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+										}
+										else {
+											$attributes['options'][$i] = '';			# wenn kein Query-Result übergeben wurde, sind die Optionen leer
+										}
+									}
+								}
+								# -----<requires>------
+								if (
+									value_of($attributes, 'dependent_options') AND
+									is_array($attributes['dependent_options'][$i])
+								) {
+									# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+									foreach ($query_result as $k => $record) {
+										# bei Erfassung eines neuen DS hat $k den Wert -1
+										$sql = $attributes['dependent_options'][$i][$k];
+										if ($sql != '') {
+											$sql = str_replace('$stelleid', $stelle_id, $sql);
+											$sql = str_replace('$userid', $this->User_ID, $sql);
+											$ret = $database->execSQL($sql, 4, 0);
+											if ($ret[0]) {
+												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
+												return 0;
+											}
+											$attributes['enum'][$i][$k] = array();
+											while ($rs = pg_fetch_array($ret[1])) {
+												$attributes['enum'][$i][$k][$rs['value']] = [
+													'output' 	=> $rs['output'],
+													'oid'			=> $rs['oid'],
+													'image'		=> value_of($rs, 'image');
+												];
+											}
+										}
+									}
+								}
+								elseif ($attributes['options'][$i] != '') {
+									if ($requires_options != '') {
+										$sql = $requires_options;
+									}
+									else {
+										$sql = $attributes['options'][$i];
+									}
+									$sql = str_replace('$stelleid', $stelle_id, $sql);
 									$sql = str_replace('$userid', $this->User_ID, $sql);
-                  $ret=$database->execSQL($sql,4,0);
-                  if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-                  while($rs = pg_fetch_array($ret[1])){
-                    $attributes['enum_value'][$i][] = $rs['value'];
-                    $attributes['enum_output'][$i][] = $rs['output'];
-                  }
-                }
-								# weitere Optionen
-                if($optionen[1] != ''){
-                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-                  for($k = 0; $k < count($further_options); $k++){
-                    if(strpos($further_options[$k], 'layer_id') !== false){     #layer_id=XX bietet die Möglichkeit hier eine Layer_ID zu definieren, für die man einen neuen Datensatz erzeugen kann
-                      $attributes['subform_layer_id'][$i] = array_pop(explode('=', $further_options[$k]));
-                      $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-                      $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-                    }
-                    elseif($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }
-                  }
-                }
-              }
-            }
-          }break;
+									$ret = $database->execSQL($sql, 4, 0);
+									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+									while ($rs = pg_fetch_array($ret[1])) {
+										$attributes['enum'][$i][$rs['value']] = [
+											'output' 	=> $rs['output'],
+											'oid'			=> $rs['oid'],
+											'image'		=> value_of($rs, 'image');
+										];
+										if ($requires_options != '') {
+											$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										}
+									}
+								}
+							}
+						}
+					} break;
 
 					case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' : {
 						if ($attributes['options'][$i] != '') {
@@ -2149,109 +2215,128 @@ class db_mapObj{
 							}
 						}
 					} break;
-					
-          case 'Radiobutton' : {
-            if($attributes['options'][$i] != ''){     # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
-              if(strpos($attributes['options'][$i], "'") === 0){      # Aufzählung wie 'wert1','wert2','wert3'
-                $attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
-                $attributes['enum_output'][$i] = $attributes['enum_value'][$i];
-              }
-              elseif(strpos(strtolower($attributes['options'][$i]), "select") === 0){     # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
-                $optionen = explode(';', $attributes['options'][$i]);  # SQL; weitere Optionen
-                $attributes['options'][$i] = $optionen[0];
-								if($attributes['options'][$i] != ''){
-                  $sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
-                  $ret=$database->execSQL($sql,4,0);
-                  if ($ret[0]) { echo "<br>Abbruch in ".$PHP_SELF." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1."<p>"; return 0; }
-                  while($rs = pg_fetch_array($ret[1])){
-                    $attributes['enum_value'][$i][] = $rs['value'];
-                    $attributes['enum_output'][$i][] = $rs['output'];
-                  }
-                }
-								# weitere Optionen
-                if($optionen[1] != ''){
-                  $further_options = explode(' ', $optionen[1]);      # die weiteren Optionen exploden (opt1 opt2 opt3)
-                  for($k = 0; $k < count($further_options); $k++){
-										if($further_options[$k] == 'embedded'){       # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }
-                  }
-                }
-              }
-            }
-          }break;					
 
-          # SubFormulare mit Primärschlüssel(n)
-          case 'SubFormPK' : {
-            if($attributes['options'][$i] != ''){
-              $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,pkey3...; weitere optionen
-              $subform = explode(',', $options[0]);
-              $attributes['subform_layer_id'][$i] = $subform[0];
-              $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-              $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-              for($k = 1; $k < count($subform); $k++){
-                $attributes['subform_pkeys'][$i][] = $subform[$k];
-              }
-              if($options[1] != ''){
-                if($options[1] == 'no_new_window'){
-                  $attributes['no_new_window'][$i] = true;
-                }
-              }
-            }
-          }break;
+					case 'Radiobutton' : {
+						if ($attributes['options'][$i] != '') {		 # das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
+							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen
+							$attributes['options'][$i] = $optionen[0];
+							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
+								$explosion = explode(',', str_replace("'", "", $attributes['options'][$i]));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
+							}
+							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
+								if ($attributes['options'][$i] != '') {
+									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
+									$ret = $database->execSQL($sql, 4, 0);
+									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+									while($rs = pg_fetch_array($ret[1])) {
+										$attributes['enum'][$i][$rs['value']]['output'] = $rs['output'];
+									}
+								}
+							}
+							# weitere Optionen
+							if ($optionen[1] != '') {
+								$further_options = explode(' ', $optionen[1]);			# die weiteren Optionen exploden (opt1 opt2 opt3)
+								for($k = 0; $k < count($further_options); $k++) {
+									if ($further_options[$k] == 'embedded') {			 # Subformular soll embedded angezeigt werden
+										$attributes['embedded'][$i] = true;
+									}
+									elseif (strpos($further_options[$k], 'horizontal') !== false) {			 # Radiobuttons nebeneinander anzeigen
+										$explosion = explode('=', $further_options[$k]);
+										if($explosion[1] != ''){
+											$attributes['horizontal'][$i] = $explosion[1];
+										}
+										else{
+											$attributes['horizontal'][$i] = true;
+										}
+									}
+								}
+							}
+						}
+					} break;
 
-          # SubFormulare mit Fremdschlüssel
-          case 'SubFormFK' : {
-            if($attributes['options'][$i] != ''){
-              $options = explode(';', $attributes['options'][$i]);  # layer_id,fkey1,fkey2,fkey3...; weitere optionen
-              $subform = explode(',', $options[0]);
-              $attributes['subform_layer_id'][$i] = $subform[0];
-              $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-              $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-              for($k = 1; $k < count($subform); $k++){
-                $attributes['subform_fkeys'][$i][] = $subform[$k];
-                $attributes['invisible'][$subform[$k]] = 'true';
-              }
-              if($options[1] != ''){
-                if($options[1] == 'no_new_window'){
-                  $attributes['no_new_window'][$i] = true;
-                }
-              }
-            }
-          }break;
+					# SubFormulare mit Primärschlüssel(n)
+					case 'SubFormPK' : {
+						if ($attributes['options'][$i] != '') {
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,pkey3...; weitere optionen
+							$subform = explode(',', $options[0]);
+							$attributes['subform_layer_id'][$i] = $subform[0];
+							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+							for($k = 1; $k < count($subform); $k++) {
+								$attributes['subform_pkeys'][$i][] = $subform[$k];
+							}
+							if ($options[1] != '') {
+								if ($options[1] == 'no_new_window') {
+									$attributes['no_new_window'][$i] = true;
+								}
+							}
+						}
+					} break;
 
-          # eingebettete SubFormulare mit Primärschlüssel(n)
-          case 'SubFormEmbeddedPK' : {
-            if($attributes['options'][$i] != ''){
-              $options = explode(';', $attributes['options'][$i]);  # layer_id,pkey1,pkey2,preview_attribute; weitere Optionen
-              $subform = explode(',', $options[0]);
-              $attributes['subform_layer_id'][$i] = $subform[0];
-              $layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
-              $attributes['subform_layer_privileg'][$i] = $layer['privileg'];
-              for($k = 1; $k < count($subform)-1; $k++){
-                $attributes['subform_pkeys'][$i][] = $subform[$k];
-              }
-              $attributes['preview_attribute'][$i] = $subform[$k];
-              if($options[1] != ''){
-                $further_options = explode(' ', $options[1]);     # die weiteren Optionen exploden (opt1 opt2 opt3)
-                for($k = 0; $k < count($further_options); $k++){
-                  switch ($further_options[$k]){
-                    case 'no_new_window': {
-                      $attributes['no_new_window'][$i] = true;
-                    }break;
-                    case 'embedded': {                            # Subformular soll embedded angezeigt werden
-                      $attributes['embedded'][$i] = true;
-                    }break;
-                  }
-                }
-              }
-            }
-          }break;
-        }
-      }
-    }
-    return $attributes;
-  }
+					# SubFormulare mit Fremdschlüssel
+					case 'SubFormFK' : {
+						if ($attributes['options'][$i] != '') {
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,fkey1,fkey2,fkey3...; weitere optionen
+							$subform = explode(',', $options[0]);
+							$attributes['subform_layer_id'][$i] = $subform[0];
+							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+							for($k = 1; $k < count($subform); $k++) {
+								$attributes['subform_fkeys'][$i][] = $subform[$k];
+								$attributes['SubFormFK_hidden'][$attributes['indizes'][$subform[$k]]] = 1;
+							}
+							if ($options[1] != '') {
+								if ($options[1] == 'no_new_window') {
+									$attributes['no_new_window'][$i] = true;
+								}
+							}
+						}
+					} break;
+
+					# eingebettete SubFormulare mit Primärschlüssel(n)
+					case 'SubFormEmbeddedPK' : {
+						if ($attributes['options'][$i] != '') {
+							$options = explode(';', $attributes['options'][$i]);	# layer_id,pkey1,pkey2,preview_attribute; weitere Optionen
+							$subform = explode(',', $options[0]);
+							$attributes['subform_layer_id'][$i] = $subform[0];
+							$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
+							$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
+							for($k = 1; $k < count($subform)-1; $k++) {
+								$attributes['subform_pkeys'][$i][] = $subform[$k];
+							}
+							$attributes['preview_attribute'][$i] = $subform[$k];
+							if ($options[1] != '') {
+								$further_options = explode(' ', $options[1]);		 # die weiteren Optionen exploden (opt1 opt2 opt3)
+								for($k = 0; $k < count($further_options); $k++) {
+									switch ($further_options[$k]) {
+										case 'no_new_window': {
+											$attributes['no_new_window'][$i] = true;
+										} break;
+										case 'embedded': {														# Subformular soll embedded angezeigt werden
+											$attributes['embedded'][$i] = true;
+										} break;
+										case 'list_edit': {														# nur Listen-Editier-Modus
+											$attributes['list_edit'][$i] = true;
+										} break;
+										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
+											$attributes['reload'][$i] = true;
+										} break;
+										case 'show_count': {														# die Anzahl der Subform-Datensätze anzeigen
+											$attributes['show_count'][$i] = true;
+										} break;										
+									}
+								}
+							}
+						}
+					} break;
+				}
+			}
+		}
+		return $attributes;
+	}
 
   function get_used_Layer($id) {
     $sql ='SELECT * FROM used_layer WHERE Layer_ID = '.$id.' AND Stelle_ID = '.$this->Stelle_ID;

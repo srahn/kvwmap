@@ -63,7 +63,7 @@ include('config.php');
 # Session
 if(!isset($_SESSION)){
 	$maxlifetime = 0;
-	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER)) ? $_SERVER['CONTEXT_PREFIX'] : '/';
+	$path = (!USE_EXISTING_SESSION AND array_key_exists('CONTEXT_PREFIX', $_SERVER) AND $_SERVER['CONTEXT_PREFIX'] != '') ? $_SERVER['CONTEXT_PREFIX'] : '/';
 	$samesite = 'strict';
 	session_set_cookie_params($maxlifetime, $path.'; samesite='.$samesite);
 	session_start();
@@ -408,6 +408,9 @@ function go_switch($go, $exit = false) {
 
 			case 'setHistTimestamp' : {
 				$GUI->setHistTimestamp();
+				$GUI->loadMap('DataBase');
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'setLanguage' : {
@@ -626,8 +629,8 @@ function go_switch($go, $exit = false) {
 					'style_width' => 'text',
 					'style_minwidth' => 'int',
 					'style_maxwidth' => 'int',
-					'style_offsetx' => 'int',
-					'style_offsety' => 'int',
+					'style_offsetx' => 'text',
+					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
 					'style_pattern' => 'text',
 					'style_geomtransform' => 'text',
@@ -752,11 +755,6 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['mime_type'] != '')$GUI->mime_type = $GUI->formvars['mime_type'];
 				$GUI->zoomto_dataset();
 			}break;
-			
-			case 'create_auto_classes_for_rollenlayer' : {
-				$GUI->sanitize(['layer_options_open' => 'int']);
-				$GUI->create_auto_classes_for_rollenlayer();
-			}break;
 
 			# PointEditor
 			case 'PointEditor' : {
@@ -796,8 +794,12 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten anzeigen
 			case 'Sachdaten' : {
-				if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
-				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
+				if ($GUI->formvars['CMD'] != '') {
+					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
+				}
+				if ($GUI->formvars['legendtouched']) {
+					$GUI->save_legend_role_parameters();
+				}
 				$GUI->queryMap();
 			}break;
 
@@ -1252,7 +1254,7 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				if (!$GUI->user->is_gast()) {
+				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};
 				$GUI->daten_export_exportieren();
@@ -1369,6 +1371,67 @@ function go_switch($go, $exit = false) {
 			case 'neuer_Layer_Datensatz_speichern' : {
 				$GUI->check_csrf_token();
 				$GUI->neuer_Layer_Datensatz_speichern();
+			} break;
+
+
+			case 'layer_charts_Anzeigen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int'
+				]);
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Editor' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'id' => 'int'
+				]);
+				$GUI->layer_chart_editor();
+			} break;
+
+			case 'layer_chart_Speichern' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int',
+					'title' => 'text',
+					'aggregate_function' => 'text',
+					'value_attribute_label' => 'text',
+					'value_attribute_name' => 'text',
+					'label_attribute_name' => 'text'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
+				if ($GUI->formvars['id'] != '' AND $chart->get_id() == '') {
+					$result = array(
+						'success' => false,
+						'err_msg' => 'Das Layer-Diagramm mit der ID: ' . $GUI->formvars['id'] . ' konnte nicht gefunden werden!'
+					);
+				}
+				else {
+					$result = $GUI->layer_chart_Speichern($chart);
+				}
+				if ($result['success']) {
+					$GUI->add_message('notice', $result['msg']);
+				}
+				else {
+					$GUI->add_message('error', $result['err_msg']);
+				}
+				$GUI->layer_charts_Anzeigen();
+			} break;
+
+			case 'layer_chart_Loeschen' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'id' => 'int',
+					'layer_id' => 'int'
+				]);
+				include_once(CLASSPATH . 'LayerChart.php');
+				$response = $GUI->layer_chart_Loeschen();
+				header('Content-Type: application/json');
+				echo json_encode($response);
 			} break;
 
 			case 'generisches_sachdaten_diagramm' : {

@@ -476,7 +476,7 @@ function formatFlurstkennzALK($FlurstKennz){
 function tausenderTrenner($number){
 	if($number != ''){
 		$explo = explode('.', $number);
-		$formated_number = number_format($explo[0], 0, ',', '.');
+		$formated_number = number_format((float)$explo[0], 0, ',', '.');
 		if($explo[1] != '')$formated_number .= ','.$explo[1];
 		return $formated_number;
 	}
@@ -1241,6 +1241,7 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('*', '_', $name);
 	$name = str_replace('$', '', $name);
 	$name = str_replace('&', '_', $name);
+	$name = str_replace('#', '_', $name);
 	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
 }
@@ -2382,6 +2383,77 @@ function attributes_from_select($sql) {
 	return $attributes;
 }
 
+/**
+ * Function return the inner part of the select in a mapserver data statement
+ * normaly looks like this:
+ * the_geom (select id, the_geom from schema.tabelle where true) using unique id using srid=25832
+ * Function extract from first select until last closing bracket.
+ * If no open pracket is before select like in this example:
+ * select id, the_geom from schema.tabelle where true, return $data as it is
+ * @param String $data Mapserver data statement
+ * @return String inner sql
+ */
+function get_sql_from_mapserver_data($data) {
+	$pos_select = stripos($data, 'select');
+	if (strpos(substr($data, 0, $pos_select), '(') === false) {
+		return $data;
+	}
+	$pos_last_closing_bracket = strrpos($data, ')');
+	$data = substr($data, $pos_select, $pos_last_closing_bracket - $pos_select);
+	return $data;
+}
+
+/**
+ * Function return the alias of the first $schema_name.$table_name in from expression of $sql.
+ * Returns an empty string if $schema_name.$table_name not exists in $sql.
+ * Returns $table_name if $schema_name.$table_name exists but no alias for it.
+ * Befor parsing the sql all select expressions will be replaced by *
+ * @param String $sql The SQL-Statement to parse.
+ * @param String $schema_name The schema name of the table.
+ * @param String $table_name The table name.
+ * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
+ */
+function get_table_alias($sql, $schema_name, $table_name) {
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+
+	// sql für parser aufbereiten, select ausdrücke durch * ersetzen.
+	$words = preg_split('/\s+/', $sql); // in Wörter zerhacken
+	$sql = '';
+	for ($i = count($words) - 1; $i > -1; $i--) {
+		$sql = $words[$i] . ' ' . $sql;
+		// sql auffüllen mit Wörtern der from - Klausel
+		if (strtolower($words[$i]) == 'from') {
+			// Schluss bei from select * davor, damit es ein valides sql wird
+			$sql = 'select * ' . $sql;
+			$i = -1; // Abbruch
+		}
+	};
+	$parser = new PHPSQLParser($sql, true);
+
+	// Extrahiere den from-Ausdruck der zu $schema.$table_name passt
+	$table_expression = array_filter(
+		$parser->parsed['FROM'],
+		function($from) use ($schema_name, $table_name) {
+			return $from['table'] == $schema_name . '.' . $table_name;
+		}
+	);
+
+	if (count($table_expression) == 0) {
+		// $schema_name.$table_name kommt nicht im $sql FROM vor
+		return '';
+	}
+
+	// $schema_name.$table kommt in FROM vor, nimmt den ersten
+	$table_expression = $table_expression[0];
+
+	if ($table_expression['alias']) {
+		return $table_expression['alias']['name']; // wenn es einen alias gibt
+	}
+	else {
+		return $table_name; // wenn es keinen gibt
+	}
+}
+
 function get_requires_options($sql, $requires) {
 	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
 	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
@@ -2460,16 +2532,17 @@ function sql_from_parse_tree($parse_tree) {
  * If $value is an array all elements will be sanitized with $type.
  * @param any $value Value to sanitize
  * @param string $type The type of the value
+ * @param bool $removeTT If true, floats and integers are converted by the function removeTausenderTrenner
  * @return any The sanitized value
  */
-function sanitize(&$value, $type) {
+function sanitize(&$value, $type, $removeTT = false) {
 	if (empty($type)) {
 		return $value;
 	}
 
 	if (is_array($value)) {
 		foreach ($value AS &$single_value) {
-			sanitize($single_value, $type);
+			sanitize($single_value, $type, $removeTT);
 		}
 		return $value;
 	}
@@ -2481,19 +2554,25 @@ function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' :
 		case 'int4' :
-		case '_int4' :
 		case 'oid' :
 		case 'boolean':
 		case 'int8' : {
-			$value = (int) $value;
+			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
+		} break;
+
+		case 'int_csv' : {
+			$value = explode(',', $value);
+			foreach ($value AS &$single_value) {
+				sanitize($single_value, 'int');
+			}
+			$value = implode(',', $value);
 		} break;
 
 		case 'numeric' :
-		case '_numeric' :
 		case 'float4' :
 		case 'float8' :
 		case 'float' : {
-			$value = (float) ((is_string($value) AND strpos($value, ',') !== false) ? removeTausenderTrenner($value) : $value);
+			$value = (float) ($removeTT ? removeTausenderTrenner($value) : $value);
 		} break;
 
 		case 'text' :

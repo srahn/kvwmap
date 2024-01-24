@@ -41,7 +41,7 @@ class Konvertierung extends PgObject {
 		$gui = $this->gui;
 
 		$gui->class_load_level = 2;
-		$gui->loadMap('DataBase');
+		$gui->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
 
 		# Setze Metadaten
 		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
@@ -52,7 +52,7 @@ class Konvertierung extends PgObject {
 		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->get_plan_attribut_aktualitaet()) . ': ' . $this->get_aktualitaetsdatum());
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
-		$gui->map->setMetaData("ows_srs", $this->Stelle->ows_srs ?: OWS_SRS);
+		$gui->map->setMetaData("ows_srs", $gui->Stelle->ows_srs ?: OWS_SRS);
 		$gui->map->web->set('header', '../templates/header.html');
 		$gui->map->web->set('footer', '../templates/footer.html');
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
@@ -61,6 +61,7 @@ class Konvertierung extends PgObject {
 		if (! $result['success']) {
 			return $result;
 		}
+
 		$layers_with_content = $result['layers_with_content'];
 		$layernames_with_content = array_keys($layers_with_content);
 		$layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
@@ -75,16 +76,7 @@ class Konvertierung extends PgObject {
 				$layer->set('template', '../templates/' . $layer->name . '_body.html');
 				# Set Data sql for layer
 				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
-				$options = array(
-					'attributes' => array(
-						'select' => array('k.bezeichnung AS plan_name', 'k.stelle_id'),
-						'from' => array('JOIN xplankonverter.konvertierungen AS k ON ' . $layerObj->get_table_alias() . '.konvertierung_id = k.id'),
-						'where' => array('k.stelle_id = ' . $gui->user->rolle->stelle_id)
-					),
-					'geom_attribute' => 'position',
-					'geom_type_filter' => true
-				);
-				$result = $layerObj->get_generic_data_sql($options);
+				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
 				}
@@ -2086,7 +2078,7 @@ class Konvertierung extends PgObject {
 		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
 			return array(
 				'success' => true,
-				'msg' => 'Benachrichtigung an den Systemadministrator versendet. Nach Behebung des Fehlers erhalten Sie eine Mitteilung per E-Mail'
+				'msg' => 'Benachrichtigung an den Systemadministrator versendet.'
 			);
 		}
 		else {

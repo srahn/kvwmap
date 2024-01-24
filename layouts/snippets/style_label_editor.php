@@ -201,6 +201,12 @@ function setScale(select){
 	.navigation-selected div{
 		color: #111;
 	}
+	#selected_style_div {
+		width: 213px;
+	}
+	.fa-clipboard:hover {
+		cursor: pointer;
+	}
 </style>
 
 <table>
@@ -215,7 +221,7 @@ function setScale(select){
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
+    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['Name_or_alias'][$i] != $this->layerdaten['Bezeichnung'][$i] ? ' [' . $this->layerdaten['Name_or_alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>

@@ -84,6 +84,7 @@ class XP_Plan extends PgObject {
 				WHERE
 					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
 			";
+
 			#echo '<p>' . $sql;
 			set_error_handler(function($e) {
 				return true;
@@ -102,6 +103,7 @@ class XP_Plan extends PgObject {
 				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}
 		}
+
 		return array(
 			'success' => true,
 			'layers_with_content' => $layers_with_content

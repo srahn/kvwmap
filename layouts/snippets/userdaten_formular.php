@@ -46,12 +46,19 @@
 
 	function resetPassword() {
 		// das Passwort und der Loginname wird zweimal URL codiert, damit es auch in der Mail URL codiert erscheint
-		var newPassword = getRandomPassword(),
-		loginName = $('form[name="GUI"] input[name="loginname"]').val(),
-		host = window.location.href.split('?')[0];
+		var newPassword = getRandomPassword();
+		var loginName = document.GUI.loginname.value;
+		var name = document.GUI.vorname.value + ' ' + document.GUI.nachname.value;
+		var link = window.location.href.split('?')[0] + '%3Fgo=logout%26login_name=' + encodeURIComponent(encodeURIComponent(loginName)) + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword));
+		var text = '<? echo str_replace(chr(13).chr(10), '%0A', $this->user_stelle->reset_password_text); ?>';
+		if (text != '') {
+			var body = '<? echo $strInvitationBody1; ?>%20' + name + '!%0A%0A' + text.replace('$link', link);
+		} else {
+			var body = '<? echo $strInvitationBody1; ?>%20' + name + '!%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + link + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A';
+		}
 		$('#resetPassword').attr(
 			'href',
-			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=<? echo $strInvitationBody1; ?>%20' + loginName + ',%0A%0A<? echo $strInvitationBody2; ?>.%0A%0A<? echo $strInvitationBody3; ?>:%0A' + host + '%3Fgo=logout%26login_name=' + encodeURIComponent(encodeURIComponent(loginName)) + '%26passwort=' + encodeURIComponent(encodeURIComponent(newPassword)) + '%0A<? echo $strInvitationBody4; ?>.%0A%0A<? echo $strInvitationBody5; ?>%0A<? echo $strInvitationBody6; ?>%0A'
+			'mailto:' + $('form[name="GUI"] input[name="email"]').val() + '?subject=<? echo $strInvitationSubject; ?>%20<? echo (TITLE == '' ? 'kvwmap' : TITLE); ?>&body=' + body
 		);
 		message('<span style="font-size: larger;"><? echo $strInvitationConfirmation1; ?></span><br><br><? echo $strInvitationConfirmation2; ?>.<br><span style="color: red"><? echo $strInvitationConfirmation3; ?>!</span>', 1000, 2000, '', '<? echo $strInvitationConfirmation4; ?>');
 		$('<input>').attr({
@@ -367,46 +374,57 @@
 						><?php echo $strLayerDataImportAllowedCheckboxText; ?>
 			</div>
 		</div>
-		
-		<?
-	if ($this->formvars['selected_user_id'] > 0) {
-		if (is_array($this->formvars['selstellen'])) {
-			$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
-			$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
-		} ?>
-		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strActiveSite;?></div>
-			<div>
-				<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
-			</div>
-		</div>
-
-		<div class="form_formular-input">
-			<div><? echo $strActiveLayers;?></div>
-			<div class="udf_eingabe-layers">
-				<table><?	
-					if(isset($this->active_layers)) {
-						for ($i = 0; $i < count($this->active_layers); $i++) { ?>
-							<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
-								<td>
-									<? echo $this->active_layers[$i]['alias']; ?>
-								</td>
-								<td>
-									<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
-								</td>
-							</tr><?
-						}
-					}					?>
-				</table>
-			</div>
-		</div>
 
 		<div class="form_formular-input form_formular-aic">
-			<div><? echo $strChangeUser;?></div>
-			<div>
-				<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+			<div><? echo $strAgreementAccepted; ?></div>
+			<div><input
+							name="agreement_accepted"
+							type="checkbox"
+							value="1"
+							<?php echo ($this->formvars['agreement_accepted'] ? 'checked' : ''); ?>
+						><?php echo $strAgreementAcceptedText; ?>
+						<span data-tooltip="<?php echo $strAgreementAcceptedDescription; ?>"></span>
 			</div>
 		</div><?
+
+		if ($this->formvars['selected_user_id'] > 0) {
+			if (is_array($this->formvars['selstellen'])) {
+				$active_stelle = array_search($this->userdaten[0]['stelle_id'], $this->formvars['selstellen']["ID"]);
+				$active_stelle_bezeichnung = $this->formvars['selstellen']['Bezeichnung'][$active_stelle];
+			} ?>
+			<div class="form_formular-input form_formular-aic">
+				<div><? echo $strActiveSite;?></div>
+				<div>
+					<a href="index.php?go=Stelleneditor&selected_stelle_id=<? echo $this->userdaten[0]['stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $active_stelle_bezeichnung; ?></a>
+				</div>
+			</div>
+
+			<div class="form_formular-input">
+				<div><? echo $strActiveLayers;?></div>
+				<div class="udf_eingabe-layers">
+					<table><?	
+						if (isset($this->active_layers)) {
+							for ($i = 0; $i < count($this->active_layers); $i++) { ?>
+								<tr id="layer_<? echo $this->active_layers[$i]['Layer_ID']; ?>" class="tr_hover">
+									<td>
+										<? echo $this->active_layers[$i]['Name_or_alias']; ?>
+									</td>
+									<td>
+										<a title="deaktivieren" href="javascript:deactivate_layer('<? echo $this->formvars['selected_user_id']; ?>', '<? echo $this->userdaten[0]['stelle_id']; ?>', '<? echo $this->active_layers[$i]['Layer_ID']; ?>');"><i class="fa fa-times" aria-hidden="true"></i></a>
+									</td>
+								</tr><?
+							}
+						}					?>
+					</table>
+				</div>
+			</div>
+
+			<div class="form_formular-input form_formular-aic">
+				<div><? echo $strChangeUser;?></div>
+				<div>
+					<a href="index.php?go=als_nutzer_anmelden&loginname=<? echo $this->formvars['loginname']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $strLoginAsUser; ?></a>
+				</div>
+			</div><?
 		} ?>
 	</div>
 </div>
