@@ -1540,7 +1540,7 @@ class ddl {
 					REPLACE INTO
 						ddl_elemente
 					SET
-						ddl_id = "						. (int)$formvars['aktivesLayout'] . ",
+						ddl_id = "						. $lastddl_id . ",
 						name = '"							. $attributes['name'][$i] . "',
 						xpos = "							. (float)$formvars['posx_'. $attributes['name'][$i]] . ",
 						ypos = "							. (float)$formvars['posy_'. $attributes['name'][$i]] . ",
