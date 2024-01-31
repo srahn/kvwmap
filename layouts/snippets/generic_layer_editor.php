@@ -397,9 +397,9 @@ if ($doit == true) { ?>
 											$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
 											#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
 											#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
-											if ($summe > 0) {
+											#if ($summe > 0) {
 												output_statistic($statistic);
-											}
+											#}
 										} ?></div>
 									</td><?
 								}
