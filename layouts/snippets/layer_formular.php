@@ -317,16 +317,16 @@
 								);
 							}
 							echo FormObject::createSelectField(
-								'Gruppe',																# name
-								$group_options,													# options
-								$this->formvars['Gruppe'],							# value
-								1,																			# size
-								'',																			# style
-								'',			# onchange
-								'gruppe-select',												# id
-								'',																			# multiple
-								'',																			# class
-								'-- ' . $this->strPleaseSelect . ' --'	# first option
+								'Gruppe',																	# name
+								$group_options,														# options
+								$this->formvars['Gruppe'],								# value
+								1,																				# size
+								'',																				# style
+								'document.GUI.gruppenaenderung.value=1',	# onchange
+								'gruppe-select',													# id
+								'',																				# multiple
+								'',																				# class
+								'-- ' . $this->strPleaseSelect . ' --'		# first option
 							); ?>
 							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
@@ -1257,6 +1257,7 @@
 	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 </a>
 
+<input type="hidden" name="gruppenaenderung" value="">
 <input type="hidden" name="stellenzuweisung" value="<? echo $this->formvars['stellenzuweisung']; ?>">
 <input type="hidden" name="go" value="Layereditor">
 <input type="hidden" name="assign_default_values" value="0">
