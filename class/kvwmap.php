@@ -4589,7 +4589,7 @@ echo '			</table>
 									$onkeyup = 'enforceMinMax(this)';
 								} break;
 								
-								case 'minwidth' : case 'maxwidth' : case 'opacity' : { 
+								case 'opacity' : { 
 									$type = 'number';
 									$min = '0';
 									$max = '100';
