@@ -18267,9 +18267,12 @@ class db_mapObj{
 											'oid'			=> $rs['oid'],
 											'image'		=> value_of($rs, 'image')
 										];
-										if ($requires_options != '') {
-											$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										if ($rs['requires']) {
+											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
+										// if ($requires_options != '') {
+										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										// }
 									}
 								}
 							}
