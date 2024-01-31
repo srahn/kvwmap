@@ -299,24 +299,43 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
-			if ($attr['enum_value'][$key]) {
+			if ($value == 'status') {
+				#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
+			}
+			if ($attr['enum'][$key]) {
 				$attr['options'][$key] = array();
-				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-					if ($attr['req'][$key]) {
-						$attr['options'][$key][] = array(
-							'value' => $attr['enum_value'][$key][$enum_key],
-							'output' => $attr['enum_output'][$key][$enum_key],
-							'requires_value' => $attr['enum_requires_value'][$key][$enum_key]
-						);
+				foreach($attr['enum'][$key] AS $enum_key => $enum) {
+					$enum_array = array(
+						'value' => $enum_key,
+						'output' => $enum['output']
+					);
+					if ($enum['requires_value']) {
+						$enum_array['requires_value'] = $enum['requires_value'];
 					}
-					else {
-						$attr['options'][$key][] = array(
-							'value' => $attr['enum_value'][$key][$enum_key],
-							'output' => $attr['enum_output'][$key][$enum_key]
-						);
-					}
+					$attr['options'][$key][] = $enum_array;
 				}
 			}
+			// if ($value == 'sorte_id') {
+			// 	echo '<br>options: ' . print_r($attr['options'][$key], true);
+			// }
+			// if ($attr['enum_value'][$key]) {
+			// 	$attr['options'][$key] = array();
+			// 	foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+			// 		if ($attr['req'][$key]) {
+			// 			$attr['options'][$key][] = array(
+			// 				'value' => $attr['enum_value'][$key][$enum_key],
+			// 				'output' => $attr['enum_output'][$key][$enum_key],
+			// 				'requires_value' => $attr['enum_requires_value'][$key][$enum_key]
+			// 			);
+			// 		}
+			// 		else {
+			// 			$attr['options'][$key][] = array(
+			// 				'value' => $attr['enum_value'][$key][$enum_key],
+			// 				'output' => $attr['enum_output'][$key][$enum_key]
+			// 			);
+			// 		}
+			// 	}
+			// }
 
 			$attributes[$key] = array(
 				"index" => $attr['indizes'][$value],
