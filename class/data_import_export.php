@@ -1072,7 +1072,7 @@ class data_import_export {
 		$command = OGR_BINPATH . 'ogr2ogr -f CSV "' . $folder . '/test.csv" "' . $dbf . '"';
 		#echo '<br>Command ogr2ogr: ' . $command;
 		exec($command, $output, $ret);
-		$command = 'file ' . $folder . '/test.csv';
+		$command = 'file --mime-encoding ' . $folder . '/test.csv';
 		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
 		if (file_exists($folder . '/test.csv')) {
@@ -1080,7 +1080,7 @@ class data_import_export {
 		}
 		#echo '<br>output: ' . $output[0];
 		$encoding = 'LATIN1';
-		if (strpos($output[0], 'UTF') !== false) {
+		if (stripos($output[0], 'UTF') !== false) {
 			$encoding = 'UTF-8';
 		}
 		#echo '<br>encoding: ' . $encoding;
