@@ -8792,7 +8792,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$stelle->updateLayerParams();
 		}
 
-		if ($this->formvars['stellenzuweisung'] == 1 AND !$duplicate) {
+		if (($this->formvars['stellenzuweisung'] == 1 OR $this->formvars['gruppenaenderung'] == 1) AND !$duplicate) {
       # Stellenzuweisung
   		$stellen = $this->addLayersToStellen(
         array($formvars['selected_layer_id']),
