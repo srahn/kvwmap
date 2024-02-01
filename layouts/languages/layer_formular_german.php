@@ -68,6 +68,7 @@
 	$strMetaParameters = "Metadaten";
 	$strminscale = "Minscale";
 	$strName = "Name";
+	$strNewLayerFromMaintableHint = "Zur Auswahl stehen alle Tabellen die entsprechend der vorhandenen Datenbankverbindungsinformationen (Tabelle: connections) verfügbar sind. Nach Auswahl einer Tabelle in diesem Auswahlfeld wird ein neuer PostGIS-Layer angelegt der diese Tabelle als Haupttabelle hat. Der Layer bekommt alle Attribute der Tabelle. Als Geometrie wird die erste gefundene Geometriespalte genommen und danach auch der Datentyp und der EPSG-Code festgelegt. Der Layer erhält eine Klasse mit Default-Style aber noch keine Einstellungen im Attributeditor und noch keine Stellenzuordnung. Der Layer kann anschließend wie ein ganz normaler Layer bearbeitet werden.";
 	$strNotDublicate  =  "nicht duplizieren";
 	$stroffsite = "Offsite";
 	$strOrder = "Reihenfolge";
