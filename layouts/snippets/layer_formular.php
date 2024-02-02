@@ -249,7 +249,7 @@ from
 			</select>
 		</td>
 	</tr><?
-	if (!$this->formvars['selected_layer_id']) { ?>
+	if (false and !$this->formvars['selected_layer_id']) { ?>
 		<tr>
 			<th align="right">
 				<span class="px17 fetter"><? echo $strMaintable; ?>:</span>

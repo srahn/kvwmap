@@ -8220,21 +8220,22 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
 		}
 		else {
-			$this->tables = array_merge(
-				...(array_map(
-					function($connection) {
-						return array_map(
-							function($table) use ($connection) {
-								return $connection->get('id') . '.' . $table['schema_name'] . '.' . $table['name'];
-							},
-							$connection->get_tables()
-						);
-					},
-					Connection::find($this, 'id')
-				))
-			);
-			$this->tables = array_filter($this->tables, function($table) { return !(strpos(strrev($table), 'satled_') === 0); });
-			asort($this->tables);
+			$this->tables = [];
+			// $this->tables = array_merge(
+			// 	...(array_map(
+			// 		function($connection) {
+			// 			return array_map(
+			// 				function($table) use ($connection) {
+			// 					return $connection->get('id') . '.' . $table['schema_name'] . '.' . $table['name'];
+			// 				},
+			// 				$connection->get_tables()
+			// 			);
+			// 		},
+			// 		Connection::find($this, 'id')
+			// 	))
+			// );
+			// $this->tables = array_filter($this->tables, function($table) { return !(strpos(strrev($table), 'satled_') === 0); });
+			// asort($this->tables);
 		}
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
