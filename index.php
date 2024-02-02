@@ -1552,6 +1552,21 @@ function go_switch($go, $exit = false) {
 				$GUI->Layereditor();
 			} break;
 
+			case 'Layereditor_info_from_maintable' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer',
+					'schema_name' => 'text',
+					'table_name' => 'text'
+				]);
+				header('Content-Type: application/json');
+				echo json_encode($GUI->pgdatabase->get_table_infos(
+					$GUI->formvars['connection_id'],
+					$GUI->formvars['schema_name'],
+					$GUI->formvars['table_name']
+				));
+			} break;
+
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->LayerAnlegen();

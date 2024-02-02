@@ -143,5 +143,22 @@ class Connection extends MyObject {
 		$connection = new Connection($gui);
 		return $connection->find_where('', ($order == '' ? 'name' : $order), $sort);
 	}
+
+	function get_tables() {
+		$pgdatabase = new pgdatabase();
+		if ($pgdatabase->open($this->get('id'))) {
+			$tables = array_merge(...(array_map(
+				function($schema) use ($pgdatabase) {
+					return $pgdatabase->get_tables($schema);
+				},
+				$pgdatabase->get_schemata($this->get('user'))
+			)));
+			if ($this->gui->pgdatabase->connection_id != $this->get('id')) {
+				$pgdatabase->close();
+			}
+			return $tables;
+		}
+		return array();
+	}
 }
 ?>
