@@ -92,15 +92,12 @@ if (!$invisible_attributes) {
 };
 $size = 16;
 $select_width = 'width: 100%;'; 
-if ($layer['alias'] != '' AND $this->Stelle->useLayerAliases) {
-	$layer['Name'] = $layer['alias'];
-}
 if ($this->formvars['overwrite_layer_name'] != '') {
 	$layer_name = $this->formvars['overwrite_layer_name']; ?>
 	<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
 }
 else {
-	$layer_name = $layer['Name'];
+	$layer_name = $layer['Name_or_alias'];
 }
 $doit = false;
 $anzObj = @count($layer['shape']);

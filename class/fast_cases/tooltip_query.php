@@ -374,9 +374,6 @@ class GUI {
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
-				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
-					$layerset[$i]['Name'] = $layerset[$i]['alias'];
-				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -512,13 +509,15 @@ class GUI {
 					$links = '';
 					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
-          for($j = 0; $j < count($attributes['name']); $j++){
-            if($attributes['tooltip'][$j]){
-							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-							if(substr($attributes['type'][$j], 0, 1) == '_'){
+          for ($j = 0; $j < count($attributes['name']); $j++){
+            if ($attributes['tooltip'][$j]){
+							if ($attributes['alias'][$j] == '') {
+								$attributes['alias'][$j] = $attributes['name'][$j];
+							}
+							if (substr($attributes['type'][$j], 0, 1) == '_'){
 								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
 							}
-							else{
+							else {
 								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
 							}
 							if(is_array($values)){

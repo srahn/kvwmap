@@ -2465,6 +2465,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	top: 0;
 	background: rgba(51,51,51,0.2);
 	z-index: 1000;
+	padding: 100px;
+	text-align: center;
 }
 
 .layerOptions, #legendOptions{

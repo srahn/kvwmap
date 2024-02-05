@@ -188,7 +188,7 @@ function validierungsergebnisseRowAttribs(row, index){
 	      <th
 	        data-field="regel_id"
 	        data-visible="false"
-	        data-switchable="false"
+	        data-switchable="true"
 	        class="text-right"
 	      >Regel_id</th>
 	    </tr>

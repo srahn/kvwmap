@@ -54,6 +54,23 @@ class XP_Bereich extends PgObject {
 		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
 		pg_query($this->database->dbConn, $sql);
 	}
+	
+		/**
+	 * Löscht alle dem Bereich zugehörigen Präsentationsobjekte
+	 */
+	function destroy_associated_praesentationsobjekte() {
+		# also deletes by konvertierung_id as gehoertzubereich does not necessarily have to be set
+		$sql = "
+			DELETE FROM
+				xplan_gml.xp_abstraktespraesentationsobjekt
+			WHERE
+				gehoertzubereich = '" . $this->get('gml_id') . "'
+			OR
+				konvertierung_id = '" . $this->get('konvertierung_id') . "'
+		";
+		#echo 'SQL zum Löschen der Objekte die zum Bereich ' . $this->get($this->identifier) . ' gehöhren: ' . $sql;
+		pg_query($this->database->dbConn, $sql);
+	}
 
 	/**
 	 * Löscht die Zuordnungen von Objekten des Bereiches zu Textabschnitten
@@ -65,7 +82,7 @@ class XP_Bereich extends PgObject {
 			USING
 				xplan_gml." . $this->planartAbk . "_objekt o
 			WHERE
-				ta." . $this->planartAbk . "_objekt_gml_id::uuid = o.gml_id
+				ta." . $this->planartAbk . "_objekt_gml_id::text = o.gml_id::text
 				AND o.gehoertzubereich = '" . $this->get($this->identifier) . "'
 		";
 		#echo '<br>SQL zum Löschen der Zuordnungen der Objekte des Bereiches ' . $this->get($this->identifier) . ' zu den Textabschnitten:' . $sql;
@@ -85,6 +102,7 @@ class XP_Bereich extends PgObject {
 		}
 		$this->destroy_objekt_zu_textabschnitte();
 		$this->destroy_associated_objekte();
+		$this->destroy_associated_praesentationsobjekte();
 		$this->delete();
 	}
 }

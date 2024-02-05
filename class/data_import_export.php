@@ -1004,7 +1004,7 @@ class data_import_export {
 			$path_parts = pathinfo($importfile);
 			$errorfile = $path_parts['filename'] . '.err';
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogrinfo ' . $command;
-			$command .= ' 2> ' . IMAGEPATH . $errorfile;
+			$command .= ' 2> "' . IMAGEPATH . $errorfile . '"';
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);

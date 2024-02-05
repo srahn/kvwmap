@@ -556,10 +556,16 @@ class GUI {
 		}
 	}
 
-	function loadlayer($map, $layerset) {
+	function loadlayer($map, $layerset, $strict_layer_name = false) {
 		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
+		if ($strict_layer_name) {
+			$layer_name_attribute = 'Name';
+		}
+		else {
+			$layer_name_attribute = 'Name_or_alias';
+		}
 		$layer = ms_newLayerObj($map);
-		$layer->set('name', (($this->Stelle->useLayerAliases AND $layerset['alias'] != '') ? $layerset['alias'] : $layerset['Name']));
+		$layer->set('name', $layerset[$layer_name_attribute]);
 		$layer->setMetaData('wms_name', $layerset['wms_name']);
 		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->setMetaData('wfs_request_method', 'GET');
@@ -567,7 +573,7 @@ class GUI {
 			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
 		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-		$layer->setMetaData('ows_title', ($layerset['alias'] != '' ? $layerset['alias'] : $layerset['Name'])); # required
+		$layer->setMetaData('ows_title', $layerset['Name_or_alias']); # required
 		$layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
 		$layer->setMetaData('wms_queryable',$layerset['queryable']);
 		$layer->setMetaData('wms_format',$layerset['wms_format']);
@@ -656,7 +662,7 @@ class GUI {
 				$layer->set('maxscaledenom', $layerset['maxscale']);
 			}
 		}
-		$layer->setProjection('+init=epsg:'.$layerset['epsg_code']); # recommended
+		$layer->setProjection('+init=epsg:' . $layerset['epsg_code']); # recommended
 		if ($layerset['connection']!='') {
 			if($layerset['connectiontype'] == 7) { # WMS-Layer
 				# $layerset['connection'] .= '&SERVICE=WMS'; # Das kann zu Fehler führen. MapServer setzt selber SERVICE=WMS
@@ -673,7 +679,7 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection',	$layerset['connection']);
+			$layer->set('connection', $layerset['connection']);
 		}
 
 		if ($layerset['connectiontype'] > 0) {
@@ -2176,8 +2182,28 @@ class db_mapObj {
 		$sql = "
 			SELECT DISTINCT
 				l.oid,
-				coalesce(rl.transparency, ul.transparency, 100) as transparency, rl.`aktivStatus`, rl.`queryStatus`, rl.`gle_view`, rl.`showclasses`, rl.`logconsume`, rl.`rollenfilter`,
-				ul.`queryable`, COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder, ul.legendorder, ul.`minscale`, ul.`maxscale`, ul.`offsite`, ul.`postlabelcache`, ul.`Filter`, ul.`template`, ul.`header`, ul.`footer`, ul.`symbolscale`, ul.`logconsume`, ul.`requires`, ul.`privileg`, ul.`export_privileg`,
+				coalesce(rl.transparency, ul.transparency, 100) as transparency,
+				rl.`aktivStatus`,
+				rl.`queryStatus`,
+				rl.`gle_view`,
+				rl.`showclasses`,
+				rl.`logconsume`,
+				rl.`rollenfilter`,
+				ul.`queryable`,
+				COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder,
+				ul.legendorder,
+				ul.`minscale`, ul.`maxscale`,
+				ul.`offsite`,
+				ul.`postlabelcache`,
+				ul.`Filter`,
+				ul.`template`,
+				ul.`header`,
+				ul.`footer`,
+				ul.`symbolscale`,
+				ul.`logconsume`,
+				ul.`requires`,
+				ul.`privileg`,
+				ul.`export_privileg`,
 				ul.`group_id`,
 				l.Layer_ID," .
 				$name_column . ",
@@ -2234,12 +2260,13 @@ class db_mapObj {
 				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
 				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
-				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') . 
+				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') .
+				($this->nurLayerIDs ? " AND l.Layer_ID IN (" . $this->nurLayerIDs . ")" : '') .
 				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
-		// echo '<br>SQL zur Abfrage der Layer: ' . $sql; exit;
+		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { 
@@ -2259,16 +2286,15 @@ class db_mapObj {
 					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
 				}
 			}
-			if ($rs['alias'] == '' OR !$useLayerAliases){
-				$rs['alias'] = $rs['Name'];
-			}
+
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
 				$rs['alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
-			);			
-			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
+			);
+			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,

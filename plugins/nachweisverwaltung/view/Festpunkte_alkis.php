@@ -1,4 +1,4 @@
-<hr><h2><?php echo $this->qlayerset[$i]['alias']; ?></h2><br>
+<hr><h2><?php echo $this->qlayerset[$i]['Name_or_alias']; ?></h2><br>
 <?php
   $anzObj = @count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {

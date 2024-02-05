@@ -15,7 +15,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+	if (error_reporting() & $err['type']) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -33,7 +33,7 @@ register_shutdown_function(function () {
       header('Content-Type: application/json');
 			$response = array(
 				'success' => false,
-				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line'] . ' Fehlermeldungen: ' . print_r($errors, true)
 			);
 			echo json_encode($response);
     }
