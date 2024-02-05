@@ -902,7 +902,7 @@ class data_import_export {
 		}
 	}
 
-	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb) {
+	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb, $options = '') {
 		$formvars_nln = ($this->formvars['layer_name'] != '' ? '-nln ' . $this->formvars['layer_name'] : '');
 		$formvars_nlt = ($this->formvars['geomtype'] != '' ? '-nlt ' . $this->formvars['geomtype'] : '');
 		$command = 'export PGDATESTYLE="ISO, MDY";'
@@ -911,8 +911,8 @@ class data_import_export {
 			. OGR_BINPATH . 'ogr2ogr '
 			. '-f ' . $exportformat . ' '
 			. '-lco ENCODING=UTF-8 '
-			. '--config DXF_WRITE_HATCH NO '
-			. '-sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
+			. $options
+			. ' -sql "' . str_replace(["\t", chr(10), chr(13)], [' ', ''], $sql) . '" '
 			. $formvars_nln . ' '
 			. $formvars_nlt . ' '
 			. $exportfile . ' '
@@ -1004,7 +1004,7 @@ class data_import_export {
 			$path_parts = pathinfo($importfile);
 			$errorfile = $path_parts['filename'] . '.err';
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogrinfo ' . $command;
-			$command .= ' 2> ' . IMAGEPATH . $errorfile;
+			$command .= ' 2> "' . IMAGEPATH . $errorfile . '"';
 			$output = array();
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
@@ -1072,7 +1072,7 @@ class data_import_export {
 		$command = OGR_BINPATH . 'ogr2ogr -f CSV "' . $folder . '/test.csv" "' . $dbf . '"';
 		#echo '<br>Command ogr2ogr: ' . $command;
 		exec($command, $output, $ret);
-		$command = 'file ' . $folder . '/test.csv';
+		$command = 'file --mime-encoding ' . $folder . '/test.csv';
 		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
 		if (file_exists($folder . '/test.csv')) {
@@ -1080,7 +1080,7 @@ class data_import_export {
 		}
 		#echo '<br>output: ' . $output[0];
 		$encoding = 'LATIN1';
-		if (strpos($output[0], 'UTF') !== false) {
+		if (stripos($output[0], 'UTF') !== false) {
 			$encoding = 'UTF-8';
 		}
 		#echo '<br>encoding: ' . $encoding;
@@ -1451,7 +1451,12 @@ class data_import_export {
 
 					case 'DXF' : {
 						$exportfile = $exportfile.'.dxf';
-						$err = $this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb);
+						$err = $this->ogr2ogr_export($sql, 'DXF', $exportfile, $layerdb, '--config DXF_WRITE_HATCH NO');
+					} break;
+
+					case 'GPX' : {
+						$exportfile = $exportfile.'.gpx';
+						$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb, '-lco FORCE_GPX_TRACK=YES -dsco GPX_USE_EXTENSIONS=YES');
 					} break;
 
 					case 'GML' : {

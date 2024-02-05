@@ -2133,7 +2133,7 @@ class db_mapObj{
 												$attributes['enum'][$i][$k][$rs['value']] = [
 													'output' 	=> $rs['output'],
 													'oid'			=> $rs['oid'],
-													'image'		=> value_of($rs, 'image');
+													'image'		=> value_of($rs, 'image')
 												];
 											}
 										}
@@ -2154,7 +2154,7 @@ class db_mapObj{
 										$attributes['enum'][$i][$rs['value']] = [
 											'output' 	=> $rs['output'],
 											'oid'			=> $rs['oid'],
-											'image'		=> value_of($rs, 'image');
+											'image'		=> value_of($rs, 'image')
 										];
 										if ($requires_options != '') {
 											$attributes['enum_requires_value'][$i][] = $rs['requires'];

@@ -254,11 +254,14 @@ class rolle {
 			SELECT 
 				cl.Layer_ID,
 				cl.Class_ID,
-				cl.Expression
+				cl.Expression,
+				cl.classification
 			FROM 
 				classes as cl
-				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID 
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
+				join layer as l on l.Layer_ID = cl.Layer_ID 
 			WHERE 
+				l.classification = cl.classification and
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
 				r2uc.stelle_id = " . $this->stelle_id . "

@@ -1328,15 +1328,91 @@ class stelle {
 
 	function copyLayerfromStelle($layer_ids, $alte_stelle_id){
 		# kopieren der Layer von einer Stelle
-		for ($i=0;$i<count($layer_ids);$i++) {
-			$sql ='INSERT IGNORE INTO used_layer ( `Stelle_ID` , `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` )';
-			$sql .= ' SELECT '.$this->id.', `Layer_ID` , `queryable` , `drawingorder` , `minscale` , `maxscale` , `offsite` , `transparency`, `template` , `header` , `footer` , `symbolscale`, `logconsume`, `requires`, `privileg` FROM used_layer WHERE Stelle_ID = '.$alte_stelle_id.' AND Layer_ID = '.$layer_ids[$i];
+		for ($i = 0; $i < count($layer_ids); $i++) {
+			# usedlayer
+			$columns = '
+				`Layer_ID`, 
+				`queryable`, 
+				`drawingorder`, 
+				`legendorder`,
+				`minscale`, 
+				`maxscale`, 
+				`offsite`, 
+				`transparency`, 
+				`postlabelcache`, 
+				`Filter`, 
+				`template`, 
+				`header`, 
+				`footer`, 
+				`symbolscale`, 
+				`logconsume`, 
+				`requires`, 
+				`privileg`, 
+				`export_privileg`,
+				`use_parent_privileges`,
+				`start_aktiv`,
+				`use_geom`
+			';
+			$sql = '
+				INSERT IGNORE INTO used_layer ( 
+					`Stelle_ID` , 
+					' . $columns . ')
+				SELECT 
+					'.$this->id.', 
+					' . $columns . '
+				FROM 
+					used_layer 
+				WHERE 
+					Stelle_ID = '.$alte_stelle_id.' AND 
+					Layer_ID = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			# Layerattributrechte mitkopieren
-			$sql ='INSERT IGNORE INTO layer_attributes2stelle (layer_id, attributename, stelle_id, privileg, tooltip) ';
-			$sql.='SELECT layer_id, attributename, '.$this->id.', privileg, tooltip FROM layer_attributes2stelle WHERE stelle_id = '.$alte_stelle_id.' AND layer_id = '.$layer_ids[$i];
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+
+			# Layerattributrechte
+			$sql = '
+				INSERT IGNORE INTO layer_attributes2stelle (
+					layer_id, 
+					attributename, 
+					stelle_id, 
+					privileg, 
+					tooltip)
+				SELECT 
+					layer_id, 
+					attributename, 
+					'.$this->id.', 
+					privileg, 
+					tooltip 
+				FROM 
+					layer_attributes2stelle 
+				WHERE 
+					stelle_id = '.$alte_stelle_id.' AND 
+					layer_id = '.$layer_ids[$i];
+			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
+			$this->database->execSQL($sql);
+			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+
+			#  u_attributfilter2used_layer
+			$sql = '
+				INSERT IGNORE INTO u_attributfilter2used_layer (
+					`Stelle_ID`, 
+					`Layer_ID`, 
+					`attributname`, 
+					`attributvalue`, 
+					`operator`, 
+					`type`)
+				SELECT
+					'.$this->id.', 
+					`Layer_ID`, 
+					`attributname`, 
+					`attributvalue`, 
+					`operator`, 
+					`type`
+				FROM 
+				u_attributfilter2used_layer 
+				WHERE 
+					stelle_id = '.$alte_stelle_id.' AND 
+					layer_id = '.$layer_ids[$i];
 			$this->debug->write("<p>file:stelle.php class:stelle->copyLayerfromStelle - kopieren der Layer von einer Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1391,56 +1467,58 @@ class stelle {
 				`postlabelcache`,
 				`requires`
 			)";
-			# Einstellungen von der Elternstelle übernehmen
-			$sql = "INSERT INTO used_layer " . $insert . "
-				SELECT
-					'" . $this->id . "',
-					'" . $layer_ids[$i] . "',
-					queryable,
-					use_geom,
-					drawingorder, 
-					legendorder, 
-					minscale, 
-					maxscale, 
-					symbolscale, 
-					offsite, 
-					transparency, 
-					filter,
-					template, 
-					header,
-					footer,
-					`privileg`,
-					`export_privileg`,
-					postlabelcache,
-					requires
-				FROM
-					used_layer as l,
-					stellen_hierarchie
-				WHERE
-					(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
-					layer_id = " . $layer_ids[$i] . " AND
-					stelle_id = parent_id AND
-					child_id = " . $this->id . "
-				ON DUPLICATE KEY UPDATE 
-					queryable = l.queryable, 
-					use_geom = l.use_geom, 
-					drawingorder = l.drawingorder, 
-					legendorder = l.legendorder, 
-					minscale = l.minscale, 
-					maxscale = l.maxscale, 
-					symbolscale = l.symbolscale, 
-					offsite = l.offsite, 
-					transparency = l.transparency, 
-					template = l.template, 
-					postlabelcache = l.postlabelcache,
-					`privileg` = l.`privileg`,
-					`export_privileg` = l.`export_privileg`,
-					requires = l.requires";
-			#echo $sql.'<br><br>';
-			$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
-			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			if ($this->database->mysqli->affected_rows == 0) {
+			if (!$assign_default_values) {
+				# Einstellungen von der Elternstelle übernehmen
+				$sql = "INSERT INTO used_layer " . $insert . "
+					SELECT
+						'" . $this->id . "',
+						'" . $layer_ids[$i] . "',
+						queryable,
+						use_geom,
+						drawingorder, 
+						legendorder, 
+						minscale, 
+						maxscale, 
+						symbolscale, 
+						offsite, 
+						transparency, 
+						filter,
+						template, 
+						header,
+						footer,
+						`privileg`,
+						`export_privileg`,
+						postlabelcache,
+						requires
+					FROM
+						used_layer as l,
+						stellen_hierarchie
+					WHERE
+						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						layer_id = " . $layer_ids[$i] . " AND
+						stelle_id = parent_id AND
+						child_id = " . $this->id . "
+					ON DUPLICATE KEY UPDATE 
+						queryable = l.queryable, 
+						use_geom = l.use_geom, 
+						drawingorder = l.drawingorder, 
+						legendorder = l.legendorder, 
+						minscale = l.minscale, 
+						maxscale = l.maxscale, 
+						symbolscale = l.symbolscale, 
+						offsite = l.offsite, 
+						transparency = l.transparency, 
+						template = l.template, 
+						postlabelcache = l.postlabelcache,
+						`privileg` = l.`privileg`,
+						`export_privileg` = l.`export_privileg`,
+						requires = l.requires";
+				#echo $sql.'<br><br>';
+				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
+				$this->database->execSQL($sql);
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			}
+			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
 				$sql = "INSERT " . (!$assign_default_values ? "IGNORE" : "") . " INTO used_layer " . $insert . "
 					SELECT
@@ -1987,8 +2065,13 @@ class stelle {
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
-		else{
-			while ($rs=$this->database->result->fetch_array()) {
+		else {
+			$layer = array(
+				'ID' => array(),
+				'Bezeichnung' => array(),
+				'export_privileg' => array()
+			);
+			while($rs=$this->database->result->fetch_array()) {
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
 				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
@@ -1997,7 +2080,7 @@ class stelle {
 				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
-			if ($layer['Bezeichnung'] != NULL){
+			if (count($layer['Bezeichnung']) > 0) {
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_arrays2 = umlaute_sortieren($layer['Bezeichnung'], $layer['export_privileg']);
 				$layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -2235,7 +2318,7 @@ class stelle {
 				ul.`symbolscale`, 
 				ul.`logconsume`, 
 				ul.`start_aktiv`, 
-				ul.`use_geom`
+				ul.`use_geom`,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung

@@ -575,10 +575,10 @@ class GUI {
 						}
 						if ($this->formvars['layer_id'] > 0 AND $layer[0]['connectiontype'] == MS_POSTGIS) {
 							echo '<li><a href="index.php?go=zoomto_selected_datasets&chosen_layer_id=' . $this->formvars['layer_id'] . '">' . $this->strAddToOwnQueries . '</a></li>';
-						}						
+						}
 						if ($layer[0]['queryable']) {
 							if ($layer[0]['privileg'] > 0 AND $layer[0]['privilegfk'] !== '0') {
-								echo '<li><a href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
+								echo '<li><a title="'. $this->strNewDatasetTitle1 . ' ' . $layer[0]['Name'] . ' ' . $this->strCreate . ' " href="index.php?go=neuer_Layer_Datensatz&selected_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->newDataset . '</a></li>';
 								if ($this->user->layer_data_import_allowed) {
 									echo '<li><a href="index.php?go=Daten_Import&chosen_layer_id=' . $this->formvars['layer_id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $this->strDataImport . '</a></li>';
 								}
@@ -1545,7 +1545,16 @@ echo '			</table>
 
 	function get_legend_graphics($layer){
 		$output = '';
-		$url = str_ireplace('&styles=', '&style=', $layer['connection']);
+		$url = $layer['connection'];
+		$pos = strpos(strtolower($layer['connection']), 'styles=');
+		if ($pos !== false) {
+			$stylesection = substr($layer['connection'], $pos + 7);
+			$pos = strpos($stylesection, '&');
+			if ($pos !== false) {
+				$stylesection = substr($stylesection, 0, $pos);
+			}
+		}
+		$styles = explode(',', $stylesection);
 		if (strpos(strtolower($url), 'format') === false) {
 			$url .= '&format=image/png';
 		}
@@ -1565,7 +1574,7 @@ echo '			</table>
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}
@@ -4664,7 +4673,7 @@ echo '			</table>
 									$onkeyup = 'enforceMinMax(this)';
 								} break;
 								
-								case 'minwidth' : case 'maxwidth' : case 'opacity' : { 
+								case 'opacity' : { 
 									$type = 'number';
 									$min = '0';
 									$max = '100';
@@ -7569,7 +7578,7 @@ echo '			</table>
 					$this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']] = str_replace(chr(13), '', $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']]);
 					$this->Docu->activeframe[0]['texts'][$j]['text'] = $this->formvars['freetext_'.$this->Docu->activeframe[0]['texts'][$j]['id']];
 				}
-				$freitext = explode(';', $this->substituteFreitext(utf8_decode($this->Docu->activeframe[0]['texts'][$j]['text'])));
+				$freitext = explode(';', $this->substituteFreitext(iconv("UTF-8", "CP1252//TRANSLIT", $this->Docu->activeframe[0]['texts'][$j]['text'])));
 				$anzahlzeilen = count($freitext);
 				$alpha = $this->Docu->activeframe[0]['texts'][$j]['angle'];
 				for($i = 0; $i < $anzahlzeilen; $i++){
@@ -7599,7 +7608,7 @@ echo '			</table>
 						);
 					}
 					else{
-						$pdf->addText($posx,$posy,$this->Docu->activeframe[0]['texts'][$j]['size'],$freitext[$i], -1 * $alpha);
+						$pdf->addText($posx, $posy, $this->Docu->activeframe[0]['texts'][$j]['size'], $freitext[$i], -1 * $alpha);
 					}
 				}
 			}
@@ -7690,7 +7699,7 @@ echo '			</table>
 					$anzahlzeilen = count($freitext);
 					for($i = 0; $i < $anzahlzeilen; $i++){
 						$h = $i * $fontsize * 1.25;
-						$pdf->addText($posx+$fontsize*0.3333,$posy-$h-$fontsize*1.18, $fontsize,utf8_decode($freitext[$i]), 0);
+						$pdf->addText($posx+$fontsize*0.3333, $posy-$h-$fontsize*1.18, $fontsize, iconv("UTF-8", "CP1252//TRANSLIT", $freitext[$i]), 0);
 					}
 				}
 			}
@@ -8258,6 +8267,24 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['selstellen'] = $mapDB->get_stellen_from_layer($this->formvars['selected_layer_id']);
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
 		}
+		else {
+			$this->tables = [];
+			// $this->tables = array_merge(
+			// 	...(array_map(
+			// 		function($connection) {
+			// 			return array_map(
+			// 				function($table) use ($connection) {
+			// 					return $connection->get('id') . '.' . $table['schema_name'] . '.' . $table['name'];
+			// 				},
+			// 				$connection->get_tables()
+			// 			);
+			// 		},
+			// 		Connection::find($this, 'id')
+			// 	))
+			// );
+			// $this->tables = array_filter($this->tables, function($table) { return !(strpos(strrev($table), 'satled_') === 0); });
+			// asort($this->tables);
+		}
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
@@ -8372,11 +8399,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $classes = array();
     switch ($method) {
 			case 1 : {		# für jeden Wert eine Klasse
-        $sql = "
-          SELECT DISTINCT " . $class_item."
-          FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
-
-        $ret=$layerdb->execSQL($sql, 4, 0);
+				$sql = "
+					SELECT DISTINCT " . $class_item."
+					FROM
+						(" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . "
+					LIMIT 100
+				";
+				$ret = $layerdb->execSQL($sql, 4, 0);
 				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$order = 1;
         while($rs = pg_fetch_assoc($ret[1])){
@@ -8821,11 +8850,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 
-		if ($this->formvars['stellenzuweisung'] == 1 AND !$duplicate) {
+		$stellen_ids = ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array());
+		for ($i = 0; $i < count($stellen_ids); $i++) {
+			$stelle = new stelle($stellen_ids[$i], $this->database);
+			$stelle->updateLayerParams();
+		}
+
+		if (($this->formvars['stellenzuweisung'] == 1 OR $this->formvars['gruppenaenderung'] == 1) AND !$duplicate) {
       # Stellenzuweisung
   		$stellen = $this->addLayersToStellen(
         array($formvars['selected_layer_id']),
-        ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array()),
+        $stellen_ids,
   			NULL,
   			$formvars['assign_default_values']
       );
@@ -8883,7 +8918,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
 					$this->user->rolle->setLayer($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id); # Hinzufügen der Layer zur Rolle
 				}
-				$stelle->updateLayerParams();
 				$this->already_assigned_stellen[$stellen_ids[$i]] = true;
 				# Kindstellen
 				$children = $stelle->getChildren($stellen_ids[$i], " ORDER BY Bezeichnung", 'only_ids', false);
@@ -15540,6 +15574,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# EPSG-Code des Layers der Abgefragt werden soll
 							$layer_epsg=$layerset[$i]['epsg_code'];
 
+							$distance = $rand;
+							$sphere = '';
 							if ($client_epsg == 4326 OR $layer_epsg == 4326) {
 								$center_y = ($rect->maxy+$rect->miny)/2;
 								$cos_lat = cos(pi() * $center_y/180.0);
@@ -15548,10 +15584,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									$distance = $layerset[$i]['tolerance'] * $pixsize * $lat_adj * 111000;
 								}
 								else if ($layer_epsg == 4326) {
-									$distance = $layerset[$i]['tolerance'] * $pixsize / $lat_adj / 111000;
+									$sphere = 'sphere';
 								}
 							}
-							else $distance = $rand;
 
 							# Bildung der Where-Klausel für die räumliche Abfrage mit der searchbox
 							$searchbox_wkt ="POLYGON((";
@@ -15576,11 +15611,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								# Behandlung der Suchanfrage mit Punkt, exakte Suche im Kreis
 								if ($client_epsg!=$layer_epsg) {
 									$sql_where =" AND " . $the_geom." && st_transform(st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")," . $layer_epsg.")";
-									$sql_where.=" AND st_distance(" . $the_geom.",st_transform(st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg.")," . $layer_epsg."))";
+									$sql_where.=" AND st_distance" . $sphere . "(" . $the_geom.",st_transform(st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg.")," . $layer_epsg."))";
 								}
 								else {
 									$sql_where =" AND " . $the_geom." && st_geomfromtext('" . $loosesearchbox_wkt."'," . $client_epsg.")";
-									$sql_where.=" AND st_distance(" . $the_geom.",st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg."))";
+									$sql_where.=" AND st_distance" . $sphere . "(" . $the_geom.",st_geomfromtext('POINT(" . $rect->minx." " . $rect->miny.")'," . $client_epsg."))";
 								}
 								$sql_where.=" <= " . $distance;
 							}
@@ -17247,7 +17282,7 @@ class db_mapObj{
 				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
+		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$Layer = array();
@@ -18144,12 +18179,11 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false, $with_requires_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
-			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
@@ -18236,13 +18270,18 @@ class db_mapObj{
 								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
 									if ($all_options) {
 										# alle Auswahlmöglichkeiten -> where abschneiden
+										foreach ($attributes['name'] as $attributename) {
+											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
 										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
 									}
 									else {
 										if ($query_result != NULL) {
 											$attributes['options'][$i] = str_replace('=<requires>', '= <requires>', $attributes['options'][$i]);
 											foreach ($attributes['name'] as $attributename) {
-												if (strpos($attributes['options'][$i], '<requires>'.$attributename.'</requires>') !== false) {
+												if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
 													$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 												}
 											}
@@ -18305,12 +18344,7 @@ class db_mapObj{
 									}
 								}
 								elseif ($attributes['options'][$i] != '') {
-									if ($requires_options != '') {
-										$sql = $requires_options;
-									}
-									else {
-										$sql = $attributes['options'][$i];
-									}
+									$sql = $attributes['options'][$i];
 									$sql = str_replace('$stelleid', $stelle_id, $sql);
 									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
@@ -18321,9 +18355,12 @@ class db_mapObj{
 											'oid'			=> $rs['oid'],
 											'image'		=> value_of($rs, 'image')
 										];
-										if ($requires_options != '') {
-											$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										if ($rs['requires']) {
+											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
+										// if ($requires_options != '') {
+										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
+										// }
 									}
 								}
 							}
@@ -18970,7 +19007,7 @@ class db_mapObj{
 					if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 					$rs = $this->db->result->fetch_array();
 					if ($rs[0] == 1) {		# Tabelle nur löschen, wenn das der einzige Layer ist, der sie benutzt
-						$sql = 'DROP TABLE IF EXISTS '.CUSTOM_SHAPE_SCHEMA.'."'.trim($explosion[0], '"').'";';
+						$sql = 'DROP TABLE IF EXISTS ' . CUSTOM_SHAPE_SCHEMA . '."' . trim($explosion[0], '"') . '";';
 						$this->debug->write("<p>file:kvwmap class:db_mapObj->deleteRollenLayer - Löschen eines RollenLayers:<br>" . $sql,4);
 						$query = pg_query($sql);
 					}
@@ -20060,7 +20097,15 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
 			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
+				$replaced_default = replace_params(
+					$rs['default'],
+					rolle::$layer_params,
+					$this->GUI->user->id,
+					$this->GUI->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->GUI->rolle->language
+				);
+				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}

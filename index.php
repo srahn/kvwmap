@@ -627,8 +627,8 @@ function go_switch($go, $exit = false) {
 					'style_angle' => 'text',
 					'style_angleitem' => 'text',
 					'style_width' => 'text',
-					'style_minwidth' => 'int',
-					'style_maxwidth' => 'int',
+					'style_minwidth' => 'float',
+					'style_maxwidth' => 'float',
 					'style_offsetx' => 'text',
 					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
@@ -1550,6 +1550,21 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
+			} break;
+
+			case 'Layereditor_info_from_maintable' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer',
+					'schema_name' => 'text',
+					'table_name' => 'text'
+				]);
+				header('Content-Type: application/json');
+				echo json_encode($GUI->pgdatabase->get_table_infos(
+					$GUI->formvars['connection_id'],
+					$GUI->formvars['schema_name'],
+					$GUI->formvars['table_name']
+				));
 			} break;
 
 			case 'Layereditor_Als neuen Layer eintragen' : {

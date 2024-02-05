@@ -109,6 +109,74 @@
 		document.getElementById(id+'_link').style.color = '#111';
 	}
 
+	function mandatoryValuesMissing() {
+		if (document.getElementById('gruppe-select').value == '') {
+			message([{ type: 'error', msg: 'Es muss eine Gruppe ausgewählt sein!'}]);
+			return true;
+		}
+		return false;
+	}
+
+	function fillFromMaintable(value) {
+		let [connection_id, schema_name, table_name] = value.split('.');
+		let elm = document.getElementById("GUI").elements;
+		elm["Name"].value = table_name;
+		elm["alias"].value = table_name.split('_').map((word) => { return word[0].toUpperCase() + word.substring(1); }).join(" ");
+		elm["connectiontype"].value = 6;
+		elm["connectiontype"].onchange();
+		elm["connection_id"].value = connection_id;
+		elm["maintable"].value = table_name;
+		elm["schema"].value = schema_name;
+		elm["sizeunits"].value = 6;
+
+		fetch(`index.php?go=Layereditor_info_from_maintable&connection_id=${connection_id}&schema_name=${schema_name}&table_name=${table_name}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`)
+			.then(response => {
+				if (!response.ok) {
+					message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>HTTP-Status Code: ${response.status} ${response.statusText}` }]);
+					response.text().then(text => {
+						message([{ type: 'error', msg: `<p>${text}` }]);
+					});
+				}
+
+				const contentType = response.headers.get("content-type");
+				if (contentType && contentType.indexOf("application/json") !== -1) {
+					response.json().then(data => {
+						console.log(data);
+						if (data.success) {
+							let elm = document.getElementById("GUI").elements;
+							elm["epsg_code"].value = data.epsg_code || '';
+							elm["oid"].value = data.oid_column;
+							elm["Datentyp"].value = data.Datentyp;
+							elm["pfad"].value =
+`SELECT
+  *
+FROM
+  ${data.table_name}
+WHERE
+  true`;
+							elm["Data"].value = (data.geom_column ? `${data.geom_column} from (select
+  ${data.oid_column},
+  ${data.geom_column}
+from
+  ${data.schema_name}.${data.table_name}
+) as foo using unique ${data.oid_column} using srid=${data.epsg_code}` : '');
+						}
+						else {
+							message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten. ${data.err_msg}` }]);
+						}
+					});
+				}
+				else {
+					console.log('Es ist kein JSON');
+					response.text().then(text => {
+						console.log(text);
+						message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>${text}` }]);
+					});
+				}
+			})
+			.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+	}
+
 	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
 </script>
 
@@ -165,22 +233,44 @@
 
 <table>
 	<tr>
-		<td style="">
+		<th align="right">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
-    		}
-    	?>
-      </select>
 		</td>
-  </tr>
+    <td>
+			<select id="selected_layer_id" style="min-width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++){
+					echo '<option';
+					if ($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
+				} ?>
+			</select>
+		</td>
+	</tr><?
+	if (false and !$this->formvars['selected_layer_id']) { ?>
+		<tr>
+			<th align="right">
+				<span class="px17 fetter"><? echo $strMaintable; ?>:</span>
+			</th>
+			<td><?
+				echo FormObject::createSelectField(
+					'table_select',
+					array_map(function($table) { $parts = explode('.', $table); return array('value' => $table, 'output' => $parts[1] . '.' . $parts[2] . ' (Conn: ' . $parts[0] . ')'); }, $this->tables),
+					$this->formvars['table_select'],
+					1,
+					'',
+					'fillFromMaintable(this.value)',
+					'',
+					'',
+					'',
+					'--------- ' . $this->strPleaseSelect . '--------'
+				); ?>
+				<span data-tooltip="<? echo $strNewLayerFromMaintableHint; ?>"></span>
+			</td>
+		</tr><?
+	} ?>
 </table>
 
 <a style="float: right; margin-top: -30px; margin-right: 10px;" href="javascript:window.scrollTo(0, document.body.scrollHeight);"	title="nach unten">
@@ -317,16 +407,16 @@
 								);
 							}
 							echo FormObject::createSelectField(
-								'Gruppe',																# name
-								$group_options,													# options
-								$this->formvars['Gruppe'],							# value
-								1,																			# size
-								'',																			# style
-								'',			# onchange
-								'gruppe-select',												# id
-								'',																			# multiple
-								'',																			# class
-								'-- ' . $this->strPleaseSelect . ' --'	# first option
+								'Gruppe',																	# name
+								$group_options,														# options
+								$this->formvars['Gruppe'],								# value
+								1,																				# size
+								'',																				# style
+								'document.GUI.gruppenaenderung.value=1',	# onchange
+								'gruppe-select',													# id
+								'',																				# multiple
+								'',																				# class
+								'-- ' . $this->strPleaseSelect . ' --'		# first option
 							); ?>
 							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
@@ -1244,7 +1334,7 @@
 				id="saveAsNewLayerButton"
 				name="dummy"
 				value="<?php echo $strButtonSaveAsNewLayer; ?>"
-				onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
+				onclick="mandatoryValuesMissing() || submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
 			>
 		</td>
 	</tr>
@@ -1257,6 +1347,7 @@
 	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 </a>
 
+<input type="hidden" name="gruppenaenderung" value="">
 <input type="hidden" name="stellenzuweisung" value="<? echo $this->formvars['stellenzuweisung']; ?>">
 <input type="hidden" name="go" value="Layereditor">
 <input type="hidden" name="assign_default_values" value="0">

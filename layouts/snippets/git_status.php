@@ -1,8 +1,8 @@
 <?
 	$folder = WWWROOT . APPLVERSION;
-	exec('cd ' . $folder . ' && git status -uno', $ausgabe, $ret);
+	$ex = exec("sudo -u gisadmin git status -uno", $ausgabe, $ret);
 	if ($ret != 0) {
-		echo 'Fehler bei der Ausführung von "git status"';
+		echo 'Fehler bei der Ausführung von "git status" in Ordner: ' . $folder . '<br>Ausgabe: ' . implode(' ', $ausgabe) . '<br>Fehlercode: ' . $ret . '<br>Exitcode: ' . $ex;
 	}
 	else {
 		$explosion = explode(' ', $ausgabe[0]);
