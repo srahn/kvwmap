@@ -8,15 +8,15 @@ class Zusammenzeichnung {
         description: 'Die Datei wird auf den Server hochgeladen und temporär abgelegt.<br>\
         Die ZIP-Datei wird entpackt und geprüft ob die notwendigen Dateien enthalten sind.<br>\
         Dann werden die Dateien an den XPlan-Validator der XPlanung-Leitstelle gesendet.<br>\
-        Wenn die Validierung keinen Fehler liefert, wird eine Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>\
+        Wenn die Validierung keinen Fehler liefert, wird ein Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>\
         Im Fehlerfall bekommen Sie eine Fehlermeldung und einen Link auf den Fehlerbericht.<br>\
-        Sie müssten dann Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen Ihrer Zusammenzeichnung starten.'
+        Sie müssen in Folge Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen Ihrer Zusammenzeichnung starten.'
       },
       import_zusammenzeichnung: {
         nr: 2,
         msg: 'Importieren der GML-Datei in die Portaldatenbank',
         description: 'Die Zusammenzeichnung wird in die Postgres-Datenbank mit dem Programm ogr2ogr eingelesen.<br>\
-        Danach wird geprüft ob es in der Datenbank schon einen Plan gibt mit der gleichen gml-id.<br>\
+        Danach wird geprüft ob es in der Datenbank schon einen Plan mit der gleichen gml-id gibt.<br>\
         Wenn ja, abbrechen und im nächsten Schritt die gml-ids in der Zusammenzeichnung ändern.<br>\
         Wenn nicht, wird das temporär angelegte Schema umbenannt und der Plan und der Bereich angelegt sowie die Datei mit den Geltungsbereichen eingelesen.<br>\
         War das erfolgreich, werden die Geometrien in die Tabelle der Geltungsbereiche für die Konvertierung übernommen.'
@@ -72,14 +72,14 @@ class Zusammenzeichnung {
         msg: 'Prüfen ob sich alle Objekte vorhandenen Planzeichenklassen zuordnen lassen.',
         description: 'Es wird geprüft ob Objekte zu definierten Klassen gehören.<br>\
         Solche, die nicht zu definierten Klassen gehören, werden aufaddiert und die Summe derer angezeigt.<br>\
-        Um welche Layer und Objekte sich handelt kann im nachhinein in der Ansicht der Zusammenzeichnung evaluiert werden.<br>\
+        Um welche Layer und Objekte sich handelt kann im Nachhinein in der Ansicht der Zusammenzeichnung evaluiert werden.<br>\
         Des Weiteren wird der Support benachrichtigt um die fehlenden Klassen anzulegen.'
       },
       replace_zusammenzeichnung: {
         nr: 11,
         msg: 'Ersetzen der alten Zusammenzeichnung durch die neue',
         description: 'Archivierung der original hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
-        Lösche die hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
+        Löschen der hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
         Löschen der alten Zusammenzeichnung in der Datenbank.\
         '
       },
@@ -133,8 +133,9 @@ class Zusammenzeichnung {
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
+				//console.log(event.target.responseText);
         if (xhttp.status == 200) {
-          try {
+					try {
             const response = JSON.parse(event.target.responseText);
             if (!Array.isArray(response.msg)) { response.msg = [response.msg]; }
             if (response.success) {
@@ -148,6 +149,7 @@ class Zusammenzeichnung {
               message([{ type: 'error', msg: response.msg }]);
             }
           } catch (err) {
+
             if (event.target.responseText.indexOf('<input id="login_name"') > 0) {
               window.location = 'index.php';
             }

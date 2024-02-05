@@ -260,7 +260,7 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		header('Content-Type: application/json');
 		echo json_encode(array(
 			'success' => false,
-			'msg' => $msg . '<br>' . $msg_zusatz . '<br>' . $result['msg']
+			'msg' => $msg
 		));
 	}
 
@@ -1679,14 +1679,10 @@ function go_switch_xplankonverter($go) {
 		} break;
 
 		/**
-			- Archivieren der xplan-gml-Dateien
-			- Löschen der alten Zusammenzeichnung
-			- Kennzeichnung der neuen Zusammenzeichnung als nun aktuell
+		* - Archivieren der xplan-gml-Dateien
+		*	- Löschen der alten Zusammenzeichnung
+		*	- Kennzeichnung der neuen Zusammenzeichnung als nun aktuell
 		*/
-		# ToDo pk:
-		# - E-Mail Versand umstellen auf ARL
-		# + Bei Erfolg fehlgeschlagene Upload-Versuche löschen.
-		# + Video für Upload
 		case 'xplankonverter_replace_zusammenzeichnung' : {
 			header('Content-Type: application/json');
 
@@ -2160,6 +2156,7 @@ function go_switch_xplankonverter($go) {
 			$tmp_file = $upload_file['name'];
 
 			$result = $GUI->xplankonverter_validate_uploaded_zusammenzeichnungen($upload_file, $tmp_dir);
+
 			if (! $result['success']) {
 				send_error('Fehler beim Hochladen der Zusammenzeichnung!<p>' . $result['msg'], false, false);
 				if (strpos($tmp_dir, XPLANKONVERTER_FILE_PATH . 'tmp/zusammenzeichnung_') !== false AND file_exists($tmp_dir)) {

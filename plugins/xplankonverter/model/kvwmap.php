@@ -373,10 +373,11 @@
 		$konvertierung = new Konvertierung($GUI); # Create empty Konvertierungsobjekt
 
 		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
+
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
-      $msg = 'Zusammenzeichnung';
 		}
+		$msg = 'Zusammenzeichnung';
 
 		if (file_exists($tmp_dir . 'Einzelfassungen.gml')) {
 			rename($tmp_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
@@ -528,6 +529,10 @@
 				}
 			}
 			$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layer->data));
+			if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
+				$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
+				$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+			}
 		}
 
 		$GUI->Stelle_ID = $stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.

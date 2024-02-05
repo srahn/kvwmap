@@ -79,6 +79,11 @@ class Konvertierung extends PgObject {
 				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
+					if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
+						$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
+						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+					}
+
 				}
 				else {
 					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
@@ -1539,24 +1544,49 @@ class Konvertierung extends PgObject {
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
 		$this->debug->write("<br><b>Validierung der Datei : {$pathinfo['basename']} mit folgendem Befehl</b><br>{$cmd}", $debuglevel);
 		exec($cmd, $output, $result_code);
-		$result = $output[0];
 
-		$this->debug->write("<br><b>Output der Validierung</b><br>{$result}", $debuglevel);
-		if (strpos($result, 'Http/1.1 Service Unavailable') !== false) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>Http/1.1 Service Unavailable<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.'
-			);
-		}
-		if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.'
-			);
-		}
-		#echo '<br>result_code: : ' . $result_code;
+    // $ch = curl_init($url);
+    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// curl_setopt($ch, CURLOPT_POST, true);
+		// curl_setopt($ch, CURLOPT_HTTPHEADER, Array('accept: application/json', 'X-Filename: ' . $pathinfo['basename'], 'Content-Type: text/gml+xml'));
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, Array('file' => new CURLFile($gml_file)));
+		// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// curl_setopt($ch, CURLOPT_HEADER, 1);
+		// $response = curl_exec($ch);
+    // $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		// echo "Request:\n" . curl_getinfo($ch, CURLINFO_HEADER_OUT) . "\n";
+		// echo "Response:\n$response\n";
+		// curl_close($ch);
+		// $this->debug->write("<br><b>Output der Validierung</b><br>{$response}", $debuglevel);
+		// if ($httpCode != 400) {
+		// 	return array(
+		// 		'success' => false,
+		// 		'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP-Fehlercode: ' . $httpCode . '<p>
+		// 		Der Server der Leistelle liefert folgende Antwort:' .  utf8_encode($response) . '<p>
+		// 		<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.'
+		// 	);
+		// }
+
 		$msg = array();
+		$result = $output[0];
 		$report = json_decode($result, false);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			if (strpos($result, 'Http/1.1 Service Unavailable') !== false) {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Http/1.1 Service Unavailable<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.';
+			}
+			else if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.';
+			}
+			else {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Fehler: ' . print_r($output, true);
+			}
+			return array(
+				'success' => false,
+				'msg' => $msg[0]
+			);
+		}
 
 		if (is_array($report->validationResult->geometrisch->errors) AND count($report->validationResult->geometrisch->errors) > 0) {
 			$msg[] = 'Der XPlanValidator der Leitstelle liefert folgende geometrischen Fehlermeldungen: .' . implode("<br>", $report->validationResult->geometrisch->errors);
