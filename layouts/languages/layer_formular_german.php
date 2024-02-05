@@ -18,7 +18,7 @@
 	$strClassItem = "Classitem";
 	$strClusterMaxdistance = "Cluster_Maxdistance";
 	$strCommonData = "Allgemeine Angaben";
-	$strConnection = "Connection*";
+	$strConnection = "Connection";
 	$strConnectionType = "Connectiontype";
 	$strData = "Data";
 	$strDataOwnerName  =  'Ansprechpartner';
@@ -39,9 +39,8 @@
 	$strDuplicateTableFieldsOpenTitle  =  'Zeige Felder zum duplizieren von Layereinstellungen.';
 	$strEpsgCode = "Epsg-code";
 	$strExpression = "Expression";
-	$strFilterItem = "Filteritem*"; 
 	$strGeomUsable = "Geometrie übernehmbar";
-	$strGroup = "Gruppe*";
+	$strGroup = "Gruppe";
 	$strHeight = "Höhe";
 	$strID = "ID";
 	$strIdAttribute = "ID-Spalte";
@@ -54,7 +53,7 @@
 	$strLabelRequires = "Labelrequires";
 	$strLayer = "Layer";
 	$strLayerCharts = "Diagramme";
-	$strLayerID = "Layer ID*";
+	$strLayerID = "Layer ID";
 	$strLegend = "Legende";
 	$strLegendGraphic = "Legendengrafik";
 	$strLegendOrder = "Legendenreihenfolge";
@@ -69,11 +68,12 @@
 	$strminscale = "Minscale";
 	$strName = "Name";
 	$strNewLayerFromMaintableHint = "Zur Auswahl stehen alle Tabellen die entsprechend der vorhandenen Datenbankverbindungsinformationen (Tabelle: connections) verfügbar sind. Nach Auswahl einer Tabelle in diesem Auswahlfeld wird ein neuer PostGIS-Layer angelegt der diese Tabelle als Haupttabelle hat. Der Layer bekommt alle Attribute der Tabelle. Als Geometrie wird die erste gefundene Geometriespalte genommen und danach auch der Datentyp und der EPSG-Code festgelegt. Der Layer erhält eine Klasse mit Default-Style aber noch keine Einstellungen im Attributeditor und noch keine Stellenzuordnung. Der Layer kann anschließend wie ein ganz normaler Layer bearbeitet werden.";
+	$strNoConnectionIdSelected = "Es wurde keine Connection Id angegeben.";
 	$strNotDublicate  =  "nicht duplizieren";
 	$stroffsite = "Offsite";
 	$strOrder = "Reihenfolge";
 	$strOWSParameter = "OWS-Parameter";
-	$strOwsSrs = "OWS-SRS*";
+	$strOwsSrs = "OWS-SRS";
 	$strPath = "Query";
 	$strPostlabelcache = "Postlabelcache";
 	$strPrintConnection = "Druck-Connection";
@@ -103,7 +103,7 @@
 	$strText = "Text";
 	$strTileIndex = "Tileindex";
 	$strTileItem = "Tileitem";
-	$strTolerance = "Tolerance*";
+	$strTolerance = "Tolerance";
 	$strToleranceUnits = "Toleranceunits";
 	$strtransparency = "Deckkraft";
 	$strTriggerFunction = "Triggerfunktion";
@@ -115,10 +115,10 @@
 	$strWMSAuthPassword = "wms_auth_password";
 	$strWMSAuthUsername = "wms_auth_username";
 	$strWMSConnectionTimeout = "WMS-connection-timeout";
-	$strWMSFormat = "WMS-format*";
+	$strWMSFormat = "WMS-format";
 	$strWMSKeywordlist = "WMS-Keywordlist";
 	$strWMSName = "WMS-Name/Typename";
-	$strWMSServerVersion = "OWS-Serverversion*";
+	$strWMSServerVersion = "OWS-Serverversion";
 	$strWriteMapserverTemplates = "Schreibe MapServer Templates";
 	$strWriteMapserverTemplatesOption1 = "von Data-Statement ableiten";
 	$strWriteMapserverTemplatesOption2 = "von Haupttabelle ableiten";

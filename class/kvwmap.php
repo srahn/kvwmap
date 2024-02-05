@@ -8220,6 +8220,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->grouplayers = $mapDB->get_layersfromgroup($this->layerdata['Gruppe']);
 		}
 		else {
+			$this->connections = Connection::find($this, 'id');
 			$this->tables = [];
 			// $this->tables = array_merge(
 			// 	...(array_map(
