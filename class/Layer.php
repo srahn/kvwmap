@@ -108,13 +108,18 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
-	function get_datasource() {
-		if (!empty($this->get('datasource'))) {
+	function get_datasource($attribute = 'beschreibung') {
+		if (empty($this->get('datasource'))) {
 			return null;
 		}
 		else {
 			$datasource = DataSource::find_by_id($this->gui, $this->get('datasource'));
-			return $datasource->get('beschreibung') ?? $this->get('datasource');
+			if ($attribute == 'beschreibung') {
+				return $datasource->get('beschreibung') ?? $this->get('name') ?? $this->get('datasource');
+			}
+			else {
+				return $datasource->get('name') ?? $this->get('beschreibung') ?? $this->get('datasource');
+			}
 		}
 	}
 
@@ -545,12 +550,12 @@ l.Name AS sub_layer_name
 	function get_baselayer_options() {
 		if (strpos($this->get('Data'), '{') === 0) {
 			$data = json_decode($this->get('Data'));
-			$data->options->attribution = $this->get_datasource();
+			$data->options->attribution = $this->get_datasource('name');
 			return $data->options;
 		}
 		else {
 			return (Object) array(
-				'attribution' => $this->get_datasource()
+				'attribution' => $this->get_datasource('name')
 			);
 		}
 	}
@@ -662,7 +667,7 @@ l.Name AS sub_layer_name
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
-			'contactOrganisation' => $this->get_datasource(),
+			'contactOrganisation' => $this->get_datasource('beschreibung'),
 			'contactPersonName' => $this->get('dataowner_name'),
 			'contactEMail' => $this->get('dataowner_email'),
 			'contactPhon' => $this->get('dataowner_tel'),

@@ -19224,12 +19224,20 @@ class db_mapObj{
 			'status',
 			'trigger_function'
 		);
+		if ($this->GUI->plugin_loaded('mobile')) {
+			$column_equal_field_attributes = array_merge(
+				$column_equal_field_attributes,
+				array('sync', 'vector_tile_url')
+			);
+		}
+
 		if ($this->GUI->plugin_loaded('portal')) {
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
-				array('vector_tile_url')
+				array('cluster_option')
 			);
 		}
+
 		foreach($column_equal_field_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
 		}
