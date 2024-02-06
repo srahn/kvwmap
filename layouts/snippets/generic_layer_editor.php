@@ -92,15 +92,12 @@ if (!$invisible_attributes) {
 };
 $size = 16;
 $select_width = 'width: 100%;'; 
-if ($layer['alias'] != '' AND $this->Stelle->useLayerAliases) {
-	$layer['Name'] = $layer['alias'];
-}
 if ($this->formvars['overwrite_layer_name'] != '') {
 	$layer_name = $this->formvars['overwrite_layer_name']; ?>
 	<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
 }
 else {
-	$layer_name = $layer['Name'];
+	$layer_name = $layer['Name_or_alias'];
 }
 $doit = false;
 $anzObj = @count($layer['shape']);
@@ -162,7 +159,8 @@ if ($doit == true) { ?>
 		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
 			<tr>
 				<td width="100%">   
-					<table class="gle1_table" cellspacing="0" cellpadding="2" width="100%">
+					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
+						<thead>
 						<? # Gruppennamen
 							if($layer['attributes']['group'][0] != ''){
 								echo '<tr><td style="border:none"></td><td style="border:none"></td>';
@@ -208,7 +206,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
+											echo '<td style="position: relative; background-clip: padding-box;" id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
 											if($collapsed)echo 'style="display: none"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
@@ -250,6 +248,8 @@ if ($doit == true) { ?>
 							if($has_geom)echo '<td bgcolor="'.BG_GLEATTRIBUTE.'">&nbsp;</td>';
 					  ?>
 					  </tr>
+					</thead>
+					<tbody>
 		<?
 			for ($k; $k<$anzObj; $k++) {
 				$definierte_attribute_privileges = $layer['attributes']['privileg'];		// hier sichern und am Ende des Datensatzes wieder herstellen
@@ -394,10 +394,34 @@ if ($doit == true) { ?>
 											$statistic['Max'] = array('title' => '&uarr;', 'value' => $max);
 											#$statistic['relative Häufigkeit'] = relative_haeufigkeit($this->qlayerset[$i]['shape'], $column_name, $min, $max);
 											#$statistic['absolute Häufigkeit'] = absolute_haeufigkeit($this->qlayerset[$i]['shape'], $column_name);
-											if ($summe > 0) {
+											#if ($summe > 0) {
 												output_statistic($statistic);
-											}
+											#}
 										} ?></div>
+									</td><?
+								}
+							} ?>
+						</tr>
+
+						<tr class="result_filter_tr">
+							<td style="border: none; padding: 0" <? if ($layer['attributes']['group'][0] != ''){echo 'colspan="2"';} ?>></td>
+							<?
+							for ($j = 0; $j < count($layer['attributes']['name']); $j++){
+								if ($layer['attributes']['type'][$j] != 'geometry' AND $layer['attributes']['visible'][$j] AND $layer['attributes']['SubFormFK_hidden'][$j] != 1) {
+									$column_name = $this->qlayerset[$i]['attributes']['name'][$j]; ?>
+									<td style="border: none; position: relative; padding: 0">
+										<div id="result_filter_<? echo $layer['Layer_ID'] . '_' . $column_name; ?>" class="gle_result_filter">
+											<? 
+											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+												echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
+															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
+																<option value="#all#">alle</option>';
+												foreach ($this->result_values[$layer['Layer_ID']][$column_name] as $value => $output) {
+													echo '<option value="' . $value . '">' . $output . '</option>';
+												}
+												echo '</select>';
+											} ?>
+										</div>
 									</td><?
 								}
 							} ?>
@@ -491,6 +515,7 @@ if ($doit == true) { ?>
 						</tr>
 			
 			<?  } ?>
+						</tbody>
 					</table>
 				</td>
 			</tr>
@@ -613,6 +638,13 @@ if ($doit == true) { ?>
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
 		<script type="text/javascript">
+			var filters = document.querySelectorAll('.gle_result_filter');
+			[].forEach.call(filters, function(filter){
+				var column_id = filter.id.replace('result_filter', 'column');
+				filter.parentNode.removeChild(filter);
+				document.getElementById(column_id).appendChild(filter);
+			});			
+
 			var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
 			[].forEach.call(vchangers, function(vchanger){if(vchanger.oninput)vchanger.oninput();});
 		</script>

@@ -134,14 +134,40 @@ class Connection extends MyObject {
 		);
 	}
 
+	function get_connection_string() {
+		return 'host: ' . $this->get('host') . 'port: ' . $this->get('port') . ' dbname: ' . $this->get('dbname') . ' user: ' . $this->get('user');
+	}
+
 	public static function find_by_id($gui, $id) {
-		$connection = new Connection($gui);
-		return $connection->find_by('id', $id);
+		if ($id) {
+			$connection = new Connection($gui);
+			return $connection->find_by('id', $id);
+		}
+		else {
+			return null;
+		}
 	}
 
 	public static	function find($gui, $order = '', $sort = '') {
 		$connection = new Connection($gui);
 		return $connection->find_where('', ($order == '' ? 'name' : $order), $sort);
+	}
+
+	function get_tables() {
+		$pgdatabase = new pgdatabase();
+		if ($pgdatabase->open($this->get('id'))) {
+			$tables = array_merge(...(array_map(
+				function($schema) use ($pgdatabase) {
+					return $pgdatabase->get_tables($schema);
+				},
+				$pgdatabase->get_schemata($this->get('user'))
+			)));
+			if ($this->gui->pgdatabase->connection_id != $this->get('id')) {
+				$pgdatabase->close();
+			}
+			return $tables;
+		}
+		return array();
 	}
 }
 ?>

@@ -35,20 +35,10 @@ if ($this->new_entry != true AND value_of($this->formvars, 'printversion') == ''
 											switch ($layer['attributes']['form_element_type'][$j]) {
 												case 'Auswahlfeld' : case 'Radiobutton' : {
 													if (is_array($layer['attributes']['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j][$k]); $e++) {
-															if ($layer['attributes']['enum_value'][$j][$k][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
-																$output[$p] = $layer['attributes']['enum_output'][$j][$k][$e];
-																break;
-															}
-														}
+														$output[$p] = $layer['attributes']['enum'][$j][$k][$layer['shape'][$k][$identifier_attributes[$p]]]['output'];
 													}
 													else {
-														for ($e = 0; $e < @count($layer['attributes']['enum_value'][$j]); $e++) {
-															if ($layer['attributes']['enum_value'][$j][$e] == $layer['shape'][$k][$identifier_attributes[$p]]) {
-																$output[$p] = $layer['attributes']['enum_output'][$j][$e];
-																break;
-															}
-														}
+														$output[$p] = $layer['attributes']['enum'][$j][$layer['shape'][$k][$identifier_attributes[$p]]]['output'];
 													} 
 												} break;
 												

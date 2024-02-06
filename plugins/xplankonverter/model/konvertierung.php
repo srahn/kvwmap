@@ -41,17 +41,18 @@ class Konvertierung extends PgObject {
 		$gui = $this->gui;
 
 		$gui->class_load_level = 2;
-		$gui->loadMap('DataBase');
+		$gui->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
 
 		# Setze Metadaten
 		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
-		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft' . $this->plan->get($this->plan_attribut_aktualitaet));
+		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft ' . $this->get_aktualitaetsdatum());
 		# Hier die Variante wo die Bezeichnung des Datums aus dem Attributnamen der Aktualität entnommen wird:
-		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->plan_attribut_aktualitaet) . ': ' . $this->plan->get($this->plan_attribut_aktualitaet));
+		#$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' ' . ucfirst($this->get_plan_attribut_aktualitaet()) . ': ' . $this->get_aktualitaetsdatum());
 		$gui->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$gui->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$gui->map->setMetaData("ows_srs", $gui->Stelle->ows_srs ?: OWS_SRS);
 		$gui->map->web->set('header', '../templates/header.html');
 		$gui->map->web->set('footer', '../templates/footer.html');
 		# Filter Layer, die nicht im Dienst zu sehen sein sollen
@@ -60,6 +61,7 @@ class Konvertierung extends PgObject {
 		if (! $result['success']) {
 			return $result;
 		}
+
 		$layers_with_content = $result['layers_with_content'];
 		$layernames_with_content = array_keys($layers_with_content);
 		$layernames_with_content[] = strtoupper($planartkuerzel) . '-Pläne';
@@ -77,6 +79,11 @@ class Konvertierung extends PgObject {
 				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
+					if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
+						$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
+						$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+					}
+
 				}
 				else {
 					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
@@ -99,9 +106,11 @@ class Konvertierung extends PgObject {
 		$konvertierung->select = $select;
 		$konvertierung->find_by($by, $id);
 		$konvertierung->debug->show('Found Konvertierung with planart: ' . $konvertierung->get('planart'), Konvertierung::$write_debug);
-		if ($konvertierung->get('planart') != '' AND $konvertierung->get_plan()) {
-			$konvertierung->plan->get_center_coord();
-			$konvertierung->plan->get_extent(OWS_SRS);
+		if ($konvertierung->get('planart') != '') {
+			if ($konvertierung->get_plan()) {
+				$konvertierung->plan->get_center_coord();
+				$konvertierung->plan->get_extent(OWS_SRS);
+			}
 			switch ($konvertierung->get('planart')) {
 				case 'BP-Plan' : {
 					$konvertierung->plan_title = 'Bebauungsplan';
@@ -109,7 +118,6 @@ class Konvertierung extends PgObject {
 					$konvertierung->plan_class = 'BP_Plan';
 					$konvertierung->plan_abk = 'bplan';
 					$konvertierung->plan_layer_id = XPLANKONVERTER_BP_PLAENE_LAYER_ID;
-					$konvertierung->plan_attribut_aktualitaet = 'inkrafttretensdatum';
 				} break;
 				case 'FP-Plan' : {
 					$konvertierung->plan_title = 'Flächennutzungsplan';
@@ -117,7 +125,6 @@ class Konvertierung extends PgObject {
 					$konvertierung->plan_class = 'FP_Plan';
 					$konvertierung->plan_abk = 'fplan';
 					$konvertierung->plan_layer_id = XPLANKONVERTER_FP_PLAENE_LAYER_ID;
-					$konvertierung->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
 				} break;
 				case 'SO-Plan' : {
 					$konvertierung->plan_title = 'Sonstige Plan';
@@ -125,7 +132,6 @@ class Konvertierung extends PgObject {
 					$konvertierung->plan_class = 'SO_Plan';
 					$konvertierung->plan_abk = 'soplan';
 					$konvertierung->plan_layer_id = XPLANKONVERTER_SO_PLAENE_LAYER_ID;
-					$konvertierung->plan_attribut_aktualitaet = 'genehmigungsdatum';
 				} break;
 				case 'RP-Plan' : {
 					$konvertierung->plan_title = 'Raumordnungsplan';
@@ -133,7 +139,6 @@ class Konvertierung extends PgObject {
 					$konvertierung->plan_class = 'RP_Plan';
 					$konvertierung->plan_abk = 'rplan';
 					$konvertierung->plan_layer_id = XPLANKONVERTER_RP_PLAENE_LAYER_ID;
-					$konvertierung->plan_attribut_aktualitaet = 'datumdesinkrafttretens';
 				} break;
 				default : {
 					$konvertierung->plan_title = 'Plan';
@@ -141,7 +146,6 @@ class Konvertierung extends PgObject {
 					$konvertierung->plan_class = 'XP_Plan';
 					$konvertierung->plan_abk = 'xplan';
 					$konvertierung->title = 'Plan';
-					$konvertierung->plan_attribut_aktualitaet = 'genehmigungsdatum';
 				} break;
 			}
 		}
@@ -261,7 +265,8 @@ class Konvertierung extends PgObject {
 				) AND
 				k.stelle_id = " . $gui->Stelle->id . " AND
 				k.planart = '" . $planart . "'
-			ORDER BY p." . $plan_attribut_aktualitaet . " DESC
+			ORDER BY 
+				COALESCE(p." . $plan_attribut_aktualitaet . ($plan_class == 'SO_Plan' ? ", p.genehmigungsdatum" : ", p.aenderungenbisdatum") . ") DESC
 		";
 		if ($gui->user->id == 3) {
 			# echo "<p>SQL zur Abfrage der Zusammenzeichnungen: " . $sql; exit;
@@ -301,7 +306,7 @@ class Konvertierung extends PgObject {
 	function archiv_old_zusammenzeichnung() {
 		# Zippe Zusammenzeichnung und Geltungsbereiche aus Verzeichnis $GUI->konvertierung->get_file_path('uploaded_xplan_gml'); (XPLANKONVERTER_FILE_PATH/<konvertierung_id>/uploaded_xplan_gml/)
 		$zip_path = XPLANKONVERTER_FILE_PATH . 'alte_zusammenzeichnungen/' . $this->gui->Stelle->id . '/';
-		$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->plan->get($this->plan_attribut_aktualitaet)), 'Y-m-d') . '.zip';
+		$zip_file = 'Zusammenzeichnung_' . $this->gui->Stelle->Bezeichnung . '_' . date_format(date_create($this->get_aktualitaetsdatum()), 'Y-m-d') . '.zip';
 		if (!file_exists($zip_path)) {
 			mkdir($zip_path, 0775, true);
 		}
@@ -828,6 +833,8 @@ class Konvertierung extends PgObject {
 			$this->debug->show('found ' . count($plan) . ' Pläne', Konvertierung::$write_debug);
 			if (count($plan) > 0) {
 				$this->plan = $plan[0];
+				$this->plan->get_center_coord();
+				$this->plan->get_extent(OWS_SRS);
 				$this->debug->show('get_plan assign first plan with planart: ' . $this->plan->planart . ' gml_id: ' . $this->plan->get('gml_id') . ' to Konvertierung.', Konvertierung::$write_debug);
 			}
 			else {
@@ -835,6 +842,51 @@ class Konvertierung extends PgObject {
 			}
 		}
 		return $this->plan;
+	}
+
+	/**
+	 * Diese Funktion liefert das Datum der Aktualität des Plans.
+	 * Wenn das Datum aus dem Attriubt $this->plan_attribut_aktualitaet nicht vorhanden ist,
+	 * wird bei SO-Plänen das Datum aus genehmigungsdatum und sonst aus aenderungenbisdatum ausgelesen.
+	 */
+	function get_aktualitaetsdatum() {
+		return $this->plan->get($this->get_plan_attribut_aktualitaet());
+	}
+
+	/**
+	 * Liefert den Namen des Attributes in dem die Aktualität des Planes steht
+	 * Ist ein Wert im Attribut $this->plan_attribut_aktualitaet enthalten, ist es $this->plan_attribut_aktualitaet.
+	 * Ist kein Wert enthalten ist es bei SO-Plänen genehmigungsdatum und sonst aenderungenbisdatum
+	 */
+	function get_plan_attribut_aktualitaet() {
+		switch ($this->get('planart')) {
+			case 'BP-Plan' : {
+				$this->plan_attribut_aktualitaet = 'inkrafttretensdatum';
+			} break;
+			case 'FP-Plan' : {
+				$this->plan_attribut_aktualitaet = 'wirksamkeitsdatum';
+			} break;
+			case 'SO-Plan' : {
+				$this->plan_attribut_aktualitaet = 'genehmigungsdatum';
+			} break;
+			case 'RP-Plan' : {
+				$this->plan_attribut_aktualitaet = 'datumdesinkrafttretens';
+			} break;
+			default : {
+				$this->plan_attribut_aktualitaet = 'genehmigungsdatum';
+			} break;
+		}
+
+		if ($this->plan->get($this->plan_attribut_aktualitaet) != '') {
+			$attribute_name = $this->plan_attribut_aktualitaet;
+		}
+		elseif ($this->plan_class == 'SO_Plan') {
+			$attribute_name = 'genehmigungsdatum';
+		}
+		else {
+			$attribute_name = 'aenderungenbisdatum';
+		}
+		return $attribute_name;
 	}
 
 	function get_num_gmlas_tmp_plaene() {
@@ -1411,12 +1463,6 @@ class Konvertierung extends PgObject {
 			$validierung->detaillierte_requires_bedeutung($bereich);
 		}
 
-		// Set die Planvalidierung durchgeführt wird, führt diese Meldung in die Irre und kann weggelassen werden.
-		// ToDo: Ggf. wird der Hinweis als Validierungsergebnis gespeichert, dann wird er auch angezeigt.
-		#if (count($bereiche) == 0) {
-		#	$this->gui->add_message('warning', 'Die Validierung liefert kein Ergebnis, weil zum Plan keine Bereiche hinzugefügt wurden!');
-		#}
-
 		if (!empty($regeln)) {
 			$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'regel_existiert');
 			$validierung->konvertierung_id = $this->get($this->identifier);
@@ -1498,24 +1544,49 @@ class Konvertierung extends PgObject {
 		$cmd = "curl -X 'POST' '" . $url	. "'-H 'accept: application/json' -H 'X-Filename: " . $pathinfo['basename'] . "' -H 'Content-Type: application/gml+xml' --data-binary @" . $gml_file;
 		$this->debug->write("<br><b>Validierung der Datei : {$pathinfo['basename']} mit folgendem Befehl</b><br>{$cmd}", $debuglevel);
 		exec($cmd, $output, $result_code);
-		$result = $output[0];
 
-		$this->debug->write("<br><b>Output der Validierung</b><br>{$result}", $debuglevel);
-		if (strpos($result, 'Http/1.1 Service Unavailable') !== false) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>Http/1.1 Service Unavailable<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.'
-			);
-		}
-		if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
-			return array(
-				'success' => false,
-				'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.'
-			);
-		}
-		#echo '<br>result_code: : ' . $result_code;
+    // $ch = curl_init($url);
+    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// curl_setopt($ch, CURLOPT_POST, true);
+		// curl_setopt($ch, CURLOPT_HTTPHEADER, Array('accept: application/json', 'X-Filename: ' . $pathinfo['basename'], 'Content-Type: text/gml+xml'));
+		// curl_setopt($ch, CURLOPT_POSTFIELDS, Array('file' => new CURLFile($gml_file)));
+		// curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		// curl_setopt($ch, CURLOPT_VERBOSE, 1);
+		// curl_setopt($ch, CURLOPT_HEADER, 1);
+		// $response = curl_exec($ch);
+    // $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		// echo "Request:\n" . curl_getinfo($ch, CURLINFO_HEADER_OUT) . "\n";
+		// echo "Response:\n$response\n";
+		// curl_close($ch);
+		// $this->debug->write("<br><b>Output der Validierung</b><br>{$response}", $debuglevel);
+		// if ($httpCode != 400) {
+		// 	return array(
+		// 		'success' => false,
+		// 		'msg' => 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP-Fehlercode: ' . $httpCode . '<p>
+		// 		Der Server der Leistelle liefert folgende Antwort:' .  utf8_encode($response) . '<p>
+		// 		<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.'
+		// 	);
+		// }
+
 		$msg = array();
+		$result = $output[0];
 		$report = json_decode($result, false);
+
+		if (json_last_error() !== JSON_ERROR_NONE) {
+			if (strpos($result, 'Http/1.1 Service Unavailable') !== false) {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Http/1.1 Service Unavailable<br>Der Validator ist zur Zeit nicht erreichbar. Prüfen Sie die Verfügbarkeit unter <a href="https://www.xplanungsplattform.de/xplan-validator/">https://www.xplanungsplattform.de/xplan-validator/</a> und versuchen Sie es wieder wenn der Validator wieder läuft.';
+			}
+			else if (strpos($result, 'HTTP Status 406 – Not Acceptable') !== false) {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>HTTP Status 406 – Not Acceptable<br>Überprüfen Sie Ihre XPlanGML-Datei auf Wohlgeformtheit und Validität.';
+			}
+			else {
+				$msg[0] = 'Fehler bei der Abfrage am XPlanValidator!<br>Fehler: ' . print_r($output, true);
+			}
+			return array(
+				'success' => false,
+				'msg' => $msg[0]
+			);
+		}
 
 		if (is_array($report->validationResult->geometrisch->errors) AND count($report->validationResult->geometrisch->errors) > 0) {
 			$msg[] = 'Der XPlanValidator der Leitstelle liefert folgende geometrischen Fehlermeldungen: .' . implode("<br>", $report->validationResult->geometrisch->errors);
@@ -1896,7 +1967,7 @@ class Konvertierung extends PgObject {
 				split_part(id, '_', 2) AS plan_gml_id,
 				xplan_name AS plan_name,
 				nummer,
-				" . $this->gui->plan_attribut_aktualitaet . ",
+				COALESCE(" . $this->gui->plan_attribut_aktualitaet . ($this->plan_class == 'SO_Plan' ? ", genehmigungsdatum" : ", aenderungenbisdatum") . "),
 				ST_Multi(raeumlichergeltungsbereich)
 			FROM
 				" . $gml_extractor->gmlas_schema . "." . strtolower($this->gui->plan_class) . "
@@ -1920,18 +1991,18 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-		Erzeugt die Metadatendokumente für die Beschreibung
-		des Datensatzes des Plans der zu dieser Konvertierung gehört
-		sowie je einen zur Beschreibung des Darstellungs- und Downloaddienstes.
-		@params $md metadata Es können Metadatendokumente zu einem Plan einer einzelnen Konvertierung erstellt werden
-			oder zu dem Gesamtdatensatz und den Diensten aller Pläne in einem xplan_gml - Schema. Das hängt davon ab
-			welche Metadaten in $md übergeben werden.
-		@return array of strings Die die Dokumente enthalten
-	*/
+	 * Erzeugt die Metadatendokumente für die Beschreibung
+	 * des Datensatzes des Plans der zu dieser Konvertierung gehört
+	 * sowie je einen zur Beschreibung des Darstellungs- und Downloaddienstes.
+	 * @params $md metadata Es können Metadatendokumente zu einem Plan einer einzelnen Konvertierung erstellt werden
+	 * oder zu dem Gesamtdatensatz und den Diensten aller Pläne in einem xplan_gml - Schema. Das hängt davon ab
+	 * welche Metadaten in $md übergeben werden.
+	 * @return array of strings Die die Dokumente enthalten
+	 */
 	function create_metadata_documents($md) {
 		$plan = $this->plan;
-		$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($this->gui, $this->get('planart'), $this->plan_class, $this->plan_attribut_aktualitaet);
-
+		$zusammenzeichnungen = Konvertierung::find_zusammenzeichnungen($this->gui, $this->get('planart'), $this->plan_class, $this->get_plan_attribut_aktualitaet());
+		#echo '<br>' . $plan->get('gemeinde');
 		# Setzen der Metadaten für die Metadatendokumente
 		if (count($zusammenzeichnungen['published']) == 0) {
 			# Noch keine Zusammenzeichnung vorhanden entnehme die uuids von der neuen Zusammenzeichnung
@@ -1943,22 +2014,22 @@ class Konvertierung extends PgObject {
 			$this->set_metadata_uuids($md->get('uuids'));
 		}
 
-		$md->set('stellendaten', $this->gui->Stelle->getstellendaten());
-		$md->set('md_date', en_date($plan->get($this->gui->plan_attribut_aktualitaet)));
+		$md->set('stellendaten', $this->gui->Stelle->getstellendaten_full_contact());
+		$md->set('md_date', en_date($this->get_aktualitaetsdatum()));
+		$md->set('date_de', $this->get_aktualitaetsdatum());
 		$md->set('id_cite_title', $plan->get('name'));
 		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist der " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
 		$md->set('id_abstract', array(
-			'dataset' => 'des Plans ' . $plan->get('name') . $abstract_zusatz,
+			'dataset' => ' des Plans ' . $plan->get('name') . $abstract_zusatz,
 			'viewservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz,
 			'downloadservice' => 'des Plans ' . $plan->get('name') . '. ' . $md->get('stellendaten')['ows_title'] . ' ' . $md->get('stellendaten')['ows_abstract'] . $abstract_zusatz
 		));
-		$md->set('date_title', $this->gui->plan_attribut_aktualitaet);
-		$md->set('date_de', $plan->get($this->gui->plan_attribut_aktualitaet));
-		$md->set('id_cite_date', en_date($plan->get($this->gui->plan_attribut_aktualitaet)));
+		$md->set('date_title', $this->get_plan_attribut_aktualitaet());
+		$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
 		$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
-		$md->set('onlineresource', URL . '/ows/' . $this->gui->Stelle->id . '/fplan?');
+		$md->set('onlineresource', URL . 'ows/' . $this->gui->Stelle->id . '/fplan?');
 		$md->set('download_name', 'Download der XPlan-GML Dateien');
 		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get_id());
 		$md->set('search_name', 'Suche im UVP-Portal Niedersachsen');
@@ -1966,6 +2037,7 @@ class Konvertierung extends PgObject {
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $md->get('service_layer_name') . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
 		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
+		$md->set('geographicIdentifier', $plan->get_regionalschluessel());
 
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(
@@ -2036,7 +2108,7 @@ class Konvertierung extends PgObject {
 		if (mail_att($from_name, $from_email, $to_email, $cc_email, $reply_email, $subject, $message, $attachement, $mode, $smtp_server, $smtp_port)) {
 			return array(
 				'success' => true,
-				'msg' => 'Benachrichtigung an den Systemadministrator versendet. Nach Behebung des Fehlers erhalten Sie eine Mitteilung per E-Mail'
+				'msg' => 'Benachrichtigung an den Systemadministrator versendet.'
 			);
 		}
 		else {

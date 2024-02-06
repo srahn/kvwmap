@@ -114,6 +114,13 @@ class Regel extends PgObject {
 			if ($sql_ausfuehrbar) {
 				$this->debug->show('<br>SQL der Regel: ' . $this->get('name') . ' ausfuehrbar', Regel::$write_debug);
 
+
+				# Prüft ob die Geometrien der mit get_shape_table_name() ermittelte Ausgangsdatentabelle eine SRID haben
+				# und wenn nicht wird der Default-EPSG-Code gesetzt.
+				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'force_geometrie_srid');
+				$validierung->konvertierung_id = $konvertierung_id;
+				$validierung->force_geometrie_srid($this, $konvertierung);
+
 				# Prüft ob die erzeugten Geometrien valide sind.
 				$validierung = Validierung::find_by_id($this->gui, 'functionsname', 'geometrie_isvalid');
 				$validierung->konvertierung_id = $konvertierung_id;

@@ -1,5 +1,9 @@
 <?php
-$strLayer="Lớp";
-$strPleaseSelect="----------------Chọn lớp thông tin-----------------";
-$strCancel="Cancel";
-?>  
+  $strCancel = 'Cancel';
+  $strCreateAnotherOne = 'create another dataset';
+  $strLayer = 'Lớp';
+  $strNoLayer = 'No PostGIS-Layer exists.';
+  $strPleaseSelect = '----------------Chọn lớp thông tin-----------------';
+  $strSave = 'Save';
+  $strTitle = 'Create new Dataset';
+?> 

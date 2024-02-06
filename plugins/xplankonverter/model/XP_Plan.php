@@ -50,6 +50,21 @@ class XP_Plan extends PgObject {
 	}
 
 	/**
+	 * Function extract regionalschlüssel from first gemeinde if exists.
+	 * @return 12 stelliger Regionalschlüssel or null if not exists
+	 */
+	function get_regionalschluessel() {
+		$schl = $this->get('gemeinde');
+		if (!empty($schl)) {
+			$parts = explode(',', $schl);
+			if (count($parts) > 1 AND !empty($parts[1])) {
+				return $parts[1];
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Return names of layer that have content from the plan
 	 * @param array $xplan_layers Array mit GUI->xplankonverter_get_xplan_layers() abgefragt wurden
 	 */
@@ -69,6 +84,7 @@ class XP_Plan extends PgObject {
 				WHERE
 					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
 			";
+
 			#echo '<p>' . $sql;
 			set_error_handler(function($e) {
 				return true;
@@ -87,6 +103,7 @@ class XP_Plan extends PgObject {
 				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}
 		}
+
 		return array(
 			'success' => true,
 			'layers_with_content' => $layers_with_content

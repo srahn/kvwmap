@@ -31,7 +31,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 <? }
 
 for($i=0;$i<$anzLayer;$i++){
-	$this->queried_layers[] = $this->qlayerset[$i]['alias'] ?: $this->qlayerset[$i]['Name'];
+	$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion

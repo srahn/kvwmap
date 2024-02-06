@@ -17,16 +17,13 @@ if ($this->currentform == 'document.GUI2') {
 else {
 	$size = 61;
 }
-$select_width = ''; 
-if($layer['alias'] != '' AND $this->Stelle->useLayerAliases){
-	$layer['Name'] = $layer['alias'];
-}
+$select_width = '';
 if ($this->formvars['overwrite_layer_name'] != '') {
 	$layer_name = $this->formvars['overwrite_layer_name']; ?>
 	<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
 }
 else {
-	$layer_name = $layer['Name'];
+	$layer_name = $layer['Name_or_alias'];
 }
 $doit = false;
 $anzObj = count_or_0($layer['shape']);

@@ -1,5 +1,5 @@
 <?php
-	/*
+/*
 	* Cases:
 	* mobile_create_layer_sync
 	* mobile_delete_images
@@ -15,15 +15,20 @@
 	* 
 	*/
 
-	/**
-	* This function return all stellen the authenticated user is assigned to
-	* where sync enabled layer are in
-	*/
-	$GUI->mobile_get_stellen = function() use ($GUI) {
-		$sql = "
+/**
+ * This function return all stellen the authenticated user is assigned to
+ * where sync enabled layer are in
+ */
+$GUI->mobile_get_stellen = function () use ($GUI) {
+	$sql = "
 			SELECT DISTINCT
 				s.ID,
-				s.Bezeichnung
+				s.Bezeichnung,
+				s.epsg_code,
+				s.minxmax,
+				s.minymax,
+				s.maxxmax,
+				s.maxymax
 			FROM
 				rolle r JOIN
 				stelle s ON r.stelle_id = s.ID JOIN
@@ -35,59 +40,58 @@
 			ORDER BY
 				s.Bezeichnung
 		";
-		$ret = $GUI->database->execSQL($sql, 4, 0);
+	$ret = $GUI->database->execSQL($sql, 4, 0);
 
-		if ($ret[0]) {
-			$result = array(
-				"success" => false,
-				"err_msg" => "Es konnten keine Stellen mit mobilen Layern abgefragt werden! SQL: " . $sql
-			);
+	if ($ret[0]) {
+		$result = array(
+			"success" => false,
+			"err_msg" => "Es konnten keine Stellen mit mobilen Layern abgefragt werden! SQL: " . $sql
+		);
+	} else {
+		$stellen = array();
+		while ($rs = $GUI->database->result->fetch_assoc()) {
+			$stellen[] = $GUI->mobile_reformat_stelle($rs);
 		}
-		else {
-			$stellen = array();
-			while ($rs = $GUI->database->result->fetch_assoc()) {
-				$stellen[] = $rs;
-			}
 
-			$result = array(
-				"success" => true,
-				"user_id" => $GUI->user->id,
-				"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
-				"stellen" => $stellen
-			);
-		}
-		return $result;
-	};
+		$result = array(
+			"success" => true,
+			"user_id" => $GUI->user->id,
+			"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
+			"stellen" => $stellen
+		);
+	}
+	return $result;
+};
 
-	/**
-	* Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
-	*/
-	$GUI->mobile_get_layers = function() use ($GUI) {
-		# ToDo get more than only the layer with selected_layer_id
-		$layers = $GUI->Stelle->getLayers('');
-		$mobile_layers = array();
+/**
+ * Frage den Layer mit selected_layer_id und die dazugehörigen Attributdaten ab
+ */
+$GUI->mobile_get_layers = function () use ($GUI) {
+	# ToDo get more than only the layer with selected_layer_id
+	$layers = $GUI->Stelle->getLayers('');
+	$mobile_layers = array();
 
-		foreach ($layers['ID'] AS $layer_id) {
-			if ($layer_id != '') {
-				# Abfragen der Layerdefinition
-				$layerset = $GUI->user->rolle->getLayer($layer_id);
-				if ($layerset and $layerset[0]['connectiontype'] == '6') {
-					# Abfragen der Privilegien der Attribute
-					$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
+	foreach ($layers['ID'] as $layer_id) {
+		if ($layer_id != '') {
+			# Abfragen der Layerdefinition
+			$layerset = $GUI->user->rolle->getLayer($layer_id);
+			if ($layerset and $layerset[0]['connectiontype'] == '6') {
+				# Abfragen der Privilegien der Attribute
+				$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
-					# Abfragen der Attribute des Layers mit selected_layer_id
-					$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
-					$layerdb = $mapDB->getlayerdatabase(
-						$layer_id,
-						$GUI->Stelle->pgdbhost
-					);
-					$attributes = $mapDB->read_layer_attributes(
-						$layer_id,
-						$layerdb,
-						$privileges['attributenames'],
-						false,
-						true
-					);
+				# Abfragen der Attribute des Layers mit selected_layer_id
+				$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+				$layerdb = $mapDB->getlayerdatabase(
+					$layer_id,
+					$GUI->Stelle->pgdbhost
+				);
+				$attributes = $mapDB->read_layer_attributes(
+					$layer_id,
+					$layerdb,
+					$privileges['attributenames'],
+					false,
+					true
+				);
 
 					# Zuordnen der Privilegien und Tooltips zu den Attributen
 					for ($j = 0; $j < count($attributes['name']); $j++) {
@@ -95,68 +99,70 @@
 						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
 					}
 					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true);
+					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
 					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
 
-					$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
-					$layer['classes'] = $GUI->mobile_reformat_classes($classes);
+				$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
+				$layer['classes'] = $GUI->mobile_reformat_classes($classes);
 
-					$mobile_layers[] = $layer;
-				}
+				$mobile_layers[] = $layer;
 			}
 		}
+	}
 
-		if (count($mobile_layers) > 0) {
-			$result = array(
-				"success" => true,
-				"layers" => $mobile_layers
-			);
-		}
-		else {
-			$result = array(
-				"success" => false,
-				"err_msg" => "Es konnten keine Layerdaten für diese Stelle abgefragt werden. Prüfen Sie ob die Stelle_ID korrekt ist und ob Sie die Rechte für den Zugriff auf den Layer in der Stelle haben."
-			);
-		}
-		return $result;
-	};
+	if (count($mobile_layers) > 0) {
+		$result = array(
+			"success" => true,
+			"layers" => $mobile_layers
+		);
+	} else {
+		$result = array(
+			"success" => false,
+			"err_msg" => "Es konnten keine Layerdaten für diese Stelle abgefragt werden. Prüfen Sie ob die Stelle_ID korrekt ist und ob Sie die Rechte für den Zugriff auf den Layer in der Stelle haben."
+		);
+	}
+	return $result;
+};
 
-	$GUI->mobile_sync = function() use ($GUI) {
-		$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
-		include_once(CLASSPATH . 'synchronisation.php');
-		# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
-		# $selected_layer_id (existiert und ist in mysql-Datenbank?)
-		# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
-		# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
-		# $client_time muss eigentlich auch nicht, wen interessiert das?
-		# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
-		# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
-		# sql muss vorhanden sein.
-		#		if ($GUI->formvars['selected_layer_id'] != '')
+$GUI->mobile_sync = function () use ($GUI) {
+	$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
+	include_once(CLASSPATH . 'synchronisation.php');
+	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
+	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
+	# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
+	# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
+	# $client_time muss eigentlich auch nicht, wen interessiert das?
+	# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
+	# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
+	# sql muss vorhanden sein.
+	#		if ($GUI->formvars['selected_layer_id'] != '')
 
-		if (!array_key_exists('client_deltas', $_FILES)) {
-			return array(
-				'success' => false,
-				'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
-			);
-		}
+	if (!array_key_exists('client_deltas', $_FILES)) {
+		return array(
+			'success' => false,
+			'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
+		);
+	}
 
-		$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
-		$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
-		$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
-		$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
-		move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
-		$GUI->deblog->write('Run function mobile_sync_parameter_valide');
+	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+	$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
+	$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+	$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
+	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+	$GUI->deblog->write('Run function mobile_sync_parameter_valide');
 
 		$result = $GUI->mobile_sync_parameter_valide($GUI->formvars);
-		$GUI->deblog->write('Client Delta sync parameter result: ' . print_r($result, true));
+
 		if ($result['success']) {
+			$GUI->debug->write('mobile_sycn_parameter_valid', 5);
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
 			$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $GUI->formvars['selected_layer_id'];
+			$GUI->debug->write('msg: ' . $result['msg'], 5);
 			$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
 			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
+			$GUI->debug->write('sync abgeschlossen.');
 		}
 		else {
 			$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
@@ -170,41 +176,44 @@
 			"msg" => 'Validierung durchgeführt für Parameter: ',
 			'err_msg' => ''
 		);
+
 		$err_msg = array();
 
-		if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
-			$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
-		}
-		$result['msg'] .= ' client_time';
+	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
+		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' client_time';
 
-		if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
-			$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
-		}
-		$result['msg'] .= ' last_client_version';
+	if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
+		$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' last_client_version';
 
-		if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
-			$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
-		}
-		$result['msg'] .= ' table_name';
+	if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
+		$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' table_name';
 
-		if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
-			$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
-		}
-		$result['msg'] .= ' device_id';
+	if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
+		$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' device_id';
 
-		if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
-			$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
-		}
-		$result['msg'] .= ' selected_layer_id';
+	if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
+		$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' selected_layer_id';
 
 		if (array_key_exists('client_deltas', $params)) {
 			$deltas = $params['client_deltas'];
+
 			if (property_exists($deltas, 'rows')) {
 				$rows = $deltas->rows;
 				if (count($rows) > 0) {
 					$first_row = $rows[0];
-					if (array_key_exists('version', $first_row)) {
+					if (property_exists($first_row, 'version')) {
 						$version = $first_row->version;
+
 						if ($version == '' || $version == 0) {
 							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
 						}
@@ -212,7 +221,7 @@
 					else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
 					}
-					if (array_key_exists('sql', $first_row)) {
+					if (property_exists($first_row, 'sql')) {
 						$sql = $first_row->sql;
 						if ($sql == '') {
 							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
@@ -235,53 +244,100 @@
 		}
 		$result['msg'] .= ' deltas';
 
-		if (count($err_msg) > 0) {
-			$result['success'] = false;
-			$result['err_msg'] = implode("\n", $err_msg);
-		}
-		return $result;
-	};
+	if (count($err_msg) > 0) {
+		$result['success'] = false;
+		$result['err_msg'] = implode("\n", $err_msg);
+	}
+	return $result;
+};
 
-	$GUI->mobile_reformat_layer = function($layerset, $attributes) use ($GUI) {
-		$geometry_types = array(
-			"Point", "Line", "Polygon"
-		);
+$GUI->mobile_reformat_stelle = function ($stelle_settings) use ($GUI) {
+	$stelle['ID'] = $stelle_settings['ID'];
+	$stelle['Bezeichnung'] = $stelle_settings['Bezeichnung'];
+	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
+	$projFROM = ms_newprojectionobj("init=epsg:" . $stelle_settings['epsg_code']);
+	$projTO = ms_newprojectionobj("init=epsg:4326");
+	$extent = ms_newRectObj();
+	$extent->setextent($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
+	$extent->project($projFROM, $projTO);
+	$stelle['west'] = round($extent->minx, 5);
+	$stelle['south'] = round($extent->miny, 5);
+	$stelle['east'] = round($extent->maxx, 5);
+	$stelle['north'] = round($extent->maxy, 5);
+	$stelle['startCenterLat'] = round($extent->miny + ($extent->maxy - $extent->miny) / 2, 5);
+	$stelle['startCenterLon'] = round($extent->minx + ($extent->maxx - $extent->minx) / 2, 5);
+	return $stelle;
+};
 
-		$layer = array(
-			"id" => $layerset['Layer_ID'],
-			"title" => $layerset['Name'],
-			"alias" => $layerset['alias'],
-			"id_attribute" => $layerset['oid'],
-			"name_attribute" => $layerset['labelitem'],
-			"classitem" => $layerset['classitem'],
-			"transparency" => $layerset['transparency'],
-			"geometry_attribute" => $attributes['the_geom'],
-			"geometry_type" => $geometry_types[$layerset['Datentyp']],
-			"table_name" => $layerset['maintable'],
-			"schema_name" => $layerset['schema'],
-			"document_path" => $layerset['document_path'],
-			"privileg" => $layerset['privileg'],
-			"drawingorder" => $layerset['drawingorder'],
-			"sync" => $layerset['sync']
-		);
-		# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
-		return $layer;
-	};
+$GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
+	$geometry_types = array(
+		"Point", "Line", "Polygon"
+	);
+
+	$layer = array(
+		"id" => $layerset['Layer_ID'],
+		"title" => $layerset['Name'],
+		"alias" => $layerset['alias'],
+		"id_attribute" => $layerset['oid'],
+		"name_attribute" => $layerset['labelitem'],
+		"classitem" => $layerset['classitem'],
+		"transparency" => $layerset['transparency'],
+		"geometry_attribute" => $attributes['the_geom'],
+		"geometry_type" => $geometry_types[$layerset['Datentyp']],
+		"table_name" => $layerset['maintable'],
+		"schema_name" => $layerset['schema'],
+		"document_path" => $layerset['document_path'],
+		"vector_tile_url" => $layerset['vector_tile_url'], 
+		"privileg" => $layerset['privileg'],
+		"drawingorder" => $layerset['drawingorder'],
+		"sync" => $layerset['sync']
+	);
+	# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
+	return $layer;
+};
 
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
-			if ($attr['enum_value'][$key]) {
+			if ($value == 'status') {
+				#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
+			}
+			if ($attr['enum'][$key]) {
 				$attr['options'][$key] = array();
-				foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
-					$attr['options'][$key][] = array(
-						'value' => $attr['enum_value'][$key][$enum_key],
-						'output' => $attr['enum_output'][$key][$enum_key]
+				foreach($attr['enum'][$key] AS $enum_key => $enum) {
+					$enum_array = array(
+						'value' => $enum_key,
+						'output' => $enum['output']
 					);
+					if ($enum['requires_value']) {
+						$enum_array['requires_value'] = $enum['requires_value'];
+					}
+					$attr['options'][$key][] = $enum_array;
 				}
 			}
+			// if ($value == 'sorte_id') {
+			// 	echo '<br>options: ' . print_r($attr['options'][$key], true);
+			// }
+			// if ($attr['enum_value'][$key]) {
+			// 	$attr['options'][$key] = array();
+			// 	foreach($attr['enum_value'][$key] AS $enum_key => $enum_value) {
+			// 		if ($attr['req'][$key]) {
+			// 			$attr['options'][$key][] = array(
+			// 				'value' => $attr['enum_value'][$key][$enum_key],
+			// 				'output' => $attr['enum_output'][$key][$enum_key],
+			// 				'requires_value' => $attr['enum_requires_value'][$key][$enum_key]
+			// 			);
+			// 		}
+			// 		else {
+			// 			$attr['options'][$key][] = array(
+			// 				'value' => $attr['enum_value'][$key][$enum_key],
+			// 				'output' => $attr['enum_output'][$key][$enum_key]
+			// 			);
+			// 		}
+			// 	}
+			// }
 
-			$attributes[] = array(
+			$attributes[$key] = array(
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
@@ -293,47 +349,58 @@
 				"saveable" => $attr['saveable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
 				"options" => $attr['options'][$key],
+				"arrangement" => $attr['arrangement'][$key],
+				"labeling" => $attr['labeling'][$key],
 				"privilege" => $attr['privileg'][$key],
-				"default" => $attr['default'][$key]
+				"default" => $attr['default'][$key],
+				'visible' => $attr['visible'][$key],
+				'vcheck_attribute' => $attr['vcheck_attribute'][$key],
+				'vcheck_operator' => $attr['vcheck_operator'][$key],
+				'vcheck_value' => $attr['vcheck_value'][$key]
 			);
-
+			if ($attr['req_by'] AND array_key_exists($key, $attr['req_by']) AND $attr['req_by'][$key] != '') {
+				$attributes[$key]['required_by'] = $attr['req_by'][$key];
+			}
+			if ($attr['req'] AND array_key_exists($key, $attr['req']) AND is_array($attr['req'][$key]) AND count($attr['req'][$key]) > 0) {
+				$attributes[$key]['requires'] = $attr['req'][$key];
+			}
 		}
 		return $attributes;
 	};
 
-	$GUI->mobile_reformat_classes = function($classes) use ($GUI) {
-		return array_map(
-			function($class) {
-				return array(
-					'id' => $class['Class_ID'],
-					'name' => $class['Name'],
-					'expression' => $class['Expression'],
-					'style' => array(
-						'id' => $class['Style'][0]['Style_ID'],
-						'symbol' => $class['Style'][0]['symbol'],
-						'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
-						'fillColor' => $class['Style'][0]['color'],
-						'fill' => ($class['Style'][0]['color'] == '-1 -1 -1' || $class['Style'][0]['color'] == '' ? false : true),
-						'opacity' => $class['Style'][0]['opacity'],
-						'color' => $class['Style'][0]['outlinecolor'],
-						'weight' => $class['Style'][0]['width'],
-						'size' => $class['Style'][0]['size']
-					)
-				);
-			},
-			$classes
-		);
-	};
+$GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
+	return array_map(
+		function ($class) {
+			return array(
+				'id' => $class['Class_ID'],
+				'name' => $class['Name'],
+				'expression' => $class['Expression'],
+				'style' => array(
+					'id' => $class['Style'][0]['Style_ID'],
+					'symbol' => $class['Style'][0]['symbol'],
+					'stroke' => ($class['Style'][0]['outlinecolor'] == '-1 -1 -1' ? false : true),
+					'fillColor' => $class['Style'][0]['color'],
+					'fill' => ($class['Style'][0]['color'] == '-1 -1 -1' || $class['Style'][0]['color'] == '' ? false : true),
+					'opacity' => $class['Style'][0]['opacity'],
+					'color' => $class['Style'][0]['outlinecolor'],
+					'weight' => $class['Style'][0]['width'],
+					'size' => $class['Style'][0]['size']
+				)
+			);
+		},
+		$classes
+	);
+};
 
-	/**
-	 * Function prepare table for layer synchronisation.
-	 * It calls the function mobile_create_sync_table
-	 * if table public.syncs does not exists
-	 * @param $layerdb Database where the layer table resists
-	 * @param $sync Switch if Synchronisation ist on or off
-	 */
-	$GUI->mobile_prepare_sync_table = function($layerdb, $sync) use ($GUI) {
-		$sql = "
+/**
+ * Function prepare table for layer synchronisation.
+ * It calls the function mobile_create_sync_table
+ * if table public.syncs does not exists
+ * @param $layerdb Database where the layer table resists
+ * @param $sync Switch if Synchronisation ist on or off
+ */
+$GUI->mobile_prepare_sync_table = function ($layerdb, $sync) use ($GUI) {
+	$sql = "
 			SELECT EXISTS (
 				SELECT 1
 				FROM information_schema.tables 
@@ -343,22 +410,25 @@
 			) AS table_exists
 		";
 
-		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+	$ret = $layerdb->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		return 0;
+	}
 
-		$rs = pg_fetch_assoc($ret[1]);
-		if ($sync == 1 AND $rs['table_exists'] == 'f') {
-			$GUI->mobile_create_sync_table($layerdb);
-		}
-	};
+	$rs = pg_fetch_assoc($ret[1]);
+	if ($sync == 1 and $rs['table_exists'] == 'f') {
+		$GUI->mobile_create_sync_table($layerdb);
+	}
+};
 
-		/**
-	 * Function create table for layer synchronisation.
-	 * @param $layerdb Database where the layer table resists
-	 * @param $sync Switch if Synchronisation ist on or off
-	 */
-	$GUI->mobile_create_sync_table = function($layerdb) use ($GUI) {
-		$sql = "
+/**
+ * Function create table for layer synchronisation.
+ * @param $layerdb Database where the layer table resists
+ * @param $sync Switch if Synchronisation ist on or off
+ */
+$GUI->mobile_create_sync_table = function ($layerdb) use ($GUI) {
+	$sql = "
 			CREATE TABLE IF NOT EXISTS public.syncs (
 				id serial NOT NULL PRIMARY KEY,
 				client_id character varying,
@@ -372,15 +442,18 @@
 				push_to_version integer
 			);
 		";
-		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
-	};
+	$ret = $layerdb->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		return 0;
+	}
+};
 
-	$GUI->mobile_prepare_layer_sync = function($layerdb, $id, $sync) use ($GUI) {
-		include_once(CLASSPATH . 'Layer.php');
-		$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
+$GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
 
-		$sql = "
+	$sql = "
 			SELECT EXISTS (
 				SELECT 1
 				FROM information_schema.tables 
@@ -389,22 +462,25 @@
 					table_name = '" . $layer->get('maintable') . "_deltas'
 			) AS table_exists
 		";
-		#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
-		$ret = $layerdb->execSQL($sql, 4, 0);
-		if ($ret[0]) { echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>"; return 0; }
+	#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
+	$ret = $layerdb->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		return 0;
+	}
 
-		$rs = pg_fetch_assoc($ret[1]);
-		if ($rs['table_exists'] == 't' AND $sync == 0) {
-			$GUI->mobile_drop_layer_sync($layerdb, $layer);
-		}
+	$rs = pg_fetch_assoc($ret[1]);
+	if ($rs['table_exists'] == 't' and $sync == 0) {
+		$GUI->mobile_drop_layer_sync($layerdb, $layer);
+	}
 
-		if ($rs['table_exists'] == 'f' AND $sync == 1) {
-			$GUI->mobile_create_layer_sync($layerdb, $layer);
-		}
-	};
+	if ($rs['table_exists'] == 'f' and $sync == 1) {
+		$GUI->mobile_create_layer_sync($layerdb, $layer);
+	}
+};
 
-	$GUI->mobile_drop_layer_sync = function($layerdb, $layer) use ($GUI) {
-		$sql = "
+$GUI->mobile_drop_layer_sync = function ($layerdb, $layer) use ($GUI) {
+	$sql = "
 			DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
 			DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
 
@@ -416,18 +492,18 @@
 
 			DROP TABLE IF EXISTS " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas;
 		";
-		#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
-		$ret = $layerdb->execSQL($sql, 4, 0, true);
-		if ($ret[0]) {
-			$GUI->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
-			return 0;
-		}
-		$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
-	};
+	#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
+	$ret = $layerdb->execSQL($sql, 4, 0, true);
+	if ($ret[0]) {
+		$GUI->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+		return 0;
+	}
+	$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
+};
 
-	$GUI->mobile_create_layer_sync = function($layerdb, $layer) use ($GUI) {
-		# create table for deltas
-		$sql = "
+$GUI->mobile_create_layer_sync = function ($layerdb, $layer) use ($GUI) {
+	# create table for deltas
+	$sql = "
 			--
 			-- Deltas Table
 			--
@@ -671,171 +747,168 @@
 			FOR EACH ROW
 			EXECUTE PROCEDURE " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
 		";
-		#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
-		$ret = $layerdb->execSQL($sql, 4, 0, true);
-		if ($ret[0]) {
-			$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
-			return 0;
+	#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
+	$ret = $layerdb->execSQL($sql, 4, 0, true);
+	if ($ret[0]) {
+		$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
+		return 0;
+	}
+	$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+};
+
+/**
+ * Function check if layer is valid for synchronisation
+ * - Check for assignments to stelle and functions and access rights
+ * - Check for necessary attributes
+ * - Check the data statement for function calls not allowed for sqlite
+ * @param $layerdb Database where the layer table resists
+ * @param $layer_id The ID of the layer that has to be validate for sync
+ * @param $sync Switch if Synchronisation ist on or off
+ */
+$GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($GUI) {
+	if ($sync == 1) {
+		include_once(CLASSPATH . 'synchronisation.php');
+		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($GUI, $layer_id);
+
+		$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
+		foreach ($results as $result) {
+			$GUI->add_message('warning', $result);
 		}
-		$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
-	};
 
-	/**
-	 * Function check if layer is valid for synchronisation
-	 * - Check for assignments to stelle and functions and access rights
-	 * - Check for necessary attributes
-	 * - Check the data statement for function calls not allowed for sqlite
-	 * @param $layerdb Database where the layer table resists
-	 * @param $layer_id The ID of the layer that has to be validate for sync
-	 * @param $sync Switch if Synchronisation ist on or off
-	 */
-	$GUI->mobile_validate_layer_sync = function($layerdb, $layer_id, $sync) use ($GUI) {
-		if ($sync == 1) {
-			include_once(CLASSPATH . 'synchronisation.php');
-			include_once(CLASSPATH . 'Layer.php');
-			$layer = Layer::find_by_id($GUI, $layer_id);
-
-			$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
-			foreach ($results AS $result) {
-				$GUI->add_message('warning', $result);
-			}
-
-			$results = $layer->has_sync_attributes(synchro::NECESSARY_ATTRIBUTES);
-			foreach ($results AS $result) {
-				$GUI->add_message('warning', $result);
-			}
-
-			$results = $layer->has_sync_id(synchro::NECESSARY_ID);
-			foreach ($results AS $result) {
-				$GUI->add_message('warning', $result);
-			}
-
-			$results = $layer->get_missing_sublayers($layer_id);
-			foreach ($results AS $l) {
-				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
-			}
-
-			$results = $layer->get_missing_sub_layers_in_stellen($layer_id);
-			foreach ($results AS $l) {
-				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') fehlt in Stelle ' . $l['stelle_bezeichnung'] . ' (' . $l['stelle_id'] . ')!');
-			}
-	
-			$results = $layer->get_none_synced_sub_layers($layer_id);
-			foreach ($results AS $l) {
-				$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') ist nicht im sync Modus!');
-			}
+		$results = $layer->has_sync_attributes(synchro::NECESSARY_ATTRIBUTES);
+		foreach ($results as $result) {
+			$GUI->add_message('warning', $result);
 		}
-	};
 
-	/*
+		$results = $layer->has_sync_id(synchro::NECESSARY_ID);
+		foreach ($results as $result) {
+			$GUI->add_message('warning', $result);
+		}
+
+		$results = $layer->get_missing_sublayers($layer_id);
+		foreach ($results as $l) {
+			$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') existiert nicht!');
+		}
+
+		$results = $layer->get_missing_sub_layers_in_stellen($layer_id);
+		foreach ($results as $l) {
+			$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') fehlt in Stelle ' . $l['stelle_bezeichnung'] . ' (' . $l['stelle_id'] . ')!');
+		}
+
+		$results = $layer->get_none_synced_sub_layers($layer_id);
+		foreach ($results as $l) {
+			$GUI->add_message('error', 'Der im Attribut ' . $l['attribute_name'] . ' verknüpfte Sub-Layer ' . $l['sub_layer_name'] . ' (' . $l['sub_layer_id'] . ') ist nicht im sync Modus!');
+		}
+	}
+};
+
+/*
 	* ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
 	* to move the uploaded images to layers document path
 	*/
-	$GUI->mobile_upload_image = function($layer_id, $files) use ($GUI) {
-		# Bestimme den Uploadpfad des Layers
-		if (intval($layer_id) == 0) {
-			return array(
-				"success" => false,
-				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
-			);
-		}
-		$layer = $GUI->Stelle->getLayer($layer_id);
-		if (count($layer) == 0) {
-			return array(
-				"success" => false,
-				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
-			);
-		}
-
-		$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
-		if (substr($doc_path, -1) != '/') {
-			$doc_path .= '/';
-		}
-		if (!is_dir($doc_path)) {
-			@mkdir($doc_path, 0777, true);
-		}
-
-		if ($files['image'] == '') {
-			return array(
-				"success" => false,
-				"msg" => "Es wurde keine Datei hochgeladen!"
-			);
-		}
-
-		if (file_exists($doc_path . $files['image']['name'])) {
-			return array(
-				"success" => true,
-				"msg" => "Datei existiert schon auf dem Server!"
-			);
-		}
-
-		# Kopiere Temporäre Datei in den Uploadpfad
-		if(!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
-			$success = false;
-			$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
-		}
-		else {
-			$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
-			$success = true;
-			$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
-		}
-
+$GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
+	# Bestimme den Uploadpfad des Layers
+	if (intval($layer_id) == 0) {
 		return array(
-			"success" => $success,
-			"msg" => $msg
+			"success" => false,
+			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
 		);
-	};
+	}
+	$layer = $GUI->Stelle->getLayer($layer_id);
+	if (count($layer) == 0) {
+		return array(
+			"success" => false,
+			"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
+		);
+	}
 
-	$GUI->mobile_delete_images = function($layer_id, $images) use ($GUI) {
-		# Bestimme den Uploadpfad des Layers
-		if (intval($layer_id) == 0) {
-			return array(
-				"success" => false,
-				"msg" => "Sie müssen eine korrekte Layer_id angeben!"
-			);
-		}
-		$layer = $GUI->Stelle->getLayer($layer_id);
-		if (count($layer) == 0) {
-			return array(
-				"success" => false,
-				"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
-			);
-		}
-		$doc_path = $layer[0]['document_path'];
+	$doc_path = ($layer[0]['document_path'] != '' ? trim($layer[0]['document_path']) : CUSTOM_IMAGE_PATH);
+	if (substr($doc_path, -1) != '/') {
+		$doc_path .= '/';
+	}
+	if (!is_dir($doc_path)) {
+		@mkdir($doc_path, 0777, true);
+	}
 
-		/*
+	if ($files['image'] == '') {
+		return array(
+			"success" => false,
+			"msg" => "Es wurde keine Datei hochgeladen!"
+		);
+	}
+
+	if (file_exists($doc_path . $files['image']['name'])) {
+		return array(
+			"success" => true,
+			"msg" => "Datei existiert schon auf dem Server!"
+		);
+	}
+
+	# Kopiere Temporäre Datei in den Uploadpfad
+	if (!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
+		$success = false;
+		$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
+	} else {
+		$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
+		$success = true;
+		$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
+	}
+
+	return array(
+		"success" => $success,
+		"msg" => $msg
+	);
+};
+
+$GUI->mobile_delete_images = function ($layer_id, $images) use ($GUI) {
+	# Bestimme den Uploadpfad des Layers
+	if (intval($layer_id) == 0) {
+		return array(
+			"success" => false,
+			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+		);
+	}
+	$layer = $GUI->Stelle->getLayer($layer_id);
+	if (count($layer) == 0) {
+		return array(
+			"success" => false,
+			"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
+		);
+	}
+	$doc_path = $layer[0]['document_path'];
+
+	/*
 		Prüfe ob die zu löschende Datei in im document_path liegt, wenn ja lösche, wenn nicht lösche nicht.
 		$GUI->deleteDokument(image);
 		*/
-		if ($images == '') {
-			return array(
-				"success" => false,
-				"msg" => "Es wurden keine Bilder zum Löschen angegeben!"
-			);
-		}
+	if ($images == '') {
+		return array(
+			"success" => false,
+			"msg" => "Es wurden keine Bilder zum Löschen angegeben!"
+		);
+	}
 
-		$images = explode(',', $images);
-		$abgelehnt = array();
-		foreach ($images AS $image) {
-			$image = trim($image);
-			if (strpos($image, $doc_path) === false) {
-				$msg[] = 'Bild ' . $image . ' nicht im richtigen Pfad: ' . $doc_path;
-			}
-			else {
-				if (file_exists($image)) {
-					unlink($image);
-					$msg[] = 'Bild ' . $image . ' erfolgreich gelöscht';
-					$fp = pathinfo($image);
-					$thumb = $fp['dirname']. '/' . $fp['filename'] . '_thumb.' . $fp['extension'];
-					if (file_exists($thumb)) {
-						unlink($thumb);
-					}
+	$images = explode(',', $images);
+	$abgelehnt = array();
+	foreach ($images as $image) {
+		$image = trim($image);
+		if (strpos($image, $doc_path) === false) {
+			$msg[] = 'Bild ' . $image . ' nicht im richtigen Pfad: ' . $doc_path;
+		} else {
+			if (file_exists($image)) {
+				unlink($image);
+				$msg[] = 'Bild ' . $image . ' erfolgreich gelöscht';
+				$fp = pathinfo($image);
+				$thumb = $fp['dirname'] . '/' . $fp['filename'] . '_thumb.' . $fp['extension'];
+				if (file_exists($thumb)) {
+					unlink($thumb);
 				}
-				else {
-					$msg[] = 'Bild ' . $image . ' nicht oder noch nicht auf dem Server';
-				};
-			}
+			} else {
+				$msg[] = 'Bild ' . $image . ' nicht oder noch nicht auf dem Server';
+			};
 		}
+	}
 
 		return array(
 			"success" => true,
