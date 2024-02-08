@@ -267,7 +267,7 @@ class stelle {
 		$this->ows_updatesequence = $rs['ows_updatesequence'];
 		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
 
 		$this->ows_contactorganization = $rs['ows_contactorganization'];
 		$this->ows_contactaddress = $rs['ows_contactaddress'];
@@ -484,6 +484,37 @@ class stelle {
 		return $rs;
 	}
 
+	/**
+	 * Query stellendaten with getstellendaten from database
+	 * and complete organization, person and emailaddress for content from contact
+	 * and for distribution from content if they are empty
+	 * @return array associative array with values of stelle
+	 */
+	function getstellendaten_full_contact() {
+		$stellendaten = $this->getstellendaten();
+		if (empty($stellendaten['ows_contentorganization'])) {
+			$stellendaten['ows_contentorganization'] = $stellendaten['ows_contactorganization'];
+		}
+		if (empty($stellendaten['ows_distributionorganization'])) {
+			$stellendaten['ows_distributionorganization'] = $stellendaten['ows_contactorganization'];
+		}
+
+		if (empty($stellendaten['ows_contentperson'])) {
+			$stellendaten['ows_contentperson'] = $stellendaten['ows_contactperson'];
+		}
+		if (empty($stellendaten['ows_distributionperson'])) {
+			$stellendaten['ows_distributionperson'] = $stellendaten['ows_contactperson'];
+		}
+
+		if (empty($stellendaten['ows_contentemailaddress'])) {
+			$stellendaten['ows_contentemailaddress'] = $stellendaten['ows_contactemailaddress'];
+		}
+		if (empty($stellendaten['ows_distributionemailaddress'])) {
+			$stellendaten['ows_distributionemailaddress'] = $stellendaten['ows_contactemailaddress'];
+		}
+		return $stellendaten;
+	}
+
 	function NeueStelleAnlegen($stellendaten) {
 		$_files = $_FILES;
 		# Neue Stelle anlegen
@@ -535,7 +566,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
 				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
@@ -635,7 +666,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "',
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
 				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
 				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
 				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
@@ -703,7 +734,7 @@ class stelle {
 				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
 				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
 				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . $stellendaten['ows_srs'] . "'
+				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -1863,6 +1894,7 @@ class stelle {
 				l.Layer_ID,
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				l.Name,
+				l.alias,
 				ul.drawingorder,
 				ul.legendorder
 			FROM
@@ -1882,7 +1914,10 @@ class stelle {
 			$i = 0;
 			while ($rs = $this->database->result->fetch_assoc()) {
 				$layer['ID'][] 						= $rs['Layer_ID'];
-				$layer['Bezeichnung'][]		= $rs['Name'];
+				$layer['Name'][]					= $rs['Name'];
+				$layer['alias'][]					= $rs['alias'];
+				$layer['Name_or_alias']		= $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
+				$layer['Bezeichnung'][]		= $layer['Name_or_alias'];
 				$layer['drawingorder'][]	= $rs['drawingorder'];
 				$layer['legendorder'][]		= $rs['legendorder'];
 				$layer['Gruppe'][]				= $rs['Gruppe'];
@@ -2039,12 +2074,10 @@ class stelle {
 			while($rs=$this->database->result->fetch_array()) {
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-				if($rs['alias'] != '' AND $this->useLayerAliases){
-					$rs['Name'] = $rs['alias'];
-				}
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['export_privileg'][]=$rs['export_privileg'];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
+				$layer['ID'][] = $rs['Layer_ID'];
+				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
+				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
 			if (count($layer['Bezeichnung']) > 0) {
@@ -2126,15 +2159,12 @@ class stelle {
 			while ($rs=$this->database->result->fetch_assoc()){
 				$rs['Name'] = replace_params($rs['Name'], rolle::$layer_params);
 				$rs['alias'] = replace_params($rs['alias'], rolle::$layer_params);
-				
-				if($rs['alias'] != '' AND $this->useLayerAliases){
-					$rs['Name'] = $rs['alias'];
-				}
-				$layer['ID'][]=$rs['Layer_ID'];
-				$layer['Bezeichnung'][]=$rs['Name'];
-				$layer['Gruppe'][]=$rs['Gruppe'];
-				$layer['Gruppenname'][]=$rs['Gruppenname'];
-				$layer['export_privileg'][]=$rs['export_privileg'];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
+				$layer['ID'][] = $rs['Layer_ID'];
+				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
+				$layer['Gruppe'][] = $rs['Gruppe'];
+				$layer['Gruppenname'][] = $rs['Gruppenname'];
+				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
 		}
 		return $layer;

@@ -132,6 +132,7 @@ class rolle {
 				l.`duplicate_from_layer_id`,
 				l.`duplicate_criterion`,
 				l.`shared_from`,
+				l.`geom_column`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,

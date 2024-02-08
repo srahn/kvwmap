@@ -134,9 +134,18 @@ class Connection extends MyObject {
 		);
 	}
 
+	function get_connection_string() {
+		return 'host: ' . $this->get('host') . 'port: ' . $this->get('port') . ' dbname: ' . $this->get('dbname') . ' user: ' . $this->get('user');
+	}
+
 	public static function find_by_id($gui, $id) {
-		$connection = new Connection($gui);
-		return $connection->find_by('id', $id);
+		if ($id) {
+			$connection = new Connection($gui);
+			return $connection->find_by('id', $id);
+		}
+		else {
+			return null;
+		}
 	}
 
 	public static	function find($gui, $order = '', $sort = '') {

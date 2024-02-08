@@ -13,7 +13,7 @@
 <? } ?>
 
 <div id="nds_titel">
-	<p><?php echo $strTitle; ?><? if($this->qlayerset[0]['alias'] != '' or $this->qlayerset[0]['Name'] != '')echo ': '; ?><? if($this->qlayerset[0]['alias'] != '')echo $this->qlayerset[0]['alias']; else echo $this->qlayerset[0]['Name']; ?></p>
+	<p><?php echo $strtitle; ?><? echo $this->qlayerset[0]['Name_or_alias']; ?></p>
 </div>
 <div id="nds_formular" <? if($this->formvars['selected_layer_id'] != '')echo 'style="display:none"'; ?>><?php
 	if (count($this->layerdaten['ID']) == 0) {
