@@ -1567,6 +1567,36 @@ function go_switch($go, $exit = false) {
 				));
 			} break;
 
+			case 'Layereditor_get_maintables' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer'
+				]);
+				if ($GUI->formvars['connection_id'] == '') {
+					$result = array(
+						'success' => true,
+						'tables' => array()
+					);
+				}
+				else {
+					$connection = Connection::find_by_id($GUI, $GUI->formvars['connection_id']);
+					if ($connection) {
+						$result = array(
+							'success' => true,
+							'tables' => $connection->get_tables()
+						);
+					}
+					else {
+						$result = array(
+							'success' => false,
+							'msg' => 'Connection mit id ' . $GUI->formvars['connection_id'] . ' nicht gefunden.'
+						);
+					}
+				}
+				header('Content-Type: application/json');
+				echo json_encode($result);
+			} break;
+
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->LayerAnlegen();

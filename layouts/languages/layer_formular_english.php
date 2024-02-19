@@ -18,7 +18,7 @@
 	$strClassItem = "Classitem";
 	$strClusterMaxdistance = "Cluster_Maxdistance";
 	$strCommonData = "General information";
-	$strConnection = "Connection*";
+	$strConnection = "Connection";
 	$strConnectionType = "Connectiontype";
 	$strData = "Data";
 	$strDataOwnerName = 'Data owner';
@@ -37,7 +37,6 @@
 	$strDrawingOrder = "drawingorder";
 	$strEpsgCode = "Epsg-code";
 	$strExpression = "Expression";
-	$strFilterItem = "Filteritem*";
 	$strGeomUsable = "Geometry usable";
 	$strGroup = "Group";
 	$strHeight = "Height";
@@ -51,7 +50,7 @@
 	$strLabelMinScale = "Labelminscale";
 	$strLabelRequires = "Labelrequires";
 	$strLayer = "Layer";
-	$strLayerID = "Layer ID*";
+	$strLayerID = "Layer ID";
 	$strLegend = "legend";
 	$strLegendGraphic = "legendgraphic";
 	$strLegendOrder = "legend order";	
@@ -69,7 +68,7 @@
 	$stroffsite = "offsite";
 	$strOrder = "Order";
 	$strOWSParameter = "OWS-Parameters";
-	$strOwsSrs = "OWS-SRS*";
+	$strOwsSrs = "OWS-SRS";
 	$strPath = "Query";
 	$strPostlabelcache = "Postlabelcache";
 	$strPrintConnection = "Print-Connection";
@@ -99,8 +98,8 @@
 	$strText = "Text";
 	$strTileIndex = "Tileindex";
 	$strTileItem = "Tileitem";
-	$strTolerance = "Tolerance*";
-	$strToleranceUnits = "Toleranceunits*";
+	$strTolerance = "Tolerance";
+	$strToleranceUnits = "Toleranceunits";
 	$strtransparency = "opacity";
 	$strTriggerFunction = "Trigger function";
 	$strTriggerFunctionHelp = "The name of a PHP-trigger function can be entered here, which is to be executed in this layer during insert, update or delete. The trigger function must be defined within a plugin or in custom/class/kvwmap.php.";
@@ -111,10 +110,10 @@
 	$strWMSAuthPassword = "wms_auth_password";
 	$strWMSAuthUsername = "wms_auth_username";
 	$strWMSConnectionTimeout = "WMS-connectiontimeout";
-	$strWMSFormat = "WMS format*";
+	$strWMSFormat = "WMS format";
 	$strWMSKeywordlist = "WMS-Keywordlist";
 	$strWMSName = "WMS-name";
-	$strWMSServerVersion = "WMS-serverversion*";
+	$strWMSServerVersion = "WMS-serverversion";
 	$strWriteMapserverTemplates = "Write MapServer Templates";
 	$strWriteMapserverTemplatesOption1 = "derive fom data statement";
 	$strWriteMapserverTemplatesOption2 = "derive from maintable";

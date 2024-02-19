@@ -2790,7 +2790,7 @@ class db_mapObj {
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
-				$rs['alias'],
+				$rs['Name_or_alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
 			);

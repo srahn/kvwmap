@@ -536,9 +536,9 @@ FROM
   }
 
 	/**
-		Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
-		For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
-		and in correct order.
+	*	Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
+	*	For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
+	*	and in correct order.
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
