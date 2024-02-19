@@ -1210,19 +1210,21 @@ class Gml_extractor {
 		}
 		$this->pgdatabase->gui->write_xlog('tables_with_reftextinhalt: ' . print_r($tables_with_reftextinhalt, true));
 		$this->pgdatabase->gui->write_xlog('select_reftextinhalte: ' . print_r($selects_reftextinhalt, true));
-		$sql = "
-			INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
-				" . $prefix . "_objekt_gml_id,
-				" . $prefix . "_textabschnitt_gml_id
-			) SELECT * FROM (" . implode(' UNION ', $selects_reftextinhalt) . ") AS reftextinhalte
-		";
-		#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
-		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		if (!$ret['success']) {
-			return array(
-				'success' => false,
-				$msg = $ret['msg']
-			);
+		if (count($selects_reftextinhalt) > 0) {
+			$sql = "
+				INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
+					" . $prefix . "_objekt_gml_id,
+					" . $prefix . "_textabschnitt_gml_id
+				) SELECT * FROM (" . implode(' UNION ', $selects_reftextinhalt) . ") AS reftextinhalte
+			";
+			#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
+			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
+			if (!$ret['success']) {
+				return array(
+					'success' => false,
+					$msg = $ret['msg']
+				);
+			}
 		}
 
 		# Nur für BP-Pläne Textabschnitte für abweichende Texte zu ausgewählten BP-Objekten, Assoziation: abweichungtext

@@ -3072,17 +3072,17 @@ echo '			</table>
 		fclose($fp);
 	}
 
-  # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
-  function saveMap($saveMapDestination) {
+	# Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
+	function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
-      $saveMapDestination = SAVEMAPFILE;
-    }
-    if ($saveMapDestination != '') {
-      $this->map->save($saveMapDestination);
-    }
-    $this->user->rolle->saveSettings($this->map->extent);
-    $this->user->rolle->readSettings();
-  }
+			$saveMapDestination = SAVEMAPFILE;
+		}
+		if ($saveMapDestination != '') {
+			$this->map->save($saveMapDestination);
+		}
+		$this->user->rolle->saveSettings($this->map->extent);
+		$this->user->rolle->readSettings();
+	}
 
 	/**
 	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
@@ -8746,7 +8746,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex->getTraceAsString()
 			);
 		}
 		return array(
