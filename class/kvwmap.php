@@ -19318,7 +19318,7 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		if ($this->GUI->plugin_loaded('mobile')) {
+		if ($this->GUI->plugin_loaded('portal')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync', 'cluster_option')
