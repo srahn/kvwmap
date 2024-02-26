@@ -1730,7 +1730,7 @@ function go_switch_xplankonverter($go) {
 				break;
 			}
 
-			$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . " ist aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_zusammenzeichnung&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
+			$result = $new_konvertierung->send_notification('der Plan ' . $new_konvertierung->get('bezeichnung') . ' ist von Nutzer ' . $GUI->user->Vorname . ' ' . $GUI->user->Nachname . ' (login: ' . $GUI->user->login_name . ") aktualisiert worden.\n\nDiese E-Mail ist vom Portal " . URL.APPLVERSION . " versendet worden.\nDie aktuelle Zusammenzeichnung können Sie sich hier ansehen: " . URL.APPLVERSION . "index.php?go=xplankonverter_zusammenzeichnung&planart=" . $GUI->formvars['planart'] . "}\n\nIhr Team von " . TITLE);
 			if (!$result['success']) {
 				send_error($result['msg']);
 				break;

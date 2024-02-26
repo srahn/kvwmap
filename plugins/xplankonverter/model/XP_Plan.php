@@ -71,8 +71,14 @@ class XP_Plan extends PgObject {
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
-			#echo '<br>' . $xplan_layer['Name'] . ' ' . $xplan_layer['geom_column'];
-
+			if ($xplan_layer['geom_column'] == '') {
+				$msg = 'In der Layerdefinition des Layers ' . $xplan_layer['Name'] . ' ist keine geom_column angegeben.';
+				$ret[0] = 1;
+				$ret[1] = $msg;
+				$ret['success'] = false;
+				$ret['msg'] = $msg;
+				return $ret;
+			}
 			$sql = "
 				SELECT
 					'" . $xplan_layer['Name'] . "',

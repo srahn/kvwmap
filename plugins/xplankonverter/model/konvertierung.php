@@ -1811,7 +1811,7 @@ class Konvertierung extends PgObject {
 				konvertierung_id = " . $this->get($this->identifier) . "
 		";
 		#echo '<p>SQL zur Erzeugung von Topology: ' . $sql;
-		$result = $this->database->execSQL($sql, 0, 3);
+		$result = $this->database->execSQL($sql, 4, 0);
 		if (!$result['success']) {
 			$this->gui->add_message('Fehler', 'Fehler beim Anlegen der Topologie!');
 			return false;
