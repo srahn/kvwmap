@@ -412,7 +412,7 @@ $GUI->mobile_prepare_sync_table = function ($layerdb, $sync) use ($GUI) {
 
 	$ret = $layerdb->execSQL($sql, 4, 0);
 	if ($ret[0]) {
-		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
 		return 0;
 	}
 
@@ -444,7 +444,7 @@ $GUI->mobile_create_sync_table = function ($layerdb) use ($GUI) {
 		";
 	$ret = $layerdb->execSQL($sql, 4, 0);
 	if ($ret[0]) {
-		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
 		return 0;
 	}
 };
@@ -465,7 +465,7 @@ $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 	#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 	$ret = $layerdb->execSQL($sql, 4, 0);
 	if ($ret[0]) {
-		echo "<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
 		return 0;
 	}
 
