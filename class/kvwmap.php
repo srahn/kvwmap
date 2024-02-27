@@ -1338,7 +1338,7 @@ echo '			</table>
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
 				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
-				$legend .= '</a>.';
+				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
@@ -19331,7 +19331,13 @@ class db_mapObj{
 		if ($this->GUI->plugin_loaded('portal')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
-				array('sync', 'cluster_option')
+				array('cluster_option')
+			);
+		}
+		if ($this->GUI->plugin_loaded('mobile')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('sync')
 			);
 		}
 		foreach ($zero_if_empty_attributes AS $key) {
@@ -19412,7 +19418,7 @@ class db_mapObj{
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
-				array('sync', 'vector_tile_url')
+				array('vector_tile_url')
 			);
 		}
 
