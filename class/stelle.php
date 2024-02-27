@@ -2319,6 +2319,7 @@ class stelle {
 				ul.`logconsume`, 
 				ul.`start_aktiv`, 
 				ul.`use_geom`,
+				ul.`group_id`,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
