@@ -1501,13 +1501,15 @@ class GUI {
 				if(value_of($layer, 'metalink') != ''){
 					$legend .= ' class="metalink boldhover" href="javascript:void(0);">';
 				}
-				else
+				else {
 					$legend .= ' class="visiblelayerlink boldhover" href="javascript:void(0)">';
+				}
 				$legend .= '<span id="'.str_replace('"', '', str_replace("'", '', str_replace('-', '_', $layer['Name_or_alias']))).'"';
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
+#				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
+				$legend .= ' >' . html_umlaute($layer['Name_or_alias']) . '</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar

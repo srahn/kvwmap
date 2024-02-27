@@ -1337,8 +1337,9 @@ echo '			</table>
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
-				$legend .= '</a>';
+#				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
+				$legend .= ' >' . html_umlaute($layer['Name_or_alias']) . '</span>';
+				$legend .= '</a>.';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
