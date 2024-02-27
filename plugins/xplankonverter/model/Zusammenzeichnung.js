@@ -93,7 +93,7 @@ class Zusammenzeichnung {
       import_reindexed_zusammenzeichnung: {
         nr: 13,
         msg: 'Importieren der neu indizierten GML-Datei in die Portaldatenbank',
-        description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit mit den umbenannten GML-IDs.<br>\
+        description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit den umbenannten GML-IDs.<br>\
         Es laufen die gleichen Teilschritte ab wie im Schritt Importieren der GML-Datei in die Portaldatenbank.'
       },
     };
@@ -264,7 +264,7 @@ class Zusammenzeichnung {
       },
       error: (jqXHR, textStatus, errorThrown) => {
         this.confirm_step('create_plaene', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result }]);
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
       }
     })
   }

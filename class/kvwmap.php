@@ -3073,17 +3073,17 @@ echo '			</table>
 		fclose($fp);
 	}
 
-  # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
-  function saveMap($saveMapDestination) {
+	# Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
+	function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
-      $saveMapDestination = SAVEMAPFILE;
-    }
-    if ($saveMapDestination != '') {
-      $this->map->save($saveMapDestination);
-    }
-    $this->user->rolle->saveSettings($this->map->extent);
-    $this->user->rolle->readSettings();
-  }
+			$saveMapDestination = SAVEMAPFILE;
+		}
+		if ($saveMapDestination != '') {
+			$this->map->save($saveMapDestination);
+		}
+		$this->user->rolle->saveSettings($this->map->extent);
+		$this->user->rolle->readSettings();
+	}
 
 	/**
 	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
@@ -5915,6 +5915,7 @@ echo '			</table>
 
 		$datastring = $datageom." from (" . $select;
 		$datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
+		$layerset[0]['Name_or_alias'] = $layerset[0][($layerset[0]['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 		$legendentext = $layerset[0]['Name_or_alias']." (".date('d.m. H:i',time()).")";
 
 		$group = $dbmap->getGroupbyName('eigene Abfragen');
@@ -6559,8 +6560,7 @@ echo '			</table>
       if($layerset['list'][$i]['aktivStatus'] != 0){
         if(($layerset['list'][$i]['minscale'] < $scale OR $layerset['list'][$i]['minscale'] == 0) AND ($layerset['list'][$i]['maxscale'] > $scale OR $layerset['list'][$i]['maxscale'] == 0)){
 					if($all_active_layers OR $this->formvars['legendlayer'.$layerset['list'][$i]['Layer_ID']] == 'on'){
-						if($layerset['list'][$i]['Name_or_alias'] != '' AND $this->Stelle->useLayerAliases)$name = $layerset['list'][$i]['Name_or_alias'];
-						else $name = $layerset['list'][$i]['Name'];
+						$name = $layerset['list'][$i]['Name_or_alias'];
 						$layer = $this->map->getLayerByName($name);
 						if($layerset['list'][$i]['showclasses']){
 							for($j = 0; $j < $layer->numclasses; $j++){
@@ -8748,7 +8748,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex->getTraceAsString()
 			);
 		}
 		return array(
@@ -17438,7 +17438,7 @@ class db_mapObj{
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
-				$rs['alias'],
+				$rs['Name_or_alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
 			);
@@ -19319,7 +19319,7 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		if ($this->GUI->plugin_loaded('mobile')) {
+		if ($this->GUI->plugin_loaded('portal')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync', 'cluster_option')

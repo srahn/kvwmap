@@ -814,6 +814,7 @@ class user {
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
 		$this->organisation = $rs['organisation'];
+		$this->position = $rs['position'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}

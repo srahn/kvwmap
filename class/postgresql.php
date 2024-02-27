@@ -580,7 +580,7 @@ FROM
 			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
-        $ret['sql'] = $sql;
+				$ret['sql'] = $sql;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
 					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
