@@ -1337,8 +1337,9 @@ echo '			</table>
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-				$legend .=' >' . html_umlaute($layer['alias_link']).'</span>';
-				$legend .= '</a>';
+#				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
+				$legend .= ' >' . html_umlaute($layer['Name_or_alias']) . '</span>';
+				$legend .= '</a>.';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
 				if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
@@ -19409,12 +19410,20 @@ class db_mapObj{
 			'status',
 			'trigger_function'
 		);
+		if ($this->GUI->plugin_loaded('mobile')) {
+			$column_equal_field_attributes = array_merge(
+				$column_equal_field_attributes,
+				array('sync', 'vector_tile_url')
+			);
+		}
+
 		if ($this->GUI->plugin_loaded('portal')) {
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
-				array('vector_tile_url')
+				array('cluster_option')
 			);
 		}
+
 		foreach($column_equal_field_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
 		}
