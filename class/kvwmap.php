@@ -4276,7 +4276,7 @@ echo '			</table>
 		}
 		#echo $sql;
 		$ret=$layerdb->execSQL($sql,4,0);
-    if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+    if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 		$rs = pg_fetch_array($ret[1]);
 		echo $rs[0];
   }
@@ -8292,7 +8292,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           FROM (" . $data_sql.") AS data ORDER BY " . replace_semicolon($class_item) . " LIMIT 100";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$order = 1;
         while($rs = pg_fetch_assoc($ret[1])){
           $class['name'] = $rs[$class_item];
@@ -8316,7 +8316,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         #echo '<br>' . $sql;
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         while($rs = pg_fetch_assoc($ret[1])){
           $min = $rs['min'];
           $max = $rs['max'];
@@ -8348,7 +8348,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         ";
 
         $ret=$layerdb->execSQL($sql, 4, 0);
-    		if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+    		if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $rows = pg_fetch_all($ret[1]);
         $range_floor = 0;
         $range_ceil = count($rows);
@@ -8379,7 +8379,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             " . replace_semicolon($class_item) . "
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         // flatten data
@@ -8414,7 +8414,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
             prozent
         ";
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $histogram = pg_fetch_all($ret[1]);
         // flatten histogram
         $flatHistogram = array_fill(0,101,0);
@@ -8459,7 +8459,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
         ";
         #echo '<p>' . $sql;
         $ret=$layerdb->execSQL($sql, 4, 0);
-				if ($ret['success']==0) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret['success']==0) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
         $data = pg_fetch_all($ret[1]);
 
         if (count($data) > 0) {
@@ -9246,7 +9246,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											if(strpos($value, '%') === false)$value2 = '%'.$value.'%';else $value2 = $value;
 											$sql = 'SELECT * FROM ('.$optionen[0].') as foo WHERE LOWER(CAST(output AS TEXT)) '.$operator.' LOWER(\''.$value2.'\')';
 											$ret=$layerdb->execSQL($sql,4,0);
-											if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+											if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 											while($rs = pg_fetch_assoc($ret[1])){
 												$keys[] = $rs['value'];
 											}
@@ -12205,25 +12205,35 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$stellen = explode('|', $formvars['stelle']);
 			foreach ($stellen as $stelleid) {
 				$stelle = new stelle($stelleid, $this->database);
-				$this->layer = $stelle->getLayer($formvars['selected_layer_id']);
-				$formvars['used_layer_parent_id'] = $this->layer[0]['used_layer_parent_id'];
-				if ($formvars['used_layer_parent_id'] != '' AND $formvars['use_parent_privileges' . $stelleid] == 1) {
-					# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
-					while (!isset($formvars['privileg_' . $this->attributes['name'][0] .'_'. $formvars['used_layer_parent_id']])) {
-						# oberste Elternstelle suchen
-						$parent_stelle = new stelle($formvars['used_layer_parent_id'], $this->database);
-						$this->layer = $parent_stelle->getLayer($formvars['selected_layer_id']);
-						$formvars['used_layer_parent_id'] = $this->layer[0]['used_layer_parent_id'];
-					}
-					$stelleid = $formvars['used_layer_parent_id'];
+				if ($formvars['use_parent_privileges' . $stelleid] == 1) {
+					# wenn Eltern-Stellen für diesen Layer vorhanden, deren Rechte übernehmen
+					$formvars['used_layer_parent_ids'] = $this->get_upper_parent_ids($formvars, [$stelleid]);
+					$stelleid = $formvars['used_layer_parent_ids'][0];
 				}
 				$stelle->set_attributes_privileges($formvars, $this->attributes);
-				$stelle->set_layer_privileges($formvars['selected_layer_id'], $formvars['privileg' . $stelleid], $formvars['export_privileg' . $stelleid], $formvars['use_parent_privileges' . $stelle->id]);
+				$stelle->set_layer_privileges($formvars);
 			}
 		}
 		elseif ($formvars['selected_layer_id'] != '') {
 			$mapdb->set_default_layer_privileges($formvars, $this->attributes);
 		}
+	}
+
+	/*
+	* Funktion sucht nach den obersten Elternstellen 
+	*/
+	function get_upper_parent_ids($formvars, $parent_ids) {
+		$upper_parents = [];
+		foreach($parent_ids as $key => $parent_id) {
+			if (!isset($formvars['privileg_' . $this->attributes['name'][0] .'_'. $parent_id])) {
+				# oberste Elternstelle suchen
+				$parent_stelle = new stelle($parent_id, $this->database);
+				$layer = $parent_stelle->getLayer($formvars['selected_layer_id']);
+				$upper_parents = array_merge($upper_parents, $this->get_upper_parent_ids($formvars, explode(',', $layer[0]['used_layer_parent_id'])));
+				unset($parent_ids[$key]);
+			}
+		}
+		return array_merge($parent_ids, $upper_parents);
 	}
 
 	/*
@@ -16521,7 +16531,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# Abfragen der Layerausdehnung
 				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
 			}break;
 
