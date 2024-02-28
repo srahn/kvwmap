@@ -19298,17 +19298,18 @@ class db_mapObj{
 		}
 
 		# Schreibt alle Attribute, die NULL bekommen sollen wenn Wert == '' ist
-		foreach(
-			array(
-				'cluster_maxdistance',
-				'labelmaxscale',
-				'labelminscale',
-				'sizeunits',
-				'connection_id',
-				'max_query_rows',
-				'shared_from',
-				'write_mapserver_templates'
-				) AS $key
+		$null_attributes = array(
+			'cluster_maxdistance',
+			'labelmaxscale',
+			'labelminscale',
+			'sizeunits',
+			'connection_id',
+			'max_query_rows',
+			'shared_from',
+			'write_mapserver_templates'
+		);
+
+		foreach($null_attributes AS $key
 		) {
 			$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 		}
@@ -19321,9 +19322,17 @@ class db_mapObj{
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
-				array('sync', 'cluster_option')
+				array('sync')
 			);
 		}
+
+		if ($this->GUI->plugin_loaded('portal')) {
+			$zero_if_empty_attributes = array_merge(
+				$zero_if_empty_attributes,
+				array('cluster_option')
+			);
+		}
+
 		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
@@ -19399,7 +19408,7 @@ class db_mapObj{
 			'status',
 			'trigger_function'
 		);
-		if ($this->GUI->plugin_loaded('portal')) {
+		if ($this->GUI->plugin_loaded('mobile')) {
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
 				array('vector_tile_url')
