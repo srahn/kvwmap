@@ -19339,7 +19339,6 @@ class db_mapObj{
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('sync')
-<<<<<<< HEAD
 			);
 		}
 
@@ -19347,8 +19346,6 @@ class db_mapObj{
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('cluster_option')
-=======
->>>>>>> 8b242e33928b312a7cb266260f2835100c69df6c
 			);
 		}
 
