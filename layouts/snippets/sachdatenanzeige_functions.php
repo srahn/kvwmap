@@ -853,7 +853,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				status = obj.checked;
 
 		while (obj != undefined) {
-			obj.checked = !status;
+			if (obj.offsetParent !== null) {	// nur wenn Datensatz sichtbar
+				obj.checked = !status;
+			}
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
