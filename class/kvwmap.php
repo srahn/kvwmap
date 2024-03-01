@@ -10210,7 +10210,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# das Listen-DIV neu geladen werden (getrennt durch █)
 				echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0);';
 			}
-			$this->output();
 		}
 		else {
 			$this->data = array(
