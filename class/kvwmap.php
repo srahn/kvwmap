@@ -11516,18 +11516,35 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function layer_chart_Speichern($chart) {
 		include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
-		if ($chart->get_id() == '') {
-			$results = $chart->create(formvars_strip($this->formvars, array('layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
-			if ($results[0]['success']) {
-				$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
+		$results = $chart->validate();
+		if (empty($results)) {
+			if ($chart->get_id() == '') {
+				$results = $chart->create();
+				if ($results[0]['success']) {
+					$results[0]['msg'] = 	$strLayerChartSaveSuccessMsg;
+				}
+			}
+			else {
+				$results = $chart->update();
+				if ($results[0]['success']) {
+					$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
+				}
 			}
 		}
 		else {
-			$results = $chart->update(formvars_strip($this->formvars, array('title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name'), 'keep'));
-			if ($results[0]['success']) {
-				$results[0]['msg'] = $strLayerChartUpdateSuccessMsg;
-			}
+
+			$results = array_map(
+				function ($a) {
+					return array(
+						'type' => $a['type'],
+						'err_msg' => $a['msg']
+					);
+				},
+				$results
+			);
 		}
+
 		return $results[0];
 	}
 
