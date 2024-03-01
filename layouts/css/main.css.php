@@ -594,6 +594,13 @@ span[data-tooltip]:hover::after {
 	width: 150px;
 }
 
+.input-form textarea {
+	float: left;
+	text-align: left;
+	width: 55%;
+	margin-left: 5px;
+}
+
 .input-form input {
 
 	font-size: <? echo $font_size_factor * 15; ?>px

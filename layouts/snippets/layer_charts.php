@@ -162,8 +162,8 @@
 			<div id="diagramms" style="display: none"><?
 				foreach ($layer['charts'] AS $chart) {
 					$id = $chart->get($chart->identifier);
-					echo 'Chart: ' . $id; ?>
-					<div id="chart_div_<? echo $id; ?>">
+					#echo 'Chart: ' . $id; ?>
+					<div id="chart_div_<? echo $id; ?>" style="width: <? echo $chart->get('breite'); ?>">
 						<canvas id="chart_<? echo $id; ?>"></canvas>
 						<div>
 							Diagrammtyp: 
@@ -172,7 +172,11 @@
 								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
 								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
 							</select><?
-							if ($this->user->funktion == 'admin') { ?>
+							if (
+								$this->Stelle->isMenueAllowed($case) OR
+								$this->Stelle->isFunctionAllowed($case) OR
+								$this->user->is_case_allowed($case)
+							) { ?>
 								<button type="button" style="margin-left: 10px" onclick="layer_chart_edit(event, <? echo $id; ?>);">Bearbeiten</button><?php
 							} ?>
 						</div>
@@ -185,11 +189,12 @@
 						let data_<? echo $id; ?> = [];
 						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
 							if (labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i]) == -1) {
+								// Die Klasse kommt zum ersten mal vor. Setze labels_$id und data_$id
 								labels_<? echo $id; ?>.push(names_<? echo $id; ?>[i]);
-								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]) / 10000);
+								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]));
 							}
 							else {
-								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]) / 10000;
+								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]);
 							}
 						}
 						let chart_<? echo $id; ?> = new Chart(
