@@ -321,8 +321,11 @@ class GUI {
 	}
 
 	/**
-	*
-	* @params $layer Array mit Angben des Layers aus der MySQL-Datenbank
+	* @param $fired BEFORE/AFTER
+	* @param $event INSERT/UPDATE/DELETE
+	* @param $layer Array mit den Layerinformationen (Layer-ID, Layername, ...)
+	* @param $oid ID des Datensatzes (bei BEFORE INSERT leer)
+	* @param $old_dataset Der Datensatz aus der DB vor der Änderung (bei INSERT leer)
 	*/
 	function exec_trigger_function($fired, $event, $layer, $oid = '', $old_dataset = array()) {
 		global $GUI;
