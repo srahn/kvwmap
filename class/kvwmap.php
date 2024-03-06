@@ -10142,6 +10142,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function gemerkte_Datensaetze_drucken($layer_id){
+		include_(CLASSPATH.'datendrucklayout.php');
 		$oids = $this->get_gemerkte_oids($layer_id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		# Generiere formvars der checkboxen für die Objekte an Hand $oids
@@ -10159,7 +10160,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['go'] = 'generischer_sachdaten_druck_Drucken';
 
 		$ddl = new ddl($this->database, $this);
-		$ddl->selectedlayout = $ddl->load_layouts(NULL, NULL, NULL, NULL);
+		$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
 		$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
 		$this->generischer_sachdaten_druck_drucken(null, null, null);
 		#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
