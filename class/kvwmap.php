@@ -10113,7 +10113,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_gemerkte_oids($layer_id = null) {
 		$sql = "
 			SELECT
-				oid
+				oid,
+				layer_id
 			FROM
 				zwischenablage
 			WHERE
@@ -10125,7 +10126,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$ret = $this->database->execSQL($sql, 4, 1);
 		$oids = array();
 		while ($rs = $this->database->result->fetch_assoc()){
-			$oids[] = $rs['oid'];
+			$oids[$rs['layer_id']][] = $rs['oid'];
 		}
 		return $oids;
 	}
@@ -10134,7 +10135,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$oids = $this->get_gemerkte_oids($layer_id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids) . "')";
+		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids[$layer_id]) . "')";
 		$this->formvars['operator_'.$layerset[0]['maintable'] . '_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
@@ -10146,7 +10147,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# Generiere formvars der checkboxen für die Objekte an Hand $oids
 		# check;table_alias;table;oid
 		$checkbox_names = array(); 
-		foreach($oids AS $oid) {
+		foreach($oids[$layer_id] AS $oid) {
 			#check;rechnungen;rechnungen;222792641=on
 			$checkbox_name = 'check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $oid;
 			$this->formvars[$checkbox_name] = 'on';

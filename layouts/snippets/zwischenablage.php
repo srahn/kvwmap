@@ -35,8 +35,6 @@
 
 	.header-item {
 		font-weight: bold;
-		font-family: Arial, Helvetica, sans-serif;
-		/* text-align: center !important; */
 	}
 
 	.item {
@@ -50,7 +48,7 @@
 
 	.layer-item {
 		float: left;
-    width: 55%;
+    width: 40%;
     text-align: left;
     margin-left: 50px;
 	}
@@ -63,12 +61,12 @@
 
 	.print-button-item {
 		float: left;
-		width: 6%;
+		width: 10%;
 		cursor: pointer;
 	}
 	.delete-button-item {
 		float: left;
-		width: 6%;
+		width: 10%;
 		cursor: pointer;
   }
 </style>
