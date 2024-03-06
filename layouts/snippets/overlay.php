@@ -44,7 +44,7 @@
 				<table style="width:100%">
 					<tr>
 						<? if (is_array($selectable_limits)) { ?>
-						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
+						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>:&nbsp;										
 							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query'; overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
 								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){

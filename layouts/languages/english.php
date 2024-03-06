@@ -8,6 +8,7 @@
 	$this->deactivatelayer = 'Deactivate layer';
 	$this->deactivatequery = 'Deactivate query';
 	$this->DisplayClasses = 'Display Classes';
+	$this->entries = 'Entries';
 	$this->FullLayerExtent = 'zoom to Layer-Exent';
 	$this->HideClasses = 'Hide Classes';
 	$this->histTimestamp = 'Timestamp for historical data';
@@ -60,7 +61,7 @@
 	$this->strLayerGroup = 'Layer group';
 	$this->strLayerParameters = 'Layer Parameter';
 	$this->strLayerSharedFrom = 'This Layer was shared by user';
-	$this->strLimit = 'Record Count:';
+	$this->strLimit = 'Record Count';
 	$this->strLoad = 'Load';
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Scale';
@@ -71,6 +72,7 @@
 	$this->strNo = 'No';
 	$this->strOr = 'or';
 	$this->strPleaseSelect = 'Please select';
+	$this->strPrint = 'Drucken';
 	$this->strPrivileges = 'privileges';
 	$this->strReadable = 'Everywhere only readable';
 	$this->strRemove = 'remove';

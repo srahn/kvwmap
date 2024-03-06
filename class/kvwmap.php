@@ -10103,27 +10103,67 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		//}
 	}
 
-	function gemerkte_Datensaetze_anzeigen($layer_id){
+	/**
+	 * function requests oid's of features in zwischenablage from Layer with $layer_id
+	 * for current user with user_id in stelle stelle_id.
+	 * and returns it in an array. If layer_id is empty it returns oids from all features.
+	 * @param Integer layer_id
+	 * @return Array
+	 */
+	function get_gemerkte_oids($layer_id = null) {
 		$sql = "
-			SELECT oid
-		FROM
-			zwischenablage
-		WHERE
-			user_id = " . $this->user->id . " AND
-			stelle_id = " . $this->Stelle->id . " AND
-			layer_id = " . $layer_id . "
+			SELECT
+				oid,
+				layer_id
+			FROM
+				zwischenablage
+			WHERE
+				user_id = " . $this->user->id . " AND
+				stelle_id = " . $this->Stelle->id . "
+				" . ($layer_id ? 'AND layer_id = ' . $layer_id : '') . "
 		";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql, 4, 1);
+		$oids = array();
 		while ($rs = $this->database->result->fetch_assoc()){
-			$oids[] = $rs['oid'];
+			$oids[$rs['layer_id']][] = $rs['oid'];
 		}
+		return $oids;
+	}
+
+	function gemerkte_Datensaetze_anzeigen($layer_id){
+		$oids = $this->get_gemerkte_oids($layer_id);
 		$layerset = $this->user->rolle->getLayer($layer_id);
 		$this->formvars['selected_layer_id'] = $layer_id;
-		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids) . "')";
+		$this->formvars['value_'.$layerset[0]['maintable'] . '_oid'] = "('" . implode("', '", $oids[$layer_id]) . "')";
 		$this->formvars['operator_'.$layerset[0]['maintable'] . '_oid'] = 'IN';
 		$this->formvars['anzahl'] = 1000;
 		$this->GenerischeSuche_Suchen();
+	}
+
+	function gemerkte_Datensaetze_drucken($layer_id){
+		include_(CLASSPATH.'datendrucklayout.php');
+		$oids = $this->get_gemerkte_oids($layer_id);
+		$layerset = $this->user->rolle->getLayer($layer_id);
+		# Generiere formvars der checkboxen für die Objekte an Hand $oids
+		# check;table_alias;table;oid
+		$checkbox_names = array(); 
+		foreach($oids[$layer_id] AS $oid) {
+			#check;rechnungen;rechnungen;222792641=on
+			$checkbox_name = 'check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $oid;
+			$this->formvars[$checkbox_name] = 'on';
+			$checkbox_names[] = $checkbox_name;
+		}
+		# checkbox_names_743=check;rechnungen;rechnungen;222792641 mehrere mit | getrennt
+		$this->formvars['checkbox_names_' . $layer_id] = implode('|', $checkbox_names);
+		$this->formvars['archivieren'] = null;
+		$this->formvars['go'] = 'generischer_sachdaten_druck_Drucken';
+
+		$ddl = new ddl($this->database, $this);
+		$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
+		$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
+		$this->generischer_sachdaten_druck_drucken(null, null, null);
+		#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
 	}
 
 	function layer_Datensatz_loeschen($layer_id, $oid, $reload_object) {
@@ -11274,6 +11314,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$newpath = 'DISTINCT ' . $newpath;
 		}
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
+		if ($this->user->id == 1) {
+			echo 'chm: ' . print_r($checkbox_names, true);
+			echo '<br>' . $this->formvars['check;ob;obj_basis;513;13']; exit;
+		}
 		# Daten abfragen
 		for ($i = 0; $i < count($checkbox_names); $i++) {
 			if ($this->formvars[$checkbox_names[$i]] == 'on') {
@@ -11330,17 +11374,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	/*
-	* Übergebene formvars Daten:
-	* go=generischer_sachdaten_druck_Drucken
-	* aktivesLayout=31
-	* chosen_layer_id=743
-	* archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
-	* Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden folgenden Parameter abgeleitet
-	* oid => 23453
-	* checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
-	* check;rechnungen;rechnungen;222792641=on
-	*/
+	/**
+	 * Erzeugt ein PDF-Dokument oder schreibt es fort.
+	 * Abgelegt wird das Dokument im document_path des Layers $document_path mit dem Namen den die Funktion createDataPDF zurückliefert
+	 * Übergebene formvars Daten:
+	 * go=generischer_sachdaten_druck_Drucken
+	 * aktivesLayout=31
+	 * chosen_layer_id=743
+	 * archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
+	 * Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden folgenden Parameter abgeleitet
+	 * oid => 23453
+	 * checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
+	 * check;rechnungen;rechnungen;222792641=on
+	 * @param Object $pdfobject Ein PDF-Objekt welches fortgesetzt werden soll. Wenn keines angegeben ist wird eine neues angelegt.
+	 * @param Int $offsetx
+	 * @param Int $offsety
+	 */
 	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);

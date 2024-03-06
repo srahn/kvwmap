@@ -8,6 +8,7 @@
 	$this->deactivatelayer = 'Dieses Thema ausschalten';
 	$this->deactivatequery = 'Die Abfrage dieses Themas ausschalten';
 	$this->DisplayClasses = 'Klassen einblenden';
+	$this->entries = 'Einträge';
 	$this->FullLayerExtent = 'volle Layerausdehnung';
 	$this->HideClasses = 'Klassen ausblenden';
 	$this->histTimestamp = 'Zeitpunkt für historische Daten';
@@ -61,7 +62,7 @@
 	$this->strLayerGroup = 'Layergruppe';
 	$this->strLayerParameters = 'Themenparameter';
 	$this->strLayerSharedFrom = 'Dieser Layer wurde geteilt durch den Nutzer';
-	$this->strLimit = 'Anzahl Treffer:';
+	$this->strLimit = 'Anzahl Treffer';
 	$this->strLoad = 'Laden';
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Maßstab';
@@ -72,6 +73,7 @@
 	$this->strNo = 'Nein';
 	$this->strOr = 'oder';
 	$this->strPleaseSelect = 'Bitte Auswählen';
+	$this->strPrint = 'Drucken';
 	$this->strPrivileges = 'Rechte';
 	$this->strReadable = 'Überall nur lesbar';
 	$this->strRemove = 'Entfernen';

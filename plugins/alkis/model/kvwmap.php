@@ -1124,7 +1124,7 @@
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
 		$GUI->generischer_sachdaten_druck_drucken();
 	};
-	
+
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
 		$GUI->main = PLUGINS.'alkis/view/Adressaenderungen_Export.php';
