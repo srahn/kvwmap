@@ -10143,15 +10143,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function gemerkte_Datensaetze_drucken($layer_id){
 		include_(CLASSPATH.'datendrucklayout.php');
+		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$oids = $this->get_gemerkte_oids($layer_id);
 		foreach ($oids as $layer_id => $layer_oids) {
 			$layerset = $this->user->rolle->getLayer($layer_id);
+			$layerdb = $mapdb->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+			$layerset[0]['attributes'] = $mapdb->read_layer_attributes($layer_id, $layerdb, NULL, false, true);
 			# Generiere formvars der checkboxen für die Objekte an Hand $oids
 			# check;table_alias;table;oid
 			$checkbox_names = array(); 
 			foreach ($layer_oids AS $oid) {
 				#check;rechnungen;rechnungen;222792641=on
-				$checkbox_name = 'check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $oid;
+				$checkbox_name = 'check;' . $layerset[0]['attributes']['table_alias_name'][$layerset[0]['maintable']] . ';' . $layerset[0]['maintable'] . ';' . $oid;
 				$this->formvars[$checkbox_name] = 'on';
 				$checkbox_names[] = $checkbox_name;
 			}
