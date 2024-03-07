@@ -62,6 +62,7 @@
 	$this->strLayerParameters = 'Layer Parameter';
 	$this->strLayerSharedFrom = 'This Layer was shared by user';
 	$this->strLimit = 'Record Count';
+	$this->strCount = 'number';
 	$this->strLoad = 'Load';
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Scale';

@@ -39,7 +39,7 @@
 
 <div class="item fett layer-item"><? echo $this->strLayer; ?></div>
 
-<div class="item fett show-item"><? echo $this->strLimit; ?></div>
+<div class="item fett show-item"><? echo $this->strCount; ?></div>
 
 <div class="item fett print-button-item"><? echo $this->strPrint; ?></div>
 
@@ -70,7 +70,7 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 <div class="item layer-item"></div>
 
 <div class="item show-item">
-	<?php echo $this->num_rows == 0 ? $strNoRecords : $this->all . ' ' . $strRecords; ?>
+	<?php echo $this->num_rows == 0 ? '' : $this->all . ' ' . $strRecords; ?>
 </div>
 
 <a href="index.php?go=gemerkte_Datensaetze_drucken">
@@ -82,5 +82,13 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 	<div id="delete_all" class="item delete-button-item<?php echo $this->num_rows == 0 ? '' : ' button datensatz_loeschen'; ?>">
 	</div>
 </a>
+
+<? 
+
+if ($this->num_rows == 0) {
+	echo '<div style="margin-top: 70px">' . $strNoRecords . '</div>';
+}
+
+?>
 
 <input type="hidden" name="go_plus" value="">

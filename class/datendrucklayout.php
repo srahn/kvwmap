@@ -1258,7 +1258,7 @@ class ddl {
 				$this->pdf->last_page_index = $page_count - 1;
 			}
 		}
-		if ($pdfobject == NULL AND $output) {
+		if ($output) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements($preview);
