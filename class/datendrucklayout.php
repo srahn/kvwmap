@@ -998,7 +998,7 @@ class ddl {
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1022,6 +1022,9 @@ class ddl {
 		}
 		else {
 			$this->gui->pdf = $this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+			if ($append) {
+				$this->pdf->newPage();
+			}
 		}
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
