@@ -90,12 +90,12 @@
 							}
 							else{
 		  					echo '<select title="'.$attributes['alias'][$j].'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
-								for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
+								foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 									echo '<option ';
-									if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
+									if ($enum_key == $layer['shape'][$k][$attributes['name'][$j]] OR ($enum_key != '' AND $enum_key == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
 										echo 'selected ';
 									}
-									echo 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
+									echo 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
 								}
 								echo '</select>';
 		  				}
@@ -115,24 +115,13 @@
 
 									case 'Auswahlfeld' : {
 										if($attributes['privileg'][$j] == '0' OR $lock[$k]){
-										  if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-														break;
-													}
-												}
+										  if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+												$auswahlfeld_output = $attributes['enum'][$j][$k][$layer['shape'][$k][$attributes['name'][$j]]]['output'];
 											}
 											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-														$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$layer['shape'][$k][$attributes['name'][$j]]]['output'];
 											}
+											$auswahlfeld_output_laenge = strlen($auswahlfeld_output) + 1;
                       echo '<input readonly style="border:0px;background-color:transparent;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
                       $auswahlfeld_output = '';
                       $auswahlfeld_output_laenge = '';
@@ -150,23 +139,18 @@
 											}
 											echo 'id="'.$layer['Layer_ID'].'_'.$attributes['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'">';
 											echo '<option value="">-- '.$this->strPleaseSelect.' --</option>';
-											if(is_array($attributes['dependent_options'][$j])){		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
-												for($e = 0; $e < count($attributes['enum_value'][$j][$k]); $e++){
-													echo '<option ';
-													if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$k][$e] != '' AND $attributes['enum_value'][$j][$k][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
-														echo 'selected ';
-													}
-													echo 'value="'.$attributes['enum_value'][$j][$k][$e].'">'.$attributes['enum_output'][$j][$k][$e].'</option>';
-												}
+											if (is_array($attributes['dependent_options'][$j])) {		# mehrere DatensÃ¤tze und ein abhÃ¤ngiges Auswahlfeld --> verschiedene AuswahlmÃ¶glichkeiten
+												$enums = $attributes['enum'][$j][$k];
 											}
-											else{
-												for($e = 0; $e < count($attributes['enum_value'][$j]); $e++){
-													echo '<option ';
-													if($attributes['enum_value'][$j][$e] == $layer['shape'][$k][$attributes['name'][$j]] OR ($attributes['enum_value'][$j][$e] != '' AND $attributes['enum_value'][$j][$e] == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
-														echo 'selected ';
-													}
-													echo 'value="'.$attributes['enum_value'][$j][$e].'">'.$attributes['enum_output'][$j][$e].'</option>';
+											else {
+												$enums = $attributes['enum'][$j];
+											}
+											foreach ($enums as $enum_key => $enum){
+												echo '<option ';
+												if ($enum_key == $layer['shape'][$k][$attributes['name'][$j]] OR ($enum_key != '' AND $enum_key == $this->formvars[$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j]])){
+													echo 'selected ';
 												}
+												echo 'value="' . $enum_key . '">' . $enum['output'] . '</option>';
 											}
 											echo '</select>';
 											if($attributes['subform_layer_id'][$j] != ''){

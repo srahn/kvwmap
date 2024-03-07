@@ -179,23 +179,12 @@
 							switch ($attributes['form_element_type'][$j]) {
 								case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : case 'Radiobutton' : {
 									if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for ($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++) {
-											if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$k][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$k][$e];
-												break;
-											}
-										}
+										$enum = $attributes['enum'][$j][$k][$dataset[$attributes['name'][$j]]];
 									}
 									else {
-										for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
-											if ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$e];
-												break;
-											}
-										}
-									} 
+										$enum = $attributes['enum'][$j][$dataset[$attributes['name'][$j]]];
+									}
+									$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">&nbsp;' : '') . $enum['output'];
 								} break;
 								
 								case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{

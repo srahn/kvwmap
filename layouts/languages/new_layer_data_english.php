@@ -1,8 +1,9 @@
 <?php
- $strLayer="Layer";
- $strPleaseSelect="--------Please select---------";
- $strSave="Save";
- $strtitle="Create new Dataset"; 
- $strCancel="Cancel";
- $strCreateAnotherOne = "create another dataset";
+  $strCancel = 'Cancel';
+  $strCreateAnotherOne = 'create another dataset';
+  $strLayer = 'Layer';
+  $strNoLayer = 'No PostGIS-Layer exists.';
+  $strPleaseSelect = '--------Please select---------';
+  $strSave = 'Save';
+  $strTitle = 'Create new Dataset';
 ?>  

@@ -103,4 +103,17 @@ UPDATE layer i
 	) n ON i.Layer_ID = n.layer_id
 SET i.classitem = 'zweckbestimmung'
 WHERE i.classitem != 'zweckbestimmung';
+
+SELECT
+  c.Class_ID,
+  l.Name,
+  c.Expression,
+  replace(replace(c.Expression, '\'[sondernutzung]\' = \'', '\'[sondernutzung]\' ~ \'\\b\\b'), '\')', '\\b\\b\')')
+FROM
+  classes c JOIN
+  layer l ON c.Layer_ID = l.Layer_ID
+WHERE
+  l.Name LIKE 'fp_bebauungsflaeche_polygons' AND
+  c.Expression LIKE '%sondernutzung]\' =%' AND
+  c.Expression NOT LIKE '%sondernutzung]\' = \'\'%';
 COMMIT;

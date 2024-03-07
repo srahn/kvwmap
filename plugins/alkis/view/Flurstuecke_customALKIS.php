@@ -129,6 +129,11 @@ hide_versions = function(flst){
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
+			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer']) {
+				for ($b=0; $b < @count($flst->Buchungen);$b++) {
+					$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+				}
+			}
 			$flst_array[] = $flst;
 		}
 		usort($flst_array, 'sort_flst');
@@ -806,8 +811,7 @@ hide_versions = function(flst){
 												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
 											</tr>
 										<? }
-										if($privileg_['eigentuemer'] AND $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
-											reset($Eigentuemerliste);
+										if ($privileg_['eigentuemer']) {
 											?>
 											<tr>
 												<td class="fett">
@@ -823,7 +827,7 @@ hide_versions = function(flst){
 											<tr>
 												<td colspan="3">
 													<table>				<?
-											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+											echo $flst->outputEigentuemer(key($flst->Buchungen[$b]['eigentuemerliste']), $flst->Buchungen[$b]['eigentuemerliste'], 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
 											?>	</table>
 												</td>
 											</tr>
@@ -865,7 +869,7 @@ hide_versions = function(flst){
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;

@@ -18,7 +18,12 @@
 			"export_privileg" => 1,
 			"geom_attribute" => "the_geom",
 			"geom_type" => ""
-		),		
+		),
+		"GPX" => array(
+			"export_privileg" => 1,
+			"geom_attribute" => "the_geom",
+			"geom_type" => ""
+		),
 		"GML" => array(
 			"export_privileg" => 1,
 			"geom_attribute" => "the_geom",
@@ -98,7 +103,7 @@ function update_format(){
 		document.getElementById('geom_div').style.display = '';
 		document.getElementById('coord_div').style.display = 'inline';
 		if(document.getElementById('groupnames_div') != null)document.getElementById('groupnames_div').style.display = 'none';
-		if(document.GUI.export_format.value == 'KML' || document.GUI.export_format.value == 'OVL'){
+		if (['KML', 'GPX', 'OVL'].includes(document.GUI.export_format.value)){
 			document.getElementById('wgs84').style.display = 'inline';
 			document.GUI.epsg.style.display = 'none';
 			document.GUI.epsg.value = 4326;

@@ -853,11 +853,14 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				status = obj.checked;
 
 		while (obj != undefined) {
-			obj.checked = !status;
+			if (obj.offsetParent !== null) {	// nur wenn Datensatz sichtbar
+				obj.checked = !status;
+			}
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
-		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
+		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
@@ -1177,6 +1180,38 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		if(button && button.style.display == 'none'){
 			button.style.display = '';
 		}		
+	}
+
+	filter_results = function(attribute_class, select){
+		var options = select.selectedOptions;
+		var values = Array.from(options).map(({ value }) => value);
+		var fields = document.querySelectorAll('.gle_attribute_value .' + attribute_class);
+		var value;
+		if (values[0] != '#all#'){
+			select.previousElementSibling.style.color = 'gray';
+		}
+		else {
+			select.previousElementSibling.style.color = '#bfbfbf';
+		}
+		[].forEach.call(fields, function (field){
+			if (field.type == 'checkbox' && !field.checked) {
+				value = 'f';
+			}
+			else {
+				value = field.value;
+			}
+			var tr = field.closest('tr');
+			if (values[0] != '#all#' && !values.includes(value)) {
+				tr.style.display = 'none';
+				tr.classList.add(attribute_class);
+			}
+			else {
+				tr.classList.remove(attribute_class);
+				if (tr.className == '') {
+					tr.style.display = '';
+				}
+			}
+		});
 	}
 
 </script>

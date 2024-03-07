@@ -140,7 +140,7 @@
 					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
 				</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
-					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['Name']; ?>">
+					<textarea rows="1" cols="12" style="min-width: 128px; width: 100%" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]"><?php echo $this->classes[$i]['Name']; ?></textarea>
 				</td><?php
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') { ?>
@@ -150,7 +150,7 @@
 					}
 				} ?>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
-					<textarea name="expression[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="28" rows="3"><?php echo $this->classes[$i]['Expression']; ?></textarea>
+					<textarea name="expression[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="28" rows="3" style="min-width: 196px; width: 100%"><?php echo $this->classes[$i]['Expression']; ?></textarea>
 				</td>
 				<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">
 					<textarea name="text[<?php echo $this->classes[$i]['Class_ID']; ?>]" cols="18" rows="3"><?php echo $this->classes[$i]['text']; ?></textarea>

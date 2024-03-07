@@ -153,8 +153,9 @@ class MetaDataCreator {
 		" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
-		<gco:DateTime>" . $this->md->get('md_date') . "</gco:DateTime>
+		<gco:DateTime>" . $this->md->get('md_date') . "T00:00:00Z</gco:DateTime>
 	</gmd:dateStamp>
+	" . $this->getReferenzSysteme() . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<srv:SV_ServiceIdentification>
 			<gmd:citation>
@@ -172,9 +173,6 @@ class MetaDataCreator {
 							</gmd:dateType>
 						</gmd:CI_Date>
 					</gmd:date>
-					<gmd:citedResponsibleParty>
-						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
-					</gmd:citedResponsibleParty>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
 							<gmd:code>
@@ -182,10 +180,13 @@ class MetaDataCreator {
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
+					<gmd:citedResponsibleParty>
+						" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
+					</gmd:citedResponsibleParty>
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Downloaddienst (WFS)" . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
+				<gco:CharacterString>Downloaddienst (WFS) " . $this->md->get('id_abstract')['downloadservice'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -206,15 +207,54 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
-						<gco:CharacterString>humanGeographicViewer</gco:CharacterString>
+						<gco:CharacterString>Downloaddienst</gco:CharacterString>
 					</gmd:keyword>
-				</gmd:MD_Keywords>
+					<gmd:keyword>
+						<gco:CharacterString>DownloadService</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>WFS</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Web Feature Service</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>F-Plan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>F-Pläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>X-Planung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>XPlanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>xplanGML</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>FPläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>FPlan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>opendata</gco:CharacterString>
+					</gmd:keyword>
+					</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
 						<gco:CharacterString>Bodennutzung</gco:CharacterString>
-				    </gmd:keyword>
+				  </gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+				  </gmd:keyword>
 					<gmd:type>
 						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
 					</gmd:type>
@@ -292,7 +332,18 @@ class MetaDataCreator {
 								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 							</gmd:northBoundLatitude>
 						</gmd:EX_GeographicBoundingBox>
-					</gmd:geographicElement>
+					</gmd:geographicElement>" . ($this->md->get('geographicIdentifier') != '' ? "
+					<gmd:geographicElement>
+						<gmd:EX_GeographicDescription>
+							<gmd:geographicIdentifier>
+								<gmd:MD_Identifier>
+									<gmd:code>
+										<gco:CharacterString>" . $this->md->get('geographicIdentifier') . "</gco:CharacterString>
+									</gmd:code>
+								</gmd:MD_Identifier>
+							</gmd:geographicIdentifier>
+						</gmd:EX_GeographicDescription>
+					</gmd:geographicElement>" : '') . "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -365,6 +416,33 @@ class MetaDataCreator {
 							</gmd:pass>
 						</gmd:DQ_ConformanceResult>
 					</gmd:result>
+					<gmd:result>
+						<gmd:DQ_ConformanceResult>
+							<gmd:specification>
+								<gmd:CI_Citation>
+									<gmd:title>
+										<gco:CharacterString>XPlanung Version 5.4</gco:CharacterString>
+									</gmd:title>
+									<gmd:date>
+										<gmd:CI_Date>
+											<gmd:date>
+												<gco:Date>2021-06-22</gco:Date>
+											</gmd:date>
+											<gmd:dateType>
+												<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+											</gmd:dateType>
+										</gmd:CI_Date>
+									</gmd:date>
+								</gmd:CI_Citation>
+							</gmd:specification>
+							<gmd:explanation>
+								<gco:CharacterString>Der Dienst liefert die FeatureTypen konform zum XPlanungs-Standard in Version 5.4. Die Struktur der Attribute ist jedoch flach gehalten. Komplexe Featuretypen werden als JSON-Strings ausgegeben. Für Codelisten- und Aufzählungstypen werden zusätzlich zu den Codes die textlichen Angaben ausgegeben.</gco:CharacterString>
+							</gmd:explanation>
+							<gmd:pass>
+								<gco:Boolean>true</gco:Boolean>
+							</gmd:pass>
+						</gmd:DQ_ConformanceResult>
+					</gmd:result>
 				</gmd:DQ_DomainConsistency>
 			</gmd:report>
 		</gmd:DQ_DataQuality>
@@ -392,17 +470,18 @@ class MetaDataCreator {
 		<gco:CharacterString>Service</gco:CharacterString>
 	</gmd:hierarchyLevelName>
 	<gmd:contact>
-	" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+		" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 	</gmd:contact>
 	<gmd:dateStamp xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
 	</gmd:dateStamp>
+	" . $this->getReferenzSysteme() . "
 	<gmd:identificationInfo xmlns:ows=\"http://www.opengis.net/ows/1.1\">
 		<srv:SV_ServiceIdentification>
 			<gmd:citation>
 				<gmd:CI_Citation>
 					<gmd:title>
-						<gco:CharacterString>" . $this->md->get('stellendaten')['ows_title'] . "</gco:CharacterString>
+						<gco:CharacterString>Darstellungsdienst " . $this->md->get('id_cite_title') . "</gco:CharacterString>
 					</gmd:title>
 					<gmd:date>
 						<gmd:CI_Date>
@@ -414,9 +493,6 @@ class MetaDataCreator {
 							</gmd:dateType>
 						</gmd:CI_Date>
 					</gmd:date>
-					<gmd:citedResponsibleParty>
-						" . $this->getResponsibleParty('ows_content', 'owner') . "
-					</gmd:citedResponsibleParty>
 					<gmd:identifier>
 						<gmd:MD_Identifier>
 							<gmd:code>
@@ -424,10 +500,13 @@ class MetaDataCreator {
 							</gmd:code>
 						</gmd:MD_Identifier>
 					</gmd:identifier>
+					<gmd:citedResponsibleParty>
+						" . $this->getResponsibleParty('ows_content', 'owner') . "
+					</gmd:citedResponsibleParty>
 				</gmd:CI_Citation>
 			</gmd:citation>
 			<gmd:abstract>
-				<gco:CharacterString>Darstellungsdienst (WMS)" . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
+				<gco:CharacterString>Darstellungsdienst (WMS) " . $this->md->get('id_abstract')['dataset'] . "</gco:CharacterString>
 			</gmd:abstract>
 			<gmd:pointOfContact>
 				" . $this->getResponsibleParty('ows_contact', 'pointOfContact') . "
@@ -448,7 +527,46 @@ class MetaDataCreator {
 			<gmd:descriptiveKeywords>
 				<gmd:MD_Keywords>
 					<gmd:keyword>
+						<gco:CharacterString>Darstellungsdienst</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
 						<gco:CharacterString>humanGeographicViewer</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>viewService</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>WMS</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Web Map Service</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>F-Plan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>F-Pläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>X-Planung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>XPlanung</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>xplanGML</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>FPläne</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+					<gco:CharacterString>FPlan</gco:CharacterString>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>opendata</gco:CharacterString>
 					</gmd:keyword>
 				</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
@@ -456,7 +574,10 @@ class MetaDataCreator {
 				<gmd:MD_Keywords>
 					<gmd:keyword>
 						<gco:CharacterString>Bodennutzung</gco:CharacterString>
-				    </gmd:keyword>
+					</gmd:keyword>
+					<gmd:keyword>
+						<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+				  </gmd:keyword>
 					<gmd:type>
 						<gmd:MD_KeywordTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
 					</gmd:type>
@@ -492,28 +613,36 @@ class MetaDataCreator {
 					</gmd:type>
 				</gmd:MD_Keywords>
 			</gmd:descriptiveKeywords>
-				<gmd:resourceConstraints>
-					 <gmd:MD_LegalConstraints>
-						  <gmd:accessConstraints>
-							   <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\" />
-						  </gmd:accessConstraints>
-						  <gmd:otherConstraints>
-							   <gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">no limitations to public access</gmx:Anchor>
-						  </gmd:otherConstraints>
-					</gmd:MD_LegalConstraints>
-				</gmd:resourceConstraints>
-				<gmd:resourceConstraints>
-					<gmd:MD_LegalConstraints>
-						   <gmd:useConstraints>
-								<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
-						   </gmd:useConstraints>
-						   <gmd:otherConstraints>
-								<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/ ConditionsApplyingToAccessAndUse/noConditionsApply\">
-									 No conditions apply to access and use 
-								</gmx:Anchor>
-						   </gmd:otherConstraints>
-					  </gmd:MD_LegalConstraints>
-				</gmd:resourceConstraints>	
+      <gmd:resourceConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+          </gmd:useConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString>Es gelten die Lizenzbedingungen „Datenlizenz Deutschland – Zero – Version 2.0“ bzw. „dl-zero-de/2.0” (https://www.govdata.de/dl-de/zero-2-0).</gco:CharacterString>
+          </gmd:otherConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString>{ \"id\": \"dl-zero-de/2.0\", \"name\": \"Datenlizenz Deutschland – Zero – Version 2.0\", \"url\": \"http://dcat-ap.de/def/licenses/dl-zero-de/2.0\", \"quelle\": \"\" }</gco:CharacterString>
+          </gmd:otherConstraints>
+        </gmd:MD_LegalConstraints>
+      </gmd:resourceConstraints>
+      <gmd:resourceConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:accessConstraints>
+            <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+          </gmd:accessConstraints>
+          <gmd:otherConstraints>
+            <gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\" xlink:type=\"simple\">Es gelten keine Zugriffsbeschränkungen</gmx:Anchor>
+          </gmd:otherConstraints>
+        </gmd:MD_LegalConstraints>
+      </gmd:resourceConstraints>
+      <gmd:resourceConstraints>
+        <gmd:MD_SecurityConstraints>
+          <gmd:classification>
+            <gmd:MD_ClassificationCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode\" codeListValue=\"unclassified\"/>
+          </gmd:classification>
+        </gmd:MD_SecurityConstraints>
+      </gmd:resourceConstraints>
 			<srv:serviceType>
 				<gco:LocalName>download</gco:LocalName>
 			</srv:serviceType>
@@ -534,7 +663,18 @@ class MetaDataCreator {
 								<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 							</gmd:northBoundLatitude>
 						</gmd:EX_GeographicBoundingBox>
-					</gmd:geographicElement>
+					</gmd:geographicElement>" . ($this->md->get('geographicIdentifier') != '' ? "
+					<gmd:geographicElement>
+						<gmd:EX_GeographicDescription>
+							<gmd:geographicIdentifier>
+								<gmd:MD_Identifier>
+									<gmd:code>
+										<gco:CharacterString>" . $this->md->get('geographicIdentifier') . "</gco:CharacterString>
+									</gmd:code>
+								</gmd:MD_Identifier>
+							</gmd:geographicIdentifier>
+						</gmd:EX_GeographicDescription>
+					</gmd:geographicElement>" : '') . "
 				</gmd:EX_Extent>
 			</srv:extent>
 			<srv:couplingType>
@@ -607,6 +747,33 @@ class MetaDataCreator {
 							</gmd:pass>
 						</gmd:DQ_ConformanceResult>
 					</gmd:result>
+					<gmd:result>
+						<gmd:DQ_ConformanceResult>
+							<gmd:specification>
+								<gmd:CI_Citation>
+									<gmd:title>
+										<gco:CharacterString>XPlanung Version 5.4</gco:CharacterString>
+									</gmd:title>
+									<gmd:date>
+										<gmd:CI_Date>
+											<gmd:date>
+												<gco:Date>2021-06-22</gco:Date>
+											</gmd:date>
+											<gmd:dateType>
+												<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+											</gmd:dateType>
+										</gmd:CI_Date>
+									</gmd:date>
+								</gmd:CI_Citation>
+							</gmd:specification>
+							<gmd:explanation>
+								<gco:CharacterString>Die Layer des Dienstes entsprechen den FeatureTypen des XPlanungs-Standard in Version 5.4. Der Style entspricht den Vorgaben im Projekt PlanDigital.</gco:CharacterString>
+							</gmd:explanation>
+							<gmd:pass>
+								<gco:Boolean>true</gco:Boolean>
+							</gmd:pass>
+						</gmd:DQ_ConformanceResult>
+					</gmd:result>
 				</gmd:DQ_DomainConsistency>
 			</gmd:report>
 		</gmd:DQ_DataQuality>
@@ -631,7 +798,7 @@ class MetaDataCreator {
 			<gmd:MD_ScopeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ScopeCode\" codeListValue=\"dataset\">dataset</gmd:MD_ScopeCode>
 		</gmd:hierarchyLevel>
 		<gmd:contact>
-		" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
+			" . $this->getResponsibleParty('ows_content', 'pointOfContact') . "
 		</gmd:contact>
 		<gmd:dateStamp>
 			<gco:Date>" . $this->md->get('md_date') . "</gco:Date>
@@ -653,7 +820,7 @@ class MetaDataCreator {
 						<gmd:date>
 							<gmd:CI_Date>
 								<gmd:date>
-									<gco:DateTime>" . $this->md->get('id_cite_date') . "</gco:DateTime>
+									<gco:DateTime>" . $this->md->get('id_cite_date') . "T00:00:00Z</gco:DateTime>
 								</gmd:date>
 								<gmd:dateType>
 									<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
@@ -667,6 +834,9 @@ class MetaDataCreator {
 								</gmd:code>
 							</gmd:MD_Identifier>
 						</gmd:identifier>
+						<gmd:citedResponsibleParty>
+							" . $this->getResponsibleParty('ows_content', 'owner') . "
+						</gmd:citedResponsibleParty>
 					</gmd:CI_Citation>
 				</gmd:citation>
 				<gmd:abstract>
@@ -701,7 +871,37 @@ class MetaDataCreator {
 				<gmd:descriptiveKeywords>
 					<gmd:MD_Keywords>
 						<gmd:keyword>
+							<gco:CharacterString>Geodatensatz</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>Flächennutzungspläne</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>F-Plan</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>F-Pläne</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>X-Planung</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>XPlanung</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>xplanGML</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>FPläne</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>FPlan</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
 							<gco:CharacterString>inspireidentifiziert</gco:CharacterString>
+						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>opendata</gco:CharacterString>
 						</gmd:keyword>
 					</gmd:MD_Keywords>
 				</gmd:descriptiveKeywords>
@@ -710,6 +910,9 @@ class MetaDataCreator {
 						<gmd:keyword>
 							<gco:CharacterString>Bodennutzung</gco:CharacterString>
 						</gmd:keyword>
+						<gmd:keyword>
+							<gco:CharacterString>Flächennutzungsplan</gco:CharacterString>
+				  	</gmd:keyword>
 						<gmd:type>
 							<gmd:MD_KeywordTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_KeywordTypeCode\" codeListValue=\"theme\"/>
 						</gmd:type>
@@ -731,30 +934,37 @@ class MetaDataCreator {
 							</gmd:CI_Citation>
 						</gmd:thesaurusName>
 					</gmd:MD_Keywords>
-				</gmd:descriptiveKeywords>				
+				</gmd:descriptiveKeywords>
 				<gmd:resourceConstraints>
-					<gmd:MD_LegalConstraints>
-						<gmd:useConstraints>
-							<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
-						</gmd:useConstraints>
-						<gmd:otherConstraints>
-							<gco:CharacterString>Datenlizenz Deutschland Namensnennung 2.0</gco:CharacterString>
-						</gmd:otherConstraints>
-						<gmd:otherConstraints>
-							<gco:CharacterString>{\"id\":\"dl-by-de/2.0\",\"name\":\"Datenlizenz Deutschland Namensnennung 2.0\",\"url\":\"https://www.govdata.de/dl-de/by-2-0\",\"quelle\":\"Freie und Hansestadt Hamburg, Landesbetrieb Geoinformation und Vermessung (LGV)\"}</gco:CharacterString>
-						</gmd:otherConstraints>
-					</gmd:MD_LegalConstraints>
-				</gmd:resourceConstraints>
-				<gmd:resourceConstraints>
-					<gmd:MD_LegalConstraints>
-						<gmd:accessConstraints>
-							<gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\">otherRestrictions</gmd:MD_RestrictionCode>
-						</gmd:accessConstraints>
-						<gmd:otherConstraints>
-							<gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\">Es gelten keine Zugriffsbeschränkungen</gmx:Anchor>
-						</gmd:otherConstraints>
-					</gmd:MD_LegalConstraints>
-				</gmd:resourceConstraints>
+        	<gmd:MD_LegalConstraints>
+         	 <gmd:useConstraints>
+         	   <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+         	 </gmd:useConstraints>
+         	 <gmd:otherConstraints>
+         	   <gco:CharacterString>Es gelten die Lizenzbedingungen „Datenlizenz Deutschland – Zero – Version 2.0“ bzw. „dl-zero-de/2.0” (https://www.govdata.de/dl-de/zero-2-0).</gco:CharacterString>
+  	        </gmd:otherConstraints>
+	          <gmd:otherConstraints>
+    	        <gco:CharacterString>{ \"id\": \"dl-zero-de/2.0\", \"name\": \"Datenlizenz Deutschland – Zero – Version 2.0\", \"url\": \"http://dcat-ap.de/def/licenses/dl-zero-de/2.0\", \"quelle\": \"\" }</gco:CharacterString>
+     	     </gmd:otherConstraints>
+     	   </gmd:MD_LegalConstraints>
+     	 </gmd:resourceConstraints>
+     	 <gmd:resourceConstraints>
+      	  <gmd:MD_LegalConstraints>
+        	  <gmd:accessConstraints>
+          	  <gmd:MD_RestrictionCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_RestrictionCode\" codeListValue=\"otherRestrictions\"/>
+         	 </gmd:accessConstraints>
+         	 <gmd:otherConstraints>
+         	   <gmx:Anchor xlink:href=\"http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations\" xlink:type=\"simple\">Es gelten keine Zugriffsbeschränkungen</gmx:Anchor>
+	          </gmd:otherConstraints>
+ 	       </gmd:MD_LegalConstraints>
+ 	     </gmd:resourceConstraints>
+  	    <gmd:resourceConstraints>
+        <gmd:MD_SecurityConstraints>
+          <gmd:classification>
+            <gmd:MD_ClassificationCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_ClassificationCode\" codeListValue=\"unclassified\"/>
+          </gmd:classification>
+        </gmd:MD_SecurityConstraints>
+      </gmd:resourceConstraints>
 				<gmd:spatialRepresentationType>
 					<gmd:MD_SpatialRepresentationTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#MD_SpatialRepresentationTypeCode\" codeListValue=\"vector\"/>
 				</gmd:spatialRepresentationType>
@@ -768,11 +978,6 @@ class MetaDataCreator {
 					<gmd:EX_Extent>
 						<gmd:geographicElement>
 							<gmd:EX_GeographicBoundingBox>
-								<!--
-								<gmd:extentTypeCode>
-									<gco:Boolean>true</gco:Boolean>
-								</gmd:extentTypeCode>
-								-->
 								<gmd:westBoundLongitude>
 									<gco:Decimal>" . $this->md->get('extents')['4326']['minx'] . "</gco:Decimal>
 								</gmd:westBoundLongitude>
@@ -786,7 +991,18 @@ class MetaDataCreator {
 									<gco:Decimal>" . $this->md->get('extents')['4326']['maxy'] . "</gco:Decimal>
 								</gmd:northBoundLatitude>
 							</gmd:EX_GeographicBoundingBox>
-						</gmd:geographicElement>
+						</gmd:geographicElement>" . ($this->md->get('geographicIdentifier') != '' ? "
+						<gmd:geographicElement>
+							<gmd:EX_GeographicDescription>
+								<gmd:geographicIdentifier>
+									<gmd:MD_Identifier>
+										<gmd:code>
+											<gco:CharacterString>" . $this->md->get('geographicIdentifier') . "</gco:CharacterString>
+										</gmd:code>
+									</gmd:MD_Identifier>
+								</gmd:geographicIdentifier>
+							</gmd:EX_GeographicDescription>
+						</gmd:geographicElement>" : '') . "
 					</gmd:EX_Extent>
 				</gmd:extent>
 			</gmd:MD_DataIdentification>
@@ -887,32 +1103,59 @@ class MetaDataCreator {
 				<gmd:report>
 					<gmd:DQ_DomainConsistency>
 						<gmd:result>
+						<gmd:DQ_ConformanceResult>
+							<gmd:specification>
+								<gmd:CI_Citation>
+									<gmd:title>
+										<gco:CharacterString>D2.8.III.4 Data Specification on Land use - Draft Technical Guidelines</gco:CharacterString>
+									</gmd:title>
+									<gmd:date>
+										<gmd:CI_Date>
+											<gmd:date>
+												<gco:Date>2013-12-10</gco:Date>
+											</gmd:date>
+											<gmd:dateType>
+												<gmd:CI_DateTypeCode codeList=\"http://www.isotc211.org/2005/resources/codeList.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
+											</gmd:dateType>
+										</gmd:CI_Date>
+									</gmd:date>
+								</gmd:CI_Citation>
+							</gmd:specification>
+							<gmd:explanation>
+								<gco:CharacterString>Die Daten entsprechen derzeit noch nicht dem Datenmodell in der oben benannten Datenspezifikation zum Thema Bodennutzung.</gco:CharacterString>
+							</gmd:explanation>
+							<gmd:pass>
+								<gco:Boolean>false</gco:Boolean>
+							</gmd:pass>
+						</gmd:DQ_ConformanceResult>
+						</gmd:result>
+						<gmd:result>
 							<gmd:DQ_ConformanceResult>
 								<gmd:specification>
 									<gmd:CI_Citation>
 										<gmd:title>
-											<gco:CharacterString>VERORDNUNG (EG) Nr. 1089/2010 DER KOMMISSION vom 23. November 2010 zur Durchführung der Richtlinie 2007/2/EG des Europäischen Parlaments und des Rates hinsichtlich der Interoperabilität von Geodatensätzen und -diensten</gco:CharacterString>
+											<gco:CharacterString>XPlanung Version 5.4</gco:CharacterString>
 										</gmd:title>
 										<gmd:date>
 											<gmd:CI_Date>
 												<gmd:date>
-													<gco:Date>2010-12-08</gco:Date>
+													<gco:Date>2021-06-22</gco:Date>
 												</gmd:date>
 												<gmd:dateType>
-													<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\">publication</gmd:CI_DateTypeCode>
+													<gmd:CI_DateTypeCode codeList=\"http://standards.iso.org/iso/19139/resources/gmxCodelists.xml#CI_DateTypeCode\" codeListValue=\"publication\"/>
 												</gmd:dateType>
 											</gmd:CI_Date>
 										</gmd:date>
 									</gmd:CI_Citation>
 								</gmd:specification>
 								<gmd:explanation>
-									<gco:CharacterString>see the referenced specification</gco:CharacterString>
+									<gco:CharacterString>Die XPlan-GML Daten sind konform zum XPlanungs-Standard in Version 5.4 und haben die Validierung im XPlanValidator bestanden.</gco:CharacterString>
 								</gmd:explanation>
 								<gmd:pass>
 									<gco:Boolean>true</gco:Boolean>
-								</gmd:pass>
+							 	</gmd:pass>
 							</gmd:DQ_ConformanceResult>
-						</gmd:result>
+				 		</gmd:result>
 					</gmd:DQ_DomainConsistency>
 				</gmd:report>
 				<gmd:lineage>

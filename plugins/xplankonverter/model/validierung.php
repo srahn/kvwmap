@@ -257,11 +257,148 @@ class Validierung extends PgObject {
 		return $geometrie_vorhanden;
 	}
 
-	/*
+  /**
+	 * Funktion prüft ob die Geometrien der mit $regel->get_shape_table_name() ermittelte Ausgangsdatentabelle eine SRID haben
+	 * und wenn nicht wird der XPLANKONVERTER_DEFAULT_EPSG gesetzt.
+	 * @param Regel $regel Die Regel für die auf srid geprüft wird.
+	 * @param Konvertierung $konvertierung Die Konvertierung auf zu der die Regel gehört.
+	 * @return Boolean $all_geom_has_srid Return true if all geometry has srid otherwise false.
+	 */
+	function force_geometrie_srid($regel, $konvertierung) {
+		$this->debug->write('<br>Validate geom_has_srid:', Validierung::$write_debug);
+		$all_geom_has_srid = true;
+		if ($regel->is_source_shape_or_gmlas($regel, $konvertierung->get('id')) == 'gmlas') {
+			$id_col = 'id';
+			$geometry_col = 'position';
+		}
+		else {
+			$id_col = 'gid';
+			$geometry_col = 'the_geom';
+		}
+		$sql = $regel->get_convert_sql($konvertierung->get('id'));
+		# Extrahiere alles ab select
+		$sql = stristr($sql, 'select');
+		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);
+		$sql = "
+			SELECT
+				" . $id_col . " AS gid
+			FROM
+				" . $regel->get_shape_table_name() . "
+			WHERE
+				ST_SRID(" . $geometry_col . ") = 0
+		";
+		$this->debug->write('<br>SQL zum Abfragen der gid der Datensätze mit Geometrien ohne SRID: ' . $sql, Validierung::$write_debug);
+
+		$result = @pg_query(
+			$this->database->dbConn,
+			$sql
+		);
+
+		if (!$result) {
+			$this->debug->write('<br>SQL ist nicht ausführbar: ' . $sql, Validierung::$write_debug);
+			$validierungsergebnis = new Validierungsergebnis($this->gui);
+			$validierungsergebnis->create(
+				array(
+					'konvertierung_id' => $konvertierung->get('id'),
+					'validierung_id' => $this->get('id'),
+					'status' => 'Fehler',
+					'msg' => 'Regel: ' . $regel->get('name') . ', ' . str_replace("'", "''", 'SQL: ' . $sql . ' nicht ausführbar.<br>' . @pg_last_error($this->database->dbConn)),
+					'user_id' => $this->gui->user->id,
+					'regel_id' => $regel->get('id')
+				)
+			);
+		}
+		else {
+			while ($row = pg_fetch_assoc($result)) {
+				$this->debug->write("<br>SRID der geometrie mit gid: {$row['gid']} ist 0 und wird auf den Default-EPSG {XPLANKONVERTER_DEFAULT_EPSG} gesetzt.", Validierung::$write_debug);
+				$all_geom_has_srid = false;
+				$update_result = $this->setDefaultSRID(
+					$konvertierung,
+					$regel,
+					$row['gid']
+				);
+				$validierungsergebnis = new Validierungsergebnis($this->gui);
+				if (!$update_result['success']) {
+					$this->debug->write('<br>SQL zum Update der SRID ist nicht ausführbar: ' . $update_result['sql'], Validierung::$write_debug);
+					$validierungsergebnis->create(
+						array(
+							'konvertierung_id' => $konvertierung->get('id'),
+							'validierung_id' => $this->get('id'),
+							'status' => 'Fehler',
+							'msg' => 'Regel: ' . $regel->get('name') . ', ' . str_replace("'", "''", 'SQL: ' . $update_result['sql'] . ' nicht ausführbar.<br>' . $update_result['err_msg']),
+							'user_id' => $this->gui->user->id,
+							'regel_id' => $regel->get('id')
+						)
+					);
+				}
+				else {
+					$validierungsergebnis->create(
+						array(
+							'konvertierung_id' => $konvertierung->get('id'),
+							'validierung_id' => $this->get('id'),
+							'status' => 'Warnung',
+							'msg' => "EPSG-Code: {XPLANKONVERTER_DEFAULT_EPSG}<br>Regel: {$regel->get('name')}<br>Tabelle: {$regel->get_shape_table_name()}<br>Geometriespalte: {$geometry_col} {$id_col}: {$row['gid']}" . ((array_key_exists('uuid', $row) AND $row['uuid'] != '') ? ' uuid: ' . $row['uuid'] : ''),
+							'user_id' => $this->gui->user->id,
+							'regel_id' => $regel->get('id')
+						)
+					);
+					if ($row['gid'] != '') {
+						$validierungsergebnis->shape_gid = $row['gid'];
+					}
+				}
+			}
+		}
+		$this->debug->write('<br>' . ($all_geom_has_srid ? 'Alle Geometrien haben eine SRID.' : 'Es gibt Geometrie ohne SRID.'), Validierung::$write_debug);
+		return $all_geom_has_srid;
+	}
+
+	/**
+	 * Set XPLANKONVERTER_DEFAULT_EPSG for geometry of dataset with $id in Table $regel->get_shape_table_name()
+	 * @param Regel $regel Die Regel für die auf srid geprüft wird.
+	 * @param Konvertierung $konvertierung Die Konvertierung auf zu der die Regel gehört.
+	 * @return array Array with success Boolean and in error case sql String and err_msg String. 
+	 */
+	function setDefaultSRID($konvertierung, $regel, $id) {
+		if ($regel->is_source_shape_or_gmlas($regel, $konvertierung->get('id')) == 'gmlas') {
+			$id_col = 'id';
+			$geometry_col = 'position';
+		}
+		else {
+			$id_col = 'gid';
+			$geometry_col = 'the_geom';
+		}
+		$sql = "
+			UPDATE
+				" . $regel->get_shape_table_name() . "
+			SET
+				" . $geometry_col . " = ST_SetSRID(" . $geometry_col . ", " . XPLANKONVERTER_DEFAULT_EPSG . ")
+			WHERE
+				" . $id_col . " = " . quote($id) . "
+		";
+		$this->debug->write('SQL zum Update der SRID:<br>' . $sql, Validierung::$write_debug);
+		$result = @pg_query(
+			$this->database->dbConn,
+			$sql
+		);
+		if (!$result) {
+			return array(
+				'success' => false,
+				'sql' => $sql,
+				'err_msg' => @pg_last_error($this->database->dbConn)
+			);
+		}
+		else {
+			return array(
+				'success' => true
+			);
+		}
+	}
+
+	/**
 	* Prüft ob die im SQL-Teil der Abfrage gelieferten Geometrien valide sind
-	* @param object $regel Objekt der Regel
-	* @param object $konvertierung Objekt der Konvertierung
-	* @return boolean $all_valid true wenn alle valide sind, false wenn nicht.
+	* @param Regel $regel Objekt der Regel
+	* @param Konvertierung $konvertierung Objekt der Konvertierung
+	* @return boolean $all_geom_isvalid true wenn alle valide sind, false wenn nicht.
 	*/
 	function geometrie_isvalid($regel, $konvertierung) {
 		$this->debug->write('<br>Validate geom_isvalid:', Validierung::$write_debug);
@@ -289,17 +426,7 @@ class Validierung extends PgObject {
 			);
 			$this->debug->write('<br>sql mit gid und is_validreason: ' . $sql, Validierung::$write_debug);
 		} else {
-			# Selektiere gid zur eindeutigen Identifizierung des Datensatzes und st_isvalidreason
-/*			$sql = substr_replace(
-				$sql,
-				"SELECT
-					st_isvalidreason(" . $geometry_col .") validreason,
-					ST_AsText(" . $geometry_col . ") AS geom_text,
-				",
-				stripos($sql, 'select'),
-				strlen('select')
-			);*/
-
+			# Selektiere id als gid zur eindeutigen Identifizierung des Datensatzes, st_isvalidreason und geom als Text
 			$sql = substr_replace(
 				$sql,
 				"SELECT
@@ -324,7 +451,7 @@ class Validierung extends PgObject {
 
 		$this->debug->write('<br>sql mit where st_isvalid: ' . $sql, Validierung::$write_debug);
 
-#		$sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
+		# $sql = "SET search_path=xplan_shapes_" . $konvertierung->get('id') . ", public; " . substr($sql, 0, stripos($sql, 'returning'));
 		$sql = substr($sql, 0, stripos($sql, 'returning')) . ')';
 
 		$this->debug->write('Sql für Prüfung geom_isvalid:<br>' . $sql, Validierung::$write_debug);
@@ -423,7 +550,7 @@ class Validierung extends PgObject {
 		# TODO In PostGIS 2.5 and higher, consider using one of the new variable precision functions instead
 		# e.g. ST_AsText with precision, ST_QuantizeCoordinates
 		# or build a custom ST_Within (and ST_Intersection?) variant, that utilizes the relevant equivalency distance
-		$tolerance_meters = '0.001';
+		$tolerance_meters = '0.002';
 		
 		if($sourcetype != 'gmlas') {
 			# replaces only first occurence to allow later subqueries
@@ -573,7 +700,7 @@ class Validierung extends PgObject {
 		$this->debug->write('<br>sql von select an: ' . $sql, Validierung::$write_debug);		
 
 		# Tolerance and buffer, see comment in geom_within_plan
-		$tolerance_meters = '0.001';
+		$tolerance_meters = '0.002';
 		# gid zur eindeutigen Identifizierung des Datensatzes (nicht bei gmlas) sowie within und distance zum select hinzufügen
 		# replace only first instance, not potential following subqueries
 		$sql = substr_replace(

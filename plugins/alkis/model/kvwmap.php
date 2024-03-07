@@ -635,7 +635,7 @@
       if ($FlurFormObj->selected) {
         # Abfragen der Flurstücke zur Flur
         $FlstNr=new flurstueck('',$GUI->pgdatabase);
-        if ($FlurID==0) { $FlurID=$FlurListe['FlurID'][0]; }
+        if ($FlurID == '') { $FlurID=$FlurListe['FlurID'][0]; }
 				$FlstNrListe=$FlstNr->getFlstListe($GemID, $GemkgID, $FlurID, $GemeindenStelle['eingeschr_flur'][$GemkgID][(int)$FlurID], $GUI->formvars['history_mode']);
         # Erzeugen des Formobjektes für die Flurstücksauswahl
         if (count($FlstNrListe['FlstID'])==1){
@@ -698,9 +698,9 @@
 		else {
 			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
 		}
-    if(@count($GemkgListe['GemkgID']) > 0){
+		if(@count($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
-      if($FlurID==0 OR $FlurID=='-1'){
+      if ($FlurID === 0 OR $FlurID == '-1') {
 				if($GUI->formvars['ALK_Suche'] == 1){
 					$GUI->loadMap('DataBase');
 					$GUI->zoomToALKGemarkung($GemkgID,10);
@@ -1124,7 +1124,7 @@
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
 		$GUI->generischer_sachdaten_druck_drucken();
 	};
-	
+
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
 		$GUI->main = PLUGINS.'alkis/view/Adressaenderungen_Export.php';

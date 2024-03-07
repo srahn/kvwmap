@@ -254,6 +254,29 @@ class Gml_builder {
 			}
 		}
 
+		// for textabschnitte
+		//checks if any exist first
+
+		$textabschnitte_names = $konvertierung->get_textabschnitt_names();
+		//$textabschnitte_names = array("BP_TextAbschnitt", "FP_TextAbschnitt", "RP_TextAbschnitt", "SO_TextAbschnitt");
+		foreach($textabschnitte_names AS $textabschnitt_name) {
+			$object = new XP_Object($konvertierung, $textabschnitt_name);
+			$object_rows = $object->get_textabschnitt_rows();
+			$objekt_attribs = $this->typeInfo->getInfo($textabschnitt_name);
+			foreach ($object_rows AS $object_row) {
+					# element anlegen und gml_id als attribut eintragen
+					$objekt_gml = "<{$xplan_ns_prefix}{$textabschnitt_name} gml:id=\"GML_{$object_row['gml_id']}\">";
+
+
+					# alle uebrigen Attribute ausgeben
+					$objekt_gml .= $this->generateGmlForAttributes($object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
+					# close and write FeatureMember
+					$objekt_gml .= "</{$xplan_ns_prefix}{$textabschnitt_name}>";
+
+					fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($objekt_gml)));
+				}
+		}
+
 		# close XPlanAuszug
 		fwrite($this->tmpFile, "\n</XPlanAuszug>");
 
@@ -285,19 +308,79 @@ class Gml_builder {
 		foreach ($uml_attribute_info as $uml_attribute) {
 			# Rueckverweise auf etwaige Bereiche hinzufügen
 			# index 10 is the current position (XPlanGML 5.0.1) for gehoertzubereich association to be implemented
+			# the association index for XP_AbstraktesPraesentationsobjekt is 3 for gehoertzubereich
+			# the association index can be found in the XSD-sequence of the attribute (count starts at 0)
 			# TODO Make this more generic to reflect possible changes in index and support all associations
 			# Might need a change in xplan_uml generation to contain association sequenceorder/index
-			if ($sequence_attr == 10) {
-				$aggregated_bereich_gml_ids = explode(',', trim($gml_object['bereiche_gml_ids'], '{}'));
-				$str = str_replace("{", "", $gml_object['bereiche_gml_ids']);  
+			# TODO This might not work for XP_Praesentationsobjekt, as it has no attributes on its own and therefore would not have a sequence 4
+			
+			# for XP_AbstraktesPraesentationsobjekt and children
+			$abstraktes_praesentationsobjekt_children = array('XP_Praesentationsobjekt','XP_PPO','XP_FPO','XP_LPO','XP_TPO');
+			$prefixes_or_signs_to_remove = array('#','GML_','Gml_','gml_','{','}');
+			
+			if ($sequence_attr == 4 && in_array($uml_attribute['origin'], $abstraktes_praesentationsobjekt_children)) {
+				$aggregated_bereiche_gml_ids = explode(',', str_replace($prefixes_or_signs_to_remove, '', $gml_object['bereiche_gml_ids']));
 				// entnimmt mögliche doppelte Werte
-				$aggregated_bereich_gml_ids = array_unique($aggregated_bereich_gml_ids);
-				foreach ($aggregated_bereich_gml_ids as $bereich_gml_id) {
+				$aggregated_bereiche_gml_ids = array_unique($aggregated_bereiche_gml_ids);
+				foreach ($aggregated_bereiche_gml_ids as $bereich_gml_id) {
 					if (!empty($bereich_gml_id)) {
 						$gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
 					}
 				}
 			}
+			# for XP_Objekt and children
+			# XP_Objekt has index elements after association so can always work with parent object
+			if ($sequence_attr == 10 && $uml_attribute['origin'] == 'XP_Objekt') {
+				$aggregated_bereiche_gml_ids = explode(',', str_replace($prefixes_or_signs_to_remove, '', $gml_object['bereiche_gml_ids']));
+				// entnimmt mögliche doppelte Werte
+				$aggregated_bereiche_gml_ids = array_unique($aggregated_bereiche_gml_ids);
+				foreach ($aggregated_bereiche_gml_ids as $bereich_gml_id) {
+					if (!empty($bereich_gml_id)) {
+						$gmlStr .= "<{$xplan_ns_prefix}gehoertZuBereich xlink:href=\"#GML_{$bereich_gml_id}\"/>";
+					}
+				}
+			}
+
+			# Association wirdDargestelltDurch
+			# has to be below gehoertzubereich according to XSD
+			if ($sequence_attr == 10 && $uml_attribute['origin'] == 'XP_Objekt') {
+				$aggregated_praesentationsobjekte_gml_ids = explode(',', str_replace($prefixes_or_signs_to_remove, '', $gml_object['wirddargestelltdurch']));
+				// entnimmt mögliche doppelte Werte
+				$aggregated_praesentationsobjekte_gml_ids = array_unique($aggregated_praesentationsobjekte_gml_ids);
+				foreach ($aggregated_praesentationsobjekte_gml_ids as $praesentationsobjekt_gml_id) {
+					if (!empty($praesentationsobjekt_gml_id)) {
+						$gmlStr .= "<{$xplan_ns_prefix}wirdDargestelltDurch xlink:href=\"#GML_{$praesentationsobjekt_gml_id}\"/>";
+					}
+				}
+			}
+			# Association dientZurDarstellungVon
+			# has to be below gehoertzubereich according to XSD
+			if ($sequence_attr == 4 && in_array($uml_attribute['origin'], $abstraktes_praesentationsobjekt_children)) {
+				$aggregated_objekte_gml_ids = explode(',', str_replace($prefixes_or_signs_to_remove, '', $gml_object['dientzurdarstellungvon']));
+				// entnimmt mögliche doppelte Werte
+				$aggregated_objekte_gml_ids = array_unique($aggregated_objekte_gml_ids);
+				foreach ($aggregated_objekte_gml_ids as $objekt_gml_id) {
+					if (!empty($objekt_gml_id)) {
+						$gmlStr .= "<{$xplan_ns_prefix}dientZurDarstellungVon xlink:href=\"#GML_{$objekt_gml_id}\"/>";
+					}
+				}
+			}
+
+			# Association refTextInhalt (always +12 for XP_Objekt ( in XPlanung 5.4)
+			# Posisition 2 after rechtscharakter in BP_Objekt
+			# Posisition 4 after rechtscharakter, spezifischePraegung, vonGenehmigungAusgenommen in FP_Objekt
+			# Posisition 3 after rechtscharakter, sonstRechtscharakter in SO_Objekt
+			# Posisition 7 after rechtscharakter, konkretisierung,g ebietstyp, kuestenmeer, bedeutsamkeit, ist zweckbindung in RP_Objekt
+			if (!empty($gml_object['reftextinhalt']) &&
+				(($sequence_attr == 14 && substr($uml_attribute['origin'],0,2) == 'BP') ||
+				 ($sequence_attr == 16 && substr($uml_attribute['origin'],0,2) == 'FP') ||
+				 ($sequence_attr == 15 && substr($uml_attribute['origin'],0,2) == 'RP') ||
+				 ($sequence_attr == 19 && substr($uml_attribute['origin'],0,2) == 'SO'))
+			) {
+				$gml_object_reftextinhalt = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['reftextinhalt']);
+				$gmlStr .= "<{$xplan_ns_prefix}refTextInhalt xlink:href=\"#GML_" . $gml_object_reftextinhalt . "\"/>";
+			}
+
 			#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
 			$sequence_attr++;
 			// leere Felder auslassen

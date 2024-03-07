@@ -453,6 +453,41 @@ span[data-tooltip]:hover::after {
   display: none;
 	border: 1px solid #bbb;
 	border-radius: 2px;
+	box-shadow: 1px 1px 6px 1px #ddd;
+  position: absolute;
+  top: 1px;
+  right: 0;
+  left: 0;
+	max-height: 400px;
+	overflow-y: auto;
+	margin: 0;
+}
+
+.custom-select .dropdown.upward {
+	top: auto;
+	bottom: 24px;
+}
+
+.custom-select.active .dropdown {
+  display: flex;
+  flex-direction: column;
+}
+
+.custom-select .dropdown li {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  padding: 3px;
+	margin-bottom: 0;
+  cursor: pointer;
+}
+
+.custom-select .dropdown li:not(:last-child) {
+  border-bottom: 1px solid #cdcdcd;
+}
+
+.custom-select .dropdown li.selected {
+  background-color: #e0e0e6;
 }
 
 .custom-select img {
@@ -492,37 +527,6 @@ span[data-tooltip]:hover::after {
 .custom-select .placeholder.editable::after {
   transform: rotate(-45deg);
   right: <? echo $font_size_factor * 15; ?>px;
-}
-
-.custom-select.active .dropdown {
-  display: flex;
-  flex-direction: column;
-  box-shadow: 1px 1px 6px 1px #ddd;
-  position: absolute;
-  top: 1px;
-  right: 0;
-  left: 0;
-  /*min-width: 200px;*/
-	max-height: 400px;
-	overflow-y: auto;
-	margin: 0;
-}
-
-.custom-select .dropdown li {
-  display: flex;
-  align-items: center;
-  background-color: #fff;
-  padding: 3px;
-	margin-bottom: 0;
-  cursor: pointer;
-}
-
-.custom-select .dropdown li:not(:last-child) {
-  border-bottom: 1px solid #cdcdcd;
-}
-
-.custom-select .dropdown li.selected {
-  background-color: #e0e0e6;
 }
 
 
@@ -588,6 +592,13 @@ span[data-tooltip]:hover::after {
 	float: left;
 	text-align: left;
 	width: 150px;
+}
+
+.input-form textarea {
+	float: left;
+	text-align: left;
+	width: 55%;
+	margin-left: 5px;
 }
 
 .input-form input {
@@ -2018,11 +2029,18 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .gle1_table{
-		border-collapse: collapse;
+	border-collapse: collapse;
+	position: relative;
+}
+
+.gle1_table>thead>tr>td{
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle1_table>tbody>tr>td{
-		border: 1px solid grey;
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle_datatype_table{
@@ -2080,6 +2098,25 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 5px 1px;
 	background: #e3e3e3;
 	border-radius: 2px;
+}
+
+.gle_result_filter {
+	position: absolute; 
+	top: 2px;
+	right: 2px;
+  z-index: 100;
+	text-align: right;
+}
+
+.gle_result_filter .value_list {
+	max-height: 250px;
+	max-width: 250px;
+	scrollbar-width: thin;
+	display: none;
+}
+
+.gle_result_filter:hover .value_list {
+	display: block;
 }
 
 .calendar {
@@ -2435,6 +2472,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	top: 0;
 	background: rgba(51,51,51,0.2);
 	z-index: 1000;
+	padding: 100px;
+	text-align: center;
 }
 
 .layerOptions, #legendOptions{
@@ -2826,4 +2865,9 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 #nds_edit #dataset_operations {
 	display: none;
+}
+
+#gemkgschl-name-Trennerwort-span {
+	display: none;
+	margin-left: 10px;
 }

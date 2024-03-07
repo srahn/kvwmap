@@ -320,7 +320,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$this->database->success) { echo "<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -606,10 +606,14 @@ class account {
 
 	function getLayer($logged) {
 		# Abfrage der Anzahl der Layer
-		$sql ='SELECT COUNT(Layer_ID) AS layers FROM layer';
-		if ($logged) {
-			$sql.=' WHERE logconsume="1"';
-		}
+		$sql = "
+			SELECT
+				COUNT(Layer_ID) AS layers
+			FROM
+				layer
+			WHERE
+				" . ($logged ? "logconsume = '1'" : "true") . "
+		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
@@ -810,6 +814,7 @@ class user {
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
 		$this->organisation = $rs['organisation'];
+		$this->position = $rs['position'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}

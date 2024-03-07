@@ -1,5 +1,5 @@
 <br>
-<h2><?php echo $this->qlayerset[$i]['alias'] ?: $this->qlayerset[$i]['Name']; ?></h2>
+<h2><?php echo $this->qlayerset[$i]['Name_or_alias']; ?></h2>
 <br>
 <?php
  #echo '<br>'.$this->qlayerset[$i][GetFeatureInfoRequest];
