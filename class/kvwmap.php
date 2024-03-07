@@ -5831,6 +5831,12 @@ echo '			</table>
 			}		
 			$select .= $oid." IN ('" . implode("','", $oids) . "')";
 		}
+		else {
+			$wherepos = strpos(strtolower($select), 'where');
+			if($wherepos === false){
+				$select .= " WHERE true";
+			}
+		}
 
 		$datastring = $datageom." from (" . $select;
 		$datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
@@ -5870,6 +5876,8 @@ echo '			</table>
 		}
 
 		$layer_id = $dbmap->newRollenLayer($this->formvars);
+		$attributes = $dbmap->load_attributes($layerdb, $select);
+		$dbmap->save_postgis_attributes($layerdb, -$layer_id, $attributes, '', '');
 
 		if ($this->formvars['selektieren'] == 'false') { # highlighten (mit der ausgewählten Farbe)
 			# ------------ automatische Klassifizierung -------------------
