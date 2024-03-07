@@ -722,7 +722,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungHtmlSpecialchars"
 					class="col-md-7"
 					data-filter-control="input"
-					data-filter-control-placeholder="Suchen"
+					data-filter-control-placeholder="Filtern"
 				>Name</th>
 				<th
 					data-field="nummer"

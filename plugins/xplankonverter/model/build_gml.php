@@ -254,6 +254,29 @@ class Gml_builder {
 			}
 		}
 
+		// for textabschnitte
+		//checks if any exist first
+
+		$textabschnitte_names = $konvertierung->get_textabschnitt_names();
+		//$textabschnitte_names = array("BP_TextAbschnitt", "FP_TextAbschnitt", "RP_TextAbschnitt", "SO_TextAbschnitt");
+		foreach($textabschnitte_names AS $textabschnitt_name) {
+			$object = new XP_Object($konvertierung, $textabschnitt_name);
+			$object_rows = $object->get_textabschnitt_rows();
+			$objekt_attribs = $this->typeInfo->getInfo($textabschnitt_name);
+			foreach ($object_rows AS $object_row) {
+					# element anlegen und gml_id als attribut eintragen
+					$objekt_gml = "<{$xplan_ns_prefix}{$textabschnitt_name} gml:id=\"GML_{$object_row['gml_id']}\">";
+
+
+					# alle uebrigen Attribute ausgeben
+					$objekt_gml .= $this->generateGmlForAttributes($object_row, $objekt_attribs, XPLAN_MAX_NESTING_DEPTH);
+					# close and write FeatureMember
+					$objekt_gml .= "</{$xplan_ns_prefix}{$textabschnitt_name}>";
+
+					fwrite($this->tmpFile, "\n" . $this->formatXML($this->wrapWithFeatureMember($objekt_gml)));
+				}
+		}
+
 		# close XPlanAuszug
 		fwrite($this->tmpFile, "\n</XPlanAuszug>");
 
@@ -341,6 +364,21 @@ class Gml_builder {
 						$gmlStr .= "<{$xplan_ns_prefix}dientZurDarstellungVon xlink:href=\"#GML_{$objekt_gml_id}\"/>";
 					}
 				}
+			}
+
+			# Association refTextInhalt (always +12 for XP_Objekt ( in XPlanung 5.4)
+			# Posisition 2 after rechtscharakter in BP_Objekt
+			# Posisition 4 after rechtscharakter, spezifischePraegung, vonGenehmigungAusgenommen in FP_Objekt
+			# Posisition 3 after rechtscharakter, sonstRechtscharakter in SO_Objekt
+			# Posisition 7 after rechtscharakter, konkretisierung,g ebietstyp, kuestenmeer, bedeutsamkeit, ist zweckbindung in RP_Objekt
+			if (!empty($gml_object['reftextinhalt']) &&
+				(($sequence_attr == 14 && substr($uml_attribute['origin'],0,2) == 'BP') ||
+				 ($sequence_attr == 16 && substr($uml_attribute['origin'],0,2) == 'FP') ||
+				 ($sequence_attr == 15 && substr($uml_attribute['origin'],0,2) == 'RP') ||
+				 ($sequence_attr == 19 && substr($uml_attribute['origin'],0,2) == 'SO'))
+			) {
+				$gml_object_reftextinhalt = str_replace(array('#','GML_','Gml_','gml_'), '', $gml_object['reftextinhalt']);
+				$gmlStr .= "<{$xplan_ns_prefix}refTextInhalt xlink:href=\"#GML_" . $gml_object_reftextinhalt . "\"/>";
 			}
 
 			#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
