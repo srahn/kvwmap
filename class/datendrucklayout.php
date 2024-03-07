@@ -1021,11 +1021,12 @@ class ddl {
 			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
 		else {
-			$this->gui->pdf = $this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+			$this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 			if ($append) {
 				$this->pdf->newPage();
 			}
 		}
+		$this->gui->pdf = $this->pdf;
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
 		if ($this->offsety) {
