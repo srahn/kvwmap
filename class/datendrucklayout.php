@@ -472,7 +472,7 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
 											$this->page_overflow = true;
@@ -998,7 +998,7 @@ class ddl {
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true ) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1021,7 +1021,7 @@ class ddl {
 			$this->pdf->ezSetMargins($this->layout['margin_top'], $this->layout['margin_bottom'], $this->layout['margin_left'], $this->layout['margin_right']);
 		}
 		else {
-			$this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+			$this->gui->pdf = $this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
 		}
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
@@ -1258,7 +1258,7 @@ class ddl {
 				$this->pdf->last_page_index = $page_count - 1;
 			}
 		}
-		if ($pdfobject == NULL) {
+		if ($pdfobject == NULL AND $output) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements($preview);

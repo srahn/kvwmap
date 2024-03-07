@@ -10144,26 +10144,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function gemerkte_Datensaetze_drucken($layer_id){
 		include_(CLASSPATH.'datendrucklayout.php');
 		$oids = $this->get_gemerkte_oids($layer_id);
-		$layerset = $this->user->rolle->getLayer($layer_id);
-		# Generiere formvars der checkboxen für die Objekte an Hand $oids
-		# check;table_alias;table;oid
-		$checkbox_names = array(); 
-		foreach($oids[$layer_id] AS $oid) {
-			#check;rechnungen;rechnungen;222792641=on
-			$checkbox_name = 'check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $oid;
-			$this->formvars[$checkbox_name] = 'on';
-			$checkbox_names[] = $checkbox_name;
-		}
-		# checkbox_names_743=check;rechnungen;rechnungen;222792641 mehrere mit | getrennt
-		$this->formvars['checkbox_names_' . $layer_id] = implode('|', $checkbox_names);
-		$this->formvars['archivieren'] = null;
-		$this->formvars['go'] = 'generischer_sachdaten_druck_Drucken';
+		foreach ($oids as $layer_id => $layer_oids) {
+			$layerset = $this->user->rolle->getLayer($layer_id);
+			# Generiere formvars der checkboxen für die Objekte an Hand $oids
+			# check;table_alias;table;oid
+			$checkbox_names = array(); 
+			foreach ($layer_oids AS $oid) {
+				#check;rechnungen;rechnungen;222792641=on
+				$checkbox_name = 'check;' . $layerset[0]['maintable'] . ';' . $layerset[0]['maintable'] . ';' . $oid;
+				$this->formvars[$checkbox_name] = 'on';
+				$checkbox_names[] = $checkbox_name;
+			}
+			# checkbox_names_743=check;rechnungen;rechnungen;222792641 mehrere mit | getrennt
+			$this->formvars['checkbox_names_' . $layer_id] = implode('|', $checkbox_names);
+			$this->formvars['archivieren'] = null;
+			$this->formvars['go'] = 'generischer_sachdaten_druck_Drucken';
 
-		$ddl = new ddl($this->database, $this);
-		$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
-		$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
-		$this->generischer_sachdaten_druck_drucken(null, null, null);
-		#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
+			$ddl = new ddl($this->database, $this);
+			$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
+			$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
+			$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false));
+			#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
+		}
 	}
 
 	function layer_Datensatz_loeschen($layer_id, $oid, $reload_object) {
@@ -11390,7 +11392,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 * @param Int $offsetx
 	 * @param Int $offsety
 	 */
-	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL) {
+	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true) {
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$ddl = new ddl($this->database, $this);
@@ -11478,12 +11480,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($this->formvars['aktivesLayout'] != '') {
 			$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
 			# PDF erzeugen
-			$output = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging']);
+			$result = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging'], $output);
 		}
 
-		if ($pdfobject == NULL) {
+		if ($output) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
-			$this->outputfile = basename($output);
+			$this->outputfile = basename($result);
 			if ($this->formvars['archivieren']) {
 				# Dokumentpfad ermitteln
 				$document_path = ($layerset[0]['document_path'] != '' ? $layerset[0]['document_path'] . '/' : CUSTOM_IMAGE_PATH);
@@ -11507,7 +11509,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (!is_dir($document_path)) {
 					mkdir($document_path, 0755);
 				}
-				rename($output, $document_path . $document_file);
+				rename($result, $document_path . $document_file);
 
 				# Wert in Attribut eintragen
 				$sql = "
@@ -11536,7 +11538,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 		else {
-			return $output; # das ist der letzte y-Wert, um nachfolgende Elemente darunter zu setzen
+			return $result; # das ist der letzte y-Wert, um nachfolgende Elemente darunter zu setzen
 		}
 	}
 
