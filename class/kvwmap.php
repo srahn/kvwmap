@@ -1548,7 +1548,12 @@ echo '			</table>
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+			$url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
+			if ($layer['wms_auth_username'] != '') {
+				$img = url_get_contents($url, $layer['wms_auth_username'], $layer['wms_auth_password']);
+				$url = 'data:image/jpg;base64,'.base64_encode($img);
+			}
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}
