@@ -993,7 +993,7 @@ class Konvertierung extends PgObject {
 				$sql .= "
 					INSERT INTO xplan_gml." . strtolower($plan_class) . " (
 						gml_id, user_id, konvertierung_id, name, nummer, internalid, beschreibung, kommentar, technherstelldatum, genehmigungsdatum, untergangsdatum, aendert,
-						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, , externereferenz, auslegungsenddatum, gemeinde,
+						wurdegeaendertvon, erstellungsmassstab, bezugshoehe, raeumlichergeltungsbereich, verfahrensmerkmale, externereferenz, auslegungsenddatum, gemeinde,
 						status, plangeber, rechtsstand, auslegungsstartdatum, traegerbeteiligungsstartdatum, aenderungenbisdatum, traegerbeteiligungsenddatum, verfahren,
 						sonstplanart, planart, aufstellungsbeschlussdatum, technischerplanersteller, veraenderungssperre, inkrafttretensdatum, durchfuehrungsvertrag,
 						staedtebaulichervertrag, erschliessungsvertrag, rechtsverordnungsdatum, ausfertigungsdatum, satzungsbeschlussdatum, versionbaunvodatum, versionbaunvotext,
@@ -1083,8 +1083,9 @@ class Konvertierung extends PgObject {
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										e_sub.beschreibung,
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
-										e_sub.typ::xplan_gml.xp_externereferenztyp
-									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+										e_sub.typ::xplan_gml.xp_externereferenztyp,
+										false
+									)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
 							FROM
 								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -1106,6 +1107,27 @@ class Konvertierung extends PgObject {
 						" . $table_schema . "." . strtolower($plan_class) . "_traegerbeteiligungsenddatum tbed ON gmlas.id = tbed.parent_id;
 				";
 				# ToDo weitere relationen von bp_plan_ ... aus gmlas_tmp_41 im Left join einbinden
+				//  SELECT der Subquery mit spezexternereferenz statt spezexternereferenzauslegung
+				// 	SElECT
+				// 	COUNT(*) AS count_externeref,
+				// 	externereferenzlink_sub.parent_id,
+				// 	array_agg((e_sub.georefurl,
+				// 			(e_sub.georefmimetype_codespace, e_sub.georefmimetype, NULL)::xplan_gml.xp_mimetypes,
+				// 			e_sub.art::xplan_gml.xp_externereferenzart,
+				// 			e_sub.informationssystemurl,
+				// 			e_sub.referenzname,
+				// 			e_sub.referenzurl,
+				// 			(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
+				// 			e_sub.beschreibung,
+				// 			to_char(e_sub.datum, 'DD.MM.YYYY'),
+				// 			e_sub.typ::xplan_gml.xp_externereferenztyp
+				// 		)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+				// FROM
+				// 	" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
+				// 	" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
+				// GROUP BY
+				// 	externereferenzlink_sub.parent_id
+
 			} break;
 
 			case ('FP-Plan') : {
@@ -1187,8 +1209,9 @@ class Konvertierung extends PgObject {
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										e_sub.beschreibung,
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
-										e_sub.typ::xplan_gml.xp_externereferenztyp
-									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+										e_sub.typ::xplan_gml.xp_externereferenztyp,
+										false
+									)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
 							FROM
 								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
