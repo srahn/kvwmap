@@ -1,4 +1,5 @@
 <?
+
 function umlaute_umwandeln($name) {
 	$name = str_replace('ä', 'ae', $name);
 	$name = str_replace('ü', 'ue', $name);
@@ -31,6 +32,38 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('#', '_', $name);
 	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
 	return $name;
+}
+
+function url_get_contents($url, $username = NULL, $password = NULL, $useragent = NULL) {
+	$hostname = parse_url($url, PHP_URL_HOST);
+	try {
+		$ctx['http']['timeout'] = 20;
+		#$ctx['http']['header'] = 'Referer: http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];		// erstmal wieder rausgenommen, da sonst Authorization nicht funktioniert
+		if ($useragent) {
+			$ctx['http']['header'] = 'User-Agent: ' . $useragent;
+		}
+		if ($username) {
+			$ctx['http']['header'].= "Authorization: Basic ".base64_encode($username . ':' . $password);
+		}
+		$proxy = getenv('HTTP_PROXY');
+		if ($proxy != '' AND $hostname != 'localhost') {
+			$ctx['http']['proxy'] = $proxy;
+			$ctx['http']['request_fulluri'] = true;
+			$ctx['ssl']['SNI_server_name'] = $hostname;
+			$ctx['ssl']['SNI_enabled'] = true;
+		}
+		$context = stream_context_create($ctx);
+		$response =  @file_get_contents($url, false, $context);
+		if ($response === false) {
+			$error = 'Fehler beim Abfragen der URL mit file_get_contents(' . $url . ')';
+			GUI::add_message_('error', $error);
+			throw new Exception($error);
+		}
+	}
+	catch (Exception $e) {
+		$response = curl_get_contents($url, $username, $password);
+	}
+	return $response;
 }
 
 function sanitize(&$value, $type) {
@@ -1745,7 +1778,12 @@ class GUI {
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic" onerror="ImageLoadFailed(this)"></div>';
+			$url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
+			if ($layer['wms_auth_username'] != '') {
+				$img = url_get_contents($url, $layer['wms_auth_username'], $layer['wms_auth_password']);
+				$url = 'data:image/jpg;base64,'.base64_encode($img);
+			}
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}

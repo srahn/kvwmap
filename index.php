@@ -1340,7 +1340,7 @@ function go_switch($go, $exit = false) {
 			case 'gemerkte_Datensaetze_drucken' : {
 				$GUI->sanitize(['chosen_layer_id' => 'int']);
 				$GUI->gemerkte_Datensaetze_drucken($GUI->formvars['chosen_layer_id']);
-			}
+			} break;
 
 			case 'Datensatz_dublizieren' : {
 				$GUI->dublicate_dataset();

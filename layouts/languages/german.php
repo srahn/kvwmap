@@ -63,6 +63,7 @@
 	$this->strLayerParameters = 'Themenparameter';
 	$this->strLayerSharedFrom = 'Dieser Layer wurde geteilt durch den Nutzer';
 	$this->strLimit = 'Anzahl Treffer';
+	$this->strCount = 'Anzahl';
 	$this->strLoad = 'Laden';
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Maßstab';
