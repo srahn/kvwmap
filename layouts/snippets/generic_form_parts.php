@@ -878,12 +878,16 @@
 			} break;
 
 			default : {
+				if ($field_id != NULL AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+					$datapart .= calendar($attributes['type'][$j], $id, $attributes['privileg'][$j]).'&nbsp;';
+					$value = ($value? de_date($value) : $value);
+				}
 				$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 				if($attribute_privileg == '0'){
 					$datapart .= ' readonly style="display:none;"';
 				}
 				else{
-					$datapart .= ' tabindex="1" style="width: 100%;"';
+					$datapart .= ' tabindex="1" style="width: 95%;"';
 				}
 				if($name == 'lock'){
 					$datapart .= ' type="hidden"';
@@ -892,7 +896,7 @@
 					$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 				}				
 				if($size)$datapart .= ' size="'.$size.'"';
-				$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+				$datapart .= ' type="text" name="'.$fieldname.'" id="'.$id.'" value="'.htmlspecialchars($value).'">';
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
 					$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
 					$datapart .= '<div class="readonly_text">' . htmlspecialchars($angezeigter_value) . '</div>';
