@@ -2563,6 +2563,20 @@ function en_date($date_de) {
 	return date('Y-m-d', strtotime($date_de));
 }
 
+/**
+*	Convert English date format 2022-12-25
+*	to German date format 25.12.2022
+*/
+function de_date($date_en) {	
+	if (strlen($date_en) > 10) {
+		return date('d.m.Y G:i:s', strtotime($date_en));
+	}
+	else {
+		return date('d.m.Y', strtotime($date_en));
+	}
+}
+
+
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
