@@ -15533,9 +15533,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 							if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
 								foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
-									$disabled_class_filter[] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+									$disabled_class_filter[$layerset[$i]['Layer_ID']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
 								}
-								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter) . "), true)";
+								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['Layer_ID']]) . "), true)";
 							}							
 							if($this->formvars['CMD'] == 'touchquery'){
 								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
