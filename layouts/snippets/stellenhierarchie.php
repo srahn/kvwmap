@@ -10,8 +10,8 @@
 
 	function create_force_layout(cluster_index){
 		var json = cluster[cluster_index];
-		var width = 1200,
-				height = 700
+		var width = 2500,
+				height = 1100
 				
 		max_depth = 0;
 				
@@ -20,14 +20,14 @@
 				.attr("height", height);
 				
 		var force = d3.layout.force()
-				.gravity(.3)
+				.gravity(.7)
 				.distance(40)
-				.charge(-5000)
+				.charge(-11000)
 				.size([width, height]);
 				
 			json.nodes.forEach(function(node, i) {
 				node.x = width/4 + i*200;
-				node.y = 400;
+				node.y = 500;
 				node.children = [];
 				node.parents = [];
 				node.depth = 0;
@@ -49,16 +49,6 @@
 					.attr("class", "node")
 					.call(force.drag);
 
-			node.append("svg:circle")
-					.attr("r", 6);
-
-			node.append("g")
-					.attr("transform", 'translate(-40, 20)')
-					.append("a")
-							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>'})
-							.append("text")
-									.text(function(d) { return d.name });
-					
 			json.links.forEach(function(link, i) {
 				link.target.parents.push(link.source);
 				link.source.children.push(link.target);
@@ -69,8 +59,28 @@
 					calculate_depth(node, 1);
 				}
 			});
+
+			node.append("svg:circle")
+					.attr("r", 6);
+
+			node.append("g")
+					.attr("transform", 'translate(-40, 20)')
+					.append("a")
+							.attr("href", function(d) { return '<? echo get_url(); ?>?go=Stelleneditor&selected_stelle_id=' + d.id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>'})
+							.append("text")
+									.text(function(d) { if (d.depth > 1){var l = 30;}else {var l = 100;} return d.name.substring(0, l) });
+									
+			node.select("g a").append("text")
+					.attr("transform", 'translate(0, 13)')
+					.text(function(d) { if (d.depth > 1){var l = 30;}else {var l = 100;} return d.name.substring(l, l * 2) });
 					
-			svg.attr("height", 100 + (100 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
+			node.select("g a").append("text")
+					.attr("transform", 'translate(0, 26)')
+					.text(function(d) { if (d.depth > 1){var l = 30;}else {var l = 100;} return d.name.substring(l * 2) });
+					
+
+					
+			svg.attr("height", 200 + (130 * max_depth));	// Hoehe des SVGs auf die Hierarchietiefe anpassen
 			
 			force.on("tick", function(e) {
 				var ky =  e.alpha;
@@ -107,6 +117,8 @@
 	.hierarchy{
 		border-bottom: 1px solid #ccc;
 		margin: 0 10px 0 10px;
+		width: 1600px;
+		overflow-x: scroll;
 	}
 
 	.link {
@@ -174,6 +186,8 @@
 	};
 	
 	create_force_layout(cluster_index);
+	
+	document.getElementById('hierarchy_<? echo $i; ?>').scrollLeft = 400;
 
 </script>
 
