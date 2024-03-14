@@ -15254,7 +15254,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layerset)-1;
-		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions();
+		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
 		$map = new mapObj('');
 		$map->set('shapepath', SHAPEPATH);
 		for ($i = 0; $i < $anzLayer; $i++) {
