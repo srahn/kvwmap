@@ -61,7 +61,7 @@ class data_import_export {
 			case 'gpkg' : {
 				$layers = $this->ogr_get_layers($filename);
 				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, false, $adjustments);
+				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
 			} break;
 			case 'xml' : {
 				$layers = $this->ogr_get_layers($filename);
