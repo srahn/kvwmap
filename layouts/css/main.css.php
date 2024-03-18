@@ -492,7 +492,8 @@ span[data-tooltip]:hover::after {
 
 .custom-select img {
   display: inline-block;
-  width: 30px;
+	min-width: 20px;
+  max-width: 30px;
 	margin-right: 5px;
 }
 
@@ -502,6 +503,7 @@ span[data-tooltip]:hover::after {
   align-items: center;
   padding: 3px;
   position: relative;
+	min-height: 20px;
 }
 
 .custom-select .placeholder.editable{
@@ -545,7 +547,7 @@ span[data-tooltip]:hover::after {
 }
 
 .styleFormField {
-	width: 87px;
+	width: 120px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {

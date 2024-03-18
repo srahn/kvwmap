@@ -4446,6 +4446,7 @@ echo '			</table>
 
   function get_classes(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$this->layer = $mapDB->get_Layer($this->formvars['layer_id']);
     $this->classdaten = $mapDB->read_Classes($this->formvars['layer_id']);
     echo'
       <select style="width:430px" size="4" class="select" name="class_1" onchange="change_class();"';
@@ -4458,7 +4459,40 @@ echo '			</table>
     }
     echo'
       </select>';
+		$this->create_symbol_list_template($this->layer);
   }
+
+	function create_symbol_list_template($layerset){
+		$this->symbols = array_merge([0 => ['name' => '']], $this->get_symbol_list($layerset, 20));
+		echo '
+		<div style="display: none">
+			<div class="custom-select" style="width: 118px" id="custom_select_style_symbolname_template">
+				<input type="hidden" class="styleFormField" id="style_symbolname" name="style_symbolname" value="' . $value . '">
+				<div class="placeholder editable" onclick="toggle_custom_select(\'style_symbolname\');">
+					<img src="">
+					<span></span>
+				</div>
+				<div style="position:relative; width: 200px">
+					<ul class="dropdown" id="dropdown">';
+						foreach ($this->symbols ?: [] as $symbol) {
+							if ($symbol['name'] === 'circle') {
+								$selected = ' selected';
+							}
+							else {
+								$selected = '';
+							}
+							echo '
+								<li class="item ' . $selected . '" data-value="' . $symbol['name'] . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
+									<img src="' . ($symbol['icon']? 'data:image/png;base64,' . base64_encode(@file_get_contents(IMAGEPATH . $symbol['icon'])) : 'graphics/leer.gif') . '">
+									<span>' . $symbol['name'] . '</span>
+								</li>';
+						}
+				echo '
+					</ul>
+				</div>
+			</div>
+		</div>';
+	}
 
 	function get_styles() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -4561,8 +4595,9 @@ echo '			</table>
 
   function add_style(){
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$layer = $mapDB->get_layer($this->formvars['layer_id']);
     $style = array();
-    switch ($this->formvars['Datentyp']) {
+    switch ($layer['Datentyp']) {
       case 0 : {
         $style['symbolname'] = 'circle';
         $style['size'] = 6;
@@ -4583,9 +4618,6 @@ echo '			</table>
         $style['maxsize'] = 2;
         $style['color'] = '0 0 0';
       }
-    }
-    if (MAPSERVERVERSION > '500') {
-    	$style['angle'] = 360;
     }
     $new_style_id = $mapDB->new_Style($style);
     $mapDB->addStyle2Class($this->formvars['class_id'], $new_style_id, NULL);
@@ -4744,6 +4776,7 @@ echo '			</table>
 				</table><?
 			}
 		}
+		echo '█replace_symbolname_field();';
 	}
 
   function save_label(){
@@ -13598,6 +13631,61 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->saveMap('');
     $this->output();
   }
+
+	function get_symbol_list($layerset = ['Datentyp' => ''], $icon_size = 30){
+		$map = new mapObj(DEFAULTMAPFILE);
+		$map->setSymbolSet(SYMBOLSET);
+		$map->setFontSet(FONTSET);
+		$numSymbols = $map->getNumSymbols();
+		$symbols = array();
+		$layer_point	 = ms_newLayerObj($map);
+		$layer_line		 = ms_newLayerObj($map);
+		$layer_polygon = ms_newLayerObj($map);
+		$layer_point->set(	'type', MS_LAYER_POINT);
+		$layer_line->set(		'type', MS_LAYER_LINE);
+		$layer_polygon->set('type', MS_LAYER_POLYGON);
+		for ($symbolid = 1; $symbolid < $numSymbols; $symbolid++) {
+			$symbol = $map->getSymbolObjectById($symbolid);
+			switch (true) {
+				case $layerset['Datentyp'] == MS_LAYER_POLYGON OR $symbol->type == 1005 : {
+					$class = new classObj($layer_polygon);
+					$symbolnr = $symbolid;
+					$size = 6;
+					$width = 1;
+				} break;
+				case $layerset['Datentyp'] == '' AND $symbol->type == 1002 : {
+					$class = new classObj($layer_line);
+					$symbolnr = 0;
+					$width = 2;
+				} break;
+				default : {
+					$class = new classObj($layer_point);
+					$symbolnr = $symbolid;
+					$size = $icon_size - 1;
+					$width = 1;
+				}
+			}
+			$class->set('name', 'testClass' . $symbolid);
+			$style = new styleObj($class);
+			$style->set('symbol', $symbolnr);
+			if (isset($size)) {
+				$style->set('size', $size);
+			}
+			$style->set('width', $width);
+			$style->color->setRGB(35, 109, 191);
+			$style->outlinecolor->setRGB(0, 0, 0);
+			$img = $class->createLegendIcon($icon_size, $icon_size);
+			$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+			$symbols[] = array(
+				'id' => $symbolid,
+				'name' => $symbol->name,
+				'type' => $symbol->type,
+				'bild' => $symbol->imagepath,
+				'icon' => 'legende_' . $symbolid . '.png'
+			);
+		}
+		return $symbols;
+	}
 
   function getfonts(){
     $fontset = file(FONTSET);
