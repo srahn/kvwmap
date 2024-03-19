@@ -286,9 +286,11 @@
     # zu 1)
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
+    $GUI->loadMap('DataBase');
     $ret = $alkis->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $GUI->user->rolle->epsg_code);
     if ($ret[0]) {
       $rect=$GUI->user->rolle->oGeorefExt;
+      $GUI->add_message('warning', 'Der Strasse sind keine Gebäude zugeordnet.');
     }
     else {
       $rect = $ret[1]['rect'];
@@ -363,7 +365,6 @@
 			
 	    $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
-	    $GUI->loadMap('DataBase');
 	    # zu 2)
 	    $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 			$GUI->map_scaledenom = $GUI->map->scaledenom;
