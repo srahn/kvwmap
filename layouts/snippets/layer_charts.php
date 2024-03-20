@@ -21,7 +21,7 @@
 
 	function layer_chart_edit(event, id) {
 		event.preventDefault();
-		window.location = 'index.php?go=layer_chart_Editor&id=' + id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+		root.window.location = 'index.php?go=layer_chart_Editor&id=' + id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 
 	function change_chart_type(chart, chart_type) {
@@ -173,9 +173,7 @@
 								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
 							</select><?
 							if (
-								$this->Stelle->isMenueAllowed($case) OR
-								$this->Stelle->isFunctionAllowed($case) OR
-								$this->user->is_case_allowed($case)
+								$this->Stelle->isMenueAllowed('Layereditor') 
 							) { ?>
 								<button type="button" style="margin-left: 10px" onclick="layer_chart_edit(event, <? echo $id; ?>);">Bearbeiten</button><?php
 							} ?>
