@@ -1,5 +1,6 @@
 <? 
 	global $selectable_limits;
+	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');

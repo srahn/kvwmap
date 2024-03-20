@@ -18515,6 +18515,7 @@ class db_mapObj{
 											$attributes['enum'][$i][$k] = array();
 											while ($rs = pg_fetch_array($ret[1])) {
 												$attributes['enum'][$i][$k][$rs['value']] = [
+													'value' 	=> $rs['value'],
 													'output' 	=> $rs['output'],
 													'oid'			=> $rs['oid'],
 													'image'		=> value_of($rs, 'image')
@@ -18531,6 +18532,7 @@ class db_mapObj{
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
 										$attributes['enum'][$i][$rs['value']] = [
+											'value' 	=> $rs['value'],
 											'output' 	=> $rs['output'],
 											'oid'			=> $rs['oid'],
 											'image'		=> value_of($rs, 'image')

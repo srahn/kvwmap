@@ -156,7 +156,7 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 				(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
 				(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
 			>
-				<img src=\"" . ($option['image']? 'data:image/png;base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
+				<img src=\"" . ($option['image']? 'data:image/' . pathinfo($option['image'])['extension'] . ';base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
 				<span>" . $option['output'] ."</span>
 			</li>";
 	}
@@ -165,7 +165,7 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 		<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
 			<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
 			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
-				<img src="' . $image . '">
+				<img src="' . ($image? 'data:image/' . pathinfo($image)['extension'] . ';base64,' . base64_encode(@file_get_contents($image)) : 'graphics/leer.gif') . '">
 				<span>' . $output . '</span>
 			</div>
 			<div style="position:relative">
