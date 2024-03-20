@@ -637,6 +637,7 @@ span[data-tooltip]:hover::after {
 .center-outerdiv {
 	padding: 30px;
 	text-align: center;
+	min-width: 800px;
 }
 
 select {

@@ -184,7 +184,7 @@
 					<script>
 						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
 						let values_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
-						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return v.options[v.selectedIndex].text});
+						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return (v.options?.[v.selectedIndex].text) ?? v.value});
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
 						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
