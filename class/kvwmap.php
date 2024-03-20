@@ -4463,34 +4463,27 @@ echo '			</table>
   }
 
 	function create_symbol_list_template($layerset){
-		$this->symbols = array_merge([0 => ['name' => '']], $this->get_symbol_list($layerset, 20));
+		include_once(CLASSPATH.'FormObject.php');
+		$this->symbols = $this->get_symbol_list($layerset, 20);
 		echo '
 		<div style="display: none">
-			<div class="custom-select" style="width: 118px" id="custom_select_style_symbolname_template">
-				<input type="hidden" class="styleFormField" id="style_symbolname" name="style_symbolname" value="' . $value . '">
-				<div class="placeholder editable" onclick="toggle_custom_select(\'style_symbolname\');">
-					<img src="">
-					<span></span>
-				</div>
-				<div style="position:relative; width: 200px">
-					<ul class="dropdown" id="dropdown">';
-						foreach ($this->symbols ?: [] as $symbol) {
-							if ($symbol['name'] === 'circle') {
-								$selected = ' selected';
-							}
-							else {
-								$selected = '';
-							}
-							echo '
-								<li class="item ' . $selected . '" data-value="' . $symbol['name'] . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
-									<img src="' . ($symbol['icon']? 'data:image/png;base64,' . base64_encode(@file_get_contents(IMAGEPATH . $symbol['icon'])) : 'graphics/leer.gif') . '">
-									<span>' . $symbol['name'] . '</span>
-								</li>';
-						}
-				echo '
-					</ul>
-				</div>
-			</div>
+			' . FormObject::createCustomSelectField(
+				'style_symbolname',															# name
+				$this->symbols,																	# options
+				'circle',																				# value
+				1,																							# size
+				'width: 118px',																	# style
+				'',																							# onchange
+				'style_symbolname',															# id
+				'',																							# multiple
+				'styleFormField',																# class
+				' ',																						# firstoption
+				'width: 200px',																	# option_style
+				'', 																						# option_class
+				'',																							# onclick
+				'',																							# onmouseenter
+				''																							# option_onmouseenter
+			) . '
 		</div>';
 	}
 
@@ -13678,10 +13671,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
 			$symbols[] = array(
 				'id' => $symbolid,
-				'name' => $symbol->name,
+				'value' => $symbol->name,
 				'type' => $symbol->type,
 				'bild' => $symbol->imagepath,
-				'icon' => 'legende_' . $symbolid . '.png'
+				'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
 			);
 		}
 		return $symbols;

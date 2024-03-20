@@ -132,18 +132,19 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 
 	$options_html = array();
 	if ($first_option != '') {
-		$options_html[] = '
-						<li class="item" data-value="" onclick="custom_select_click(this)">
-							<span>' . $first_option . '</span>
-						</li>';
+		$options = array_merge([0 => ['value' => '', 'output' => $first_option]], $options);
 	}
 	foreach($options AS $option) {
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
+		if (!array_key_exists('output', $option)) {
+			$option['output'] = $option['value'];
+		}
 		if (strval($option['value']) === strval($value)) {
 			$selected = ' selected';
 			$output = $option['output'];
+			$image = $option['image'];
 		}
 		else {
 			$selected = '';
@@ -155,14 +156,16 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 				(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
 				(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
 			>
+				<img src=\"" . ($option['image']? 'data:image/png;base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
 				<span>" . $option['output'] ."</span>
 			</li>";
 	}
 
 	$html  = '
-		<div class="custom-select" id="custom_select_' . $id . '">
-			<input type="hidden" ' . $onchange . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
-			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.' ' . $style . '>
+		<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
+			<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
+			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
+				<img src="' . $image . '">
 				<span>' . $output . '</span>
 			</div>
 			<div style="position:relative">

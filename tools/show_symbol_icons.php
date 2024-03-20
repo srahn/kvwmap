@@ -14,7 +14,7 @@
 			array_map(
 				function($symbol) {
 					$html = '<img
-						src="' . IMAGEURL . $symbol['icon'] . '"
+						src="' . IMAGEURL . basename($symbol['image']) . '"
 						border="1"
 						style="
 							margin-right: 7px;
@@ -22,9 +22,9 @@
 							vertical-align:middle
 						"' . ($symbol['bild'] ? '
 						onmouseover="this.src = \'' . URL . APPLVERSION . CUSTOM_PATH . 'symbols/' . $symbol['bild'] . '\';this.width=\'250\'"
-						onmouseout="this.src = \'' . IMAGEURL . $symbol['icon'] . '\';this.width=\'35\'"' : '') . '
+						onmouseout="this.src = \'' . IMAGEURL . basename($symbol['image']) . '\';this.width=\'35\'"' : '') . '
 						width="35"
-					>' . $symbol['id'] . '. ' . $symbol['name'] . ($symbol['bild'] != '' ? ' (' . $symbol['bild'] . ')' : '') . ' Symboltyp: ' . $symbol['type'];
+					>' . $symbol['id'] . '. ' . $symbol['value'] . ($symbol['bild'] != '' ? ' (' . $symbol['bild'] . ')' : '') . ' Symboltyp: ' . $symbol['type'];
 					return $html;
 				},
 				$symbols
@@ -37,7 +37,7 @@
 				'',
 				array_map(
 					function($symbol) {
-						$html = '<option class="icon-' . $symbol['id'] . '" value="' . $symbol['id'] . '" style="background-image:url(' . IMAGEURL . $symbol['icon'] . ');">' . $symbol['id'] . '. ' . $symbol['name'] . '</option>';
+						$html = '<option class="icon-' . $symbol['id'] . '" value="' . $symbol['id'] . '" style="background-image:url(' . IMAGEURL . basename($symbol['image']) . ');">' . $symbol['id'] . '. ' . $symbol['value'] . '</option>';
 						return $html;
 					},
 					$symbols

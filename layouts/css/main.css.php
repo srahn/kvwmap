@@ -455,11 +455,13 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
+	width: 200px;
   top: 1px;
   right: 0;
   left: 0;
 	max-height: 400px;
 	overflow-y: auto;
+	overflow-x: hidden;
 	margin: 0;
 }
 
@@ -477,6 +479,7 @@ span[data-tooltip]:hover::after {
   display: flex;
   align-items: center;
   background-color: #fff;
+	min-height: 20px;
   padding: 3px;
 	margin-bottom: 0;
   cursor: pointer;
@@ -492,7 +495,6 @@ span[data-tooltip]:hover::after {
 
 .custom-select img {
   display: inline-block;
-	min-width: 20px;
   max-width: 30px;
 	margin-right: 5px;
 }
@@ -504,6 +506,7 @@ span[data-tooltip]:hover::after {
   padding: 3px;
   position: relative;
 	min-height: 20px;
+	overflow: hidden;
 }
 
 .custom-select .placeholder.editable{

@@ -48,7 +48,9 @@ function get_style(style_id){
 
 function replace_symbolname_field(){
 	var symbolname_field = document.querySelector('#selected_style_div input[name=\'style_symbolname\']');
-	var custom_select = document.querySelector('#custom_select_style_symbolname_template').cloneNode(true);
+	var custom_select_template = document.querySelector('#custom_select_style_symbolname, #custom_select_style_symbolname_template');
+	var custom_select = custom_select_template.cloneNode(true);
+	custom_select_template.id = 'custom_select_style_symbolname_template';
 	custom_select.id = 'custom_select_style_symbolname';
 	symbolname_field.insertAdjacentElement('afterend', custom_select);
 	var options = custom_select.querySelectorAll('.dropdown li');
