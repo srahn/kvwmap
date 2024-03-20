@@ -1213,7 +1213,7 @@
 					<ul class="dropdown" id="dropdown">';
 			foreach($enums ?: [] as $enum_key => $enum) {
 				$datapart .= '
-						<li class="item" data-value="' . $enum_key . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
+						<li class="item ' . ($enum_key == $value? 'selected' : '') . '" data-value="' . $enum_key . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
 							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">
 							<span>' . $enum['output'] . '</span>
 						</li>';
