@@ -23,6 +23,13 @@ function replace_params_link($str, $params, $layer_id) {
 	return $str;
 }
 
+/**
+* Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
+*/
+function err_msg($file, $line, $msg, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
+}
+
 function sql_err_msg($title, $sql, $msg, $div_id) {
 	$err_msg = "
 		<div style=\"text-align: left;\">" .
