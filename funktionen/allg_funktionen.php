@@ -2361,7 +2361,9 @@ function before_last($txt, $delimiter) {
 
 function attributes_from_select($sql) {
 	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
 	$parser = new PHPSQLParser($sql, true);
+	$creator = new PHPSQLCreator();
 	$attributes = array();
 	foreach ($parser->parsed['SELECT'] AS $key => $value) {
 		$name = $alias = '';
@@ -2376,8 +2378,13 @@ function attributes_from_select($sql) {
 		else {
 			$name = $alias = $value['base_expr'];
 		}
+		unset($value['alias']);
+		$value['delim'] = '';
+		$select_part['SELECT'][0] = $value;
+		$base_exp = substr($creator->create($select_part), 7);
+
 		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
+			'base_expr' => $base_exp,
 			'alias' => $alias
 		);
 	}
