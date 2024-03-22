@@ -1578,28 +1578,31 @@ class stelle {
 						tooltip
 					)
 				";
-				# Rechte von der Elternstelle übernehmen
+				# Rechte von der Elternstelle übernehmen (bei mehreren Elternstellen die höchsten Rechte)
 				$sql = $insert . "
-					SELECT 
-						layer_id,
-						attributename,
-						" . $this->id . ",
-						privileg,
-						tooltip
-					FROM
-						layer_attributes2stelle l,
-						stellen_hierarchie
-					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
-						layer_id = " . $layer_ids[$i] . " AND
-						stelle_id = parent_id AND
-						child_id = " . $this->id . "
+					SELECT * FROM (
+						SELECT 
+							layer_id,
+							attributename,
+							" . $this->id . ",
+							max(privileg) as privileg,
+							max(tooltip) as tooltip
+						FROM
+							layer_attributes2stelle l,
+							stellen_hierarchie
+						WHERE
+							(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+							layer_id = " . $layer_ids[$i] . " AND
+							stelle_id = parent_id AND
+							child_id = " . $this->id . "
+						  GROUP BY attributename
+					) as foo
 					ON DUPLICATE KEY UPDATE
-						layer_id = l.layer_id, 
-						attributename = l.attributename, 
+						layer_id = foo.layer_id, 
+						attributename = foo.attributename, 
 						stelle_id = " . $this->id . ", 
-						privileg = l.privileg, 
-						tooltip = l.tooltip
+						privileg = foo.privileg, 
+						tooltip = foo.tooltip
 					";
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -1611,15 +1614,23 @@ class stelle {
 					DELETE l 
 					FROM 
 						layer_attributes2stelle l 
-						LEFT JOIN stellen_hierarchie ON l.stelle_id = child_id 
-						LEFT JOIN layer_attributes2stelle l2 ON 
-							l2.layer_id = " . $layer_ids[$i] . " AND 
-							l2.stelle_id = parent_id AND 
-							l.attributename = l2.attributename 
+						LEFT JOIN (
+							SELECT 
+								layer_id, stelle_id, attributename 
+							FROM 
+								layer_attributes2stelle l2 
+								JOIN stellen_hierarchie ON 
+								" . $this->id . " = child_id
+								WHERE
+								l2.layer_id = " . $layer_ids[$i] . " AND 
+								l2.stelle_id = parent_id
+						) as foo ON 
+							l.layer_id = foo.layer_id AND
+							l.attributename = foo.attributename
 					WHERE
 						l.layer_id = " . $layer_ids[$i] . " AND 
-						l.stelle_id = " . $this->id . " AND 
-						l2.attributename IS NULL;
+							l.stelle_id = " . $this->id . " AND
+							foo.layer_id IS NULL;
 						";
 					#echo $sql.'<br>';
 					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);

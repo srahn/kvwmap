@@ -2361,7 +2361,9 @@ function before_last($txt, $delimiter) {
 
 function attributes_from_select($sql) {
 	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
 	$parser = new PHPSQLParser($sql, true);
+	$creator = new PHPSQLCreator();
 	$attributes = array();
 	foreach ($parser->parsed['SELECT'] AS $key => $value) {
 		$name = $alias = '';
@@ -2376,8 +2378,13 @@ function attributes_from_select($sql) {
 		else {
 			$name = $alias = $value['base_expr'];
 		}
+		unset($value['alias']);
+		$value['delim'] = '';
+		$select_part['SELECT'][0] = $value;
+		$base_exp = substr($creator->create($select_part), 7);
+
 		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
+			'base_expr' => $base_exp,
 			'alias' => $alias
 		);
 	}
@@ -2646,6 +2653,20 @@ function put_value_first($array, $value) {
 function en_date($date_de) {	
 	return date('Y-m-d', strtotime($date_de));
 }
+
+/**
+*	Convert English date format 2022-12-25
+*	to German date format 25.12.2022
+*/
+function de_date($date_en) {	
+	if (strlen($date_en) > 10) {
+		return date('d.m.Y G:i:s', strtotime($date_en));
+	}
+	else {
+		return date('d.m.Y', strtotime($date_en));
+	}
+}
+
 
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(

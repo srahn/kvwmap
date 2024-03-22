@@ -455,11 +455,13 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
+	width: 200px;
   top: 1px;
   right: 0;
   left: 0;
 	max-height: 400px;
 	overflow-y: auto;
+	overflow-x: hidden;
 	margin: 0;
 }
 
@@ -477,6 +479,7 @@ span[data-tooltip]:hover::after {
   display: flex;
   align-items: center;
   background-color: #fff;
+	min-height: 20px;
   padding: 3px;
 	margin-bottom: 0;
   cursor: pointer;
@@ -492,7 +495,7 @@ span[data-tooltip]:hover::after {
 
 .custom-select img {
   display: inline-block;
-  width: 30px;
+  max-width: 30px;
 	margin-right: 5px;
 }
 
@@ -502,6 +505,8 @@ span[data-tooltip]:hover::after {
   align-items: center;
   padding: 3px;
   position: relative;
+	min-height: 20px;
+	overflow: hidden;
 }
 
 .custom-select .placeholder.editable{
@@ -545,7 +550,7 @@ span[data-tooltip]:hover::after {
 }
 
 .styleFormField {
-	width: 87px;
+	width: 120px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
@@ -594,6 +599,13 @@ span[data-tooltip]:hover::after {
 	width: 150px;
 }
 
+.input-form textarea {
+	float: left;
+	text-align: left;
+	width: 55%;
+	margin-left: 5px;
+}
+
 .input-form input {
 
 	font-size: <? echo $font_size_factor * 15; ?>px
@@ -628,6 +640,7 @@ span[data-tooltip]:hover::after {
 .center-outerdiv {
 	padding: 30px;
 	text-align: center;
+	min-width: 800px;
 }
 
 select {

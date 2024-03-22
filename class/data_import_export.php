@@ -61,7 +61,7 @@ class data_import_export {
 			case 'gpkg' : {
 				$layers = $this->ogr_get_layers($filename);
 				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, false, $adjustments);
+				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $this->ogr_unkown_srid($filename), $adjustments);
 			} break;
 			case 'xml' : {
 				$layers = $this->ogr_get_layers($filename);
@@ -986,8 +986,8 @@ class data_import_export {
 		return $ret;
 	}
 
-	function ogrinfo($importfile) {
-		$command = ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : '') . ' "' . $importfile . '"';
+	function ogrinfo($importfile, $options = '') {
+		$command = ' "' . $importfile . '" ' . $options;
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
@@ -1020,7 +1020,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile);
+		$result = $this->ogrinfo($importfile, ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : ''));
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1037,6 +1037,17 @@ class data_import_export {
 				$value = explode(': ', $value)[1];
 			});
 			return $layers;
+		}
+	}
+
+	function ogr_unkown_srid($importfile){
+		$result = $this->ogrinfo($importfile, ' -al -so');
+		if ($result->exitCode != 0)	{
+			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
+			return true;
+		}
+		else {
+			return strpos(get_first_word_after($result->stdout, 'Layer SRS WKT'), 'unknown') !== false;
 		}
 	}
 	

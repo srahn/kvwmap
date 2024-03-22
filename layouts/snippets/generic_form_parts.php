@@ -878,12 +878,16 @@
 			} break;
 
 			default : {
+				if ($field_id != NULL AND in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
+					$datapart .= calendar($attributes['type'][$j], $id, $attributes['privileg'][$j]).'&nbsp;';
+					$value = ($value? de_date($value) : $value);
+				}
 				$datapart .= '<input class="'.$field_class.'" onchange="'.$onchange.'" onkeyup="checknumbers(this, \''.$attributes['type'][$j].'\', \''.$attributes['length'][$j].'\', \''.$attributes['decimal_length'][$j].'\');" title="'.$alias.'" ';
 				if($attribute_privileg == '0'){
 					$datapart .= ' readonly style="display:none;"';
 				}
 				else{
-					$datapart .= ' tabindex="1" style="width: 100%;"';
+					$datapart .= ' tabindex="1" style="width: 95%;"';
 				}
 				if($name == 'lock'){
 					$datapart .= ' type="hidden"';
@@ -892,7 +896,7 @@
 					$datapart .= ' maxlength="'.$attributes['length'][$j].'"';
 				}				
 				if($size)$datapart .= ' size="'.$size.'"';
-				$datapart .= ' type="text" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$k.'" value="'.htmlspecialchars($value).'">';
+				$datapart .= ' type="text" name="'.$fieldname.'" id="'.$id.'" value="'.htmlspecialchars($value).'">';
 				if($attribute_privileg == '0'){ // nur lesbares Attribut
 					$angezeigter_value = (($attributes['type'][$j] == 'bool' OR $attributes['form_element_type'][$j] == 'Editiersperre') ? ($value == 't' ? $gui->strYes : $gui->strNo) : $value);
 					$datapart .= '<div class="readonly_text">' . htmlspecialchars($angezeigter_value) . '</div>';
@@ -1179,42 +1183,35 @@
 		}
 		$auswahlfeld_output = $enums[$value]['output'];
 		$auswahlfeld_image = $enums[$value]['image'];
-		$datapart .= '<div class="custom-select" id="custom_select_' . $layer_id . '_' . $name . '_' . $k . '">';
 		if ($privileg == '0') {
 			$datapart .= '
-				<div class="placeholder" title="' . $alias . '" style="' . $select_width . '">
-					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
-					<span>' . $auswahlfeld_output . '</span>
-					<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
+				<div class="custom-select" id="custom_select_' . $layer_id . '_' . $name . '_' . $k . '">
+					<div class="placeholder" title="' . $alias . '" style="' . $select_width . '">
+						<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
+						<span>' . $auswahlfeld_output . '</span>
+						<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
+					</div>
 				</div>';
 			$auswahlfeld_output = '';
 		}
 		else {
-			if ($change_all) {
-				$onchange = 'change_all(' . $layer_id . ', ' . $k . ', \'' . $layer_id . '_' . $name . '\');';
-			}
-			if ($req_by != '') {
-				$onchange = 'update_require_attribute(this, \'' . $req_by . '\', ' . $k . ',' . $layer_id . ', new Array(\'' . implode("','", $attributenames) . '\'));' . $onchange;
-			}
-			$datapart .= '
-				<input type="hidden" class="' . $field_class . '" onchange="' . $onchange . '"
-							 id="' . $layer_id . '_' . $name . '_' . $k . '" 
-							 name="' . $fieldname . '"
-							 value="' . $value . '">
-				<div class="placeholder editable" onclick="toggle_custom_select(\'' . $layer_id . '_' . $name . '_' . $k . '\');" title="' . $alias . '" style="' . $select_width . '">
-					<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
-					<span>' . $auswahlfeld_output . '</span>
-				</div>
-				<div style="position:relative">
-					<ul class="dropdown" id="dropdown">';
-			foreach($enums ?: [] as $enum_key => $enum) {
-				$datapart .= '
-						<li class="item" data-value="' . $enum_key . '" onmouseenter="custom_select_hover(this)" onclick="custom_select_click(this)">
-							<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">
-							<span>' . $enum['output'] . '</span>
-						</li>';
-			}
-			$datapart .= '</ul></div>';
+			$datapart .= FormObject::createCustomSelectField(
+				$fieldname,																			# name
+				$enums,																					# options
+				$value,																					# value
+				1,																							# size
+				$select_width,																	# style
+				$onchange,																			# onchange
+				$layer_id . '_' . $name . '_' . $k,							# id
+				'',																							# multiple
+				$field_class,																		# class
+				' ',																						# firstoption
+				'',																							# option_style
+				'', 																						# option_class
+				'',																							# onclick
+				'',																							# onmouseenter
+				''																							# option_onmouseenter
+			);
 			if($subform_layer_id != ''){
 				if($subform_layer_privileg > 0){
 					if($embedded == true){
@@ -1232,7 +1229,6 @@
 				}
 			}
 		}
-		$datapart .= '</div>';
 		return $datapart;
 	}	
 	

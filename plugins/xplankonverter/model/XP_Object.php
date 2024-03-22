@@ -120,6 +120,52 @@ class XP_Object extends PgObject {
 
 		return pg_fetch_all($query);
 	}
+	
+	# Order by gml_id to always get same order if a plan is reloaded with GMLAS
+	# textabschnitte do not have gehoertzubereich and no geometry
+	public function get_textabschnitt_rows() {
+		$sub_classes = $this->get_sub_classes();
+		$sql_ta = "
+			SELECT
+				{$this->tableName}.*
+			FROM
+				{$this->schema}.{$this->tableName}" .
+				implode(
+					'',
+					array_map(
+						function($sub_class) {
+							$sub_class_table_name = strtolower($sub_class);
+							$table_sql = " LEFT JOIN
+				{$this->schema}.{$sub_class_table_name} ON {$this->tableName}.gml_id = {$sub_class_table_name}.gml_id";
+							return $table_sql;
+						},
+						$sub_classes
+					)
+				) . "
+			WHERE
+				{$this->tableName}.konvertierung_id = {$this->konvertierung->get('id')}" .
+				implode(
+					'',
+					array_map(
+						function($sub_class) {
+							$sub_class_table_name = strtolower($sub_class);
+							$where_sql = " AND
+				{$sub_class_table_name}.gml_id IS NULL";
+							return $where_sql;
+						},
+						$sub_classes
+					)
+				) . "
+			ORDER BY
+				gml_id
+		";
+
+		$this->debug->show('sql to find textabschnitt-objects for class ' . $this->tableName . ': ' . $sql_ta, false);
+
+		$query = pg_query($this->database->dbConn, $sql_ta);
+
+		return pg_fetch_all($query);
+	}
 
 }
 
