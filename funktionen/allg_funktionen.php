@@ -2359,38 +2359,6 @@ function before_last($txt, $delimiter) {
 	return implode($delimiter , $parts);
 }
 
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
-	$parser = new PHPSQLParser($sql, true);
-	$creator = new PHPSQLCreator();
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		unset($value['alias']);
-		$value['delim'] = '';
-		$select_part['SELECT'][0] = $value;
-		$base_exp = substr($creator->create($select_part), 7);
-
-		$attributes[$name] = array(
-			'base_expr' => $base_exp,
-			'alias' => $alias
-		);
-	}
-	return $attributes;
-}
-
 /**
  * Function return the inner part of the select in a mapserver data statement
  * normaly looks like this:

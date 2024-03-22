@@ -601,7 +601,7 @@ class spatial_processor {
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
-				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
+				$select = $fromwhere = $this->pgdatabase->eliminate_star($select);
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');

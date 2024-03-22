@@ -2479,7 +2479,7 @@ class stelle {
 			$offset = 7;
 		}
 		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path, $offset);
+		$path = $database->eliminate_star($path);
 		if(substr_count(strtolower($path), ' from ') > 1){
 			$whereposition = strpos($path, ' WHERE ');
 			$withoutwhere = substr($path, 0, $whereposition);
