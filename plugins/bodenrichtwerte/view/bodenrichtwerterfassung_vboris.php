@@ -109,7 +109,7 @@ function update_nutzungsart() {
 		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
 	}
 	if (document.GUI.entwicklungszustand.value == 'SF') {
-		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF'), '-- Bitte wählen --');
+		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
 	}
 }
 
@@ -256,8 +256,8 @@ update_require_attribute = function(attributes, layer_id, value){
 																	$FormatBez = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'SF'){
-																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '');
-																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', 'UF', 'FF', 'FEE', 'FVE', 'FNS', 'ÖG', 'PVF', '-- Bitte wählen --');
+																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '');
+																	$FormatBez = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '-- Bitte wählen --');
 																}
 																else{ 
 												        	$FormatWerte = array('');
@@ -365,7 +365,7 @@ update_require_attribute = function(attributes, layer_id, value){
 								</td>
 								<td><img src="<? echo GRAPHICSPATH; ?>leer.gif" width="5"></td>
 								<td valign="top">
-									<table border="0" style="border:1px steelblue solid" cellpadding="3" cellspacing="0">
+									<table border="0" style="border:1px steelblue solid; width: 310px;" cellpadding="3" cellspacing="0">
 									  <tr> 
 									    <td>
 									    	Bauweise:
@@ -394,7 +394,29 @@ update_require_attribute = function(attributes, layer_id, value){
 									      ?>
 									    </td>
 									  </tr>
-									  <tr> 
+										<tr> 
+									    <td>
+									    	Zahl der oberirdischen Geschosse:
+									    </td>
+									    <td colspan="2">
+									      <?php 
+									        $FormatWerte = array('', 'I', 'I-II', 'I-III', 'II', 'II-III', 'III', 'III-IV', 'III-V', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
+									        $FormatBez = array('-- Bitte wählen --', 'I', 'I-II', 'I-III', 'II', 'II-III', 'III', 'III-IV', 'III-V', 'IV', 'IV-V', 'V', 'V-VI', 'VI','VI-VII','VII','VII-VIII','VIII','VIII-IX','IX','IX-X','X','X-XI','XI','XI-XII');
+									        $ogeschosszahl = new FormObject('ogeschosszahl','select',$FormatWerte,array($this->formvars['ogeschosszahl']),$FormatBez,1,$maxlenght,$multiple,146);
+									        $ogeschosszahl->OutputHTML();
+									        echo $ogeschosszahl->html;
+									      ?>
+									    </td>
+									  </tr>
+										<tr> 
+									    <td>
+									    	wertrelevante Geschossflächenzahl:
+									    </td>
+									    <td colspan="2"> 
+									      <input name="wgeschossflaechenzahl" type="text" style="width:146px" maxlength="11" id="wgeschossflaechenzahl" value="<?php echo $this->formvars['wgeschossflaechenzahl']; ?>">
+									    </td>
+									  </tr>
+										<tr> 
 									    <td>
 									    	Geschossflächenzahl:
 									    </td>
@@ -567,6 +589,26 @@ update_require_attribute = function(attributes, layer_id, value){
 						      <input name="bedarfswert" type="text" id="bedarfswert" value="<?php echo $this->formvars['bedarfswert']; ?>" size="9" maxlength="5">
 						    </td>
 						  </tr>
+
+							<tr> 
+						    <td colspan="2">
+						    	Qualitätsstichtag:
+						    </td>
+						    <td>
+						    	<input name="qualitaetsstichtag" type="text" value="<? echo $this->formvars['qualitaetsstichtag']; ?>" size="9" maxlength="10">
+						    </td>
+						  </tr>
+						  <tr> 
+						    <td colspan="2">
+						    	Bodenrichtwert Qualitätsstichtag [&euro;/m&sup2;]:
+						    </td>
+						    <td> 
+						      <input name="bodenrichtwert_qualitaetsstichtag" type="text" id="bodenrichtwert_qualitaetsstichtag" value="<?php echo $this->formvars['bodenrichtwert_qualitaetsstichtag']; ?>" size="9" maxlength="5">
+						    </td>
+						  </tr>
+							<tr>
+								<td></td>
+							</tr>
 						  <tr> 
 						    <td>
 						    	Gemeinde:
