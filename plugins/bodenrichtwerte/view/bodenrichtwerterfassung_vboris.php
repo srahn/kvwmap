@@ -106,7 +106,7 @@ function update_nutzungsart() {
 		add_options(document.GUI.nutzungsart, new Array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MDW', 'MI', 'MK', 'MU', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB'), '-- Bitte wählen --');
 	}
 	if (document.GUI.entwicklungszustand.value == 'LF') {
-		add_options(document.GUI.nutzungsart, new Array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
+		add_options(document.GUI.nutzungsart, new Array('L', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F'), '-- Bitte wählen --');
 	}
 	if (document.GUI.entwicklungszustand.value == 'SF') {
 		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
@@ -252,8 +252,8 @@ update_require_attribute = function(attributes, layer_id, value){
 																	$FormatBez = array('W', 'WS', 'WR', 'WA', 'WB', 'M', 'MD', 'MDW', 'MI', 'MK', 'MU', 'G', 'GE', 'GI', 'S', 'SE', 'SO', 'GB', '-- Bitte wählen --'); 
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'LF'){
-																	$FormatWerte = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '');
-																	$FormatBez = array('LW', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
+																	$FormatWerte = array('L', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '');
+																	$FormatBez = array('L', 'A', 'GR', 'EGA', 'SK', 'WG', 'KUP', 'UN', 'F', '-- Bitte wählen --');
 																}
 																elseif($this->formvars['entwicklungszustand'] == 'SF'){
 																	$FormatWerte = array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN', '');
