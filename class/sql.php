@@ -2,41 +2,45 @@
 
 class SQL {
 
+  var $query;
   var $parsed;
 
-  function __construct($sql = NULL) {
+  function __construct($query = NULL) {
     include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-    include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLCreator.php');
-		if($sql != NULL){
-			$this->parse($sql);
+		if($query != NULL){
+			$this->parse($query);
 		}
   }
 
-  function parse($sql){
-    $parser = new PHPSQLParser($sql, true);
+  function parse($query){
+    $parser = new PHPSQLParser($query, true);
+    $this->query = $query;
     $this->parsed = $parser->parsed;
   }
   
   function get_attributes() {
-    $creator = new PHPSQLCreator();
     $attributes = array();
-    foreach ($this->parsed['SELECT'] as $value) {
+    foreach ($this->parsed['SELECT'] as $index => $select_part) {
       $name = $alias = '';
       if (
-        is_array($value['alias']) AND
-        array_key_exists('no_quotes', $value['alias']) AND
-        $value['alias']['no_quotes'] != ''
+        is_array($select_part['alias']) AND
+        array_key_exists('no_quotes', $select_part['alias']) AND
+        $select_part['alias']['no_quotes'] != ''
       ) {
-        $name = $value['alias']['no_quotes'];
-        $alias = $value['alias']['no_quotes'];
+        $name = $alias = $select_part['alias']['no_quotes'];
       }
       else {
-        $name = $alias = $value['base_expr'];
+        $name = trim(array_pop(explode('.', $select_part['base_expr'])), '"');
       }
-      unset($value['alias']);
-      $value['delim'] = '';
-      $select_part['SELECT'][0] = $value;
-      $base_exp = substr($creator->create($select_part), 7);
+      $length = ($this->parsed['SELECT'][$index + 1]['position'] ?: $this->parsed['FROM'][0]['position']) - $select_part['position'];
+      $base_exp = substr($this->query, $select_part['position'], $length);
+      if (!$this->parsed['SELECT'][$index + 1]['position']) {
+        $base_exp = substr($base_exp, 0, strripos($base_exp, 'from'));   # wenn letztes Attribut, das FROM abschneiden
+      }
+      $base_exp = trim($base_exp, ", \n\r\t");
+      if (is_array($select_part['alias'])) {
+        $base_exp = substr($base_exp, 0, -strlen($select_part['alias']['base_expr']));    # wenn alias, den alias abschneiden
+      }
   
       $attributes[$name] = array(
         'base_expr' => $base_exp,
@@ -47,11 +51,7 @@ class SQL {
   }
   
   function get_from() {
-    $creator = new PHPSQLCreator();
-    $parsed = $this->parsed;
-    $select[0] = ['expr_type' => 'const', 'base_expr' => '1'];
-    $parsed['SELECT'] = $select;
-    $from = substr($creator->create($parsed), 8);
+    $from = 'FROM ' . substr($this->query, $this->parsed['FROM'][0]['position']);
     return $from;
   }
 
