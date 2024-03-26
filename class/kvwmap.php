@@ -20302,15 +20302,17 @@ class db_mapObj{
 
 			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$replace_params = rolle::$layer_params;
-				foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
-					if (
-						in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
-						array_key_exists($attribute, $replace_params)
-					) {
-						# Attribute is predefined or layer_param. Skip to add as replace_param.
-					}
-					else {
-						$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
+				if ($this->GUI->formvars['attributenames']) {
+					foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
+						if (
+							in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
+							array_key_exists($attribute, $replace_params)
+						) {
+							# Attribute is predefined or layer_param. Skip to add as replace_param.
+						}
+						else {
+							$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
+						}
 					}
 				}
 				$replaced_default = replace_params(
