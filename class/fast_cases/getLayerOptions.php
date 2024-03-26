@@ -512,7 +512,7 @@ class GUI {
 						}
 						echo '</ul>
 						<table class="ul_table">';
-						if ($this->formvars['layer_id'] < 0) {
+						if ($layer[0]['connectiontype'] == 6 AND $this->formvars['layer_id'] < 0) {
 							echo '<tr>
 												<td>
 													<span>' . $this->strAutoClassify . ':</span>

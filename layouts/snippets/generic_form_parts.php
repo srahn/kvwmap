@@ -113,7 +113,7 @@
 		$oid = $dataset[$layer['maintable'] . '_oid'];									# die oid des Datensatzes
 		$attribute_privileg = $attributes['privileg'][$j];							# das Recht des Attributs
 
-		if($field_name == NULL)$fieldname = $layer_id.';'.$attributes['real_name'][$name].';'.$tablename.';'.$oid.';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].';'.$attributes['saveable'][$j];
+		if($field_name == NULL)$fieldname = $layer_id . ';' . ($attributes['saveable'][$j]? $attributes['real_name'][$name] : '') . ';' . $tablename . ';' . $oid . ';' . $attributes['form_element_type'][$j] . ';' . $attributes['nullable'][$j] . ';' . $attributes['type'][$j] . ';' . $attributes['saveable'][$j];
 		else $fieldname = $field_name;
 				
 		if(!$change_all){

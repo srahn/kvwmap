@@ -990,7 +990,7 @@ class stelle {
 			$offset = 7;
 		}
 		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path, $offset);
+		$path = $database->eliminate_star($path);
 		if(substr_count(strtolower($path), ' from ') > 1){
 			$whereposition = strpos($path, ' WHERE ');
 			$withoutwhere = substr($path, 0, $whereposition);
@@ -1541,37 +1541,23 @@ class pgdatabase {
 		);
 	}
 
-  function eliminate_star($query, $offset){
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strrpos($query, ' WHERE ');
-  		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strrpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-  		if($whereposition){
-  			$withoutwhere = substr($query, 0, $whereposition);
-  		}
-  		else{
-  			$withoutwhere = $query;
-  		}
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $select = substr($query, $offset, $fromposition-$offset);
-    $from = substr($query, $fromposition);
-    $column = explode(',', $select);
-    $column = get_select_parts($select);
-    for($i = 0; $i < count($column); $i++){
-      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
+  function eliminate_star($query){
+		include_once(CLASSPATH . 'sql.php');
+		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
+		$sql_object = new SQL($query);
+		$columns = $sql_object->get_attributes();
+		$from = $sql_object->get_from();
+    foreach ($columns as $column) {
+      if(strpos(trim($column['base_expr']), '*') === 0 OR strpos($column['base_expr'], '.*') !== false){
+        $sql = "SELECT ".$column['base_expr']." ".$from." LIMIT 0";
         $ret = $this->execSQL($sql, 4, 0);
         if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
+        	$tablename = str_replace('*', '', trim($column['base_expr']));
+          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
           for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
+            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
           }
-          $query = str_replace(trim($column[$i]), $columns, $query);
+          $query = str_replace(trim($column['base_expr']), $columns, $query);
         }
       }
     }
