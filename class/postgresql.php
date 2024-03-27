@@ -793,6 +793,20 @@ FROM
 		return $table_alias_names;
 	}
 
+	function get_target_entries($parse_tree){
+		$target_entry_parts = explode("\n      {TARGETENTRY", $parse_tree);
+		#$statement_begin = get_first_word_after($parse_tree, "\n   :stmt_location");
+		array_shift($target_entry_parts);
+		foreach ($target_entry_parts as $target_entry_part){
+			# Spaltennummer in der Tabelle
+			$target_entry['col_num'] = get_first_word_after($target_entry_part, "\n      :resorigcol");
+			# Beginn im Statement (funktioniert nicht zuverlässig z.B. bei cast(...))
+			#$target_entry['attribute_begin'] = get_first_word_after($target_entry_part, "\n         :location") - $statement_begin;
+			$target_entries[] = $target_entry;
+		}
+		return $target_entries;
+	}
+
 	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
@@ -823,9 +837,9 @@ FROM
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
-			$query_plan = $error_list[0];
-			$table_alias_names = $this->get_table_alias_names($query_plan);
-			$field_plan_info = explode("\n      :resno", $query_plan);
+			$parse_tree = $error_list[0];
+			$table_alias_names = $this->get_table_alias_names($parse_tree);
+			$target_entries = $this->get_target_entries($parse_tree);
 			if ($pseudo_realnames) {
 				include_once(CLASSPATH . 'sql.php');
 				$sql_object = new SQL($select);
@@ -836,7 +850,7 @@ FROM
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
+				$col_num = $target_entries['col_num'];
 				
 				# Tabellen-oid des Attributs
 				$table_oid = pg_field_table($ret[1], $i, true);
