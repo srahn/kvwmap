@@ -5,6 +5,17 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann

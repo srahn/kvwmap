@@ -128,7 +128,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 
 ob_start ();    // Ausgabepufferung starten
 
@@ -2001,6 +2001,21 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
 			} break;
+
+			case 'zweifaktor_authentifizierung' : {
+				$GUI->checkCaseAllowed('zweifaktor_authentifizierung');
+				$GUI->zweifaktor_authentifizierung();
+			} break;
+
+			case 'zwiefactor_enable' : {
+							$GUI->checkCaseAllowed('zweifaktor_authentifizierung');
+							$GUI->zweifactor_enable();
+			} break;
+
+			case 'zwiefactor_disable' : {
+							$GUI->checkCaseAllowed('zweifaktor_authentifizierung');
+							$GUI->zweifactor_disable();
+			} break;			
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');

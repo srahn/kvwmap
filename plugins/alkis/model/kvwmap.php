@@ -112,8 +112,8 @@
     $layer->set('name',$legendentext);
     $layer->set('type',2);
     $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
@@ -123,9 +123,9 @@
       $layer->setConnectionType(6);
     }
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $klasse->setexpression($expression);
@@ -177,8 +177,8 @@
     $layer->set('name',$legendentext);
     $layer->set('type',2);
     $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
@@ -188,9 +188,9 @@
       $layer->setConnectionType(6);
     }
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0');
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $style=ms_newStyleObj($klasse);

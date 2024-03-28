@@ -256,8 +256,7 @@ class stelle {
 		$rs = $this->database->result->fetch_array();
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['Bezeichnung'];
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
