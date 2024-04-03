@@ -17798,6 +17798,16 @@ class db_mapObj{
     return $rect;
   }
 	
+	/**
+	* Diese Funktion liefert zu einem Layer die Bestandteile, die für eine Sachdatenabfrage benötigt werden.
+	* Es wird ein Array mit 3 Elementen zurückgeliefert:
+	* select  - die entsprechend der Rechte gekürzte Attributliste für den SELECT-Teil der Abfrage, Array- und Datentyp-Attribute werden mit to_json() abgefragt, zusätzlich erweitert um die ID-Spalte
+	* query   - das SQL aus dem Query-Feld des Layers, zusätzlich erweitert um die ID-Spalte, kann dann in einer Unterabfrage im FROM-Teil eingebaut werden
+	* orderby - das ORDER BY aus dem Query-Feld des Layers, falls vorhanden 
+	* @param layerset array enthält die Layerinformationen inkl. den Attributinformationen
+	* @param privileges array enthält die Rechteeinstellungen der Attribute
+	* @return array with string select and string query and string orderby
+	*/
 	function getQueryParts($layerset, $privileges){
 		$path = $layerset['pfad'];
 
