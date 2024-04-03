@@ -18386,15 +18386,6 @@ class db_mapObj{
 				}
 			}
 			if ($withvalues == true) {
-				$attributes['options'][$i] = replace_params(
-					$attributes['options'][$i],
-					rolle::$layer_params,
-					$this->user->id,
-					$stelle_id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
-
 				switch ($attributes['form_element_type'][$i]) {
 					# Auswahlfelder
 					case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : {
@@ -18504,8 +18495,9 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
-											$sql = str_replace('$stelleid', $stelle_id, $sql);
-											$sql = str_replace('$userid', $this->User_ID, $sql);
+											#$sql = str_replace('$stelleid', $stelle_id, $sql);
+											#$sql = str_replace('$userid', $this->User_ID, $sql);
+											#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
@@ -18525,8 +18517,9 @@ class db_mapObj{
 								}
 								elseif ($attributes['options'][$i] != '') {
 									$sql = $attributes['options'][$i];
-									$sql = str_replace('$stelleid', $stelle_id, $sql);
-									$sql = str_replace('$userid', $this->User_ID, $sql);
+									#$sql = str_replace('$stelleid', $stelle_id, $sql);
+									#$sql = str_replace('$userid', $this->User_ID, $sql);
+									#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
@@ -18543,6 +18536,7 @@ class db_mapObj{
 										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
 										// }
 									}
+									#echo '<br>attr: ' . print_r($attributes['enum'], true);
 								}
 							}
 						}
@@ -20333,8 +20327,16 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $language, $rs['options']);
+			$rs['options'] = replace_params(
+				$rs['options'],
+				rolle::$layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$language
+			);
+			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			#$rs['options'] = str_replace('$language', $language, $rs['options']);
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
