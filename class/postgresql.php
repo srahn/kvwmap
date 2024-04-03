@@ -1206,30 +1206,7 @@ FROM
 		}
 		return $geom_type;
 	}
-  
-  function eliminate_star($query){
-		include_once(CLASSPATH . 'sql.php');
-		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
-		$sql_object = new SQL($query);
-		$columns = $sql_object->get_attributes();
-		$from = $sql_object->get_from();
-    foreach ($columns as $column) {
-      if(strpos(trim($column['base_expr']), '*') === 0 OR strpos($column['base_expr'], '.*') !== false){
-        $sql = "SELECT ".$column['base_expr']." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column['base_expr']));
-          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
-          }
-          $query = str_replace(trim($column['base_expr']), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-	
+  	
   function pg_table_constraints($table_oid){
   	if($table_oid != ''){
 			$constraints = array();
