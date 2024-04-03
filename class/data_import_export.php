@@ -1336,8 +1336,8 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
+			#echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
-			#echo '<br>Frage Daten ab mit SQL: '. $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);
 
@@ -1441,7 +1441,7 @@ class data_import_export {
 
 						$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 
-						if (in_array('mobile', $kvwmap_plugins)) {
+						if (in_array('mobile', $kvwmap_plugins) AND $layerset[0]['sync'] > 0) {
 							$sql = "
 								SELECT
 									coalesce(max(version), 1) AS version
