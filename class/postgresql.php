@@ -850,7 +850,7 @@ FROM
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = $target_entries['col_num'];
+				$col_num = $target_entries[$i]['col_num'];
 				
 				# Tabellen-oid des Attributs
 				$table_oid = pg_field_table($ret[1], $i, true);
