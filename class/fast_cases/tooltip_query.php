@@ -384,7 +384,8 @@ class GUI {
 				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
-				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
+				$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
+				$pfad = $query_parts['query'];
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
@@ -465,17 +466,19 @@ class GUI {
 					$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 				}
 
+				$query_parts['select'] .= ', highlight_geom';
+
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 								
-				$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
+				$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad . ") as query WHERE 1=1 ".$sql_where;
 
 				# order by wieder einbauen
-				if($layerset[$i]['attributes']['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
-					$sql .= $layerset[$i]['attributes']['orderby'];
+				if ($query_parts['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
+					$sql .= $query_parts['orderby'];
 				}
 
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
@@ -980,58 +983,6 @@ class stelle {
 		$this->readDefaultValues();
 	}
 	
-	function parse_path($database, $path, $privileges, $attributes = NULL){
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
-		$distinctpos = strpos(strtolower($path), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$offset = $distinctpos+8;
-		}
-		else{
-			$offset = 7;
-		}
-		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path);
-		if(substr_count(strtolower($path), ' from ') > 1){
-			$whereposition = strpos($path, ' WHERE ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos($withoutwhere, ' FROM ');
-		}
-		else{
-			$whereposition = strpos(strtolower($path), ' where ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		}
-		$where = substr($path, $whereposition);
-		$from = substr($withoutwhere, $fromposition);
-
-		$attributesstring = substr($path, $offset, $fromposition-$offset);
-		//$fieldstring = explode(',', $attributesstring);
-		$fieldstring = get_select_parts($attributesstring);
-		$count = count($fieldstring);
-		for($i = 0; $i < $count; $i++){
-			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
-				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
-				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
-			}
-			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', strtolower($fieldstring[$i]));
-				$attributename = trim($explosion[count($explosion)-1]);
-				$real_attributename = $fieldstring[$i];
-			}
-			if($privileges[$attributename] != ''){
-				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
-				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-			}
-			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-			}
-		}
-		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
-		return $newpath;
-	}	
-
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
@@ -1541,29 +1492,6 @@ class pgdatabase {
 		);
 	}
 
-  function eliminate_star($query){
-		include_once(CLASSPATH . 'sql.php');
-		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
-		$sql_object = new SQL($query);
-		$columns = $sql_object->get_attributes();
-		$from = $sql_object->get_from();
-    foreach ($columns as $column) {
-      if(strpos(trim($column['base_expr']), '*') === 0 OR strpos($column['base_expr'], '.*') !== false){
-        $sql = "SELECT ".$column['base_expr']." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column['base_expr']));
-          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
-          }
-          $query = str_replace(trim($column['base_expr']), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-
   function setClientEncodingAndDateStyle() {
     $sql = "
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
@@ -1744,26 +1672,26 @@ class db_mapObj{
 		}
 	}
 	
-	function getQueryWithOid($layerset, $layerdb, $stelle){
-		$path = replace_params(
-			$layerset['pfad'],
-			rolle::$layer_params,
-			$this->user->id,
-			$stelle->id,
-			rolle::$hist_timestamp,
-			$this->user->rolle->language
-		);
-		$privileges = $stelle->get_attributes_privileges($layerset['Layer_ID']);
-		$layerset['attributes'] = $this->read_layer_attributes($layerset['Layer_ID'], $layerdb, $privileges['attributenames']);
-		if($layerset['Layer_ID'] > 0){			# bei Rollenlayern nicht
-			$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
+	function getQueryParts($layerset, $privileges){
+		$path = $layerset['pfad'];
+
+		foreach ($layerset['attributes']['name'] as $i => $attributename) {
+			if (value_of($privileges, $attributename) != '') {
+				$type = $attributes['type'][$i];
+				if (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) {
+					$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;								# Array oder Datentyp
+				}
+				else {
+					$newattributesarray[] = pg_quote($attributename);					# normal
+				}
+			}
 		}
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
 		$lastfromposition = strrpos(strtolower($path), 'from');
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			$layerset['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
+			$orderby = ' '.substr($path, $orderbyposition);
 			$path = substr($path, 0, $orderbyposition);
 		}
 
@@ -1783,11 +1711,14 @@ class db_mapObj{
 			$pfad = substr(trim($path), 7);
 		}
 		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
-			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']] ?: $layerset['maintable']).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+			$newattributesarray[] = pg_quote($layerset['maintable'] . '_oid');
+		}
+		if ($distinct == true) {
+			$pfad = 'DISTINCT ' . $pfad;
 		}
 
 		$the_geom = $layerset['attributes']['the_geom'];
-
 				
 		# group by wieder einbauen
 		if($layerset['attributes']['groupby'] != ''){
@@ -1800,8 +1731,12 @@ class db_mapObj{
 				$j++;
 			}
 		}
-		return $pfad;
-	}	
+		return [
+				'select' => implode(', ', $newattributesarray),
+				'query' => $pfad, 
+				'orderby' => $orderby
+			];
+	}
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;

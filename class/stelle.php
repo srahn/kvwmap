@@ -2468,38 +2468,6 @@ class stelle {
 		return $privileges;
 	}
 
-	function parse_path($database, $path, $privileges, $attributes = NULL){
-		$path = str_replace(["\r\n", "\n", "\t", "  "], ' ', $path);
-		$distinctpos = strpos(strtolower($path), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$offset = $distinctpos+8;
-		}
-		else{
-			$offset = 7;
-		}
-		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path);
-
-		include_once(CLASSPATH . 'sql.php');
-		$sql_object = new SQL($path);
-		$columns = $sql_object->get_attributes();
-		$from = $sql_object->get_from();
-
-		foreach ($columns as $attributename => $column) {
-			if(value_of($privileges, $attributename) != ''){
-				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) {
-					$newattributesarray[] = 'to_json(' . $column['base_expr'] . ')::text as ' . $attributename;								# Array oder Datentyp
-				}
-				else {
-					$newattributesarray[] = $column['base_expr'] . ($column['alias']? ' as ' . $column['alias'] : '');					# normal
-				}
-			}
-		}
-		$newpath = $offstring.' ' . implode(', ', $newattributesarray) . ' ' . $from;
-		return $newpath;
-	}
-
 	function set_layer_privileges($formvars){
 		if ($formvars['used_layer_parent_ids'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
 			# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
