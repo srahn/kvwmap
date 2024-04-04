@@ -1928,6 +1928,11 @@ echo '			</table>
 				$map->maxsize = 4096;
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
 
+				$map->setSize(
+					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
+					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
+				);
+
 				$bb = $this->Stelle->MaxGeorefExt;
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
@@ -1952,10 +1957,7 @@ echo '			</table>
 					}
 				}
 
-				$map->setSize(
-					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
-					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
-				);
+
 
 				# OWS Metadaten
 				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
@@ -2873,7 +2875,7 @@ echo '			</table>
 		}
   }
 
-	function zoomMap($nZoomFactor){
+  function zoomMap($nZoomFactor){
 		# Funktion zum Zoomen über die Navigationswerkzeuge; Koordinaten sind Bildkoordinaten
     $corners=explode(';',$this->formvars['INPUT_COORD']);
     # Auslesen der ersten übergebenen Koordinate
@@ -2905,8 +2907,7 @@ echo '			</table>
       # Zoomen auf einen Punkt
       $this->debug->write('<br>Es wird auf einen Punkt gezoomt',4);
       # Erzeugen eines Punktobjektes
-      $oPixelPos=ms_newPointObj();
-
+      $oPixelPos = new PointObj();
 			$oPixelPos->setXY($minx,$maxy);
 			$this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     }
@@ -2922,7 +2923,7 @@ echo '			</table>
 					$this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
 					# Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
 					# verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
-					$oPixelPos=ms_newPointObj();
+					$oPixelPos = new PointObj();
 					$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 					$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				}
@@ -2937,7 +2938,7 @@ echo '			</table>
 		$minx = (float) $lu[0];
 		$miny = (float) $lu[1];
 		if (count($corners) == 1) { # Zoom auf Punktkoordinate
-			$oPixelPos = ms_newPointObj();
+			$oPixelPos = new PointObj();
 			if ($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code) {
 				$oPixelPos->setXY($minx, $miny);
 				$projFROM = ms_newprojectionobj("init=epsg:" . $this->formvars['epsg_code']);
@@ -3022,8 +3023,7 @@ echo '			</table>
 			$ru = explode(',',$corners[1]);
 			$maxx=$ru[0];
 			$maxy=$ru[1];
-			$rect=ms_newRectObj();
-			$rect->setextent($minx,$miny,$maxx,$maxy);
+			$rect = rectObj($minx,$miny,$maxx,$maxy);
 			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
 				$projFROM = ms_newprojectionobj("init=epsg:" . $this->formvars['epsg_code']);
 				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
@@ -3032,7 +3032,7 @@ echo '			</table>
 			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 			# Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
 			# verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
-			$oPixelPos=ms_newPointObj();
+			$oPixelPos = new PointObj();
 			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 		}
@@ -3105,13 +3105,7 @@ echo '			</table>
 	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
 	 */
 	function setMapExtent() {
-    if (MAPSERVERVERSION < 600) {
-	    $extent = ms_newRectObj();
-		}
-    else {
-		  $extent = new rectObj();
-		}
-		$extent->setextent($this->formvars['left'],$this->formvars['bottom'],$this->formvars['right'],$this->formvars['top']);
+		$extent = rectObj($this->formvars['left'],$this->formvars['bottom'],$this->formvars['right'],$this->formvars['top']);
 		$wgsProjection = ms_newprojectionobj("init=epsg:4326");
 		$userProjection = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$extent->project($wgsProjection, $userProjection);
@@ -5372,11 +5366,12 @@ echo '			</table>
 					$this->formvars['loc_x'] = $this->point['pointx'];
 					$this->formvars['loc_y'] = $this->point['pointy'];
 					$this->formvars['angle'] = $value = str_replace('.', ',', $this->point['angle']);
-					$rect = ms_newRectObj();
-					$rect->minx = $this->point['pointx'] - 100;
-					$rect->maxx = $this->point['pointx'] + 100;
-					$rect->miny = $this->point['pointy'] - 100;
-					$rect->maxy = $this->point['pointy'] + 100;
+					$rect = rectObj(
+						$this->point['pointx'] - 100,
+						$this->point['pointx'] + 100,
+						$this->point['pointy'] - 100,
+						$this->point['pointy'] + 100
+					);
 					$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 					if (MAPSERVERVERSION > 600) {
 						$this->map_scaledenom = $this->map->scaledenom;
@@ -5496,26 +5491,15 @@ echo '			</table>
 					if($this->formvars['zoom'] != 'false'){
 						$rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-						if (MAPSERVERVERSION > 600) {
-							$this->map_scaledenom = $this->map->scaledenom;
-						}
-						else {
-							$this->map_scaledenom = $this->map->scale;
-						}
+						$this->map_scaledenom = $this->map->scaledenom;
 					}
 				}
 			}
     }
 		# Zoom auf Geometrie-Fehler-Position
 		if ($this->error_position != '') {
-			$rect = ms_newRectObj();
-			$this->map->setextent($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
-			if (MAPSERVERVERSION > 600) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
+			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
+			$this->map_scaledenom = $this->map->scaledenom;
 		}
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
@@ -5704,26 +5688,15 @@ echo '			</table>
 					if($this->formvars['zoom'] != 'false'){
 						$rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-						if (MAPSERVERVERSION > 600) {
-							$this->map_scaledenom = $this->map->scaledenom;
-						}
-						else {
-							$this->map_scaledenom = $this->map->scale;
-						}
+						$this->map_scaledenom = $this->map->scaledenom;
 					}
 				}
 			}
 		}
 		# Zoom auf Geometrie-Fehler-Position
 		if ($this->error_position != '') {
-			$rect = ms_newRectObj();
-			$this->map->setextent($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
-			if (MAPSERVERVERSION > 600) {
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				$this->map_scaledenom = $this->map->scale;
-			}
+			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
+			$this->map_scaledenom = $this->map->scaledenom;
 		}
 		# zoomToMaxLayerExtent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
@@ -5906,7 +5879,7 @@ echo '			</table>
 			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 
 			# damit nicht außerhalb des Stellen-Extents gezoomt wird
-			$oPixelPos=ms_newPointObj();
+			$oPixelPos = new PointObj();
 	    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			$this->map->zoomscale($this->map->scaledenom,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 			$this->map_scaledenom = $this->map->scaledenom;
@@ -6110,22 +6083,24 @@ echo '			</table>
   }	
 
 	function get_rect_by_buffer($x, $y, $rand) {
-		$rect = ms_newRectObj();
-		$rect->minx = $x - $rand;
-		$rect->maxx = $x + $rand;
-		$rect->miny = $y - $rand;
-		$rect->maxy = $y + $rand;
+		$rect = rectObj(
+			$x - $rand,
+			$x + $rand,
+			$y - $rand,
+			$y + $rand
+		);
 		return $rect;
 	}
 
 	function get_rect_by_scale($x, $y, $scale) {
-		$rect = ms_newRectObj();
 		$width_rand  = 0.02535 / 96 * $this->user->rolle->nImageWidth  * $scale / 2;
 		$height_rand = 0.02535 / 96 * $this->user->rolle->nImageHeight * $scale / 2;
-		$rect->minx = $x - $width_rand;
-		$rect->maxx = $x + $width_rand;
-		$rect->miny = $y - $height_rand;
-		$rect->maxy = $y + $height_rand;
+		$rect = rectObj(
+			$x - $width_rand,
+			$x + $width_rand,
+			$y - $height_rand,
+			$y + $height_rand
+		);
 		return $rect;
 	}
 
@@ -6517,11 +6492,12 @@ echo '			</table>
 				# Extent setzen
 				$width = $this->Document->activeframe[0]['mapwidth'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
 				$height = $this->Document->activeframe[0]['mapheight'] * $this->Document->ausschnitt[0]['print_scale']/$this->meter_pro_einheit * 0.00035277;
-				$rect= ms_newRectObj();
-				$rect->minx = $this->Document->ausschnitt[0]['center_x'] - $width/2;
-				$rect->miny = $this->Document->ausschnitt[0]['center_y'] - $height/2;
-				$rect->maxx = $this->Document->ausschnitt[0]['center_x'] + $width/2;
-				$rect->maxy = $this->Document->ausschnitt[0]['center_y'] + $height/2;
+				$rect= rectObj(
+					$this->Document->ausschnitt[0]['center_x'] - $width/2,
+					$this->Document->ausschnitt[0]['center_y'] - $height/2,
+					$this->Document->ausschnitt[0]['center_x'] + $width/2,
+					$this->Document->ausschnitt[0]['center_y'] + $height/2
+				);
 				if($this->Document->ausschnitt[0]['epsg_code'] != '' AND $this->Document->ausschnitt[0]['epsg_code'] != $this->user->rolle->epsg_code){
 					$projFROM = ms_newprojectionobj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
 					$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
@@ -7845,7 +7821,7 @@ echo '			</table>
 		else {
 			$bb = array($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
 		}
-		$this->center = ms_newPointObj();
+		$this->center = new PointObj();
 		$this->center->setXY($bb[0] + ($bb[2] - $bb[0]) / 2, $bb[1] + ($bb[3] - $bb[1]) / 2);
 		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:4326");
@@ -11009,14 +10985,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					# Zoom auf Geometrie-Fehler-Position
 					if ($this->error_position != '') {
-						$rect = ms_newRectObj();
-						$this->map->setextent($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
-						if (MAPSERVERVERSION > 600) {
-							$this->map_scaledenom = $this->map->scaledenom;
-						}
-						else {
-							$this->map_scaledenom = $this->map->scale;
-						}
+						$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
+						$this->map_scaledenom = $this->map->scaledenom;
 					}
 					# evtl. Zoom auf "Mutter-Layer"
 					if ($this->formvars['layer_id_mother'] != '' AND $this->formvars['oid_mother'] != '' AND $this->formvars['tablename_mother'] != '' AND $this->formvars['columnname_mother'] != '') {
@@ -11081,12 +11051,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									if ($this->formvars['zoom'] != 'false') {
 										$rect = $lineeditor->zoomToLine($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
 										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-										if (MAPSERVERVERSION > 600) {
-											$this->map_scaledenom = $this->map->scaledenom;
-										}
-										else {
-											$this->map_scaledenom = $this->map->scale;
-										}
+										$this->map_scaledenom = $this->map->scaledenom;
 									}
 								}
 							}
@@ -11102,18 +11067,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							if ($this->point['pointx'] != '') {
 								$this->formvars['loc_x']=$this->point['pointx'];
 								$this->formvars['loc_y']=$this->point['pointy'];
-								$rect = ms_newRectObj();
-								$rect->minx = $this->point['pointx']-100;
-								$rect->maxx = $this->point['pointx']+100;
-								$rect->miny = $this->point['pointy']-100;
-								$rect->maxy = $this->point['pointy']+100;
+								$rect = rectObj(
+									$this->point['pointx']-100,
+									$this->point['pointx']+100,
+									$this->point['pointy']-100,
+									$this->point['pointy']+100
+								);
 								$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-								if (MAPSERVERVERSION > 600) {
-									$this->map_scaledenom = $this->map->scaledenom;
-								}
-								else {
-									$this->map_scaledenom = $this->map->scale;
-								}
+								$this->map_scaledenom = $this->map->scaledenom;
 							}
 						}
 						#-----Pointeditor-----#
@@ -14400,8 +14361,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->errmsg="Der gespeicherte Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
     }
     else {
-			$rect = ms_newRectObj();
-			$rect->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+			$rect = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
 			if($ret[1]['epsg_code'] != '' AND $ret[1]['epsg_code'] != $this->user->rolle->epsg_code){
 				$projFROM = ms_newprojectionobj("init=epsg:" . $ret[1]['epsg_code']);
 				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
@@ -14423,10 +14383,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function setPrevMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $prevextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $prevextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
     while($i < 100 AND
@@ -14468,10 +14426,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   }
 
   function setNextMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $nextextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $nextextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $nextextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     # Abfragen der nächsten Kartenausdehnung
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
@@ -15621,12 +15577,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							}
 							$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
 							$projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
-							$rect2=ms_newRectObj();
-							$rect2->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+							$rect2 = rectObj($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							$rect2->project($projFROM, $projTO);
 							if ($layerset[$i]['Datentyp'] == 3) {
 								# bei Rasterlayern nur punktuell abfragen
-								$point=ms_newPointObj();
+								$point = new PointObj();
 								$point->setXY($rect2->minx+($rect2->maxx-$rect2->minx)/2, $rect2->miny+($rect2->maxy-$rect2->miny)/2);
 								@$layer->queryByPoint($point, MS_MULTIPLE, 0);
 							}
@@ -16037,8 +15992,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
             $projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
 
-            $bbox=ms_newRectObj();
-            $bbox->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
+            $bbox = rectObj($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 
             $bbox = $this->pgdatabase->transformRect($bbox,$this->user->rolle->epsg_code,$layerset[$i]['epsg_code']);
             $bbox = $bbox[1];
@@ -16126,8 +16080,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
               case 'meters' : $pixsize=1; break;
               default : $pixsize=$this->user->rolle->pixsize;
             }
-						$rect2 = ms_newRectObj();
-						$rect2->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);		// rect kopieren, damit das Original nicht umprojeziert wird und beim nächsten Layer einen Fehler verursacht
+						$rect2 = rectObj($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);		// rect kopieren, damit das Original nicht umprojeziert wird und beim nächsten Layer einen Fehler verursacht
             if($rect2->minx == $rect2->maxx AND $rect2->miny == $rect2->maxy){
             	$rand=$layerset[$i]['tolerance']*$pixsize;
             }
@@ -16231,7 +16184,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 #		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
 #		$refmap->extent->project($projFROM, $projTO);
 		# zoomen
-		$oPixelPos = ms_newPointObj();
+		$oPixelPos = new PointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
 		//$refmap->zoomscale($scale,$oPixelPos,$width,$height,$refmap->extent,$this->Stelle->MaxGeorefExt);
 		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent);
@@ -16731,8 +16684,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
     else {
       # Abfrage fehlerfrei
-      # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -16743,8 +16694,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+			$rect = rectObj(
+				$rs['minx'],
+				$rs['miny'],
+      	$rs['maxx'],
+				$rs['maxy']
+			);
     	$randx=($rect->maxx-$rect->minx)*$border/100;
     	$randy=($rect->maxy-$rect->miny)*$border/100;
     	# Setzen der neuen Kartenausdehnung.
@@ -16874,20 +16829,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 			$this->map->setextent($minx,$miny,$maxx,$maxy);
 			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
-			$oPixelPos=ms_newPointObj();
+			$oPixelPos = new PointObj();
 			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
-			if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scaledenom;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scaledenom;
-			}
-			else {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scale;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scale;
-			}
+			if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
+			else $nScale = $this->map->scaledenom;
+			$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			$this->map_scaledenom = $this->map->scaledenom;
 		}
   }
 
@@ -16923,11 +16870,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			";
 			$ret = $layerdb->execSQL($sql, 4, 0);
 			$rs = pg_fetch_array($ret[1]);
-			$rect = ms_newRectObj();
-			$rect->minx = $rs['minx'];
-			$rect->maxx = $rs['maxx'];
-			$rect->miny = $rs['miny'];
-			$rect->maxy = $rs['maxy'];
+			$rect = rectObj(
+				$rs['minx'],
+				$rs['maxx'],
+				$rs['miny'],
+				$rs['maxy']
+			);
 			$randx = ($rect->maxx-$rect->minx) * 50 / 100 + 0.01;
 			$randy = ($rect->maxy-$rect->miny) * 50 / 100 + 0.01;
 			if ($rect->minx != '') {
@@ -17028,8 +16976,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$maxx=$minx+$width;
 					$maxy=$miny+$height;
 				}
-				$rect=ms_newRectObj();
-				$rect->setextent($minx,$miny,$maxx,$maxy);
+				$rect = rectObj($minx,$miny,$maxx,$maxy);
 			}
 			else{
 				$polygon = 'POLYGON((';
@@ -17047,27 +16994,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
   function zoomToRefExt() {
-    # Zoomen auf den in der Referenckarte gesetzten Punkt
+    # Zoomen auf den in der Referenzkarte gesetzten Punkt
     # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte
     $refmapwidthm=($this->reference_map->reference->extent->maxx-$this->reference_map->reference->extent->minx);
     $refmappixsize=$refmapwidthm/$this->reference_map->reference->width;
     $refmapxposm=$this->reference_map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
     $refmapyposm=$this->reference_map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
 
-		$point = ms_newPointObj();
+		$point = new PointObj();
 	  $point->setXY($refmapxposm, $refmapyposm);
 
-		#$newextent=ms_newRectObj();
-		#$newextent->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
 		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-			if(MAPSERVERVERSION < '600'){
-				$projFROM = ms_newprojectionobj("init=epsg:" . $this->ref['epsg_code']);
-				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-			}
-			else{
-				$projFROM = $this->reference_map->projection;
-				$projTO = $this->map->projection;
-			}
+			$projFROM = $this->reference_map->projection;
+			$projTO = $this->map->projection;
 			$point->project($projFROM, $projTO);
 		}
 
@@ -17079,7 +17018,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $zoomminy=$point->y - $halfmapheight;
 
     $this->map->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
-    $oPixelPos=ms_newPointObj();
+    $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     $this->saveMap('');
@@ -17946,11 +17885,12 @@ class db_mapObj{
 		#echo $sql;
     $ret = $layerdb->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-    $rect->minx=$rs['minx'];
-    $rect->maxx=$rs['maxx'];
-    $rect->miny=$rs['miny'];
-    $rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+    	$rs['minx'],
+    	$rs['maxx'],
+    	$rs['miny'],
+    	$rs['maxy']
+		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
 			if($client_epsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
 			else $randx = $randy = ZOOMBUFFER;
@@ -21587,7 +21527,6 @@ class db_mapObj{
   }
 
   function getMaxMapExtent() {
-    $rect=ms_newRectObj();
     $sql ='SELECT MIN(minxmax) AS minxmax, MIN(minymax) AS minymax';
     $sql.=', MAX(maxxmax) AS maxxmax, MAX(maxymax) AS maxymax FROM stelle';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getMaxMapExtent - Lesen der Maximalen Kartenausdehnung:<br>" . $sql,4);

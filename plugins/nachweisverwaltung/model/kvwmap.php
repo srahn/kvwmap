@@ -72,11 +72,12 @@
 		$sql.=" FROM nachweisverwaltung.n_nachweise WHERE id = ".$id.") AS foo";
 		$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-		$rect->minx=$rs['minx'];
-		$rect->maxx=$rs['maxx'];
-		$rect->miny=$rs['miny'];
-		$rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['maxx'],
+			$rs['miny'],
+			$rs['maxy']
+		);
 		$randx=($rect->maxx-$rect->minx)*0.02;
 		$randy=($rect->maxy-$rect->miny)*0.02;
 		if($rect->minx != ''){

@@ -421,7 +421,7 @@ class GUI {
 			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 			$this->map->setextent($minx,$miny,$maxx,$maxy);
 			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
-			$oPixelPos=ms_newPointObj();
+			$oPixelPos = new PointObj();
 			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			if (MAPSERVERVERSION > 600) {
 				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
@@ -995,6 +995,11 @@ class GUI {
 				$map->maxsize = 4096;
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
 
+				$map->setSize(
+					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
+					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
+				);
+
 				$bb = $this->Stelle->MaxGeorefExt;
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
@@ -1018,11 +1023,6 @@ class GUI {
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
-
-				$map->setSize(
-					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
-					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
-				);
 
 				# OWS Metadaten
 				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
@@ -1638,10 +1638,8 @@ class GUI {
   }
 	
   function setPrevMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $prevextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $prevextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
     while($i < 100 AND 
@@ -1682,10 +1680,8 @@ class GUI {
   }
 
   function setNextMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $nextextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $nextextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $nextextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
 		$nexttime = $consumetime;
     # Abfragen der nächsten Kartenausdehnung
     $ret = $this->user->rolle->getConsume($consumetime);
@@ -1758,8 +1754,7 @@ class GUI {
       # Zoomen auf einen Punkt
       $this->debug->write('<br>Es wird auf einen Punkt gezoomt',4);
       # Erzeugen eines Punktobjektes
-      $oPixelPos=ms_newPointObj();
-
+      $oPixelPos = new PointObj();
 			$oPixelPos->setXY($minx,$maxy);
 			$this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     }
@@ -1775,7 +1770,7 @@ class GUI {
 					$this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
 					# Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
 					# verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
-					$oPixelPos=ms_newPointObj();
+					$oPixelPos = new PointObj();
 					$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 					$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
 				}
@@ -1899,7 +1894,7 @@ class GUI {
   }
 
   function scaleMap($nScale) {
-    $oPixelPos=ms_newPointObj();
+    $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
   	if (MAPSERVERVERSION >= 600 ) {

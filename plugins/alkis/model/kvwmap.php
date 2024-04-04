@@ -1007,7 +1007,7 @@
 	$GUI->ALKIS_Kartenauszug = function($layout, $formvars) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
-		$point=ms_newPointObj();
+		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
 		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);

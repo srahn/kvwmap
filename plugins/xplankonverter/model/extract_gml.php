@@ -100,7 +100,6 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -228,7 +227,6 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {

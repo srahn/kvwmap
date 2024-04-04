@@ -1299,7 +1299,6 @@ FROM
     else {
       # Abfrage fehlerfrei
       # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_assoc($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -1310,8 +1309,12 @@ FROM
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+			$rect = rectObj(
+      	$rs['minx'],
+				$rs['miny'],
+      	$rs['maxx'], 
+				$rs['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
@@ -1322,12 +1325,13 @@ FROM
     $sql.=" FROM (select st_extent(st_transform(st_geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
-      $rect= ms_newRectObj();
       $rs=pg_fetch_assoc($ret[1]);
-      $rect->minx=$rs['minx']-30; 
-			$rect->miny=$rs['miny']-30;
-      $rect->maxx=$rs['maxx']+30; 
-			$rect->maxy=$rs['maxy']+30;
+      $rect = rectObj(
+				$rs['minx']-30,
+				$rs['miny']-30,
+      	$rs['maxx']+30,
+				$rs['maxy']+30
+			);
       return $rect;
     }
   }

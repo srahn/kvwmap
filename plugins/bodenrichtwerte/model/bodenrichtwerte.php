@@ -59,8 +59,6 @@ class bodenrichtwertzone {
     }
     else {
       # Abfrage fehlerfrei
-      # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
       # Wenn die Box eine Kantenlänge von 0 hat, wird sie etwas aufgeweitet um 100m.
@@ -72,8 +70,12 @@ class bodenrichtwertzone {
         $rs['maxy']=$rs['maxy']+100;
         $rs['miny']=$rs['miny']-100;        
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      $rect = rectObj(
+				$rs['minx'],
+				$rs['maxx'],
+				$rs['miny'],
+				$rs['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
