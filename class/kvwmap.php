@@ -9713,7 +9713,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->delete_last_query();
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $request, NULL, $this->formvars['anzahl'], NULL);
 				}
-				$layerset[0]['attributes'] = $mapDB->add_attribute_values($attributes, $this->pgdatabase, $layerset[0]['shape'], true, $this->Stelle->id);
+				$layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $this->pgdatabase, $layerset[0]['shape'], true, $this->Stelle->id);
       }break;
 		}   # Ende switch connectiontype
 
@@ -9761,7 +9761,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							for ($k = 0; $k < count($this->qlayerset[$i]['shape']); $k++){
 								$oids[] = $this->qlayerset[$i]['shape'][$k][$layerset[0]['maintable'].'_oid'];
 							}
-							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $attributes['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
+							$rect = $mapDB->zoomToDatasets($oids, $layerset[0], $layerset[0]['attributes']['the_geom'], 10, $layerdb, $this->user->rolle->epsg_code, $this->Stelle);
 							$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
 							if (MAPSERVERVERSION > 600) {
 								$this->map_scaledenom = $this->map->scaledenom;
@@ -10075,6 +10075,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function Zwischenablage(){
 		global $language;
+		include_(CLASSPATH.'datendrucklayout.php');
+		$ddl = new ddl($this->database);
 		if($language != 'german') {
 			$name_column = "
 			CASE
@@ -10088,9 +10090,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$sql = "SELECT count(z.layer_id) as count, z.layer_id, " . $name_column.", l.alias FROM zwischenablage as z, layer as l WHERE z.layer_id = l.Layer_ID AND user_id = " . $this->user->id." AND stelle_id = " . $this->Stelle->id." GROUP BY z.layer_id, l.Name";
 		#echo $sql.'<br>';
 		$ret = $this->database->execSQL($sql,4, 1);
+		$result = $this->database->result;
     $this->num_rows = $this->database->result->num_rows;
-		while($rs = $this->database->result->fetch_assoc()){
+		while($rs = $result->fetch_assoc()){
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+			$rs['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $rs['layer_id'], array(0,1), 'only_ids');
 			$this->layer[] = $rs;
 		}
 		// if($this->num_rows == 1){
@@ -10165,10 +10169,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 			$ddl = new ddl($this->database, $this);
 			$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
-			$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
-			$this->formvars['chosen_layer_id'] = $layer_id;
-			$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
-			#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
+			if ($this->formvars['aktivesLayout'] = $ddl->selectedlayout[0]) {
+				$this->formvars['chosen_layer_id'] = $layer_id;
+				$this->qlayerset[0]['shape'] = null;
+				$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
+			}
+			# folgendes wird nur ausgeführt, wenn der letzte Layer kein Drucklayout hatte und nicht gedruckt wurde
+			$this->outputfile = 'zwischenablage.pdf';
+			$fp = fopen(IMAGEPATH . $this->outputfile, 'wb');
+			fwrite($fp, $this->pdf->ezOutput());
+			fclose($fp);
+			$this->mime_type='pdf';
+			$this->output();
 		}
 	}
 
@@ -11401,7 +11413,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($this->qlayerset[0]['shape'] != null) {
 			$result = $this->qlayerset[0]['shape'];
 		}
-		else {
+		elseif ($checkbox_names[0] != '') {
 			for ($i = 0; $i < count($checkbox_names); $i++) {
 				if ($this->formvars[$checkbox_names[$i]] == 'on') {
 					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
@@ -11414,7 +11426,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				FROM 
 					(SELECT " . $query_parts['query'] . ") as foo
 				WHERE
-					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN (" . implode(',', $oids) . ")
+					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN (" . implode(',', $oids ?: []) . ")
 				";
 			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
 			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
