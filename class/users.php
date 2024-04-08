@@ -606,10 +606,14 @@ class account {
 
 	function getLayer($logged) {
 		# Abfrage der Anzahl der Layer
-		$sql ='SELECT COUNT(Layer_ID) AS layers FROM layer';
-		if ($logged) {
-			$sql.=' WHERE logconsume="1"';
-		}
+		$sql = "
+			SELECT
+				COUNT(Layer_ID) AS layers
+			FROM
+				layer
+			WHERE
+				" . ($logged ? "logconsume = '1'" : "true") . "
+		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
@@ -709,12 +713,6 @@ class user {
 		elseif (
 			$case == 'Layereditor' AND
 			$this->database->gui->go == 'Klasseneditor'
-		) {
-			return true;
-		}
-		elseif (
-			$case == 'chart_speichern' AND
-			$this->funktion == 'admin'
 		) {
 			return true;
 		}
@@ -1172,7 +1170,6 @@ class user {
 					, maxx = " . $newExtent['maxx'] . "
 					, maxy = " . $newExtent['maxy'] . "
 					, language = '" . $formvars['language'] . "'
-					" . ($formvars['fontsize_gle'] ? ", fontsize_gle = '" . $formvars['fontsize_gle'] . "'" : "") . "
 					, tooltipquery = '" . ($formvars['tooltipquery'] != '' ? "1" : "0") . "'
 					, result_color = '" . $formvars['result_color'] . "'
 					, result_hatching = '" . (value_of($formvars, 'result_hatching') == '' ? '0' : '1') . "'

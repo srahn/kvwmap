@@ -91,46 +91,50 @@ class LogFile {
 	################################################################################
 
 	# öffnet die Logdatei
-	function __construct($filename,$format,$title,$headline) {
-		$this->name=$filename;
-		$this->fp=fopen($filename,"a");
-		$this->format=$format;
+	function __construct($filename, $format, $title, $headline, $with_timestamp = false) {
+		$this->name = $filename;
+		$this->fp = fopen($filename,"a");
+		$this->format = $format;
+		$this->with_timestamp = $with_timestamp;
     $ret = true;
-		if ($format=="html") {
+		if ($format == "html") {
 			# fügt HEML header ein zum loggen in einer HTML-Datei
 			# Wenn title gesetzt ist wird er als Titel im header gesetzt, sonst default.
-			if ($title=="") { $title=="Logdatei"; }
-			fwrite($this->fp,"<html>\n<head>\n<title>".$title."</title>\n</head>\n<body>");
-			if ($headline!="") {
-				$ret=@fwrite($this->fp,"<h1>".$headline."</h1>");
+			if ($title == "") { $title=="Logdatei"; }
+			fwrite($this->fp, "<html>\n<head>\n<title>" . $title . "</title>\n</head>\n<body>");
+			if ($headline != "") {
+				$ret = @fwrite($this->fp, "<h1>" . $headline . "</h1>");
 			}
 		}
-		if ($format=="text") {
-			if ($headline!="") {
-				$ret=@fwrite($this->fp,"\n".$headline);
+		if ($format == "text") {
+			if ($headline != "") {
+				$ret = @fwrite($this->fp, "\n" . $headline);
 			}
 		}
 		if (!$ret) {
-			$this->Fehlermeldung ='In die Logdatei '.$this->name.' läßt sich nicht schreiben.';
-			$this->Fehlermeldung.='<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
-			$this->Fehlermeldung.='<br>Prüfen Sie die Rechte der Datei!';
-			include(LAYOUTPATH."snippets/Fehlermeldung.php");
+			$this->Fehlermeldung  = 'In die Logdatei ' . $this->name . ' läßt sich nicht schreiben.';
+			$this->Fehlermeldung .= '<br>Das kann daran liegen, dass für den WebServer, in dem kvwmap läuft, keine Schreibrechte gesetzt sind.';
+			$this->Fehlermeldung .= '<br>Prüfen Sie die Rechte der Datei!';
+			include(LAYOUTPATH . "snippets/Fehlermeldung.php");
 			exit;
 		}
 	}
 
 	function write($msg) {
-		if ($this->format=="html") {
-			fwrite($this->fp,"\n<br>".$msg);
+		if ($this->with_timestamp) {
+			$msg = date("Y-m-d H:i:s") . ': ' . $msg;
 		}
-		if ($this->format=="text") {
-			fwrite($this->fp,"\n".$msg);
+		if ($this->format == "html") {
+			fwrite($this->fp, "\n<br>" . $msg);
+		}
+		if ($this->format == "text") {
+			fwrite($this->fp, "\n" . $msg);
 		}
 	}
 
 	function close() {
-		if ($this->format=="html") {
-			fwrite($this->fp,"\n</body>\n</html>");
+		if ($this->format == "html") {
+			fwrite($this->fp, "\n</body>\n</html>");
 		}
 		fclose($this->fp);
 	}

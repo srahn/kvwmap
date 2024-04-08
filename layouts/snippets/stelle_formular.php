@@ -147,7 +147,7 @@ function addMenues(){
 	}
 	
 	#form input[type="text"], #form select, #form textarea {
-		width: 100%;
+		width: 95%;
 	}
 
 	#form textarea {
@@ -757,7 +757,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-					<?php echo $strOwsNameSpace; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
+					<?php echo $strOwsNameSpace; ?>&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 					<input name="ows_namespace" type="text" value="<?php echo $this->formvars['ows_namespace']; ?>" size="50" maxlength="100">
@@ -1165,10 +1165,30 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 				<tr class="group-sonstiges">
 					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strResetPasswordText; ?>
+					</th>
+					<td colspan="2" valign="top" align="left" style="border-bottom:1px solid #C3C7C3">
+						<textarea name="reset_password_text" colls="30" rows="10"><? echo $this->formvars['reset_password_text']; ?></textarea>
+						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strResetPasswordTextDescription; ?>"></span>
+					</td>
+				</tr>
+
+				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
+						<?php echo $strInvitationText; ?>
+					</th>
+					<td colspan="2" valign="top" align="left" style="border-bottom:1px solid #C3C7C3">
+						<textarea name="invitation_text" colls="30" rows="10"><? echo $this->formvars['invitation_text']; ?></textarea>
+						<span style="vertical-align: top; margin-left: 3px" data-tooltip="<?php echo $strInvitationTextDescription; ?>"></span>
+					</td>
+				</tr>
+
+				<tr class="group-sonstiges">
+					<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
 						<?php echo $this->strComment; ?>
 					</th>
 					<td colspan="2" align="left" style="border-bottom:1px solid #C3C7C3">
-						<textarea name="comment" colls="33" rows="2"><? echo $this->formvars['comment']; ?></textarea>
+						<textarea name="comment" colls="30" rows="2"><? echo $this->formvars['comment']; ?></textarea>
 					</td>
 				</tr><?
 			} ?>

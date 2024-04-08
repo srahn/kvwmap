@@ -1,9 +1,16 @@
 <?php
 	global $supportedLanguages;
-	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
-	include(LAYOUTPATH . $language_file);
-	include(PLUGINS . 'mobile/' . $language_file);
-	include(PLUGINS . 'portal/' . $language_file);
+	$language_file_name = 'layer_formular_' . $this->user->rolle->language . '.php';
+
+	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'mobile/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'portal/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -102,6 +109,142 @@
 		document.getElementById(id+'_link').style.color = '#111';
 	}
 
+	function mandatoryValuesMissing() {
+		if (document.getElementById('gruppe-select').value == '') {
+			message([{ type: 'error', msg: 'Es muss eine Gruppe ausgewählt sein!'}]);
+			return true;
+		}
+		return false;
+	}
+
+	function loadMaintables(connection_id) {
+		fetch(`index.php?go=Layereditor_get_maintables&connection_id=${connection_id}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`)
+		.then(response => {
+				if (!response.ok) {
+					message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection.<p>HTTP-Status Code: ${response.status} ${response.statusText}` }]);
+					response.text().then(text => {
+						message([{ type: 'error', msg: `<p>${text}` }]);
+					});
+				}
+
+				const contentType = response.headers.get("content-type");
+				if (contentType && contentType.indexOf("application/json") !== -1) {
+					response.json().then(data => {
+						if (data.success) {
+							if (data.tables.length == 0) {
+								$('#maintables_tr').hide();
+								resetForm('GUI');
+								message([{ type: 'info', msg: `<? echo $strNoConnectionIdSelected; ?>`}]);
+							}
+							else {
+								let maintableSelectField = document.getElementById("maintable_select");
+								data.tables.forEach((maintable) => {
+									let option = document.createElement("option");
+									option.text = `${connection_id}.${maintable.schema_name}.${maintable.name}`;
+									maintableSelectField.add(option);
+								});
+								$('#maintables_tr').show();
+							}
+						}
+						else {
+							message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection. ${data.err_msg}` }]);
+						}
+					});
+				}
+				else {
+					console.log('Es ist kein JSON');
+					response.text().then(text => {
+						console.log(text);
+						message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection.<p>${text}` }]);
+					});
+				}
+			})
+			.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+	}
+
+	function fillFromMaintable(value) {
+		let elm = document.getElementById("GUI").elements;
+		if (value) {
+			let [connection_id, schema_name, table_name] = value.split('.');
+			elm["Name"].value = table_name;
+			elm["alias"].value = table_name.split('_').map((word) => { return word[0].toUpperCase() + word.substring(1); }).join(" ");
+			elm["connectiontype"].value = 6;
+			elm["connectiontype"].onchange();
+			elm["connection_id"].value = connection_id;
+			elm["maintable"].value = table_name;
+			elm["schema"].value = schema_name;
+			elm["sizeunits"].value = 6;
+
+			fetch(`index.php?go=Layereditor_info_from_maintable&connection_id=${connection_id}&schema_name=${schema_name}&table_name=${table_name}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`)
+				.then(response => {
+					if (!response.ok) {
+						message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>HTTP-Status Code: ${response.status} ${response.statusText}` }]);
+						response.text().then(text => {
+							message([{ type: 'error', msg: `<p>${text}` }]);
+						});
+					}
+
+					const contentType = response.headers.get("content-type");
+					if (contentType && contentType.indexOf("application/json") !== -1) {
+						response.json().then(data => {
+							console.log(data);
+							if (data.success) {
+								let elm = document.getElementById("GUI").elements;
+								elm["epsg_code"].value = data.epsg_code || '';
+								elm["oid"].value = data.oid_column;
+								elm["Datentyp"].value = data.Datentyp;
+								elm["pfad"].value =
+`SELECT
+  *
+FROM
+  ${data.table_name}
+WHERE
+  true`;
+								elm["Data"].value = (data.geom_column ? `${data.geom_column} from (
+select
+  ${data.oid_column},
+  ${data.geom_column}
+from
+  ${data.schema_name}.${data.table_name}
+) as foo using unique ${data.oid_column} using srid=${data.epsg_code}` : '');
+							}
+							else {
+								message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten. ${data.err_msg}` }]);
+							}
+						});
+					}
+					else {
+						console.log('Es ist kein JSON');
+						response.text().then(text => {
+							console.log(text);
+							message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>${text}` }]);
+						});
+					}
+				})
+				.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+		}
+		else {
+			resetForm('GUI');
+		}
+	}
+
+	function resetForm(form) {
+		let elm = document.getElementById(form).elements;
+		elm["Name"].value = '';
+		elm["alias"].value = '';
+		elm["connectiontype"].value = '';
+		elm["connectiontype"].onchange();
+		elm["connection_id"].value = '';
+		elm["maintable"].value = '';
+		elm["schema"].value = '';
+		elm["sizeunits"].value = '';
+		elm["epsg_code"].value = '';
+		elm["oid"].value = '';
+		elm["Datentyp"].value = '';
+		elm["pfad"].value = '';
+		elm["Data"].value = '';
+	}
+
 	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
 </script>
 
@@ -158,24 +301,60 @@
 
 <table>
 	<tr>
-		<td style="">
+		<th align="right">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
-    		}
-    	?>
-      </select>
 		</td>
-  </tr>
+    <td>
+			<select id="selected_layer_id" style="min-width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++){
+					echo '<option';
+					if ($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
+				} ?>
+			</select>
+		</td>
+	</tr><?
+	if (!$this->formvars['selected_layer_id']) { ?>
+		<tr>
+			<td align="right">
+				<span class="px17 fetter"><?php echo $strConnection; ?>:</span>
+			</td>
+			<td><?
+				echo FormObject::createSelectField(
+					'connection_select',
+					array_map(
+						function($connection) {
+							return array('value' => $connection->get('id'), 'output' => $connection->get_connection_string() . ' id: ' . $connection->get_id());
+						},
+						$this->connections
+					),
+					$this->formvars['connection_select'],
+					1,
+					'style="margin-left: 5px"',
+					'loadMaintables(this.value)',
+					'',
+					'',
+					'',
+					'--------- ' . $this->strPleaseSelect . '--------'
+				); ?>
+			</td>
+		</tr>
+		<tr id="maintables_tr" style="display: none">
+			<td align="right">
+				<span class="px17 fetter"><? echo $strMaintable; ?>:</span>
+			</td>
+			<td>
+				<select id="maintable_select" onchange="fillFromMaintable(this.value)">
+					<option value="">--------- <? echo $this->strPleaseSelect; ?>--------</option>
+				</select>
+				<span data-tooltip="<? echo $strNewLayerFromMaintableHint; ?>"></span>
+			</td>
+		</tr><?
+	} ?>
 </table>
-
 <a style="float: right; margin-top: -30px; margin-right: 10px;" href="javascript:window.scrollTo(0, document.body.scrollHeight);"	title="nach unten">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
@@ -289,7 +468,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 							$group_options = array_map(
 								function($group) {
@@ -362,7 +541,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<div id="connection_div" <? if($this->formvars['connectiontype'] == MS_POSTGIS){echo 'style="display: none"';} ?>>
 								<textarea id="connection" name="connection" cols="33" rows="2"><?	echo $this->formvars['connection']; ?></textarea>
@@ -614,7 +793,7 @@
 					</tr>
 					<? } ?>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="tolerance" type="text" value="<?php echo $this->formvars['tolerance']; ?>" size="50" maxlength="100">
 						</td>
@@ -637,7 +816,7 @@
 								</select>
 						</td>
 					</tr>
-					<tr style="display: none">
+					<tr>
 						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLayerCharts; ?></th>
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
@@ -661,7 +840,7 @@
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>
 					<tr>
-						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?>*</th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="50" maxlength="255">
 						</td>
@@ -679,7 +858,7 @@
 						</td>
 					</tr>				
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="wms_server_version">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -691,7 +870,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="wms_format">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -1237,7 +1416,7 @@
 				id="saveAsNewLayerButton"
 				name="dummy"
 				value="<?php echo $strButtonSaveAsNewLayer; ?>"
-				onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
+				onclick="mandatoryValuesMissing() || submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
 			>
 		</td>
 	</tr>

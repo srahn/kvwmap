@@ -455,11 +455,13 @@ span[data-tooltip]:hover::after {
 	border-radius: 2px;
 	box-shadow: 1px 1px 6px 1px #ddd;
   position: absolute;
+	width: 200px;
   top: 1px;
   right: 0;
   left: 0;
 	max-height: 400px;
 	overflow-y: auto;
+	overflow-x: hidden;
 	margin: 0;
 }
 
@@ -477,6 +479,7 @@ span[data-tooltip]:hover::after {
   display: flex;
   align-items: center;
   background-color: #fff;
+	min-height: 20px;
   padding: 3px;
 	margin-bottom: 0;
   cursor: pointer;
@@ -492,7 +495,7 @@ span[data-tooltip]:hover::after {
 
 .custom-select img {
   display: inline-block;
-  width: 30px;
+  max-width: 30px;
 	margin-right: 5px;
 }
 
@@ -502,6 +505,8 @@ span[data-tooltip]:hover::after {
   align-items: center;
   padding: 3px;
   position: relative;
+	min-height: 20px;
+	overflow: hidden;
 }
 
 .custom-select .placeholder.editable{
@@ -545,7 +550,7 @@ span[data-tooltip]:hover::after {
 }
 
 .styleFormField {
-	width: 87px;
+	width: 120px;
 }
 
 .layerdaten-topdiv, .userdaten-topdiv, .stellendaten-topdiv {
@@ -594,6 +599,13 @@ span[data-tooltip]:hover::after {
 	width: 150px;
 }
 
+.input-form textarea {
+	float: left;
+	text-align: left;
+	width: 55%;
+	margin-left: 5px;
+}
+
 .input-form input {
 
 	font-size: <? echo $font_size_factor * 15; ?>px
@@ -628,6 +640,7 @@ span[data-tooltip]:hover::after {
 .center-outerdiv {
 	padding: 30px;
 	text-align: center;
+	min-width: 800px;
 }
 
 select {
@@ -2022,11 +2035,18 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .gle1_table{
-		border-collapse: collapse;
+	border-collapse: collapse;
+	position: relative;
+}
+
+.gle1_table>thead>tr>td{
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle1_table>tbody>tr>td{
-		border: 1px solid grey;
+	border: 1px solid grey;
+	padding: 2px;
 }
 
 .gle_datatype_table{
@@ -2084,6 +2104,25 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin: 5px 1px;
 	background: #e3e3e3;
 	border-radius: 2px;
+}
+
+.gle_result_filter {
+	position: absolute; 
+	top: 2px;
+	right: 2px;
+  z-index: 100;
+	text-align: right;
+}
+
+.gle_result_filter .value_list {
+	max-height: 250px;
+	max-width: 250px;
+	scrollbar-width: thin;
+	display: none;
+}
+
+.gle_result_filter:hover .value_list {
+	display: block;
 }
 
 .calendar {
@@ -2256,37 +2295,38 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .fstanzeigecontainer{
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: flex-start;
+	width: 580px;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: flex-start;
 }
 
 .fstanzeigehover{
-								position: relative;
-								float: left;
-								margin: auto;
-								visibility: visible;
-								line-height: 30px;
+	position: relative;
+	float: left;
+	margin: auto;
+	visibility: visible;
+	line-height: 30px;
 }
 
 .fstanzeigehover:hover{
-								background-color:rgba(255,255,255,0.4);
+	background-color:rgba(255,255,255,0.4);
 }
 
 .flexcontainer1{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		flex-wrap: wrap;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .flexcontainer2{
-		display: flex;
-		justify-content:flex-start;
-		flex-direction: row;
-		align-items:stretch;
+	display: flex;
+	justify-content:flex-start;
+	flex-direction: row;
+	align-items:stretch;
 }
 
 .map-right{
@@ -2438,6 +2478,8 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	top: 0;
 	background: rgba(51,51,51,0.2);
 	z-index: 1000;
+	padding: 100px;
+	text-align: center;
 }
 
 .layerOptions, #legendOptions{
@@ -2829,4 +2871,9 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 #nds_edit #dataset_operations {
 	display: none;
+}
+
+#gemkgschl-name-Trennerwort-span {
+	display: none;
+	margin-left: 10px;
 }

@@ -2,6 +2,8 @@
 include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
+include_once(CLASSPATH . 'DataSource.php');
+
 class Layer extends MyObject {
 
 	static $write_debug = false;
@@ -106,6 +108,21 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
+	function get_datasource($attribute = 'beschreibung') {
+		if (empty($this->get('datasource'))) {
+			return null;
+		}
+		else {
+			$datasource = DataSource::find_by_id($this->gui, $this->get('datasource'));
+			if ($attribute == 'beschreibung') {
+				return $datasource->get('beschreibung') ?? $this->get('name') ?? $this->get('datasource');
+			}
+			else {
+				return $datasource->get('name') ?? $this->get('beschreibung') ?? $this->get('datasource');
+			}
+		}
+	}
+
 	function get_layer_attributes() {
 		$obj = new LayerAttribute($this->gui);
 		$layer_attributes = $obj->find_where(
@@ -114,6 +131,7 @@ class Layer extends MyObject {
 		);
 		return $layer_attributes;
 	}
+
 	function get_layer_charts() {
 		$obj = new LayerChart($this->gui);
 		$layer_charts = $obj->find_where(
@@ -532,12 +550,12 @@ l.Name AS sub_layer_name
 	function get_baselayer_options() {
 		if (strpos($this->get('Data'), '{') === 0) {
 			$data = json_decode($this->get('Data'));
-			$data->options->attribution = $this->get('datasource');
+			$data->options->attribution = $this->get_datasource('name');
 			return $data->options;
 		}
 		else {
 			return (Object) array(
-				'attribution' => $this->get('datasource')
+				'attribution' => $this->get_datasource('name')
 			);
 		}
 	}
@@ -649,7 +667,7 @@ l.Name AS sub_layer_name
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
-			'contactOrganisation' => $this->get('datasource'),
+			'contactOrganisation' => $this->get_datasource('beschreibung'),
 			'contactPersonName' => $this->get('dataowner_name'),
 			'contactEMail' => $this->get('dataowner_email'),
 			'contactPhon' => $this->get('dataowner_tel'),
@@ -871,35 +889,45 @@ l.Name AS sub_layer_name
   }
 
 	/**
-	* Liefert an Hand des schema und maintable ein data-Statement wie es vom MapServer genutzt wird mit den dazugehörigen Attributen der Datentypen, Aufzählungen, CodeListen mit oder ohne Array.
-	* Hier ein Beispiel für die Attriubte noch ohne Aufspreizung auf Unterattribute von Typen, Arrays etc.
-	* position (select xplankonverter.konvertierungen.bezeichnung AS planname, xplan_gml.fp_landwirtschaft.aufschrift, xplan_gml.fp_landwirtschaft.created_at, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.detailliertezweckbestimmung)) AS detailliertezweckbestimmung, xplan_gml.fp_landwirtschaft.ebene, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.endebedingung), false) AS endebedingung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.externereferenz), true) AS externereferenz, xplan_gml.fp_landwirtschaft.flaechenschluss, xplan_gml.fp_landwirtschaft.flussrichtung, xplan_gml.fp_landwirtschaft.gehoertzubereich, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.gesetzlichegrundlage)) AS gesetzlichegrundlage, xplan_gml.fp_landwirtschaft.gliederung1, xplan_gml.fp_landwirtschaft.gliederung2, xplan_gml.fp_landwirtschaft.gml_id, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hatgenerattribut), true) AS hatgenerattribut, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.hoehenangabe), true) AS hoehenangabe, xplan_gml.fp_landwirtschaft.konvertierung_id, xplan_gml.fp_landwirtschaft.nordwinkel, xplan_gml.fp_landwirtschaft.position, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtscharakter), 'xplan_gml', 'fp_rechtscharakter', false) AS rechtscharakter, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.rechtsstand), 'xplan_gml', 'xp_rechtsstand', false) AS rechtsstand, xplan_gml.fp_landwirtschaft.refbegruendunginhalt, xplan_gml.fp_landwirtschaft.reftextinhalt, gdi_codelist_json_to_text(to_json(xplan_gml.fp_landwirtschaft.spezifischepraegung)) AS spezifischepraegung, gdi_datatype_json_to_text(to_json(xplan_gml.fp_landwirtschaft.startbedingung), false) AS startbedingung, xplan_gml.fp_landwirtschaft.text, xplan_gml.fp_landwirtschaft.updated_at, xplan_gml.fp_landwirtschaft.user_id, xplan_gml.fp_landwirtschaft.uuid, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchflaeche, xplan_gml.fp_landwirtschaft.wirdausgeglichendurchspe, xplan_gml.fp_landwirtschaft.wirddargestelltdurch, gdi_enum_json_to_text(to_json(xplan_gml.fp_landwirtschaft.zweckbestimmung), 'xplan_gml', 'xp_zweckbestimmunglandwirtschaft', true) AS zweckbestimmung from xplan_gml.fp_landwirtschaft JOIN xplankonverter.konvertierungen ON xplan_gml.fp_landwirtschaft.konvertierung_id = xplankonverter.konvertierungen.id) as foo using unique gml_id using srid=25832
-	* Die Abfrage der Attribute erfolgt in der Funktion get_maintable_attributes
-	*/
+	 * Generiert ein data-Statement in dem fehlende Attribute aus dem main_table ergänzt werden.
+	 * Bei den Attributen, die ergänzt werden werden auch zusätzliche Attribute für Codelistenwerte, ids und Formatierungen für DataTypen etc. angelegt, siehe Formatter-Klassen.
+	 * Attribute, die schon im Datastatement enthalten sind werden so belassen wie sie sind. Nur die dessen real_name nicht gefunden wurde wird ergänzt.
+	 */
 	function get_generic_data_sql() {
 		include_once(CLASSPATH . 'Enumeration.php');
 		include_once(CLASSPATH . 'DataType.php');
 		include_once(CLASSPATH . 'CodeList.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
+		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
-		$data_attributes = $mapDB->getDataAttributes($layerdb, $this->get($this->identifier));
-		$data = str_replace('$scale', '1000', $mapDB->getData($this->get($this->identifier)));
-		$this->table_alias = $data_attributes[0]['table_alias_name'];
 
-		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
+		// get the attribute names from the data select statement
+		$data_attribute_names = array_map(
+			function($attr) {
+				return $attr['name'];
+			},
+			array_filter(
+				$mapDB->getDataAttributes($layerdb, $this->get($this->identifier)),
+				function($attr) {
+					// filter out geom name and index attributes
+					return is_array($attr);
+				}
+			)
+		);
+		$data = str_replace('$scale', '1000', $mapDB->getData($this->get($this->identifier)));
+		$this->table_alias = get_table_alias(get_sql_from_mapserver_data($data), $this->get('schema'), $this->get('maintable'));
+
+		// read the attributes from the maintable
 		$ret = $this->get_maintable_attributes($layerdb);
 		if (!$ret['success']) {
 			return $ret;
 		}
-		foreach($data_attributes as $data_attribute) {
-			# bereits im Data vorhandene Attribute weglassen
-			if (is_array($data_attribute) AND array_key_exists($data_attribute['real_name'], $ret['maintable_attributes'])) {
-				unset($ret['maintable_attributes'][$data_attribute['real_name']]);
-			}
-		}
 
+		// get the select expressions for the different attribute types
+		// ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
+		$generic_selects = array();
 		foreach ($ret['maintable_attributes'] AS $attr) {
 			switch($this->get_attribute_type($attr)) {
 				case 'Enumeration' : {
@@ -919,23 +947,31 @@ l.Name AS sub_layer_name
 					$formatter_objekt = new LayerAttribute($this->gui);
 				}
 			}
-			# ToDo in get_generic_select jeweils weiter Attribute vom Typ oder Werte, Codes und Beschreibungen etc. abfragen und ggf. mehrere wenn Arraytyp
-			$sql = $formatter_objekt->get_generic_select($this, $attr);
-			#echo '<br>attr: ' . $attr['att_name'] . ' type: ' . $this->get_attribute_type($attr) . ' sql: ' . $sql['select'];
-			foreach(array('select', 'from', 'where') AS $key) {
-				if (array_key_exists($key, $sql) AND $sql[$key] != '') {
-					$attributes[$key][] = $sql[$key];
-				}
-			}
+			$generic_select = $formatter_objekt->get_generic_select($this->table_alias, $attr);
+			$generic_selects = array_merge($generic_selects, $generic_select);
 		}
 
-		# neue Attribute ins Data einfügen
-		$pos = stripos($data, 'from', stripos($data, 'select'));
-		if ($pos !== false) {
+		// filter out these that are allready in data select statement and extract sql string
+		$additional_selects = array_map(
+			function ($select) {
+				return $select['sql'];
+			},
+			array_filter(
+				$generic_selects,
+				function ($select) use ($data_attribute_names) {
+					return (! in_array($select['att_name'], $data_attribute_names));
+				}
+			)
+		);
+
+		# fehlende Attribute in das data statement einfügen vor dem ersten Vorkommen von 'from' nach dem ersten Vorkommen von 'select'
+		$pos_select = stripos($data, 'select');
+		$pos_from = strripos($data, 'from', $pos_select);
+		if ($pos_from !== false) {
 			$data = substr_replace(
-				$data, 
-				', ' . implode(', ', $attributes['select']) . ' from', 
-				$pos, 
+				$data,
+				"  ," . implode(",\n    ", $additional_selects) . "\n  from", 
+				$pos_from,
 				strlen('from')
 			);
 		}

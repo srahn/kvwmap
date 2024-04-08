@@ -5,18 +5,22 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
- /**
-  * 
-  */
-function mapserverExp2SQL($exp, $classitem){
+/**
+ * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
+ * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
+ * @param String $exp Die MapServer-Expression
+ * @param String $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
+ */
+function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
 	$exp = str_replace(' eq ', '=', $exp);
 	$exp = str_replace(' ne ', '!=', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
-	
-	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
-		if (strpos($exp, '/') === 0) {		# regex
+
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
+		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
 			$exp = str_replace('/', '', $exp);
 		}
@@ -25,7 +29,7 @@ function mapserverExp2SQL($exp, $classitem){
 		}
 		if (substr($exp, 0, 1) != "'") {
 			$quote = "'";
-		}						
+		}
 		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
 	}
 	return $exp;
@@ -471,6 +475,7 @@ function formatFlurstkennzALK($FlurstKennz){
 
 function tausenderTrenner($number){
 	if($number != ''){
+		$number = str_replace(',', '.', $number);
 		$explo = explode('.', $number);
 		$formated_number = number_format((float)$explo[0], 0, ',', '.');
 		if($explo[1] != '')$formated_number .= ','.$explo[1];
@@ -1928,6 +1933,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($user_id))							$str = str_replace('$userid', $user_id, $str);  // deprecated
+	if (!is_null($stelle_id))						$str = str_replace('$stelleid', $stelle_id, $str); // deprecated
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
@@ -2354,29 +2361,75 @@ function before_last($txt, $delimiter) {
 	return implode($delimiter , $parts);
 }
 
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	$parser = new PHPSQLParser($sql, true);
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
-			'alias' => $alias
-		);
+/**
+ * Function return the inner part of the select in a mapserver data statement
+ * normaly looks like this:
+ * the_geom (select id, the_geom from schema.tabelle where true) using unique id using srid=25832
+ * Function extract from first select until last closing bracket.
+ * If no open pracket is before select like in this example:
+ * select id, the_geom from schema.tabelle where true, return $data as it is
+ * @param String $data Mapserver data statement
+ * @return String inner sql
+ */
+function get_sql_from_mapserver_data($data) {
+	$pos_select = stripos($data, 'select');
+	if (strpos(substr($data, 0, $pos_select), '(') === false) {
+		return $data;
 	}
-	return $attributes;
+	$pos_last_closing_bracket = strrpos($data, ')');
+	$data = substr($data, $pos_select, $pos_last_closing_bracket - $pos_select);
+	return $data;
+}
+
+/**
+ * Function return the alias of the first $schema_name.$table_name in from expression of $sql.
+ * Returns an empty string if $schema_name.$table_name not exists in $sql.
+ * Returns $table_name if $schema_name.$table_name exists but no alias for it.
+ * Befor parsing the sql all select expressions will be replaced by *
+ * @param String $sql The SQL-Statement to parse.
+ * @param String $schema_name The schema name of the table.
+ * @param String $table_name The table name.
+ * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
+ */
+function get_table_alias($sql, $schema_name, $table_name) {
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+
+	// sql für parser aufbereiten, select ausdrücke durch * ersetzen.
+	$words = preg_split('/\s+/', $sql); // in Wörter zerhacken
+	$sql = '';
+	for ($i = count($words) - 1; $i > -1; $i--) {
+		$sql = $words[$i] . ' ' . $sql;
+		// sql auffüllen mit Wörtern der from - Klausel
+		if (strtolower($words[$i]) == 'from') {
+			// Schluss bei from select * davor, damit es ein valides sql wird
+			$sql = 'select * ' . $sql;
+			$i = -1; // Abbruch
+		}
+	};
+	$parser = new PHPSQLParser($sql, true);
+
+	// Extrahiere den from-Ausdruck der zu $schema.$table_name passt
+	$table_expression = array_filter(
+		$parser->parsed['FROM'],
+		function($from) use ($schema_name, $table_name) {
+			return $from['table'] == $schema_name . '.' . $table_name;
+		}
+	);
+
+	if (count($table_expression) == 0) {
+		// $schema_name.$table_name kommt nicht im $sql FROM vor
+		return '';
+	}
+
+	// $schema_name.$table kommt in FROM vor, nimmt den ersten
+	$table_expression = $table_expression[0];
+
+	if ($table_expression['alias']) {
+		return $table_expression['alias']['name']; // wenn es einen alias gibt
+	}
+	else {
+		return $table_name; // wenn es keinen gibt
+	}
 }
 
 function get_requires_options($sql, $requires) {
@@ -2483,6 +2536,14 @@ function sanitize(&$value, $type, $removeTT = false) {
 		case 'boolean':
 		case 'int8' : {
 			$value = (int) ($removeTT ? removeTausenderTrenner($value) : $value);
+		} break;
+
+		case 'int_csv' : {
+			$value = explode(',', $value);
+			foreach ($value AS &$single_value) {
+				sanitize($single_value, 'int');
+			}
+			$value = implode(',', $value);
 		} break;
 
 		case 'numeric' :

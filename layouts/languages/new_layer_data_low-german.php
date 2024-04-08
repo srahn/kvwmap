@@ -1,7 +1,9 @@
 <?php
-$strLayer="Layer";
-$strPleaseSelect="---------Beed utsöken---------";
-$strSave="Spiekern";
-$strtitle="Niegen Datensatz infögen"; 
-$strCancel="Afbräcken";
+  $strCancel = 'Afbräcken';
+  $strCreateAnotherOne = 'und einen weiteren Datensatz erfassen'; 
+  $strLayer = 'Layer';
+  $strNoLayer = 'Es sind noch keine PostGIS-Layer vorhanden.';
+  $strPleaseSelect = '---------Beed utsöken---------';
+  $strSave = 'Spiekern';
+  $strTitle = 'Niegen Datensatz infögen';
 ?>  

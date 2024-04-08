@@ -15,7 +15,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+	if (error_reporting() & $err['type']) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -33,7 +33,7 @@ register_shutdown_function(function () {
       header('Content-Type: application/json');
 			$response = array(
 				'success' => false,
-				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line'] . ' Fehlermeldungen: ' . print_r($errors, true)
 			);
 			echo json_encode($response);
     }
@@ -629,8 +629,8 @@ function go_switch($go, $exit = false) {
 					'style_width' => 'text',
 					'style_minwidth' => 'float',
 					'style_maxwidth' => 'float',
-					'style_offsetx' => 'int',
-					'style_offsety' => 'int',
+					'style_offsetx' => 'text',
+					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
 					'style_pattern' => 'text',
 					'style_geomtransform' => 'text',
@@ -794,8 +794,12 @@ function go_switch($go, $exit = false) {
 
 			# Sachdaten anzeigen
 			case 'Sachdaten' : {
-				if($GUI->formvars['CMD'] != '')$GUI->user->rolle->setSelectedButton($GUI->formvars['CMD']);
-				if($GUI->formvars['legendtouched'])$GUI->saveLegendRoleParameters();
+				if ($GUI->formvars['CMD'] != '') {
+					$GUI->user->rolle->set_selected_button($GUI->formvars['CMD']);
+				}
+				if ($GUI->formvars['legendtouched']) {
+					$GUI->save_legend_role_parameters();
+				}
 				$GUI->queryMap();
 			}break;
 
@@ -1250,7 +1254,7 @@ function go_switch($go, $exit = false) {
 					'newpathwkt' => 'text',
 					'precision' => 'int'
 				]);
-				if (!$GUI->user->is_gast()) {
+				if (!$GUI->Stelle->is_gast_stelle()) {
 					$GUI->checkCaseAllowed('Daten_Export');
 				};
 				$GUI->daten_export_exportieren();
@@ -1333,6 +1337,11 @@ function go_switch($go, $exit = false) {
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
+			case 'gemerkte_Datensaetze_drucken' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
+				$GUI->gemerkte_Datensaetze_drucken($GUI->formvars['chosen_layer_id']);
+			} break;
+
 			case 'Datensatz_dublizieren' : {
 				$GUI->dublicate_dataset();
 			} break;
@@ -1396,7 +1405,9 @@ function go_switch($go, $exit = false) {
 					'aggregate_function' => 'text',
 					'value_attribute_label' => 'text',
 					'value_attribute_name' => 'text',
-					'label_attribute_name' => 'text'
+					'label_attribute_name' => 'text',
+					'beschreibung' => 'text',
+					'breite' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
@@ -1411,11 +1422,12 @@ function go_switch($go, $exit = false) {
 				}
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
+					$GUI->layer_charts_Anzeigen();
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
+					$GUI->layer_chart_editor();
 				}
-				$GUI->layer_charts_Anzeigen();
 			} break;
 
 			case 'layer_chart_Loeschen' : {
@@ -1546,6 +1558,51 @@ function go_switch($go, $exit = false) {
 			case 'Layereditor' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->Layereditor();
+			} break;
+
+			case 'Layereditor_info_from_maintable' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer',
+					'schema_name' => 'text',
+					'table_name' => 'text'
+				]);
+				header('Content-Type: application/json');
+				echo json_encode($GUI->pgdatabase->get_table_infos(
+					$GUI->formvars['connection_id'],
+					$GUI->formvars['schema_name'],
+					$GUI->formvars['table_name']
+				));
+			} break;
+
+			case 'Layereditor_get_maintables' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer'
+				]);
+				if ($GUI->formvars['connection_id'] == '') {
+					$result = array(
+						'success' => true,
+						'tables' => array()
+					);
+				}
+				else {
+					$connection = Connection::find_by_id($GUI, $GUI->formvars['connection_id']);
+					if ($connection) {
+						$result = array(
+							'success' => true,
+							'tables' => $connection->get_tables()
+						);
+					}
+					else {
+						$result = array(
+							'success' => false,
+							'msg' => 'Connection mit id ' . $GUI->formvars['connection_id'] . ' nicht gefunden.'
+						);
+					}
+				}
+				header('Content-Type: application/json');
+				echo json_encode($result);
 			} break;
 
 			case 'Layereditor_Als neuen Layer eintragen' : {

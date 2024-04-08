@@ -55,21 +55,28 @@ class rolle {
 		return $formvars;
 	}
 
-  function setSelectedButton($selectedButton) {
-    $this->selectedButton=$selectedButton;
-    # Eintragen des aktiven Button
-    $sql ='UPDATE rolle SET selectedButton="'.$selectedButton.'"';
-    $sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-    $this->debug->write("<p>file:rolle.php class:rolle->setSelectedButton - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
-    $this->database->execSQL($sql,4, $this->loglevel);
-    return 1;
-  }
+	function set_selected_button($selectedButton) {
+		$this->selectedButton = $selectedButton;
+		# Eintragen des aktiven Button
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				selectedButton = '" . $selectedButton . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		$this->debug->write("<p>file:rolle.php class:rolle->set_selected_button - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}
 
 	function getLayer($LayerName) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
-		
+
 		# Abfragen der Layer in der Rolle
 		if ($language != 'german') {
 			$name_column = "
@@ -77,16 +84,14 @@ class rolle {
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
-		}
-		else {
+		} else {
 			$name_column = "l.Name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
 				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
-			}
-			else {
+			} else {
 				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
 			$privilegfk = ",
@@ -107,9 +112,9 @@ class rolle {
 
 		$sql = "
 			SELECT " .
-				$name_column . ",
+			$name_column . ",
 				l.Layer_ID,
-				l.alias, Datentyp, Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
@@ -127,6 +132,7 @@ class rolle {
 				l.`duplicate_from_layer_id`,
 				l.`duplicate_criterion`,
 				l.`shared_from`,
+				l.`geom_column`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -149,30 +155,32 @@ class rolle {
 			FROM
 				layer AS l JOIN
 				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID LEFT JOIN
+				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID= " . $this->stelle_id . " AND
-				r2ul.User_ID= " . $this->user_id .
-				$layer_name_filter . "
+				ul.Stelle_ID = " . $this->stelle_id . " AND
+				r2ul.User_ID = " . $this->user_id .
+			$layer_name_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
-		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			return 0;
+		}
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
-			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
-				if($rs['Filter'] == ''){
-					$rs['Filter'] = '('.$rs['rollenfilter'].')';
-				}
-				else {
-					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['Filter'] == '') {
+					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+				} else {
+					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -183,8 +191,9 @@ class rolle {
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
@@ -450,7 +459,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1222,46 +1230,74 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->resetQuerys - resetten aller aktiven Layer zur Rolle:",4);
 		$this->database->execSQL($sql,4, $this->loglevel);
 	}
-	
+
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
-		$this->layerset=$this->getLayer('');
-		if(!$ignore_rollenlayer){
-			$rollenlayer=$this->getRollenLayer('', NULL);
+		$this->layerset = $this->getLayer('');
+		if (!$ignore_rollenlayer) {
+			$rollenlayer = $this->getRollenLayer('', NULL);
 			$this->layerset = array_merge($this->layerset, $rollenlayer);
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i=0;$i<count($this->layerset)-1;$i++) {
-			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
-			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
-			if($aktiv_status !== '' OR $requires_status !== ''){										// entweder ist der Layer selber an oder sein requires-Layer
+		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
+			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>'; exit;
+			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'Layer_ID'));
+			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
+			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if($this->layerset[$i]['Layer_ID'] > 0){
-					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				if ($this->layerset[$i]['Layer_ID'] > 0) {
+					$sql ="
+						UPDATE
+							u_rolle2used_layer
+						SET
+							aktivStatus = '" . $aktiv_status . "'
+						WHERE
+							user_id = " . $this->user_id . " AND
+							stelle_id = " . $this->stelle_id . " AND
+							layer_id = " . $this->layerset[$i]['Layer_ID'] . "
+					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
-				else{						# Rollenlayer
-					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id = '.abs($this->layerset[$i]['Layer_ID']);
+				else { # Rollenlayer
+					$sql  = "
+						UPDATE
+							rollenlayer
+						SET
+							aktivStatus = '" . $aktiv_status . "'
+						WHERE
+							user_id = " . $this->user_id . " AND
+							stelle_id = " . $this->stelle_id . " AND
+							id = " . abs($this->layerset[$i]['Layer_ID']) . "
+					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
 				#neu eintragen der deaktiven Klassen
-				if($aktiv_status != 0){
-					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
+				if ($aktiv_status != 0){
+					$sql = "
+						SELECT
+							Class_ID
+						FROM
+							classes
+						WHERE
+							Layer_ID = " . $this->layerset[$i]['Layer_ID'] . "
+					";
 					$this->database->execSQL($sql);
 					$result = $this->database->result;
 					while ($rs = mysqli_fetch_assoc($result)) {
-						if(value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
+						if (value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
 							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['Class_ID'].', '.$formvars['class'.$rs['Class_ID']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif(value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
-							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$rs['Class_ID'].';';
+						elseif (value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
+							$sql1 = "
+								DELETE FROM
+									u_rolle2used_class
+								WHERE
+									user_id = " . $this->user_id . " AND
+									stelle_id = " . $this->stelle_id . " AND
+									class_id = " . $rs['Class_ID'] . "
+							";
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}
 					}
@@ -1270,7 +1306,7 @@ class rolle {
 		}
 		return 1;
 	}
-	
+
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
 		for ($i=0; $i<count($this->layerset)-1; $i++){
@@ -1638,7 +1674,6 @@ class rolle {
 					`language`,
 					`hidemenue`,
 					`hidelegend`,
-					`fontsize_gle`,
 					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,
@@ -1685,7 +1720,6 @@ class rolle {
 					`language`,
 					`hidemenue`,
 					`hidelegend`,
-					`fontsize_gle`,
 					`tooltipquery`,
 					`buttons`,
 					`scrollposition`,

@@ -352,6 +352,22 @@
 		});
 	};
 
+	/**
+	 * Function jumps to the detail view of plan with given gml_id
+	 * Before set the new location catch current search string and append
+	 * backlink parameter to href to get search result when jump back to this page
+	 * @params gml_id uuid
+	 */
+	const showPlanDetails = (gml_id) => {
+		let q = $($('.search-input')[0]).val() ?? '';
+		const go = 'Layer-Suche_Suchen';
+		const planart = '<?php echo $this->formvars['planart']; ?>';
+		const selected_layer_id = '<?php echo $this->plan_layer_id ?>';
+		const backlink = `index.php?go=xplankonverter_plaene_index%26planart=${planart}%26q=${q}%26csrf_token=<? echo $_SESSION['csrf_token']; ?>`;
+		const href = `index.php?go=${go}&selected_layer_id=${selected_layer_id}&operator_plan_gml_id==&value_plan_gml_id=${gml_id}&backlink=${backlink}`;
+		location.href = `index.php?go=${go}&selected_layer_id=${selected_layer_id}&operator_plan_gml_id==&value_plan_gml_id=${gml_id}&backlink=${backlink}`;
+	};
+
 	function konvertierungHtmlSpecialchars(value) {
 		return htmlspecialchars(value);
 	}
@@ -383,7 +399,7 @@
 				funcIsInProgress,
 				disableFrag = ' disabled" onclick="return false',
 				output = '<span class="btn-group" role="group" plan_oid="' + row.<?php echo $this->plan_oid_name; ?> + '" plan_name="' + htmlspecialchars(row.anzeigename) + '">';
-		output += '<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<?php echo $this->plan_layer_id ?>&operator_plan_gml_id==&value_plan_gml_id=' + row.plan_gml_id + '"><i class="btn-link fa fa-lg fa-pencil"></i></a>';
+		output += `<a title="Plan bearbeiten" class="btn btn-link btn-xs xpk-func-btn" href="javascript:void(0)" onClick="showPlanDetails('${row.plan_gml_id}');"><i class="btn-link fa fa-lg fa-pencil"></i></a>`;
 		output += '<a id="delButton' + value + '" title="Konvertierung l&ouml;schen" class="btn btn-link btn-xs xpk-func-btn xpk-func-del-konvertierung" href="#"><i class="fa fa-lg fa-trash"></i></a>';
 		output += '</span>';
 		return output;
@@ -410,7 +426,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
+		output += '<a title="Validieren und Konvertierung durchführen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').innerHTML = \'Anfrage gesendet. Bitte warten.\'; document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
@@ -682,6 +698,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 		data-sort-name="Name"
 		data-sort-order="asc"
 		data-search="true"
+		data-search-text="<? echo $_REQUEST['q']; ?>"
 		data-visible-search="true"
 		data-show-export="false"
 		data-show-refresh="false"
@@ -705,7 +722,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungHtmlSpecialchars"
 					class="col-md-7"
 					data-filter-control="input"
-					data-filter-control-placeholder="Suchen"
+					data-filter-control-placeholder="Filtern"
 				>Name</th>
 				<th
 					data-field="nummer"

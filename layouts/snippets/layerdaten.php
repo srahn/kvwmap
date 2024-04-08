@@ -11,7 +11,7 @@
 <?php
   include(LAYOUTPATH . 'languages/layerdaten_' . $this->user->rolle->language . '.php');
 	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
-	
+
 	$datatypes = [0 => 'Punkt',
 								1 => 'Linie',
 								2 => 'Polygon',
@@ -113,8 +113,8 @@
 								<th>&nbsp;</th>
 							</tr><?
 							for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
-								if ($this->formvars['order'] == "Name" or $this->formvars['order']=="Alias") {
-									if ($this->formvars['order'] == "Name" or $this->layerdaten['alias'][$i]!='') {
+								if ($this->formvars['order'] == "Name" or $this->formvars['order'] == "Alias") {
+									if ($this->formvars['order'] == "Name" or $this->layerdaten['alias'][$i] != '') {
 										if ($this->formvars['order'] == "Name") {
 											$anzeigename=$this->layerdaten['Bezeichnung'][$i];
 										}
@@ -166,7 +166,7 @@
 										}
 									}
 								}
-								if ($this->formvars['order']!="Alias" or ($this->formvars['order']=="Alias" and $this->layerdaten['alias'][$i]!='')) { ?>
+								if ($this->formvars['order'] != "Alias" or ($this->formvars['order'] == "Alias" and $this->layerdaten['alias'][$i] != '')) { ?>
 									<tr class="listen-tr<?
 										echo (($has_sync_layer AND $this->layerdaten['sync'][$i]) ? ' sync' : ' no-sync');
 										echo (($has_shared_layer AND $this->layerdaten['shared_from'][$i] != '') ? ' shared' : ' no-shared');

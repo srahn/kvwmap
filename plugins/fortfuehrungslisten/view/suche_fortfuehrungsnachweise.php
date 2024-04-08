@@ -91,11 +91,11 @@ include_once(CLASSPATH . 'FormObject.php');
 
 function getAttributOptions($field_name, $attributes) {
 	$options = array_map(
-		function($value, $output) {
-			return array('value' => $value, 'output' => $output);
+		function($enum, $key) {
+			return array('value' => $key, 'output' => $enum['output']);
 		},
-		$attributes['enum_value'][$attributes['indizes'][$field_name]],
-		$attributes['enum_output'][$attributes['indizes'][$field_name]]
+		$attributes['enum'][$attributes['indizes'][$field_name]],
+		array_keys($attributes['enum'][$attributes['indizes'][$field_name]])
 	);
 	array_unshift($options, array('value=' => '', 'output' => '-- Bitte Wählen --'));
 	return $options;

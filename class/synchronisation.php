@@ -157,7 +157,7 @@ class synchro {
 		$sql = "UPDATE ".$attributes['all_table_names'][0]." SET lock = '".$trans_id."|'||oid ".$where." AND lock IS NULL";
 		#echo $sql.'<br>';
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		$sql = "SELECT * FROM ".$attributes['all_table_names'][0];
+		$sql = "SELECT * FROM " . $attributes['all_table_names'][0];
 		$sql.= $where;
 		$sql.= " AND '".$trans_id."' = split_part(lock, '|', 1)";			# nur die mit dem entsprechenden Lock abfragen
 		#echo $sql;
@@ -172,8 +172,8 @@ class synchro {
 
 			# abhängige Layer auch exportieren, hier erstmal die Verknüpfungsattribute für jeden verknüpften Layer zusammen sammeln
 			$j = 0;
-			for($i = 0; $i < count($attributes['name']); $i++) {
-				if(in_array($attributes['form_element_type'][$i], array('SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'))) {
+			for ($i = 0; $i < count($attributes['name']); $i++) {
+				if (in_array($attributes['form_element_type'][$i], array('SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'))) {
 					$options = explode(';', $attributes['options'][$i]);
 					$subform = explode(',', $options[0]);
 					if(!in_array($subform[0], $this->already_exported_layers)) {

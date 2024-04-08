@@ -9,4 +9,5 @@
   $strSetPosition="Positschoon setten";
   $strSetGPSPosition="GPS Positschoon setten";
   $strRuler="Streek afmeten";
+  $strCircle = "Kreis hinzuf\u00fcgen";
 ?>

@@ -328,17 +328,11 @@ class spatial_processor {
 			}break;			
 		
 			case 'add_buffered_line':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width']);
+				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width'] ?: 50);
 			}break;
 			
 			case 'add_parallel_polygon':{
-				if ($formvars['width'] == '') {
-					$formvars['width'] = 50;
-				}
-				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'], $formvars['side'], $formvars['subtract']);
+				$result = $this->add_parallel_polygon($polywkt1, $polywkt2, $formvars['width'] ?: 50, $formvars['side'], $formvars['subtract']);
 			}break;
 		
 			case 'split':{
@@ -607,7 +601,7 @@ class spatial_processor {
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
-				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
+				$fromwhere = $select;
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');

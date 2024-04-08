@@ -1,0 +1,6 @@
+BEGIN;
+
+ALTER TABLE `styles` CHANGE `offsetx` `offsetx` VARCHAR(50) NULL DEFAULT NULL, CHANGE `offsety` `offsety` VARCHAR(50) NULL DEFAULT NULL;
+ALTER TABLE `labels` CHANGE `offsetx` `offsetx` VARCHAR(50) NULL DEFAULT NULL, CHANGE `offsety` `offsety` VARCHAR(50) NULL DEFAULT NULL;
+
+COMMIT;

@@ -5,6 +5,14 @@ class LayerChart extends MyObject {
 
 	function __construct($gui) {
 		parent::__construct($gui, 'layer_charts', 'id');
+		$this->validations = array(
+			array(
+				'attribute' => 'breite',
+				'condition' => 'not_null',
+				'description' => 'Es muss eine Breite angegeben sein.',
+				'options' => null
+			)
+		);
 	}
 
 	public static	function find_by_id($gui, $id) {

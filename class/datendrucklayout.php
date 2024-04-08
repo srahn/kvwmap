@@ -472,7 +472,7 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
 											$this->page_overflow = true;
@@ -941,27 +941,13 @@ class ddl {
 		}
 		switch ($this->attributes['form_element_type'][$j]) {
 			case 'Auswahlfeld' : {
-				if(is_array($this->attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-					for($e = 0; $e < @count($this->attributes['enum_value'][$j][$i]); $e++){
-						if($this->attributes['enum_value'][$j][$i][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$i][$e];
-							break;
-						}
-						else $output = $value;
-					}
+				if (is_array($this->attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
+					$enum = $this->attributes['enum'][$j][$i];
 				}
 				else{
-					for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-						if($this->attributes['enum_value'][$j][$e] == $value){
-							$output = $this->attributes['enum_output'][$j][$e];
-							break;
-						}
-						else $output = $value;
-					}
+					$enum = $this->attributes['enum'][$j];
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
-					$output = $value;
-				}
+				$output = $enum[$value]['output'] ?: $value;
 			}break;
 			case 'Autovervollständigungsfeld' : {
 				if(@count($this->attributes['enum_output'][$j]) == 0){	
@@ -970,17 +956,19 @@ class ddl {
 				else $output = $this->attributes['enum_output'][$j][$i];
 			}break;
 			case 'Radiobutton' : {
-				for($e = 0; $e < count($this->attributes['enum_value'][$j]); $e++){
-					if($this->attributes['enum_value'][$j][$e] == $value){
+				foreach ($this->attributes['enum'][$j] as $enum_key => $enum) {
+					if ($enum_key == $value) {
 						$output .= '<box><b> X </b></box>  ';
 					}
-					else $output .= '<box>    </box>  ';
-					$output .= $this->attributes['enum_output'][$j][$e].'   ';
+					else {
+						$output .= '<box>    </box>  ';
+					}
+					$output .= $enum['output'] . '   ';
 					if(!$this->attributes['horizontal'][$j] OR (is_numeric($this->attributes['horizontal'][$j]) AND ($e+1) % $this->attributes['horizontal'][$j] == 0)){
 						$output .= chr(10).chr(10);
 					}
 				}
-				if(count($this->attributes['enum_value'][$j]) == 0){	
+				if (count($this->attributes['enum'][$j]) == 0){	
 					$output = $value;
 				}			
 			}break;			
@@ -1010,7 +998,7 @@ class ddl {
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1034,7 +1022,11 @@ class ddl {
 		}
 		else {
 			$this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+			if ($append) {
+				$this->pdf->newPage();
+			}
 		}
+		$this->gui->pdf = $this->pdf;
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
 		if ($this->offsety) {
@@ -1270,7 +1262,7 @@ class ddl {
 				$this->pdf->last_page_index = $page_count - 1;
 			}
 		}
-		if ($pdfobject == NULL) {
+		if ($output) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements($preview);
@@ -1904,7 +1896,7 @@ class ddl {
 			$where_clauses[] = 'd.id = ' . $ddl_id;
 		}
 		if ($layer_id) {
-			$where_clauses[] = "d.layer_id = " . $layer_id;
+			$where_clauses[] = "(d.layer_id = " . $layer_id . " OR d.layer_id = l.duplicate_from_layer_id)";
 		}
 		if ($types != NULL) {
 			$where_clauses[] = "d.type IN (" . implode(", ", $types) . ")";
@@ -1918,6 +1910,7 @@ class ddl {
 			FROM
 				datendrucklayouts d LEFT JOIN
 				ddl2stelle d2s ON d.id = d2s.ddl_id
+				" . ($layer_id ? 'LEFT JOIN layer l ON l.Layer_ID = ' . $layer_id : '') . "
 			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY

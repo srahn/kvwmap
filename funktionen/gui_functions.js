@@ -439,6 +439,13 @@ function resizemap2window(){
 	}
 }
 
+function fetchMessageFromURL(url) {
+  fetch(url)
+   .then(response => response.json())
+   .then(data => message([{'type':'notice','msg': data.header}, {'type':'info', 'msg': data.body}]))    	
+   .catch(error => message([{'type': 'error', 'msg' : error}]));
+}
+
 /*
 * Function create content to show messages of different types
 * in div message_box
@@ -921,7 +928,8 @@ function overlay_link(data, start, target){
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
 	var dropdown = custom_select_div.querySelector('.dropdown');
-	custom_select_div.classList.toggle('active');	 
+	custom_select_div.classList.toggle('active');
+	custom_select_hover(custom_select_div.querySelector('li.selected')); 
 	if (dropdown.getBoundingClientRect().bottom > 900) {
 		dropdown.classList.add('upward');
 	}
@@ -952,7 +960,7 @@ function custom_select_keydown(evt){
 function custom_select_hover(option) {
 	var custom_select_div = option.closest('.custom-select');
 	option.scrollIntoView({behavior: "smooth", block: "nearest"});
-	custom_select_div.querySelector('li.selected').classList.remove('selected');
+	custom_select_div.querySelector('li.selected')?.classList.remove('selected');
 	option.classList.add('selected');
 }
 
@@ -1546,19 +1554,23 @@ function showMapParameter(epsg_code, width, height, l) {
 	}]);
 }
 
-function showExtentURL(epsg_code) {
-	var gui = document.GUI,
-			msg = " \
+function showURL(params, headline) {
+	var msg = " \
 				<div style=\"text-align: left\"> \
-					<h2>URL des aktuellen Kartenausschnitts</h2><br> \
-					<input id=\"extenturl\" style=\"width: 350px\" type=\"text\" value=\""+document.baseURI.match(/.*\//)+"index.php?go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code+"\"><br> \
+					<h2>" + headline + "</h2><br> \
+					<input id=\"url\" style=\"width: 350px\" type=\"text\" value=\"" + document.baseURI.match(/.*\//) + 'index.php?' + params + "\"><br> \
 				</div> \
 			";
 	message([{
 			'type': 'info',
 			'msg': msg
 	}]);
-	document.getElementById('extenturl').select();
+	document.getElementById('url').select();
+}
+
+function showExtentURL(epsg_code) {
+	var gui = document.GUI;
+	showURL("go=zoom2coord&INPUT_COORD="+toFixed(gui.minx.value, 3)+","+toFixed(gui.miny.value, 3)+";"+toFixed(gui.maxx.value, 3)+","+toFixed(gui.maxy.value, 3)+"&epsg_code="+epsg_code, 'URL des aktuellen Kartenausschnitts');
 }
 
 function toFixed(value, precision) {

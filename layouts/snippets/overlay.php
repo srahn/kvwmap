@@ -1,4 +1,4 @@
-<html>
+<html style="scroll-behavior: smooth">
 	<head>
 		<title><? echo $this->titel ?: TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
@@ -18,6 +18,7 @@
 				}
 		<? } ?>
 			}
+			document.addEventListener("scroll", (event) => {enclosingForm.gle_scrollposition.value = document.scrollingElement.scrollTop});
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
@@ -43,7 +44,7 @@
 				<table style="width:100%">
 					<tr>
 						<? if (is_array($selectable_limits)) { ?>
-						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>&nbsp;										
+						<td style="width:40%" class="px13">&nbsp;<? echo $this->strLimit; ?>:&nbsp;										
 							<select name="anzahl" id="anzahl" onchange="javascript:currentform.go.value = 'get_last_query'; overlay_submit(currentform, false);">
 								<? foreach($selectable_limits as $limit){
 								if($this->formvars['anzahl'] != '' AND $custom_limit != true AND !in_array($this->formvars['anzahl'], $selectable_limits) AND $this->formvars['anzahl'] < $limit){

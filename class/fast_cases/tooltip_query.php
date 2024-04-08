@@ -374,9 +374,6 @@ class GUI {
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
-				if($layerset[$i]['alias'] != '' AND $this->Stelle->useLayerAliases){
-					$layerset[$i]['Name'] = $layerset[$i]['alias'];
-				}
 				$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);				
 				$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 				$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames']);
@@ -387,7 +384,8 @@ class GUI {
 				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
-				$pfad = $this->mapDB->getQueryWithOid($layerset[$i], $layerdb, $this->Stelle);
+				$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
+				$pfad = $query_parts['query'];
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
@@ -468,17 +466,19 @@ class GUI {
 					$pfad = "st_assvg(st_buffer(st_transform(".$layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']].'.'.$the_geom.", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
 				}
 
+				$query_parts['select'] .= ', highlight_geom';
+
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 								
-				$sql = "SELECT * FROM (SELECT ".$pfad.") as query WHERE 1=1 ".$sql_where;
+				$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad . ") as query WHERE 1=1 ".$sql_where;
 
 				# order by wieder einbauen
-				if($layerset[$i]['attributes']['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
-					$sql .= $layerset[$i]['attributes']['orderby'];
+				if ($query_parts['orderby'] != ''){										#  der Layer hat im Pfad ein ORDER BY
+					$sql .= $query_parts['orderby'];
 				}
 
 				# Anhängen des Begrenzers zur Einschränkung der Anzahl der Ergebniszeilen
@@ -512,13 +512,15 @@ class GUI {
 					$links = '';
 					$pictures = '';
 					$highlight_geom .= $layer['shape'][$k]['highlight_geom'].' ';
-          for($j = 0; $j < count($attributes['name']); $j++){
-            if($attributes['tooltip'][$j]){
-							if($attributes['alias'][$j] == '')$attributes['alias'][$j] = $attributes['name'][$j];
-							if(substr($attributes['type'][$j], 0, 1) == '_'){
+          for ($j = 0; $j < count($attributes['name']); $j++){
+            if ($attributes['tooltip'][$j]){
+							if ($attributes['alias'][$j] == '') {
+								$attributes['alias'][$j] = $attributes['name'][$j];
+							}
+							if (substr($attributes['type'][$j], 0, 1) == '_'){
 								$values = json_decode($layer['shape'][$k][$attributes['name'][$j]]);
 							}
-							else{
+							else {
 								$values = array($layer['shape'][$k][$attributes['name'][$j]]);
 							}
 							if(is_array($values)){
@@ -538,20 +540,10 @@ class GUI {
 										case 'Auswahlfeld': {
 											$auswahlfeld_output = '';
 											if(is_array($attributes['dependent_options'][$j])){		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-												for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-													if($attributes['enum_value'][$j][$k][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$k][$value]['output'];
 											}
 											else{
-												for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-													if($attributes['enum_value'][$j][$e] == $value){
-														$auswahlfeld_output = $attributes['enum_output'][$j][$e];
-														break;
-													}
-												}
+												$auswahlfeld_output = $attributes['enum'][$j][$value]['output'];
 											}
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $auswahlfeld_output;
@@ -559,13 +551,7 @@ class GUI {
 											$attribcount++;
 										} break;
 										case 'Radiobutton': {
-											$radiobutton_output = '';
-											for($e = 0; $e < @count($attributes['enum_value'][$j]); $e++){
-												if($attributes['enum_value'][$j][$e] == $value){
-													$radiobutton_output = $attributes['enum_output'][$j][$e];
-													break;
-												}
-											}
+											$radiobutton_output = $attributes['enum'][$j][$value]['output'];
 											$output .=  $attributes['alias'][$j].': ';
 											$output .= $radiobutton_output;
 											$output .= '##';
@@ -997,58 +983,6 @@ class stelle {
 		$this->readDefaultValues();
 	}
 	
-	function parse_path($database, $path, $privileges, $attributes = NULL){
-		$path = str_replace(array("\r\n", "\n"), ' ', $path);
-		$distinctpos = strpos(strtolower($path), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$offset = $distinctpos+8;
-		}
-		else{
-			$offset = 7;
-		}
-		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path, $offset);
-		if(substr_count(strtolower($path), ' from ') > 1){
-			$whereposition = strpos($path, ' WHERE ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos($withoutwhere, ' FROM ');
-		}
-		else{
-			$whereposition = strpos(strtolower($path), ' where ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		}
-		$where = substr($path, $whereposition);
-		$from = substr($withoutwhere, $fromposition);
-
-		$attributesstring = substr($path, $offset, $fromposition-$offset);
-		//$fieldstring = explode(',', $attributesstring);
-		$fieldstring = get_select_parts($attributesstring);
-		$count = count($fieldstring);
-		for($i = 0; $i < $count; $i++){
-			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
-				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
-				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
-			}
-			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', strtolower($fieldstring[$i]));
-				$attributename = trim($explosion[count($explosion)-1]);
-				$real_attributename = $fieldstring[$i];
-			}
-			if($privileges[$attributename] != ''){
-				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.') as '.$attributename.', ';		# Array oder Datentyp
-				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-			}
-			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-			}
-		}
-		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
-		return $newpath;
-	}	
-
   function getName() {
     $sql ='SELECT ';
     if ($this->language != 'german' AND $this->language != ''){
@@ -1218,7 +1152,6 @@ class rolle {
 			$language = $this->language;
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
-			$this->fontsize_gle=$rs['fontsize_gle'];
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -1559,43 +1492,6 @@ class pgdatabase {
 		);
 	}
 
-  function eliminate_star($query, $offset){
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strrpos($query, ' WHERE ');
-  		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strrpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-  		if($whereposition){
-  			$withoutwhere = substr($query, 0, $whereposition);
-  		}
-  		else{
-  			$withoutwhere = $query;
-  		}
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $select = substr($query, $offset, $fromposition-$offset);
-    $from = substr($query, $fromposition);
-    $column = explode(',', $select);
-    $column = get_select_parts($select);
-    for($i = 0; $i < count($column); $i++){
-      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_field_name($ret[1], 0);
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', '.$tablename.pg_field_name($ret[1], $j);
-          }
-          $query = str_replace(trim($column[$i]), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-
   function setClientEncodingAndDateStyle() {
     $sql = "
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
@@ -1776,26 +1672,26 @@ class db_mapObj{
 		}
 	}
 	
-	function getQueryWithOid($layerset, $layerdb, $stelle){
-		$path = replace_params(
-			$layerset['pfad'],
-			rolle::$layer_params,
-			$this->user->id,
-			$stelle->id,
-			rolle::$hist_timestamp,
-			$this->user->rolle->language
-		);
-		$privileges = $stelle->get_attributes_privileges($layerset['Layer_ID']);
-		$layerset['attributes'] = $this->read_layer_attributes($layerset['Layer_ID'], $layerdb, $privileges['attributenames']);
-		if($layerset['Layer_ID'] > 0){			# bei Rollenlayern nicht
-			$path = $stelle->parse_path($layerdb, $path, $privileges, $layerset['attributes']);
+	function getQueryParts($layerset, $privileges){
+		$path = $layerset['pfad'];
+
+		foreach ($layerset['attributes']['name'] as $i => $attributename) {
+			if (value_of($privileges, $attributename) != '') {
+				$type = $attributes['type'][$i];
+				if (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) {
+					$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;								# Array oder Datentyp
+				}
+				else {
+					$newattributesarray[] = pg_quote($attributename);					# normal
+				}
+			}
 		}
 
 		# order by rausnehmen
 		$orderbyposition = strrpos(strtolower($path), 'order by');
 		$lastfromposition = strrpos(strtolower($path), 'from');
 		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			$layerset['attributes']['orderby'] = ' '.substr($path, $orderbyposition);
+			$orderby = ' '.substr($path, $orderbyposition);
 			$path = substr($path, 0, $orderbyposition);
 		}
 
@@ -1815,11 +1711,14 @@ class db_mapObj{
 			$pfad = substr(trim($path), 7);
 		}
 		if ($layerset['maintable'] != '' AND $layerset['oid'] != '') {
-			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']]).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+			$pfad = pg_quote($layerset['attributes']['table_alias_name'][$layerset['maintable']] ?: $layerset['maintable']).'.'.$layerset['oid'].' AS ' . pg_quote($layerset['maintable'] . '_oid').', ' . $pfad;
+			$newattributesarray[] = pg_quote($layerset['maintable'] . '_oid');
+		}
+		if ($distinct == true) {
+			$pfad = 'DISTINCT ' . $pfad;
 		}
 
 		$the_geom = $layerset['attributes']['the_geom'];
-
 				
 		# group by wieder einbauen
 		if($layerset['attributes']['groupby'] != ''){
@@ -1832,8 +1731,12 @@ class db_mapObj{
 				$j++;
 			}
 		}
-		return $pfad;
-	}	
+		return [
+				'select' => implode(', ', $newattributesarray),
+				'query' => $pfad, 
+				'orderby' => $orderby
+			];
+	}
 
   function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;
@@ -2020,8 +1923,10 @@ class db_mapObj{
 				$attributes['constraints'][$i] != '' AND
 				!in_array($attributes['constraints'][$i], array('PRIMARY KEY', 'UNIQUE'))
 			) {	# das sind die Auswahlmöglichkeiten, die durch die Tabellendefinition in Postgres fest vorgegeben sind
-				$attributes['enum_value'][$i] = explode("','", trim($attributes['constraints'][$i], "'"));
-				$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+				$explosion = explode("','", trim($attributes['constraints'][$i], "'"));
+				foreach ($explosion as $option) {
+					$attributes['enum'][$i][$option]['output'] = $option;
+				}
 			}
 			if ($withvalues == true) {
 				$attributes['options'][$i] = replace_params(
@@ -2040,8 +1945,10 @@ class db_mapObj{
 							# das sind die Auswahlmöglichkeiten, die man im Attributeditor selber festlegen kann
 							if (strpos($attributes['options'][$i], "'") === 0) {
 								# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
-								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+								$explosion = explode("','", substr(str_replace(["', ", chr(10), chr(13)], ["',", '', ''], $attributes['options'][$i]), 1, -1));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {
 								# SQL-Abfrage wie select attr1 as value, atrr2 as output from table1
@@ -2057,7 +1964,7 @@ class db_mapObj{
 											$layer = $this->get_used_Layer($attributes['subform_layer_id'][$i]);
 											$attributes['subform_layer_privileg'][$i] = $layer['privileg'];
 										}
-										elseif ($further_options[$k] == 'embedded') {
+										elseif (trim($further_options[$k]) == 'embedded') {
 											# Subformular soll embedded angezeigt werden
 											$attributes['embedded'][$i] = true;
 										}
@@ -2142,12 +2049,13 @@ class db_mapObj{
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
 												return 0;
 											}
-											$attributes['enum_value'][$i][$k] = array();
+											$attributes['enum'][$i][$k] = array();
 											while ($rs = pg_fetch_array($ret[1])) {
-												$attributes['enum_value'][$i][$k][] = $rs['value'];
-												$attributes['enum_output'][$i][$k][] = $rs['output'];
-												$attributes['enum_oid'][$i][$k][] = $rs['oid'];
-												$attributes['enum_image'][$i][$k][] = value_of($rs, 'image');
+												$attributes['enum'][$i][$k][$rs['value']] = [
+													'output' 	=> $rs['output'],
+													'oid'			=> $rs['oid'],
+													'image'		=> value_of($rs, 'image')
+												];
 											}
 										}
 									}
@@ -2164,10 +2072,11 @@ class db_mapObj{
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
-										$attributes['enum_value'][$i][] = $rs['value'];
-										$attributes['enum_output'][$i][] = $rs['output'];
-										$attributes['enum_oid'][$i][] = value_of($rs, 'oid');
-										$attributes['enum_image'][$i][] = value_of($rs, 'image');
+										$attributes['enum'][$i][$rs['value']] = [
+											'output' 	=> $rs['output'],
+											'oid'			=> $rs['oid'],
+											'image'		=> value_of($rs, 'image')
+										];
 										if ($requires_options != '') {
 											$attributes['enum_requires_value'][$i][] = $rs['requires'];
 										}
@@ -2233,8 +2142,10 @@ class db_mapObj{
 							$optionen = explode(';', $attributes['options'][$i]);	# Optionen; weitere Optionen
 							$attributes['options'][$i] = $optionen[0];
 							if (strpos($attributes['options'][$i], "'") === 0) {			# Aufzählung wie 'wert1','wert2','wert3'
-								$attributes['enum_value'][$i] = explode(',', str_replace("'", "", $attributes['options'][$i]));
-								$attributes['enum_output'][$i] = $attributes['enum_value'][$i];
+								$explosion = explode(',', str_replace("'", "", $attributes['options'][$i]));
+								foreach ($explosion as $option) {
+									$attributes['enum'][$i][$option]['output'] = $option;
+								}
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
@@ -2242,8 +2153,7 @@ class db_mapObj{
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {
-										$attributes['enum_value'][$i][] = $rs['value'];
-										$attributes['enum_output'][$i][] = $rs['output'];
+										$attributes['enum'][$i][$rs['value']]['output'] = $rs['output'];
 									}
 								}
 							}
