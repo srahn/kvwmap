@@ -236,7 +236,7 @@ function setSquare(deg) {
 ';
 $randomnumber = rand(0, 1000000);
 $svgfile1  = $randomnumber.'SVG_colorchooser.svg';
-$fpsvg1 = fopen(IMAGEPATH.$svgfile1,w) or die('fail: fopen('.$svgfile1.')');
+$fpsvg1 = fopen(IMAGEPATH.$svgfile1, 'w') or die('fail: fopen('.$svgfile1.')');
 chmod(IMAGEPATH.$svgfile1, 0666);
 #
 # erstellen der SVG

@@ -1913,7 +1913,7 @@ class GUI {
 	}
 
   function switchScaleUnitIfNecessary() {
-		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->units = MS_KILOMETERS;
   }
 
 	function map_saveWebImage($image,$format) {

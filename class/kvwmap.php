@@ -3211,7 +3211,12 @@ echo '			</table>
 		}
 		else{
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
-			$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
+			if (MAPSERVERVERSION >= 800) {
+				$this->img['scalebar'] = $img_scalebar->save(IMAGEPATH.$filename);
+			}
+			else {
+				$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
+			}
 			$this->img['scalebar'] = IMAGEURL.$filename;
 		}
 		$this->calculatePixelSize();
@@ -3219,7 +3224,7 @@ echo '			</table>
   }
 
   function switchScaleUnitIfNecessary() {
-		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->units = MS_KILOMETERS;
   }
 
 	function calculatePixelSize() {
@@ -13615,14 +13620,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$map->setFontSet(FONTSET);
 		$numSymbols = $map->getNumSymbols();
 		$symbols = array();
-		$layer_point	 = ms_newLayerObj($map);
-		$layer_line		 = ms_newLayerObj($map);
-		$layer_polygon = ms_newLayerObj($map);
-		$layer_point->set(	'type', MS_LAYER_POINT);
-		$layer_line->set(		'type', MS_LAYER_LINE);
-		$layer_polygon->set('type', MS_LAYER_POLYGON);
+		$layer_point	 = new LayerObj($map);
+		$layer_line		 = new LayerObj($map);
+		$layer_polygon = new LayerObj($map);
+		$layer_point->type = MS_LAYER_POINT;
+		$layer_line->type = MS_LAYER_LINE;
+		$layer_polygon->type = MS_LAYER_POLYGON;
 		for ($symbolid = 1; $symbolid < $numSymbols; $symbolid++) {
-			$symbol = $map->getSymbolObjectById($symbolid);
+			if (MAPSERVERVERSION >= 800) {
+				$symbol = $map->symbolset->getSymbol($symbolid);
+			}
+			else {
+				$symbol = $map->getSymbolObjectById($symbolid);
+			}
 			switch (true) {
 				case $layerset['Datentyp'] == MS_LAYER_POLYGON OR $symbol->type == 1005 : {
 					$class = new classObj($layer_polygon);
@@ -13642,17 +13652,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$width = 1;
 				}
 			}
-			$class->set('name', 'testClass' . $symbolid);
+			$class->name = 'testClass' . $symbolid;
 			$style = new styleObj($class);
-			$style->set('symbol', $symbolnr);
+			$style->symbol = $symbolnr;
 			if (isset($size)) {
-				$style->set('size', $size);
+				$style->size = $size;
 			}
-			$style->set('width', $width);
+			$style->width = $width;
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
-			$img = $class->createLegendIcon($icon_size, $icon_size);
-			$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+			if (MAPSERVERVERSION >= 800) {
+				$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+			}
+			else {
+				$img = $class->createLegendIcon($icon_size, $icon_size);
+			}
+			if (MAPSERVERVERSION >= 800) {
+				$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
+			}
+			else {
+				$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+			}
 			$symbols[] = array(
 				'id' => $symbolid,
 				'value' => $symbol->name,
