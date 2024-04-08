@@ -2467,59 +2467,6 @@ class stelle {
 		return $privileges;
 	}
 
-	function parse_path($database, $path, $privileges, $attributes = NULL){
-		$newattributesstring = '';
-		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
-		$distinctpos = strpos(strtolower($path), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$offset = $distinctpos+8;
-		}
-		else{
-			$offset = 7;
-		}
-		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path, $offset);
-		if(substr_count(strtolower($path), ' from ') > 1){
-			$whereposition = strpos($path, ' WHERE ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos($withoutwhere, ' FROM ');
-		}
-		else{
-			$whereposition = strpos(strtolower($path), ' where ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		}
-		$where = substr($path, $whereposition);
-		$from = substr($withoutwhere, $fromposition);
-
-		$attributesstring = substr($path, $offset, $fromposition-$offset);
-		//$fieldstring = explode(',', $attributesstring);
-		$fieldstring = get_select_parts($attributesstring);
-		$count = count($fieldstring);
-		for($i = 0; $i < $count; $i++){
-			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
-				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
-				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
-			}
-			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', $fieldstring[$i]);
-				$attributename = trim($explosion[count($explosion)-1]);
-				$real_attributename = $fieldstring[$i];
-			}
-			if(value_of($privileges, trim($attributename, '"')) != ''){
-				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.')::text as '.$attributename.', ';		# Array oder Datentyp
-				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-			}
-			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-			}
-		}
-		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
-		return $newpath;
-	}
-
 	function set_layer_privileges($formvars){
 		if ($formvars['used_layer_parent_ids'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
 			# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen

@@ -28,7 +28,8 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 				s.minxmax,
 				s.minymax,
 				s.maxxmax,
-				s.maxymax
+				s.maxymax,
+				s.selectable_layer_params
 			FROM
 				rolle r JOIN
 				stelle s ON r.stelle_id = s.ID JOIN
@@ -50,7 +51,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 	} else {
 		$stellen = array();
 		while ($rs = $GUI->database->result->fetch_assoc()) {
-			$stellen[] = $GUI->mobile_reformat_stelle($rs);
+			$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
 		}
 
 		$result = array(
@@ -69,8 +70,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 $GUI->mobile_get_layers = function () use ($GUI) {
 	# ToDo get more than only the layer with selected_layer_id
 	$layers = $GUI->Stelle->getLayers('');
-	$mobile_layers = array();
-
+	$mobile_layers = array();	
 	foreach ($layers['ID'] as $layer_id) {
 		if ($layer_id != '') {
 			# Abfragen der Layerdefinition
@@ -92,15 +92,16 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					false,
 					true
 				);
+				# Zuordnen der Privilegien und Tooltips zu den Attributen
+				for ($j = 0; $j < count($attributes['name']); $j++) {
+					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
+					#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
+				}
 
-					# Zuordnen der Privilegien und Tooltips zu den Attributen
-					for ($j = 0; $j < count($attributes['name']); $j++) {
-						$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
-						#$attributes['tooltip'][$j] = $attributes['tooltip'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges['tooltip_' . $attributes['name'][$j]]);
-					}
-					$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
-					$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
-					$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
+				$layer = $GUI->mobile_reformat_layer($layerset[0], $attributes);
+				$attributes = $mapDB->add_attribute_values($attributes, $layerdb, array(), true, $GUI->Stelle->ID, true, true);
+				$layer['attributes'] = $GUI->mobile_reformat_attributes($attributes);
+				$layer['tables'] = $GUI->mobile_reformat_tables($layer['schema_name'], $attributes);
 
 				$classes = $mapDB->read_Classes($layer_id, NULL, false, $layerset[0]['classification']);
 				$layer['classes'] = $GUI->mobile_reformat_classes($classes);
@@ -251,7 +252,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	return $result;
 };
 
-$GUI->mobile_reformat_stelle = function ($stelle_settings) use ($GUI) {
+$GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($GUI) {
 	$stelle['ID'] = $stelle_settings['ID'];
 	$stelle['Bezeichnung'] = $stelle_settings['Bezeichnung'];
 	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
@@ -265,7 +266,18 @@ $GUI->mobile_reformat_stelle = function ($stelle_settings) use ($GUI) {
 	$stelle['north'] = round($extent->maxy, 5);
 	$stelle['startCenterLat'] = round($extent->miny + ($extent->maxy - $extent->miny) / 2, 5);
 	$stelle['startCenterLon'] = round($extent->minx + ($extent->maxx - $extent->minx) / 2, 5);
+	$stelle['layer_params'] = $layer_params;
 	return $stelle;
+};
+
+$GUI->mobile_reformat_tables = function ($mainschema, $attr) use ($GUI) {
+	return array_unique(array_map(
+		function($schema, $table) use ($mainschema) {
+			return ($schema ?: $mainschema) . '.' . $table;
+		},
+		$attr['schema'],
+		$attr['table_name']
+	));
 };
 
 $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
@@ -285,6 +297,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"geometry_type" => $geometry_types[$layerset['Datentyp']],
 		"table_name" => $layerset['maintable'],
 		"schema_name" => $layerset['schema'],
+		"query" => $layerset['pfad'],
 		"document_path" => $layerset['document_path'],
 		"vector_tile_url" => $layerset['vector_tile_url'], 
 		"privileg" => $layerset['privileg'],
@@ -298,11 +311,11 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		$attributes = array();
 		foreach($attr['name'] AS $key => $value) {
-			if ($value == 'status') {
+			if ($value == 'kartierergruppe_id') {
 				#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
 			}
 			if ($attr['enum'][$key]) {
-				$attr['options'][$key] = array();
+				$attr['enums'][$key] = array();
 				foreach($attr['enum'][$key] AS $enum_key => $enum) {
 					$enum_array = array(
 						'value' => $enum_key,
@@ -311,8 +324,11 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 					if ($enum['requires_value']) {
 						$enum_array['requires_value'] = $enum['requires_value'];
 					}
-					$attr['options'][$key][] = $enum_array;
+					$attr['enums'][$key][] = $enum_array;
 				}
+			}
+			else {
+				$attr['enums'][$key] = array();
 			}
 			// if ($value == 'sorte_id') {
 			// 	echo '<br>options: ' . print_r($attr['options'][$key], true);
@@ -347,7 +363,6 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 				"nullable" => $attr['nullable'][$key],
 				"saveable" => $attr['saveable'][$key],
 				"form_element_type" => $attr['form_element_type'][$key],
-				"options" => $attr['options'][$key],
 				"arrangement" => $attr['arrangement'][$key],
 				"labeling" => $attr['labeling'][$key],
 				"privilege" => $attr['privileg'][$key],
@@ -357,6 +372,14 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 				'vcheck_operator' => $attr['vcheck_operator'][$key],
 				'vcheck_value' => $attr['vcheck_value'][$key]
 			);
+			if ($GUI->formvars['kvmobile_version'] >= '1.13.0') {
+				$attributes[$key]['options'] = $attr['options'][$key];
+				$attributes[$key]['enums'] = $attr['enums'][$key];
+			}
+			else {
+				$attributes[$key]['options'] = ($attr['enum'][$key] ? $attr['enums'][$key] : $attr['options'][$key]);
+			}
+
 			if ($attr['req_by'] AND array_key_exists($key, $attr['req_by']) AND $attr['req_by'][$key] != '') {
 				$attributes[$key]['required_by'] = $attr['req_by'][$key];
 			}

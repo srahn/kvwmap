@@ -1944,6 +1944,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($user_id))							$str = str_replace('$userid', $user_id, $str);  // deprecated
+	if (!is_null($stelle_id))						$str = str_replace('$stelleid', $stelle_id, $str); // deprecated
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
@@ -2368,31 +2370,6 @@ function before_last($txt, $delimiter) {
 	$parts = explode($delimiter, $txt);
 	array_pop($parts);
 	return implode($delimiter , $parts);
-}
-
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	$parser = new PHPSQLParser($sql, true);
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
-			'alias' => $alias
-		);
-	}
-	return $attributes;
 }
 
 /**

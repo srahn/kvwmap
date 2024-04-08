@@ -54,10 +54,16 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 		<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><? echo $this->layer[$i]['count'] . ' ' . ($this->layer[$i]['count'] == 1 ? $strRecord : $strRecords); ?></a>
 	</div>
 
+<? if (!empty($this->layer[$i]['layouts'])) { ?>
 	<a href="index.php?go=gemerkte_Datensaetze_drucken&chosen_layer_id=<? echo $this->layer[$i]['layer_id']; ?>">
 		<div class="item print-button-item button drucken">
 		</div>
-	</a>
+	</a>	<? 
+	}
+	else { ?>
+		<div class="item print-button-item">
+		</div>
+<? } ?>
 
 	<a href="index.php?go=Datensaetze_nicht_mehr_merken&chosen_layer_id=<? echo $this->layer[$i]['layer_id']; ?>">
 		<div class="item delete-button-item button datensatz_loeschen">
