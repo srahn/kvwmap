@@ -155,7 +155,7 @@ function fortfuehrungslisten_add_user_names($GUI) {
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
 	while ($rs = pg_fetch_assoc($result[1])) {
 		$GUI->attributes['enum'][$GUI->attributes['indizes'][$field_name]][$rs['username']]['output'] = $rs['username'];
-	);
+	}
 	return $GUI->attributes;
 }
 
