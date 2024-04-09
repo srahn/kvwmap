@@ -1479,7 +1479,20 @@ from
 				name="dummy"
 				value="<?php echo $strButtonSaveAsNewLayer; ?>"
 				onclick="mandatoryValuesMissing() || submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
-			>
+			><?
+			if (
+				$this->formvars['selected_layer_id'] > 0 AND
+				$this->formvars['editable']
+			) { ?>
+				<input
+					id="layer_formular_delete_button"
+					type="button"
+					class="delete-button"
+					name="layer_formular_delete_button"
+					value="<?php echo $this->strDelete; ?>"
+					onclick="Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>', '<? echo $this->strDeleteWarningMessage; ?>');"
+				><?
+			} ?>
 		</td>
 	</tr>
 	<tr>

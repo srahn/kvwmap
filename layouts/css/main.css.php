@@ -2975,7 +2975,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 .selectable-item {
-
+  color: black;
 }
 
 .selected-item {
@@ -3030,4 +3030,12 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 
 .chosen-item-close {
 	cursor: pointer;
+}
+
+.delete-button {
+
+}
+
+.delete-button:hover {
+	background-color: #ffa2a2;
 }
