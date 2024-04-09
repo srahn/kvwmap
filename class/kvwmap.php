@@ -3110,17 +3110,17 @@ echo '			</table>
 		fclose($fp);
 	}
 
-	# Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
-	function saveMap($saveMapDestination) {
+  # Speichert die Daten des MapObjetes in Datei oder Datenbank und den Extent in die Rolle
+  function saveMap($saveMapDestination) {
 		if ($saveMapDestination=='') {
-			$saveMapDestination = SAVEMAPFILE;
-		}
-		if ($saveMapDestination != '') {
-			$this->map->save($saveMapDestination);
-		}
-		$this->user->rolle->saveSettings($this->map->extent);
-		$this->user->rolle->readSettings();
-	}
+      $saveMapDestination = SAVEMAPFILE;
+    }
+    if ($saveMapDestination != '') {
+      $this->map->save($saveMapDestination);
+    }
+    $this->user->rolle->saveSettings($this->map->extent);
+    $this->user->rolle->readSettings();
+  }
 
 	/**
 	 * transformiert die gegebenen Koordinaten von wgs in das System der Stelle und speichert den Kartenextent für die Rolle
@@ -5977,7 +5977,6 @@ echo '			</table>
 
 		$datastring = $datageom." from (" . $select;
 		$datastring.=") as foo using unique ".$layerset[0]['oid']." using srid=" . $layerset[0]['epsg_code'];
-		$layerset[0]['Name_or_alias'] = $layerset[0][($layerset[0]['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 		$legendentext = $layerset[0]['Name_or_alias']." (".date('d.m. H:i',time()).")";
 
 		$group = $dbmap->getGroupbyName('eigene Abfragen');
@@ -6627,7 +6626,8 @@ echo '			</table>
       if($layerset['list'][$i]['aktivStatus'] != 0){
         if(($layerset['list'][$i]['minscale'] < $scale OR $layerset['list'][$i]['minscale'] == 0) AND ($layerset['list'][$i]['maxscale'] > $scale OR $layerset['list'][$i]['maxscale'] == 0)){
 					if($all_active_layers OR $this->formvars['legendlayer'.$layerset['list'][$i]['Layer_ID']] == 'on'){
-						$name = $layerset['list'][$i]['Name_or_alias'];
+						if($layerset['list'][$i]['Name_or_alias'] != '' AND $this->Stelle->useLayerAliases)$name = $layerset['list'][$i]['Name_or_alias'];
+						else $name = $layerset['list'][$i]['Name'];
 						$layer = $this->map->getLayerByName($name);
 						if($layerset['list'][$i]['showclasses']){
 							for($j = 0; $j < $layer->numclasses; $j++){
@@ -8316,6 +8316,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 	function Layereditor() {
 		include_once(CLASSPATH . 'LayerChart.php');
+		include_once(CLASSPATH . 'DataSource.php');
 		$this->titel = 'Layer Editor';
 		$this->main = 'layer_formular.php';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -8343,7 +8344,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			// 				$connection->get_tables()
 			// 			);
 			// 		},
-			// 		Connection::find($this, 'id')
+			// 		Connection::find($this, 'id')@
 			// 	))
 			// );
 			// $this->tables = array_filter($this->tables, function($table) { return !(strpos(strrev($table), 'satled_') === 0); });
@@ -8352,7 +8353,14 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->stellen = $this->Stelle->getStellen('Bezeichnung');
 		$this->Groups = $mapDB->get_Groups();
 		$this->epsg_codes = read_epsg_codes($this->pgdatabase);
-		$this->layerdata['charts'] = (empty($this->formvars['selected_layer_id']) ? array() : LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']));
+		$this->layerdata['charts'] = array();
+		$this->layerdata['datasources'] = array();
+		$this->layerdata['datasource_ids'] = array();
+		if ($this->formvars['selected_layer_id'] != '') {
+			$this->layerdata['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
+			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
+			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
+		}
 		$this->output();
 	}
 
@@ -8810,7 +8818,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		} catch (Exception $ex) {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex->getTraceAsString()
+				'msg' => 'Fehler beim Speichern der Map-Datei ' . WMS_MAPFILE_PATH . $mapfile . ', der Templates oder des Wrappers ' . $wrapperpath . $wrapperfile . ' für den Dienst in Funktion write_mapfile. ' . $ex
 			);
 		}
 		return array(
@@ -8827,10 +8835,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
   * @param boolean $duplicate True if the layer is a duplicate from another
   */
 	function LayerAendern($formvars, $duplicate = false) {
+		include_once(CLASSPATH . 'Layer.php');
 		global $supportedLanguages;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 
 		$mapDB->updateLayer($formvars, $duplicate);
+		$layer = Layer::find_by_id($this, $formvars['selected_layer_id']);
+		$layer->update_datasources($this, ($formvars['datasource_ids'] ?? array()));
 
 		if ($formvars['connectiontype'] == 6) {
 			if ($formvars['connection_id'] != '') {
@@ -13939,7 +13950,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function datasources_anzeigen() {
 		$this->class = 'DataSource';
 		include_once(CLASSPATH . "{$this->class}.php");
-		$this->myobjects = $this->class::find($this, $this->formvars['order'], $this->formvars['sort']);
+		$this->myobjects = $this->class::find($this, '', $this->formvars['order'], $this->formvars['sort']);
 		$this->main = 'myobject.php';
 		$this->output();
 	}
@@ -14218,16 +14229,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_copyrights(){
 		$sql = "
 			SELECT 
-				GROUP_CONCAT(l.Name SEPARATOR ', ') as layer, 
-				d.beschreibung
+				GROUP_CONCAT(l.`Name` SEPARATOR ', ') as layer, 
+				d.`beschreibung`
 			FROM 
-				`datasources` as d
-				JOIN layer as l ON l.datasource = d.id
-				JOIN u_rolle2used_layer r ON r.layer_id = l.Layer_ID AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
+				`datasources` as d JOIN
+				`layer_datasources` as ld ON ld.datasource_id = d.id JOIN
+				`layer` as l ON l.Layer_ID = ld.layer_id JOIN
+				`u_rolle2used_layer` r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
 			WHERE
-				r.aktivStatus != '0'
+				r.`aktivStatus` != '0'
 			GROUP BY
-				d.id";
+				d.`id`
+		";
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$output = '<table>';
@@ -17351,7 +17364,8 @@ class db_mapObj{
 		return $Layer;
 	}
 
-	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
+		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -17416,7 +17430,6 @@ class db_mapObj{
 				l.duplicate_criterion,
 				l.shared_from,
 				l.kurzbeschreibung,
-				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
 				l.dataowner_tel,
@@ -17482,7 +17495,7 @@ class db_mapObj{
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
-				$rs['Name_or_alias'],
+				$rs['alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
 			);
@@ -17508,6 +17521,7 @@ class db_mapObj{
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
+			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->GUI, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
@@ -18782,7 +18796,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `geom_column`
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `geom_column`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
@@ -19326,7 +19340,6 @@ class db_mapObj{
 					'requires',
 					'postlabelcache',
 					'kurzbeschreibung',
-					'datasource',
 					'dataowner_name',
 					'dataowner_email',
 					'dataowner_tel',
@@ -19381,7 +19394,7 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		if ($this->GUI->plugin_loaded('portal')) {
+		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
 				array('cluster_option')
@@ -19519,7 +19532,10 @@ class db_mapObj{
 	* return Integer The ID of new created layer or in case of error the number 0
 	*/
 	function newLayer($layerdata) {
+		include_once(CLASSPATH . 'LayerDataSource.php');
 		global $supportedLanguages;
+		$datasource_ids = array();
+
 		# Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
 		if (is_array($layerdata)) {
 			# formvars wurden übergeben
@@ -19594,7 +19610,6 @@ class db_mapObj{
 					`querymap`,
 					`processing`,
 					`kurzbeschreibung`,
-					`datasource`,
 					`dataowner_name`,
 					`dataowner_email`,
 					`dataowner_tel`,
@@ -19673,7 +19688,6 @@ class db_mapObj{
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
 					" . quote($formvars['kurzbeschreibung']) . ",
-					" . quote_or_null($formvars['datasource']) . ",
 					" . quote($formvars['dataowner_name']) . ",
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
@@ -19770,6 +19784,19 @@ class db_mapObj{
 		if (!$this->db->success) {
 			return 0;
 		}
+
+		if (count($datasource_ids) > 0) {
+			$layer_datasource = new LayerDataSource($this->GUI);
+			foreach($datasource_ids AS $datasource_id) {
+				$layer_datasource->create(
+					array(
+						'layer_id' => $this->db->mysqli->insert_id,
+						'datasource_id' => $datasource_id
+					)
+				);
+			}
+		}
+
 		return $this->db->mysqli->insert_id;
 	}
 
@@ -20380,7 +20407,6 @@ class db_mapObj{
 				l.metalink,
 				l.kurzbeschreibung,
 				l.wms_keywordlist,
-				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
 				l.dataowner_tel,
@@ -20412,7 +20438,8 @@ class db_mapObj{
 			'Kurzbeschreibung' => array(),
 			'metalink' => array(),
 			'wms_keywordlist' => array(),
-			'datasource' => array(),
+			'datasources' => array(),
+			'datasource_ids' => array(),
 			'dataowner_name' => array(),
 			'dataowner_email' => array(),
 			'dataowner_tel' => array(),
@@ -20440,7 +20467,6 @@ class db_mapObj{
 			$layer['Kurzbeschreibung'][] = $rs['kurzbeschreibung'];
 			$layer['metalink'][] = $rs['metalink'];
 			$layer['wms_keywordlist'][] = $rs['wms_keywordlist'];
-			$layer['datasource'][] = $rs['datasource'];
 			$layer['dataowner_name'][] = $rs['dataowner_name'];
 			$layer['dataowner_email'][] = $rs['dataowner_email'];
 			$layer['dataowner_tel'][] = $rs['dataowner_tel'];

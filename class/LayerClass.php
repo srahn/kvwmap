@@ -60,7 +60,7 @@ class LayerClass extends MyObject {
 		return $layer_style;
 	}
 
-	function get_layerdef($classitem = null, $datentyp = 0) {
+	function get_layerdef($classitem = null, $datentyp = 0, $layer_opacity = 1) {
 		#echo 'get_layerdef for Class: ' . $this->get('Name') . '(' . $this->get('Class_ID') . ')';
 
 		if ($this->get('Expression') == '') {
@@ -88,7 +88,7 @@ class LayerClass extends MyObject {
 				$layerdef->icon = $first_style->get_icondef();
 			}
 			else {
-				$layerdef->style = $first_style->get_styledef($datentyp);
+				$layerdef->style = $first_style->get_styledef($datentyp, $layer_opacity);
 			}
 		}
 		return $layerdef;

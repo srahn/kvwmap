@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -248,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if($GUI->formvars['legendtouched']){
+				if ($GUI->formvars['legendtouched']) {
 					$GUI->neuLaden();
 				}
 				else{

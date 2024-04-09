@@ -3,6 +3,7 @@ include_once(CLASSPATH . 'MyObject.php');
 include_once(CLASSPATH . 'LayerAttribute.php');
 include_once(CLASSPATH . 'LayerChart.php');
 include_once(CLASSPATH . 'DataSource.php');
+include_once(CLASSPATH . 'LayerDataSource.php');
 
 class Layer extends MyObject {
 
@@ -12,6 +13,9 @@ class Layer extends MyObject {
 	public $attributes;
 	public $charts;
 	public $table_alias;
+	public $opacity;
+	public $minScale;
+	public $maxScale;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -108,18 +112,40 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
-	function get_datasource($attribute = 'beschreibung') {
-		if (empty($this->get('datasource'))) {
+	function update_datasources($gui, $datasource_ids) {
+		#echo '<br>update_datasources: ' . implode(', ', $datasource_ids) . ' of layer: ' . $this->get_id(); 
+		foreach(LayerDataSource::find($gui, '`layer_id` = ' . $this->get_id()) AS $layer_datasource) {
+			$layer_datasource->delete();
+		}
+		$layer_datasource = new LayerDataSource($gui);
+		foreach($datasource_ids AS $datasource_id) {
+			$layer_datasource->create(array(
+				'layer_id' => $this->get_id(),
+				'datasource_id' => $datasource_id
+			));
+		}
+	}
+
+	/**
+	 * This function query the data sources for the layer
+	 * and aggregate and returns the $attriubte from datasource to a source text.
+	 * If $attribute is empty it takes the other (name in sted of beschreibung and vise versa).
+	 * If not of both exists it takes the kurzbeschreibung from the layer.
+	 */
+	function get_datasources($attribute = 'beschreibung') {
+		$datasources = DataSource::find_by_layer_id($this->gui, $this->get_id());
+		if (count($datasources) == 0) {
 			return null;
 		}
 		else {
-			$datasource = DataSource::find_by_id($this->gui, $this->get('datasource'));
+			$source_text = array();
 			if ($attribute == 'beschreibung') {
-				return $datasource->get('beschreibung') ?? $this->get('name') ?? $this->get('datasource');
+				$source_text = array_map(function($datasource) { return $datasource->get('beschreibung') ?? $this->get('name') ?? $this->get('kurzbeschreibung'); }, $datasources);
 			}
 			else {
-				return $datasource->get('name') ?? $this->get('beschreibung') ?? $this->get('datasource');
+				$source_text = array_map(function($datasource) { return $datasource->get('name') ?? $datasource->get('beschreibung') ?? $this->get('kurzbeschreibung'); }, $datasources);
 			}
+			return implode(', ', $source_text);
 		}
 	}
 
@@ -550,12 +576,12 @@ l.Name AS sub_layer_name
 	function get_baselayer_options() {
 		if (strpos($this->get('Data'), '{') === 0) {
 			$data = json_decode($this->get('Data'));
-			$data->options->attribution = $this->get_datasource('name');
+			$data->options->attribution = $this->get_datasources('name');
 			return $data->options;
 		}
 		else {
 			return (Object) array(
-				'attribution' => $this->get_datasource('name')
+				'attribution' => $this->get_datasources('name')
 			);
 		}
 	}
@@ -603,7 +629,8 @@ l.Name AS sub_layer_name
 				);
 				$options = (Object) array(
 					'transparent' => true,
-					'attribution' => $this->get('dataowner_name')
+					'attribution' => $this->get('dataowner_name'),
+					'opacity' => $this->opacity / 100
 				);
 			} break;
 			case 7 : { # WMS-Layer
@@ -636,7 +663,8 @@ l.Name AS sub_layer_name
 				);
 				$options = (Object) array(
 					'transparent' => true,
-					'attribution' => $this->get('dataowner_name')
+					'attribution' => $this->get('dataowner_name'),
+					'opacity' => $this->opacity / 100
 				);
 			} break;
 			default : { # currently same as PostGIS-Layer
@@ -655,19 +683,21 @@ l.Name AS sub_layer_name
 				);
 				$options = (Object) array(
 					'transparent' => true,
-					'attribution' => $this->get('dataowner_name')
+					'attribution' => $this->get('dataowner_name'),
+					'opacity' => $this->opacity / 100
 				);
 			}
 		}
 
 		$classitem = $this->get('classitem');
 		$datentyp = $this->get('Datentyp');
+		$layer_opacity = $this->opacity;
 
 		$layerdef = (Object) array(
 			'thema' => $this->get_group_name(),
 			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
 			'abstract' => $this->get('kurzbeschreibung'),
-			'contactOrganisation' => $this->get_datasource('beschreibung'),
+			'contactOrganisation' => $this->get_datasources('beschreibung'),
 			'contactPersonName' => $this->get('dataowner_name'),
 			'contactEMail' => $this->get('dataowner_email'),
 			'contactPhon' => $this->get('dataowner_tel'),
@@ -681,8 +711,8 @@ l.Name AS sub_layer_name
 			'params' => $params,
 			'options' => $options,
 			'classes' => array_map(
-				function($class) use ($classitem, $datentyp) {
-					return $class->get_layerdef($classitem, $datentyp);
+				function($class) use ($classitem, $datentyp, $layer_opacity) {
+					return $class->get_layerdef($classitem, $datentyp, $layer_opacity);
 				},
 				LayerClass::find($this->gui, 'Layer_ID = ' . $this->get('Layer_ID'), 'legendorder')
 			),
