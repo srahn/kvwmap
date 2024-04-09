@@ -944,7 +944,7 @@ class GUI {
   function loadclasses($layer, $layerset, $classset, $map){
     $anzClass=@count($classset);
     for ($j=0;$j<$anzClass;$j++) {
-      $klasse = ms_newClassObj($layer);
+      $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
         $klasse -> set('name',$classset[$j]['Name']);
       }
@@ -965,12 +965,7 @@ class GUI {
 			}
       for ($k=0;$k<@count($classset[$j]['Style']);$k++) {
         $dbStyle=$classset[$j]['Style'][$k];
-				if (MAPSERVERVERSION < 600) {
-          $style = ms_newStyleObj($klasse);
-        }
-				else {
-				  $style = new styleObj($klasse);
-				}
+				$style = new styleObj($klasse);
 				if($dbStyle['geomtransform'] != ''){
 					$style->updateFromString("STYLE GEOMTRANSFORM '" . $dbStyle['geomtransform']."' END");
 				}
