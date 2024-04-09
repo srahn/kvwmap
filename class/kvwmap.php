@@ -17826,7 +17826,7 @@ class db_mapObj{
 		if (array_key_exists('attributes', $layerset)) {
 			foreach ($layerset['attributes']['name'] as $i => $attributename) {
 				if (value_of($privileges, $attributename) != '') {
-					$type = $attributes['type'][$i];
+					$type = $layerset['attributes']['type'][$i];
 					if (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) {
 						$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;								# Array oder Datentyp
 					}
