@@ -2411,7 +2411,7 @@ class stelle {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
 					$layer->minScale = $layer2Stelle->get('minscale');
 					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = 100 - $layer2Stelle->get('transparency');
+					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
 					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
 					return $layer->get_overlays_def($this->id);
 				},

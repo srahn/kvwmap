@@ -1248,6 +1248,7 @@ class rolle {
 	}
 
 	function getLayer($LayerName) {
+		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -1297,7 +1298,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -1307,6 +1308,7 @@ class rolle {
 				l.`duplicate_from_layer_id`,
 				l.`duplicate_criterion`,
 				l.`shared_from`,
+				l.`geom_column`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -1365,11 +1367,18 @@ class rolle {
 					$rs['duplicate_criterion']
 				);
 			}
+			#$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
 			$layer[$i] = $rs;
 			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
+		array_walk($layer, function($l) {
+			if (array_key_exists('Layer_ID', $l)) {
+				$l['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $l['Layer_ID'])));
+			}
+			return $l;
+		});
 		return $layer;
 	}
 }

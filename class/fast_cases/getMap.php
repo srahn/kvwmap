@@ -2159,7 +2159,8 @@ class db_mapObj {
 		return $groups;
 	}
 
-	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
+		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -2224,7 +2225,6 @@ class db_mapObj {
 				l.duplicate_criterion,
 				l.shared_from,
 				l.kurzbeschreibung,
-				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
 				l.dataowner_tel,
@@ -2316,6 +2316,7 @@ class db_mapObj {
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
+			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];

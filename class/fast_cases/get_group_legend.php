@@ -1,4 +1,7 @@
 <?
+function replace_semicolon($text) {
+	return str_replace(';', '', $text);
+}
 function umlaute_umwandeln($name) {
 	$name = str_replace('ä', 'ae', $name);
 	$name = str_replace('ü', 'ue', $name);
@@ -1508,8 +1511,8 @@ class GUI {
 				if(value_of($layer, 'minscale') != -1 AND value_of($layer, 'maxscale') > 0){
 					$legend .= ' title="'.round($layer['minscale']).' - '.round($layer['maxscale']).'"';
 				}
-#				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
-				$legend .= ' >' . html_umlaute($layer['Name_or_alias']) . '</span>';
+				$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
+#				$legend .= ' >' . html_umlaute($layer['Name_or_alias']) . '</span>';
 				$legend .= '</a>';
 
 				# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
@@ -1714,6 +1717,7 @@ class GUI {
 		}
 		return $legend;
 	}
+
 
 	function get_legend_graphics($layer){
 		$output = '';
@@ -2661,7 +2665,8 @@ class db_mapObj {
     return $groups;
   }
 
-	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL){
+	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
+		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -2726,7 +2731,6 @@ class db_mapObj {
 				l.duplicate_criterion,
 				l.shared_from,
 				l.kurzbeschreibung,
-				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
 				l.dataowner_tel,
@@ -2792,7 +2796,7 @@ class db_mapObj {
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
-				$rs['Name_or_alias'],
+				$rs['alias'],
 				rolle::$layer_params,
 				$rs['Layer_ID']
 			);
@@ -2818,6 +2822,7 @@ class db_mapObj {
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
+			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->GUI, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
