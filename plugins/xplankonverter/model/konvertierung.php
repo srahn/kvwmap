@@ -1310,6 +1310,56 @@ class Konvertierung extends PgObject {
 		}
 		return $class_names;
 	}
+	
+	/**
+	* Fragt die unique textabschnitte ab, die in der Konvertierung verwendet wurden.
+	*/
+	function get_textabschnitt_names() {
+		$this->debug->show('Konvertierung: get_textabschnitt_names.', Konvertierung::$write_debug);
+		$sql = "
+			SELECT * FROM (
+				SELECT
+					CASE WHEN EXISTS(SELECT 1 FROM xplan_gml.bp_textabschnitt ta WHERE ta.konvertierung_id = " . $this->get($this->identifier) . ")
+					THEN 'BP_TextAbschnitt'
+					END AS class_name
+				UNION
+				SELECT
+					CASE WHEN EXISTS(SELECT 1 FROM xplan_gml.fp_textabschnitt ta WHERE ta.konvertierung_id = " . $this->get($this->identifier) . ")
+					THEN 'FP_TextAbschnitt'
+					END AS class_name
+				UNION
+				SELECT
+					CASE WHEN EXISTS(SELECT 1 FROM xplan_gml.rp_textabschnitt ta WHERE ta.konvertierung_id = " . $this->get($this->identifier) . ")
+					THEN 'RP_TextAbschnitt'
+					END AS class_name
+				UNION
+				SELECT
+					CASE WHEN EXISTS(SELECT 1 FROM xplan_gml.so_textabschnitt ta WHERE ta.konvertierung_id = " . $this->get($this->identifier) . ")
+					THEN 'SO_TextAbschnitt'
+					END AS class_name
+			) AS result
+			WHERE result.class_name IS NOT NULL
+		";
+
+		$this->debug->show('sql: ' . $sql, Konvertierung::$write_debug);
+		$result = pg_fetch_all(
+			pg_query($this->database->dbConn, $sql)
+		);
+
+		if ($result) {
+			$textabschnitte_names = array_map(
+				function($row) {
+					return $row['class_name'];
+				},
+				$result
+			);
+		}
+		else {
+			$textabschnitte_names = array();
+		}
+
+		return $textabschnitte_names;
+	}
 
 	function set_status($new_status = '') {
 		$this->debug->show('<br>Setze status in Konvertierung.', Konvertierung::$write_debug);

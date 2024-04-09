@@ -62,6 +62,6 @@ SELECT setval('xplankonverter.mappingtable_gmlas_to_gml_id_seq', (SELECT max(id)
 
 INSERT INTO xplankonverter.mappingtable_gmlas_to_gml (feature_class,o_table,o_column,o_data_type,t_table,t_column,t_data_type,regel)
 VALUES
-(true,'fp_bebauungsflaeche','detailliertesondernutzung','ARRAY character varying','fp_bebauungsflaeche','detailliertesondernutzung','fp_detailsondernutzung[]','NULLIF(detailliertesondernutzung, ARRAY[NULL]) END AS detailliertesondernutzung')
+(true,'fp_bebauungsflaeche','detailliertesondernutzung','ARRAY character varying','fp_bebauungsflaeche','detailliertesondernutzung','fp_detailsondernutzung[]','NULLIF(detailliertesondernutzung, ARRAY[NULL]) END AS detailliertesondernutzung');
 
 COMMIT;

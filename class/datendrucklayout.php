@@ -472,7 +472,7 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy);
+										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
 											$this->page_overflow = true;
@@ -679,11 +679,12 @@ class ddl {
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
-							$rect = ms_newRectObj();
-							$rect->minx = $point['pointx'] - $rand;
-							$rect->maxx = $point['pointx'] + $rand;
-							$rect->miny = $point['pointy'] - $rand;
-							$rect->maxy = $point['pointy'] + $rand;
+							$rect = rectObj(
+								$point['pointx'] - $rand, 
+								$point['pointx'] + $rand,
+								$point['pointy'] - $rand,
+								$point['pointy'] + $rand
+							);
 						}
 						else {
 							include_(CLASSPATH.'polygoneditor.php');
@@ -998,7 +999,7 @@ class ddl {
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
 	*/
-	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL ) {
+	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
 		$result = (!$result ? array() : $result);
 		$this->layerset = $layerset[0];
 		$this->layout = $layout;
@@ -1022,7 +1023,11 @@ class ddl {
 		}
 		else {
 			$this->pdf = $pdfobject; # ein PDF-Objekt wurde aus einem übergeordneten Druckrahmen/Layer übergeben
+			if ($append) {
+				$this->pdf->newPage();
+			}
 		}
+		$this->gui->pdf = $this->pdf;
 		$this->miny[$this->pdf->currentContents] = 1000000;
 		$this->max_dataset_height = 0;
 		if ($this->offsety) {
@@ -1258,7 +1263,7 @@ class ddl {
 				$this->pdf->last_page_index = $page_count - 1;
 			}
 		}
-		if ($pdfobject == NULL) {
+		if ($output) {
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF erzeugen
 			# Freitexte hinzufügen, die auf jeder Seite erscheinen sollen (Seitennummerierung etc.)
 			$this->add_everypage_elements($preview);

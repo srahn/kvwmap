@@ -270,7 +270,7 @@ class spatial_processor {
 			case 'transform':{
 		    # Transformation des aktuellen Kartenausschnittes
 		    # in das Koordinatensystem des aktuellen EPSG-Codes
-		    # Geg:	curExtent ... Koordinaten des aktuellen Ausschnittes (ms_newRectObj)
+		    # Geg:	curExtent ... Koordinaten des aktuellen Ausschnittes (RectObj)
 		    #				curSRID		...	Urspr�ngliche SRID (EPSG-Code als int)
 		    #				newSRID		...	Neue SRID (EPSG-Code als int) 
 		    $curExtent=$this->rolle->oGeorefExt;
@@ -425,8 +425,7 @@ class spatial_processor {
 			$miny = $this->rolle->oGeorefExt->miny + $pixsize * ($this->rolle->nImageHeight - $ru[1]); # y Wert
 			$maxx = $minx + $width;
 			$maxy = $miny + $height;
-			$rect = ms_newRectObj();
-			$rect->setextent($minx, $miny, $maxx, $maxy);
+			$rect = rectObj($minx, $miny, $maxx, $maxy);
 		}
 		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
 		return $geom;
@@ -601,7 +600,7 @@ class spatial_processor {
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
-				$select = $fromwhere = $this->pgdatabase->eliminate_star($select, 7);
+				$fromwhere = $select;
 				# order by rausnehmen
 				$orderby = '';
 				$orderbyposition = strrpos(strtolower($select), 'order by');

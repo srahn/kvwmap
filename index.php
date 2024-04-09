@@ -127,7 +127,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 
 ob_start ();    // Ausgabepufferung starten
 
@@ -1336,6 +1336,11 @@ function go_switch($go, $exit = false) {
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
+			case 'gemerkte_Datensaetze_drucken' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
+				$GUI->gemerkte_Datensaetze_drucken($GUI->formvars['chosen_layer_id']);
+			} break;
+
 			case 'Datensatz_dublizieren' : {
 				$GUI->dublicate_dataset();
 			} break;
@@ -1399,7 +1404,9 @@ function go_switch($go, $exit = false) {
 					'aggregate_function' => 'text',
 					'value_attribute_label' => 'text',
 					'value_attribute_name' => 'text',
-					'label_attribute_name' => 'text'
+					'label_attribute_name' => 'text',
+					'beschreibung' => 'text',
+					'breite' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
@@ -1414,11 +1421,12 @@ function go_switch($go, $exit = false) {
 				}
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
+					$GUI->layer_charts_Anzeigen();
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
+					$GUI->layer_chart_editor();
 				}
-				$GUI->layer_charts_Anzeigen();
 			} break;
 
 			case 'layer_chart_Loeschen' : {
@@ -1991,7 +1999,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;
+			} break;			
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');

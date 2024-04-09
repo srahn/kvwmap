@@ -11,7 +11,7 @@
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];
 	$size['map_functions_bar']['height'] = ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
-	$size['lagebzeichnung_bar']['height'] = (@count($this->Lagebezeichnung) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
+	$size['lagebzeichnung_bar']['height'] = (@count($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$legend_hide_width = $size['legend']['hide_width'];

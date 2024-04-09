@@ -4,7 +4,8 @@
  * Formular zur Bearbeitung von Diagrammdefinitionen
  */
 include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
-include(CLASSPATH . 'FormObject.php') ?>
+include_once(CLASSPATH . 'FormObject.php') ?>
+
 <h2 style="margin-top: 20px"><? echo $strLayerChartTitle; ?></h2><?
 if ($this->formvars['layer_id'] == '') {
 	$this->Fehlermeldung = $strLayerChartMissingLayerId;
@@ -24,13 +25,13 @@ if ($this->Fehlermeldung != '') {
 else { ?>
 	<style>
 		.input-form {
-			width: 60%;
+			width: 100%;
 		}
 		.input-form label {
 			padding: 5px;
 			margin: 2 8 5 0;
 			height: auto;
-			width: 270px;
+			width: 40%;
 		}
 		.input-form input[type="text"], .input-form select {
 			margin: 5px;
@@ -127,6 +128,19 @@ else { ?>
 				1, '', '', '', '',
 				'diagram_form_elem_' . $id
 			); ?>
+			<div style="clear: both"></div>
+
+			<label class="fetter form-label" for="label_attribute_name">Beschreibung:</label>
+			<textarea class="form-field" name="beschreibung"><? echo $this->layer_chart->get('beschreibung'); ?></textarea>
+			<div style="clear: both"></div>
+
+			<label class="fetter form-label" for="label_attribute_name">Breite: * </label>
+			<input type="text" class="form-field" name="breite" value="<? echo $this->layer_chart->get('breite'); ?>"/>
+			<span data-tooltip="Die Angabe kann in % oder px erfolgen." style="
+				float: right;
+				position: relative;
+				left: 17px;
+			"></span>
 			<div style="clear: both"></div>
 		</div>
 		<div style="clear: both"></div>

@@ -61,7 +61,7 @@ class data_import_export {
 			case 'gpkg' : {
 				$layers = $this->ogr_get_layers($filename);
 				$this->unique_column = 'ogc_fid';
-				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, false, $adjustments);
+				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $this->ogr_unkown_srid($filename), $adjustments);
 			} break;
 			case 'xml' : {
 				$layers = $this->ogr_get_layers($filename);
@@ -895,9 +895,6 @@ class data_import_export {
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
 			$path = $this->layerset[0]['pfad'];
 			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-			if ($this->layerset['connectiontype'] == 6) {
-				$newpath = $stelle->parse_path($layerdb, $path, $privileges);
-			}
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
 	}
@@ -986,8 +983,8 @@ class data_import_export {
 		return $ret;
 	}
 
-	function ogrinfo($importfile) {
-		$command = ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : '') . ' "' . $importfile . '"';
+	function ogrinfo($importfile, $options = '') {
+		$command = ' "' . $importfile . '" ' . $options;
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogrinfo&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
@@ -1020,7 +1017,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile);
+		$result = $this->ogrinfo($importfile, ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : ''));
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1037,6 +1034,17 @@ class data_import_export {
 				$value = explode(': ', $value)[1];
 			});
 			return $layers;
+		}
+	}
+
+	function ogr_unkown_srid($importfile){
+		$result = $this->ogrinfo($importfile, ' -al -so');
+		if ($result->exitCode != 0)	{
+			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
+			return true;
+		}
+		else {
+			return strpos(get_first_word_after($result->stdout, 'Layer SRS WKT'), 'unknown') !== false;
 		}
 	}
 	
@@ -1219,7 +1227,6 @@ class data_import_export {
   }
 
 	function export_exportieren($formvars, $stelle, $user){
-		global $language;
 		global $GUI;
 		global $kvwmap_plugins;
 		$currenttime = date('Y-m-d H:i:s',time());
@@ -1228,21 +1235,14 @@ class data_import_export {
 		$layerset = ($export_rollen_layer ? $user->rolle->getRollenLayer((int) $this->formvars['selected_layer_id'] * -1) : $user->rolle->getLayer($this->formvars['selected_layer_id']));
 		$mapdb = new db_mapObj($stelle->id,$user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-		$sql = replace_params(
-			$layerset[0]['pfad'],
-			rolle::$layer_params,
-			$user->id,
-			$stelle->id,
-			rolle::$hist_timestamp,
-			$user->rolle->language
-		);
+		$sql = $layerset[0]['pfad'];
 		$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-		$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
+		$layerset[0]['attributes'] = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 		if ($export_rollen_layer) {
 			include_once(CLASSPATH . 'LayerAttribute.php');
 			$attribute = new LayerAttribute($GUI);
-			$layerset[0]['oid'] = $attribute->get_oid($this->attributes);
-			$layerset[0]['maintable'] = $this->attributes['table_name'][$layerset[0]['oid']];
+			$layerset[0]['oid'] = $attribute->get_oid($layerset[0]['attributes']);
+			$layerset[0]['maintable'] = $layerset[0]['attributes']['table_name'][$layerset[0]['oid']];
 		}
 		// TODO hier checken ob oid und maintable abgefragt werden konnten und valide sind.
 		if ($layerset[0]['connectiontype'] == 9) {
@@ -1280,67 +1280,29 @@ class data_import_export {
 				strrpos(strtolower($this->formvars['sql_' . $this->formvars['selected_layer_id']]), 'where')
 			);
 
-			# order by rausnehmen
-			$orderbyposition = strrpos(strtolower($sql), 'order by');
-			$lastfromposition = strrpos(strtolower($sql), 'from');
-			if ($orderbyposition !== false AND $orderbyposition > $lastfromposition) {
-				$orderby = ' '.substr($sql, $orderbyposition);
-				$sql = substr($sql, 0, $orderbyposition);
-			}
-			# group by rausnehmen
-			$groupbyposition = strpos(strtolower($sql), 'group by');
-			if ($groupbyposition !== false) {
-				$groupby = ' '.substr($sql, $groupbyposition);
-				$sql = substr($sql, 0, $groupbyposition);
-	  	}
-
 			# Zusammensammeln der Attribute, die abgefragt werden müssen
-			for ($i = 0; $i < count($this->attributes['name']); $i++) {
-				if ($this->formvars['check_'.$this->attributes['name'][$i]]  or $this->formvars['all'] == 1) {		# Entweder das Attribut wurde angehakt
-					$selection[$this->attributes['name'][$i]] = 1;
-					$selected_attributes[] = $this->attributes['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
-					$selected_attr_types[] = $this->attributes['type'][$i];
-					$selected_attr_length[] = $this->attributes['length'][$i];
+			for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
+				if ($this->formvars['check_'.$layerset[0]['attributes']['name'][$i]]  or $this->formvars['all'] == 1) {		# Entweder das Attribut wurde angehakt
+					$selection[$layerset[0]['attributes']['name'][$i]] = 1;
+					$selected_attributes[] = $layerset[0]['attributes']['name'][$i];						# Zusammensammeln der angehakten Attribute, denn nur die sollen weiter unten auch exportiert werden
+					$selected_attr_types[] = $layerset[0]['attributes']['type'][$i];
+					$selected_attr_length[] = $layerset[0]['attributes']['length'][$i];
 				}
-				if (strpos($where, 'query.'.$this->attributes['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
-					$selection[$this->attributes['name'][$i]] = 1;
+				if (strpos($where, 'query.'.$layerset[0]['attributes']['name'][$i])) {			# oder es kommt in der Where-Bedingung des Sachdatenabfrage-SQLs vor
+					$selection[$layerset[0]['attributes']['name'][$i]] = 1;
 				}
-				if (strpos($orderby, $this->attributes['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
-					$selection[$this->attributes['name'][$i]] = 1;
+				if (strpos($orderby, $layerset[0]['attributes']['name'][$i])) {						# oder es kommt im ORDER BY des Layer-Query vor
+					$selection[$layerset[0]['attributes']['name'][$i]] = 1;
 				}
-				if (strpos($filter, $this->attributes['name'][$i])) {						# oder es kommt im Filter des Layers vor
-					$selection[$this->attributes['name'][$i]] = 1;
+				if (strpos($filter, $layerset[0]['attributes']['name'][$i])) {						# oder es kommt im Filter des Layers vor
+					$selection[$layerset[0]['attributes']['name'][$i]] = 1;
 				}
-				if ($this->formvars['download_documents'] != '' AND $this->attributes['form_element_type'][$i] == 'Dokument') {			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
-					$selection[$this->attributes['name'][$i]] = 1;
+				if ($this->formvars['download_documents'] != '' AND $layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {			# oder das Attribut ist vom Typ "Dokument" und die Dokumente sollen auch exportiert werden
+					$selection[$layerset[0]['attributes']['name'][$i]] = 1;
 				}
 			}
 
-			$sql = $stelle->parse_path($layerdb, $sql, $selection, $this->attributes);		# parse_path wird hier benutzt um die Auswahl der Attribute auf das Pfad-SQL zu übertragen
-
-			# oid auch abfragen
-			$distinctpos = strpos(strtolower($sql), 'distinct');
-			if ($distinctpos !== false && $distinctpos < 10) {
-				$pfad = substr(trim($sql), $distinctpos + 8);
-				$distinct = true;
-			}
-			else {
-				$pfad = substr(trim($sql), 7);
-			}
-			$pfad = pg_quote($this->attributes['table_alias_name'][$layerset[0]['maintable']]) . '.' . $layerset[0]['oid'] . ' AS ' . pg_quote($layerset[0]['maintable'] . '_oid') . ', ' . $pfad;
-			if ($groupby != '') {
-				$groupby .= ',' . pg_quote($this->attributes['table_alias_name'][$layerset[0]['maintable']]).'.'.$layerset[0]['oid'];
-			}
-			if ($distinct == true) {
-				$pfad = "
-					DISTINCT "
-					. $pfad . "
-				";
-			}
-			$sql = "
-				SELECT "
-					. $pfad . "
-				";
+			$query_parts = $mapdb->getQueryParts($layerset[0], $selection);		# getQueryParts wird hier benutzt um die Auswahl der Attribute auf das Query-SQL zu übertragen
 
 			# Bedingungen
 			if ($where != '') {
@@ -1360,24 +1322,22 @@ class data_import_export {
 			if ($this->formvars['newpathwkt']){
 				# über Polygon einschränken
 				if ($this->formvars['within'] == 1) {
-					$where .= " AND st_within(".$this->attributes['the_geom'].", st_buffer(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."), 0.0001))";
+					$where .= " AND st_within(".$layerset[0]['attributes']['the_geom'].", st_buffer(st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."), 0.0001))";
 				}
 				else {
-					$where .= " AND st_intersects(".$this->attributes['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
+					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
 			}
 			$sql = "
-				SELECT *
+				SELECT 
+					" . $query_parts['select'] . "
 				FROM
-					("
-						. $sql
-						. $groupby . "
-					) as query "
+					(SELECT "	. $query_parts['query'] . ") as query "
 				. $where
-				. $orderby . "
+				. $query_parts['orderby'] . "
 			";
+			#echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
-			#echo '<br>Frage Daten ab mit SQL: '. $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);
 
@@ -1391,12 +1351,12 @@ class data_import_export {
 			for ($s = 0; $s < count($selected_attributes); $s++) {
 				$selected_attributes[$s] = pg_quote($selected_attributes[$s]);
 				# Transformieren der Geometrie
-				if (trim($this->attributes['the_geom'], "'\"") == trim($selected_attributes[$s], "'\"")) {
+				if (trim($layerset[0]['attributes']['the_geom'], "'\"") == trim($selected_attributes[$s], "'\"")) {
 					$selected_attributes[$s] = 'st_transform(' . $selected_attributes[$s] . ', ' . $this->formvars['epsg'] . ') ';
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
 					}
-					$selected_attributes[$s] .= 'as ' . $this->attributes['the_geom'];
+					$selected_attributes[$s] .= 'as ' . $layerset[0]['attributes']['the_geom'];
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
@@ -1425,7 +1385,7 @@ class data_import_export {
 				$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
 				$this->formvars['layer_name'] = umlaute_umwandeln($this->formvars['layer_name']);
 				$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
-				$this->formvars['geomtype'] = $this->attributes['geomtype'][$this->attributes['the_geom']];
+				$this->formvars['geomtype'] = $layerset[0]['attributes']['geomtype'][$layerset[0]['attributes']['the_geom']];
 				$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
 				$old = umask(0);
 	      mkdir(IMAGEPATH.$folder, 0777);                       # Ordner erzeugen
@@ -1481,7 +1441,7 @@ class data_import_export {
 
 						$err = $this->ogr2ogr_export($sql, 'GeoJSON', $exportfile, $layerdb);
 
-						if (in_array('mobile', $kvwmap_plugins)) {
+						if (in_array('mobile', $kvwmap_plugins) AND $layerset[0]['sync'] > 0) {
 							$sql = "
 								SELECT
 									coalesce(max(version), 1) AS version
@@ -1510,8 +1470,8 @@ class data_import_export {
 							$csv = '';
 						}
 						else {
-							$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
-							$csv = $this->create_csv($result, $this->attributes, $formvars['export_groupnames']);
+							$layerset[0]['attributes'] = $mapdb->add_attribute_values($layerset[0]['attributes'], $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
+							$csv = $this->create_csv($result, $layerset[0]['attributes'], $formvars['export_groupnames']);
 						}
 						$exportfile = $exportfile.'.csv';
 						$fp = fopen($exportfile, 'w');
@@ -1523,12 +1483,12 @@ class data_import_export {
 
 					case 'UKO' : {
 						$exportfile = $exportfile.'.uko';
-						$this->create_uko($layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg'], $exportfile);
+						$this->create_uko($layerdb, $sql, $layerset[0]['attributes']['the_geom'], $this->formvars['epsg'], $exportfile);
 						$contenttype = 'text/uko';
 					} break;
 
 					case 'OVL' : {
-						$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $sql, $this->attributes['the_geom'], $this->formvars['epsg']);
+						$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $sql, $layerset[0]['attributes']['the_geom'], $this->formvars['epsg']);
 						for($i = 0; $i < count($ovl); $i++){
 							$exportfile2 = $exportfile.'_'.$i.'.ovl';
 							$fp = fopen($exportfile2, 'w');
@@ -1545,9 +1505,9 @@ class data_import_export {
 							$result[] = $rs;
 						}
 					}
-					$this->attributes = $mapdb->add_attribute_values($this->attributes, $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
+					$layerset[0]['attributes'] = $mapdb->add_attribute_values($layerset[0]['attributes'], $layerdb, $result, true, $stelle->id, (count($result) > 2500 ? true : false));
 					for ($i = 0; $i < count($result); $i++) {
-						$doc_zip = $this->copy_documents_to_export_folder($result[$i], $this->attributes, $layerset[0]['maintable'], $folder, $layerset[0]['document_path'], $layerset[0]['document_url']);
+						$doc_zip = $this->copy_documents_to_export_folder($result[$i], $layerset[0]['attributes'], $layerset[0]['maintable'], $folder, $layerset[0]['document_path'], $layerset[0]['document_url']);
 						$zip = $zip || $doc_zip;
 					}
 				}
@@ -1587,10 +1547,10 @@ class data_import_export {
 				if ($err == '') {
 					// Update timestamp formular_element_types having option export
 					$time_attributes = array();
-					foreach ($this->attributes['name'] AS $key => $value) {
+					foreach ($layerset[0]['attributes']['name'] AS $key => $value) {
 						if (
-							$this->attributes['form_element_type'][$value] == 'Time' AND
-							trim(strtolower($this->attributes['options'][$value])) == 'export'
+							$layerset[0]['attributes']['form_element_type'][$value] == 'Time' AND
+							trim(strtolower($layerset[0]['attributes']['options'][$value])) == 'export'
 						) {
 							$time_attributes[] = $value . " = '" . $currenttime . "'";
 						}

@@ -21,7 +21,7 @@
 
 	function layer_chart_edit(event, id) {
 		event.preventDefault();
-		window.location = 'index.php?go=layer_chart_Editor&id=' + id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
+		root.window.location = 'index.php?go=layer_chart_Editor&id=' + id + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 	}
 
 	function change_chart_type(chart, chart_type) {
@@ -162,8 +162,8 @@
 			<div id="diagramms" style="display: none"><?
 				foreach ($layer['charts'] AS $chart) {
 					$id = $chart->get($chart->identifier);
-					echo 'Chart: ' . $id; ?>
-					<div id="chart_div_<? echo $id; ?>">
+					#echo 'Chart: ' . $id; ?>
+					<div id="chart_div_<? echo $id; ?>" style="width: <? echo $chart->get('breite'); ?>">
 						<canvas id="chart_<? echo $id; ?>"></canvas>
 						<div>
 							Diagrammtyp: 
@@ -172,7 +172,9 @@
 								<option value="pie"<? echo ($chart->get('type') == 'pie' ? ' selected' : ''); ?>>Torten</option>
 								<option value="doughnut"<? echo ($chart->get('type') == 'doughnut' ? ' selected' : ''); ?>>Doughnut</option>
 							</select><?
-							if ($this->user->funktion == 'admin') { ?>
+							if (
+								$this->Stelle->isMenueAllowed('Layereditor') 
+							) { ?>
 								<button type="button" style="margin-left: 10px" onclick="layer_chart_edit(event, <? echo $id; ?>);">Bearbeiten</button><?php
 							} ?>
 						</div>
@@ -180,16 +182,17 @@
 					<script>
 						let chart_type_<? echo $id; ?> = '<? echo $chart->get('type'); ?>';
 						let values_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('value_attribute_name'); ?>').map((k, v) => { return v.value });
-						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return v.options[v.selectedIndex].text});
+						let names_<? echo $id; ?> = $('.attr_<? echo $layer['Layer_ID']; ?>_<? echo $chart->get('label_attribute_name'); ?>').map((k, v) => { return (v.options?.[v.selectedIndex].text) ?? v.value});
 						let labels_<? echo $id; ?> = [];
 						let data_<? echo $id; ?> = [];
 						for (let i = 0; i < names_<? echo $id; ?>.length; i++) {
 							if (labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i]) == -1) {
+								// Die Klasse kommt zum ersten mal vor. Setze labels_$id und data_$id
 								labels_<? echo $id; ?>.push(names_<? echo $id; ?>[i]);
-								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]) / 10000);
+								data_<? echo $id; ?>.push(parseFloat(values_<? echo $id; ?>[i]));
 							}
 							else {
-								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]) / 10000;
+								data_<? echo $id; ?>[labels_<? echo $id; ?>.indexOf(names_<? echo $id; ?>[i])] += parseFloat(values_<? echo $id; ?>[i]);
 							}
 						}
 						let chart_<? echo $id; ?> = new Chart(

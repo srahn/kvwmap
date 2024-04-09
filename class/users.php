@@ -320,7 +320,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$this->database->success) { echo "<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -713,12 +713,6 @@ class user {
 		elseif (
 			$case == 'Layereditor' AND
 			$this->database->gui->go == 'Klasseneditor'
-		) {
-			return true;
-		}
-		elseif (
-			$case == 'chart_speichern' AND
-			$this->funktion == 'admin'
 		) {
 			return true;
 		}

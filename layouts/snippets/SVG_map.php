@@ -214,7 +214,7 @@
   $dx       = $this->map->extent->maxx-$this->map->extent->minx;
   $dy       = $this->map->extent->maxy-$this->map->extent->miny;
   $scale    = ($dx/$res_x+$dy/$res_y)/2;
-  $radius = $this->formvars['searchradius'] / $scale;	
+  $radius = (float)$this->formvars['searchradius'] / $scale;	
 
 
 $fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');

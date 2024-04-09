@@ -3,6 +3,17 @@ function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
 
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0) {
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' : {
@@ -25,6 +36,13 @@ function replace_params_link($str, $params, $layer_id) {
 		}
 	}
 	return $str;
+}
+
+/**
+* Function returns a readable message of sql errors optionally with word $find replaced by asterists *****
+*/
+function err_msg($file, $line, $msg, $find = '') {
+	return "<br>Abbruch in " . $file . " Zeile: " . $line . "<br>wegen: " . ($find != '' ? str_replace($find, '*****', $msg) : $msg). "<p>" . INFO1;
 }
 
 function sql_err_msg($title, $sql, $msg, $div_id) {
@@ -356,7 +374,7 @@ class GUI {
 
 				# Abfragen der Layerausdehnung
 				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg($htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
 			}break;
 			
@@ -406,7 +424,7 @@ class GUI {
 			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
 			$this->map->setextent($minx,$miny,$maxx,$maxy);
 			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
-			$oPixelPos=ms_newPointObj();
+			$oPixelPos = new PointObj();
 			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
 			if (MAPSERVERVERSION > 600) {
 				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
@@ -437,43 +455,43 @@ class GUI {
 		else {
 			$layer_name_attribute = 'Name_or_alias';
 		}
-		$layer = ms_newLayerObj($map);
-		$layer->set('name', $layerset[$layer_name_attribute]);
-		$layer->setMetaData('wms_name', $layerset['wms_name']);
-		$layer->setMetaData('kvwmap_layer_id', $layerset['Layer_ID']);
-		$layer->setMetaData('wfs_request_method', 'GET');
+		$layer = new LayerObj($map);
+		$layer->name = $layerset[$layer_name_attribute];
+		$layer->metadata->set('wms_name', $layerset['wms_name']);
+		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
+		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
-			$layer->setMetaData('ows_keywordlist', $layerset['wms_keywordlist']);
+			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->setMetaData('wfs_typename', $layerset['wms_name']);
-		$layer->setMetaData('ows_title', $layerset['Name_or_alias']); # required
-		$layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
-		$layer->setMetaData('wms_queryable',$layerset['queryable']);
-		$layer->setMetaData('wms_format',$layerset['wms_format']);
-		$layer->setMetaData('ows_server_version',$layerset['wms_server_version']);
-		$layer->setMetaData('ows_version',$layerset['wms_server_version']);
+		$layer->metadata->set('wfs_typename', $layerset['wms_name']);
+		$layer->metadata->set('ows_title', $layerset['Name_or_alias']); # required
+		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		$layer->metadata->set('wms_queryable',$layerset['queryable']);
+		$layer->metadata->set('wms_format',$layerset['wms_format']);
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']);
+		$layer->metadata->set('ows_version',$layerset['wms_server_version']);
 		if ($layerset['metalink']) {
-			$layer->setMetaData('ows_metadataurl_href',$layerset['metalink']);
-			$layer->setMetaData('ows_metadataurl_type', 'ISO 19115');
-			$layer->setMetaData('ows_metadataurl_format', 'text/plain');
+			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
+			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
+			$layer->metadata->set('ows_metadataurl_format', 'text/plain');
 		}
 		if ($layerset['ows_srs'] == '') {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
-		$layer->setMetaData('ows_srs', $layerset['ows_srs']);
-		$layer->setMetaData('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
-		$layer->setMetaData('ows_auth_username', $layerset['wms_auth_username']);
-		$layer->setMetaData('ows_auth_password', $layerset['wms_auth_password']);
-		$layer->setMetaData('ows_auth_type', 'basic');
-		$layer->setMetaData('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
+		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
+		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->metadata->set('ows_auth_type', 'basic');
+		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
-		#$layer->setMetaData("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->setMetaData("gml_featureid", $layerset['oid']);
-		$layer->setMetaData("gml_include_items", "all");
-		$layer->setMetaData('wms_abstract', $layerset['kurzbeschreibung']);
-		$layer->set('dump', 0);
-		$layer->set('type',$layerset['Datentyp']);
-		$layer->set('group', umlaute_umwandeln($layerset['Gruppenname']));
+		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
+		$layer->metadata->set("gml_featureid", $layerset['oid']);
+		$layer->metadata->set("gml_include_items", "all");
+		$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']);
+		$layer->dump = 0;
+		$layer->type = $layerset['Datentyp'];
+		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -483,10 +501,10 @@ class GUI {
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
 		if ($layerset['aktivStatus'] == 0) {
-			$layer->set('status', 0);
+			$layer->status = 0;
 		}
 		else{
-			$layer->set('status', 1);
+			$layer->status = 1;
 		}
 
 		# fremde Layer werden auf Verbindung getestet
@@ -495,16 +513,16 @@ class GUI {
 			if (!in_array($credentials['host'], array('pgsql', 'localhost'))) {
 				$fp = @fsockopen($credentials['host'], $credentials['port'], $errno, $errstr, 5);
 				if (!$fp) {			# keine Verbindung --> Layer ausschalten
-					$layer->set('status', 0);
-					$layer->setMetaData('queryStatus', 0);
+					$layer->status = 0;
+					$layer->metadata->set('queryStatus', 0);
 					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
 				}
 			}
 		}
 
-		if ($layerset['aktivStatus'] != 0){
+		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
-			if ($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
+			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
 				if($group['status'] == 0){
 					$this->group_has_active_layers[$layerset['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
 					$collapsed = true;
@@ -521,18 +539,18 @@ class GUI {
 
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
 			if($this->map_factor != ''){
-				$layer->set('minscaledenom', $layerset['minscale']/$this->map_factor*1.414);
+				$layer->minscaledenom = $layerset['minscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('minscaledenom', $layerset['minscale']);
+				$layer->minscaledenom = $layerset['minscale'];
 			}
 		}
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
 			if($this->map_factor != ''){
-				$layer->set('maxscaledenom', $layerset['maxscale']/$this->map_factor*1.414);
+				$layer->maxscaledenom = $layerset['maxscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('maxscaledenom', $layerset['maxscale']);
+				$layer->maxscaledenom = $layerset['maxscale'];
 			}
 		}
 		$layer->setProjection('+init=epsg:' . $layerset['epsg_code']); # recommended
@@ -552,11 +570,11 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection', $layerset['connection']);
+			$layer->connection = $layerset['connection'];
 		}
 
 		if ($layerset['connectiontype'] > 0) {
-			$layer->setConnectionType($layerset['connectiontype']);
+			$layer->setConnectionType($layerset['connectiontype'], '');
 		}
 
 		if ($layerset['connectiontype'] == 6) {
@@ -575,12 +593,18 @@ class GUI {
 				)
 			);
 			foreach ($processings as $processing) {
-				$layer->setProcessing($processing);
+				if (MAPSERVERVERSION >= 800) {
+					$p = explode('=', $processing);
+					$layer->setProcessingKey($p[0], $p[1]);
+				}
+				else {
+					$layer->setProcessing($processing);
+				}
 			}
 		}
 
 		if (value_of($layerset, 'postlabelcache') != 0) {
-			$layer->set('postlabelcache',$layerset['postlabelcache']);
+			$layer->postlabelcache = $layerset['postlabelcache'];
 		}
 
 		if($layerset['Datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
@@ -598,12 +622,12 @@ class GUI {
 				}
 			}
 			if ($layerset['tileindex']!='') {
-				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
+				$layer->tileindex = SHAPEPATH.$layerset['tileindex'];
 			}
 			else {
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
-			$layer->set('tileitem',$layerset['tileitem']);
+			$layer->tileitem = $layerset['tileitem'];
 			if ($layerset['offsite']!='') {
 				$RGB=explode(' ',$layerset['offsite']);
 				$layer->offsite->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -615,7 +639,7 @@ class GUI {
 				if(strpos($layerset['Data'], '$scale') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
 			
 			if (value_of($layerset, 'buffer') != 0) {
@@ -624,38 +648,40 @@ class GUI {
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
 				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
 				$layer->data;
-				$layer->set('type', 2);
+				$layer->type = 2;
 			}
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
 			if (value_of($this->formvars, 'go') == 'OWS') {
-				$layer->set('template', 'dummy');
+				$layer->template = 'dummy';
 			}
 			# Header (Kopfdatei)
 			if (value_of($layerset, 'header') != '') {
-				$layer->set('header',$layerset['header']);
+				$layer->header = $layerset['header'];
 			}
 			# Footer (Fusszeile)
 			if (value_of($layerset, 'footer') != '') {
-				$layer->set('footer',$layerset['footer']);
+				$layer->footer = $layerset['footer'];
 			}
 			# Setzen der Spalte nach der der Layer klassifiziert werden soll
 			if ($layerset['classitem']!='') {
-				$layer->set('classitem', $layerset['classitem']);
-			}
-			else {
-				#$layer->set('classitem','id');
+				$layer->classitem = $layerset['classitem'];
 			}
 			# Setzen des Filters
-			if($layerset['Filter'] != ''){
+			if ($layerset['Filter'] != '') {
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-				if(substr($layerset['Filter'],0,1)=='('){
-					if(MAPSERVERVERSION > 700){
-						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-					}
-					else{
-						$layer->setFilter($layerset['Filter']);
+				if (substr($layerset['Filter'],0,1) == '(') {
+					switch (true) {
+						case MAPSERVERVERSION >= 800 : {
+							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+						}break;
+						case MAPSERVERVERSION >= 700 : {
+							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						}break;
+						default : {
+							$layer->setFilter($layerset['Filter']);
+						}
 					}
 			 }
 			 else {
@@ -804,7 +830,7 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-  function loadMap($loadMapSource) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -847,15 +873,15 @@ class GUI {
         $map->web->set('imageurl', IMAGEURL);
 
         # OWS Metadaten
-        $map->setMetaData('ows_title', 'WMS Ausdruck');
-        $map->setMetaData('wms_extent',$this->formvars['post_minx'].''.$this->formvars['post_miny'].' '.$this->formvars['post_maxx'].' '.$this->formvars['post_maxy']);
+        $map->web->metadata->set('ows_title', 'WMS Ausdruck');
+        $map->web->metadata->set('wms_extent',$this->formvars['post_minx'].''.$this->formvars['post_miny'].' '.$this->formvars['post_maxx'].' '.$this->formvars['post_maxy']);
 
         # Legendobject
         $map->legend->set('status', MS_ON);
         #$map->legend->set('transparent', MS_OFF);
         $map->legend->set('keysizex', '16');
         $map->legend->set('keysizey', '16');
-        $map->legend->set('template', LAYOUTPATH.'legend_layer.htm');
+        $map->legend->set('template', LAYOUTPATH . 'legend_layer.htm');
         $map->legend->imagecolor -> setRGB(255,255,255);
         $map->legend->outlinecolor -> setRGB(-1,-1,-1);
         $map->legend->label->set('type', MS_TRUETYPE);
@@ -865,35 +891,32 @@ class GUI {
 
         # layer
         if (is_array($this->formvars['layer'])) {
-          $layerset=array_values($this->formvars['layer']);
+          $layerset = array_values($this->formvars['layer']);
         }
-        else {
-          $layerset=array();
-        }
-        for ($i=0; $i<count($layerset); $i++) {
+        for ($i = 0; $i < count($layerset); $i++) {
 				  if (MAPSERVERVERSION < 600) {
             $layer = ms_newLayerObj($map);
           }
 					else {
 					  $layer = new layerObj($map);
 					}
-					$layer->setMetaData('wms_name', $layerset[$i][name]);
-          $layer->setMetaData('wms_server_version','1.1.1');
-          $layer->setMetaData('wms_format','image/png');
-          $layer->setMetaData('wms_extent',$this->formvars['post_minx'].' '.$this->formvars['post_miny'].' '.$this->formvars['post_maxx'].' '.$this->formvars['post_maxy']);
-          $layer->setMetaData('ows_title', $layerset[$i][name]);
+					$layer->metadata->set('wms_name', $layerset[$i][name]);
+          $layer->metadata->set('wms_server_version','1.1.1');
+          $layer->metadata->set('wms_format','image/png');
+          $layer->metadata->set('wms_extent',$this->formvars['post_minx'].' '.$this->formvars['post_miny'].' '.$this->formvars['post_maxx'].' '.$this->formvars['post_maxy']);
+          $layer->metadata->set('ows_title', $layerset[$i][name]);
           if($layerset[$i][epsg_code] != ''){
-            $layer->setMetaData('ows_srs', $layerset[$i][epsg_code]);
+            $layer->metadata->set('ows_srs', $layerset[$i][epsg_code]);
           }
           else{
-            $layer->setMetaData('ows_srs', $this->formvars['post_epsg']);
+            $layer->metadata->set('ows_srs', $this->formvars['post_epsg']);
           }
-          $layer->setMetaData('wms_exceptions_format', 'application/vnd.ogc.se_inimage');
-          $layer->setMetaData('real_layer_status', 1);
-          $layer->setMetaData('off_requires',0);
-          $layer->setMetaData('wms_connectiontimeout',60);
-          $layer->setMetaData('wms_queryable',0);
-          $layer->setMetaData('wms_group_title','WMS');
+          $layer->metadata->set('wms_exceptions_format', 'application/vnd.ogc.se_inimage');
+          $layer->metadata->set('real_layer_status', 1);
+          $layer->metadata->set('off_requires',0);
+          $layer->metadata->set('wms_connectiontimeout',60);
+          $layer->metadata->set('wms_queryable',0);
+          $layer->metadata->set('wms_group_title','WMS');
           $layer->set('type', 3);
           $layer->set('name', $layerset[$i][name]);
           $layer->set('status', 1);
@@ -901,20 +924,10 @@ class GUI {
             $this->map_factor=1;
           }
           if($layerset[$i]['maxscale'] > 0) {
-            if(MAPSERVERVERSION > 500){
-              $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
-            }
-            else{
-              $layer->set('maxscale', $layerset[$i]['maxscale']/$this->map_factor*1.414);
-            }
+            $layer->set('maxscaledenom', $layerset[$i]['maxscale']/$this->map_factor*1.414);
           }
           if($layerset[$i]['minscale'] > 0) {
-            if(MAPSERVERVERSION > 500){
-              $layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
-            }
-            else{
-              $layer->set('minscale', $layerset[$i]['minscale']/$this->map_factor*1.414);
-            }
+						$layer->set('minscaledenom', $layerset[$i]['minscale']/$this->map_factor*1.414);
           }
           if($layerset[$i][epsg_code] != ''){
             $layer->setProjection('+init='.strtolower($layerset[$i][epsg_code])); # recommended
@@ -963,7 +976,7 @@ class GUI {
 					$map = ms_newMapObj(DEFAULTMAPFILE);
 				}
 				else {
-					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
+					$map = new mapObj(DEFAULTMAPFILE);
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -971,26 +984,29 @@ class GUI {
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
-				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
-				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
-				$map->set('resolution', 96);
+				$map->resolution = 96;
 				#$map->set('transparent', MS_OFF);
 				#$map->set('interlace', MS_ON);
-				$map->set('status', MS_ON);
-				$map->set('name', MAPFILENAME);
+				$map->status = MS_ON;
+				$map->name = MAPFILENAME;
 
 				if (MS_DEBUG_LEVEL > 0) {
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
-					$map->set('debug', MS_DEBUG_LEVEL);
+					$map->debug = MS_DEBUG_LEVEL;
 				};
-        $map->imagecolor->setRGB(255,255,255);
-        $map->maxsize = 4096;
-        $map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
+				$map->imagecolor->setRGB(255,255,255);
+				$map->maxsize = 4096;
+				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
 
-				$bb=$this->Stelle->MaxGeorefExt;
+				$map->setSize(
+					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
+					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
+				);
+
+				$bb = $this->Stelle->MaxGeorefExt;
 
 				# setzen der Kartenausdehnung über die letzten Benutzereinstellungen
-				if($this->user->rolle->oGeorefExt->minx==='') {
+				if ($this->user->rolle->oGeorefExt->minx==='') {
 				  echo "Richten Sie mit phpMyAdmin in der kvwmap Datenbank eine Referenzkarte, eine Stelle, einen Benutzer und eine Rolle ein ";
 				  echo "<br>(Tabellen referenzkarten, stelle, user, rolle) ";
 				  echo "<br>oder wenden Sie sich an ihren Systemverwalter.";
@@ -1006,108 +1022,64 @@ class GUI {
 					if (value_of($this->formvars, 'go') != 'OWS') {
 						$map->setextent($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 					}
-					else{
+					else {
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
 
-        # OWS Metadaten
-
-        if($this->Stelle->ows_title != ''){
-          $map->setMetaData("ows_title",$this->Stelle->ows_title);}
-        else{
-          $map->setMetaData("ows_title",OWS_TITLE);
-        }
-        if($this->Stelle->ows_abstract != ''){
-          $map->setMetaData("ows_abstract", $this->Stelle->ows_abstract);}
-        else{
-          $map->setMetaData("ows_abstract", OWS_ABSTRACT);
-        }
-        if($this->Stelle->wms_accessconstraints != ''){
-          $map->setMetaData("ows_accessconstraints",$this->Stelle->wms_accessconstraints);}
-        else{
-          $map->setMetaData("ows_accessconstraints",OWS_ACCESSCONSTRAINTS);
-        }
-        if($this->Stelle->ows_contactperson != ''){
-          $map->setMetaData("ows_contactperson",$this->Stelle->ows_contactperson);}
-        else{
-          $map->setMetaData("ows_contactperson",OWS_CONTACTPERSON);
-        }
-        if($this->Stelle->ows_contactorganization != ''){
-          $map->setMetaData("ows_contactorganization",$this->Stelle->ows_contactorganization);}
-        else{
-          $map->setMetaData("ows_contactorganization",OWS_CONTACTORGANIZATION);
-        }
-        if($this->Stelle->ows_contactelectronicmailaddress != ''){
-          $map->setMetaData("ows_contactelectronicmailaddress",$this->Stelle->ows_contactelectronicmailaddress);}
-        else{
-          $map->setMetaData("ows_contactelectronicmailaddress",OWS_CONTACTELECTRONICMAILADDRESS);
-        }
-        if($this->Stelle->ows_contactposition != ''){
-          $map->setMetaData("ows_contactposition",$this->Stelle->ows_contactposition);}
-        else{
-          $map->setMetaData("ows_contactposition",OWS_CONTACTPOSITION);
-        }
-
-				$map->setMetaData("ows_encoding", 'UTF-8');
-				$map->setMetaData("ows_keywordlist", OWS_KEYWORDLIST);
-				$map->setMetaData("ows_contactvoicetelephone", OWS_CONTACTVOICETELEPHONE);
-				$map->setMetaData("ows_contactfacsimiletelephone", OWS_CONTACTFACSIMILETELEPHONE);
-				$map->setMetaData("ows_addresstype", 'postal');
-				$map->setMetaData("ows_address", OWS_ADDRESS);
-				$map->setMetaData("ows_city", OWS_CITY);
-				$map->setMetaData("ows_stateorprovince", OWS_STATEORPROVINCE);
-				$map->setMetaData("ows_postcode", OWS_POSTCODE);
-				$map->setMetaData("ows_country", OWS_COUNTRY);
-				$map->setMetaData("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
-				$map->setMetaData("ows_hoursofservice", OWS_HOURSOFSERVICE);
-				$map->setMetaData("ows_role", OWS_ROLE);
-
-        if($this->Stelle->ows_fees != ''){
-          $map->setMetaData("ows_fees",$this->Stelle->ows_fees);}
-        else{
-          $map->setMetaData("ows_fees",OWS_FEES);
-        }
-        if($this->Stelle->ows_srs != ''){
-          $map->setMetaData("ows_srs",$this->Stelle->ows_srs);}
-        else{
-          $map->setMetaData("ows_srs",OWS_SRS);
-        }
+				# OWS Metadaten
+				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
+				$map->web->metadata->set("ows_abstract", $this->Stelle->ows_abstract ?: OWS_ABSTRACT);
+				$map->web->metadata->set("ows_accessconstraints", $this->Stelle->wms_accessconstraints ?: OWS_ACCESSCONSTRAINTS);
+				$map->web->metadata->set("ows_contactorganization", $this->Stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+				$map->web->metadata->set("ows_contactperson", $this->Stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+				$map->web->metadata->set("ows_contactposition", $this->Stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+				$map->web->metadata->set("ows_contactelectronicmailaddress", $this->Stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+				$map->web->metadata->set("ows_contactvoicetelephone", $this->Stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+				$map->web->metadata->set("ows_contactfacsimiletelephone", $this->Stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+				$map->web->metadata->set("ows_stateorprovince", $this->Stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+				$map->web->metadata->set("ows_address", $this->Stelle->ows_contactaddress ?: OWS_ADDRESS);
+				$map->web->metadata->set("ows_postcode", $this->Stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+				$map->web->metadata->set("ows_city", $this->Stelle->ows_contactcity ?: OWS_CITY);
+				$map->web->metadata->set("ows_country", OWS_COUNTRY);
+				$map->web->metadata->set("ows_addresstype", 'postal');
+				$map->web->metadata->set("ows_fees", $this->Stelle->ows_fees ?: OWS_FEES);
+				$map->web->metadata->set("ows_encoding", 'UTF-8');
+				$map->web->metadata->set("ows_keywordlist", OWS_KEYWORDLIST);
+				$map->web->metadata->set("ows_contactinstructions", OWS_CONTACTINSTRUCTIONS);
+				$map->web->metadata->set("ows_hoursofservice", OWS_HOURSOFSERVICE);
+				$map->web->metadata->set("ows_role", OWS_ROLE);
+				$map->web->metadata->set("ows_srs", $this->Stelle->ows_srs ?: OWS_SRS);
 				if (value_of($_REQUEST, 'onlineresource') != '') {
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
-					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  value_of($_REQUEST, 'passwort');
+					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
 				}
-        $map->setMetaData("ows_onlineresource", $ows_onlineresource);
-				$map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+				$map->web->metadata->set("ows_onlineresource", $ows_onlineresource);
+				$map->web->metadata->set("ows_service_onlineresource", $ows_onlineresource);
 
-        $map->setMetaData("wms_extent",$bb->minx.' '.$bb->miny.' '.$bb->maxx.' '.$bb->maxy);
+				$map->web->metadata->set("wms_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				// enable service types
-        $map->setMetaData("ows_enable_request", '*');
+				$map->web->metadata->set("ows_enable_request", '*');
 
         ///------------------------------////
 
         $map->setSymbolSet(SYMBOLSET);
         $map->setFontSet(FONTSET);
-        $map->set('shapepath', SHAPEPATH);
+        $map->shapepath = SHAPEPATH;
 
         # Umrechnen des Stellenextents kann hier raus, weil es schon in start.php gemacht wird
 
         # Webobject
-        $map->web->set('imagepath', IMAGEPATH);
-        $map->web->set('imageurl', IMAGEURL);
-        $map->web->set('log', LOGPATH.'mapserver.log');
-        $map->setMetaData('wms_feature_info_mime_type',  'text/html');
+        $map->web->imagepath = IMAGEPATH;
+        $map->web->imageurl = IMAGEURL;
+        $map->web->log = LOGPATH . 'mapserver.log';
+        $map->web->metadata->set('wms_feature_info_mime_type', 'text/html');
         //$map->web->set('ERRORFILE', LOGPATH.'mapserver_error.log');
 
         # Referenzkarte
-				if(MAPSERVERVERSION < 600){
-					$reference_map = ms_newMapObj(DEFAULTMAPFILE);
-				}
-				else {
-					$reference_map = new mapObj(DEFAULTMAPFILE);
-				}
+				$reference_map = new mapObj(DEFAULTMAPFILE);
 				$this->ref=$mapDB->read_ReferenceMap();
 				if (!is_array($this->ref)) {
 					$this->ref = array(
@@ -1118,56 +1090,64 @@ class GUI {
 				else {
 					$this->ref['refMapImg'] = REFERENCEMAPPATH.$this->ref['Dateiname'];
 				}
-				$reference_map->web->set('imagepath', IMAGEPATH);
-				$reference_map->setProjection('+init=epsg:'.$this->ref['epsg_code'], MS_FALSE);
-				$reference_map->reference->extent->setextent(round($this->ref['xmin']),round($this->ref['ymin']),round($this->ref['xmax']),round($this->ref['ymax']));
-				$reference_map->reference->set('image', $this->ref['refMapImg']);
-        $reference_map->reference->set('width',$this->ref['width']);
-        $reference_map->reference->set('height',$this->ref['height']);
-        $reference_map->reference->set('status','MS_ON');
-				if (MAPSERVERVERSION < 600) {
-					$extent=ms_newRectObj();
-				}
-				else {
-				  $extent = new rectObj();
-				}
+				$reference_map->web->imagepath = IMAGEPATH;
+				$reference_map->setProjection('+init=epsg:' . $this->ref['epsg_code']);
+				$reference_map->reference->extent->minx = round($this->ref['xmin']);
+				$reference_map->reference->extent->miny = round($this->ref['ymin']);
+				$reference_map->reference->extent->maxx = round($this->ref['xmax']);
+				$reference_map->reference->extent->maxy = round($this->ref['ymax']);
+				$reference_map->reference->image = $this->ref['refMapImg'];
+        $reference_map->reference->width = $this->ref['width'];
+        $reference_map->reference->height = $this->ref['height'];
+        $reference_map->reference->status = MS_ON;
 				$reference_map->reference->color->setRGB(-1,-1,-1);
 				$reference_map->reference->outlinecolor->setRGB(255,0,0);
 
         # Scalebarobject
-        $map->scalebar->set('status', MS_ON);
-        $map->scalebar->set('units', MS_METERS);
-        $map->scalebar->set('intervals', 4);
+        $map->scalebar->status = MS_ON;
+        $map->scalebar->units =  MS_METERS;
+        $map->scalebar->intervals = 4;
         $map->scalebar->color->setRGB(0,0,0);
         $r = substr(BG_MENUETOP, 1, 2);
         $g = substr(BG_MENUETOP, 3, 2);
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->set('font', 'SourceSansPro');		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
+				$map->scalebar->label->font = 'SourceSansPro';		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
 				}
 				$map->scalebar->label->size = 10.5;
-        # Groups
-        if(value_of($this->formvars, 'nurAufgeklappteLayer') == ''){
-	        $this->groupset=$mapDB->read_Groups();
-        }
 
-        # Layer
+				# Groups
+				if (value_of($this->formvars, 'nurAufgeklappteLayer') == '') {
+					$this->groupset = $mapDB->read_Groups();
+				}
+
+				# Filter für read_Layer
 				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
-        $mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
-        $mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
+				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
+				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
+				$mapDB->nurNameLike = value_of($this->formvars, 'nurNameLike');
+				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
+				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
+				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
+				$mapDB->nurLayerIDs = value_of($this->formvars, 'only_layer_ids');
+				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
+
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
-        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));     # class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
-        $rollenlayer = $mapDB->read_RollenLayer();
-        $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
-        $layerset['anzLayer'] = count($layerset['list']);
+
+				if (count($layerset) == 0) {
+					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$rollenlayer = $mapDB->read_RollenLayer();
+					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
+					$layerset['anzLayer'] = count($layerset['list']);
+				}
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
-				for ($i=0; $i < $layerset['anzLayer']; $i++) {
+				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
 						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
@@ -1177,16 +1157,17 @@ class GUI {
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
 
-					if(value_of($layerset['list'][$i], 'requires') != ''){
+					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
-					if($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)){      # nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
+					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
+						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-						$this->loadlayer($map, $layerset['list'][$i]);
-          }
-        }
+						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
+					}
+				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
 					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
@@ -1199,11 +1180,11 @@ class GUI {
 				else {
 					$this->map_scaledenom = $map->scale;
 				}
-        $this->mapDB=$mapDB;
-      } break; # end of lade Karte von Datenbank
-    } # end of switch loadMapSource
-    return 1;
-  }
+				$this->mapDB = $mapDB;
+			} break; # end of lade Karte von Datenbank
+		} # end of switch loadMapSource
+		return 1;
+	}
 
 		/**
 	 * Return a drawing order with default layers to top
@@ -1660,10 +1641,8 @@ class GUI {
   }
 	
   function setPrevMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $prevextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $prevextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $prevextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
     $ret = $this->user->rolle->getConsume($consumetime);
     $i = 0;
     while($i < 100 AND 
@@ -1704,10 +1683,8 @@ class GUI {
   }
 
   function setNextMapExtent($consumetime) {
-    $currentextent = ms_newRectObj();
-    $nextextent = ms_newRectObj();
-    $currentextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
-    $nextextent->setextent($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $currentextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
+    $nextextent = rectObj($this->map->extent->minx, $this->map->extent->miny, $this->map->extent->maxx, $this->map->extent->maxy);
 		$nexttime = $consumetime;
     # Abfragen der nächsten Kartenausdehnung
     $ret = $this->user->rolle->getConsume($consumetime);
@@ -1780,23 +1757,26 @@ class GUI {
       # Zoomen auf einen Punkt
       $this->debug->write('<br>Es wird auf einen Punkt gezoomt',4);
       # Erzeugen eines Punktobjektes
-      $oPixelPos=ms_newPointObj();
-
+      $oPixelPos = new PointObj();
 			$oPixelPos->setXY($minx,$maxy);
 			$this->map->zoompoint($nZoomFactor,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
     }
     else {
       # Zoomen auf ein Rechteck
       $this->debug->write('<br>Es wird auf ein Rechteck gezoomt',4);
-			$oPixelExt=ms_newRectObj();
-      if($minx != 'undefined' AND $miny != 'undefined' AND $maxx != 'undefined' AND $maxy != 'undefined'){
-       	$oPixelExt->setextent($minx,$miny,$maxx,$maxy);
-        $this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
-        # Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
-        # verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
-        $oPixelPos=ms_newPointObj();
-        $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
-        $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+      if ($minx != 'undefined' AND $miny != 'undefined' AND $maxx != 'undefined' AND $maxy != 'undefined') {
+				$oPixelExt = rectObj($minx,$miny,$maxx,$maxy, MS_TRUE);
+				if (MAPSERVERVERSION >= 800) {
+					$this->map->zoomrectangle($oPixelExt, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+				}
+				else {
+					$this->map->zoomrectangle($oPixelExt,$this->map->width,$this->map->height,$this->map->extent);
+					# Nochmal Zoomen auf die Mitte mit Faktor 1, damit der Ausschnitt in den erlaubten Bereich
+					# verschoben wird, falls er ausserhalb liegt, zoompoint berücksichtigt das, zoomrectangle nicht.
+					$oPixelPos = new PointObj();
+					$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+					$this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+				}
       }
     }
   }
@@ -1836,9 +1816,9 @@ class GUI {
 		}
 	}
 
-  function drawMap() {
+	function drawMap($img_urls = false) {
 		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
-			set_error_handler("MapserverErrorHandler");
+			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
@@ -1847,18 +1827,39 @@ class GUI {
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
 			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
-		}		
-    $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		ob_start();
-		$this->image_map->saveImage();
-		$image = ob_get_clean();
-    $this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
-
-		if($this->formvars['go'] != 'navMap_ajax'){
-			$this->legende = $this->create_dynamic_legend();
-			$this->debug->write("Legende erzeugt",4);
 		}
-		else{
+
+    $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
+		if (!$img_urls) {
+			if (MAPSERVERVERSION >= 800) {
+				$image = $this->image_map->getBytes();
+			}
+			else {
+				ob_start();
+				$this->image_map->saveImage();
+				$image = ob_get_clean();
+			}
+			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
+		}
+		else {
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
+			if (MAPSERVERVERSION >= 800) {
+				$this->image_map->save(IMAGEPATH . $filename);
+			}
+			else {
+				$this->image_map->saveImage(IMAGEPATH . $filename);
+			}
+			$this->img['hauptkarte'] = IMAGEURL . $filename;
+		}
+		if ($this->formvars['go'] == 'getMap'){
+			$this->outputfile = $filename;
+			return;
+		}
+		if ($this->formvars['go'] != 'navMap_ajax'){
+			$this->legende = $this->create_dynamic_legend();
+			$this->debug->write("Legende erzeugt", 4);
+		}
+		else {
 			# Zusammensetzen eines Layerhiddenstrings, in dem die aktuelle Sichtbarkeit aller aufgeklappten Layer gespeichert ist um damit bei Bedarf die Legende neu zu laden
 			for($i = 0; $i < $this->layerset['anzLayer']; $i++) {
 				$layer=&$this->layerset['list'][$i];
@@ -1870,20 +1871,33 @@ class GUI {
 			}
 		}
 
-    # Erstellen des Maßstabes
+		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
     $this->switchScaleUnitIfNecessary();
+		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
-		ob_start();
-		$img_scalebar->saveImage();
-		$image = ob_get_clean();
-    $this->img['scalebar'] = 'data:image/jpg;base64,'.base64_encode($image);
+		if(!$img_urls){
+			if (MAPSERVERVERSION >= 800) {
+				$image = $img_scalebar->getBytes();
+			}
+			else {
+				ob_start();
+				$img_scalebar->saveImage();
+				$image = ob_get_clean();
+			}
+			$this->img['scalebar'] = 'data:image/png;base64,'.base64_encode($image);
+		}
+		else{
+			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
+			$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
+			$this->img['scalebar'] = IMAGEURL.$filename;
+		}
 		$this->calculatePixelSize();
 		$this->drawReferenceMap();
   }
 
   function scaleMap($nScale) {
-    $oPixelPos=ms_newPointObj();
+    $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
   	if (MAPSERVERVERSION >= 600 ) {
@@ -1902,7 +1916,7 @@ class GUI {
 	}
 
   function switchScaleUnitIfNecessary() {
-		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->set('units', MS_KILOMETERS);
+		if ($this->map_scaledenom > $this->scaleUnitSwitchScale) $this->map->scalebar->units = MS_KILOMETERS;
   }
 
 	function map_saveWebImage($image,$format) {
@@ -1930,20 +1944,19 @@ class GUI {
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				if(MAPSERVERVERSION < '600'){
-					$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
-					$projTO = ms_newprojectionobj("init=epsg:".$this->ref['epsg_code']);
-				}
-				else{
-					$projFROM = $this->map->projection;
-					$projTO = $this->reference_map->projection;
-				}
+				$projFROM = $this->map->projection;
+				$projTO = $this->reference_map->projection;
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
-      ob_start();
-			$img_refmap->saveImage();
-			$image = ob_get_clean();
+			if (MAPSERVERVERSION >= 800) {
+				$image = $img_refmap->getBytes();
+			}
+			else {
+				ob_start();
+				$img_refmap->saveImage();
+				$image = ob_get_clean();
+			}
       $this->img['referenzkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
       $this->Lagebezeichung=$this->getLagebezeichnung($this->user->rolle->epsg_code);
     }
@@ -2409,7 +2422,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -2428,11 +2441,10 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->postgres_connection_id = $rs['postgres_connection_id'];
 		# ---> deprecated
@@ -2474,7 +2486,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -2613,7 +2625,7 @@ class rolle {
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
     while ($rs = $this->database->result->fetch_assoc()) {
       $groups[]=$rs;
     }
@@ -2835,7 +2847,7 @@ class rolle {
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
 			$layer[]=$rs;
@@ -2886,8 +2898,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
@@ -3207,7 +3218,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;

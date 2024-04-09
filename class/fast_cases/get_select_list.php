@@ -1,4 +1,16 @@
 <?
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' : {
@@ -581,7 +593,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -600,11 +612,10 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->postgres_connection_id = $rs['postgres_connection_id'];
 		# ---> deprecated
@@ -646,7 +657,7 @@ class stelle {
     #echo '<br>'.$sql;
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     if ($rs['check_client_ip']=='1') {
@@ -703,8 +714,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;

@@ -72,11 +72,12 @@
 		$sql.=" FROM nachweisverwaltung.n_nachweise WHERE id = ".$id.") AS foo";
 		$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-		$rect->minx=$rs['minx'];
-		$rect->maxx=$rs['maxx'];
-		$rect->miny=$rs['miny'];
-		$rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['maxx'],
+			$rs['miny'],
+			$rs['maxy']
+		);
 		$randx=($rect->maxx-$rect->minx)*0.02;
 		$randy=($rect->maxy-$rect->miny)*0.02;
 		if($rect->minx != ''){
@@ -94,7 +95,7 @@
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
+			$layer->metadata->set('wms_queryable','0');
 			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
@@ -126,7 +127,7 @@
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
+			$layer->metadata->set('wms_queryable','0');
 			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
@@ -147,7 +148,7 @@
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
+			$layer->metadata->set('wms_queryable','0');
 			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);
@@ -170,7 +171,7 @@
 			$layer->setConnectionType(6);
 			$layer->set('connection',$layerset[0]['connection']);
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
-			$layer->setMetaData('wms_queryable','0');
+			$layer->metadata->set('wms_queryable','0');
 			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
 			$klasse=ms_newClassObj($layer);
 			$klasse->set('status', MS_ON);

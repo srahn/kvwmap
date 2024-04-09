@@ -100,7 +100,6 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -228,7 +227,6 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -2362,13 +2360,19 @@ class Gml_extractor {
 		$i = 0;
 		foreach ($norm_attributes AS $n_a) {
 			$i++;
+			$class_and_attr = $gml_class . "_" . $n_a;
+			// class is shortened by ogr if class+attribute are longer than 60 characters, currently only known for the following exception)
+			if($gml_class == "bp_verkehrsflaechebesondererzweckbestimmung" && $n_a == "wirddargestelltdurch") {
+				$class_and_attr = "bp_verkehrsflaecbesondererzweckbestimmu_wirddargestelltdurch";
+			}
+			
 			# check if table exists
 			$sql_checkexists_norm_table = "
 				SELECT 
 					EXISTS (
 						SELECT FROM information_schema.tables 
 						WHERE table_schema = '" . $this->gmlas_schema . "'
-						AND table_name = '" . $gml_class . '_' . $n_a . "'
+						AND table_name = '" . $class_and_attr . "'
 					)
 			";
 			$ret = $this->pgdatabase->execSQL($sql_checkexists_norm_table, 4, 0);
@@ -2377,7 +2381,9 @@ class Gml_extractor {
 				# single ' escaped later
 				$norm_1 = "norm_table_" . $i;
 				if ($n_a == "wirddargestelltdurch" OR $n_a == "dientzurdarstellungvon" OR $n_a == "reftextinhalt") {
-					$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
+					
+					
+					$select_sql .= "(SELECT string_agg(lower(href),',') FROM " . $this->gmlas_schema . "." . $class_and_attr . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
 					$gml_attributes[] = $n_a;
 				}
 				if ($n_a == "detailliertezweckbestimmung" OR $n_a == "zweckbestimmung") {
@@ -2407,8 +2413,8 @@ class Gml_extractor {
 						$norm_2 = "norm_table_" . $i . "_" . $i;
 						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
 						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
-						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
-						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . '[]';
+						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
+						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . '[]';
 						$select_sql .= " ELSE NULL END AS " . $n_a . ",";
 						$gml_attributes[] = $n_a;
 					}

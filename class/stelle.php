@@ -256,8 +256,7 @@ class stelle {
 		$rs = $this->database->result->fetch_array();
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['Bezeichnung'];
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
@@ -1516,7 +1515,7 @@ class stelle {
 				#echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 			}
 			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
@@ -1578,28 +1577,31 @@ class stelle {
 						tooltip
 					)
 				";
-				# Rechte von der Elternstelle übernehmen
+				# Rechte von der Elternstelle übernehmen (bei mehreren Elternstellen die höchsten Rechte)
 				$sql = $insert . "
-					SELECT 
-						layer_id,
-						attributename,
-						" . $this->id . ",
-						privileg,
-						tooltip
-					FROM
-						layer_attributes2stelle l,
-						stellen_hierarchie
-					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
-						layer_id = " . $layer_ids[$i] . " AND
-						stelle_id = parent_id AND
-						child_id = " . $this->id . "
+					SELECT * FROM (
+						SELECT 
+							layer_id,
+							attributename,
+							" . $this->id . ",
+							max(privileg) as privileg,
+							max(tooltip) as tooltip
+						FROM
+							layer_attributes2stelle l,
+							stellen_hierarchie
+						WHERE
+							(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+							layer_id = " . $layer_ids[$i] . " AND
+							stelle_id = parent_id AND
+							child_id = " . $this->id . "
+						  GROUP BY attributename
+					) as foo
 					ON DUPLICATE KEY UPDATE
-						layer_id = l.layer_id, 
-						attributename = l.attributename, 
+						layer_id = foo.layer_id, 
+						attributename = foo.attributename, 
 						stelle_id = " . $this->id . ", 
-						privileg = l.privileg, 
-						tooltip = l.tooltip
+						privileg = foo.privileg, 
+						tooltip = foo.tooltip
 					";
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -1611,15 +1613,23 @@ class stelle {
 					DELETE l 
 					FROM 
 						layer_attributes2stelle l 
-						LEFT JOIN stellen_hierarchie ON l.stelle_id = child_id 
-						LEFT JOIN layer_attributes2stelle l2 ON 
-							l2.layer_id = " . $layer_ids[$i] . " AND 
-							l2.stelle_id = parent_id AND 
-							l.attributename = l2.attributename 
+						LEFT JOIN (
+							SELECT 
+								layer_id, stelle_id, attributename 
+							FROM 
+								layer_attributes2stelle l2 
+								JOIN stellen_hierarchie ON 
+								" . $this->id . " = child_id
+								WHERE
+								l2.layer_id = " . $layer_ids[$i] . " AND 
+								l2.stelle_id = parent_id
+						) as foo ON 
+							l.layer_id = foo.layer_id AND
+							l.attributename = foo.attributename
 					WHERE
 						l.layer_id = " . $layer_ids[$i] . " AND 
-						l.stelle_id = " . $this->id . " AND 
-						l2.attributename IS NULL;
+							l.stelle_id = " . $this->id . " AND
+							foo.layer_id IS NULL;
 						";
 					#echo $sql.'<br>';
 					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
@@ -1908,7 +1918,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayers - Lesen der Layer zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		} else {
 			$i = 0;
@@ -2319,6 +2329,7 @@ class stelle {
 				ul.`logconsume`, 
 				ul.`start_aktiv`, 
 				ul.`use_geom`,
+				ul.`group_id`,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -2447,7 +2458,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -2456,70 +2467,33 @@ class stelle {
 		return $privileges;
 	}
 
-	function parse_path($database, $path, $privileges, $attributes = NULL){
-		$newattributesstring = '';
-		$path = str_replace(["\r\n", "\n", "\t"], ' ', $path);
-		$distinctpos = strpos(strtolower($path), 'distinct');
-		if($distinctpos !== false && $distinctpos < 10){
-			$offset = $distinctpos+8;
-		}
-		else{
-			$offset = 7;
-		}
-		$offstring = substr($path, 0, $offset);
-		$path = $database->eliminate_star($path, $offset);
-		if(substr_count(strtolower($path), ' from ') > 1){
-			$whereposition = strpos($path, ' WHERE ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos($withoutwhere, ' FROM ');
-		}
-		else{
-			$whereposition = strpos(strtolower($path), ' where ');
-			$withoutwhere = substr($path, 0, $whereposition);
-			$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		}
-		$where = substr($path, $whereposition);
-		$from = substr($withoutwhere, $fromposition);
-
-		$attributesstring = substr($path, $offset, $fromposition-$offset);
-		//$fieldstring = explode(',', $attributesstring);
-		$fieldstring = get_select_parts($attributesstring);
-		$count = count($fieldstring);
-		for($i = 0; $i < $count; $i++){
-			if($as_pos = strripos($fieldstring[$i], ' as ')){   # Ausdruck AS attributname
-				$attributename = trim(substr($fieldstring[$i], $as_pos+4));
-				$real_attributename = substr($fieldstring[$i], 0, $as_pos);
+	function set_layer_privileges($formvars){
+		if ($formvars['used_layer_parent_ids'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
+			# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
+			$privileg = 0;
+			$export_privileg = 0;
+			foreach($formvars['used_layer_parent_ids'] as $parent_id) {
+				# unter allen Elternstellen das höchste Recht finden
+				if ($formvars['privileg' . $parent_id] > $privileg) {
+					$privileg = $formvars['privileg' . $parent_id];
+				}
+				if ($formvars['export_privileg' . $parent_id] > $export_privileg or $formvars['export_privileg' . $parent_id] == 1) {
+					$export_privileg = $formvars['export_privileg' . $parent_id];
+				}
 			}
-			else{   # tabellenname.attributname oder attributname
-				$explosion = explode('.', $fieldstring[$i]);
-				$attributename = trim($explosion[count($explosion)-1]);
-				$real_attributename = $fieldstring[$i];
-			}
-			if(value_of($privileges, trim($attributename, '"')) != ''){
-				$type = $attributes['type'][$attributes['indizes'][$attributename]];
-				if(POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type))$newattributesstring .= 'to_json('.$real_attributename.')::text as '.$attributename.', ';		# Array oder Datentyp
-				else $newattributesstring .= $fieldstring[$i].', ';																																			# normal
-			}
-			if(substr_count($fieldstring[$i], '(') - substr_count($fieldstring[$i], ')') > 0){
-				$fieldstring[$i+1] = $fieldstring[$i].','.$fieldstring[$i+1];
-			}
+			$formvars['privileg' . $this->id] = $privileg;
+			$formvars['export_privileg' . $this->id] = $export_privileg;
 		}
-		$newattributesstring = substr($newattributesstring, 0, strlen($newattributesstring)-2);
-		$newpath = $offstring.' '.$newattributesstring.' '.$from.$where;
-		return $newpath;
-	}
-
-	function set_layer_privileges($layer_id, $privileg, $exportprivileg, $use_parent_privileges){
 		$sql = '
 			UPDATE 
 				used_layer 
 			SET 
-				privileg = "' . $privileg . '", 
-				export_privileg = "' . $exportprivileg . '" ,
-				use_parent_privileges = "' . ($use_parent_privileges ?: 0) . '" 
+				privileg = "' . $formvars['privileg' . $this->id] . '", 
+				export_privileg = "' . $formvars['export_privileg' . $this->id] . '" ,
+				use_parent_privileges = "' . ($formvars['use_parent_privileges' . $this->id] ?: 0) . '" 
 			WHERE 
-				layer_id = '.$layer_id.' AND 
-				stelle_id = '.$this->id;
+				layer_id = ' . $formvars['selected_layer_id'] . ' AND 
+				stelle_id = ' . $this->id;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_layer_privileges - Speichern der Layerrechte zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2537,13 +2511,24 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		# dann Attributrechte eintragen
 		for ($i = 0; $i < count($attributes['type']); $i++) {
-			if ($formvars['used_layer_parent_id'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
+			if ($formvars['used_layer_parent_ids'] != '' AND $formvars['use_parent_privileges' . $this->id] == 1) {
 				# wenn Eltern-Stelle für diesen Layer vorhanden, deren Rechte übernehmen
-				$formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['privileg_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];
-				$formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] = $formvars['tooltip_' . $attributes['name'][$i] .'_'. $formvars['used_layer_parent_id']];
+				$privileg = '';
+				$tooltip = '';
+				foreach($formvars['used_layer_parent_ids'] as $parent_id) {
+					# unter allen Elternstellen das höchste Recht finden
+					if ($formvars['privileg_' . $attributes['name'][$i] .'_'. $parent_id] > $privileg) {
+						$privileg = $formvars['privileg_' . $attributes['name'][$i] .'_'. $parent_id];
+					}
+					if ($formvars['tooltip_' . $attributes['name'][$i] .'_'. $parent_id] > $tooltip) {
+						$tooltip = $formvars['tooltip_' . $attributes['name'][$i] .'_'. $parent_id];
+					}
+				}
+				$formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] = $privileg;
+				$formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] = $tooltip;
 			}
 			if($formvars['privileg_'.$attributes['name'][$i].'_'.$this->id] !== '') {
 				$sql = "
@@ -2559,7 +2544,7 @@ class stelle {
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
+				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 			}
 		}
 	}

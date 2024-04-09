@@ -47,11 +47,12 @@ class lineeditor {
 		$sql.=" FROM " . $tablename." WHERE ".$this->oid_attribute." = '" . $oid."') AS foo";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-		$rect->minx=$rs['minx']; 
-		$rect->maxx=$rs['maxx'];
-		$rect->miny=$rs['miny']; 
-		$rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['maxx'],
+			$rs['miny'],
+			$rs['maxy']
+		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0) {
 			if($this->clientepsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
 			else $randx = $randy = ZOOMBUFFER;

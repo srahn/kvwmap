@@ -112,8 +112,8 @@
     $layer->set('name',$legendentext);
     $layer->set('type',2);
     $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
@@ -123,9 +123,9 @@
       $layer->setConnectionType(6);
     }
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $klasse->setexpression($expression);
@@ -177,8 +177,8 @@
     $layer->set('name',$legendentext);
     $layer->set('type',2);
     $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
     if (MAPSERVERVERSION < '540') {
@@ -188,9 +188,9 @@
       $layer->setConnectionType(6);
     }
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0');
     $klasse=ms_newClassObj($layer);
     $klasse->set('status', MS_ON);
     $style=ms_newStyleObj($klasse);
@@ -286,9 +286,11 @@
     # zu 1)
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
+    $GUI->loadMap('DataBase');
     $ret = $alkis->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $GUI->user->rolle->epsg_code);
     if ($ret[0]) {
       $rect=$GUI->user->rolle->oGeorefExt;
+      $GUI->add_message('warning', 'Der Strasse sind keine Gebäude zugeordnet.');
     }
     else {
       $rect = $ret[1]['rect'];
@@ -363,7 +365,6 @@
 			
 	    $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
-	    $GUI->loadMap('DataBase');
 	    # zu 2)
 	    $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 			$GUI->map_scaledenom = $GUI->map->scaledenom;
@@ -1006,7 +1007,7 @@
 	$GUI->ALKIS_Kartenauszug = function($layout, $formvars) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
-		$point=ms_newPointObj();
+		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
 		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
@@ -1124,7 +1125,7 @@
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
 		$GUI->generischer_sachdaten_druck_drucken();
 	};
-	
+
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';
 		$GUI->main = PLUGINS.'alkis/view/Adressaenderungen_Export.php';

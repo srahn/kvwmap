@@ -1,4 +1,16 @@
 <?
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' : {
@@ -342,7 +354,7 @@ class GUI {
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
-			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, false, false, false);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
@@ -512,7 +524,7 @@ class GUI {
 						}
 						echo '</ul>
 						<table class="ul_table">';
-						if ($this->formvars['layer_id'] < 0) {
+						if ($layer[0]['connectiontype'] == 6 AND $this->formvars['layer_id'] < 0) {
 							echo '<tr>
 												<td>
 													<span>' . $this->strAutoClassify . ':</span>
@@ -952,7 +964,7 @@ class stelle {
     $this->debug->write("<p>file:stelle.php class:stelle->getName - Abfragen des Namens der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
     $this->Bezeichnung=$rs['Bezeichnung'];
@@ -971,11 +983,10 @@ class stelle {
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->postgres_connection_id = $rs['postgres_connection_id'];
 		# ---> deprecated
@@ -1019,7 +1030,7 @@ class stelle {
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
+		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
@@ -1035,7 +1046,7 @@ class stelle {
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
 		}
 		else{
@@ -1137,7 +1148,7 @@ class rolle {
     #echo $sql.'<br>';
     $this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
     $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
     while ($rs = $this->database->result->fetch_assoc()) {
       $layer[]=$rs;
@@ -1166,8 +1177,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
@@ -1344,7 +1354,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		}
 		$i = 0;
@@ -1499,9 +1509,12 @@ class db_mapObj {
 		return $params;
 	}	
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
 		global $language;
-		$attributes = array();
+		$attributes = array(
+			'name' => array(),
+			'tab' => array()
+		);
 		$einschr = '';
 
 		$alias_column = (
@@ -1522,7 +1535,7 @@ class db_mapObj {
 		}
 
 		$sql = "
-			SELECT 
+			SELECT
 				`order`, " .
 				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
 				`layer_id`,
@@ -1530,6 +1543,7 @@ class db_mapObj {
 				`real_name`,
 				`tablename`,
 				`table_alias_name`,
+				a.`schema`,
 				`type`,
 				d.`name` as typename,
 				`geometrytype`,
@@ -1543,6 +1557,7 @@ class db_mapObj {
 				`options`,
 				`tooltip`,
 				`group`,
+				`tab`,
 				`arrangement`,
 				`labeling`,
 				`raster_visibility`,
@@ -1571,19 +1586,16 @@ class db_mapObj {
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
 			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
-			if ($rs['tablename']){
-				if (strpos($rs['tablename'], '.') !== false){
-					$explosion = explode('.', $rs['tablename']);
-					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-				}
-				$attributes['table_name'][$i]= $rs['tablename'];
+			if ($rs['tablename']) {
+				$attributes['table_name'][$i] = $rs['tablename'];
 				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+				$attributes['schema'][$i] = $rs['schema'];
 			}
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
@@ -1601,13 +1613,36 @@ class db_mapObj {
 			$attributes['geomtype'][$rs['name']]= $rs['geometrytype'];
 			$attributes['constraints'][$i]= $rs['constraints'];
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
+			if ($rs['constraints'] == 'PRIMARY KEY') {
+				$attributes['pk'][] = $rs['real_name'];
+			}
 			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
 			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
+				$replace_params = rolle::$layer_params;
+				foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
+					if (
+						in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
+						array_key_exists($attribute, $replace_params)
+					) {
+						# Attribute is predefined or layer_param. Skip to add as replace_param.
+					}
+					else {
+						$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
+					}
+				}
+				$replaced_default = replace_params(
+					$rs['default'],
+					$replace_params,
+					$this->GUI->user->id,
+					$this->GUI->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->GUI->rolle->language
+				);
+				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 				if ($ret1[0] == 0) {
 					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 				}
@@ -1628,6 +1663,7 @@ class db_mapObj {
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
 			$attributes['group'][$i] = $rs['group'];
+			$attributes['tab'][$i] = $rs['tab'];
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
@@ -1651,12 +1687,13 @@ class db_mapObj {
 			}
 			$i++;
 		}
-		if ($attributes['table_name'] != NULL) {
+		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
 		}
 		else {
 			$attributes['all_table_names'] = array();
 		}
+		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
 	}
 
@@ -1667,7 +1704,6 @@ class db_mapObj {
 		$options = array_merge($default_options, $options);
 		global $language;
 		$data = str_replace('$scale', '1000', $this->getData($layer_id));
-
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
@@ -1996,7 +2032,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -2212,6 +2248,7 @@ class pgdatabase {
 			SET debug_print_parse = false;
 			SET client_min_messages = 'NOTICE';
 			" . ($this->host == 'pgsql'? "SET log_min_messages='error';" : "");
+
 		$this->execSQL($sql, 4, 0);
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
@@ -2333,7 +2370,6 @@ class pgdatabase {
 			# Füge Fehlermeldung hinzu
 			$err_msgs[] = $ret[1];
 		}
-
 		if (count($err_msgs) > 0) {
 			# Wenn Fehler auftraten liefer nur die Fehler zurück
 			$ret[0] = 1;
