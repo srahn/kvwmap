@@ -1631,7 +1631,7 @@ FROM
   
   function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column){		
 		$sql ="
-			SELECT distinct 
+			SELECT  
 				f." . $oid_column . "::text as oid, 
 				f.gml_id, 
 				0 as hist_alb, 
@@ -1652,7 +1652,9 @@ FROM
 				zeitpunktderentstehung::date as entsteh, 
 				a.kennzeichen as antragsnummer, 
 				f.beginnt, 
-				f.endet 
+				f.endet,
+				gem.endet as gem_endet,
+				g.endet as g_endet 
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
@@ -1675,7 +1677,7 @@ FROM
 		else {
 			$sql.= " 
 				UNION 
-				SELECT distinct 
+				SELECT  
 					NULL, 
 					f.gml_id, 
 					1 as hist_alb, 
@@ -1696,7 +1698,9 @@ FROM
 					zeitpunktderentstehung::date as entsteh, 
 					'' as antragsnummer, 
 					f.beginnt, 
-					f.endet 
+					f.endet,
+					gem.endet as gem_endet,
+					g.endet as g_endet 
 				FROM 
 					alkis.ax_historischesflurstueckohneraumbezug as f 
 					LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land 
@@ -1704,7 +1708,7 @@ FROM
 					LEFT JOIN alkis.ax_gemeinde g ON f.gemeindezugehoerigkeit_gemeinde=g.gemeinde AND ppg.kreis = g.kreis 
 				WHERE 
 					f.flurstueckskennzeichen = '" . $FlurstKennz . "'
-				order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
+				order by endet DESC, gem_endet DESC, g_endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
 		}		
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
