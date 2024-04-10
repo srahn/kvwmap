@@ -139,7 +139,6 @@ else { ?>
 			<span data-tooltip="Die Angabe kann in % oder px erfolgen." style="
 				float: right;
 				position: relative;
-				top: -22px;
 				left: 17px;
 			"></span>
 			<div style="clear: both"></div>

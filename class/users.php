@@ -716,12 +716,6 @@ class user {
 		) {
 			return true;
 		}
-		elseif (
-			$case == 'chart_speichern' AND
-			$this->funktion == 'admin'
-		) {
-			return true;
-		}
 		else {
 			return false;
 		}

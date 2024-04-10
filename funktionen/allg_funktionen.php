@@ -1933,6 +1933,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($user_id))							$str = str_replace('$userid', $user_id, $str);  // deprecated
+	if (!is_null($stelle_id))						$str = str_replace('$stelleid', $stelle_id, $str); // deprecated
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
@@ -2359,31 +2361,6 @@ function before_last($txt, $delimiter) {
 	return implode($delimiter , $parts);
 }
 
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	$parser = new PHPSQLParser($sql, true);
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
-			'alias' => $alias
-		);
-	}
-	return $attributes;
-}
-
 /**
  * Function return the inner part of the select in a mapserver data statement
  * normaly looks like this:
@@ -2646,6 +2623,20 @@ function put_value_first($array, $value) {
 function en_date($date_de) {	
 	return date('Y-m-d', strtotime($date_de));
 }
+
+/**
+*	Convert English date format 2022-12-25
+*	to German date format 25.12.2022
+*/
+function de_date($date_en) {	
+	if (strlen($date_en) > 10) {
+		return date('d.m.Y G:i:s', strtotime($date_en));
+	}
+	else {
+		return date('d.m.Y', strtotime($date_en));
+	}
+}
+
 
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(

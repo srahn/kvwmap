@@ -43,7 +43,26 @@ function get_style(style_id){
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
 	layer_id = document.GUI.selected_layer_id.value;
 	document.GUI.selected_style_id.value = style_id;
-	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div'), ''), ['', 'execute_function']);
+}
+
+function replace_symbolname_field(){
+	var symbolname_field = document.querySelector('#selected_style_div input[name=\'style_symbolname\']');
+	var custom_select_template = document.querySelector('#custom_select_style_symbolname, #custom_select_style_symbolname_template');
+	var custom_select = custom_select_template.cloneNode(true);
+	custom_select_template.id = 'custom_select_style_symbolname_template';
+	custom_select.id = 'custom_select_style_symbolname';
+	symbolname_field.insertAdjacentElement('afterend', custom_select);
+	var options = custom_select.querySelectorAll('.dropdown li');
+	var found = false;
+	[].forEach.call(options, function (option){
+		if (!found && option.dataset.value == symbolname_field.value) {
+			custom_select_click(option);
+			toggle_custom_select('style_symbolname');
+			found = true;
+		}
+	});
+	symbolname_field.remove();
 }
 
 function get_label(label_id){
@@ -120,7 +139,7 @@ function save_style(style_id){
 	formData.append('layer_id', document.GUI.selected_layer_id.value);
 	formData.append('class_id', document.GUI.class_1.value);
 	formData.append('style_id', style_id);	
-	ahah('index.php', formData, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
+	ahah('index.php', formData, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div'), ''), ['', '', 'execute_function']);
 }
 
 function save_label(label_id){
@@ -202,7 +221,7 @@ function setScale(select){
 		color: #111;
 	}
 	#selected_style_div {
-		width: 213px;
+		width: 248px;
 	}
 	.fa-clipboard:hover {
 		cursor: pointer;
@@ -221,7 +240,7 @@ function setScale(select){
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['Name_or_alias'][$i] != $this->layerdaten['Bezeichnung'][$i] ? ' [' . $this->layerdaten['Name_or_alias'][$i] . ']' : '') . '</option>';
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>
@@ -272,6 +291,7 @@ function setScale(select){
 			    		}
 			    		?>
 			      </select>
+						<? $this->create_symbol_list_template($this->layerdata); ?>
 			      </div> 
 			  	</td>
 			  </tr>
