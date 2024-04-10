@@ -15603,6 +15603,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$layerdb = $this->mapDB->getlayerdatabase($layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 							$privileges = $this->Stelle->get_attributes_privileges($layerset[$i]['Layer_ID']);
 							$layerset[$i]['attributes'] = $this->mapDB->read_layer_attributes($layerset[$i]['Layer_ID'], $layerdb, $privileges['attributenames'], false, true);
+							
+							if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+								$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
+							}
+							if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+								$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
+							}
 
 							$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
 							$pfad = $query_parts['query'];
@@ -15614,12 +15621,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 							if ($layerset[$i]['Layer_ID'] > 0 AND empty($privileges)) {
 								$pfad = 'NULL::geometry as ' . $layerset[$i]['attributes']['the_geom'] . ' ' . $pfad;
-							}
-							if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
-								$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
-							}
-							if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
-								$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 							}
 
 							if ($layerset[$i]['attributes']['the_geom'] == '') {					# Geometriespalte ist nicht geladen, da auf "nicht sichtbar" gesetzt --> aus Data holen
