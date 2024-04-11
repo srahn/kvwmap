@@ -13589,15 +13589,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$style->set('width', $width);
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
-			$img = $class->createLegendIcon($icon_size, $icon_size);
-			$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			$symbols[] = array(
-				'id' => $symbolid,
-				'value' => $symbol->name,
-				'type' => $symbol->type,
-				'bild' => $symbol->imagepath,
-				'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
-			);
+			try {
+				$img = $class->createLegendIcon($icon_size, $icon_size);
+				$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				$symbols[] = array(
+					'id' => $symbolid,
+					'value' => $symbol->name,
+					'type' => $symbol->type,
+					'bild' => $symbol->imagepath,
+					'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
+				);
+			}
+			catch (Exception $ex) {
+				$this->add_message('error', 'Fehler beim Erzeugen des Icons für Symbol ' . $symbol->name);
+			}
 		}
 		return $symbols;
 	}
