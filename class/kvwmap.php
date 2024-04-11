@@ -19307,10 +19307,9 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		$formvars['pfad'] = $this->db->mysqli->real_escape_string($formvars['pfad']);
-		$formvars['Data'] = $this->db->mysqli->real_escape_string($formvars['Data']);
-		$formvars['metalink'] = $this->db->mysqli->real_escape_string($formvars['metalink']);
-		$formvars['duplicate_criterion'] = $this->db->mysqli->real_escape_string($formvars['duplicate_criterion']);
+		foreach (array('pfad', 'Data', 'metalink', 'duplicate_criterion', 'comment') AS $var_name) {
+			$formvars[$var_name] = $this->db->mysqli->real_escape_string($formvars[$var_name]);
+		}
 		if ($formvars['id'] != '') {
 			$formvars['selected_layer_id'] = $formvars['id'];
 		}
@@ -19534,6 +19533,7 @@ class db_mapObj{
 	function newLayer($layerdata) {
 		include_once(CLASSPATH . 'LayerDataSource.php');
 		global $supportedLanguages;
+
 		$datasource_ids = array();
 
 		# Erzeugt einen neuen Layer (entweder aus formvars oder aus einem Layerobjekt)
@@ -19636,11 +19636,11 @@ class db_mapObj{
 					" . quote_or_null($formvars['Datentyp']) . ",
 					" . quote_or_null($formvars['Gruppe']) . ",
 					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['pfad'])) . ",
-					" . quote_or_null($formvars['maintable']) . ",
+					" . quote_or_null(trim($formvars['maintable'])) . ",
 					" . quote_or_null($formvars['oid']) . ",
 					" . quote_or_null($formvars['identifier_text']) . ",
 					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['Data'])) . ",
-					" . quote_or_null($formvars['schema']) . ",
+					" . quote_or_null(trim($formvars['schema'])) . ",
 					" . quote_or_null(append_slash($formvars['document_path'])) . ",
 					" . quote_or_null($formvars['document_url']) . ",
 					" . quote($formvars['tileindex']) . ",
@@ -19687,13 +19687,13 @@ class db_mapObj{
 					" . quote($formvars['selectiontype']) . ", -- selectiontype
 					" . quote(($formvars['querymap'] == '' ? '0' : $formvars['querymap']), 'text') . ", -- querymap
 					" . quote($formvars['processing']) . ",
-					" . quote($formvars['kurzbeschreibung']) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['kurzbeschreibung'])) . ",
 					" . quote($formvars['dataowner_name']) . ",
 					" . quote($formvars['dataowner_email']) . ",
 					" . quote($formvars['dataowner_tel']) . ",
 					" . quote($formvars['uptodateness']) . ",
 					" . quote($formvars['updatecycle']) . ",
-					" . quote($formvars['metalink']) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['metalink'])) . ",
 					" . quote($formvars['status']) . ",
 					" . quote($formvars['trigger_function']) . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
@@ -19701,7 +19701,7 @@ class db_mapObj{
 					" . quote($this->db->mysqli->real_escape_string($formvars['duplicate_criterion'])) . ",
 					" . quote_or_null($formvars['shared_from']) . ",
 					'" . ($formvars['version'] == '' ? '1.0.0' : $formvars['version']) . "',
-					" . quote_or_null($formvars['comment']) . "
+					" . quote_or_null($this->db->mysqli->real_escape_string($formvars['comment'])) . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote(($formvars['sync'] == '' ? '0' : $formvars['sync']), 'text') : '') . "
 					" . ($this->GUI->plugin_loaded('mobile') ? ", " . quote($formvars['vector_tile_url']) : '') . "
 					" . ($this->GUI->plugin_loaded('portal') ? ", " . quote(($formvars['cluster_option'] == '' ? '0' : $formvars['cluster_option']), 'text') : '') . "
