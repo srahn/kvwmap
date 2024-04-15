@@ -10997,6 +10997,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
+						$parentlayerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['layer_id_mother'], $layerdb2, NULL, false, true, true);
 						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0], $this->formvars['columnname_mother'], 10, $layerdb2, $this->user->rolle->epsg_code, $this->Stelle);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
@@ -13610,25 +13611,30 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$style->width = $width;
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
-			if (MAPSERVERVERSION >= 800) {
-				$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+			try {
+				if (MAPSERVERVERSION >= 800) {
+					$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+				}
+				else {
+					$img = $class->createLegendIcon($icon_size, $icon_size);
+				}
+				if (MAPSERVERVERSION >= 800) {
+					$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				else {
+					$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				$symbols[] = array(
+					'id' => $symbolid,
+					'value' => $symbol->name,
+					'type' => $symbol->type,
+					'bild' => $symbol->imagepath,
+					'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
+				);
 			}
-			else {
-				$img = $class->createLegendIcon($icon_size, $icon_size);
+			catch (Exception $ex) {
+				$this->add_message('error', 'Fehler beim Erzeugen des Icons für Symbol ' . $symbol->name);
 			}
-			if (MAPSERVERVERSION >= 800) {
-				$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			else {
-				$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			$symbols[] = array(
-				'id' => $symbolid,
-				'value' => $symbol->name,
-				'type' => $symbol->type,
-				'bild' => $symbol->imagepath,
-				'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
-			);
 		}
 		return $symbols;
 	}
