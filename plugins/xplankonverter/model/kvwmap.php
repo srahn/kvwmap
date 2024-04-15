@@ -455,7 +455,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei {$uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
 			);
 		}
 		return array(

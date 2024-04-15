@@ -2550,7 +2550,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		} break;
 
 		case 'int_csv' : {
-			$value = explode(',', $value);
+			$value = explode(',', (string)$value);
 			foreach ($value AS &$single_value) {
 				sanitize($single_value, 'int');
 			}
