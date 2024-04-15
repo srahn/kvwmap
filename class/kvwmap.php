@@ -10972,6 +10972,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
+						$parentlayerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['layer_id_mother'], $layerdb2, NULL, false, true, true);
 						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0], $this->formvars['columnname_mother'], 10, $layerdb2, $this->user->rolle->epsg_code, $this->Stelle);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
