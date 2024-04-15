@@ -177,9 +177,6 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
 							<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
 <? 
-							if (is_array($this->attributes['dependent_options'][$i])) {
-								$this->attributes['enum'][$i] = $this->attributes['enum'][$i][0];
-							}
 							if (is_array($this->attributes['enum'][$i])){
 								foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
 									<option  <? 
