@@ -1044,7 +1044,6 @@ class data_import_export {
 			return true;
 		}
 		else {
-			print_r($result->stdout);exit;
 			return strpos(get_first_word_after($result->stdout, 'Layer SRS WKT'), 'unknown') !== false;
 		}
 	}
