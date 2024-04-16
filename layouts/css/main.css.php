@@ -1719,10 +1719,6 @@ span.black {
 	clear: both;
 }
 
-#nds_edit #layer {
-	margin: 0;
-}
-
 /* Vorschaubilder für Bilder (und PDFs) werden zunächst mit 125px Breite angezeigt und bei Hover auf PREVIEW_IMAGE_WIDTH vergrößert */
 a .preview_image{
 	border:1px solid black;
@@ -2822,9 +2818,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	margin-bottom: 0px;
 	margin-top: 10px;
 }
-#nds_titel p {
-	margin: 0px 0px -32px 0px;
-}
+
 #nds_formular {
 	margin: 40px 0px 20px 0px;
 	padding-left: 20px;
