@@ -1006,7 +1006,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = $output;
+			$result->stdout = implode('', $output);
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1044,6 +1044,7 @@ class data_import_export {
 			return true;
 		}
 		else {
+			print_r($result->stdout);exit;
 			return strpos(get_first_word_after($result->stdout, 'Layer SRS WKT'), 'unknown') !== false;
 		}
 	}
