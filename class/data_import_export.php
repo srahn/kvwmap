@@ -1012,7 +1012,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = $output;
+			$result->stdout = implode('', $output);
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1023,7 +1023,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : ''));
+		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();

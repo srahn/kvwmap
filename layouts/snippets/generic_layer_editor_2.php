@@ -48,8 +48,16 @@ if ($doit == true) {
 		$privileg = $layer['attributes']['privileg'][$index];
 		$nullable = $layer['attributes']['nullable'][$index];
 		if ($this->new_entry == true AND $privileg == 1) {
-			$show_geom_editor = true;
-		}
+			$show_geom_editor = true; ?>
+			<style>
+				#nds_titel p {
+					margin: 0px 0px -32px 0px;
+				}
+				#nds_edit #layer {
+					margin: 0;
+				}
+			</style>
+<?	}
 		if ($nullable === '0'){ ?>
 			<script type="text/javascript">
 				geom_not_null = true;

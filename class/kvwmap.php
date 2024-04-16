@@ -1181,7 +1181,7 @@ echo '			</table>
 				<tr>
 					<td>
 						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
-		$layercount = @count($this->layerset['layers_of_group'][$group_id]);
+		$layercount = @count($this->layerset['layers_of_group'][$group_id] ?: []);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -2102,7 +2102,7 @@ echo '			</table>
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
-					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+					#$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers)); geht wohl so in SwigMapscript nicht
 				}
 				$this->map = $map;
 				$this->reference_map = $reference_map;
@@ -10997,6 +10997,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
+						$parentlayerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['layer_id_mother'], $layerdb2, NULL, false, true, true);
 						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0], $this->formvars['columnname_mother'], 10, $layerdb2, $this->user->rolle->epsg_code, $this->Stelle);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
@@ -13610,25 +13611,30 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$style->width = $width;
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
-			if (MAPSERVERVERSION >= 800) {
-				$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+			try {
+				if (MAPSERVERVERSION >= 800) {
+					$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+				}
+				else {
+					$img = $class->createLegendIcon($icon_size, $icon_size);
+				}
+				if (MAPSERVERVERSION >= 800) {
+					$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				else {
+					$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				$symbols[] = array(
+					'id' => $symbolid,
+					'value' => $symbol->name,
+					'type' => $symbol->type,
+					'bild' => $symbol->imagepath,
+					'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
+				);
 			}
-			else {
-				$img = $class->createLegendIcon($icon_size, $icon_size);
+			catch (Exception $ex) {
+				$this->add_message('error', 'Fehler beim Erzeugen des Icons für Symbol ' . $symbol->name);
 			}
-			if (MAPSERVERVERSION >= 800) {
-				$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			else {
-				$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			$symbols[] = array(
-				'id' => $symbolid,
-				'value' => $symbol->name,
-				'type' => $symbol->type,
-				'bild' => $symbol->imagepath,
-				'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
-			);
 		}
 		return $symbols;
 	}
@@ -19394,12 +19400,7 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		if ($this->GUI->plugin_loaded('mobile')) {
-			$zero_if_empty_attributes = array_merge(
-				$zero_if_empty_attributes,
-				array('cluster_option')
-			);
-		}
+		
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
