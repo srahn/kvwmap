@@ -13608,7 +13608,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		array_multisort(
 			array_map(
 					static function ($symbol) {
-							return $symbol['value'];
+							return strtolower($symbol['value']);
 					},
 					$symbols
 			),
