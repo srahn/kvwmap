@@ -1107,13 +1107,16 @@ echo '			</table>
 	}
 
 	function get_group_legend() {
-		# Änderungen in den Gruppen werden gesetzt
-		$this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
-		# Ein- oder Ausblenden der Klassen
-		$this->user->rolle->setClassStatus($this->formvars);
-		$this->loadMap('DataBase');
-		echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
-	}
+    # Änderungen in den Gruppen werden gesetzt
+    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+    # Ein- oder Ausblenden der Klassen
+    $this->user->rolle->setClassStatus($this->formvars);
+    $this->loadMap('DataBase');
+		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}
+    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
+  }
 
   function close_group_legend() {
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
@@ -1385,16 +1388,21 @@ echo '			</table>
 								for($s = 0; $s < $class->numstyles; $s++){
 									$style = $class->getStyle($s);
 									if($maplayer->type > 0){
-										$symbol = $this->map->getSymbolObjectById($style->symbol);
+										if (MAPSERVERVERSION >= 800) {
+											$symbol = $this->map->symbolset->getSymbol($style->symbol);
+										}
+										else {
+											$symbol = $this->map->getSymbolObjectById($style->symbol);
+										}
 										if($symbol->type == 1006){ 	# 1006 == hatch
-											$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2*$style->width);
+											$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2*$style->width;
 										}
 										elseif($style->symbolname == ''){
-											$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2);
-											$style->set('width', 2);
-											$style->set('maxwidth', 2);
+											$style->size = 2;					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2;
+											$style->width = 2;
+											$style->maxwidth = 2;
 										}
 										if ($maplayer->type == MS_LAYER_CHART) {
 											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
@@ -1438,10 +1446,20 @@ echo '			</table>
 											$imagename = TEMPPATH_REL.$newname;
 										}
 										else{																												# vom Mapserver generiertes Klassenbild
-											$image = $class->createLegendIcon($width, $height);
-											ob_start();
-											$image->saveImage();
-											$image = ob_get_clean();
+											if (MAPSERVERVERSION >= 800) {
+												$img = $class->createLegendIcon($this->map, $class->layer, $width, $height);
+											}
+											else {
+												$img = $class->createLegendIcon($width, $height);
+											}
+											if (MAPSERVERVERSION >= 800) {
+												$image = $img->getBytes();
+											}
+											else {
+												ob_start();
+												$img->saveImage();
+												$image = ob_get_clean();
+											}
 											$imagename = 'data:image/jpg;base64,'.base64_encode($image);
 										}
 										$original_class_image = $imagename;
@@ -2172,7 +2190,7 @@ echo '			</table>
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
 		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
-		$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
+		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
 		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
@@ -2326,7 +2344,7 @@ echo '			</table>
 				$layer->data = $layerset['Data'];
 			}
 			
-			if (value_of($layerset, 'buffer') != 0) {
+			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 				$geom = explode(' ', $layer->data)[0];
 				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
