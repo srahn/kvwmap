@@ -1,4 +1,20 @@
 <?
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
+function replace_semicolon($text) {
+	return str_replace(';', '', $text);
+}
+
 function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' : {
@@ -244,6 +260,11 @@ class GUI {
 		$this->trigger_functions = array();
   }
 
+	function plugin_loaded($plugin) {
+		global $kvwmap_plugins;
+		return in_array($plugin, $kvwmap_plugins);
+	}
+
 	function sanitize($vars) {
 		foreach ($vars as $name => $type) {
 			sanitize($this->formvars[$name], $type);
@@ -354,8 +375,8 @@ class GUI {
 			$layerset = $this->user->rolle->getLayer('');
 		}
     $anzLayer=count($layerset);
-    $map=ms_newMapObj('');
-    $map->set('shapepath', SHAPEPATH);
+    #$map = new MapObj('');
+    #$map->shapepath = SHAPEPATH;
 		$found = false;
     for ($i=0;$i<$anzLayer;$i++) {
 			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
@@ -999,40 +1020,127 @@ class stelle {
   }
 
 	function readDefaultValues() {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
+				ELSE s.`Bezeichnung`
+			END AS Bezeichnung";
+		}
+		else {
+			$name_column = "s.`Bezeichnung`";
+		}
+
 		$sql = "
 			SELECT
-				*
+				`ID`," .
+				$name_column . ",
+				`start`,
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`ows_namespace`,
+				`ows_title`,
+				`wms_accessconstraints`,
+				`ows_abstract`,
+				`ows_updatesequence`,
+				`ows_geographicdescription`,
+				`ows_fees`,
+				`ows_srs`,
+
+				`ows_contactorganization`,
+				`ows_contactaddress`,
+				`ows_contactpostalcode`,
+				`ows_contactcity`,
+				`ows_contactadministrativearea`,
+				`ows_contactemailaddress`,
+				`ows_contactperson`,
+				`ows_contactposition`,
+				`ows_contactvoicephone`,
+				`ows_contactfacsimile`,
+
+				`ows_distributionorganization`,
+				`ows_distributionaddress`,
+				`ows_distributionpostalcode`,
+				`ows_distributioncity`,
+				`ows_distributionadministrativearea`,
+				`ows_distributionemailaddress`,
+				`ows_distributionperson`,
+				`ows_distributionposition`,
+				`ows_distributionvoicephone`,
+				`ows_distributionfacsimile`,
+
+				`ows_contentorganization`,
+				`ows_contentaddress`,
+				`ows_contentpostalcode`,
+				`ows_contentcity`,
+				`ows_contentadministrativearea`,
+				`ows_contentemailaddress`,
+				`ows_contentperson`,
+				`ows_contentposition`,
+				`ows_contentvoicephone`,
+				`ows_contentfacsimile`,
+
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
 			FROM
-				stelle
+				stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$this->database->execSQL($sql);
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
+		$this->data = $rs;
+		$this->Bezeichnung = $rs['Bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
-		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->ows_contactperson = $rs['ows_contactperson'];
-		$this->ows_contactorganization = $rs['ows_contactorganization'];
-		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
-		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_namespace = $rs['ows_namespace'];
+		$this->ows_updatesequence = $rs['ows_updatesequence'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
+
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactaddress = $rs['ows_contactaddress'];
+		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
+		$this->ows_contactcity = $rs['ows_contactcity'];
+		$this->ows_contactadministrativearea = $rs['ows_contactadministrativearea'];
+		$this->ows_contactemailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
+
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
+		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
+		$this->ows_distributioncity = $rs['ows_distributioncity'];
+		$this->ows_distributionadministrativearea = $rs['ows_distributionadministrativearea'];
+		$this->ows_distributionemailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
+		$this->ows_distributionvoicephone = $rs['ows_distributionvoicephone'];
+		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
+
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contentaddress = $rs['ows_contentaddress'];
+		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
+		$this->ows_contentcity = $rs['ows_contentcity'];
+		$this->ows_contentadministrativearea = $rs['ows_contentadministrativearea'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_contentvoicephone = $rs['ows_contentvoicephone'];
+		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
+
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
@@ -1040,7 +1148,10 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
+		$this->reset_password_text = $rs['reset_password_text'];
+		$this->invitation_text = $rs['invitation_text'];
 	}
 
   function checkClientIpIsOn() {
@@ -1089,17 +1200,24 @@ class stelle {
 }
 
 class rolle {
-
-  var $user_id;
-  var $stelle_id;
-  var $debug;
-  var $database;
-  var $loglevel;
-  static $hist_timestamp;
-  static $layer_params;
+	var $user_id;
+	var $stelle_id;
+	var $debug;
+	var $database;
+	var $loglevel;
+	var $hist_timestamp_de;
+	static $hist_timestamp;
+	static $layer_params;
+	var $minx;
+	var $language;
+	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id,$stelle_id,$database) {
 		global $debug;
+		global $GUI;
+		$this->gui_object = $GUI;
 		$this->debug=$debug;
 		$this->user_id=$user_id;
 		$this->stelle_id=$stelle_id;
@@ -1442,7 +1560,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection: successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
