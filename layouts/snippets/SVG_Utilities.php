@@ -136,6 +136,9 @@
 			</g>
 	</svg>';
 
+	$ortho_points_x = implode(',', $this->formvars['ortho_point_x'] ?: []);
+	$ortho_points_y = implode(',', $this->formvars['ortho_point_y'] ?: []);
+	$rolle_gps = ($this->user->rolle->gps ? 1 : 0);
 	$scriptdefinitions = <<<SCRIPTDEFINITIONS
 	let enclosingForm = top.currentform;
 	let transformfunctions = false;
@@ -173,8 +176,8 @@
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
 		let ortho_point_vertices = new Array();
-		let o_p_local_x = [{implode(',', $this->formvars['ortho_point_x'] ?: [])}];
-		let o_p_local_y = [{implode(',', $this->formvars['ortho_point_y'] ?: [])}];
+		let o_p_local_x = [{$ortho_points_x}];
+		let o_p_local_y = [{$ortho_points_y}];
 	}
 	let helmert;
 	let textx = {$text_x};
@@ -204,7 +207,7 @@
 	let movinggeom  = false;
 	let moved  = false;
 	let must_redraw = false;
-	let mobile = {($this->user->rolle->gps ? 1 : 0)};
+	let mobile = {$rolle_gps};
 	let gps_follow_cooldown = 0;
 	let selected_vertex;
 	let last_selected_vertex;
@@ -527,7 +530,7 @@ SCRIPTDEFINITIONS;
 				break;
 			}
 		}
-		if(selected == false)top.message([{ 'type': 'warning', 'msg': '$strNoLayer' }]);
+		if(selected == false)top.message([{ 'type': 'warning', 'msg': '{$strNoLayer}' }]);
 		return selected;
 	}	
 	

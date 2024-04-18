@@ -264,7 +264,7 @@ class data_import_export {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
-			$custom_table['error'] = print_r($ret, true);
+			$custom_table['error'] = (is_array($ret) ? implode(', ', $ret) : $ret);
 			return array($custom_table);
 		}
 		else {
