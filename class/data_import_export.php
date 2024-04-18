@@ -29,6 +29,12 @@
 #############################
 
 class data_import_export {
+	var $pgdatabase;
+	var $debug;
+	var $delimiters;
+	var $epsg_codes;
+	var $unique_column;
+	var $ask_epsg;
 
 	function __construct() {
 		global $debug;
@@ -275,12 +281,12 @@ class data_import_export {
 		else {
 			return;
 		}
-		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding, true);
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, '-lco FID=gid', $encoding, true);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
-			$custom_table['error'] = $ret;
+			$custom_table['error'] = (is_array($ret) ? implode(', ', $ret) : $ret);
 			return array($custom_table);
 		}
 		else {
@@ -1028,7 +1034,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = $output;
+			$result->stdout = implode('', $output);
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1039,7 +1045,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : ''));
+		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();

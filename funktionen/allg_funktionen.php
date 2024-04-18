@@ -184,16 +184,6 @@ function versionFormatter($version) {
 }
 
 /**
- * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
- * @return integer 3 digit version number of gdal
- */
-function get_ogr_version() {
-	exec('gdalinfo --version', $output, $ret);
-	$version_str = explode(' ', explode(',', $output[0])[0])[1];
-	return intVal(versionFormatter($version_str));
-}
-
-/**
  * This function return the absolute path to a document in the file system of the server
  * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
  * @param string $layer_document_path The document path of the layer the attribute belongs to.
@@ -322,17 +312,17 @@ function float_from_slash_text($slash_text) {
 }
 
 function compare_layers($a, $b){
-	$a['alias'] = strtoupper($a['alias']);
-	$b['alias'] = strtoupper($b['alias']);
-	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
-	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
-	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
-	$a['alias'] = str_replace('ß', 's', $a['alias']);
-	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
-	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
-	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
-	$b['alias'] = str_replace('ß', 's', $b['alias']);
-	return strcmp($a['alias'], $b['alias']);
+	$a['Name_or_alias'] = strtoupper($a['Name_or_alias']);
+	$b['Name_or_alias'] = strtoupper($b['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ä', 'A', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ü', 'U', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ö', 'O', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('ß', 's', $a['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ä', 'A', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ü', 'U', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ö', 'O', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('ß', 's', $b['Name_or_alias']);
+	return strcmp($a['Name_or_alias'], $b['Name_or_alias']);
 }
 
 function compare_names($a, $b){
@@ -2668,6 +2658,27 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 	else {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
 	}
+}
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
 }
 
 /**

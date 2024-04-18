@@ -1107,13 +1107,16 @@ echo '			</table>
 	}
 
 	function get_group_legend() {
-		# Änderungen in den Gruppen werden gesetzt
-		$this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
-		# Ein- oder Ausblenden der Klassen
-		$this->user->rolle->setClassStatus($this->formvars);
-		$this->loadMap('DataBase');
-		echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
-	}
+    # Änderungen in den Gruppen werden gesetzt
+    $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
+    # Ein- oder Ausblenden der Klassen
+    $this->user->rolle->setClassStatus($this->formvars);
+    $this->loadMap('DataBase');
+		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
+			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		}
+    echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
+  }
 
   function close_group_legend() {
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
@@ -1181,7 +1184,7 @@ echo '			</table>
 				<tr>
 					<td>
 						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
-		$layercount = @count($this->layerset['layers_of_group'][$group_id]);
+		$layercount = @count($this->layerset['layers_of_group'][$group_id] ?: []);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -1385,16 +1388,21 @@ echo '			</table>
 								for($s = 0; $s < $class->numstyles; $s++){
 									$style = $class->getStyle($s);
 									if($maplayer->type > 0){
-										$symbol = $this->map->getSymbolObjectById($style->symbol);
+										if (MAPSERVERVERSION >= 800) {
+											$symbol = $this->map->symbolset->getSymbol($style->symbol);
+										}
+										else {
+											$symbol = $this->map->getSymbolObjectById($style->symbol);
+										}
 										if($symbol->type == 1006){ 	# 1006 == hatch
-											$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2*$style->width);
+											$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2*$style->width;
 										}
 										elseif($style->symbolname == ''){
-											$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2);
-											$style->set('width', 2);
-											$style->set('maxwidth', 2);
+											$style->size = 2;					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2;
+											$style->width = 2;
+											$style->maxwidth = 2;
 										}
 										if ($maplayer->type == MS_LAYER_CHART) {
 											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
@@ -1438,10 +1446,20 @@ echo '			</table>
 											$imagename = TEMPPATH_REL.$newname;
 										}
 										else{																												# vom Mapserver generiertes Klassenbild
-											$image = $class->createLegendIcon($width, $height);
-											ob_start();
-											$image->saveImage();
-											$image = ob_get_clean();
+											if (MAPSERVERVERSION >= 800) {
+												$img = $class->createLegendIcon($this->map, $class->layer, $width, $height);
+											}
+											else {
+												$img = $class->createLegendIcon($width, $height);
+											}
+											if (MAPSERVERVERSION >= 800) {
+												$image = $img->getBytes();
+											}
+											else {
+												ob_start();
+												$img->saveImage();
+												$image = ob_get_clean();
+											}
 											$imagename = 'data:image/jpg;base64,'.base64_encode($image);
 										}
 										$original_class_image = $imagename;
@@ -2102,7 +2120,7 @@ echo '			</table>
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
-					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+					#$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers)); geht wohl so in SwigMapscript nicht
 				}
 				$this->map = $map;
 				$this->reference_map = $reference_map;
@@ -2140,19 +2158,20 @@ echo '			</table>
 		}
 		$layer = new LayerObj($map);
 		$layer->name = $layerset[$layer_name_attribute];
-		$layer->metadata->set('wms_name', $layerset['wms_name']);
+		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']);
-		$layer->metadata->set('ows_title', $layerset['Name_or_alias']); # required
+		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']);
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']);
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']);
+		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -2162,16 +2181,16 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']);
+		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
-		$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']);
+		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
 		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
@@ -2325,7 +2344,7 @@ echo '			</table>
 				$layer->data = $layerset['Data'];
 			}
 			
-			if (value_of($layerset, 'buffer') != 0) {
+			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 				$geom = explode(' ', $layer->data)[0];
 				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
@@ -9599,9 +9618,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				#if ($this->user->id == 1) {
-				#	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
-				#}
+				// if ($this->user->id == 41) {
+			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -10997,6 +11016,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						# das sind die Sachen vom "Mutter"-Layer
 						$parentlayerset = $this->user->rolle->getLayer($this->formvars['layer_id_mother']);
 						$layerdb2 = $this->mapDB->getlayerdatabase($this->formvars['layer_id_mother'], $this->Stelle->pgdbhost);
+						$parentlayerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['layer_id_mother'], $layerdb2, NULL, false, true, true);
 						$rect = $this->mapDB->zoomToDatasets(array($this->formvars['oid_mother']), $parentlayerset[0], $this->formvars['columnname_mother'], 10, $layerdb2, $this->user->rolle->epsg_code, $this->Stelle);
 						if ($rect->minx != '') {
 							$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy); # Zoom auf den "Mutter"-Datensatz
@@ -13610,26 +13630,41 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$style->width = $width;
 			$style->color->setRGB(35, 109, 191);
 			$style->outlinecolor->setRGB(0, 0, 0);
-			if (MAPSERVERVERSION >= 800) {
-				$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+			try {
+				if (MAPSERVERVERSION >= 800) {
+					$img = $class->createLegendIcon($map, $class->layer, $icon_size, $icon_size);
+				}
+				else {
+					$img = $class->createLegendIcon($icon_size, $icon_size);
+				}
+				if (MAPSERVERVERSION >= 800) {
+					$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				else {
+					$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
+				}
+				$symbols[] = array(
+					'id' => $symbolid,
+					'value' => $symbol->name,
+					'type' => $symbol->type,
+					'bild' => $symbol->imagepath,
+					'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
+				);
 			}
-			else {
-				$img = $class->createLegendIcon($icon_size, $icon_size);
+			catch (Exception $ex) {
+				$this->add_message('error', 'Fehler beim Erzeugen des Icons für Symbol ' . $symbol->name);
 			}
-			if (MAPSERVERVERSION >= 800) {
-				$img->save(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			else {
-				$img->saveImage(IMAGEPATH . 'legende_' . $symbolid . '.png');
-			}
-			$symbols[] = array(
-				'id' => $symbolid,
-				'value' => $symbol->name,
-				'type' => $symbol->type,
-				'bild' => $symbol->imagepath,
-				'image' => IMAGEPATH . 'legende_' . $symbolid . '.png'
-			);
 		}
+		array_multisort(
+			array_map(
+					static function ($symbol) {
+							return strtolower($symbol['value']);
+					},
+					$symbols
+			),
+			SORT_ASC,
+			$symbols
+		);
 		return $symbols;
 	}
 
@@ -15191,6 +15226,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
+							#echo 'SQL zum Update des Datensatzes: ' . $sql;
 							$this->debug->show('<br>sql for update: ' . $sql);
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :", 4);
@@ -19394,12 +19430,7 @@ class db_mapObj{
 			'drawingorder',
 			'listed'
 		);
-		if ($this->GUI->plugin_loaded('mobile')) {
-			$zero_if_empty_attributes = array_merge(
-				$zero_if_empty_attributes,
-				array('cluster_option')
-			);
-		}
+		
 		if ($this->GUI->plugin_loaded('mobile')) {
 			$zero_if_empty_attributes = array_merge(
 				$zero_if_empty_attributes,
