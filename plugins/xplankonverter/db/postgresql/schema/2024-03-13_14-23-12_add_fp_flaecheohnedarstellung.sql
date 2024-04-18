@@ -36,14 +36,7 @@ CREATE TABLE IF NOT EXISTS xplan_gml.fp_flaecheohnedarstellung
     -- Inherited from table xplan_gml.fp_flaechenschlussobjekt: aufschrift character varying COLLATE pg_catalog."default",
     -- Inherited from table xplan_gml.fp_flaechenschlussobjekt: vongenehmigungausgenommen boolean
 )
-    INHERITS (xplan_gml.fp_flaechenschlussobjekt)
-WITH (
-    OIDS = TRUE
-)
-TABLESPACE pg_default;
-
-ALTER TABLE xplan_gml.fp_flaecheohnedarstellung
-    OWNER to kvwmap;
+INHERITS (xplan_gml.fp_flaechenschlussobjekt);
 
 COMMENT ON TABLE xplan_gml.fp_flaecheohnedarstellung
     IS 'FeatureType: "FP_FlaecheOhneDarstellung". Fläche, für die keine geplante Nutzung angegben werden kann';

@@ -9,7 +9,6 @@
 		$layerdb = $mapdb->getlayerdatabase(LAYER_ID_SCHNELLSPRUNG, $this->Stelle->pgdbhost);
 		$path = $mapdb->getPath(LAYER_ID_SCHNELLSPRUNG);
 		$privileges = $this->Stelle->get_attributes_privileges(LAYER_ID_SCHNELLSPRUNG);
-		$newpath = $this->Stelle->parse_path($layerdb, $path, $privileges);
 		$attributes = $mapdb->read_layer_attributes(LAYER_ID_SCHNELLSPRUNG, $layerdb, $privileges['attributenames']);
 		# wenn Attributname/Wert-Paare �bergeben wurden, diese im Formular einsetzen
 		for($i = 0; $i < count($attributes['name']); $i++){

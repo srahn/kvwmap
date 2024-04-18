@@ -1391,7 +1391,6 @@ CREATE TABLE `rolle` (
   `language` enum('german','low-german','english','polish','vietnamese') NOT NULL DEFAULT 'german',
   `hidemenue` enum('0','1') NOT NULL DEFAULT '0',
   `hidelegend` enum('0','1') NOT NULL DEFAULT '0',
-  `fontsize_gle` int(2) DEFAULT 15,
   `tooltipquery` tinyint(1) NOT NULL DEFAULT 0,
   `buttons` varchar(255) DEFAULT 'back,forward,zoomin,zoomout,zoomall,recentre,jumpto,coord_query,query,touchquery,queryradius,polyquery,measure',
   `geom_buttons` varchar(255) DEFAULT 'delete,polygon,flurstquery,polygon2,buffer,transform,vertex_edit,coord_input,ortho_point,measure',

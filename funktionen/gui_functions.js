@@ -928,7 +928,8 @@ function overlay_link(data, start, target){
 function toggle_custom_select(id) {
 	var custom_select_div = document.getElementById('custom_select_' + id);
 	var dropdown = custom_select_div.querySelector('.dropdown');
-	custom_select_div.classList.toggle('active');	 
+	custom_select_div.classList.toggle('active');
+	custom_select_hover(custom_select_div.querySelector('li.selected')); 
 	if (dropdown.getBoundingClientRect().bottom > 900) {
 		dropdown.classList.add('upward');
 	}
@@ -959,7 +960,7 @@ function custom_select_keydown(evt){
 function custom_select_hover(option) {
 	var custom_select_div = option.closest('.custom-select');
 	option.scrollIntoView({behavior: "smooth", block: "nearest"});
-	custom_select_div.querySelector('li.selected').classList.remove('selected');
+	custom_select_div.querySelector('li.selected')?.classList.remove('selected');
 	option.classList.add('selected');
 }
 

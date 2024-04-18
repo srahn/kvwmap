@@ -1,5 +1,5 @@
 <?php
-$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+$language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
 include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
 
@@ -107,7 +107,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
-		$GUI->add_message('info', $strLoggedOutAlready);
+		#$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 	$GUI->formvars['go'] = '';
@@ -353,7 +353,7 @@ if (!$show_login_form) {
 			else {
 				$GUI->debug->write('Kein OWS Request.', 4);
 
-				if ($permission['reason'] == 'password expired') {
+				if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
 					logout();
 					if (is_new_password($GUI->formvars)) {
 						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
@@ -376,24 +376,31 @@ if (!$show_login_form) {
 						}
 					}
 					else {
-						$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-						if ($GUI->formvars['format'] == 'json') {
-							header('Content-Type: application/json; charset=utf-8');
-							$json = json_encode(
-								array(
-									'success' => false,
-									'err_msg' => $permission['errmsg']
-								)
-							);
-							echo utf8_decode($json);
-							exit;
+						if ($permission['reason'] == 'password_expired' AND is_temporary_password_expired($GUI->user)) {
+							$GUI->add_message('error', 'Dieser Link zur Passwortvergabe ist nicht mehr gültig. Bitte fordern Sie bei Ihrem Administrator einen neuen Link an.');
+							$show_login_form = true;
+							$go = 'login';
 						}
 						else {
-							$GUI->add_message('error', $permission['errmsg']);
+							$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
+							if ($GUI->formvars['format'] == 'json') {
+								header('Content-Type: application/json; charset=utf-8');
+								$json = json_encode(
+									array(
+										'success' => false,
+										'err_msg' => $permission['errmsg']
+									)
+								);
+								echo utf8_decode($json);
+								exit;
+							}
+							else {
+								$GUI->add_message('error', $permission['errmsg']);
+							}
+							$show_login_form = true;
+							$go = 'login_new_password';
+							# login case 19
 						}
-						$show_login_form = true;
-						$go = 'login_new_password';
-						# login case 19
 					}
 				}
 				else {
@@ -685,20 +692,20 @@ function get_permission_in_stelle($GUI) {
 		else  {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
-			$reason = 'password expired';
+			$reason = $expiration_info;
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
 			switch ($expiration_info) {
 				case 'password_age_expired' : {
 					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
 				} break;
-				case 'password_age_expired' : {
+				case 'password_expired' : {
 					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
 				} break;
 				default : {
 					$errmsg .= 'abgelaufen.';
 				}
 			}
-			$errmsg .= ' Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
+			$errmsg .= ' Geben Sie jetzt ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
 		}
 	}
 	else {
@@ -739,6 +746,10 @@ function is_password_expired($user, $stelle) {
 		}
 	}
 	return 'not_expired';
+}
+
+function is_temporary_password_expired($user){
+	return (((time() - strtotime($user->password_setting_time)) / 3600) > 72);
 }
 
 function is_registration($formvars) {

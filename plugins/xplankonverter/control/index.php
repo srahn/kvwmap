@@ -73,6 +73,17 @@ include_once(PLUGINS . 'metadata/model/metadaten.php');
 * xplankonverter_xplanvalidator
 * xplankonverter_zusammenzeichnung
 */
+function isInStelleAllowed($stelle, $requestStelleId) {
+	global $GUI;
+	if ($stelle->id == $requestStelleId) {
+		return true;
+	}
+	else {
+		$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
+		return false;
+	}
+}
+
 if (stripos($GUI->go, 'xplankonverter_') === 0) {
 	$GUI->formvars['konvertierung_id'] = trim($GUI->formvars['konvertierung_id']);
 	$xplankonverter_file_path = XPLANKONVERTER_FILE_PATH . ($GUI->formvars['konvertierung_id'] != '' ? $GUI->formvars['konvertierung_id'] . '/' : '');
@@ -89,17 +100,6 @@ if (stripos($GUI->go, 'xplankonverter_') === 0) {
 		'',
 		true
 	);
-
-	function isInStelleAllowed($stelle, $requestStelleId) {
-		global $GUI;
-		if ($stelle->id == $requestStelleId) {
-			return true;
-		}
-		else {
-			$GUI->add_message('error', 'Das angefragte Objekt darf nicht in dieser Stelle bearbeitet werden.' . ($requestStelleId != '' ? ' Es gehört zur Stelle mit der ID: ' . $requestStelleId : ''));
-			return false;
-		}
-	}
 
 	/*
 	* extract zip files if necessary, check completeness and copy files to upload folder

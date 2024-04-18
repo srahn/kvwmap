@@ -412,6 +412,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
+			enclosingForm.gle_scrollposition.value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -432,6 +433,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
+			enclosingForm.gle_scrollposition.value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -452,6 +454,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
+			enclosingForm.gle_scrollposition.value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -469,6 +472,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
+			enclosingForm.gle_scrollposition.value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){

@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -128,7 +127,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 
 ob_start ();    // Ausgabepufferung starten
 
@@ -248,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if($GUI->formvars['legendtouched']){
+				if ($GUI->formvars['legendtouched']) {
 					$GUI->neuLaden();
 				}
 				else{
@@ -2000,7 +1999,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;
+			} break;			
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');

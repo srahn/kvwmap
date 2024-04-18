@@ -85,7 +85,9 @@ class FormObject {
 */
 static	function createSelectField($name, $options, $value = '', $size = 1, $style = '', $onchange = '', $id = '', $multiple = '', $class = '', $first_option = '-- Bitte Wählen --', $option_style = '', $option_class = '', $onclick = '', $onmouseenter = '') {
 	$id = ($id == '' ? $name : $id);
-	if ($multiple != '') $multiple = ' multiple';
+	if ($multiple != '') {
+		$multiple = ' multiple';
+	}
 	if ($style != '') $style = 'style="' . $style . '"';
 	if ($onchange != '') $onchange = 'onchange="' . $onchange . '"';
 	if ($onclick != '') $onclick = 'onclick="' . $onclick . '"';
@@ -102,7 +104,12 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
-		$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
+		if ($multiple != '') {
+			$selected = (in_array(strval($option['value']), explode(',', $value)) ? ' selected' : '');
+		}
+		else {
+			$selected = (strval($option['value']) === strval($value) ? ' selected' : '');
+		}
 		$options_html[] = "
 			<option " . $onclick . " " . $option_style . " " . $option_class . " 
 				value=\"{$option['value']}\"{$selected}" .
@@ -113,8 +120,8 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 	}
 
 	$html  = '
-<select id="'.$id.'" name="'.$name.'" size="'.$size.'" '.$style.' '.$onchange.' '.$onmouseenter.' '.$multiple.' '.$class.'>
-	'.implode('<br>', $options_html).'
+<select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . '>
+	' . implode('<br>', $options_html) . '
 </select>';
   return $html;
 }
@@ -132,18 +139,19 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 
 	$options_html = array();
 	if ($first_option != '') {
-		$options_html[] = '
-						<li class="item" data-value="" onclick="custom_select_click(this)">
-							<span>' . $first_option . '</span>
-						</li>';
+		$options = array_merge([0 => ['value' => '', 'output' => $first_option]], $options);
 	}
 	foreach($options AS $option) {
 		if (is_string($option)) {
 			$option = array('value' => $option, 'output' => $option);		// falls die Optionen kein value und output haben
 		}
+		if (!array_key_exists('output', $option)) {
+			$option['output'] = $option['value'];
+		}
 		if (strval($option['value']) === strval($value)) {
 			$selected = ' selected';
 			$output = $option['output'];
+			$image = $option['image'];
 		}
 		else {
 			$selected = '';
@@ -155,14 +163,16 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 				(array_key_exists('title', $option) ? " title=\"" . $option['title'] ."\"" : '') .
 				(array_key_exists('style', $option) ? " style=\"" . $option['style'] . "\"" : '') . "
 			>
+				<img src=\"" . ($option['image']? 'data:image/' . pathinfo($option['image'])['extension'] . ';base64,' . base64_encode(@file_get_contents($option['image'])) : 'graphics/leer.gif') . "\">
 				<span>" . $option['output'] ."</span>
 			</li>";
 	}
 
 	$html  = '
-		<div class="custom-select" id="custom_select_' . $id . '">
-			<input type="hidden" ' . $onchange . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
-			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.' ' . $style . '>
+		<div class="custom-select" id="custom_select_' . $id . '" ' . $style . '>
+			<input type="hidden" ' . $onchange . ' ' . $class . ' id="' . $id . '" name="' . $name . '" value="' . $value . '">
+			<div class="placeholder editable" onclick="toggle_custom_select(\'' . $id . '\');" '.$onmouseenter.'>
+				<img src="' . ($image? 'data:image/' . pathinfo($image)['extension'] . ';base64,' . base64_encode(@file_get_contents($image)) : 'graphics/leer.gif') . '">
 				<span>' . $output . '</span>
 			</div>
 			<div style="position:relative">

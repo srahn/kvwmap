@@ -4,7 +4,7 @@
  ?>
 
 <script type="text/javascript" src="funktionen/helmert_trafo.js"></script>
- 
+
 <script language="JavaScript">
 
 	var enclosingForm = <? echo $this->currentform; ?>;
@@ -136,31 +136,33 @@
 			</g>
 	</svg>';
 
-	$scriptdefinitions ='
-	var enclosingForm = top.currentform;
-	var transformfunctions = false;
-	var coord_input_functions = false;
-	var ortho_point_functions = false;
-	var bufferfunctions = false;
-	var special_bufferfunctions = false;
-	var polygonfunctions = false;
-	var polygonfunctions2 = false;
-	var flurstuecksqueryfunctions = false;
-	var boxfunctions = false;
-	var pointfunctions = false;
-	var linefunctions = false;
-	var measurefunctions = false;
-	var dragging  = false;
-	var path  = "";
-	var path_second  = "";
-	var pathx_second = new Array();
-	var pathy_second = new Array();
-	var poly_pathx_second = new Array();
-	var poly_pathy_second = new Array();
-	var pathx = new Array();
-	var pathy = new Array();
-	var m_pathx = new Array();
-	var m_pathy = new Array();
+	$ortho_points_x = implode(',', $this->formvars['ortho_point_x'] ?: []);
+	$ortho_points_y = implode(',', $this->formvars['ortho_point_y'] ?: []);
+	$rolle_gps = ($this->user->rolle->gps ? 1 : 0);
+	$scriptdefinitions = <<<SCRIPTDEFINITIONS
+	let enclosingForm = top.currentform;
+	let transformfunctions = false;
+	let coord_input_functions = false;
+	let ortho_point_functions = false;
+	let bufferfunctions = false;
+	let special_bufferfunctions = false;
+	let polygonfunctions = false;
+	let polygonfunctions2 = false;
+	let flurstuecksqueryfunctions = false;
+	let boxfunctions = false;
+	let pointfunctions = false;
+	let linefunctions = false;
+	let measurefunctions = false;
+	let path  = "";
+	let path_second  = "";
+	let pathx_second = new Array();
+	let pathy_second = new Array();
+	let poly_pathx_second = new Array();
+	let poly_pathy_second = new Array();
+	let pathx = new Array();
+	let pathy = new Array();
+	let m_pathx = new Array();
+	let m_pathy = new Array();
 	if(enclosingForm.newpath.value){
 		pathx = getxcoordsfromsvgpath(enclosingForm.newpath.value);
 		pathy = getycoordsfromsvgpath(enclosingForm.newpath.value);
@@ -172,61 +174,61 @@
 		pathy_second = str.split(";");
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
-		var ortho_point_vertices = new Array();
-		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x'] ?: []).'];
-		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y'] ?: []).'];
+		let ortho_point_vertices = new Array();
+		let o_p_local_x = [{$ortho_points_x}];
+		let o_p_local_y = [{$ortho_points_y}];
 	}
-	var helmert;
-	var textx = '.$text_x.';
-	var texty = '.$text_y.';
-	var newpath_undo = new Array();
-	var newpathwkt_undo = new Array();
+	let helmert;
+	let textx = {$text_x};
+	let texty = {$text_y};
+	let newpath_undo = new Array();
+	let newpathwkt_undo = new Array();
 
-	var minx  = '.$this->user->rolle->oGeorefExt->minx.';
-	var maxx  = '.$this->user->rolle->oGeorefExt->maxx.';
-	var miny  = '.$this->user->rolle->oGeorefExt->miny.';
-	var maxy  = '.$this->user->rolle->oGeorefExt->maxy.';
-	var resx  = '.$res_x.';
-	var resy  = '.$res_y.';
-	var resx_m  = '.$res_xm.';
-	var resy_m  = '.$res_ym.';
-	var scale = '.$pixelsize.';
-	var boxx 	= new Array();
-	var boxy 	= new Array();
-	var move_x 	= new Array();
-	var move_y 	= new Array();
-	var move_dx;
-	var move_dy;
-	var dragging  = false;
-	var dragdone  = false;
-	var draggingFS  = false;
-	var moving  = false;
-	var movinggeom  = false;
-	var moved  = false;
-	var must_redraw = false;
-	var mobile = '.($this->user->rolle->gps ? 1 : 0).';
-	var gps_follow_cooldown = 0;
-	var selected_vertex;
-	var last_selected_vertex;
-	var vertex_old_world_x = "";
-	var vertex_old_world_y = "";
-	var vertex_new_world_x;
-	var vertex_new_world_y;
-	var vertex_moved = false;
-	var mouse_down = false;
-	var time_mouse_down;
-	var mouse_coords_type = "image";
-	var measuring  = false;
-	var deactivated_foreign_vertex = 0;
-	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
-	var root = document.documentElement;
-	var mousewheelloop = 0;
-	var measured_distance = 0;
-	var new_distance = 0;
-	var doing;
-	var doing_save;
-	var suppresszoom = false;
-	';
+	let minx  = {$this->user->rolle->oGeorefExt->minx};
+	let maxx  = {$this->user->rolle->oGeorefExt->maxx};
+	let miny  = {$this->user->rolle->oGeorefExt->miny};
+	let maxy  = {$this->user->rolle->oGeorefExt->maxy};
+	let resx  = {$res_x};
+	let resy  = {$res_y};
+	let resx_m  = {$res_xm};
+	let resy_m  = {$res_ym};
+	let scale = {$pixelsize};
+	let boxx 	= new Array();
+	let boxy 	= new Array();
+	let move_x 	= new Array();
+	let move_y 	= new Array();
+	let move_dx;
+	let move_dy;
+	let dragging  = false;
+	let dragdone  = false;
+	let draggingFS  = false;
+	let moving  = false;
+	let movinggeom  = false;
+	let moved  = false;
+	let must_redraw = false;
+	let mobile = {$rolle_gps};
+	let gps_follow_cooldown = 0;
+	let selected_vertex;
+	let last_selected_vertex;
+	let vertex_old_world_x = "";
+	let vertex_old_world_y = "";
+	let vertex_new_world_x;
+	let vertex_new_world_y;
+	let vertex_moved = false;
+	let mouse_down = false;
+	let time_mouse_down;
+	let mouse_coords_type = "image";
+	let measuring  = false;
+	let deactivated_foreign_vertex = 0;
+	let geomload = {$geomload};		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
+	let root = document.documentElement;
+	let mousewheelloop = 0;
+	let measured_distance = 0;
+	let new_distance = 0;
+	let doing;
+	let doing_save;
+	let suppresszoom = false;
+SCRIPTDEFINITIONS;
 
 	$polygonANDpoint = '
 	var polygonXORpoint = false;
@@ -458,8 +460,7 @@
 	}
 	';
 
-	$basicfunctions = '
-	
+	$basicfunctions = <<<BASICFUNCTIONS
 	function world2pixelsvg(pathWelt){
 		var path  = new Array();
 		pathWelt = pathWelt.replace(/L /g, "");		// neuere Postgis-Versionen haben ein L mit drin
@@ -515,19 +516,19 @@
 
   function Full_Extent(){
     enclosingForm.CMD.value = "Full_Extent";
-    get_map_ajax(\'go=navMap_ajax\');
+    get_map_ajax('go=navMap_ajax');
   }
 
 	function checkQueryFields(){
 		var selected = false;
-		query_fields = top.document.getElementsByClassName(\'info-select-field\');
+		query_fields = top.document.getElementsByClassName('info-select-field');
 		for(var i = 0; i < query_fields.length; i++){
 			if(query_fields[i].checked){
 				selected = true;
 				break;
 			}
 		}
-		if(selected == false)top.message([{ \'type\': \'warning\', \'msg\': \''.$strNoLayer.'\' }]);
+		if(selected == false)top.message([{ 'type': 'warning', 'msg': '{$strNoLayer}' }]);
 		return selected;
 	}	
 	
@@ -542,22 +543,22 @@
      case "zoomin_point":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax\');
+      get_map_ajax('go=navMap_ajax');
      break;
      case "zoomout":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value          = cmd;
-      get_map_ajax(\'go=navMap_ajax\');
+      get_map_ajax('go=navMap_ajax');
      break;
      case "zoomin_box":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
       enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax\');
+      get_map_ajax('go=navMap_ajax');
      break;
      case "recentre":
       enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
       enclosingForm.CMD.value = cmd;
-			get_map_ajax(\'go=navMap_ajax\');
+			get_map_ajax('go=navMap_ajax');
      break;
      case "ppquery_point":
 			if(!checkQueryFields())break;
@@ -618,7 +619,7 @@
       enclosingForm.CMD.value = cmd;
      break;
      default:
-      alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
+      alert("Keine Bearbeitung moeglich! Übergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
      break;
     }
   }
@@ -665,7 +666,7 @@
   	}
  	}
 
- 	function mousewheelzoom(){
+ 	function mousewheelzoom() {
 		cleartooltip();
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
 		var g = document.getElementById("moveGroup");
@@ -676,7 +677,7 @@
 		navY[0] = Math.round(zx.f);
 		navX[2] = Math.round(zx.e + resx*zx.a); 
 		navY[2] = Math.round(zx.f + resy*zx.a);
-		if(enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
+		if (enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
 			enclosingForm.always_draw.checked = true;
 		}
 		sendpath("zoomin_box", navX, navY);
@@ -711,22 +712,30 @@
 		}
 	}
 	
-	function mousewheelchange(evt){
-		if(!evt)evt = window.event; // For IE
-		if(top.document.GUI.stopnavigation.value == 0){
+	function mousewheelchange(evt) {
+		if (!evt) {
+			evt = window.event; // For IE
+		}
+		if (top.document.GUI.stopnavigation.value == 0) {
 			window.clearTimeout(mousewheelloop);
-			if(evt.preventDefault)evt.preventDefault();
-			else evt.returnValue = false; // IE fix
-			if(evt.wheelDelta)
+			if (evt.preventDefault) {
+				evt.preventDefault();
+			}
+			else {
+				evt.returnValue = false; // IE fix
+			}
+			if (evt.wheelDelta) {
 				delta = evt.wheelDelta / 3600; // Chrome/Safari
-			else
+			}
+			else {
 				delta = evt.detail / -90; // Mozilla
-			var z = 1 + delta*5;
-			var g = document.getElementById("moveGroup");
-			var p = getEventPoint(evt);
-			if(p.x > 0 && p.y > 0){
+			}
+			let z = 1 + delta * 5;
+			let g = document.getElementById("moveGroup");
+			let p = getEventPoint(evt);
+			if (p.x > 0 && p.y > 0) {
 				p = p.matrixTransform(g.getCTM().inverse());
-				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+				let k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 				setCTM(g, g.getCTM().multiply(k));
 				if (!suppresszoom) {
 					mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
@@ -756,19 +765,19 @@
  	
 	function init(){
 		// Bug Workaround fuer Firefox
-		var nav_button_bgs = document.querySelectorAll(\'.navbutton_bg\');
+		var nav_button_bgs = document.querySelectorAll('.navbutton_bg');
 		[].forEach.call(nav_button_bgs, function (nav_button_bg){
-			nav_button_bg.setAttribute(\'width\', parseInt(nav_button_bg.getAttribute(\'width\')) + 0.01);
+			nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
 		});
 		startup();
 		if(window.addEventListener){
 			if(top.browser != "other"){
 				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 			}
-			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
-			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
-			window.addEventListener(\'keydown\', suppressZoom, {passive: false});
-			window.addEventListener(\'keyup\', unSuppressZoom, {passive: false});
+			window.addEventListener('mousewheel', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+			window.addEventListener('DOMMouseScroll', mousewheelchange, {passive: false});		//Firefox
+			window.addEventListener('keydown', suppressZoom, {passive: false});
+			window.addEventListener('keyup', unSuppressZoom, {passive: false});
 		}
 		else {
 			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -904,11 +913,7 @@
 		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
 			var g = document.getElementById("moveGroup");
 			zx = g.getCTM().inverse();
-			console.log(zx);
-			console.log(evt.clientX);
-			console.log((evt.clientX * zx.a));
 			client_x = (evt.clientX * zx.a) + zx.e;
-			console.log(client_x);
 			client_y = resy - ((evt.clientY * zx.a) + zx.f);
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
@@ -1060,7 +1065,7 @@
 			break;
 
 			default:
-				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+enclosingForm.last_doing.value);
+				alert("Fehlerhafte Eingabe! Übergebene Daten: "+enclosingForm.last_doing.value);
 			break;
 		}
 		if(polygonfunctions){
@@ -1111,7 +1116,7 @@ function mousemove(evt){
 			        showMeasurement(client_x, client_y);
 			      }
 			      else {
-			      	show_tooltip(\'Startpunkt setzen\',evt.clientX,evt.clientY)
+			      	show_tooltip('Startpunkt setzen',evt.clientX,evt.clientY)
 			      }
 					}
 					else{
@@ -1285,8 +1290,7 @@ function mouseup(evt){
 			enclosingForm.pathy_second.value = "";
 		}
 	}
-	
-	';
+BASICFUNCTIONS;
 
 
 	$coord_input_functions = '
@@ -1600,7 +1604,6 @@ function mouseup(evt){
 
 	function rotate_point_direction(){
 		angle = 360 - enclosingForm.angle.value.replace(",", ".");
-		console.log(angle);
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");

@@ -99,7 +99,8 @@ class Gml_builder {
 				'GML_' || gml_id::text || '_envelope'
 			) AS envelope
 		";
-					$plan->find_by('konvertierung_id',$konvertierung->get('id'));
+		$plan->find_by('konvertierung_id', $konvertierung->get('id'));
+		$plan->filter_nurzurauslegung($this);
 
 		# XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
 		fwrite(
@@ -131,6 +132,14 @@ class Gml_builder {
 		// fetch information about attributes and their properties
 		//$typeInfo = new TypeInfo($this->database);
 		$plan_attribs = $this->typeInfo->getInfo($plan->tableName);
+
+		// Entfernt ,t oder ,f oder nur , am Ende: {"(,,Dokument,,A,,,X,,1000,f)","(,,Dokument,,X,,,A,,5000,t)"} => {"(,,Dokument,,A,,,X,,1000)","(,,Dokument,,X,,,A,,5000)"}
+		$plan->data['externereferenz'] = str_replace(array(',)"', ',f)"', ',t)"'), ')"', $plan->data['externereferenz']);
+		// foreach ($plan_attribs AS $i => $plan_attribut) {
+		// 	if ($plan_attribut['type'] == 'xp_spezexternereferenzauslegung' AND $plan_attribut['type_type'] == 'c') {
+		// 		$plan_attribs[$i]['type'] = 'xp_spezexternereferenz';
+		// 	}
+		// };
 
 		// alle Attribute vom Planobjekt ausgeben
 		$gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs, XPLAN_MAX_NESTING_DEPTH);
@@ -300,7 +309,9 @@ class Gml_builder {
 
 	function generateGmlForAttributes($gml_object, $uml_attribute_info, $depth) {
 		$this->err_msg = '';
-		if (($depth) < 0) return '';
+		if (($depth) < 0) {
+			return '';
+		}
 		$xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 		$gmlStr = '';
 		$sequence_attr = 0;
@@ -384,14 +395,16 @@ class Gml_builder {
 			#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
 			$sequence_attr++;
 			// leere Felder auslassen
-			if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
+			if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') {
+				continue;
+			}
 
 			// special arraycheck as some attributes with same name can appear twice in same class due to unknown hierarchical depth
 			// only known example currently (xplan 5.1) is: 
 			// XP_Plan: <xplan:name>  and --><xplan:plangeber>--><xplan:XP_Plangeber>--><xplan:name>
 			// plangeber sub-elements has the field kennziffer, which doesn't exist on plan-hierarchy-level
 			// TODO consider solving this in a generic fashion
-			if(is_array($gml_object[$uml_attribute['col_name']]) and array_key_exists('kennziffer', $gml_object)) {
+			if (is_array($gml_object[$uml_attribute['col_name']]) and array_key_exists('kennziffer', $gml_object)) {
 				$gml_object[$uml_attribute['col_name']] = $gml_object[$uml_attribute['col_name']][0];
 			}
 
@@ -412,19 +425,20 @@ class Gml_builder {
 								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
 							}
 							break;
-						case "DataType":
+						case "DataType" :
 							$gml_attrib_str = '';
 							// check whether attribute value is already parsed into an array
-							if (is_array($gml_object[$uml_attribute['col_name']]))
+							if (is_array($gml_object[$uml_attribute['col_name']])) {
 								$value_array = $gml_object[$uml_attribute['col_name']];
-							else // parse attribute value if not yet done
+							}
+							else { // parse attribute value if not yet done
 								$value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
-
+							}
 							// fetch information about attributes and their properties
 							$datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
 
 							// retrieve attribute names
-							$value_array_keys = array_column($datatype_attribs,'col_name');
+							$value_array_keys = array_column($datatype_attribs, 'col_name');
 
 							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
 							if($uml_attribute['col_name'] == 'aendert') {
@@ -441,17 +455,21 @@ class Gml_builder {
 								$value_array = $aux_array;
 							}
 							// leere Datentypen auslassen
-							if (!$value_array) break;
+							if (!$value_array) {
+								break;
+							}
 							// process composite data type
 							foreach ($value_array as $single_value) {
 								// associate values with attribute names
 								#$gmlStr .= '<note>single_value: ' . implode(', ', $single_value) . '</note>';
 								#$gmlStr .= '<note>value_array_keys: ' . implode(', ', $value_array_keys) . '</note>';
 								// Null-Array-Werte auslassen
-								if($single_value == null) continue;
+								if ($single_value == null) {
+									continue;
+								}
 								$single_value = array_combine($value_array_keys, $single_value);
 								// generate GML output (!!! recursive !!!)
-								$gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
+								$gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs, $depth - 1);
 								// leere Datentypen auslassen
 								if (strlen($gml_attrib_str) == 0) break;
 								$typeElementName = end($datatype_attribs)['origin'];
