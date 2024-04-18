@@ -301,17 +301,17 @@ function float_from_slash_text($slash_text) {
 }
 
 function compare_layers($a, $b){
-	$a['alias'] = strtoupper($a['alias']);
-	$b['alias'] = strtoupper($b['alias']);
-	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
-	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
-	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
-	$a['alias'] = str_replace('ß', 's', $a['alias']);
-	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
-	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
-	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
-	$b['alias'] = str_replace('ß', 's', $b['alias']);
-	return strcmp($a['alias'], $b['alias']);
+	$a['Name_or_alias'] = strtoupper($a['Name_or_alias']);
+	$b['Name_or_alias'] = strtoupper($b['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ä', 'A', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ü', 'U', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ö', 'O', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('ß', 's', $a['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ä', 'A', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ü', 'U', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ö', 'O', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('ß', 's', $b['Name_or_alias']);
+	return strcmp($a['Name_or_alias'], $b['Name_or_alias']);
 }
 
 function compare_names($a, $b){
