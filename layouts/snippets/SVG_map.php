@@ -347,7 +347,6 @@ if ($this->user->rolle->gps) {
  	window.setInterval("update_gps_position()", 1000);';
 }
 $conditional_output = function ($condition, $output = '', $else = '') {
-	$output = $output ?? $condition;
 	return ($condition ? $output : $else);
 };
 $svg .= <<<FUNCTIONDEF
@@ -417,16 +416,12 @@ function mousewheelchange(evt) {
 		prevent1(evt);
 		if (evt.wheelDelta) {
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
-			console.log('delta from evt.wheelDelta Chrome/Safari');
 		}
 		else if (evt.detail) {
 			delta = evt.detail / -90; // Mozilla
-			console.log('delta from evt.detail Mozilla');
 		}
-		console.log('delta: ', delta);
 		let z = 1 + delta * 5;
 		let p = getEventPoint(evt);
-		console.log(`eventPoint \${p.x}, \${p.y}`);
 		if (p.x > 0 && p.y > 0) {
 			zoomTransform(p, null, z, null);
 			mousewheelloop = window.setTimeout("applyZoom()", 400);
