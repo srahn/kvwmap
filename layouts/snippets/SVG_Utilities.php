@@ -153,7 +153,6 @@
 	let pointfunctions = false;
 	let linefunctions = false;
 	let measurefunctions = false;
-	let dragging  = false;
 	let path  = "";
 	let path_second  = "";
 	let pathx_second = new Array();
@@ -462,7 +461,6 @@ SCRIPTDEFINITIONS;
 	';
 
 	$basicfunctions = <<<BASICFUNCTIONS
-
 	function world2pixelsvg(pathWelt){
 		var path  = new Array();
 		pathWelt = pathWelt.replace(/L /g, "");		// neuere Postgis-Versionen haben ein L mit drin
@@ -621,7 +619,7 @@ SCRIPTDEFINITIONS;
       enclosingForm.CMD.value = cmd;
      break;
      default:
-      alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
+      alert("Keine Bearbeitung moeglich! Übergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
      break;
     }
   }
@@ -1076,7 +1074,7 @@ SCRIPTDEFINITIONS;
 			break;
 
 			default:
-				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+enclosingForm.last_doing.value);
+				alert("Fehlerhafte Eingabe! Übergebene Daten: "+enclosingForm.last_doing.value);
 			break;
 		}
 		if(polygonfunctions){
