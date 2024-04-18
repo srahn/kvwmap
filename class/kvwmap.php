@@ -2167,7 +2167,9 @@ echo '			</table>
 		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		# $layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
+		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
+		# $layer->setMetaData('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -10327,6 +10329,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'success' => $this->success,
 				'msg' => 'Datensatz erfolgreich gelöscht'
 			);
+
+			if ($this->formvars['format'] == 'json_result') {
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($this->data));
+			}
 		}
 
 		return $this->success;
