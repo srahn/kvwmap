@@ -455,7 +455,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei {$uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
@@ -513,7 +513,7 @@
 			$layer->set('header', 'templates/' . $layer->name . '_head.html');
 			$layer->set('template', 'templates/' . $layer->name . '_body.html');
 			# Extent mit Ausdehnung von adminstelle überschreiben
-			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+			$layer->metadata->set("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
 			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 
@@ -594,7 +594,7 @@
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 				# Extent mit Ausdehnung von adminstelle überschreiben
-				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+				$layer->metadata->set("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer

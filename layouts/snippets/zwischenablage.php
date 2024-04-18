@@ -45,6 +45,8 @@
 
 <div class="item fett delete-button-item"><? echo $this->strDelete; ?></div><?
 
+$print_all = false;
+
 for ($i = 0; $i < @count($this->layer); $i++) { ?>
 	<div class="item layer-item">
 		<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><? echo $this->layer[$i]['Name_or_alias']; ?></a>
@@ -53,11 +55,18 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 	<div class="item show-item">
 		<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><? echo $this->layer[$i]['count'] . ' ' . ($this->layer[$i]['count'] == 1 ? $strRecord : $strRecords); ?></a>
 	</div>
-
-	<a href="index.php?go=gemerkte_Datensaetze_drucken&chosen_layer_id=<? echo $this->layer[$i]['layer_id']; ?>">
-		<div class="item print-button-item button drucken">
+<? 
+	if (!empty($this->layer[$i]['layouts'])) {
+		$print_all = true;	 ?>
+		<a href="index.php?go=gemerkte_Datensaetze_drucken&chosen_layer_id=<? echo $this->layer[$i]['layer_id']; ?>">
+			<div class="item print-button-item button drucken">
+			</div>
+		</a>	<? 
+	}
+	else { ?>
+		<div class="item print-button-item">
 		</div>
-	</a>
+<? } ?>
 
 	<a href="index.php?go=Datensaetze_nicht_mehr_merken&chosen_layer_id=<? echo $this->layer[$i]['layer_id']; ?>">
 		<div class="item delete-button-item button datensatz_loeschen">
@@ -73,10 +82,17 @@ for ($i = 0; $i < @count($this->layer); $i++) { ?>
 	<?php echo $this->num_rows == 0 ? '' : $this->all . ' ' . $strRecords; ?>
 </div>
 
-<a href="index.php?go=gemerkte_Datensaetze_drucken">
-	<div id="print_all" class="item print-button-item<?php echo $this->num_rows == 0 ? '' : ' button drucken'; ?>">
-	</div>
-</a>
+<?
+	if ($print_all) { ?>
+		<a href="index.php?go=gemerkte_Datensaetze_drucken">
+			<div id="print_all" class="item print-button-item button drucken">
+			</div>
+		</a> <?
+	}
+	else { ?>
+		<div id="print_all" class="item print-button-item">
+		</div>
+<?}?>
 
 <a href="index.php?go=Datensaetze_nicht_mehr_merken">
 	<div id="delete_all" class="item delete-button-item<?php echo $this->num_rows == 0 ? '' : ' button datensatz_loeschen'; ?>">

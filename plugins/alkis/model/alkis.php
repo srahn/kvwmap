@@ -2408,11 +2408,12 @@ class ALKIS {
   function getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode) {
     $ret=$this->database->getMERfromGebaeude($Gemeinde,$Strasse,$Hausnr, $epsgcode);
     if ($ret[0]==0) {
-      $rect=ms_newRectObj();
-      $rect->minx = $ret[1]['minx'];
-			$rect->maxx = $ret[1]['maxx'];
-      $rect->miny = $ret[1]['miny'];
-			$rect->maxy = $ret[1]['maxy'];
+      $rect = rectObj(
+      	$ret[1]['minx'],
+				$ret[1]['maxx'],
+      	$ret[1]['miny'],
+				$ret[1]['maxy']
+			);
       $ret[1]['rect'] = $rect;
     }
     return $ret;
@@ -2421,11 +2422,12 @@ class ALKIS {
   function getMERfromGemeinde($Gemeinde, $epsgcode) {
     $ret = $this->database->getMERfromGemeinde($Gemeinde, $epsgcode);
     if ($ret[0] == 0) {
-      $rect = ms_newRectObj();
-      $rect->minx = $ret[1]['minx'];
-			$rect->maxx = $ret[1]['maxx'];
-      $rect->miny = $ret[1]['miny'];
-			$rect->maxy = $ret[1]['maxy'];
+      $rect = rectObj(
+      	$ret[1]['minx'],
+				$ret[1]['maxx'],
+      	$ret[1]['miny'],
+				$ret[1]['maxy']
+			);
       $ret[1] = $rect;
     }
     return $ret;
@@ -2435,11 +2437,12 @@ class ALKIS {
     # 2006-02-01 pk
     $ret=$this->database->getMERfromGemarkung($Gemkgschl, $epsgcode);
     if ($ret[0]==0) {
-      $rect=ms_newRectObj();
-      $rect->minx = $ret[1]['minx'];
-			$rect->maxx = $ret[1]['maxx'];
-      $rect->miny = $ret[1]['miny'];
-			$rect->maxy = $ret[1]['maxy'];
+      $rect = rectObj(
+      	$ret[1]['minx'],
+				$ret[1]['maxx'],
+      	$ret[1]['miny'],
+				$ret[1]['maxy']
+			);
       $ret[1] = $rect;
     }
     return $ret;
@@ -2449,9 +2452,12 @@ class ALKIS {
     # 2006-02-01 pk
     $ret=$this->database->getMERfromFlur($Gemarkung,$Flur,$epsgcode);
     if ($ret[0]==0) {
-      $rect=ms_newRectObj();
-      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
-      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $rect = rectObj(
+      	$ret[1]['minx'],
+				$ret[1]['maxx'],
+      	$ret[1]['miny'],
+				$ret[1]['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
@@ -2460,9 +2466,12 @@ class ALKIS {
   function getMERfromFlurstuecke($flstliste, $epsgcode) {
     $ret=$this->database->getMERfromFlurstuecke($flstliste, $epsgcode);
     if ($ret[0]==0) {
-      $rect=ms_newRectObj();
-      $rect->minx=$ret[1]['minx']; $rect->maxx=$ret[1]['maxx'];
-      $rect->miny=$ret[1]['miny']; $rect->maxy=$ret[1]['maxy'];
+      $rect = rectObj(
+      	$ret[1]['minx'],
+				$ret[1]['maxx'],
+      	$ret[1]['miny'],
+				$ret[1]['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;

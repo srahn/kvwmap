@@ -112,13 +112,15 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 					</div>
 <?
 					if (!$this->user->rolle->visually_impaired) {
-						if (is_array($attributes['dependent_options'][$i])) {
+						if (is_array($this->attributes['dependent_options'][$i])) {
 							$this->attributes['enum'][$i] = $this->attributes['enum'][$i][0];
 						}
 						$output_not_numeric = false;
-						foreach ($this->attributes['enum'][$i] as $enum){
-							if (!is_numeric($enum['output'])) {
-								$output_not_numeric = true;
+						if (is_array($this->attributes['enum'][$i])) {
+							foreach ($this->attributes['enum'][$i] as $enum){
+								if (!is_numeric($enum['output'])) {
+									$output_not_numeric = true;
+								}
 							}
 						}
 ?>
@@ -175,17 +177,16 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							 name="<? echo $prefix; ?>value_<? echo $this->attributes['name'][$i].$array; ?>"><?echo "\n"; ?>
 							<option value="">-- <? echo $this->strChoose; ?> --</option><? echo "\n"; ?>
 <? 
-							if (is_array($attributes['dependent_options'][$i])) {
-								$this->attributes['enum'][$i] = $this->attributes['enum'][$i][0];
-							}
-							foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
-								<option  <? 
-								if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
-									$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);																																																																																															 
+							if (is_array($this->attributes['enum'][$i])){
+								foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
+									<option  <? 
+									if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
+										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);																																																																																															 
+									}
+									if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $enum_key != '') {
+										echo 'selected';
+									} ?> value="<? echo $enum_key; ?>" title="<? echo $enum['output']; ?>"><? echo $enum['output']; ?></option><? echo "\n";
 								}
-								if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $enum_key != '') {
-									echo 'selected';
-								} ?> value="<? echo $enum_key; ?>" title="<? echo $enum['output']; ?>"><? echo $enum['output']; ?></option><? echo "\n";
 							}
 ?>
 							</select>

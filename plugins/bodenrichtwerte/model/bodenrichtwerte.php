@@ -59,8 +59,6 @@ class bodenrichtwertzone {
     }
     else {
       # Abfrage fehlerfrei
-      # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
       # Wenn die Box eine Kantenlänge von 0 hat, wird sie etwas aufgeweitet um 100m.
@@ -72,8 +70,12 @@ class bodenrichtwertzone {
         $rs['maxy']=$rs['maxy']+100;
         $rs['miny']=$rs['miny']-100;        
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      $rect = rectObj(
+				$rs['minx'],
+				$rs['maxx'],
+				$rs['miny'],
+				$rs['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
@@ -152,6 +154,7 @@ class bodenrichtwertzone {
 			$this->debug->write('<br>file:bodenrichtwerte.php class:bodenrichtwertzone function eintragenNeueZone<br>Einfügen der Daten zu einer Richtwertzone in<br>PostGIS',4);
 			$sql ="INSERT INTO bodenrichtwerte.bw_zonen (";
 			if($formvars['stichtag']){$sql.= "stichtag";} 
+			if($formvars['qualitaetsstichtag']){$sql.= "qualitaetsstichtag";} 
 			if($formvars['gemeinde']){$sql.= ",gemeinde";} 
 			if($formvars['gemarkung']){$sql.= ",gemarkung";} 
 			if($formvars['ortsteilname']){$sql.= ",ortsteilname";} 
@@ -161,6 +164,7 @@ class bodenrichtwertzone {
 			if($formvars['bodenrichtwertnummer']){$sql.= ",bodenrichtwertnummer";} 
 			if($formvars['oertliche_bezeichnung']){$sql.= ",oertliche_bezeichnung";} 
 			if($formvars['bodenrichtwert']){$sql.= ",bodenrichtwert";}
+			if($formvars['bodenrichtwert_qualitaetsstichtag']){$sql.= ",bodenrichtwert_qualitaetsstichtag";}
 			if($formvars['brwu']){$sql.= ",brwu";}
 			if($formvars['brws']){$sql.= ",brws";}
 			if($formvars['brwb']){$sql.= ",brwb";}		
@@ -172,8 +176,10 @@ class bodenrichtwertzone {
 			if($formvars['ergaenzende_nutzung']){$sql.= ",ergaenzende_nutzung";} 
 			if($formvars['bauweise']){$sql.= ",bauweise";} 
 			if($formvars['geschosszahl']){$sql.= ",geschosszahl";} 
+			if($formvars['ogeschosszahl']){$sql.= ",ogeschosszahl";} 
 			if($formvars['grundflaechenzahl']){$sql.= ",grundflaechenzahl";} 
-			if($formvars['geschossflaechenzahl']){$sql.= ",geschossflaechenzahl";} 
+			if($formvars['geschossflaechenzahl']){$sql.= ",geschossflaechenzahl";}
+			if($formvars['wgeschossflaechenzahl']){$sql.= ",wgeschossflaechenzahl";} 
 			if($formvars['baumassenzahl']){$sql.= ",baumassenzahl";} 
 			if($formvars['flaeche']){$sql.= ",flaeche";} 
 			if($formvars['tiefe']){$sql.= ",tiefe";} 
@@ -189,6 +195,7 @@ class bodenrichtwertzone {
 			if($formvars['bemerkungen']){$sql.= ",bemerkungen";} 
 			$sql.=", the_geom, textposition) VALUES (";
 			if($formvars['stichtag']){$sql.= "'".$formvars['stichtag']."' ";}
+			if($formvars['qualitaetsstichtag']){$sql.= "'".$formvars['qualitaetsstichtag']."' ";}
 			if($formvars['gemeinde']){$sql.= ",".$formvars['gemeinde'];}
 			if($formvars['gemarkung']){$sql.= ",".$formvars['gemarkung'];}
 			if($formvars['ortsteilname']){$sql.= ",'".$formvars['ortsteilname']."' ";}
@@ -198,6 +205,7 @@ class bodenrichtwertzone {
 			if($formvars['bodenrichtwertnummer']){$sql.= ",".$formvars['bodenrichtwertnummer'];}
 			if($formvars['oertliche_bezeichnung']){$sql.= ",'".$formvars['oertliche_bezeichnung']."' ";}
 			if($formvars['bodenrichtwert']){$sql.= ",".$formvars['bodenrichtwert'];}
+			if($formvars['bodenrichtwert_qualitaetsstichtag']){$sql.= ",".$formvars['bodenrichtwert_qualitaetsstichtag'];}
 			if($formvars['brwu']){$sql.= ",".$formvars['brwu'];}
 			if($formvars['brws']){$sql.= ",".$formvars['brws'];}
 			if($formvars['brwb']){$sql.= ",".$formvars['brwb'];}
@@ -209,8 +217,10 @@ class bodenrichtwertzone {
 			if($formvars['ergaenzende_nutzung']){$sql.= ",'".$formvars['ergaenzende_nutzung']."' ";}
 			if($formvars['bauweise']){$sql.= ",'".$formvars['bauweise']."' ";}
 			if($formvars['geschosszahl']){$sql.= ",'".$formvars['geschosszahl']."' ";}
+			if($formvars['ogeschosszahl']){$sql.= ",'".$formvars['ogeschosszahl']."' ";}
 			if($formvars['grundflaechenzahl']){$sql.= ",'" . $formvars['grundflaechenzahl'] . "' ";}
 			if($formvars['geschossflaechenzahl']){$sql.= ",'" . $formvars['geschossflaechenzahl'] . "'";}
+			if($formvars['wgeschossflaechenzahl']){$sql.= ",'" . $formvars['wgeschossflaechenzahl'] . "'";}
 			if($formvars['baumassenzahl']){$sql.= ",'" . $formvars['baumassenzahl'] . "'";}
 			if($formvars['flaeche']){$sql.= ",'".$formvars['flaeche']."' ";}
 			if($formvars['tiefe']){$sql.= ",'".$formvars['tiefe']."' ";}
@@ -249,6 +259,7 @@ class bodenrichtwertzone {
 		}
 		if($valid[0] == 'Valid Geometry'){
 			$formvars['bodenrichtwert'] = str_replace(',', '.', $formvars['bodenrichtwert']);
+			$formvars['wgeschossflaechenzahl'] = str_replace(',', '.', $formvars['wgeschossflaechenzahl']);
 			$formvars['geschossflaechenzahl'] = str_replace(',', '.', $formvars['geschossflaechenzahl']);
 			$formvars['grundflaechenzahl'] = str_replace(',', '.', $formvars['grundflaechenzahl']);
 			$formvars['baumassenzahl'] = str_replace(',', '.', $formvars['baumassenzahl']);
@@ -266,6 +277,8 @@ class bodenrichtwertzone {
 			if($formvars['oertliche_bezeichnung']){$sql.= "oertliche_bezeichnung = '".$formvars['oertliche_bezeichnung']."', ";}
 			if($formvars['bodenrichtwert'] == '')$sql.= "bodenrichtwert = NULL, ";
 			else $sql.= "bodenrichtwert = ".(float)$formvars['bodenrichtwert'].", ";
+			if($formvars['bodenrichtwert_qualitaetsstichtag'] == '')$sql.= "bodenrichtwert_qualitaetsstichtag = NULL, ";
+			else $sql.= "bodenrichtwert_qualitaetsstichtag = ".(float)$formvars['bodenrichtwert_qualitaetsstichtag'].", ";
 			if($formvars['brwu'] == '')$sql.= "brwu = NULL, ";
 			else $sql.= "brwu = ".(float)$formvars['brwu'].", ";
 			if($formvars['brws'] == '')$sql.= "brws = NULL, ";
@@ -274,6 +287,7 @@ class bodenrichtwertzone {
 			else $sql.= "brwb = ".(float)$formvars['brwb'].", ";
 			if($formvars['bedarfswert']){$sql.= "bedarfswert = ".(float)$formvars['bedarfswert'].", ";}
 			if($formvars['stichtag']){$sql.= "stichtag = '".$formvars['stichtag']."', ";}
+			if($formvars['qualitaetsstichtag']){$sql.= "qualitaetsstichtag = '".$formvars['qualitaetsstichtag']."', ";}
 			if($formvars['basiskarte']){$sql.="basiskarte = '".$formvars['basiskarte']."', ";}
 			if($formvars['entwicklungszustand']){$sql.= "entwicklungszustand = '".$formvars['entwicklungszustand']."', ";}
 			if($formvars['beitragszustand']){$sql.= "beitragszustand = '".$formvars['beitragszustand']."', ";}
@@ -282,8 +296,11 @@ class bodenrichtwertzone {
 			else $sql.= "ergaenzende_nutzung = '".$formvars['ergaenzende_nutzung']."', ";
 			if($formvars['bauweise']){$sql.= "bauweise = '".$formvars['bauweise']."', ";}
 			if($formvars['geschosszahl']){$sql.= "geschosszahl = '".$formvars['geschosszahl']."', ";}
+			if($formvars['ogeschosszahl']){$sql.= "ogeschosszahl = '".$formvars['ogeschosszahl']."', ";}
 			if($formvars['grundflaechenzahl'] == '')$sql.= "grundflaechenzahl = NULL, ";
 			else $sql.= "grundflaechenzahl = '".$formvars['grundflaechenzahl']."', ";
+			if($formvars['wgeschossflaechenzahl'] == '')$sql.= "wgeschossflaechenzahl = NULL, ";
+			else $sql.= "wgeschossflaechenzahl = '".$formvars['wgeschossflaechenzahl']."', ";
 			if($formvars['geschossflaechenzahl'] == '')$sql.= "geschossflaechenzahl = NULL, ";
 			else $sql.= "geschossflaechenzahl = '".$formvars['geschossflaechenzahl']."', ";
 			if($formvars['baumassenzahl'] == '')$sql.= "baumassenzahl = NULL, ";
@@ -340,8 +357,8 @@ class bodenrichtwertzone {
     else {
       # SQL-Einfügeanfrage stellen
       $this->debug->write('Kopieren der Zonen von einem Stichtag zu einem neuen.',4);
-      $sql.="INSERT INTO bodenrichtwerte.bw_zonen";
-      $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, geschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, erschliessungsverhaeltnisse, bedarfswert, bodenart, brwu, brws, brwb, textposition, the_geom";
+      $sql.="INSERT INTO bodenrichtwerte.bw_zonen (gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, stichtag, basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, wgeschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, erschliessungsverhaeltnisse, bedarfswert, bodenart, brwu, brws, brwb, textposition, the_geom, qualitaetsstichtag, bodenrichtwert_qualitaetsstichtag, ogeschosszahl, geschossflaechenzahl) ";
+      $sql.=" SELECT gemeinde, gemarkung, ortsteilname, postleitzahl, zonentyp, gutachterausschuss, bodenrichtwertnummer, oertliche_bezeichnung, bodenrichtwert, '".$newStichtag."', basiskarte, entwicklungszustand, beitragszustand, nutzungsart, ergaenzende_nutzung, bauweise, geschosszahl, grundflaechenzahl, wgeschossflaechenzahl, baumassenzahl, flaeche, tiefe, breite, wegeerschliessung, ackerzahl, gruenlandzahl, aufwuchs, verfahrensgrund, verfahrensgrund_zusatz, bemerkungen, erschliessungsverhaeltnisse, bedarfswert, bodenart, brwu, brws, brwb, textposition, the_geom, qualitaetsstichtag, bodenrichtwert_qualitaetsstichtag, ogeschosszahl, geschossflaechenzahl";
       $sql.=" FROM bodenrichtwerte.bw_zonen WHERE stichtag = '".$oldStichtag."'";
       $ret=$this->database->execSQL($sql,4, 1);
       if ($ret[0]) {

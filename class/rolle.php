@@ -13,6 +13,8 @@ class rolle {
 	var $minx;
 	var $language;
 	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
@@ -73,6 +75,7 @@ class rolle {
 	}
 
 	function getLayer($LayerName) {
+		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -122,7 +125,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -197,6 +200,12 @@ class rolle {
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
+		array_walk($layer, function($l) {
+			if (array_key_exists('Layer_ID', $l)) {
+				$l['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $l['Layer_ID'])));
+			}
+			return $l;
+		});
 		return $layer;
 	}
 
@@ -250,7 +259,7 @@ class rolle {
     return $ret;
   }
 	
-  function read_disabled_class_expressions() {
+  function read_disabled_class_expressions($layerset) {
 		$sql = "
 			SELECT 
 				cl.Layer_ID,
@@ -260,9 +269,7 @@ class rolle {
 			FROM 
 				classes as cl
 				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
-				join layer as l on l.Layer_ID = cl.Layer_ID 
 			WHERE 
-				l.classification = cl.classification and
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
 				r2uc.stelle_id = " . $this->stelle_id . "
@@ -270,7 +277,9 @@ class rolle {
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
 		$this->database->execSQL($sql);
     while ($row = $this->database->result->fetch_assoc()) {
-  		$result[$row['Layer_ID']][] = $row;
+			if ($layerset['layer_ids'][$row['Layer_ID']]['classification'] == $row['classification']) {
+  			$result[$row['Layer_ID']][] = $row;
+			}
 		}
 		return $result ?: [];
   }	
@@ -440,8 +449,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;

@@ -104,7 +104,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -686,6 +686,11 @@ FROM
 				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
+				if (strpos(strtolower($this->gui->formvars['export_format']), 'json') !== false) {
+					header('Content-Type: application/json; charset=utf-8');
+					echo utf8_decode(json_encode($ret));
+					exit;
+				}
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
@@ -793,6 +798,20 @@ FROM
 		return $table_alias_names;
 	}
 
+	function get_target_entries($parse_tree){
+		$target_entry_parts = explode("\n      {TARGETENTRY", $parse_tree);
+		#$statement_begin = get_first_word_after($parse_tree, "\n   :stmt_location");
+		array_shift($target_entry_parts);
+		foreach ($target_entry_parts as $target_entry_part){
+			# Spaltennummer in der Tabelle
+			$target_entry['col_num'] = get_first_word_after($target_entry_part, "\n      :resorigcol");
+			# Beginn im Statement (funktioniert nicht zuverlässig z.B. bei cast(...))
+			#$target_entry['attribute_begin'] = get_first_word_after($target_entry_part, "\n         :location") - $statement_begin;
+			$target_entries[] = $target_entry;
+		}
+		return $target_entries;
+	}
+
 	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
@@ -823,18 +842,20 @@ FROM
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
-			$query_plan = $error_list[0];
-			$table_alias_names = $this->get_table_alias_names($query_plan);
-			$field_plan_info = explode("\n      :resno", $query_plan);
+			$parse_tree = $error_list[0];
+			$table_alias_names = $this->get_table_alias_names($parse_tree);
+			$target_entries = $this->get_target_entries($parse_tree);
 			if ($pseudo_realnames) {
-				$select_attr = attributes_from_select($select);
+				include_once(CLASSPATH . 'sql.php');
+				$sql_object = new SQL($select);
+				$select_attr = $sql_object->get_attributes();
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');
+				$col_num = $target_entries[$i]['col_num'];
 				
 				# Tabellen-oid des Attributs
 				$table_oid = pg_field_table($ret[1], $i, true);
@@ -1197,44 +1218,7 @@ FROM
 		}
 		return $geom_type;
 	}
-  
-  function eliminate_star($query, $offset){
-		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strrpos($query, ' WHERE ');
-  		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strrpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-  		if($whereposition){
-  			$withoutwhere = substr($query, 0, $whereposition);
-  		}
-  		else{
-  			$withoutwhere = $query;
-  		}
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $select = substr($query, $offset, $fromposition-$offset);
-    $from = substr($query, $fromposition);
-    $column = get_select_parts($select);
-    for($i = 0; $i < count($column); $i++){
-      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
-          }
-          $query = str_replace(trim($column[$i]), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-	
+  	
   function pg_table_constraints($table_oid){
   	if($table_oid != ''){
 			$constraints = array();
@@ -1311,7 +1295,6 @@ FROM
     else {
       # Abfrage fehlerfrei
       # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_assoc($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -1322,8 +1305,12 @@ FROM
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+			$rect = rectObj(
+      	$rs['minx'],
+				$rs['miny'],
+      	$rs['maxx'], 
+				$rs['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
@@ -1334,12 +1321,13 @@ FROM
     $sql.=" FROM (select st_extent(st_transform(st_geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
-      $rect= ms_newRectObj();
       $rs=pg_fetch_assoc($ret[1]);
-      $rect->minx=$rs['minx']-30; 
-			$rect->miny=$rs['miny']-30;
-      $rect->maxx=$rs['maxx']+30; 
-			$rect->maxy=$rs['maxy']+30;
+      $rect = rectObj(
+				$rs['minx']-30,
+				$rs['miny']-30,
+      	$rs['maxx']+30,
+				$rs['maxy']+30
+			);
       return $rect;
     }
   }
@@ -1659,7 +1647,7 @@ FROM
   
   function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column){		
 		$sql ="
-			SELECT distinct 
+			SELECT  
 				f." . $oid_column . "::text as oid, 
 				f.gml_id, 
 				0 as hist_alb, 
@@ -1680,7 +1668,9 @@ FROM
 				zeitpunktderentstehung::date as entsteh, 
 				a.kennzeichen as antragsnummer, 
 				f.beginnt, 
-				f.endet 
+				f.endet,
+				gem.endet as gem_endet,
+				g.endet as g_endet 
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
@@ -1703,7 +1693,7 @@ FROM
 		else {
 			$sql.= " 
 				UNION 
-				SELECT distinct 
+				SELECT  
 					NULL, 
 					f.gml_id, 
 					1 as hist_alb, 
@@ -1724,7 +1714,9 @@ FROM
 					zeitpunktderentstehung::date as entsteh, 
 					'' as antragsnummer, 
 					f.beginnt, 
-					f.endet 
+					f.endet,
+					gem.endet as gem_endet,
+					g.endet as g_endet 
 				FROM 
 					alkis.ax_historischesflurstueckohneraumbezug as f 
 					LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land 
@@ -1732,7 +1724,7 @@ FROM
 					LEFT JOIN alkis.ax_gemeinde g ON f.gemeindezugehoerigkeit_gemeinde=g.gemeinde AND ppg.kreis = g.kreis 
 				WHERE 
 					f.flurstueckskennzeichen = '" . $FlurstKennz . "'
-				order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
+				order by endet DESC, gem_endet DESC, g_endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
 		}		
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
