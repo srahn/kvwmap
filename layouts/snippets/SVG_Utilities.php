@@ -153,7 +153,6 @@
 	let pointfunctions = false;
 	let linefunctions = false;
 	let measurefunctions = false;
-	let dragging  = false;
 	let path  = "";
 	let path_second  = "";
 	let pathx_second = new Array();
@@ -621,7 +620,7 @@ SCRIPTDEFINITIONS;
       enclosingForm.CMD.value = cmd;
      break;
      default:
-      alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
+      alert("Keine Bearbeitung moeglich! Uebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
      break;
     }
   }
@@ -715,7 +714,6 @@ SCRIPTDEFINITIONS;
 	}
 	
 	function mousewheelchange(evt) {
-		console.log('mousewheelchange');
 		if (!evt) {
 			evt = window.event; // For IE
 		}
@@ -728,18 +726,14 @@ SCRIPTDEFINITIONS;
 				evt.returnValue = false; // IE fix
 			}
 			if (evt.wheelDelta) {
-				console.log('delta from evt.wheelDelta for Chrome/Safari');
 				delta = evt.wheelDelta / 3600; // Chrome/Safari
 			}
 			else {
-				console.log('delta from evt.detail for Mozilla');
 				delta = evt.detail / -90; // Mozilla
 			}
-			console.log(`delta: \${delta}`);
 			let z = 1 + delta * 5;
 			let g = document.getElementById("moveGroup");
 			let p = getEventPoint(evt);
-			console.log(`eventPoint (\${p.x}, \${p.y})`);
 			if (p.x > 0 && p.y > 0) {
 				p = p.matrixTransform(g.getCTM().inverse());
 				let k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
@@ -920,11 +914,7 @@ SCRIPTDEFINITIONS;
 		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
 			var g = document.getElementById("moveGroup");
 			zx = g.getCTM().inverse();
-			console.log(zx);
-			console.log(evt.clientX);
-			console.log((evt.clientX * zx.a));
 			client_x = (evt.clientX * zx.a) + zx.e;
-			console.log(client_x);
 			client_y = resy - ((evt.clientY * zx.a) + zx.f);
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
@@ -1076,7 +1066,7 @@ SCRIPTDEFINITIONS;
 			break;
 
 			default:
-				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+enclosingForm.last_doing.value);
+				alert("Fehlerhafte Eingabe! Uebergebene Daten: "+enclosingForm.last_doing.value);
 			break;
 		}
 		if(polygonfunctions){
@@ -1615,7 +1605,6 @@ BASICFUNCTIONS;
 
 	function rotate_point_direction(){
 		angle = 360 - enclosingForm.angle.value.replace(",", ".");
-		console.log(angle);
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");
