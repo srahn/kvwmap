@@ -2669,4 +2669,36 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
 	}
 }
+
+/**
+ * Function check if in $files exists files with any of $required extensions.
+ * Default is to check if all required shape files extensions exists in $files
+ * @param Array $files A list of filenames.
+ * @param Array $required (optional) A list of extensions.
+ */
+function required_shape_files_exists($files, $required = array('shp', 'shx', 'dbf')) {
+	$existing = array_intersect(
+		$required,
+		array_map(
+			function($file) {
+				return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+			},
+			$files
+		)
+	);
+
+	if ($required == $existing) {
+		return array(
+			'success' => true,
+			'msg' => 'Alle erforderlichen Dateien vorhanden.'
+		);
+	}
+	else {
+		$missing = array_diff($required, $existing);
+		return array(
+			'success' => false,
+			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
+		);
+	}
+}
 ?>

@@ -5020,7 +5020,7 @@ echo '			</table>
       # Dateiformat zuweisen
       $imageformat=$wms_param['format'];
       # Dateiendung zuweisen
-      $imageextention=substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
+      $imageextension = substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
       # eindeutigen Dateinamen erzeugen aus bbox Parameter
       $bbox=explode(',',$wms_param['bbox']);
       $box=$bbox[0].','.$bbox[1].','.$bbox[2].','.$bbox[3];
@@ -5030,8 +5030,8 @@ echo '			</table>
         $wms_param['layers'].'_'.
         $zoomstufe.'-'.
         $sw.'_'.
-        $wms_param['width'].'x'.
-        $wms_param['height'].'.'.$imageextention;
+        $wms_param['width'] . 'x' .
+        $wms_param['height'] . '.' . $imageextension;
       # Prüfen ob die Datei schon existiert
       if(file_exists($tmpfile)) {
         # Datei existiert schon, Ausgeben des Bildes an den Browser
