@@ -13655,6 +13655,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->add_message('error', 'Fehler beim Erzeugen des Icons für Symbol ' . $symbol->name);
 			}
 		}
+		array_multisort(
+			array_map(
+					static function ($symbol) {
+							return strtolower($symbol['value']);
+					},
+					$symbols
+			),
+			SORT_ASC,
+			$symbols
+		);
 		return $symbols;
 	}
 
