@@ -2638,7 +2638,6 @@ function de_date($date_en) {
 	}
 }
 
-
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
