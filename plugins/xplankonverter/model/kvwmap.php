@@ -308,6 +308,7 @@
 	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
 		$success = false;
 		if (!file_exists($tmp_dir)) {
+			$deb_msg = '<br>Dir ' . $tmp_dir . ' angelegt.';
 			try {
 				mkdir($tmp_dir, 0775);
 			} catch (Exception $ex) {
@@ -319,6 +320,7 @@
 		}
 
 		try {
+			$deb_msg .= '<br>move ' . $upload_file['tmp_name'] . ' nach ' . $tmp_dir . $upload_file['name'];
 			move_uploaded_file($upload_file['tmp_name'], $tmp_dir . $upload_file['name']);
 		} catch (Exception $ex) {
 			return array(
@@ -336,6 +338,7 @@
 				);
 			}
 			$msg .= 'Extract ' . $tmp_dir . $upload_file['name'] . ' nach ' . $tmp_dir;
+
 			try {
 				$zip->extractTo($tmp_dir);
 			} catch (Exception $ex) {
@@ -365,30 +368,37 @@
 			);
 		}
 
-
 		#TODO: Hier kann man die hochgeladenen Datei ggf. noch umbenennen in Zusammenzeichnung.gml falls die anders heißt
 		# Aber wie rausbekommen wie die Zusammenzeichnung heißt. Vorerst bleibt es bei der Konvention dass die Datei
 		# Zusammenzeichnung.gml heißen muss.
 
-		$konvertierung = new Konvertierung($GUI); # Create empty Konvertierungsobjekt
+		$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']); # Create empty Konvertierungsobjekt
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
+		$upload_validation_result = $konvertierung->validate_uploaded_files($tmp_dir);
+		if (!$upload_validation_result['success']) {
+			return $upload_validation_result;
+		}
+
+		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $konvertierung->config['plan_file_name']);
 
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
 		}
-		$msg = 'Zusammenzeichnung';
 
-		if (file_exists($tmp_dir . 'Einzelfassungen.gml')) {
-			rename($tmp_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
-		}
+		$msg = $konvertierung->config['title'];
 
-		if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
-			$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
-			if (!$result_geltungsbereiche['success']) {
-				return $result_geltungsbereiche;
+		if ($konvertierung->get('planart') == 'FP-Plan') {
+			if (file_exists($tmp_dir . $zip_dir . 'Einzelfassungen.gml')) {
+				rename($tmp_dir . $zip_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
 			}
-			$msg .= ' und Geltungsbereiche';
+
+			if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
+				$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
+				if (!$result_geltungsbereiche['success']) {
+					return $result_geltungsbereiche;
+				}
+				$msg .= ' und Geltungsbereiche';
+			}
 		}
 		$msg .= ' valide.';
 
@@ -396,7 +406,7 @@
 		# Create Konvertierung and get konvertierung_id
 		# Bezeichnung wird später wenn die Zusammenzeichnung eingelesen wurde noch entsprechend der Zusammenzeichnung.gml aktualisiert.
 		$konvertierung_id = $konvertierung->create(
-			'Neue Zusammenzeichnung aus Datei ' . $upload_file['name'],
+			$GUI->konvertierung->config['title'] . ' aus Datei ' . $upload_file['name'],
 			$GUI->Stelle->epsg_code,
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
@@ -409,6 +419,7 @@
 
 		# move files from tmp to upload folder from konvertierung
 		rename($tmp_dir, $konvertierung->get_file_path('uploaded_xplan_gml'));
+		$msg .= '<br>Temporäre Dateien von ' . $tmp_dir . ' nach ' .  $konvertierung->get_file_path('uploaded_xplan_gml') . ' kopiert.';
 
 		$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
 		# Der Validierungsreport der Geltungsbereiche wird nicht gespeichert, weil es nur einen Report pro Konvertierung geben kann und für die Geltungsbereiche
@@ -417,6 +428,7 @@
     if (!$result['success']) {
       return $result;
     }
+		$msg .= $result['msg'];
 
 		return array(
 			'success' => true,
@@ -438,8 +450,8 @@
 		if (! file_exists($reindexed_xplan_gml_path)) {
 			mkdir($reindexed_xplan_gml_path, 0777);
 		}
-		$read_handle = fopen($uploaded_xplan_gml_path . 'Zusammenzeichnung.gml', "r");
-		$write_handle = fopen($reindexed_xplan_gml_path . 'Zusammenzeichnung.gml', "w");
+		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "r");
+		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "w");
 		$GUI->xplan_gml_ids = array();
 		if ($read_handle) {
 			while (($line = fgets($read_handle)) !== false) {
@@ -455,7 +467,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->config['plan_file_name']} zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
@@ -464,6 +476,7 @@
 		);
 	};
 
+	// MARK: create_geoweb_service
 	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers, $ows_onlineresource) use ($GUI) {
 		global $admin_stellen;
 
@@ -478,7 +491,7 @@
 		$GUI->class_load_level = 2;
 		$GUI->formvars['only_layer_ids'] = implode(', ', array_map(function($layer) { return $layer['id']; }, $result['layers_with_content']));
 		$GUI->service_layernames = array_keys($result['layers_with_content']); // set layernames array for output in view show_service_data.php
-		$stelle_id = $GUI->Stelle_ID; // speichern für späteren Gebrauch
+		$start_stelle_id = $GUI->Stelle_ID; // speichern für späteren Gebrauch
 		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
 		$GUI->Stelle_ID = $admin_stelle->id; // setze Stelle_ID von Adminstelle zur Erzeugung des MapFiles der Adminstelle
 		$GUI->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
@@ -491,7 +504,7 @@
 		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		#$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
-		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht der einzelnen Zusammenzeichnungen der Flächennutzungspläne)');
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht ' . $GUI->konvertierung->config['genitiv_plural']);
 		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
 		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
 		$GUI->map->setMetaData("ows_contactorganization", $admin->stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
@@ -535,11 +548,12 @@
 			}
 		}
 
-		$GUI->Stelle_ID = $stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.
-
+		$GUI->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.
+		$geoweb_service_updated_at = Date('Y-m-d H:i:s');
 		return array(
 			'success' => true,
-			'mapfile' => MAPFILENAME . '.map'
+			'mapfile' => $GUI->konvertierung->config['mapfile_name'],
+			'geoweb_service_updated_at' => $geoweb_service_updated_at
 		);
 	};
 
@@ -634,7 +648,12 @@
 		$pg_object = new PgObject($GUI, 'xplankonverter', 'plan_services');
 
 		$plan_object = new XP_Plan($GUI, $GUI->formvars['planart']);
-		$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
+		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
+			$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
+		}
+		else {
+			$plan_object->get_extent(OWS_SRS); # Alle Pläne in Tabelle der Planart
+		}
 		$plan_service = $pg_object->find_by('planart', $GUI->formvars['planart']);
 
 		if (! $plan_service) {
@@ -658,7 +677,12 @@
 		$md->set('date_title', 'Datum');
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
-		$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
+		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
+			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
+		}
+		else {
+			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '.';
+		}
 
 		$md->set('id_abstract', array(
 			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,

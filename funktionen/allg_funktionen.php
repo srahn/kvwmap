@@ -2681,4 +2681,31 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
 	}
 }
+
+/**
+ * Function read all files recursively from a directory
+ * @param String $dir - The directory
+ * @return Array $files - The files in the directory and below
+ */
+function getAllFiles($dir) {
+	$files = [];
+
+	if (substr($dir, -1) != '/') {
+		$dir .= '/';
+	}
+
+	// Get all files and directories within the directory
+	$items = glob($dir . '*', GLOB_MARK);
+
+	foreach ($items AS $item) {
+		if (is_dir($item)) {
+			$files = array_merge($files, getAllFiles($item));
+		}
+		else {
+			$files[] = $item;
+		}
+	}
+
+	return $files;
+}
 ?>
