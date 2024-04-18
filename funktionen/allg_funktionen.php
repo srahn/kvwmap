@@ -2667,4 +2667,26 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
 	}
 }
+
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
+}
 ?>

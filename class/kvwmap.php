@@ -9576,9 +9576,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				#if ($this->user->id == 1) {
-				#	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
-				#}
+				// if ($this->user->id == 41) {
+			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -15154,6 +15154,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
+							#echo 'SQL zum Update des Datensatzes: ' . $sql;
 							$this->debug->show('<br>sql for update: ' . $sql);
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :", 4);
