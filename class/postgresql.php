@@ -1658,10 +1658,10 @@ FROM
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
-				alkis.ax_gemarkung AS gem, 
-				alkis.ax_flurstueck AS f 
+				alkis.ax_gemarkung AS gem
 				LEFT JOIN 
-					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle)
+					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(gem.istamtsbezirkvon_stelle),
+				alkis.ax_flurstueck AS f 				
 				LEFT JOIN
 					alkis.aa_antrag a ON a.identifier = any(f.zeigtaufexternes_uri)
 			WHERE 
