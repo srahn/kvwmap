@@ -68,9 +68,9 @@ function checkStatus($request, $username, $password){
       $status = false;
       $info = 404;
     }
-		elseif (strpos($header, '301 Moved Permanently') !== false) {
+		elseif (strpos($header, '301 Moved Permanently') !== false OR strpos($header, '307 Temporary Redirect') !== false) {
 			$new_location = trim(get_first_word_after($header, 'Location:', ' ', chr(10)));
-			$info = '<p>301 Moved Permanently Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
+			$info = '<p>' . substr($header, 0, strpos($header, 'Location:')) . '<br>Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
 			$result = checkStatus($new_location, $username, $password);
 			$result[1] = $info . ' ' . (string)$result[1];
 			return $result;
