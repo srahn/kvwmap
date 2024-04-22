@@ -253,7 +253,7 @@ class GUI {
 			$this->params_layer = $mapDB->get_layer_params_layer();
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
-		else{		# Parameter abfragen, die nur dieser Layer hat
+		else{		# Parameter abfragen, die dieser Layer hat
 			$this->params_layer = $mapDB->get_layer_params_layer(NULL, $layer_id);
 			$selectable_layer_params = implode(', ', array_keys($this->params_layer));
 			$rolle = $this->user->rolle;
@@ -1442,7 +1442,7 @@ class db_mapObj {
 		}
 	}
 	
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
+	function get_layer_params_layer($param_id = NULL, $layer_id = NULL) {
 		$params = array();
 		$sql = "
 			SELECT
@@ -1456,27 +1456,11 @@ class db_mapObj {
 					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
-		if($param_id != NULL){
+		if ($param_id != NULL) {
 			$sql .= " AND p.id = ".$params_id;
 		}
-		if($layer_id != NULL){
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
-			$sql .= " 
-			AND l.Layer_ID NOT IN (
-					SELECT 
-						SUBSTRING_INDEX(options, ';', 1) 
-					FROM 
-						layer_attributes as a
-					WHERE 
-						a.layer_id = " . $layer_id . " AND 
-						a.form_element_type = 'SubformEmbeddedPK'
-			) 
-			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
-			GROUP BY 
-				p.id
-      HAVING 
-				count(l.Layer_ID) = 1 AND 
-				l.Layer_ID = " . $layer_id;
+		if ($layer_id != NULL) {
+			$sql .= " AND l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
