@@ -20511,7 +20511,7 @@ class db_mapObj{
 		return $layer_params;
 	}
 
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
+	function get_layer_params_layer($param_id = NULL, $layer_id = NULL) {
 		$params = array();
 		$sql = "
 			SELECT
@@ -20529,23 +20529,7 @@ class db_mapObj{
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if ($layer_id != NULL) {
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
-			$sql .= " 
-			AND l.Layer_ID NOT IN (
-					SELECT 
-						SUBSTRING_INDEX(options, ';', 1) 
-					FROM 
-						layer_attributes as a
-					WHERE 
-						a.layer_id = " . $layer_id . " AND 
-						a.form_element_type = 'SubformEmbeddedPK'
-			) 
-			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
-			GROUP BY 
-				p.id
-      HAVING 
-				count(l.Layer_ID) = 1 AND 
-				l.Layer_ID = " . $layer_id;
+			$sql .= " AND l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
@@ -20557,7 +20541,7 @@ class db_mapObj{
 			}
 		}
 		return $params;
-	}
+	}	
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";

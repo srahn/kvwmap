@@ -442,7 +442,7 @@ span[data-tooltip]:hover::after {
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
-	margin: 3px 3px 3px 0;
+	margin: 0 3px 3px 0;
 }
 
 .custom-select .dropdown {
