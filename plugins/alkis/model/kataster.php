@@ -1328,7 +1328,7 @@ class flurstueck {
 						st_area(f.wkb_geometry)
 					)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END
 				) AS flaeche, 
-				nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, 
+				nas.nutzungsartengruppe::text || lpad(nas.nutzungsart::text, 2, '0') || lpad(nas.untergliederung1::text, 2, '0') || lpad(nas.untergliederung2::text, 2, '0') as nutzungskennz, 
 				nag.gruppe || ' ' || coalesce(na.nutzungsart, '') || ' '||coalesce(nu1.untergliederung1, '') || ' ' || coalesce(nu2.untergliederung2, '') as bezeichnung, 
 				nag.bereich, 
 				nag.gruppe, 
