@@ -201,12 +201,19 @@ class data_import_export {
     return $layer_id;
 	}
 
-	function get_shp_epsg($file, $pgdatabase){
-		if(file_exists($file.'.prj')){
-			$prj = file_get_contents($file.'.prj');
+	/**
+	 * Function determine the EPSG-Code number from a prj-file if exists.
+	 * @param String $filename - The name of the file without extension.
+	 * @return Mixed - false if no code found the epsg-code number else.
+	 */
+	function get_shp_epsg($filename, $pgdatabase) {
+		if (file_exists($filename . '.prj')) {
+			$prj = file_get_contents($filename . '.prj');
 			return $this->get_epsg_from_wkt($prj, $pgdatabase);
 		}
-		else return false;
+		else {
+			return false;
+		}
 	}
 
 	function get_gdal_epsg($raster_file, $pgdatabase){
@@ -249,12 +256,27 @@ class data_import_export {
 		return $result[0];
 	}
 
-	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
-		if (file_exists($uploadpath . $file . '.dbf')) {
-			$filename = $uploadpath . $file . '.dbf';
+	/**
+	 * @param pgdatabase $pgdatabase - Die Datenbank in die die Shape-Datei eingelesen werden soll.
+	 * @param String $uploadpath - Das Verzeichnis in dem die hochgeladene Shape-Datei eingelesen werden soll.
+	 * @param String $shapefile - File name of the shapefile (without extention)
+	 * @param Integer $epsg - EPSG-Code
+	 * @param String $schemaname - database schema name
+	 * @param String $tablename - database table name in which the shapes shall be stored
+	 * @param String $encoding - The encoding of the dbf file.
+	 * @param Boolean $adjustments - True if the attribute names and geometry type of the shape file shall be adjusted, see function rename_reserved_attribute_names
+	 * @return Mixed NULL if no dbf file exists.
+	 */
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $shapefile, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
+		// ToDo: Die nachfolgenden beiden Test mit Groß und Kleinschreibung sind nicht vollständig für z.B. (Dbf, DBf).
+		// Man kann man mit diesem Statement den Test vereinfachen auf eine Zeile
+		$filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
+
+		if (file_exists($uploadpath . $shapefile . '.dbf')) {
+			$filename = $uploadpath . $shapefile . '.dbf';
 		}
-		elseif (file_exists($uploadpath . $file . '.DBF')) {
-			$filename = $uploadpath . $file . '.DBF';
+		elseif (file_exists($uploadpath . $shapefile . '.DBF')) {
+			$filename = $uploadpath . $shapefile . '.DBF';
 		}
 		else {
 			return;

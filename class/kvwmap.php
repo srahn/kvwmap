@@ -2167,7 +2167,9 @@ echo '			</table>
 		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		# $layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
+		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
+		# $layer->setMetaData('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -5033,7 +5035,7 @@ echo '			</table>
       # Dateiformat zuweisen
       $imageformat=$wms_param['format'];
       # Dateiendung zuweisen
-      $imageextention=substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
+      $imageextension = substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
       # eindeutigen Dateinamen erzeugen aus bbox Parameter
       $bbox=explode(',',$wms_param['bbox']);
       $box=$bbox[0].','.$bbox[1].','.$bbox[2].','.$bbox[3];
@@ -5043,8 +5045,8 @@ echo '			</table>
         $wms_param['layers'].'_'.
         $zoomstufe.'-'.
         $sw.'_'.
-        $wms_param['width'].'x'.
-        $wms_param['height'].'.'.$imageextention;
+        $wms_param['width'] . 'x' .
+        $wms_param['height'] . '.' . $imageextension;
       # Prüfen ob die Datei schon existiert
       if(file_exists($tmpfile)) {
         # Datei existiert schon, Ausgeben des Bildes an den Browser
@@ -9608,9 +9610,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				#if ($this->user->id == 1) {
-				#	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
-				#}
+				// if ($this->user->id == 41) {
+			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
 				if ($ret['success']) {
@@ -10317,6 +10319,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'success' => $this->success,
 				'msg' => 'Datensatz erfolgreich gelöscht'
 			);
+
+			if ($this->formvars['format'] == 'json_result') {
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($this->data));
+			}
 		}
 
 		return $this->success;
@@ -15213,6 +15220,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[$layer_id][0], $oid, $old_dataset);
 							}
 
+							#echo 'SQL zum Update des Datensatzes: ' . $sql;
 							$this->debug->show('<br>sql for update: ' . $sql);
 
 							$this->debug->write("<p>file:kvwmap class:sachdaten_speichern :", 4);

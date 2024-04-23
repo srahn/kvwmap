@@ -750,6 +750,13 @@ class stelle {
 
 	function getStellen($order, $user_id = 0, $where = "1") {
 		global $admin_stellen;
+		$stellen = array(
+			'ID' => array(),
+			'index' => array(),
+			'Bezeichnung' => array(),
+			'show_shared_layers' => array(),
+			'Bezeichnung_parent' => array()
+		);
 		$sql = "
 			SELECT
 				s.ID,

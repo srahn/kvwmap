@@ -2638,7 +2638,6 @@ function de_date($date_en) {
 	}
 }
 
-
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
@@ -2657,6 +2656,87 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 	}
 	else {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
+	}
+}
+
+/**
+ * Function read all files recursively from a directory
+ * @param String $dir - The directory
+ * @return Array $files - The files in the directory and below
+ */
+function getAllFiles($dir) {
+	$files = [];
+
+	if (substr($dir, -1) != '/') {
+		$dir .= '/';
+	}
+
+	// Get all files and directories within the directory
+	$items = glob($dir . '*', GLOB_MARK);
+
+	foreach ($items AS $item) {
+		if (is_dir($item)) {
+			$files = array_merge($files, getAllFiles($item));
+		}
+		else {
+			$files[] = $item;
+		}
+	}
+
+	return $files;
+}
+
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Function check if in $files exists files with any of $required extensions.
+ * Default is to check if all required shape files extensions exists in $files
+ * @param Array $files A list of filenames.
+ * @param Array $required (optional) A list of extensions.
+ */
+function required_shape_files_exists($files, $required = array('shp', 'shx', 'dbf')) {
+	$existing = array_intersect(
+		$required,
+		array_map(
+			function($file) {
+				return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+			},
+			$files
+		)
+	);
+
+	if ($required == $existing) {
+		return array(
+			'success' => true,
+			'msg' => 'Alle erforderlichen Dateien vorhanden.'
+		);
+	}
+	else {
+		$missing = array_diff($required, $existing);
+		return array(
+			'success' => false,
+			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
+		);
 	}
 }
 ?>
