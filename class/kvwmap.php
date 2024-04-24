@@ -8426,6 +8426,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
+			$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
       $this->formvars['classification'] = $auto_classes[$i]['classification'];
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
