@@ -17165,7 +17165,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 	
-	function check_class_completeness() {
+	function check_class_completeness($output_html = false) {
     $html = '';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id']) {
@@ -17240,12 +17240,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'msg' => 'Keine Konvertierung ID angegeben!'
 			);
 		}
-		return array(
-      'success' => $ret['success'],
-			'msg' => $ret['msg'],
-      'html' => $html,
-      'num_unclassified' => $num_unclassified
-    );
+		if ($output_html) {
+			return $html;
+		}
+		else {
+			return array(
+				'success' => $ret['success'],
+				'msg' => $ret['msg'],
+				'html' => $html,
+				'num_unclassified' => $num_unclassified
+			);
+		}
 	}
 	
 } # end of class GUI
