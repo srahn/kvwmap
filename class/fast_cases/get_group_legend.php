@@ -213,6 +213,21 @@ class GUI {
 		}
 	}
 
+	function colorramp($path, $width, $height, $colorrange){
+		$colors = explode(' ', $colorrange);
+		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
+		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
+		$img = imagecreatetruecolor($width, $height);
+		for($i = 0; $i < $height; $i++) {
+			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
+			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
+			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
+			$color = imagecolorallocate($img,$r,$g,$b);
+			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
+		}
+		imagejpeg($img, $path, 70);
+	}
+
 	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
