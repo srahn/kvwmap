@@ -28,7 +28,7 @@
   <tr>
   	<td>&nbsp;</td>
   	<td valign="top" align="center" colspan="2" style="padding: 10px">
-			<div class="fett" style="padding: 5px"><? echo $this->rollenlayer[0]['Name'] ?></div>
+			<div class="fett" style="padding: 5px; white-space: nowrap; text-overflow: ellipsis; width: 200px;"><? echo $this->rollenlayer[0]['Name'] ?></div>
   		<div id="rollenlayer_table" style="position: relative">
 				<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 				for ($i = 0; $i < count($this->rollenlayer_attributes) - 2; $i++) { ?>
@@ -48,7 +48,7 @@
 			} ?>
 		</td>
   	<td valign="top" align="center" colspan="2" style="padding: 10px">
-			<div class="fett" style="padding: 5px"><? echo $this->layer[0]['Name'] ?></div>
+			<div class="fett" style="padding: 5px; white-space: nowrap; text-overflow: ellipsis; width: 200px;"><? echo $this->layer[0]['Name'] ?></div>
   		<div border="0" id="layer_table" style="position: relative">
 				<div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div><?
 				for ($i = 0; $i < count($this->layer_attributes['name']); $i++) {
