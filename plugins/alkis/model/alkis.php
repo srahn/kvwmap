@@ -83,28 +83,33 @@ class ALKIS {
 	
 	function create_nas_request_xml_file($FlurstKennz, $Grundbuchbezirk, $Grundbuchblatt, $Buchnungstelle, $print_params, $formnummer){
 		$xml = '<?xml version="1.0" encoding="UTF-8"?>
-<CPA_Benutzungsauftrag
- xmlns ="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
- xmlns:cpa="http://www.cpa-systems.de/namespaces/adv/gid/6.0"
- xmlns:adv="http://www.adv-online.de/namespaces/adv/gid/6.0"
- xmlns:gmd ="http://www.isotc211.org/2005/gmd"
- xmlns:gml="http://www.opengis.net/gml/3.2"
- xmlns:ogc="http://www.adv-online.de/namespaces/adv/gid/ogc"
- xmlns:wfs="http://www.adv-online.de/namespaces/adv/gid/wfs"
- xmlns:wfsext="http://www.adv-online.de/namespaces/adv/gid/wfsext"
- xmlns:xlink="http://www.w3.org/1999/xlink"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xmlns:gco="http://www.isotc211.org/2005/gco"
- xmlns:ext="http://www.supportgis.de/cpa"
- xsi:schemaLocation="http://www.cpa-systems.de/namespaces/adv/gid/6.0 AAA-Extensions_CPA.xsd"
->
+		
+<CPA_Benutzungsauftrag 
+ xmlns="http://www.cpa-systems.de/namespaces/adv/gid/7.1" 
+ xmlns:cpa="http://www.cpa-systems.de/namespaces/adv/gid/7.1"
+ xmlns:ext="http://www.supportgis.de/cpa" 
+ xmlns:adv="http://www.adv-online.de/namespaces/adv/gid/7.1" 
+ xmlns:gco="http://www.isotc211.org/2005/gco" 
+ xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+ xmlns:gml="http://www.opengis.net/gml/3.2" 
+ xmlns:gmlcov="http://www.opengis.net/gmlcov/1.0" 
+ xmlns:gmlexr="http://www.opengis.net/gml/3.3/exr" 
+ xmlns:ows="http://www.opengis.net/ows/1.1" 
+ xmlns:wfs="http://www.opengis.net/wfs/2.0" 
+ xmlns:wfsext="http://www.adv-online.de/namespaces/adv/gid/wfsext/2.0" 
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+ xmlns:xlink="http://www.w3.org/1999/xlink" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xmlns:fes="http://www.opengis.net/fes/2.0" 
+ xsi:schemaLocation="http://www.cpa-systems.de/namespaces/adv/gid/7.1 AAA-Extensions_CPA.xsd">
+
 	<empfaenger>
-		<adv:AA_Empfaenger>
+		<AA_Empfaenger>
 			<adv:direkt>true</adv:direkt>
-		</adv:AA_Empfaenger>
+		</AA_Empfaenger>
 	</empfaenger>
 	<ausgabeform>application/xml</ausgabeform>
-	<art>'.$formnummer.'</art>
+	<art xlink:href="https://registry.gdi-de.org/codelist/de.adv-online.gid/AA_Anlassart_Benutzungsauftrag/'.$formnummer.'"/>
 	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>';
 	
 	if($print_params == NULL) $xml .= '<anforderungsmerkmale>';
@@ -116,43 +121,43 @@ class ALKIS {
 	
 		case 'MV0700' : {   
 			$xml .= '
-			<wfs:Query typeName="adv:AX_Buchungsblatt">
-				<ogc:Filter>
-					<ogc:PropertyIsEqualTo>
-						<ogc:PropertyName>buchungsblattkennzeichen</ogc:PropertyName>
-						<ogc:Literal>'.$Grundbuchbezirk.str_pad($Grundbuchblatt, 7, '0',STR_PAD_LEFT).'</ogc:Literal>
-					</ogc:PropertyIsEqualTo>';
+			<wfs:Query typeNames="adv:AX_Buchungsblatt">
+				<fes:Filter>
+					<fes:PropertyIsEqualTo>
+						<fes:ValueReference>buchungsblattkennzeichen</fes:ValueReference>
+						<fes:Literal>'.$Grundbuchbezirk.str_pad($Grundbuchblatt, 7, '0',STR_PAD_LEFT).'</fes:Literal>
+					</fes:PropertyIsEqualTo>';
 		}break;
 		
 		case 'MV0600' : {   
 			$xml .= '
-			<wfs:Query typeName="adv:AX_Buchungsstelle">
-				<ogc:Filter>
-					<ogc:PropertyIsEqualTo>
-						<ogc:PropertyName>id</ogc:PropertyName>
-						<ogc:Literal>'.$Buchnungstelle.'</ogc:Literal>
-					</ogc:PropertyIsEqualTo>';
+			<wfs:Query typeNames="adv:AX_Buchungsstelle">
+				<fes:Filter>
+					<fes:PropertyIsEqualTo>
+						<fes:ValueReference>id</fes:ValueReference>
+						<fes:Literal>'.$Buchnungstelle.'</fes:Literal>
+					</fes:PropertyIsEqualTo>';
 		}break;
 		
 		default : {
 			$xml .= '
-			<wfs:Query typeName="adv:AX_Flurstueck">
-			<ogc:Filter>';
-			if(count($FlurstKennz) > 1)$xml .= '<ogc:Or>';
+			<wfs:Query typeNames="adv:AX_Flurstueck">
+			<fes:Filter>';
+			if(count($FlurstKennz) > 1)$xml .= '<fes:Or>';
 			foreach($FlurstKennz as $flurst){
 				$xml .= '
-				<ogc:PropertyIsEqualTo>
-					<ogc:PropertyName>flurstueckskennzeichen</ogc:PropertyName>
-					<ogc:Literal>'.$flurst.'</ogc:Literal>
-				</ogc:PropertyIsEqualTo>';
+				<fes:PropertyIsEqualTo>
+					<fes:ValueReference>flurstueckskennzeichen</fes:ValueReference>
+					<fes:Literal>'.$flurst.'</fes:Literal>
+				</fes:PropertyIsEqualTo>';
 			}
-			if(count($FlurstKennz) > 1)$xml .= '</ogc:Or>';
+			if(count($FlurstKennz) > 1)$xml .= '</fes:Or>';
 		}
 	}
 	
 	if($print_params == NULL){
 		$xml .='
-					</ogc:Filter>
+					</fes:Filter>
 				</wfs:Query>
 		</anforderungsmerkmale>';
 	}
