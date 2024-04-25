@@ -1343,7 +1343,7 @@ class flurstueck {
 				alkis.ax_flurstueck f, 
 				alkis.n_nutzung n 
 				join st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) as a (flaeche) ON true
-				left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2
+				left join alkis.n_nutzungsartenschluessel nas on n.objektart = nas.objektart and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2
 				left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel 
 				left join alkis.n_nutzungsart na on nas.nutzungsartengruppe = na.nutzungsartengruppe and nas.nutzungsart = na.schluessel 
 				left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel 
