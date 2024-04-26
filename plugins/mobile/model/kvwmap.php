@@ -251,9 +251,6 @@ $GUI->mobile_sync = function () use ($GUI) {
 	}
 	return $result;
 };
-$GUI->mobile_test = function ($row, $layer_params) use ($GUI) {
-	echo '<br>row: ' . print_r($row, true);
-};
 
 $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($GUI) {
 	$stelle['ID'] = $stelle_settings['ID'];
