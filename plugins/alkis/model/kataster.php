@@ -1350,7 +1350,7 @@ class flurstueck {
 				left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung1 = nu2.untergliederung1 and nas.untergliederung2 = nu2.schluessel
 			WHERE 
 				st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
-				a.flaeche > 0.01 AND 
+				a.flaeche > 0.05 AND 
 				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'" .
 				$this->database->build_temporal_filter(array('f','n')) . "
 			ORDER BY nutzungskennz";
