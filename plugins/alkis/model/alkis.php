@@ -110,13 +110,19 @@ class ALKIS {
 	</empfaenger>
 	<ausgabeform>application/xml</ausgabeform>
 	<art xlink:href="https://registry.gdi-de.org/codelist/de.adv-online.gid/AA_Anlassart_Benutzungsauftrag/'.$formnummer.'"/>
-	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>';
+	<koordinatenreferenzsystem xlink:href="urn:adv:crs:ETRS89_UTM33"/>
+	';
 	
 	if($print_params == NULL) $xml .= '<anforderungsmerkmale>';
 	
 	switch($formnummer){
 		case '0110' : case '0111' : case '0120' : case '0121' : {   
-			$xml .= '<zentrumskoordinate srsName="urn:adv:crs:ETRS89_UTM33">'.$print_params['coord'].'</zentrumskoordinate>';
+			$xml .= '
+			<zentrumskoordinate>
+				<gml:Point srsName="urn:adv:crs:ETRS89_UTM33">
+					<gml:pos>'.$print_params['coord'].'</gml:pos>
+				</gml:Point>	
+			</zentrumskoordinate>';
 		}break;
 	
 		case 'MV0700' : {   
