@@ -12118,15 +12118,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
 				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
 			}
+			else {
+				$attribute = pg_quote($attribute);
+			}
 		}
-		$sql = "
+		$sql = '
 			INSERT INTO 
-				" . $this->layer[0]['maintable'] . "
-				(" . implode(', ', $this->formvars['layer_attributes']) . ")
+				' . $this->layer[0]['maintable'] . '
+				("' . implode('", "', $this->formvars['layer_attributes']) . '")
 			SELECT 
-				" . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . "
+				' . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . '
 			FROM
-				" . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+				' . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
 			if ($this->formvars['remove_rollenlayer']) {
