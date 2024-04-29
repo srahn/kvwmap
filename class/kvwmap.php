@@ -14262,7 +14262,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_copyrights(){
 		$sql = "
 			SELECT 
-				GROUP_CONCAT(l.`Name` SEPARATOR ', ') as layer, 
+				GROUP_CONCAT(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.`alias`, l.`Name`)' : 'l.`Name`') . " SEPARATOR ', ') as layer, 
 				d.`beschreibung`
 			FROM 
 				`datasources` as d JOIN
@@ -14278,6 +14278,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$output = '<table>';
 		while ($rs = $this->database->result->fetch_assoc()){
+			$rs['layer'] = replace_params(
+				$rs['layer'],
+				rolle::$layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->rolle->language
+			);
       $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
 							<td>' . $rs['beschreibung'] . '</td>
@@ -16536,7 +16544,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
-				$output .= $layer['Name'].' : || ';
+				$output .= $layer['Name_or_alias'].' : || ';
  				$attributes = $layer['attributes'];
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {

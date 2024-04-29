@@ -523,7 +523,7 @@ class GUI {
     if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
-				$output .= $layer['Name'].' : || ';
+				$output .= $layer['Name_or_alias'].' : || ';
  				$attributes = $layer['attributes'];
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
@@ -1449,8 +1449,9 @@ class rolle {
 				);
 			}
 			#$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
-			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+			$layer[$i]=$rs;
+			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
