@@ -2709,7 +2709,6 @@ class rolle {
 	}
 
 	function getLayer($LayerName) {
-		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -2828,18 +2827,11 @@ class rolle {
 					$rs['duplicate_criterion']
 				);
 			}
-			#$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
 			$layer[$i] = $rs;
 			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
-		array_walk($layer, function($l) {
-			if (array_key_exists('Layer_ID', $l)) {
-				$l['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $l['Layer_ID'])));
-			}
-			return $l;
-		});
 		return $layer;
 	}
 
@@ -3793,7 +3785,6 @@ class db_mapObj{
 				l.duplicate_criterion,
 				l.shared_from,
 				l.kurzbeschreibung,
-				l.datasource,
 				l.dataowner_name,
 				l.dataowner_email,
 				l.dataowner_tel,
