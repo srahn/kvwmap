@@ -72,8 +72,8 @@ class bodenrichtwertzone {
       }
       $rect = rectObj(
 				$rs['minx'],
+				$rs['miny'],				
 				$rs['maxx'],
-				$rs['miny'],
 				$rs['maxy']
 			);
       $ret[1]=$rect;

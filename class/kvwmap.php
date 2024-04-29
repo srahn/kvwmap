@@ -5415,8 +5415,8 @@ echo '			</table>
 					$this->formvars['angle'] = $value = str_replace('.', ',', $this->point['angle']);
 					$rect = rectObj(
 						$this->point['pointx'] - 100,
+						$this->point['pointy'] - 100,						
 						$this->point['pointx'] + 100,
-						$this->point['pointy'] - 100,
 						$this->point['pointy'] + 100
 					);
 					$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
@@ -6132,8 +6132,8 @@ echo '			</table>
 	function get_rect_by_buffer($x, $y, $rand) {
 		$rect = rectObj(
 			$x - $rand,
+			$y - $rand,			
 			$x + $rand,
-			$y - $rand,
 			$y + $rand
 		);
 		return $rect;
@@ -6144,8 +6144,8 @@ echo '			</table>
 		$height_rand = 0.02535 / 96 * $this->user->rolle->nImageHeight * $scale / 2;
 		$rect = rectObj(
 			$x - $width_rand,
+			$y - $height_rand,			
 			$x + $width_rand,
-			$y - $height_rand,
 			$y + $height_rand
 		);
 		return $rect;
@@ -11097,8 +11097,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->formvars['loc_y']=$this->point['pointy'];
 								$rect = rectObj(
 									$this->point['pointx']-100,
+									$this->point['pointy']-100,									
 									$this->point['pointx']+100,
-									$this->point['pointy']-100,
 									$this->point['pointy']+100
 								);
 								$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
@@ -12124,15 +12124,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
 				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
 			}
+			else {
+				$attribute = pg_quote($attribute);
+			}
 		}
-		$sql = "
+		$sql = '
 			INSERT INTO 
-				" . $this->layer[0]['maintable'] . "
-				(" . implode(', ', $this->formvars['layer_attributes']) . ")
+				' . $this->layer[0]['maintable'] . '
+				("' . implode('", "', $this->formvars['layer_attributes']) . '")
 			SELECT 
-				" . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . "
+				' . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . '
 			FROM
-				" . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+				' . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
 			if ($this->formvars['remove_rollenlayer']) {
@@ -16826,8 +16829,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$rs = pg_fetch_array($ret[1]);
 			$rect = rectObj(
 				$rs['minx'],
+				$rs['miny'],				
 				$rs['maxx'],
-				$rs['miny'],
 				$rs['maxy']
 			);
 			$randx = ($rect->maxx-$rect->minx) * 50 / 100 + 0.01;
@@ -17842,8 +17845,8 @@ class db_mapObj{
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
     	$rs['minx'],
+    	$rs['miny'],			
     	$rs['maxx'],
-    	$rs['miny'],
     	$rs['maxy']
 		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){

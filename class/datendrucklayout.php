@@ -680,9 +680,9 @@ class ddl {
 							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
 							$rect = rectObj(
-								$point['pointx'] - $rand, 
+								$point['pointx'] - $rand,
+								$point['pointy'] - $rand,								 
 								$point['pointx'] + $rand,
-								$point['pointy'] - $rand,
 								$point['pointy'] + $rand
 							);
 						}

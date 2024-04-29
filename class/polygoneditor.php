@@ -49,8 +49,8 @@ class polygoneditor {
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
 			$rs['minx'],
+			$rs['miny'],			
 			$rs['maxx'],
-			$rs['miny'],
 			$rs['maxy']
 		);
 		if($border == NULL AND defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$border = ZOOMBUFFER;
