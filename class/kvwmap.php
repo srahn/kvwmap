@@ -20532,7 +20532,7 @@ class db_mapObj{
 		$params = array();
 		$sql = "
 			SELECT
-				p.id, l.Layer_ID, l.Name
+				p.id, l.Layer_ID, l.Name, l.alias
 			FROM
 				`layer_parameter` as p,
 				layer as l
@@ -20554,7 +20554,16 @@ class db_mapObj{
 		}
 		else {
 			while ($rs = $this->db->result->fetch_assoc()) {
-				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name']];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+				$rs['Name_or_alias'] = replace_params(
+					$rs['Name_or_alias'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name_or_alias']];
 			}
 		}
 		return $params;
