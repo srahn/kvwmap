@@ -1662,6 +1662,47 @@ class db_mapObj {
 		return $attributes;
 	}
 
+  function getPath($layer_id){
+    $sql = "
+			SELECT
+				`pfad`,
+				`duplicate_criterion`
+			FROM
+				`layer`
+			WHERE
+				Layer_ID = " . $layer_id . "
+		";
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getPath - Lesen des Path-Statements des Layers:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    $layer = $this->db->result->fetch_assoc();
+		$path = replace_params(
+			$layer['pfad'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language,
+			$layer['duplicate_criterion']
+		);
+		return $path;
+  }
+
+	function getPathAttributes($database, $path, $pseudo_realnames = array()) {
+		$pathAttributes = array();
+		if ($path != '') {
+			$ret = $database->getFieldsfromSelect($path, false, $pseudo_realnames);
+			if ($ret['success']) {
+				$pathAttributes = $ret[1]; # Gebe die Attribute zurück
+			}
+			else {
+				$pathAttributes = array();
+				$this->GUI->add_message('waring', 'Der Fehler ist bei der Abfrage der Attribute des Query-Statements aufgetreten. Es sollte geprüft werden ob die Abfrage im Query-Statement korrekt ist.');
+			}
+		}
+		return $pathAttributes;
+	}	
+
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(
 			'if_empty_use_query' => false
