@@ -49,8 +49,8 @@ class lineeditor {
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
 			$rs['minx'],
+			$rs['miny'],			
 			$rs['maxx'],
-			$rs['miny'],
 			$rs['maxy']
 		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0) {
