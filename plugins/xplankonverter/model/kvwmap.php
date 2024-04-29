@@ -123,11 +123,16 @@
 				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
 				//$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
-
+				#echo '<script>console.log("' . print_r($GUI->formvars) . '")</script>';
 				# layer_schemaname needs to be an empty textfield in the layer definition
 				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
-				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
-					# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
+				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
+				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
+				) {
++				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
+				# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
 					//$konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
 					$sql = "
 								 ALTER SCHEMA
@@ -526,7 +531,7 @@
 			$layer->set('header', 'templates/' . $layer->name . '_head.html');
 			$layer->set('template', 'templates/' . $layer->name . '_body.html');
 			# Extent mit Ausdehnung von adminstelle überschreiben
-			$layer->metadata->set("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
 			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 
@@ -608,7 +613,7 @@
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 				# Extent mit Ausdehnung von adminstelle überschreiben
-				$layer->metadata->set("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer

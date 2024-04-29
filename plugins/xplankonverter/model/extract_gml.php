@@ -694,9 +694,8 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp,
-								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -795,9 +794,8 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp,
-								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -882,9 +880,8 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp,
-								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -978,9 +975,8 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp,
-								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp
+							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid

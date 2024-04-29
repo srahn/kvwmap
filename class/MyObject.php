@@ -24,7 +24,7 @@ class MyObject {
 		$this->tableName = $tableName;
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
-		$this->identifiers = array();
+		$this->identifiers = ($this->identifier_type == 'array' ? $identifier : array());
 		$this->data = array();
 		$this->children_ids = array();
 		$this->validations = array();

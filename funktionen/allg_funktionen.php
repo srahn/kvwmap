@@ -1924,7 +1924,9 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	if (!is_null($duplicate_criterion)) {
+		$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+	}
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
 			$str = str_replace('$'.$key, $value, $str);

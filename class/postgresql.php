@@ -1057,11 +1057,11 @@ FROM
 				}
 	      if($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
-				}	   
+				}/*
 				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
 					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
 					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
-				}
+				}*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}

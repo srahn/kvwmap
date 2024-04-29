@@ -1237,9 +1237,8 @@ class Konvertierung extends PgObject {
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										e_sub.beschreibung,
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
-										e_sub.typ::xplan_gml.xp_externereferenztyp,
-										false
-									)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+										e_sub.typ::xplan_gml.xp_externereferenztyp
+									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 							FROM
 								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -1363,9 +1362,8 @@ class Konvertierung extends PgObject {
 										(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 										e_sub.beschreibung,
 										to_char(e_sub.datum, 'DD.MM.YYYY'),
-										e_sub.typ::xplan_gml.xp_externereferenztyp,
-										false
-									)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+										e_sub.typ::xplan_gml.xp_externereferenztyp
+									)::xplan_gml.xp_spezexternereferenz) AS externereferenz
 							FROM
 								" . $table_schema . "." . strtolower($plan_class) . "_externereferenz externereferenzlink_sub LEFT JOIN
 								" . $table_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
