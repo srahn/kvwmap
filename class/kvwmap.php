@@ -16499,7 +16499,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
-				$output .= $layer['Name'].' : || ';
+				$output .= $layer['Name_or_alias'].' : || ';
  				$attributes = $layer['attributes'];
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
