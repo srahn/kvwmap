@@ -46,6 +46,25 @@ class XP_Plan extends PgObject {
 	}
 
 	/**
+	 * Funktion konvertiert den Typ vom Attribut externereferenz
+	 * von xp_spezexternereferenzauslegung nach xp_spezexternereferenz
+	 * $plan_attribs wird bearbeitet und zurückgeliefert.
+	 * @param Array $plan_attribs Die mit der Funktion pgdatabase->get_attribute_information() abgefragten Attributdaten
+	 * @return Array Das modifizierte Array von $plan_attribs
+	 */
+	public static function convert_xp_spezexternereferenzauslegung($plan_attribs) {
+		// Entfernt den textteil auslegung in Planattribut type und type_name für typ xp_spezexternereferenzauslegung
+		foreach ($plan_attribs AS $i => $plan_attribut) {
+			if ($plan_attribut['type'] == 'xp_spezexternereferenzauslegung' AND $plan_attribut['type_type'] == 'c') {
+				$plan_attribs[$i]['type'] = str_replace('auslegung', '', $plan_attribs[$i]['type']);
+				$plan_attribs[$i]['type_name'] = str_replace('auslegung', '', $plan_attribs[$i]['type_name']);
+				$plan_attribs[$i]['type_schema'] = 'xplan_gml';
+			}
+		}
+		return $plan_attribs;
+	}
+
+	/**
 	 * Die Funktion filtert dokumente aus dem Attribut externereferenz die laut Angaben zur Auslegung
 	 * nicht veröffentlicht werden sollen raus. Rausgefiltert wird wenn das Attribut nurzurauslegung der externenreferenz true ist und der Zeitraum nicht zu den Planattributen auslegungsstartdatum und auslegungsenddatum passen.
 	 * Bei denen, die veröffentlicht werden sollen, wird das Attribut nurzurauslegung abgezogen.
@@ -62,7 +81,7 @@ class XP_Plan extends PgObject {
 	 * externereferenz für den GML-Export. Die find Funktion von XP_Plan filtert dann immer externereferenz
 	 * entsprechend er Angaben in externereferenzauslegung und den Planattributen auslegungsstart und enddatum.
 	 */
-	function filter_nurzurauslegung($gml_builder) {
+	function filter_nurzurauslegung() {
 		$start = explode(',', str_replace(['{', '}'], '', $this->get('auslegungsstartdatum')));
 		$ende = explode(',', str_replace(['{', '}'], '', $this->get('auslegungsenddatum')));
 		$now = date('d.m.Y');
@@ -70,7 +89,7 @@ class XP_Plan extends PgObject {
 		// Die, die nicht zur Auslegung sind rausfiltern
 		$externereferenzen_mit_nurzurauslegung_json_gefiltert = array_filter(
 			$externereferenzen_mit_nurzurauslegung_json,
-			function ($externereferenz_mit_nurzurauslegung_json) use ($gml_builder, $start, $ende, $now) {
+			function ($externereferenz_mit_nurzurauslegung_json) use ($start, $ende, $now) {
 				$keep_referenz = true;
 				if ($externereferenz_mit_nurzurauslegung_json->nurzurauslegung) {
 					$im_zeitraum = in_date_range($start, $ende, $now);

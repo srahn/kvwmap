@@ -553,7 +553,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 	else {
 		clearTimeout(messageTimeoutID);
-		$('#message_box').stop().fadeIn();
+		$('#message_box').stop().fadeIn().show();
 	}
 }
 

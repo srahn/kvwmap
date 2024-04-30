@@ -2097,6 +2097,7 @@ echo '			</table>
 				}
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
+				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
@@ -2115,8 +2116,20 @@ echo '			</table>
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
+
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
+						$error = ms_GetErrorObj();
+						while ($error && $error->code != MS_NOERR) {
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
+							$error = $error->next();
+						}
+						ms_ResetErrorList();
 					}
+				}
+				if ($this->error_message != '') {
+					$this->error_message .= '<br>';
+					//  throw new ErrorException($this->error_message);
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
@@ -2135,6 +2148,20 @@ echo '			</table>
 		} # end of switch loadMapSource
 		return 1;
 	}
+
+
+	function print($id, $x) {
+        $error = ms_GetErrorObj();
+        if ($error && $error->code != MS_NOERR) {
+            while ($error && $error->code != MS_NOERR) {
+                error_log($id . '-' . $x . '  ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code);
+                $error = $error->next();
+            }
+        } 
+        else {
+            error_log($x . '   noError');
+        }
+    }	
 
 	/**
 	 * Return a drawing order with default layers to top
@@ -2179,7 +2206,7 @@ echo '			</table>
 		}
 		if ($layerset['ows_srs'] == '') {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-		}
+		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
 		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
@@ -2198,6 +2225,7 @@ echo '			</table>
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
+
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -2221,7 +2249,7 @@ echo '			</table>
 				}
 			}
 		}
-
+		
 		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
 			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
@@ -2439,12 +2467,12 @@ echo '			</table>
 				}
 			}
 		} # ende of Vektorlayer
-		$classset=$layerset['Class'];
+		$classset=$layerset['Class'];		
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+	$anzClass = @count($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -2466,7 +2494,7 @@ echo '			</table>
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
+			}			
       for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
@@ -2522,10 +2550,10 @@ echo '			</table>
 						foreach($pattern as &$pat){
 							$pat = $pat * $this->map_factor;
 						}
-						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END ");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -2536,7 +2564,7 @@ echo '			</table>
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -2624,7 +2652,7 @@ echo '			</table>
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -2693,7 +2721,7 @@ echo '			</table>
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -18434,7 +18462,7 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
-											#$sql = str_replace('$stelleid', $stelle_id, $sql);
+											$sql = str_replace('$stelleid', $stelle_id, $sql);
 											#$sql = str_replace('$userid', $this->User_ID, $sql);
 											#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 											$ret = $database->execSQL($sql, 4, 0);
@@ -18456,7 +18484,7 @@ class db_mapObj{
 								}
 								elseif ($attributes['options'][$i] != '') {
 									$sql = $attributes['options'][$i];
-									#$sql = str_replace('$stelleid', $stelle_id, $sql);
+									$sql = str_replace('$stelleid', $stelle_id, $sql);
 									#$sql = str_replace('$userid', $this->User_ID, $sql);
 									#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 									$ret = $database->execSQL($sql, 4, 0);

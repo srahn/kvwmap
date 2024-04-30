@@ -100,7 +100,7 @@ class Gml_builder {
 			) AS envelope
 		";
 		$plan->find_by('konvertierung_id', $konvertierung->get('id'));
-		$plan->filter_nurzurauslegung($this);
+		$plan->filter_nurzurauslegung();
 
 		# XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
 		fwrite(
@@ -129,17 +129,11 @@ class Gml_builder {
 		$gmlElemOpenTag = "<{$xplan_ns_prefix}{$plan->umlName}";
 		$gmlElemOpenTag .= " gml:id=\"GML_{$plan->data['gml_id']}\"";
 
-		// fetch information about attributes and their properties
-		//$typeInfo = new TypeInfo($this->database);
+		// fetch information about attributes and their properties and
+		// convert Typ xp_spezexternereferenzauslegung to xp_spezexternereferenz
 		$plan_attribs = $this->typeInfo->getInfo($plan->tableName);
-
-		// Entfernt ,t oder ,f oder nur , am Ende: {"(,,Dokument,,A,,,X,,1000,f)","(,,Dokument,,X,,,A,,5000,t)"} => {"(,,Dokument,,A,,,X,,1000)","(,,Dokument,,X,,,A,,5000)"}
+		// convert data of externereferenz from type xp_spezexternereferenzauslegung to xp_spezexternereferenz
 		$plan->data['externereferenz'] = str_replace(array(',)"', ',f)"', ',t)"'), ')"', $plan->data['externereferenz']);
-		// foreach ($plan_attribs AS $i => $plan_attribut) {
-		// 	if ($plan_attribut['type'] == 'xp_spezexternereferenzauslegung' AND $plan_attribut['type_type'] == 'c') {
-		// 		$plan_attribs[$i]['type'] = 'xp_spezexternereferenz';
-		// 	}
-		// };
 
 		// alle Attribute vom Planobjekt ausgeben
 		$gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs, XPLAN_MAX_NESTING_DEPTH);
@@ -377,6 +371,28 @@ class Gml_builder {
 				}
 			}
 
+			# for references xp_plan to xp_textabschnitt
+			# sequence 16 = xp_externereferenz in xp_plan (in v 5.4)
+			# which is followed by texte (to xp_textabschnitt)
+			# and begruendungstexte (to xp_begruendungsabschnitt)
+			if ($sequence_attr == 17) {
+				$sql = "SELECT gml_id::text FROM xplan_gml.xp_textabschnitt
+								WHERE inverszu_texte_xp_plan IS NOT NULL AND konvertierung_id = " .  $gml_object['konvertierung_id'] .  ";";
+				$xp_textabschnitte_to_xp_plan = pg_query($this->database->dbConn, $sql);
+				
+				while ($xp_textabschnitt_to_xp_plan = pg_fetch_array($xp_textabschnitte_to_xp_plan, NULL, PGSQL_ASSOC)) {
+					$gmlStr .= "<{$xplan_ns_prefix}texte xlink:href=\"#GML_" . $xp_textabschnitt_to_xp_plan['gml_id'] . "\"/>";
+				}
+
+				$sql = "SELECT gml_id::text FROM xplan_gml.xp_begruendungabschnitt
+								WHERE inverszu_begruendungstexte_xp_plan IS NOT NULL AND konvertierung_id = " .  $gml_object['konvertierung_id'] .  ";";
+				$xp_begruendungsabschnitte_to_xp_plan = pg_query($this->database->dbConn, $sql);
+				
+				while ($xp_begruendungsabschnitt_to_xp_plan = pg_fetch_array($xp_begruendungsabschnitte_to_xp_plan, NULL, PGSQL_ASSOC)) {
+					$gmlStr .= "<{$xplan_ns_prefix}begruendungsTexte xlink:href=\"#GML_" . $xp_begruendungsabschnitt_to_xp_plan['gml_id'] . "\"/>";
+				}
+			}
+
 			# Association refTextInhalt (always +12 for XP_Objekt ( in XPlanung 5.4)
 			# Posisition 2 after rechtscharakter in BP_Objekt
 			# Posisition 4 after rechtscharakter, spezifischePraegung, vonGenehmigungAusgenommen in FP_Objekt
@@ -408,7 +424,6 @@ class Gml_builder {
 				$gml_object[$uml_attribute['col_name']] = $gml_object[$uml_attribute['col_name']][0];
 			}
 
-			#$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . ' uml-attribute-type: '. $uml_attribute['type'] . ' uml-attribute-datatype: '. $uml_attribute['uml_dtype'] . '</note>';
 			switch ($uml_attribute['type_type']) {
 				case 'c': // custom datatype
 					switch ($uml_attribute['stereotype']){
@@ -427,18 +442,20 @@ class Gml_builder {
 							break;
 						case "DataType" :
 							$gml_attrib_str = '';
+							// fetch information about attributes and their properties
+							$datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
+							
+							// retrieve attribute names
+							$value_array_keys = array_column($datatype_attribs, 'col_name');
+
 							// check whether attribute value is already parsed into an array
 							if (is_array($gml_object[$uml_attribute['col_name']])) {
 								$value_array = $gml_object[$uml_attribute['col_name']];
 							}
 							else { // parse attribute value if not yet done
-								$value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
+								#$value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
+								$value_array = $this->getValuesFromDataType($gml_object, $uml_attribute, $value_array_keys);
 							}
-							// fetch information about attributes and their properties
-							$datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
-
-							// retrieve attribute names
-							$value_array_keys = array_column($datatype_attribs, 'col_name');
 
 							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
 							if($uml_attribute['col_name'] == 'aendert') {
@@ -467,17 +484,18 @@ class Gml_builder {
 								if ($single_value == null) {
 									continue;
 								}
+
 								$single_value = array_combine($value_array_keys, $single_value);
 								// generate GML output (!!! recursive !!!)
 								$gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs, $depth - 1);
 								// leere Datentypen auslassen
 								if (strlen($gml_attrib_str) == 0) break;
 								$typeElementName = end($datatype_attribs)['origin'];
-								$gmlStr .= $this->wrapWithElement(
-								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-
 								// wrap all data-types with their data-type-element-tag
-								$this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
+								$gmlStr .= $this->wrapWithElement(
+									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+									$this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str)
+								);
 								$gml_attrib_str = '';
 							}
 							break;
@@ -679,8 +697,31 @@ class Gml_builder {
     return $result;
   }
 
+	function getValuesFromDataType($gml_attribute, $uml_attribute, $keys) {
+		$data_string = $gml_attribute[$uml_attribute['col_name']];
+		$data_type = $uml_attribute['type'];
+		$type_schema = $uml_attribute['type_schema'];
+		$is_array = $uml_attribute['is_array'];
+		$sql = "
+			SELECT
+				" . implode(
+					', ',
+					array_map(
+						function($key) use ($data_string, $data_type, $type_schema, $is_array) {
+							return "(" . ($is_array ? 'unnest(' : '') . "'" . $data_string . "'::" . $type_schema . "." . $data_type .  ($is_array ? '[])' : '') . ")." . $key . " AS " . $key;
+						},
+						$keys
+					)
+				) . "
+		";
+		#echo '<br>SQL zur Abfrage der Values des DataTypes: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$array_values = pg_fetch_all($query);
+		return $array_values;
+	}
+
 	/*
-	* Diese Funktion parses den Inhalt des übergebenen
+	* Diese Funktion parsed den Inhalt des übergebenen
 	* Query-Results für Spalten vom Typ Composite Datatype
 	* und gibt die Werte in einem (ggf. verschachtelten)
 	* Array zurück.

@@ -62,6 +62,17 @@ class PgObject {
 		$this->extents = array();
 	}
 
+	/**
+	 * Dis function can be used to find if a function is called in static context
+	 */
+	public static function _isStatic() {
+		$backtrace = debug_backtrace();
+
+		// The 0th call is to _isStatic(), so we need to check the next
+		// call down the stack.
+		return $backtrace[1]['type'] == '::';
+	}
+
 	public static	function postgis_version($gui) {
 		$query = pg_query(
 			$gui->pgdatabase->dbConn, "
