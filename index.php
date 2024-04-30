@@ -1644,7 +1644,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompleteness' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				echo $GUI->checkClassCompleteness();
+				echo $GUI->check_class_completeness(true);
 			} break;
 			
 			case 'checkClassCompletenessAll' : {

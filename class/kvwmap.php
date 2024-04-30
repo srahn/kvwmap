@@ -2194,7 +2194,9 @@ echo '			</table>
 		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		# $layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
+		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
+		# $layer->setMetaData('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -2686,11 +2688,6 @@ echo '			</table>
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
 					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
         }
-        if ($dbStyle['backgroundcolor']!='') {
-          $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']), 'strlen');
-        	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
 				}
@@ -3064,7 +3061,6 @@ echo '			</table>
 				$style['outlinecolorblue'] = 0;
 				$style['size'] = 10;
 				$style['symbolname'] = 'circle';
-				$style['backgroundcolor'] = NULL;
 				$style['minsize'] = NULL;
 				$style['maxsize'] = 100000;
 				$style['angle'] = 360;
@@ -3307,11 +3303,13 @@ echo '			</table>
 	}
 
 	function map_saveWebImage($image,$format) {
-		if(MAPSERVERVERSION >= 600 ) {
-			return $image->saveWebImage();
+		if(MAPSERVERVERSION >= 800 ) {
+			$filename = IMAGEPATH . $this->user->id.'_'.rand(0, 1000000) . '.jpg';
+			$image->save($filename);
+			return $filename;
 		}
 		else {
-			return $image->saveWebImage($format, 1, 1, 0);
+			return $image->saveWebImage();
 		}
 	}
 
@@ -4803,7 +4801,7 @@ echo '			</table>
 									$onkeyup = 'enforceMinMax(this)';
 								} break;
 								
-								case 'color' : case 'outlinecolor' : case 'backgroundcolor' : { 
+								case 'color' : case 'outlinecolor' : { 
 									$type = 'text';
 									$copy = true;
 								} break;
@@ -5067,7 +5065,7 @@ echo '			</table>
       # Dateiformat zuweisen
       $imageformat=$wms_param['format'];
       # Dateiendung zuweisen
-      $imageextention=substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
+      $imageextension = substr(strstr($imageformat,'/'),1); # z.B. macht aus image/png png
       # eindeutigen Dateinamen erzeugen aus bbox Parameter
       $bbox=explode(',',$wms_param['bbox']);
       $box=$bbox[0].','.$bbox[1].','.$bbox[2].','.$bbox[3];
@@ -5077,8 +5075,8 @@ echo '			</table>
         $wms_param['layers'].'_'.
         $zoomstufe.'-'.
         $sw.'_'.
-        $wms_param['width'].'x'.
-        $wms_param['height'].'.'.$imageextention;
+        $wms_param['width'] . 'x' .
+        $wms_param['height'] . '.' . $imageextension;
       # Prüfen ob die Datei schon existiert
       if(file_exists($tmpfile)) {
         # Datei existiert schon, Ausgeben des Bildes an den Browser
@@ -5441,8 +5439,8 @@ echo '			</table>
 					$this->formvars['angle'] = $value = str_replace('.', ',', $this->point['angle']);
 					$rect = rectObj(
 						$this->point['pointx'] - 100,
+						$this->point['pointy'] - 100,						
 						$this->point['pointx'] + 100,
-						$this->point['pointy'] - 100,
 						$this->point['pointy'] + 100
 					);
 					$this->map->setextent($rect->minx, $rect->miny, $rect->maxx, $rect->maxy);
@@ -6158,8 +6156,8 @@ echo '			</table>
 	function get_rect_by_buffer($x, $y, $rand) {
 		$rect = rectObj(
 			$x - $rand,
+			$y - $rand,			
 			$x + $rand,
-			$y - $rand,
 			$y + $rand
 		);
 		return $rect;
@@ -6170,8 +6168,8 @@ echo '			</table>
 		$height_rand = 0.02535 / 96 * $this->user->rolle->nImageHeight * $scale / 2;
 		$rect = rectObj(
 			$x - $width_rand,
+			$y - $height_rand,			
 			$x + $width_rand,
-			$y - $height_rand,
 			$y + $height_rand
 		);
 		return $rect;
@@ -6856,10 +6854,6 @@ echo '			</table>
 		else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
     $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
     $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
-    if($dbStyle['backgroundcolor']!='') {
-      $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']), 'strlen');
-      if($RGB[0] != '')$style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-    }
 		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
 			$style->set('opacity', $dbStyle['opacity']);
 		}
@@ -8501,6 +8495,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
+			$this->formvars['layer_id'] = $this->formvars['selected_layer_id'];
       $this->formvars['class_name'] = $auto_classes[$i]['name'];
       $this->formvars['classification'] = $auto_classes[$i]['classification'];
       $this->formvars['class_order'] = $auto_classes[$i]['order'];
@@ -10355,6 +10350,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'success' => $this->success,
 				'msg' => 'Datensatz erfolgreich gelöscht'
 			);
+
+			if ($this->formvars['format'] == 'json_result') {
+				header('Content-Type: application/json; charset=utf-8');
+				echo utf8_decode(json_encode($this->data));
+			}
 		}
 
 		return $this->success;
@@ -11121,8 +11121,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$this->formvars['loc_y']=$this->point['pointy'];
 								$rect = rectObj(
 									$this->point['pointx']-100,
+									$this->point['pointy']-100,									
 									$this->point['pointx']+100,
-									$this->point['pointy']-100,
 									$this->point['pointy']+100
 								);
 								$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
@@ -11729,7 +11729,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		    $barBorderColor = $chartColors['black'];
 
 		    $y = 90;
-		    #imagefill($image, 0, 0, $backGroundColor);	# geht bei FGS wohl nicht
 			  imagefilledrectangle($image, 0, 0, 2380, 60*count($result)+170, $backGroundColor);
 				$label = $value = $attributes['alias'][$index] ?: $this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']];
 		    imagettftext($image, 36, 0, 70, $y, $chartColors['black'], dirname(FONTSET).'/arial.ttf', $label);
@@ -11788,7 +11787,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		    $rightBarBorderColor = $chartColors['black'];
 
 		    $y = 90;
-		    #imagefill($image, 0, 0, $backgroundColor);		# geht bei FGS wohl nicht
 			  imagefilledrectangle($image, 0, 0, 2380, 15*count($result)+230, $backgroundColor);
 		    $label = $value = $attributes['alias'][$index] ?: $this->formvars['chartlabel_'.$this->formvars['chosen_layer_id']];
 		    $labelbox = imagettfbbox(36, 0, dirname(FONTSET).'/arial.ttf', $label);
@@ -11908,7 +11906,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		    $barBorderColor = $chartColors['black'];
 
 		    $y = 120;
-		    #imagefill($image, 0, 0, $backGroundColor);	# geht bei FGS wohl nicht
 			  imagefilledrectangle($image, 0, 0, 2000, 2000, $backGroundColor);
 			  #Layername als Überschrift
 			  $labelbox = imagettfbbox(50, 0, dirname(FONTSET).'/arial_bold.ttf', $layerset[0]['Name']);
@@ -12151,15 +12148,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($attribute == $this->rollenlayer_attributes['the_geom']) {
 				$attribute = 'st_transform(' . $attribute . ', ' . $this->layer[0]['epsg_code'] . ')';
 			}
+			else {
+				$attribute = pg_quote($attribute);
+			}
 		}
-		$sql = "
+		$sql = '
 			INSERT INTO 
-				" . $this->layer[0]['maintable'] . "
-				(" . implode(', ', $this->formvars['layer_attributes']) . ")
+				' . $this->layer[0]['maintable'] . '
+				("' . implode('", "', $this->formvars['layer_attributes']) . '")
 			SELECT 
-				" . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . "
+				' . implode(', ', array_slice($this->formvars['rollenlayer_attributes'], 0, count($this->formvars['layer_attributes']))) . '
 			FROM
-				" . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
+				' . $this->rollenlayer_attributes[0]['schema_name'] . '.' . $this->rollenlayer_attributes[0]['table_name'];
 		$ret = $this->layerdb->execSQL($sql,4, 0);
 		if (!$ret[0]){
 			if ($this->formvars['remove_rollenlayer']) {
@@ -14292,7 +14292,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_copyrights(){
 		$sql = "
 			SELECT 
-				GROUP_CONCAT(l.`Name` SEPARATOR ', ') as layer, 
+				GROUP_CONCAT(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.`alias`, l.`Name`)' : 'l.`Name`') . " SEPARATOR ', ') as layer, 
 				d.`beschreibung`
 			FROM 
 				`datasources` as d JOIN
@@ -14308,6 +14308,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$output = '<table>';
 		while ($rs = $this->database->result->fetch_assoc()){
+			$rs['layer'] = replace_params(
+				$rs['layer'],
+				rolle::$layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->rolle->language
+			);
       $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
 							<td>' . $rs['beschreibung'] . '</td>
@@ -15561,7 +15569,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$anzLayer = count($layerset)-1;
 		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
 		$map = new mapObj('');
-		$map->set('shapepath', SHAPEPATH);
+		$map->shapepath = SHAPEPATH;
 		for ($i = 0; $i < $anzLayer; $i++) {
 			$sql_order = '';
 			if (
@@ -16566,7 +16574,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     if($found){
       for($i = 0; $i < count($this->qlayerset); $i++) {
       	$layer = $this->qlayerset[$i];
-				$output .= $layer['Name'].' : || ';
+				$output .= $layer['Name_or_alias'].' : || ';
  				$attributes = $layer['attributes'];
         $anzObj = count($layer['shape']);
         for($k = 0; $k < $anzObj; $k++) {
@@ -16834,7 +16842,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$layer_id = $layerset['Layer_ID'];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$map = new mapObj(NULL);
-			$map->set('debug', 5);
+			$map->debug = 5;
 			$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 			# Auf den Datensatz zoomen
 			$sql = "
@@ -16853,8 +16861,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$rs = pg_fetch_array($ret[1]);
 			$rect = rectObj(
 				$rs['minx'],
+				$rs['miny'],				
 				$rs['maxx'],
-				$rs['miny'],
 				$rs['maxy']
 			);
 			$randx = ($rect->maxx-$rect->minx) * 50 / 100 + 0.01;
@@ -16862,10 +16870,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($rect->minx != '') {
 				$map->setextent($rect->minx - $randx, $rect->miny - $randy, $rect->maxx + $randx, $rect->maxy + $randy);
 				# Haupt-Layer erzeugen
-				$layer = ms_newLayerObj($map);
+				$layer = new LayerObj($map);
 				# Parameter $scale in Data ersetzen
 				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
@@ -16881,44 +16889,44 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$layer->setFilter($expr);
 					}
 				}
-				$layer->set('status',MS_ON);
-				$layer->set('template', ' ');
-				$layer->set('name','querymap'.$k);
-				$layer->set('type',$layerset['Datentyp']);
-				$layer->setConnectionType(6);
-				$layer->set('connection', $layerset['connection']);
+				$layer->status = MS_ON;
+				$layer->template = ' ';
+				$layer->name = 'querymap' . $k;
+				$layer->type = $layerset['Datentyp'];
+				$layer->setConnectionType(6, '');
+				$layer->connection = $layerset['connection'];
 				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
 				$layer->metadata->set('wms_queryable', '0');
 				$klasse = new ClassObj($layer);
-				$klasse->set('status', MS_ON);
-				$style=ms_newStyleObj($klasse);
+				$klasse->status = MS_ON;
+				$style = new StyleObj($klasse);
 				$style->color->setRGB(12, 255, 12);
-				$style->set('width', 1);
+				$style->width = 1;
 				$style->outlinecolor->setRGB(110, 110, 110);
 				# Datensatz-Layer erzeugen
-				$layer = ms_newLayerObj($map);
+				$layer = new LayerObj($map);
 				$datastring  = "the_geom from (select	'" . $geom . "'::geometry as the_geom, 1 as id) as foo using unique id using srid=" . $layerset['epsg_code'];
-				$layer->set('data', $datastring);
-				$layer->set('status', MS_ON);
-				$layer->set('template', ' ');
-				$layer->set('name', 'querymap' . $k);
-				$layer->set('type', $layerset['Datentyp']);
-				$layer->setConnectionType(6);
-				$layer->set('connection', $layerset['connection']);
+				$layer->data = $datastring;
+				$layer->status = MS_ON;
+				$layer->template = ' ';
+				$layer->name = 'querymap' . $k;
+				$layer->type = $layerset['Datentyp'];
+				$layer->setConnectionType(6, '');
+				$layer->connection = $layerset['connection'];
 				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
 				$layer->metadata->set('wms_queryable', '0');
 				$klasse = new ClassObj($layer);
-				$klasse->set('status', MS_ON);
-				$style=ms_newStyleObj($klasse);
+				$klasse->status = MS_ON;
+				$style = new StyleObj($klasse);
 				$style->color->setRGB(255, 5, 12);
-				$style->set('width', 2);
+				$style->width = 2;
 				$style->outlinecolor->setRGB(0,0,0);
 				# Karte rendern
-				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code, MS_TRUE);
-				$map->web->set('imagepath', IMAGEPATH);
-				$map->web->set('imageurl', IMAGEURL);
-				$map->set('width', 50);
-				$map->set('height', 50);
+				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
+				$map->web->imagepath = IMAGEPATH;
+				$map->web->imageurl = IMAGEURL;
+				$map->width = 50;
+				$map->height = 50;
 				#$map->save('/var/www/logs/test.map');
 				$image_map = $map->draw();
 				$filename = $this->map_saveWebImage($image_map, 'jpeg');
@@ -17224,7 +17232,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 	
-	function check_class_completeness() {
+	function check_class_completeness($output_html = false) {
     $html = '';
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->formvars['layer_id']) {
@@ -17299,12 +17307,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				'msg' => 'Keine Konvertierung ID angegeben!'
 			);
 		}
-		return array(
-      'success' => $ret['success'],
-			'msg' => $ret['msg'],
-      'html' => $html,
-      'num_unclassified' => $num_unclassified
-    );
+		if ($output_html) {
+			return $html;
+		}
+		else {
+			return array(
+				'success' => $ret['success'],
+				'msg' => $ret['msg'],
+				'html' => $html,
+				'num_unclassified' => $num_unclassified
+			);
+		}
 	}
 	
 } # end of class GUI
@@ -17430,7 +17443,6 @@ class db_mapObj{
 	}
 
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
-		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -17586,7 +17598,6 @@ class db_mapObj{
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
-			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->GUI, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
@@ -17864,8 +17875,8 @@ class db_mapObj{
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
     	$rs['minx'],
+    	$rs['miny'],			
     	$rs['maxx'],
-    	$rs['miny'],
     	$rs['maxy']
 		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0){
@@ -18328,7 +18339,7 @@ class db_mapObj{
 	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < @count($attributes['name'] ?: []); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();
@@ -18960,7 +18971,7 @@ class db_mapObj{
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`backgroundcolor`,`outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`,`maxsize`, `minscale`, `maxscale`, `angle`,`angleitem`,`width`,`minwidth`,`maxwidth`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`,`maxsize`, `minscale`, `maxscale`, `angle`,`angleitem`,`width`,`minwidth`,`maxwidth`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
 				for ($k = 0; $k < @count($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
@@ -19231,7 +19242,6 @@ class db_mapObj{
 				}
 			}
 		}
-		$style['backgroundcolor'] = NULL;
 		$style['minsize'] = NULL;
 		# echo '<p>neuer Style style_id: ' . $style_id;
 		if (!$style_id) {
@@ -19346,10 +19356,6 @@ class db_mapObj{
       		$style['maxsize'] = 20;
       	}
      	}
-      $style['backgroundcolor'] = NULL;
-      if (MAPSERVERVERSION > '500') {
-      	$style['angle'] = 360;
-      }
       $style_id = $this->new_Style($style);
       $this->addStyle2Class($class_id, $style_id, 0);          # den Style der Klasse zuordnen
 			$i++;
@@ -20580,11 +20586,11 @@ class db_mapObj{
 		return $layer_params;
 	}
 
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
+	function get_layer_params_layer($param_id = NULL, $layer_id = NULL) {
 		$params = array();
 		$sql = "
 			SELECT
-				p.id, l.Layer_ID, l.Name
+				p.id, l.Layer_ID, l.Name, l.alias
 			FROM
 				`layer_parameter` as p,
 				layer as l
@@ -20598,23 +20604,7 @@ class db_mapObj{
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if ($layer_id != NULL) {
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
-			$sql .= " 
-			AND l.Layer_ID NOT IN (
-					SELECT 
-						SUBSTRING_INDEX(options, ';', 1) 
-					FROM 
-						layer_attributes as a
-					WHERE 
-						a.layer_id = " . $layer_id . " AND 
-						a.form_element_type = 'SubformEmbeddedPK'
-			) 
-			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
-			GROUP BY 
-				p.id
-      HAVING 
-				count(l.Layer_ID) = 1 AND 
-				l.Layer_ID = " . $layer_id;
+			$sql .= " AND l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
@@ -20622,11 +20612,20 @@ class db_mapObj{
 		}
 		else {
 			while ($rs = $this->db->result->fetch_assoc()) {
-				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name']];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+				$rs['Name_or_alias'] = replace_params(
+					$rs['Name_or_alias'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name_or_alias']];
 			}
 		}
 		return $params;
-	}
+	}	
 
 	function save_all_layer_params($formvars) {
 		$sql = "TRUNCATE layer_parameter";
@@ -20948,7 +20947,7 @@ class db_mapObj{
   }
 
 	function copyStyle($style_id){
-		$sql = "INSERT INTO styles (symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,backgroundcolor,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
+		$sql = "INSERT INTO styles (symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform) SELECT symbol,symbolname,size,color,outlinecolor,minsize,maxsize,angle,angleitem,width,minwidth,maxwidth,geomtransform FROM styles WHERE Style_ID = " . $style_id;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->copyStyle - Kopieren eines Styles:<br>" . $sql,4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -21130,9 +21129,7 @@ class db_mapObj{
       else $sql.= "color = '" . $style['color']."'";
       if(value_of($style, 'symbol')){$sql.= ", symbol = '" . $style['symbol']."'";}
       if(value_of($style, 'symbolname')){$sql.= ", symbolname = '" . $style['symbolname']."'";}
-      if(value_of($style, 'size')){$sql.= ", size = '" . $style['size']."'";}
-      if(value_of($style, 'backgroundcolor')){$sql.= ", backgroundcolor = '" . $style['backgroundcolor']."'";}
-      if(value_of($style, 'backgroundcolorred')){$sql.= ", backgroundcolor = '" . $style['backgroundcolorred']." " . $style['backgroundcolorgreen']." " . $style['backgroundcolorblue']."'";}
+      if(value_of($style, 'size')){$sql.= ", size = '" . $style['size']."'";}      
       if (value_of($style, 'outlinecolor')) {
 				$sql.= ", outlinecolor = '" . $style['outlinecolor']."'";
 			}
@@ -21165,7 +21162,6 @@ class db_mapObj{
       $sql.= "symbolname = '" . $style->symbolname."', ";
       $sql.= "size = '" . $style->size."', ";
       $sql.= "color = '" . $style->color->red." " . $style->color->green." " . $style->color->blue."', ";
-      $sql.= "backgroundcolor = '" . $style->backgroundcolor->red." " . $style->backgroundcolor->green." " . $style->backgroundcolor->blue."', ";
       $sql.= "outlinecolor = '" . $style->outlinecolor->red." " . $style->outlinecolor->green." " . $style->outlinecolor->blue."', ";
       $sql.= "minsize = '" . $style->minsize."', ";
       $sql.= "maxsize = '" . $style->maxsize."'";
@@ -21339,7 +21335,6 @@ class db_mapObj{
     $sql.="symbolname = '" . $formvars["style_symbolname"]."',";
     if($formvars["style_size"] != ''){$sql.="size = '" . $formvars["style_size"]."',";}else{$sql.="size = NULL,";}
     if($formvars["style_color"] != ''){$sql.="color = '" . $formvars["style_color"]."',";}else{$sql.="color = NULL,";}
-    if($formvars["style_backgroundcolor"] != ''){$sql.="backgroundcolor = '" . $formvars["style_backgroundcolor"]."',";}else{$sql.="backgroundcolor = NULL,";}
     if($formvars["style_outlinecolor"] != ''){$sql.="outlinecolor = '" . $formvars["style_outlinecolor"]."',";}else{$sql.="outlinecolor = NULL,";}
 		if($formvars["style_colorrange"] != ''){$sql.="colorrange = '" . $formvars["style_colorrange"]."',";}else{$sql.="colorrange = NULL,";}
 		if($formvars["style_datarange"] != ''){$sql.="datarange = '" . $formvars["style_datarange"]."',";}else{$sql.="datarange = NULL,";}

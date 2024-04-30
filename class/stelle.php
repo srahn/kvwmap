@@ -750,6 +750,13 @@ class stelle {
 
 	function getStellen($order, $user_id = 0, $where = "1") {
 		global $admin_stellen;
+		$stellen = array(
+			'ID' => array(),
+			'index' => array(),
+			'Bezeichnung' => array(),
+			'show_shared_layers' => array(),
+			'Bezeichnung_parent' => array()
+		);
 		$sql = "
 			SELECT
 				s.ID,
@@ -2125,7 +2132,7 @@ class stelle {
 					l.connectiontype = 6 OR
 					l.connectiontype = 9
 				) AND "
-				. ($use_geom != NULL ? "ul.use_geom = 1" : "l.queryable = '1'")
+				. ($use_geom != NULL ? "ul.use_geom = 1" : "ul.queryable = '1'")
 				. ($no_query_layers ? " AND l.`Datentyp` != 5" : "")
 				. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 				. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")

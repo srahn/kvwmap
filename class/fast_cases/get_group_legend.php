@@ -227,6 +227,21 @@ class GUI {
 		}
 	}
 
+	function colorramp($path, $width, $height, $colorrange){
+		$colors = explode(' ', $colorrange);
+		$s[0] = $colors[0];	$s[1] = $colors[1];	$s[2] = $colors[2];
+		$e[0] = $colors[3];	$e[1] = $colors[4];	$e[2] = $colors[5];
+		$img = imagecreatetruecolor($width, $height);
+		for($i = 0; $i < $height; $i++) {
+			$r = $s[0] - ((($s[0]-$e[0])/$height)*$i);
+			$g = $s[1] - ((($s[1]-$e[1])/$height)*$i);
+			$b = $s[2] - ((($s[2]-$e[2])/$height)*$i);
+			$color = imagecolorallocate($img,$r,$g,$b);
+			imagefilledrectangle($img,0,$i,$width,$i+1,$color);
+		}
+		imagejpeg($img, $path, 70);
+	}
+
 	function plugin_loaded($plugin) {
 		global $kvwmap_plugins;
 		return in_array($plugin, $kvwmap_plugins);
@@ -631,21 +646,24 @@ class GUI {
 		else {
 			$layer_name_attribute = 'Name_or_alias';
 		}
-		$layer = ms_newLayerObj($map);
-		$layer->set('name', $layerset[$layer_name_attribute]);
-		$layer->metadata->set('wms_name', $layerset['wms_name']);
+		$layer = new LayerObj($map);
+		$layer->name = $layerset[$layer_name_attribute];
+		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']);
-		$layer->metadata->set('ows_title', $layerset['Name_or_alias']); # required
-		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
+		# $layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
+		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
+		# $layer->setMetaData('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']);
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']);
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']);
+		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -655,19 +673,19 @@ class GUI {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']);
+		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
-		$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']);
-		$layer->set('dump', 0);
-		$layer->set('type',$layerset['Datentyp']);
-		$layer->set('group', umlaute_umwandeln($layerset['Gruppenname']));
+		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
+		$layer->dump = 0;
+		$layer->type = $layerset['Datentyp'];
+		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -677,10 +695,10 @@ class GUI {
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
 		if ($layerset['aktivStatus'] == 0) {
-			$layer->set('status', 0);
+			$layer->status = 0;
 		}
 		else{
-			$layer->set('status', 1);
+			$layer->status = 1;
 		}
 
 		# fremde Layer werden auf Verbindung getestet
@@ -689,7 +707,7 @@ class GUI {
 			if (!in_array($credentials['host'], array('pgsql', 'localhost'))) {
 				$fp = @fsockopen($credentials['host'], $credentials['port'], $errno, $errstr, 5);
 				if (!$fp) {			# keine Verbindung --> Layer ausschalten
-					$layer->set('status', 0);
+					$layer->status = 0;
 					$layer->metadata->set('queryStatus', 0);
 					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
 				}
@@ -715,18 +733,18 @@ class GUI {
 
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
 			if($this->map_factor != ''){
-				$layer->set('minscaledenom', $layerset['minscale']/$this->map_factor*1.414);
+				$layer->minscaledenom = $layerset['minscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('minscaledenom', $layerset['minscale']);
+				$layer->minscaledenom = $layerset['minscale'];
 			}
 		}
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
 			if($this->map_factor != ''){
-				$layer->set('maxscaledenom', $layerset['maxscale']/$this->map_factor*1.414);
+				$layer->maxscaledenom = $layerset['maxscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('maxscaledenom', $layerset['maxscale']);
+				$layer->maxscaledenom = $layerset['maxscale'];
 			}
 		}
 		$layer->setProjection('+init=epsg:' . $layerset['epsg_code']); # recommended
@@ -746,11 +764,11 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection', $layerset['connection']);
+			$layer->connection = $layerset['connection'];
 		}
 
 		if ($layerset['connectiontype'] > 0) {
-			$layer->setConnectionType($layerset['connectiontype']);
+			$layer->setConnectionType($layerset['connectiontype'], '');
 		}
 
 		if ($layerset['connectiontype'] == 6) {
@@ -769,12 +787,18 @@ class GUI {
 				)
 			);
 			foreach ($processings as $processing) {
-				$layer->setProcessing($processing);
+				if (MAPSERVERVERSION >= 800) {
+					$p = explode('=', $processing);
+					$layer->setProcessingKey($p[0], $p[1]);
+				}
+				else {
+					$layer->setProcessing($processing);
+				}
 			}
 		}
 
 		if (value_of($layerset, 'postlabelcache') != 0) {
-			$layer->set('postlabelcache',$layerset['postlabelcache']);
+			$layer->postlabelcache = $layerset['postlabelcache'];
 		}
 
 		if($layerset['Datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
@@ -792,12 +816,12 @@ class GUI {
 				}
 			}
 			if ($layerset['tileindex']!='') {
-				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
+				$layer->tileindex = SHAPEPATH.$layerset['tileindex'];
 			}
 			else {
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
-			$layer->set('tileitem',$layerset['tileitem']);
+			$layer->tileitem = $layerset['tileitem'];
 			if ($layerset['offsite']!='') {
 				$RGB=explode(' ',$layerset['offsite']);
 				$layer->offsite->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -809,47 +833,49 @@ class GUI {
 				if(strpos($layerset['Data'], '$scale') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
 			
-			if (value_of($layerset, 'buffer') != 0) {
+			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 				$geom = explode(' ', $layer->data)[0];
 				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
 				$layer->data;
-				$layer->set('type', 2);
+				$layer->type = 2;
 			}
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
 			if (value_of($this->formvars, 'go') == 'OWS') {
-				$layer->set('template', 'dummy');
+				$layer->template = 'dummy';
 			}
 			# Header (Kopfdatei)
 			if (value_of($layerset, 'header') != '') {
-				$layer->set('header',$layerset['header']);
+				$layer->header = $layerset['header'];
 			}
 			# Footer (Fusszeile)
 			if (value_of($layerset, 'footer') != '') {
-				$layer->set('footer',$layerset['footer']);
+				$layer->footer = $layerset['footer'];
 			}
 			# Setzen der Spalte nach der der Layer klassifiziert werden soll
 			if ($layerset['classitem']!='') {
-				$layer->set('classitem', $layerset['classitem']);
-			}
-			else {
-				#$layer->set('classitem','id');
+				$layer->classitem = $layerset['classitem'];
 			}
 			# Setzen des Filters
-			if($layerset['Filter'] != ''){
+			if ($layerset['Filter'] != '') {
 				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-				if(substr($layerset['Filter'],0,1)=='('){
-					if(MAPSERVERVERSION > 700){
-						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-					}
-					else{
-						$layer->setFilter($layerset['Filter']);
+				if (substr($layerset['Filter'],0,1) == '(') {
+					switch (true) {
+						case MAPSERVERVERSION >= 800 : {
+							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+						}break;
+						case MAPSERVERVERSION >= 700 : {
+							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						}break;
+						default : {
+							$layer->setFilter($layerset['Filter']);
+						}
 					}
 			 }
 			 else {
@@ -858,34 +884,34 @@ class GUI {
 			 }
 			}
 			if ($layerset['styleitem']!='') {
-				$layer->set('styleitem',$layerset['styleitem']);
+				$layer->styleitem = $layerset['styleitem'];
 			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
-				$layer->set('labelitem',$layerset['labelitem']);
+				$layer->labelitem = $layerset['labelitem'];
 			}
 			if (value_of($layerset, 'labelmaxscale') != '') {
-				$layer->set('labelmaxscaledenom',$layerset['labelmaxscale']);
+				$layer->labelmaxscaledenom = $layerset['labelmaxscale'];
 			}
 			if (value_of($layerset, 'labelminscale') != '') {
-				$layer->set('labelminscaledenom',$layerset['labelminscale']);
+				$layer->labelminscaledenom = $layerset['labelminscale'];
 			}
 			if (value_of($layerset, 'labelrequires') != '') {
-				$layer->set('labelrequires',$layerset['labelrequires']);
+				$layer->labelrequires = $layerset['labelrequires'];
 			}
 			if (value_of($layerset, 'tolerance') != '') {
-				$layer->set('tolerance',$layerset['tolerance']);
+				$layer->tolerance = $layerset['tolerance'];
 			}
 			if (value_of($layerset, 'toleranceunits') != '') {
-				$layer->set('toleranceunits', constant('MS_' . strtoupper($layerset['toleranceunits'])));
+				$layer->toleranceunits = constant('MS_' . strtoupper($layerset['toleranceunits']));
 			}
 			
 			if (value_of($layerset, 'sizeunits') != '') {
-				$layer->set('sizeunits', $layerset['sizeunits']);
+				$layer->sizeunits = $layerset['sizeunits'];
 			}
 			if ($layerset['transparency']!=''){
 				if ($layerset['transparency']==-1) {
-						$layer->set('opacity',MS_GD_ALPHA);
+						$layer->opacity = MS_GD_ALPHA;
 				}
 				else {
 					if (MAPSERVERVERSION > 700) {
@@ -898,10 +924,10 @@ class GUI {
 			}
 			if (value_of($layerset, 'symbolscale') != '') {
 				if($this->map_factor != ''){
-					$layer->set('symbolscaledenom',$layerset['symbolscale']/$this->map_factor*1.414);
+					$layer->symbolscaledenom = $layerset['symbolscale']/$this->map_factor*1.414;
 				}
 				else{
-					$layer->set('symbolscaledenom',$layerset['symbolscale']);
+					$layer->symbolscaledenom = $layerset['symbolscale'];
 				}
 			}
 		} # ende of Vektorlayer
@@ -909,202 +935,220 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-  function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass=@count($classset);
-    for ($j=0;$j<$anzClass;$j++) {
+	function loadclasses($layer, $layerset, $classset, $map){
+    $anzClass = @count($classset);
+    for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
-        $klasse -> set('name',$classset[$j]['Name']);
+        $klasse->name = $classset[$j]['Name'];
       }
-      if($classset[$j]['Status']=='1'){
-      	$klasse->set('status', MS_ON);
+      if ($classset[$j]['Status']=='1'){
+      	$klasse->status = MS_ON;
       }
-      else{
-      	$klasse->set('status', MS_OFF);
+      else {
+      	$klasse->status = MS_OFF;
       }
-      $klasse -> set('template', $layerset['template']);
-      $klasse -> setexpression($classset[$j]['Expression']);
-      if ($classset[$j]['text']!='') {
-        $klasse -> settext($classset[$j]['text']);
+			if (value_of($layerset, 'template') != '') {
+				$klasse->template = value_of($layerset, 'template');
+			}
+			$klasse->setexpression(str_replace([chr(10), chr(13)], '', $classset[$j]['Expression']));
+      if ($classset[$j]['text'] != '' AND is_null($layerset['user_labelitem'])) {
+				$klasse->settext("'" . trim($classset[$j]['text'], "'") . "'");
       }
       if ($classset[$j]['legendgraphic'] != '') {
-				$imagename = '../' . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
-				$klasse->set('keyimage', $imagename);
+				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
+				$klasse->keyimage = $imagename;
 			}
-      for ($k=0;$k<@count($classset[$j]['Style']);$k++) {
-        $dbStyle=$classset[$j]['Style'][$k];
+      for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
+        $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
-				if($dbStyle['geomtransform'] != ''){
-					$style->updateFromString("STYLE GEOMTRANSFORM '" . $dbStyle['geomtransform']."' END");
+				if ($dbStyle['geomtransform'] != '') {
+					$style->updateFromString('STYLE GEOMTRANSFORM "' . $dbStyle['geomtransform'] . '" END');
 				}
-				if($dbStyle['minscale'] != ''){
-					$style->set('minscaledenom', $dbStyle['minscale']);
+				if ($dbStyle['minscale'] != ''){
+					$style->minscaledenom = $dbStyle['minscale'];
 				}
 				if($dbStyle['maxscale'] != ''){
-					$style->set('maxscaledenom', $dbStyle['maxscale']);
+					$style->maxscaledenom = $dbStyle['maxscale'];
+				}
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+					$dbStyle['symbolname'] = NULL;
+					$dbStyle['symbol'] = NULL;
 				}
 				if (substr($dbStyle['symbolname'], 0, 1) == '[') {
 					$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->set('symbolname',$dbStyle['symbolname']);
+						$style->symbolname = $dbStyle['symbolname'];
 					}
 					if ($dbStyle['symbol']>0) {
-						$style->set('symbol',$dbStyle['symbol']);
+						$style->symbol = $dbStyle['symbol'];
+					}
+				}				
+				if ($dbStyle['geomtransform'] != '') {
+					# Es scheint so als würde phpMapScript in dieser Version centroid und andere ignorieren
+					# centroid wird zwar gesetzt was man mit getGeomTransform abfragen kann, aber
+					# es landet nicht im STYLE Objekt was man mit convertToString abfragen kann.
+					# centroid und andere z.B. simplify werden nicht in der MapDatei mit saveMap ausgegeben!
+					# Ein workaround wäre irgend etwas anderes einzufügen, was sich auf den Style nicht tauswirkt
+					# und das dann nach dem Speichern der MapDatei mit dem richtigen zu ersetzen.
+					# Man könnte sich auch alle Symbole merken die als center gesetzt werden sollen
+					# und nach dem Speichern des Mapfiles
+					# SYMBOL "symbolname"
+					# durch
+					# SYMBOL "symbolname"
+					# GEOMTRANSFORM "centroid"
+					# ersetzen. Das hat den Nachteil, dass centroid auch für Styles gesetzt wird
+					# die zwar das Symbol verwenden aber nicht centroid sein sollen.
+					# Man könnte auch eine bestimmte OUTLINEWITH schreiben. Die wirkt sich nur auf (ellipse, truetype and polygon vector symbols) aus
+					# diese OUTLINEWITH wurde hier im Code bisher noch garnicht verwendet könnte aber auch mit einer bestimmten Konstante ergänzt werden
+					# z.B. OUTLINEWITH + 0.000001 Das wird dann erstetzt durch das ohne .000001 und die GEOMTRANSFORM centroid
+					# Man könnten auch für verschiedene Konstanten unterschiedliche GEOMTRANSFORM, die auch nicht funktionieren ersetzen.
+					$style->updateFromString('STYLE GEOMTRANSFORM "' . $dbStyle['geomtransform'] . '" END');
+					$style->updateFromString('STYLE OUTLINEWIDTH 1.00001 END');
+				}
+				if ($dbStyle['pattern'] != '') {
+					if ($this->map_factor != '') {
+						$pattern = explode(' ', $dbStyle['pattern']);
+						foreach($pattern as &$pat){
+							$pat = $pat * $this->map_factor;
+						}
+						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+					}
+					else {
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+					}
+					$style->linecap = 'butt';
+				}
+				if($dbStyle['gap'] != '') {
+					if($this->map_factor != ''){
+						$style->gap = $dbStyle['gap']*$this->map_factor/1.414;
+					}
+					else{
+						$style->gap = $dbStyle['gap'];
 					}
 				}
-        if (MAPSERVERVERSION >= 620) {
-					if($dbStyle['geomtransform'] != '') {
-						$style->setGeomTransform($dbStyle['geomtransform']);
-					}
-          if ($dbStyle['pattern']!='') {
-            $style->setPattern(explode(' ',$dbStyle['pattern']));
-            $style->linecap = 'butt';
-          }
-					if($dbStyle['gap'] != '') {
-						if($this->map_factor != ''){
-							$style->set('gap', $dbStyle['gap']*$this->map_factor/1.414);
-						}
-						else{
-							$style->set('gap', $dbStyle['gap']);
-						}
-	        }
-					if($dbStyle['initialgap'] != '') {
-            $style->set('initialgap', $dbStyle['initialgap']);
-          }
-					if($dbStyle['linecap'] != '') {
-	          $style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
-	        }
-					if($dbStyle['linejoin'] != '') {
-	          $style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
-	        }
-					if($dbStyle['linejoinmaxsize'] != '') {
-	          $style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
-	        }
-					if($dbStyle['polaroffset'] != '') {
-	          $style->updateFromString("STYLE POLAROFFSET " . $dbStyle['polaroffset']." END");
-	        }
-        }
+				if($dbStyle['initialgap'] != '') {
+					$style->initialgap = $dbStyle['initialgap'];
+				}
+				if($dbStyle['linecap'] != '') {
+					$style->linecap = constant('MS_CJC_'.strtoupper($dbStyle['linecap']));
+				}
+				else {
+					$style->linecap = constant('MS_CJC_ROUND');
+				}
+				if($dbStyle['linejoin'] != '') {
+					$style->linejoin = constant('MS_CJC_'.strtoupper($dbStyle['linejoin']));
+				}
+				if($dbStyle['linejoinmaxsize'] != '') {
+					$style->linejoinmaxsize = $dbStyle['linejoinmaxsize'];
+				}
+				if($dbStyle['polaroffset'] != '') {
+					$style->updateFromString("STYLE POLAROFFSET " . $dbStyle['polaroffset']." END");
+				}
 
-        if($this->map_factor != ''){
-          if (MAPSERVERVERSION >= 620) {
-            $pattern = $style->getpatternarray();
-            if($pattern){
-					    foreach($pattern as &$pat){
-					      $pat = $pat * $this->map_factor;
-					    }
-					    $style->setPattern($pattern);
-				    }
-          }
-          else {
-            if($style->symbol > 0){
-              $symbol = $map->getSymbolObjectById($style->symbol);
-              $pattern = $symbol->getpatternarray();
-              if(is_array($pattern) AND $symbol->inmapfile != 1){
-                foreach($pattern as &$pat){
-                  $pat = $pat * $this->map_factor;
-                }
-                $symbol->setpattern($pattern);
-                $symbol->set('inmapfile', 1);
-              }
-            }
-          }
-        }
 				if($dbStyle['size'] != ''){
 					if ($layerset['Datentyp'] == 8) {
 						# Skalierung der Stylegröße when Type Chart
 						$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
 					}
 					else {
-						if($this->map_factor != '') {
-							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']*$this->map_factor/1.414);
-							else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
+						if ($this->map_factor != '') {
+							if (is_numeric($dbStyle['size'])) {
+								$style->size = $dbStyle['size'] * $this->map_factor/1.414;
+							}
+							else {
+								$style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
+							}
 						}
-						else{
-							if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-							else $style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
+						else {
+							if (is_numeric($dbStyle['size'])) {
+								$style->size = $dbStyle['size'];
+							}
+							else {
+								$style->updateFromString("STYLE SIZE [" . $dbStyle['size']."] END");
+							}
 						}
 					}
 				}
 
         if ($dbStyle['minsize']!='') {
-          if($this->map_factor != ''){
-            $style -> set('minsize',$dbStyle['minsize']*$this->map_factor/1.414);
+          if ($this->map_factor != ''){
+            $style->minsize = $dbStyle['minsize']*$this->map_factor/1.414;
           }
-          else{
-            $style -> set('minsize',$dbStyle['minsize']);
+          else {
+            $style->minsize = $dbStyle['minsize'];
           }
         }
 
         if ($dbStyle['maxsize']!='') {
           if($this->map_factor != ''){
-            $style -> set('maxsize',$dbStyle['maxsize']*$this->map_factor/1.414);
+            $style->maxsize = $dbStyle['maxsize']*$this->map_factor/1.414;
           }
           else{
-            $style -> set('maxsize',$dbStyle['maxsize']);
+            $style->maxsize = $dbStyle['maxsize'];
           }
         }
 
 				if($dbStyle['angle'] != '') {
-					$style->updateFromString("STYLE ANGLE " . $dbStyle['angle']." END"); 		# wegen AUTO
+					$style->updateFromString("STYLE ANGLE " . $dbStyle['angle'] . " END"); 		# wegen AUTO
 				}
-        if ($dbStyle['angleitem']!=''){
-          if(MAPSERVERVERSION < 500){
-            $style->set('angleitem',$dbStyle['angleitem']);
-          }
-          else{
-            $style->setbinding(MS_STYLE_BINDING_ANGLE, $dbStyle['angleitem']);
-          }
+
+				if ($dbStyle['angleitem']!=''){
+					$style->setbinding(MS_STYLE_BINDING_ANGLE, $dbStyle['angleitem']);
         }
         if ($dbStyle['width']!='') {
-          if ($dbStyle['antialias']!='') {
-            $style -> set('antialias',$dbStyle['antialias']);
-          }
-          if($this->map_factor != ''){
-            $style -> set('width',$dbStyle['width']*$this->map_factor/1.414);
-          }
-          else{
-            $style->set('width',$dbStyle['width']);
-          }
+					if ($this->map_factor != '') {
+						if (is_numeric($dbStyle['width'])) {
+							$style->width = $dbStyle['width']*$this->map_factor/1.414;
+						}
+						else {
+							$style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+						}
+					}
+					else{
+						if (is_numeric($dbStyle['width'])) {
+							$style->width = $dbStyle['width'];
+						}
+						else {
+							$style->updateFromString("STYLE WIDTH [" . $dbStyle['width']."] END");
+						}
+					}
         }
 
         if ($dbStyle['minwidth']!='') {
-          if($this->map_factor != ''){
-            $style->set('minwidth',$dbStyle['minwidth']*$this->map_factor/1.414);
+          if ($this->map_factor != '') {
+            $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
           }
-          else{
-            $style->set('minwidth',$dbStyle['minwidth']);
+          else {
+            $style->minwidth = $dbStyle['minwidth'];
           }
         }
 
         if ($dbStyle['maxwidth']!='') {
-          if($this->map_factor != ''){
-            $style->set('maxwidth',$dbStyle['maxwidth']*$this->map_factor/1.414);
+          if ($this->map_factor != '') {
+            $style->maxwidth = $dbStyle['maxwidth'] * $this->map_factor/1.414;
           }
-          else{
-            $style->set('maxwidth',$dbStyle['maxwidth']);
+          else {
+            $style->maxwidth = $dbStyle['maxwidth'];
           }
         }
-				
+
         if ($dbStyle['color']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['color']), 'strlen');
           if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
           if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
         }
-				if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-					$style->set('opacity', $dbStyle['opacity']);
+				if ($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
+					$style->opacity = $dbStyle['opacity'];
 				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
         	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        }
-        if ($dbStyle['backgroundcolor']!='') {
-          $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']), 'strlen');
-        	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
         }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
@@ -1115,205 +1159,173 @@ class GUI {
 				if($dbStyle['rangeitem'] != '') {
 					$style->updateFromString("STYLE RANGEITEM " . $dbStyle['rangeitem']." END");
 				}
-        if ($dbStyle['offsetx']!='') {
-          $style->set('offsetx', $dbStyle['offsetx']);
-        }
-        if ($dbStyle['offsety']!='') {
-          $style->set('offsety', $dbStyle['offsety']);
-        }
+				$offset_attribute = false;
+				if (!is_numeric($dbStyle['offsetx'] ?: 0)){
+					$dbStyle['offsetx'] = '[' . $dbStyle['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbStyle['offsety'] ?: 0)){
+					$dbStyle['offsety'] = '[' . $dbStyle['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$style->updateFromString("STYLE offset " . ($dbStyle['offsetx'] ?: '0') . " " . ($dbStyle['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbStyle['offsetx']!='') {
+						$style->set('offsetx', $dbStyle['offsetx']);
+					}
+					if ($dbStyle['offsety']!='') {
+						$style->set('offsety', $dbStyle['offsety']);
+					}
+				}
       } # Ende Schleife für mehrere Styles
 
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
         $dbLabel=$classset[$j]['Label'][$k];
-        if (MAPSERVERVERSION < 600) {
-          $klasse->label->set('type',$dbLabel['type']);
-          $klasse->label->set('font',$dbLabel['font']);
-          $RGB=explode(" ",$dbLabel['color']);
-          if ($RGB[0]=='') { $RGB[0]=0; }
-          if ($RGB[1]=='') { $RGB[1]=0; }
-          if ($RGB[2]=='') { $RGB[2]=0; }
-          $klasse->label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          $RGB=explode(" ",$dbLabel['outlinecolor']);
-          $klasse->label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          if ($dbLabel['shadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['shadowcolor']);
-            $klasse->label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $klasse->label->set('shadowsizex',$dbLabel['shadowsizex']);
-            $klasse->label->set('shadowsizey',$dbLabel['shadowsizey']);
-          }
-          if ($dbLabel['backgroundcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundcolor']);
-            $klasse->label->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          }
-          if ($dbLabel['backgroundshadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
-            $klasse->label->backgroundshadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $klasse->label->set('backgroundshadowsizex',$dbLabel['backgroundshadowsizex']);
-            $klasse->label->set('backgroundshadowsizey',$dbLabel['backgroundshadowsizey']);
-          }
-          $klasse->label->set('angle',$dbLabel['angle']);
-          if(MAPSERVERVERSION > 500 AND $layerset['labelangleitem']!=''){
-            $klasse->label->setbinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
-          }
-					if($dbLabel['anglemode'] != NULL) {
-						$label->set('anglemode', $dbLabel['anglemode']);
-					}
-          if ($dbLabel['buffer']!='') {
-            $klasse->label->set('buffer',$dbLabel['buffer']);
-          }
-					$klasse->label->set('maxlength',$dbLabel['maxlength']);
-          $klasse->label->set('wrap',$dbLabel['wrap']);
-          $klasse->label->set('force',$dbLabel['the_force']);
-          $klasse->label->set('partials',$dbLabel['partials']);
-          $klasse->label->set('size',$dbLabel['size']);
-          $klasse->label->set('minsize',$dbLabel['minsize']);
-          $klasse->label->set('maxsize',$dbLabel['maxsize']);
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
-          if($this->map_factor != ''){
-            $klasse->label->set('minsize',$dbLabel['minsize']*$this->map_factor/1.414);
-            $klasse->label->set('maxsize',$dbLabel['size']*$this->map_factor/1.414);
-            $klasse->label->set('size',$dbLabel['size']*$this->map_factor/1.414);
-          }
-          if ($dbLabel['position']!='') {
-            switch ($dbLabel['position']){
-              case '0' :{
-                $klasse->label->set('position', MS_UL);
-              }break;
-              case '1' :{
-                $klasse->label->set('position', MS_LR);
-              }break;
-              case '2' :{
-                $klasse->label->set('position', MS_UR);
-              }break;
-              case '3' :{
-                $klasse->label->set('position', MS_LL);
-              }break;
-              case '4' :{
-                $klasse->label->set('position', MS_CR);
-              }break;
-              case '5' :{
-                $klasse->label->set('position', MS_CL);
-              }break;
-              case '6' :{
-                $klasse->label->set('position', MS_UC);
-              }break;
-              case '7' :{
-                $klasse->label->set('position', MS_LC);
-              }break;
-              case '8' :{
-                $klasse->label->set('position', MS_CC);
-              }break;
-              case '9' :{
-                $klasse->label->set('position', MS_AUTO);
-              }break;
-            }
-          }
-          if ($dbLabel['offsetx']!='') {
-            $klasse->label->set('offsetx',$dbLabel['offsetx']);
-          }
-          if ($dbLabel['offsety']!='') {
-            $klasse->label->set('offsety',$dbLabel['offsety']);
-          }
-        } # ende mapserver < 600
-        else {
-          $label = new labelObj();
-          $label->font = $dbLabel['font'];
-          $RGB=explode(" ",$dbLabel['color']);
-          if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-          if($dbLabel['outlinecolor'] != ''){
-						$RGB=explode(" ",$dbLabel['outlinecolor']);
-						$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-					}
-          if ($dbLabel['shadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['shadowcolor']);
-            $label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $label->shadowsizex = $dbLabel['shadowsizex'];
-            $label->shadowsizey = $dbLabel['shadowsizey'];
-          }
-
-          if($dbLabel['backgroundshadowcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
-            $style = new styleObj($label);
-						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-            $style->set('offsetx', $dbLabel['backgroundshadowsizex']);
-						$style->set('offsety', $dbLabel['backgroundshadowsizey']);
-						if ($dbLabel['buffer']!='') {
-							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-							$style->set('width', $dbLabel['buffer']);
-						}
-          }
-					if ($dbLabel['backgroundcolor']!='') {
-            $RGB=explode(" ",$dbLabel['backgroundcolor']);
+				$label = new labelObj();
+				if (MAPSERVERVERSION < 700 ) {
+					$label->type = 'truetype';
+				}
+				if ($dbLabel['text'] != '') {
+					$label->updateFromString("LABEL TEXT '" . $dbLabel['text'] . "' END");
+				}				
+				$label->font = $dbLabel['font'];
+				$RGB=explode(" ",$dbLabel['color']);
+				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
+				$label->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				if($dbLabel['outlinecolor'] != ''){
+					$RGB=explode(" ",$dbLabel['outlinecolor']);
+					$label->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				if ($dbLabel['shadowcolor']!='') {
+					$RGB=explode(" ",$dbLabel['shadowcolor']);
+					$label->shadowcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					$label->shadowsizex = $dbLabel['shadowsizex'];
+					$label->shadowsizey = $dbLabel['shadowsizey'];
+				}
+				if($dbLabel['backgroundshadowcolor']!='') {
+					$RGB=explode(" ",$dbLabel['backgroundshadowcolor']);
+					if (MAPSERVERVERSION < 800 ) {
 						$style = new styleObj($label);
-						$style->setGeomTransform('labelpoly');
-            $style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-						if ($dbLabel['buffer']!='') {
-							$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-							$style->set('width', $dbLabel['buffer']);
-						}
-          }
-          if ($dbLabel['buffer']!='') {
-            $label->buffer = $dbLabel['buffer'];
-          }
-					$label->set('maxlength',$dbLabel['maxlength']);
-          $label->wrap = $dbLabel['wrap'];
-          $label->force = $dbLabel['the_force'];
-          $label->partials = $dbLabel['partials'];
-          $label->size = $dbLabel['size'];
-          $label->minsize = $dbLabel['minsize'];
-          $label->maxsize = $dbLabel['maxsize'];
-          # Skalierung der Labelschriftgröße, wenn map_factor gesetzt
-          if($this->map_factor != ''){
-            $label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
-            $label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
-            $label->size = $dbLabel['size']*$this->map_factor/1.414;
-          }
-          if ($dbLabel['position']!='') {
-            switch ($dbLabel['position']){
-              case '0' :{
-                $label->set('position', MS_UL);
-              }break;
-              case '1' :{
-                $label->set('position', MS_LR);
-              }break;
-              case '2' :{
-                $label->set('position', MS_UR);
-              }break;
-              case '3' :{
-                $label->set('position', MS_LL);
-              }break;
-              case '4' :{
-                $label->set('position', MS_CR);
-              }break;
-              case '5' :{
-                $label->set('position', MS_CL);
-              }break;
-              case '6' :{
-                $label->set('position', MS_UC);
-              }break;
-              case '7' :{
-                $label->set('position', MS_LC);
-              }break;
-              case '8' :{
-                $label->set('position', MS_CC);
-              }break;
-              case '9' :{
-                $label->set('position', MS_AUTO);
-              }break;
-            }
-          }
-          if ($dbLabel['offsetx']!='') {
-            $label->offsetx = $dbLabel['offsetx'];
-          }
-          if ($dbLabel['offsety']!='') {
-            $label->offsety = $dbLabel['offsety'];
-          }
-          $klasse->addLabel($label);
-        } # ende mapserver >=600
+					}
+					else {
+						$style = new styleObj();
+					}
+					$style->setGeomTransform('labelpoly');
+					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					$style->offsetx = $dbLabel['backgroundshadowsizex'];
+					$style->offsety = $dbLabel['backgroundshadowsizey'];
+					if ($dbLabel['buffer']!='') {
+						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						$style->width = $dbLabel['buffer'];
+					}
+					$label->insertStyle($style);
+				}
+				if ($dbLabel['backgroundcolor']!='') {
+					$RGB=explode(" ",$dbLabel['backgroundcolor']);
+					if (MAPSERVERVERSION < 800 ) {
+						$style = new styleObj($label);
+					}
+					else {
+						$style = new styleObj();
+					}
+					$style->setGeomTransform('labelpoly');
+					$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+					if ($dbLabel['buffer']!='') {
+						$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+						$style->width = $dbLabel['buffer'];
+					}
+					$label->insertStyle($style);
+				}
+
+				$label->angle = $dbLabel['angle'];
+				if(value_of($layerset, 'labelangleitem') != ''){
+					$label->setBinding(MS_LABEL_BINDING_ANGLE, $layerset['labelangleitem']);
+				}
+				if($dbLabel['anglemode'] != NULL) {
+					$label->anglemode = $dbLabel['anglemode'];
+				}
+				if ($dbLabel['buffer']!='') {
+					$label->buffer = $dbLabel['buffer'];
+				}
+				$label->maxlength = $dbLabel['maxlength'];
+				$label->repeatdistance = $dbLabel['repeatdistance'];
+				$label->wrap = $dbLabel['wrap'];
+				$label->force = $dbLabel['the_force'];
+				$label->partials = $dbLabel['partials'];
+				$label->size = $dbLabel['size'];
+				$label->minsize = $dbLabel['minsize'];
+				$label->maxsize = $dbLabel['maxsize'];
+				if ($dbLabel['maxscale'] != '') {
+					$label->maxscaledenom = $dbLabel['maxscale'];
+				}
+				if ($dbLabel['minscale'] != '') {
+					$label->minscaledenom = $dbLabel['minscale'];
+				}
+				# Skalierung der Labelschriftgröße, wenn map_factor gesetzt
+				if($this->map_factor != ''){
+					$label->minsize = $dbLabel['minsize']*$this->map_factor/1.414;
+					$label->maxsize = $dbLabel['size']*$this->map_factor/1.414;
+					$label->size = $dbLabel['size']*$this->map_factor/1.414;
+				}
+				if ($dbLabel['position']!='') {
+					switch ($dbLabel['position']){
+						case '0' :{
+							$label->position = MS_UL;
+						}break;
+						case '1' :{
+							$label->position = MS_LR;
+						}break;
+						case '2' :{
+							$label->position = MS_UR;
+						}break;
+						case '3' :{
+							$label->position = MS_LL;
+						}break;
+						case '4' :{
+							$label->position = MS_CR;
+						}break;
+						case '5' :{
+							$label->position = MS_CL;
+						}break;
+						case '6' :{
+							$label->position = MS_UC;
+						}break;
+						case '7' :{
+							$label->position = MS_LC;
+						}break;
+						case '8' :{
+							$label->position = MS_CC;
+						}break;
+						case '9' :{
+							$label->position = MS_AUTO;
+						}break;
+					}
+				}
+				$offset_attribute = false;
+				if (!is_numeric($dbLabel['offsetx'] ?: 0)){
+					$dbLabel['offsetx'] = '[' . $dbLabel['offsetx'] . ']';
+					$offset_attribute = true;
+				}
+				if (!is_numeric($dbLabel['offsety'] ?: 0)){
+					$dbLabel['offsety'] = '[' . $dbLabel['offsety'] . ']';
+					$offset_attribute = true;
+				}
+				if ($offset_attribute) {
+					$label->updateFromString("LABEL offset " . ($dbLabel['offsetx'] ?: '0') . " " . ($dbLabel['offsety'] ?: '0') . " END");
+				}
+				else {
+					if ($dbLabel['offsetx']!='') {
+						$label->set('offsetx', $dbLabel['offsetx']);
+					}
+					if ($dbLabel['offsety']!='') {
+						$label->set('offsety', $dbLabel['offsety']);
+					}
+				}
+				$klasse->addLabel($label);
       } # ende Schleife für mehrere Label
     } # end of Schleife Class
   }
@@ -1554,16 +1566,21 @@ class GUI {
 								for($s = 0; $s < $class->numstyles; $s++){
 									$style = $class->getStyle($s);
 									if($maplayer->type > 0){
-										$symbol = $this->map->getSymbolObjectById($style->symbol);
+										if (MAPSERVERVERSION >= 800) {
+											$symbol = $this->map->symbolset->getSymbol($style->symbol);
+										}
+										else {
+											$symbol = $this->map->getSymbolObjectById($style->symbol);
+										}
 										if($symbol->type == 1006){ 	# 1006 == hatch
-											$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2*$style->width);
+											$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2*$style->width;
 										}
 										elseif($style->symbolname == ''){
-											$style->set('size', 2);					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-											$style->set('maxsize', 2);
-											$style->set('width', 2);
-											$style->set('maxwidth', 2);
+											$style->size = 2;					# size und width bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+											$style->maxsize = 2;
+											$style->width = 2;
+											$style->maxwidth = 2;
 										}
 										if ($maplayer->type == MS_LAYER_CHART) {
 											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
@@ -1607,10 +1624,20 @@ class GUI {
 											$imagename = TEMPPATH_REL.$newname;
 										}
 										else{																												# vom Mapserver generiertes Klassenbild
-											$image = $class->createLegendIcon($width, $height);
-											ob_start();
-											$image->saveImage();
-											$image = ob_get_clean();
+											if (MAPSERVERVERSION >= 800) {
+												$img = $class->createLegendIcon($this->map, $class->layer, $width, $height);
+											}
+											else {
+												$img = $class->createLegendIcon($width, $height);
+											}
+											if (MAPSERVERVERSION >= 800) {
+												$image = $img->getBytes();
+											}
+											else {
+												ob_start();
+												$img->saveImage();
+												$image = ob_get_clean();
+											}
 											$imagename = 'data:image/jpg;base64,'.base64_encode($image);
 										}
 										$original_class_image = $imagename;
@@ -1767,11 +1794,13 @@ class GUI {
 	}
 
 	function map_saveWebImage($image,$format) {
-		if(MAPSERVERVERSION >= 600 ) {
-			return $image->saveWebImage();
+		if(MAPSERVERVERSION >= 800 ) {
+			$filename = IMAGEPATH . $this->user->id.'_'.rand(0, 1000000) . '.jpg';
+			$image->save($filename);
+			return $filename;
 		}
 		else {
-			return $image->saveWebImage($format, 1, 1, 0);
+			return $image->saveWebImage();
 		}
 	}
 }
@@ -2668,7 +2697,6 @@ class db_mapObj {
   }
 
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
-		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -2824,7 +2852,6 @@ class db_mapObj {
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
-			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->GUI, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];

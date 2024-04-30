@@ -265,7 +265,7 @@ class GUI {
 			$this->params_layer = $mapDB->get_layer_params_layer();
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
-		else{		# Parameter abfragen, die nur dieser Layer hat
+		else{		# Parameter abfragen, die dieser Layer hat
 			$this->params_layer = $mapDB->get_layer_params_layer(NULL, $layer_id);
 			$selectable_layer_params = implode(', ', array_keys($this->params_layer));
 			$rolle = $this->user->rolle;
@@ -1258,7 +1258,6 @@ class rolle {
 	}
 
 	function getLayer($LayerName) {
-		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -1377,18 +1376,11 @@ class rolle {
 					$rs['duplicate_criterion']
 				);
 			}
-			#$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
 			$layer[$i] = $rs;
 			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
-		array_walk($layer, function($l) {
-			if (array_key_exists('Layer_ID', $l)) {
-				$l['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $l['Layer_ID'])));
-			}
-			return $l;
-		});
 		return $layer;
 	}
 }
@@ -1461,7 +1453,7 @@ class db_mapObj {
 		}
 	}
 	
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL){
+	function get_layer_params_layer($param_id = NULL, $layer_id = NULL) {
 		$params = array();
 		$sql = "
 			SELECT
@@ -1475,27 +1467,11 @@ class db_mapObj {
 					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 				) > 0
 		";
-		if($param_id != NULL){
+		if ($param_id != NULL) {
 			$sql .= " AND p.id = ".$params_id;
 		}
-		if($layer_id != NULL){
-			# nur die Parameter abfragen, die nur dieser Layer hat aber eigene Subform-Layer und Requires-Layer dabei ignorieren
-			$sql .= " 
-			AND l.Layer_ID NOT IN (
-					SELECT 
-						SUBSTRING_INDEX(options, ';', 1) 
-					FROM 
-						layer_attributes as a
-					WHERE 
-						a.layer_id = " . $layer_id . " AND 
-						a.form_element_type = 'SubformEmbeddedPK'
-			) 
-			AND (l.requires != " . $layer_id . " or l.requires IS NULL)
-			GROUP BY 
-				p.id
-      HAVING 
-				count(l.Layer_ID) = 1 AND 
-				l.Layer_ID = " . $layer_id;
+		if ($layer_id != NULL) {
+			$sql .= " AND l.Layer_ID = " . $layer_id;
 		}
 		$this->db->execSQL($sql);
 		if (!$this->db->success) {
@@ -1696,6 +1672,47 @@ class db_mapObj {
 		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
 	}
+
+  function getPath($layer_id){
+    $sql = "
+			SELECT
+				`pfad`,
+				`duplicate_criterion`
+			FROM
+				`layer`
+			WHERE
+				Layer_ID = " . $layer_id . "
+		";
+    $this->debug->write("<p>file:kvwmap class:db_mapObj->getPath - Lesen des Path-Statements des Layers:<br>" . $sql,4);
+    $this->db->execSQL($sql);
+    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
+    $layer = $this->db->result->fetch_assoc();
+		$path = replace_params(
+			$layer['pfad'],
+			rolle::$layer_params,
+			$this->User_ID,
+			$this->Stelle_ID,
+			rolle::$hist_timestamp,
+			$this->rolle->language,
+			$layer['duplicate_criterion']
+		);
+		return $path;
+  }
+
+	function getPathAttributes($database, $path, $pseudo_realnames = array()) {
+		$pathAttributes = array();
+		if ($path != '') {
+			$ret = $database->getFieldsfromSelect($path, false, $pseudo_realnames);
+			if ($ret['success']) {
+				$pathAttributes = $ret[1]; # Gebe die Attribute zurück
+			}
+			else {
+				$pathAttributes = array();
+				$this->GUI->add_message('waring', 'Der Fehler ist bei der Abfrage der Attribute des Query-Statements aufgetreten. Es sollte geprüft werden ob die Abfrage im Query-Statement korrekt ist.');
+			}
+		}
+		return $pathAttributes;
+	}	
 
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(

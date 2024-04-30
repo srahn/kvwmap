@@ -149,9 +149,9 @@ class XP_Plan extends PgObject {
 			$sql = "
 				SELECT
 					'" . $xplan_layer['Name'] . "',
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
 				FROM
 					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
@@ -159,6 +159,7 @@ class XP_Plan extends PgObject {
 			";
 
 			#echo '<p>' . $sql;
+			
 			set_error_handler(function($e) {
 				return true;
 			});
@@ -168,10 +169,11 @@ class XP_Plan extends PgObject {
 				return $ret;
 			}
 			$content = pg_fetch_array($ret[1]);
+
 			if (
-				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
-				($xplan_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
-				($xplan_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
+				($xplan_layer['Datentyp'] == 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['Datentyp'] == 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['Datentyp'] == 2 AND $content['num_polygons'] > 0)
 			) {
 				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}

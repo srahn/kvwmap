@@ -2410,8 +2410,8 @@ class ALKIS {
     if ($ret[0]==0) {
       $rect = rectObj(
       	$ret[1]['minx'],
+      	$ret[1]['miny'],				
 				$ret[1]['maxx'],
-      	$ret[1]['miny'],
 				$ret[1]['maxy']
 			);
       $ret[1]['rect'] = $rect;
@@ -2424,8 +2424,8 @@ class ALKIS {
     if ($ret[0] == 0) {
       $rect = rectObj(
       	$ret[1]['minx'],
+      	$ret[1]['miny'],				
 				$ret[1]['maxx'],
-      	$ret[1]['miny'],
 				$ret[1]['maxy']
 			);
       $ret[1] = $rect;
@@ -2439,8 +2439,8 @@ class ALKIS {
     if ($ret[0]==0) {
       $rect = rectObj(
       	$ret[1]['minx'],
+      	$ret[1]['miny'],				
 				$ret[1]['maxx'],
-      	$ret[1]['miny'],
 				$ret[1]['maxy']
 			);
       $ret[1] = $rect;
@@ -2454,8 +2454,8 @@ class ALKIS {
     if ($ret[0]==0) {
       $rect = rectObj(
       	$ret[1]['minx'],
+      	$ret[1]['miny'],				
 				$ret[1]['maxx'],
-      	$ret[1]['miny'],
 				$ret[1]['maxy']
 			);
       $ret[1]=$rect;
@@ -2468,8 +2468,8 @@ class ALKIS {
     if ($ret[0]==0) {
       $rect = rectObj(
       	$ret[1]['minx'],
+      	$ret[1]['miny'],				
 				$ret[1]['maxx'],
-      	$ret[1]['miny'],
 				$ret[1]['maxy']
 			);
       $ret[1]=$rect;

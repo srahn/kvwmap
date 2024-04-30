@@ -163,15 +163,15 @@ class PgObject {
 	}
 
 	/**
-		Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
-		additional it query and set the extents in epsg given in $ows_srs string
-		@params string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
-		e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
-		with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
-		@return array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
-		$this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
-		$this->extent['25832'] eg. contains the same extent in EPSG:25832
-	*/
+	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
+	 * additional it query and set the extents in epsg given in $ows_srs string
+	 * @param String $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+	 * e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
+	 * with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
+	 * @return Array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
+	 * $this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
+	 * $this->extent['25832'] eg. contains the same extent in EPSG:25832
+	 */
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
 			$where = $this->get_id_condition(array($this->get($this->identifier)));
@@ -602,13 +602,13 @@ class PgObject {
 		return $this->attribute_types;
 	}
 
-	/*
+	/**
 	* Query all child elementes of a table related over given fk_id
-	* @params $child_schema string - Name of the schema of child table
-	* @params $child_table string - Name of the table of child table
-	* @params $fkey_column string - Name of the column where the fkeys resists in child table
-	* @params $fk_id string - ID of the parent to filter the childs that belongs to the parent
-	* @return array(PgObject) - The childs that belongs to the parent over this fkey constraint
+	* @param String $child_schema - Name of the schema of child table
+	* @param String $child_table - Name of the table of child table
+	* @param String $fkey_column - Name of the column where the fkeys resists in child table
+	* @param String $fk_id - ID of the parent to filter the childs that belongs to the parent
+	* @return Array(PgObject) - The childs that belongs to the parent over this fkey constraint
 	*/
 	function find_childs($child_schema, $child_table, $fkey_column, $fk_id) {
 		$table = new PgObject($this->gui, $child_schema, $child_table);

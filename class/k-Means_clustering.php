@@ -206,7 +206,7 @@ class kMeansClustering {
     return array_map(function($item){return $item['mean'];  }, $accumulator);
   }
 
-  function getNumberOfUniqueValues($array){
+  static function getNumberOfUniqueValues($array){
     return count(array_unique($array, SORT_REGULAR));
   }
 
