@@ -3275,11 +3275,13 @@ echo '			</table>
 	}
 
 	function map_saveWebImage($image,$format) {
-		if(MAPSERVERVERSION >= 600 ) {
-			return $image->saveWebImage();
+		if(MAPSERVERVERSION >= 800 ) {
+			$filename = IMAGEPATH . $this->user->id.'_'.rand(0, 1000000) . '.jpg';
+			$image->save($filename);
+			return $filename;
 		}
 		else {
-			return $image->saveWebImage($format, 1, 1, 0);
+			return $image->saveWebImage();
 		}
 	}
 
@@ -16812,7 +16814,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$layer_id = $layerset['Layer_ID'];
 			$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 			$map = new mapObj(NULL);
-			$map->set('debug', 5);
+			$map->debug = 5;
 			$layerdb = $mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
 			# Auf den Datensatz zoomen
 			$sql = "
@@ -16840,10 +16842,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($rect->minx != '') {
 				$map->setextent($rect->minx - $randx, $rect->miny - $randy, $rect->maxx + $randx, $rect->maxy + $randy);
 				# Haupt-Layer erzeugen
-				$layer = ms_newLayerObj($map);
+				$layer = new LayerObj($map);
 				# Parameter $scale in Data ersetzen
 				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
@@ -16859,44 +16861,44 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$layer->setFilter($expr);
 					}
 				}
-				$layer->set('status',MS_ON);
-				$layer->set('template', ' ');
-				$layer->set('name','querymap'.$k);
-				$layer->set('type',$layerset['Datentyp']);
-				$layer->setConnectionType(6);
-				$layer->set('connection', $layerset['connection']);
+				$layer->status = MS_ON;
+				$layer->template = ' ';
+				$layer->name = 'querymap' . $k;
+				$layer->type = $layerset['Datentyp'];
+				$layer->setConnectionType(6, '');
+				$layer->connection = $layerset['connection'];
 				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
 				$layer->metadata->set('wms_queryable', '0');
 				$klasse = new ClassObj($layer);
-				$klasse->set('status', MS_ON);
-				$style=ms_newStyleObj($klasse);
+				$klasse->status = MS_ON;
+				$style = new StyleObj($klasse);
 				$style->color->setRGB(12, 255, 12);
-				$style->set('width', 1);
+				$style->width = 1;
 				$style->outlinecolor->setRGB(110, 110, 110);
 				# Datensatz-Layer erzeugen
-				$layer = ms_newLayerObj($map);
+				$layer = new LayerObj($map);
 				$datastring  = "the_geom from (select	'" . $geom . "'::geometry as the_geom, 1 as id) as foo using unique id using srid=" . $layerset['epsg_code'];
-				$layer->set('data', $datastring);
-				$layer->set('status', MS_ON);
-				$layer->set('template', ' ');
-				$layer->set('name', 'querymap' . $k);
-				$layer->set('type', $layerset['Datentyp']);
-				$layer->setConnectionType(6);
-				$layer->set('connection', $layerset['connection']);
+				$layer->data = $datastring;
+				$layer->status = MS_ON;
+				$layer->template = ' ';
+				$layer->name = 'querymap' . $k;
+				$layer->type = $layerset['Datentyp'];
+				$layer->setConnectionType(6, '');
+				$layer->connection = $layerset['connection'];
 				$layer->setProjection('+init=epsg:' . $layerset['epsg_code']);
 				$layer->metadata->set('wms_queryable', '0');
 				$klasse = new ClassObj($layer);
-				$klasse->set('status', MS_ON);
-				$style=ms_newStyleObj($klasse);
+				$klasse->status = MS_ON;
+				$style = new StyleObj($klasse);
 				$style->color->setRGB(255, 5, 12);
-				$style->set('width', 2);
+				$style->width = 2;
 				$style->outlinecolor->setRGB(0,0,0);
 				# Karte rendern
-				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code, MS_TRUE);
-				$map->web->set('imagepath', IMAGEPATH);
-				$map->web->set('imageurl', IMAGEURL);
-				$map->set('width', 50);
-				$map->set('height', 50);
+				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
+				$map->web->imagepath = IMAGEPATH;
+				$map->web->imageurl = IMAGEURL;
+				$map->width = 50;
+				$map->height = 50;
 				#$map->save('/var/www/logs/test.map');
 				$image_map = $map->draw();
 				$filename = $this->map_saveWebImage($image_map, 'jpeg');
@@ -18309,7 +18311,7 @@ class db_mapObj{
 	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < @count($attributes['name'] ?: []); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
 				$query_result2 = array();

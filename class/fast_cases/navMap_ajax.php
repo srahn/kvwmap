@@ -2018,7 +2018,7 @@ class GUI {
 		if ($ret[0]) {
 		}
 		else {
-			if ($ret[1]['flur'] != '') {
+			if (is_array($ret[1]) AND $ret[1]['flur'] != '') {
 				$Flurbezeichnung = $ret[1];
 			}
 		}
@@ -2877,9 +2877,9 @@ class rolle {
 
 	function setQueryStatus($formvars) {
 		# Eintragen des query_status=1 für Layer, die für die Abfrage selektiert wurden
-		for ($i=0;$i<count($this->layerset);$i++){
-			$query_status = $formvars['qLayer'.$this->layerset[$i]['Layer_ID']];
-			if(isset($query_status)){	
+		for ($i=0; $i<count($this->layerset)-1; $i++){
+			$query_status = value_of($formvars, 'qLayer'.value_of($this->layerset[$i], 'Layer_ID'));
+			if($query_status !== ''){	
 				if($this->layerset[$i]['Layer_ID'] > 0){
 					$sql ='UPDATE u_rolle2used_layer set queryStatus="'.$query_status.'"';
 					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
@@ -2895,7 +2895,7 @@ class rolle {
 			}
 		}
 		return 1;
-	}	
+	}
 
   function readSettings() {
 		global $language;
@@ -3415,28 +3415,6 @@ class pgdatabase {
       }
     }
     return $epsg_codes;
-  }
-
-	function getBezeichnungFromPosition($position, $epsgcode) {
-    $this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
-		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeindezugehoerigkeit_gemeinde gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
-    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";
-		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";
-		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
-    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.gemeindezugehoerigkeit_kreis AND gm.gemeinde = fl.gemeindezugehoerigkeit_gemeinde ";
-    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry) ";
-		$sql.= $this->build_temporal_filter(array('gk', 'gm', 'fl'));
-    #echo $sql;
-    $ret=$this->execSQL($sql,4, 0);
-    if ($ret[0]!=0) {
-      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
-    }
-    else {
-      if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_assoc($ret[1]);
-      }
-    }
-    return $ret;
   }
 
 	function build_temporal_filter($tablenames){
@@ -4120,7 +4098,25 @@ class Flur {
   }
 
 	function getBezeichnungFromPosition($position, $epsgcode){
-		return $this->database->getBezeichnungFromPosition($position, $epsgcode);
+		$this->debug->write("<p>kataster.php Flur->getBezeichnungFromPosition:",4);
+		$sql ="SELECT gm.bezeichnung as gemeindename, fl.gemeindezugehoerigkeit_gemeinde gemeinde, gk.bezeichnung as gemkgname, fl.land::text||fl.gemarkungsnummer::text as gemkgschl, fl.flurnummer as flur, CASE WHEN fl.nenner IS NULL THEN fl.zaehler::text ELSE fl.zaehler::text||'/'||fl.nenner::text end as flurst, s.bezeichnung as strasse, l.hausnummer ";
+    $sql.="FROM alkis.ax_gemarkung as gk, alkis.ax_gemeinde as gm, alkis.ax_flurstueck as fl ";
+		$sql.="LEFT JOIN alkis.ax_lagebezeichnungmithausnummer l ON l.gml_id = ANY(fl.weistauf) ";
+		$sql.="LEFT JOIN alkis.ax_lagebezeichnungkatalogeintrag s ON l.kreis=s.kreis AND l.gemeinde=s.gemeinde AND s.lage = lpad(l.lage,5,'0') ";
+    $sql.="WHERE gk.gemarkungsnummer = fl.gemarkungsnummer AND gm.kreis = fl.gemeindezugehoerigkeit_kreis AND gm.gemeinde = fl.gemeindezugehoerigkeit_gemeinde ";
+    $sql.=" AND ST_WITHIN(st_transform(st_geomfromtext('POINT(".$position['rw']." ".$position['hw'].")',".$epsgcode."), ".EPSGCODE_ALKIS."),fl.wkb_geometry) ";
+		$sql.= $this->database->build_temporal_filter(array('gk', 'gm', 'fl'));
+    #echo $sql;
+    $ret=$this->database->execSQL($sql,4, 0);
+    if ($ret[0]!=0) {
+      $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
+    }
+    else {
+      if (pg_num_rows($ret[1])>0) {
+        $ret[1]=pg_fetch_assoc($ret[1]);
+      }
+    }
+    return $ret;
   }
 }
 ?>
