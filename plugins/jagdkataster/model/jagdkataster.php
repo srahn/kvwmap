@@ -372,7 +372,7 @@ class jagdkataster {
 				ar.flaeche > 1 
 				" . $this->database->build_temporal_filter(array('g', 'f')) . "
 			ORDER BY 
-				jagdbezirke.name";
+				jagdbezirke.name, f.flurstueckskennzeichen";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 	
