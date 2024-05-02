@@ -9801,8 +9801,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			header('Content-type: text/html; charset=UTF-8');
 			include(LAYOUTPATH . 'snippets/embedded_subformPK.php'); # listenförmige Ausgabe mit Links untereinander
 			if (!$ret['success']) {
-				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . addslashes(str_replace('
-', '', $ret['msg'])) . "'}]);</script>";
+				// Diese Variante funktioniert nicht wenn in $ret['msg'] Zeilenumbrüche drin sind, wie das hier z.B.
+				// 				WHERE
+				//   (
+				//     $stelle_id = k.stelle_id OR
+				//     $stelle_id = 1
+				//  ). Das str_replace scheint nicht zu wirken.
+				// 				echo "<script>message([{ \"type\" : 'error', \"msg\" : '" . addslashes(str_replace('
+				// ', '', $ret['msg'])) . "'}]);</script>";
+				echo "<script>message([{ \"type\" : 'error', \"msg\" : " . json_encode($ret['msg']) . "}]);</script>";
 			}
 		}
 		elseif (value_of($this->formvars, 'embedded_subformPK_liste') != '') {
