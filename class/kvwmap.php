@@ -12948,6 +12948,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$Stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
       $Stelle->language = $this->Stelle->language;
       $this->stellendaten = $Stelle->getstellendaten();
+			$this->allstellendaten = $this->Stelle->getStellen('');
       $this->formvars['bezeichnung'] = $this->stellendaten['Bezeichnung'];
 			if ($language != 'german') {
 				$this->formvars['Bezeichnung_' . $language] = $this->stellendaten['Bezeichnung_' . $language];

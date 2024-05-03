@@ -193,6 +193,21 @@ function addMenues(){
 		<td><h2><? echo ($this->formvars['go'] == 'Dienstmetadaten' ? $this->strTask . ' ' . $this->Stelle->Bezeichnung : $strTitle); ?></h2></td>
 	</tr>
 	<tr>
+    <td style="text-align: center">
+		<span class="px17 fetter"><? echo $this->strTask;?>:</span>
+			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
+				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+				for ($i = 0; $i < count($this->allstellendaten['ID']); $i++){
+					echo '<option';
+					if ($this->allstellendaten['ID'][$i] == $this->formvars['selected_stelle_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->allstellendaten['ID'][$i].'">' . $this->allstellendaten['Bezeichnung'][$i] . '</option>';
+				} ?>
+			</select>
+		</td>
+	</tr	
+	<tr>
 		<td align="center"><?php
 if ($this->Meldung=='Daten der Stelle erfolgreich eingetragen!' OR $this->Meldung=='') {
 	$bgcolor=BG_FORM;
@@ -1202,7 +1217,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?
 			}
 			if ($this->formvars['selected_stelle_id'] > 0) {
-				?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
 				?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
 			}
 			if ($this->formvars['go'] != 'Dienstmetadaten') {

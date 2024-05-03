@@ -11,7 +11,22 @@
 <table border="0" cellpadding="5" cellspacing="0" style="width: 100%">
   <tr align="center">
     <td><h2><?php echo $strTitel; ?></h2></td>
-  </tr>
+  </tr>	<? 
+	
+	if ($this->formvars['order'] == 'Bezeichnung') { ?>
+		<tr height="50px" valign="bottom">
+			<td><?
+				$umlaute=array("Ä","Ö","Ü");
+				for ($i = 0; $i < count($this->stellendaten['ID']); $i++) {
+					if (!in_array(strtoupper(mb_substr($this->stellendaten['Bezeichnung'][$i],0,1,'UTF-8')),$umlaute) AND strtolower(mb_substr($this->stellendaten['Bezeichnung'][$i],0,1,'UTF-8')) != $first) {
+						echo "<a href='#".strtoupper(mb_substr($this->stellendaten['Bezeichnung'][$i],0,1,'UTF-8'))."'><div class='menu abc'>".strtoupper(mb_substr($this->stellendaten['Bezeichnung'][$i],0,1,'UTF-8'))."</div></a>";
+						$first=strtolower(mb_substr($this->stellendaten['Bezeichnung'][$i],0,1));
+					}
+				} ?>
+			</td>
+		</tr><?
+	} ?>
+
   <tr>
     <td>
 			<div class="stellendaten-topdiv">
@@ -27,7 +42,47 @@
 						<th>&nbsp;</th>
 						<th>&nbsp;</th>
 					</tr><?php
-					for ($i = 0; $i < count($this->stellendaten['ID']); $i++) { ?>
+					for ($i = 0; $i < count($this->stellendaten['ID']); $i++) {
+						if ($this->formvars['order'] == 'Bezeichnung') {
+
+							$first = strtoupper(mb_substr($this->stellendaten['Bezeichnung'][$i], 0, 1, 'UTF-8'));
+							if (in_array($first, $umlaute)) {
+								switch ($first) {
+									case 'Ä': {
+										$first='A';
+									} break;
+									case 'Ö': {
+										$first='O';
+									} break;
+									case 'Ü': {
+										$first='U';
+									} break;
+								}
+							}
+							if ($first != $nextfirst) { ?>
+								<tr>
+									<th align="left" style="border-top:1px solid #808080; margin:0px;">
+										<? echo "<a name='".$first."'>".$first."</a>";
+										$nextfirst=$first;
+										if (in_array($first,$umlaute)) {
+											switch ($first) {
+												case 'Ä': {
+													$nextfirst='A';
+												} break;
+												case 'Ö': {
+													$nextfirst='O';
+												} break;
+												case 'Ü': {
+													$nextfirst='U';
+												} break;
+											}
+										} ?>
+									</th><?
+									$colspan = 5; ?>
+									<td colspan="<? echo $colspan; ?>" align="right" style="border-top:1px solid #808080;"></td>
+								</tr><?
+							}
+						} ?>
 						<tr class="listen-tr">
 							<td align="right"><?php echo $this->stellendaten['ID'][$i]; ?></td>
 							<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
