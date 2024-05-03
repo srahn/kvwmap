@@ -34,7 +34,8 @@
 					<tr class="stellendaten-header">
 						<th align="right"><a href="index.php?go=Stellen_Anzeigen&order=ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID; ?></a></th>
 						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName; ?></a></th>
-						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strParentStelle; ?></a></th><?
+						<th align="left"><a href="index.php?go=Stellen_Anzeigen&order=Bezeichnung_parent&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strParentStelle; ?></a></th>
+						<th style="width: 140px"><? echo $strLastActivity; ?></th><?
 						if ($has_shared_stelle) { ?>
 							<th>&nbsp;</th><?
 						} ?>
@@ -86,7 +87,8 @@
 						<tr class="listen-tr">
 							<td align="right"><?php echo $this->stellendaten['ID'][$i]; ?></td>
 							<td><?php echo $this->stellendaten['Bezeichnung'][$i]; ?></td>
-							<td><?php echo $this->stellendaten['Bezeichnung_parent'][$i]; ?></td><?
+							<td><?php echo $this->stellendaten['Bezeichnung_parent'][$i]; ?></td>
+							<td><?php echo $this->stellendaten['last_time_id'][$i]; ?></td><?
 							if ($has_shared_stelle) { ?>
 								<td><?
 									if ($this->stellendaten['show_shared_layers'][$i]) { ?>

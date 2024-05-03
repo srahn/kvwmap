@@ -771,7 +771,15 @@ class stelle {
 					WHERE
 						s.`ID` = h.`child_id` AND 
 						es.ID = h.parent_id
-				) as Bezeichnung_parent
+				) as Bezeichnung_parent,
+				(
+					SELECT
+						max(last_time_id)
+					FROM
+						`rolle`
+					WHERE
+					`rolle`.stelle_id = s.ID
+				) as last_time_id
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
@@ -794,6 +802,7 @@ class stelle {
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}
 		return $stellen;
