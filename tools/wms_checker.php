@@ -46,6 +46,7 @@ function get_first_word_after($str, $word, $delim1 = ' ', $delim2 = ' ', $last =
 function checkStatus($request, $username, $password){
 	#echo '<p>Check Status of layer with request: ' . $request . '<p>'; 
   $info = null;
+  $info2 = null;
   $ch = curl_init();
   curl_setopt($ch, CURLOPT_URL, $request);
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -70,9 +71,10 @@ function checkStatus($request, $username, $password){
     }
 		elseif (strpos($header, '301 Moved Permanently') !== false OR strpos($header, '307 Temporary Redirect') !== false) {
 			$new_location = trim(get_first_word_after($header, 'Location:', ' ', chr(10)));
-			$info = '<p>' . substr($header, 0, strpos($header, 'Location:')) . '<br>Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
+			$info = '<p>' . substr($header, 0, strpos($header, 'Location:'));
+      $info2 = '<br>Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
 			$result = checkStatus($new_location, $username, $password);
-			$result[1] = $info . ' ' . (string)$result[1];
+			$result[1] = $info . '<br>' . (string)$result[1];
 			return $result;
 		}
     else{
@@ -91,7 +93,7 @@ function checkStatus($request, $username, $password){
       }
     }
   }
-  return array($status,$info);
+  return array($status, $info, $info2);
 }
 
 function getExceptionCode($data){
@@ -180,8 +182,8 @@ while($line = $result->fetch_assoc()){
   echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: '.$color.'">';  
 	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   if(!$status[0]){
-    echo 'nicht ok<br>'.$status[1];
-		$query = "UPDATE `layer` SET status = '".$status[1]."' WHERE Layer_ID = ".$line["Layer_ID"];
+    echo 'nicht ok<br>' . $status[1] . $status[2];
+		$query = "UPDATE `layer` SET status = '" . addslashes($status[1]) . "' WHERE Layer_ID = ".$line["Layer_ID"];
   }
   else{
 		echo ($status[0] != '' ? 'info: ' . $status[1] : '');
