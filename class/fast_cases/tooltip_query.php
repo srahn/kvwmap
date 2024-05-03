@@ -11,6 +11,29 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	}
 }
 
+function mapserverExp2SQL($exp, $classitem) {
+	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = str_replace(' eq ', '=', $exp);
+	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
+
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
+		if (strpos($exp, '/') === 0) { # regex
+			$operator = '~';
+			$exp = str_replace('/', '', $exp);
+		}
+		else {
+			$operator = '=';
+		}
+		if (substr($exp, 0, 1) != "'") {
+			$quote = "'";
+		}
+		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
+	}
+	return $exp;
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
@@ -375,6 +398,7 @@ class GUI {
 			$layerset = $this->user->rolle->getLayer('');
 		}
     $anzLayer=count($layerset);
+		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
     #$map = new MapObj('');
     #$map->shapepath = SHAPEPATH;
 		$found = false;
@@ -492,6 +516,13 @@ class GUI {
 					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
+				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
+				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
+					foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
+						$disabled_class_filter[$layerset[$i]['Layer_ID']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+					}
+					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['Layer_ID']]) . "), true)";
+				}	
 								
 				$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad . ") as query WHERE 1=1 ".$sql_where;
 
@@ -1226,6 +1257,31 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+
+  function read_disabled_class_expressions($layerset) {
+		$sql = "
+			SELECT 
+				cl.Layer_ID,
+				cl.Class_ID,
+				cl.Expression,
+				cl.classification
+			FROM 
+				classes as cl
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
+			WHERE 
+				r2uc.status = 0 AND 
+				r2uc.user_id = " . $this->user_id . "	AND 
+				r2uc.stelle_id = " . $this->stelle_id . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->database->execSQL($sql);
+    while ($row = $this->database->result->fetch_assoc()) {
+			if ($layerset['layer_ids'][$row['Layer_ID']]['classification'] == $row['classification']) {
+  			$result[$row['Layer_ID']][] = $row;
+			}
+		}
+		return $result ?: [];
+  }	
 
   function readSettings() {
 		global $language;
