@@ -151,6 +151,10 @@ body {
   height: 0;
 }
 
+.collapsed *{
+	margin: 0 !important;
+}
+
 #copyrights_div table td {
 	vertical-align: top;
 	padding: 4px;
@@ -1720,7 +1724,7 @@ span.black {
 }
 
 #layer {
-	margin:0px 8px 8px 8px;
+	margin: 18px 8px 8px 8px;
 	clear: both;
 }
 

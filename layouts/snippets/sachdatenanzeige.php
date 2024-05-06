@@ -11,7 +11,7 @@
 
 <div id="overlayheader2" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%;margin-top: 5px; display: none"></div>
 
-<a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
+<a href="javascript:scrollbottom();" style="float: right; margin-top: 10;" title="<? echo $strToBottom; ?>">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
 <a name="oben"></a><?
