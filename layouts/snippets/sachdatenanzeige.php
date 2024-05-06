@@ -9,7 +9,7 @@
 	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 </script>
 
-<div id="overlayheader2" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%;margin-top: 5px"></div>
+<div id="overlayheader2" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%;margin-top: 5px; display: none"></div>
 
 <a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
@@ -17,8 +17,8 @@
 <a name="oben"></a><?
 if ($this->formvars['window_type'] == 'overlay') { ?>
 	<script type="text/javascript">
-		if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
-		if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
+		//if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
+		//if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
 	</script><?
 }
 $this->found = 'false';
@@ -35,11 +35,10 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 <? }
 
 $active_layer_tab = null;
-$layer_visibility = 'collapse';
+$layer_visibility = 'collapsed';
 $zindex = 100;
 
-for($i=0;$i<$anzLayer;$i++){
-	$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
+for($i=0;$i<$anzLayer;$i++){	
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
 	   # Blätterfunktion
@@ -78,19 +77,20 @@ for($i=0;$i<$anzLayer;$i++){
   }
 
 	if ($gesamt > 0) {
+		$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
 		if ($active_layer_tab == NULL) {
-			$layer_visibility = 'visible';
+			$layer_visibility = '';
 			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
 		}
-		$layer_tabs .= '<div class="gle_layer_tab ' . ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']? 'active_tab' : '') . '" style="z-index: ' . $zindex . '" onclick="">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$layer_tabs .= '<div class="gle_layer_tab ' . ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']? 'active_tab' : '') . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['Layer_ID'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
 		$zindex--;
 	}
 
 	echo '
-		<div id="result_' . $this->qlayerset[$i]['Layer_ID'] . '" style="visibility: ' . $layer_visibility . '">
+		<div class="layer_results ' . $layer_visibility . '" id="result_' . $this->qlayerset[$i]['Layer_ID'] . '">
 	';
 
-	$layer_visibility = 'collapse';
+	$layer_visibility = 'collapsed';
 
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
@@ -132,10 +132,6 @@ for($i=0;$i<$anzLayer;$i++){
 	
 	echo value_of($this->qlayerset[$i], 'paging');
 	
-	if($gesamt > 0){
-		echo '<hr class="gle_hr">';
-	}
-
 	echo '
 		</div>
 	';
@@ -196,20 +192,24 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <? } ?>
 
 <?
-	if($this->found != 'false' AND value_of($this->formvars, 'printversion') == ''){	?>		
+	if ($this->found != 'false' AND value_of($this->formvars, 'printversion') == '') {	
+		if (count($this->queried_layers) > 1) { ?>
+			<script type="text/javascript">
+				document.getElementById('overlayheader2').style.display = '';
+				document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
+			</script>
+<?	}	?>
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
-				<script type="text/javascript">
-					document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
-				</script>
 				<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined){
-							document.getElementById('overlayfooter').style.display = 'block';
-							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
+							//document.getElementById('overlayfooter').style.display = 'block';
+							//document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
 						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
+						document.getElementById('overlayheader').style.display = document.getElementById('overlayheader2').style.display;
 						document.getElementById('overlayheader').innerHTML = document.getElementById('overlayheader2').innerHTML;
 					</script>
 				<? }else{

@@ -146,6 +146,11 @@ body {
 	margin: auto;
 }
 
+.collapsed {
+	visibility: collapse;
+  height: 0;
+}
+
 #copyrights_div table td {
 	vertical-align: top;
 	padding: 4px;
@@ -790,12 +795,12 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
-a.invisiblelayerlink:hover{
-	color: gray;
-}
-
 .sachdatenanzeige_paging{
 	margin-top: 10px;
+}
+
+a.invisiblelayerlink:hover{
+	color: gray;
 }
 
 select[name="geom_from_layer"] {
