@@ -1927,7 +1927,14 @@ function go_switch($go, $exit = false) {
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
+				$_SESSION['prev_login_name'] = $_SESSION['login_name'];
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
+				header('location: index.php');
+			} break;
+
+			case 'als_voriger_Nutzer_anmelden' : {
+				$_SESSION['login_name'] = $_SESSION['prev_login_name'];
+				unset($_SESSION['prev_login_name']);
 				header('location: index.php');
 			} break;
 
