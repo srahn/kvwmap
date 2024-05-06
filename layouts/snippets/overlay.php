@@ -22,6 +22,7 @@
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
+			<div id="overlayheader" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->noOverlayFooter OR $this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%; position:fixed; top: 0px; margin: 0px 0 -11px 0; padding-top: 7px;"></div>
 			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: fit-content;width: -moz-fit-content;position:relative;">
 				<table border="0" height="100%" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>

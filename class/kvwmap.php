@@ -15571,7 +15571,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		$this->queryrect = $rect;
 		# Abfragen der Layer, die zur Stelle gehören
-		$layer = $this->user->rolle->getLayer('');
+		$layer = $this->user->rolle->getLayer('', true);
 		$rollenlayer = $this->user->rolle->getRollenLayer('', 'import');
 		$layerset = array_merge($layer, $rollenlayer);
 		$anzLayer = count($layerset)-1;
@@ -15584,8 +15584,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset[$i]['queryable'] AND
 				$layerset[$i]['status']  == '' AND 
 				(
-					value_of($this->formvars, 'qLayer' . $layerset[$i]['Layer_ID']) == '1' OR
-					value_of($this->formvars, 'qLayer' . $layerset[$i]['requires']) == '1'
+					#value_of($this->formvars, 'qLayer' . $layerset[$i]['Layer_ID']) == '1' OR
+					#value_of($this->formvars, 'qLayer' . $layerset[$i]['requires']) == '1'
+					value_of($this->formvars, 'thema' . $layerset[$i]['Layer_ID']) == '1' OR
+					value_of($this->formvars, 'thema' . $layerset[$i]['requires']) == '1'
 				) AND
 				(
 					($this->last_query == '' AND $layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND ($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom) OR 

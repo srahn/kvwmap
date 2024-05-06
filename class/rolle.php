@@ -74,7 +74,7 @@ class rolle {
 		return 1;
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -110,6 +110,10 @@ class rolle {
 						ul.Layer_ID = las.layer_id AND
 						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
+		}
+
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
 		}
 
 		$sql = "
@@ -162,7 +166,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . "
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";

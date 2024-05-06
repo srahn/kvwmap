@@ -5,31 +5,38 @@
   include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
-	<script>
-		keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
-	</script>
-	<a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
-		<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
-	</a>
-	<a name="oben"></a><?
-	if ($this->formvars['window_type'] == 'overlay') { ?>
-		<script type="text/javascript">
-			if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
-			if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
-		</script><?
-	}
+<script>
+	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
+</script>
+
+<div id="overlayheader2" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%;margin-top: 5px"></div>
+
+<a href="javascript:scrollbottom();" style="float: right;" title="<? echo $strToBottom; ?>">
+	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
+</a>
+<a name="oben"></a><?
+if ($this->formvars['window_type'] == 'overlay') { ?>
+	<script type="text/javascript">
+		if (document.getElementById('overlayfooter') != undefined) 	document.getElementById('overlayfooter').style.display = 'none';
+		if (document.getElementById('savebutton') != undefined) 		document.getElementById('savebutton').style.display = 'none';
+	</script><?
+}
 $this->found = 'false';
 $anzLayer=count($this->qlayerset);
 if ($anzLayer==0) {
 	?>
 <span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
 	<?php	
-}
-	
+} 
+
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
 <div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
+
+$active_layer_tab = null;
+$layer_visibility = 'collapse';
+$zindex = 100;
 
 for($i=0;$i<$anzLayer;$i++){
 	$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
@@ -69,6 +76,22 @@ for($i=0;$i<$anzLayer;$i++){
 
 	   </table>';	 
   }
+
+	if ($gesamt > 0) {
+		if ($active_layer_tab == NULL) {
+			$layer_visibility = 'visible';
+			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
+		}
+		$layer_tabs .= '<div class="gle_layer_tab ' . ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']? 'active_tab' : '') . '" style="z-index: ' . $zindex . '" onclick="">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$zindex--;
+	}
+
+	echo '
+		<div id="result_' . $this->qlayerset[$i]['Layer_ID'] . '" style="visibility: ' . $layer_visibility . '">
+	';
+
+	$layer_visibility = 'collapse';
+
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {
 		if ($template == '') {
@@ -112,6 +135,10 @@ for($i=0;$i<$anzLayer;$i++){
 	if($gesamt > 0){
 		echo '<hr class="gle_hr">';
 	}
+
+	echo '
+		</div>
+	';
 }
 
 if(!empty($this->noMatchLayers)){
@@ -173,6 +200,9 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" id="sachdatenanzeige_footer">
     <tr>
     	<td width="49%" class="px13">
+				<script type="text/javascript">
+					document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
+				</script>
 				<? if($this->formvars['window_type'] == 'overlay'){ ?>
 					<script type="text/javascript">
 						if(document.getElementById('overlayfooter') != undefined){
@@ -180,6 +210,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 							document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
 						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
+						document.getElementById('overlayheader').innerHTML = document.getElementById('overlayheader2').innerHTML;
 					</script>
 				<? }else{
 							echo '&nbsp;'.$strLimit; ?>&nbsp;
