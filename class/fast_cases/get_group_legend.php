@@ -1448,7 +1448,7 @@ class GUI {
 						"this.checked = this.checked2;" :
 						"updateThema(
 							event,
-							document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+							document.getElementById('thema" . $layer['Layer_ID'] . "'),
 							document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
 							'',
 							''," .
@@ -1463,7 +1463,7 @@ class GUI {
 					$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
 						"updateThema(
 							event,
-							document.getElementById('thema_" . $layer['Layer_ID'] . "'),
+							document.getElementById('thema" . $layer['Layer_ID'] . "'),
 							document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
 							($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
 							($this->user->rolle->singlequery == 1 ? "document.GUI.layers" : "''") . "," .
@@ -1487,17 +1487,17 @@ class GUI {
 				}
 				$legend .=  '</td><td valign="top">';
 				// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-				$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="0">';
+				$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
 
-				$legend .=  '<input id="thema_'.$layer['Layer_ID'].'" ';
+				$legend .=  '<input id="thema'.$layer['Layer_ID'].'" ';
 				if(value_of($layer, 'selectiontype') == 'radio'){
 					$legend .=  'type="radio" ';
-					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
+					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
 					$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
 				}
 				else{
 					$legend .=  'type="checkbox" ';
-					$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema_'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
+					$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
 				}
 				$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
 				if($layer['aktivStatus'] == 1){
@@ -1709,7 +1709,7 @@ class GUI {
 			if($layer['aktivStatus'] == 1){
 				$legend .=  'checked="true" ';
 			}
-			$legend .= 'id="thema_'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
+			$legend .= 'id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" disabled="true"></td><td>';
 			$legend .= '<a ';
 			if ($this->user->rolle->showlayeroptions) {
 				$legend .= ' oncontextmenu="getLayerOptions(' . $layer['Layer_ID'] . '); return false;"';

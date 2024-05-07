@@ -402,11 +402,15 @@ class GUI {
     #$map = new MapObj('');
     #$map->shapepath = SHAPEPATH;
 		$found = false;
+		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
     for ($i=0;$i<$anzLayer;$i++) {
 			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
-					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
+					(
+						$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+						$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+					) AND
 					(
 						(
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
@@ -1384,7 +1388,7 @@ class rolle {
 		}
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -1421,6 +1425,10 @@ class rolle {
 						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
+
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+		}		
 
 		$sql = "
 			SELECT " .
@@ -1472,7 +1480,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . "
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";
