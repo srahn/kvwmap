@@ -8896,10 +8896,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 
 		$stellen_ids = ($formvars['selstellen'] != '' ? explode(', ', $formvars['selstellen']) : array());
-		for ($i = 0; $i < count($stellen_ids); $i++) {
-			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->updateLayerParams();
-		}
 
 		if (($this->formvars['stellenzuweisung'] == 1 OR $this->formvars['gruppenaenderung'] == 1) AND !$duplicate) {
       # Stellenzuweisung
@@ -8930,6 +8926,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
       # /Löschen der in der Selectbox entfernten Stellen
     }
+
+		for ($i = 0; $i < count($stellen_ids); $i++) {
+			$stelle = new stelle($stellen_ids[$i], $this->database);
+			$stelle->updateLayerParams();
+		}
 
 		$this->update_duplicate_layers($formvars);
 	}
