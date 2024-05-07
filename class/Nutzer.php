@@ -34,7 +34,7 @@ class Nutzer extends MyObject {
 	}
 
 	function get_name() {
-		return ($this->get('Vorname') ? $this->get('Vorname') . ' ' : '') . ($this->get('Name') ? $this->get('Name') : $this->login_name);
+		return ($this->get('Name') ? $this->get('Name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {

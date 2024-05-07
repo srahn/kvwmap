@@ -3424,7 +3424,7 @@ echo '			</table>
 			$this->notification = new Notification($this);
 		}
 		$this->allstellen = Stelle::find($this, 'true', 'Bezeichnung');
-		$this->allusers = Nutzer::find($this, 'true');
+		$this->allusers = Nutzer::find($this, 'true', 'Name');
 
 		$this->main = 'notification_formular.php';
 		$this->output();
