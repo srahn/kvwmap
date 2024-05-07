@@ -56,6 +56,7 @@ include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php
 	}
 
 	function checkQueryFields() {
+		<? if ($this->user->rolle->singlequery == 2) {echo 'return true;';}	?>
 		var selected = false;
 		query_fields = document.getElementsByClassName('info-select-field');
 		for (var i = 0; i < query_fields.length; i++) {

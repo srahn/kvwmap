@@ -1384,7 +1384,7 @@ class GUI {
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layer_ids_of_group[$group_id]).'">';
-					if(!$this->user->rolle->singlequery) {
+					if($this->user->rolle->singlequery == 0) {
 						$legend .=  '<a href="javascript:selectgroupquery(document.GUI.layers_of_group_'.$group_id.', '.$this->user->rolle->instant_reload.')"><img border="0" src="graphics/pfeil.gif" title="'.$this->strActivateAllQueries.'"></a>';
 					}
 					$legend .=		'</td>
@@ -1431,13 +1431,13 @@ class GUI {
 					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
 				}
 
-				if ($layer['queryable'] == 1 AND !value_of($this->formvars, 'nurFremdeLayer')) {
+				if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
 					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 					$input_attr['value'] = 1;
 					$input_attr['class'] = 'info-select-field';
-					$input_attr['type'] = (($this->user->rolle->singlequery or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
+					$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
 					$input_attr['style'] = ((
 						$this->user->rolle->query or
 						$this->user->rolle->touchquery or
@@ -1466,7 +1466,7 @@ class GUI {
 							document.getElementById('thema_" . $layer['Layer_ID'] . "'),
 							document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
 							($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
-							($this->user->rolle->singlequery ? "document.GUI.layers" : "''") . "," .
+							($this->user->rolle->singlequery == 1 ? "document.GUI.layers" : "''") . "," .
 							$this->user->rolle->instant_reload . "
 						)" :
 						""
@@ -1676,7 +1676,7 @@ class GUI {
 			$legend .=  '
 						<tr>
 							<td valign="top">';
-			if($layer['queryable'] == 1){
+			if($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2){
 				$style = ((
 						$this->user->rolle->query or
 						$this->user->rolle->touchquery or

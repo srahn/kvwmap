@@ -1931,7 +1931,7 @@ thead.gle th {
 }
 
 .gle_tabs > div{
-	padding: 0 5px 0 8px;
+	padding: 1px 5px 0 8px;
 	cursor: pointer;
 	border: 1px solid #bbb;
 	border-left: none;
@@ -1943,7 +1943,7 @@ thead.gle th {
 }
 
 .gle_tabs > div:first-child {
-	padding: 0 5px 0 5px;
+	padding: 1px 5px 0 5px;
 	margin-left: 0;
 }
 

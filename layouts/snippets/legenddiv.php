@@ -32,12 +32,14 @@
 				include(SNIPPETS.'schnellsprung.php');
 			} ?>
 	<div id="legendcontrol">
-		<? if(!$this->simple_legend){ ?>
+		<? if(!$this->simple_legend){
+					if ($this->user->rolle->singlequery < 2) { ?>
 		<a href="index.php?go=reset_querys">
 			<div>
 				<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 			</div>
 		</a>
+				<? } ?>
 		<a href="index.php?go=reset_layers">
 			<div>
 				<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>
