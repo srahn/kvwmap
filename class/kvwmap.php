@@ -14598,7 +14598,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$groups = $mapDB->read_Groups();
 		$ret = $this->user->rolle->getLayerComments(
 			$this->formvars['id'],
-			($this->formvars['from_default_user'] != '' ? $this->Stelle->default_user_id : $this->user->id)
+			($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
 		);
 		if ($ret[0]) {
 			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
