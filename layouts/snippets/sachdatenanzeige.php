@@ -34,6 +34,7 @@ if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != '
 	<div style="margin-right: 10px">
 <? }
 
+$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 $active_layer_tab = null;
 $layer_visibility = 'collapsed';
 $zindex = 100;
@@ -276,9 +277,9 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 	  	}
   	}
   	else{
-			for($i = 0; $i < $anzLayer; $i++){
-				if($this->formvars['qLayer'.$this->qlayerset[$i]['Layer_ID']] == 1){
-					echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
+			for ($i = 0; $i < $anzLayer; $i++) {
+				if ($this->formvars[$queryfield . $this->qlayerset[$i]['Layer_ID']] == 1) {
+					#echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
 					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
 					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
 				}
