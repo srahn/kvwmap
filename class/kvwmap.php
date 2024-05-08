@@ -15566,10 +15566,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function SachdatenAnzeige($rect) {
 		$this->qlayerset = array();
+		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 		$last_query_deleted = false;
 		if ($this->last_query != '') {
 			foreach($this->last_query['layer_ids'] as $layer_id) {
-				$this->formvars['qLayer' . $layer_id] = 1;
+				$this->formvars[$queryfield . $layer_id] = 1;
 			}
 		}
 		if (is_string($rect)){
@@ -15584,7 +15585,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
 		$map = new mapObj('');
 		$map->shapepath = SHAPEPATH;
-		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
 		for ($i = 0; $i < $anzLayer; $i++) {
 			$sql_order = '';
 			if (
