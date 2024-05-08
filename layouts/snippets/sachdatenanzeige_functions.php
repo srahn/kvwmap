@@ -143,6 +143,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
 		layer_to_open.classList.remove('collapsed');
+		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
 	
 	check_visibility = function(layer_id, object, dependents, k){

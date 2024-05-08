@@ -959,6 +959,10 @@ function go_switch($go, $exit = false) {
 				$GUI->saveOverlayPosition();
 			} break;
 
+			case 'set_last_query_layer' : {
+				$GUI->set_last_query_layer();
+			} break;			
+
 			case 'Administratorfunktionen' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->adminFunctions();

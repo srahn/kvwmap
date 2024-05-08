@@ -484,6 +484,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -2187,6 +2188,21 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
+
+	function set_last_query_layer($layer_id){
+		$sql = '
+			UPDATE 
+				rolle 
+			SET 
+				last_query_layer = ' . $layer_id . '
+			WHERE 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:set_last_query_layer - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
 		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';

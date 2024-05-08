@@ -38,6 +38,16 @@ $active_layer_tab = null;
 $layer_visibility = 'collapsed';
 $zindex = 100;
 
+for ($i = 0; $i < $anzLayer; $i++) {	
+	if ($this->qlayerset[$i]['count'] > 0) {
+		$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
+		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['Layer_ID'] == $this->user->rolle->last_query_layer) {
+			# entweder der erste Layer mit Treffern oder der zuletzt angeguckte Layer
+			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
+		}
+	}
+}
+
 for($i=0;$i<$anzLayer;$i++){	
 	$gesamt = $this->qlayerset[$i]['count'];
   if($this->qlayerset[$i]['connectiontype'] == MS_POSTGIS AND $gesamt > 1){
@@ -77,12 +87,11 @@ for($i=0;$i<$anzLayer;$i++){
   }
 
 	if ($gesamt > 0) {
-		$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
-		if ($active_layer_tab == NULL) {
+		if ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']) {
 			$layer_visibility = '';
-			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
+			$active_tab = 'active_tab';
 		}
-		$layer_tabs .= '<div class="gle_layer_tab ' . ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']? 'active_tab' : '') . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['Layer_ID'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
+		$layer_tabs .= '<div class="gle_layer_tab ' . $active_tab . '" style="z-index: ' . $zindex . '" onclick="toggle_layer(this, ' . $this->qlayerset[$i]['Layer_ID'] . ')">' . $this->qlayerset[$i]['Name_or_alias'] . '</div>';
 		$zindex--;
 	}
 
@@ -91,6 +100,7 @@ for($i=0;$i<$anzLayer;$i++){
 	';
 
 	$layer_visibility = 'collapsed';
+	$active_tab = '';
 
 	$template = $this->qlayerset[$i]['template'];
 	if (in_array($template, array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php'))) {

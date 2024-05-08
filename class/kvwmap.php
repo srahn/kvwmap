@@ -5413,6 +5413,10 @@ echo '			</table>
   	$this->user->rolle->saveOverlayPosition($this->formvars['overlayx'],$this->formvars['overlayy']);
   }
 
+	function set_last_query_layer(){
+  	$this->user->rolle->set_last_query_layer($this->formvars['layer_id']);
+  }
+
 	function PointEditor() {
 		include_once(CLASSPATH . 'pointeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
