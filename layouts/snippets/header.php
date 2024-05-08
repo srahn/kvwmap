@@ -138,7 +138,7 @@
 
 	<div><? 
 		if (array_key_exists('prev_login_name', $_SESSION)) {
-			echo '<a href="index.php?go=als_voriger_Nutzer_anmelden" class="fett">zurück zum vorigen Nutzer wechseln</a>';
+			echo '<a href="index.php?go=als_voriger_Nutzer_anmelden" class="fett" style="white-space: nowrap;">zurück zum vorigen Nutzer wechseln</a>';
 		} ?>
 	</div>
 </div>
