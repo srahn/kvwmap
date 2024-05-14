@@ -26755,7 +26755,7 @@ CREATE TRIGGER log_hist_operations_trigger
     BEFORE INSERT
     ON alkis.delete
     FOR EACH ROW
-    EXECUTE FUNCTION alkis.log_hist_operations();
+    EXECUTE PROCEDURE alkis.log_hist_operations();
 
 
 
