@@ -5,6 +5,17 @@
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
 
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
@@ -173,16 +184,6 @@ function versionFormatter($version) {
 }
 
 /**
- * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
- * @return integer 3 digit version number of gdal
- */
-function get_ogr_version() {
-	exec('gdalinfo --version', $output, $ret);
-	$version_str = explode(' ', explode(',', $output[0])[0])[1];
-	return intVal(versionFormatter($version_str));
-}
-
-/**
  * This function return the absolute path to a document in the file system of the server
  * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
  * @param string $layer_document_path The document path of the layer the attribute belongs to.
@@ -311,17 +312,17 @@ function float_from_slash_text($slash_text) {
 }
 
 function compare_layers($a, $b){
-	$a['alias'] = strtoupper($a['alias']);
-	$b['alias'] = strtoupper($b['alias']);
-	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
-	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
-	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
-	$a['alias'] = str_replace('ß', 's', $a['alias']);
-	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
-	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
-	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
-	$b['alias'] = str_replace('ß', 's', $b['alias']);
-	return strcmp($a['alias'], $b['alias']);
+	$a['Name_or_alias'] = strtoupper($a['Name_or_alias']);
+	$b['Name_or_alias'] = strtoupper($b['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ä', 'A', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ü', 'U', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ö', 'O', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('ß', 's', $a['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ä', 'A', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ü', 'U', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ö', 'O', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('ß', 's', $b['Name_or_alias']);
+	return strcmp($a['Name_or_alias'], $b['Name_or_alias']);
 }
 
 function compare_names($a, $b){
@@ -689,7 +690,7 @@ if(!function_exists('imagerotate')){
 function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
-  $point = ms_newPointObj();
+  $point = new PointObj();
 	$point->setXY($x,$y);
 	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
   $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
@@ -1933,6 +1934,8 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
 	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
 	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
+	if (!is_null($user_id))							$str = str_replace('$userid', $user_id, $str);  // deprecated
+	if (!is_null($stelle_id))						$str = str_replace('$stelleid', $stelle_id, $str); // deprecated
 	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
 	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
@@ -2359,31 +2362,6 @@ function before_last($txt, $delimiter) {
 	return implode($delimiter , $parts);
 }
 
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	$parser = new PHPSQLParser($sql, true);
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
-			'alias' => $alias
-		);
-	}
-	return $attributes;
-}
-
 /**
  * Function return the inner part of the select in a mapserver data statement
  * normaly looks like this:
@@ -2562,7 +2540,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		} break;
 
 		case 'int_csv' : {
-			$value = explode(',', $value);
+			$value = explode(',', (string)$value);
 			foreach ($value AS &$single_value) {
 				sanitize($single_value, 'int');
 			}
@@ -2647,6 +2625,19 @@ function en_date($date_de) {
 	return date('Y-m-d', strtotime($date_de));
 }
 
+/**
+*	Convert English date format 2022-12-25
+*	to German date format 25.12.2022
+*/
+function de_date($date_en) {	
+	if (strlen($date_en) > 10) {
+		return date('d.m.Y G:i:s', strtotime($date_en));
+	}
+	else {
+		return date('d.m.Y', strtotime($date_en));
+	}
+}
+
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
@@ -2665,6 +2656,87 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 	}
 	else {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
+	}
+}
+
+/**
+ * Function read all files recursively from a directory
+ * @param String $dir - The directory
+ * @return Array $files - The files in the directory and below
+ */
+function getAllFiles($dir) {
+	$files = [];
+
+	if (substr($dir, -1) != '/') {
+		$dir .= '/';
+	}
+
+	// Get all files and directories within the directory
+	$items = glob($dir . '*', GLOB_MARK);
+
+	foreach ($items AS $item) {
+		if (is_dir($item)) {
+			$files = array_merge($files, getAllFiles($item));
+		}
+		else {
+			$files[] = $item;
+		}
+	}
+
+	return $files;
+}
+
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Function check if in $files exists files with any of $required extensions.
+ * Default is to check if all required shape files extensions exists in $files
+ * @param Array $files A list of filenames.
+ * @param Array $required (optional) A list of extensions.
+ */
+function required_shape_files_exists($files, $required = array('shp', 'shx', 'dbf')) {
+	$existing = array_intersect(
+		$required,
+		array_map(
+			function($file) {
+				return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+			},
+			$files
+		)
+	);
+
+	if ($required == $existing) {
+		return array(
+			'success' => true,
+			'msg' => 'Alle erforderlichen Dateien vorhanden.'
+		);
+	}
+	else {
+		$missing = array_diff($required, $existing);
+		return array(
+			'success' => false,
+			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
+		);
 	}
 }
 ?>

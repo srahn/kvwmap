@@ -4,7 +4,7 @@
  ?>
 
 <script type="text/javascript" src="funktionen/helmert_trafo.js"></script>
- 
+
 <script language="JavaScript">
 
 	var enclosingForm = <? echo $this->currentform; ?>;
@@ -136,31 +136,33 @@
 			</g>
 	</svg>';
 
-	$scriptdefinitions ='
-	var enclosingForm = top.currentform;
-	var transformfunctions = false;
-	var coord_input_functions = false;
-	var ortho_point_functions = false;
-	var bufferfunctions = false;
-	var special_bufferfunctions = false;
-	var polygonfunctions = false;
-	var polygonfunctions2 = false;
-	var flurstuecksqueryfunctions = false;
-	var boxfunctions = false;
-	var pointfunctions = false;
-	var linefunctions = false;
-	var measurefunctions = false;
-	var dragging  = false;
-	var path  = "";
-	var path_second  = "";
-	var pathx_second = new Array();
-	var pathy_second = new Array();
-	var poly_pathx_second = new Array();
-	var poly_pathy_second = new Array();
-	var pathx = new Array();
-	var pathy = new Array();
-	var m_pathx = new Array();
-	var m_pathy = new Array();
+	$ortho_points_x = implode(',', $this->formvars['ortho_point_x'] ?: []);
+	$ortho_points_y = implode(',', $this->formvars['ortho_point_y'] ?: []);
+	$rolle_gps = ($this->user->rolle->gps ? 1 : 0);
+	$scriptdefinitions = <<<SCRIPTDEFINITIONS
+	let enclosingForm = top.currentform;
+	let transformfunctions = false;
+	let coord_input_functions = false;
+	let ortho_point_functions = false;
+	let bufferfunctions = false;
+	let special_bufferfunctions = false;
+	let polygonfunctions = false;
+	let polygonfunctions2 = false;
+	let flurstuecksqueryfunctions = false;
+	let boxfunctions = false;
+	let pointfunctions = false;
+	let linefunctions = false;
+	let measurefunctions = false;
+	let path  = "";
+	let path_second  = "";
+	let pathx_second = new Array();
+	let pathy_second = new Array();
+	let poly_pathx_second = new Array();
+	let poly_pathy_second = new Array();
+	let pathx = new Array();
+	let pathy = new Array();
+	let m_pathx = new Array();
+	let m_pathy = new Array();
 	if(enclosingForm.newpath.value){
 		pathx = getxcoordsfromsvgpath(enclosingForm.newpath.value);
 		pathy = getycoordsfromsvgpath(enclosingForm.newpath.value);
@@ -172,61 +174,61 @@
 		pathy_second = str.split(";");
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
-		var ortho_point_vertices = new Array();
-		var o_p_local_x = ['.implode(',', $this->formvars['ortho_point_x'] ?: []).'];
-		var o_p_local_y = ['.implode(',', $this->formvars['ortho_point_y'] ?: []).'];
+		let ortho_point_vertices = new Array();
+		let o_p_local_x = [{$ortho_points_x}];
+		let o_p_local_y = [{$ortho_points_y}];
 	}
-	var helmert;
-	var textx = '.$text_x.';
-	var texty = '.$text_y.';
-	var newpath_undo = new Array();
-	var newpathwkt_undo = new Array();
+	let helmert;
+	let textx = {$text_x};
+	let texty = {$text_y};
+	let newpath_undo = new Array();
+	let newpathwkt_undo = new Array();
 
-	var minx  = '.$this->user->rolle->oGeorefExt->minx.';
-	var maxx  = '.$this->user->rolle->oGeorefExt->maxx.';
-	var miny  = '.$this->user->rolle->oGeorefExt->miny.';
-	var maxy  = '.$this->user->rolle->oGeorefExt->maxy.';
-	var resx  = '.$res_x.';
-	var resy  = '.$res_y.';
-	var resx_m  = '.$res_xm.';
-	var resy_m  = '.$res_ym.';
-	var scale = '.$pixelsize.';
-	var boxx 	= new Array();
-	var boxy 	= new Array();
-	var move_x 	= new Array();
-	var move_y 	= new Array();
-	var move_dx;
-	var move_dy;
-	var dragging  = false;
-	var dragdone  = false;
-	var draggingFS  = false;
-	var moving  = false;
-	var movinggeom  = false;
-	var moved  = false;
-	var must_redraw = false;
-	var mobile = '.($this->user->rolle->gps ? 1 : 0).';
-	var gps_follow_cooldown = 0;
-	var selected_vertex;
-	var last_selected_vertex;
-	var vertex_old_world_x = "";
-	var vertex_old_world_y = "";
-	var vertex_new_world_x;
-	var vertex_new_world_y;
-	var vertex_moved = false;
-	var mouse_down = false;
-	var time_mouse_down;
-	var mouse_coords_type = "image";
-	var measuring  = false;
-	var deactivated_foreign_vertex = 0;
-	var geomload = '.$geomload.';		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
-	var root = document.documentElement;
-	var mousewheelloop = 0;
-	var measured_distance = 0;
-	var new_distance = 0;
-	var doing;
-	var doing_save;
-	var suppresszoom = false;
-	';
+	let minx  = {$this->user->rolle->oGeorefExt->minx};
+	let maxx  = {$this->user->rolle->oGeorefExt->maxx};
+	let miny  = {$this->user->rolle->oGeorefExt->miny};
+	let maxy  = {$this->user->rolle->oGeorefExt->maxy};
+	let resx  = {$res_x};
+	let resy  = {$res_y};
+	let resx_m  = {$res_xm};
+	let resy_m  = {$res_ym};
+	let scale = {$pixelsize};
+	let boxx 	= new Array();
+	let boxy 	= new Array();
+	let move_x 	= new Array();
+	let move_y 	= new Array();
+	let move_dx;
+	let move_dy;
+	let dragging  = false;
+	let dragdone  = false;
+	let draggingFS  = false;
+	let moving  = false;
+	let movinggeom  = false;
+	let moved  = false;
+	let must_redraw = false;
+	let mobile = {$rolle_gps};
+	let gps_follow_cooldown = 0;
+	let selected_vertex;
+	let last_selected_vertex;
+	let vertex_old_world_x = "";
+	let vertex_old_world_y = "";
+	let vertex_new_world_x;
+	let vertex_new_world_y;
+	let vertex_moved = false;
+	let mouse_down = false;
+	let time_mouse_down;
+	let mouse_coords_type = "image";
+	let measuring  = false;
+	let deactivated_foreign_vertex = 0;
+	let geomload = {$geomload};		// Geometrie wird das erste Mal geladen, diese Variable verhindert den Weiterzeichnenmodus
+	let root = document.documentElement;
+	let mousewheelloop = 0;
+	let measured_distance = 0;
+	let new_distance = 0;
+	let doing;
+	let doing_save;
+	let suppresszoom = false;
+SCRIPTDEFINITIONS;
 
 	$polygonANDpoint = '
 	var polygonXORpoint = false;
@@ -458,46 +460,45 @@
 	}
 	';
 
-	$basicfunctions = '
-	
+	$basicfunctions = "
 	function world2pixelsvg(pathWelt){
 		var path  = new Array();
-		pathWelt = pathWelt.replace(/L /g, "");		// neuere Postgis-Versionen haben ein L mit drin
-		explosion = pathWelt.split(" ");
+		pathWelt = pathWelt.replace(/L /g, '');		// neuere Postgis-Versionen haben ein L mit drin
+		explosion = pathWelt.split(' ');
 		for(i = 0; i < explosion.length; i++){
-			if(explosion[i] == "M"){
-				path.push("M");
+			if(explosion[i] == 'M'){
+				path.push('M');
 				laststartx = Math.round((explosion[i+1] - minx)/scale);
 				laststarty = Math.round((Math.abs(explosion[i+2]) - top.document.GUI.miny.value)/scale);
 			}
-			if(explosion[i] != "M" && explosion[i] != "Z" && explosion[i] != ""){
+			if(explosion[i] != 'M' && explosion[i] != 'Z' && explosion[i] != ''){
 				path.push(Math.round((explosion[i] - minx)/scale));
 				path.push(Math.round((Math.abs(explosion[i+1]) - miny)/scale));
 				i++;
 			}
-			if(explosion[i] == "Z"){			// neuere Postgis-Versionen liefern bei asSVG ein Z zum Schliessen des Rings anstatt der Startkoordinate
+			if(explosion[i] == 'Z'){			// neuere Postgis-Versionen liefern bei asSVG ein Z zum Schliessen des Rings anstatt der Startkoordinate
 				path.push(laststartx);
 				path.push(laststarty);
 			}
 		}
-		pixelpath = "";
+		pixelpath = '';
 		for(i = 0; i < path.length; i++){
-			pixelpath = pixelpath + path[i] + " ";
+			pixelpath = pixelpath + path[i] + ' ';
 		}
 		return pixelpath;
 	}
 
 	function redrawpoint(){
-		if(document.getElementById("pointposition")){
-			var obj = document.getElementById("pointposition");
+		if(document.getElementById('pointposition')){
+			var obj = document.getElementById('pointposition');
 			pixel_coordx = (textx - minx) / scale;
 			pixel_coordy = (texty - miny) / scale;
 			if(pixel_coordy < 0){				// im Firefox fuehrten grosse negative Zahlen zum Absturz
 				pixel_coordy = -1000;
 				pixel_coordx = -1000;
 			}
-		  obj.setAttribute("x", pixel_coordx);
-		  obj.setAttribute("y", pixel_coordy);
+		  obj.setAttribute('x', pixel_coordx);
+		  obj.setAttribute('y', pixel_coordy);
 			if(pointfunctions == true && enclosingForm.angle != undefined)rotate_point_direction();
 		}
 	}
@@ -514,20 +515,21 @@
   }
 
   function Full_Extent(){
-    enclosingForm.CMD.value = "Full_Extent";
-    get_map_ajax(\'go=navMap_ajax\');
+    enclosingForm.CMD.value = 'Full_Extent';
+    get_map_ajax('go=navMap_ajax');
   }
 
 	function checkQueryFields(){
+		" . ($this->user->rolle->singlequery == 2 ? 'return true;' : '') . "
 		var selected = false;
-		query_fields = top.document.getElementsByClassName(\'info-select-field\');
+		query_fields = top.document.getElementsByClassName('info-select-field');
 		for(var i = 0; i < query_fields.length; i++){
 			if(query_fields[i].checked){
 				selected = true;
 				break;
 			}
 		}
-		if(selected == false)top.message([{ \'type\': \'warning\', \'msg\': \''.$strNoLayer.'\' }]);
+		if(selected == false)top.message([{ 'type': 'warning', 'msg': '{$strNoLayer}' }]);
 		return selected;
 	}	
 	
@@ -537,99 +539,99 @@
     // navY[0] enthaelt den Hochwert des ersten Punktes im Bild in Pixeln
     // allerdings von oben nach untern gerechnet
     // [2] jeweils den anderen Punkt wenn ein Rechteck uebergeben wurde
-		enclosingForm.action = "index.php";
+		enclosingForm.action = 'index.php';
     switch(cmd) {
-     case "zoomin_point":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
-      enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax\');
+     case 'zoomin_point':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0];
+      enclosingForm.CMD.value          = 'zoomin';
+      get_map_ajax('go=navMap_ajax');
      break;
-     case "zoomout":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
+     case 'zoomout':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0];
       enclosingForm.CMD.value          = cmd;
-      get_map_ajax(\'go=navMap_ajax\');
+      get_map_ajax('go=navMap_ajax');
      break;
-     case "zoomin_box":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
-      enclosingForm.CMD.value          = "zoomin";
-      get_map_ajax(\'go=navMap_ajax\');
+     case 'zoomin_box':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
+      enclosingForm.CMD.value          = 'zoomin';
+      get_map_ajax('go=navMap_ajax');
      break;
-     case "recentre":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0];
+     case 'recentre':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0];
       enclosingForm.CMD.value = cmd;
-			get_map_ajax(\'go=navMap_ajax\');
+			get_map_ajax('go=navMap_ajax');
      break;
-     case "ppquery_point":
+     case 'ppquery_point':
 			if(!checkQueryFields())break;
-      path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      path = navX[0]+','+navY[0]+';'+navX[0]+','+navY[0];
       enclosingForm.INPUT_COORD.value  = path;
-      enclosingForm.CMD.value          = "ppquery";
+      enclosingForm.CMD.value          = 'ppquery';
 			go_backup = enclosingForm.go.value;
-			enclosingForm.go.value = "Sachdaten";
+			enclosingForm.go.value = 'Sachdaten';
 			top.overlay_submit(enclosingForm, true);
 			enclosingForm.go.value = go_backup;
      break;
-     case "ppquery_box":
+     case 'ppquery_box':
 			if(!checkQueryFields())break;
-      path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      path = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
       enclosingForm.INPUT_COORD.value  = path;
-      enclosingForm.CMD.value          = "ppquery";
+      enclosingForm.CMD.value          = 'ppquery';
 			go_backup = enclosingForm.go.value;
-			enclosingForm.go.value = "Sachdaten";
+			enclosingForm.go.value = 'Sachdaten';
       top.overlay_submit(enclosingForm, true);
 			enclosingForm.go.value = go_backup;
      break;
-		 case "edit_other_object_point":
+		 case 'edit_other_object_point':
 			if(!checkQueryFields())break;
-      path = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+      path = navX[0]+','+navY[0]+';'+navX[0]+','+navY[0];
       enclosingForm.INPUT_COORD.value  = path;
-      enclosingForm.CMD.value          = "ppquery";
-			enclosingForm.go.value = "Sachdaten";
-			enclosingForm.last_doing.value = "";
-			enclosingForm.geom_from_layer.value = "";
+      enclosingForm.CMD.value          = 'ppquery';
+			enclosingForm.go.value = 'Sachdaten';
+			enclosingForm.last_doing.value = '';
+			enclosingForm.geom_from_layer.value = '';
 			enclosingForm.edit_other_object.value = 1;
 			enclosingForm.submit();
      break;
-     case "edit_other_object_box":
+     case 'edit_other_object_box':
 			if(!checkQueryFields())break;
-      path = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+      path = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
       enclosingForm.INPUT_COORD.value  = path;
-      enclosingForm.CMD.value          = "ppquery";
-			enclosingForm.go.value = "Sachdaten";
-			enclosingForm.last_doing.value = "";
-			enclosingForm.geom_from_layer.value = "";
+      enclosingForm.CMD.value          = 'ppquery';
+			enclosingForm.go.value = 'Sachdaten';
+			enclosingForm.last_doing.value = '';
+			enclosingForm.geom_from_layer.value = '';
 			enclosingForm.edit_other_object.value = 1;
       enclosingForm.submit();
      break;
-     case "add_geom_box":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+     case 'add_geom_box':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
       enclosingForm.CMD.value = cmd;
      break;
-		 case "subtract_geom_box":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[2]+","+navY[2];
+		 case 'subtract_geom_box':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
       enclosingForm.CMD.value = cmd;
      break;
-     case "add_geom_point":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+     case 'add_geom_point':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[0]+','+navY[0];
       enclosingForm.CMD.value = cmd;
      break;
-		 case "subtract_geom_point":
-      enclosingForm.INPUT_COORD.value  = navX[0]+","+navY[0]+";"+navX[0]+","+navY[0];
+		 case 'subtract_geom_point':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[0]+','+navY[0];
       enclosingForm.CMD.value = cmd;
      break;
      default:
-      alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+navX[0]+","+navY[0]);
+      alert('Keine Bearbeitung moeglich! Übergebene Daten: '+cmd+', '+navX[0]+','+navY[0]);
      break;
     }
   }
 
   function updatepaths(){
-  	if(enclosingForm.result.value != "" && enclosingForm.result.value != " "){
-	  	result = ""+enclosingForm.result.value;
-	  	paths = result.split("||");
-	  	if(paths[1] == "GEOMETRYCOLLECTION EMPTY" || paths[1] == ""){
-  			paths[0] = "";
-  			paths[1] = "";
+  	if(enclosingForm.result.value != '' && enclosingForm.result.value != ' '){
+	  	result = ''+enclosingForm.result.value;
+	  	paths = result.split('||');
+	  	if(paths[1] == 'GEOMETRYCOLLECTION EMPTY' || paths[1] == ''){
+  			paths[0] = '';
+  			paths[1] = '';
 				if(polygonfunctions == true){
   				enclosingForm.firstpoly.value = false;
   				enclosingForm.secondpoly.value = false;
@@ -643,7 +645,7 @@
 	  	}
 	  	enclosingForm.newpath.value = paths[0];
 	  	enclosingForm.newpathwkt.value = paths[1];
-	  	enclosingForm.result.value = "";
+	  	enclosingForm.result.value = '';
 			must_redraw = true;
 	  	if(polygonfunctions == true){
 	  		polygonarea();				
@@ -651,24 +653,24 @@
 			if(linefunctions == true){
 				linelength();
 	  	}
-			if(enclosingForm.last_doing.value == "split_geometry"){
+			if(enclosingForm.last_doing.value == 'split_geometry'){
 				split_geometry();
 			}
 			if(enclosingForm.split != undefined){
 				if(paths[1].search(/MULTI.+/) != -1){
-					enclosingForm.split.style.visibility = "visible";
+					enclosingForm.split.style.visibility = 'visible';
 				}
 				else{
-					enclosingForm.split.style.visibility = "hidden";
+					enclosingForm.split.style.visibility = 'hidden';
 				}
 			}
   	}
  	}
 
- 	function mousewheelzoom(){
+ 	function mousewheelzoom() {
 		cleartooltip();
 		enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
-		var g = document.getElementById("moveGroup");
+		var g = document.getElementById('moveGroup');
 		zx = g.getCTM().inverse();
 		navX = new Array();
 		navY = new Array();
@@ -676,10 +678,10 @@
 		navY[0] = Math.round(zx.f);
 		navX[2] = Math.round(zx.e + resx*zx.a); 
 		navY[2] = Math.round(zx.f + resy*zx.a);
-		if(enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
+		if (enclosingForm.last_doing.value != 'vertex_edit' && enclosingForm.always_draw != undefined){
 			enclosingForm.always_draw.checked = true;
 		}
-		sendpath("zoomin_box", navX, navY);
+		sendpath('zoomin_box', navX, navY);
 	}
 	
 	function suppressZoom(evt){
@@ -691,45 +693,53 @@
 	function unSuppressZoom(evt){
 		if (evt.keyCode == 17) {
 			suppresszoom = false;
-			document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");
+			document.getElementById('moveGroup').setAttribute('transform', 'translate(0 0)');
 			resizeElementsForSuppressedZoom(1);
 		}
 	}
 	
 	function resizeElementsForSuppressedZoom(z){
 		if (z == 1) {
-			for (circle of document.getElementById("foreignvertices").childNodes) {
-				circle.setAttribute("r", 7);
+			for (circle of document.getElementById('foreignvertices').childNodes) {
+				circle.setAttribute('r', 7);
 			}
-			document.getElementById("polygon_first").style.strokeWidth = "1.5px";
+			document.getElementById('polygon_first').style.strokeWidth = '1.5px';
 		}
 		else {
-			for (circle of document.getElementById("foreignvertices").childNodes) {
-				circle.setAttribute("r", circle.getAttribute("r") / z);
+			for (circle of document.getElementById('foreignvertices').childNodes) {
+				circle.setAttribute('r', circle.getAttribute('r') / z);
 			}
-			document.getElementById("polygon_first").style.strokeWidth = (parseFloat(document.getElementById("polygon_first").style.strokeWidth) / z) + "px";
+			document.getElementById('polygon_first').style.strokeWidth = (parseFloat(document.getElementById('polygon_first').style.strokeWidth) / z) + 'px';
 		}
 	}
 	
-	function mousewheelchange(evt){
-		if(!evt)evt = window.event; // For IE
-		if(top.document.GUI.stopnavigation.value == 0){
+	function mousewheelchange(evt) {
+		if (!evt) {
+			evt = window.event; // For IE
+		}
+		if (top.document.GUI.stopnavigation.value == 0) {
 			window.clearTimeout(mousewheelloop);
-			if(evt.preventDefault)evt.preventDefault();
-			else evt.returnValue = false; // IE fix
-			if(evt.wheelDelta)
+			if (evt.preventDefault) {
+				evt.preventDefault();
+			}
+			else {
+				evt.returnValue = false; // IE fix
+			}
+			if (evt.wheelDelta) {
 				delta = evt.wheelDelta / 3600; // Chrome/Safari
-			else
+			}
+			else {
 				delta = evt.detail / -90; // Mozilla
-			var z = 1 + delta*5;
-			var g = document.getElementById("moveGroup");
-			var p = getEventPoint(evt);
-			if(p.x > 0 && p.y > 0){
+			}
+			let z = 1 + delta * 5;
+			let g = document.getElementById('moveGroup');
+			let p = getEventPoint(evt);
+			if (p.x > 0 && p.y > 0) {
 				p = p.matrixTransform(g.getCTM().inverse());
-				var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
+				let k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x, -p.y);
 				setCTM(g, g.getCTM().multiply(k));
 				if (!suppresszoom) {
-					mousewheelloop = window.setTimeout("mousewheelzoom()", 400);
+					mousewheelloop = window.setTimeout('mousewheelzoom()', 400);
 				}
 				else {
 					resizeElementsForSuppressedZoom(z);
@@ -739,15 +749,15 @@
 	}
 	
 	function setCTM(element, matrix) {
-		var s = "matrix(" + matrix.a + "," + matrix.b + "," + matrix.c + "," + matrix.d + "," + matrix.e + "," + matrix.f + ")";
-		element.setAttribute("transform", s);
+		var s = 'matrix(' + matrix.a + ',' + matrix.b + ',' + matrix.c + ',' + matrix.d + ',' + matrix.e + ',' + matrix.f + ')';
+		element.setAttribute('transform', s);
 	}
 	
 	function getEventPoint(evt) {
 		var p = root.createSVGPoint();
 		p.x = evt.clientX;
 		p.y = evt.clientY;
-		if(top.navigator.userAgent.toLowerCase().indexOf("msie") >= 0){
+		if(top.navigator.userAgent.toLowerCase().indexOf('msie') >= 0){
 			p.x = p.x - (top.document.body.clientWidth - resx)/2;
 	    		p.y = p.y - (top.document.body.clientHeight - resy)/2;
 		}
@@ -756,22 +766,22 @@
  	
 	function init(){
 		// Bug Workaround fuer Firefox
-		var nav_button_bgs = document.querySelectorAll(\'.navbutton_bg\');
+		var nav_button_bgs = document.querySelectorAll('.navbutton_bg');
 		[].forEach.call(nav_button_bgs, function (nav_button_bg){
-			nav_button_bg.setAttribute(\'width\', parseInt(nav_button_bg.getAttribute(\'width\')) + 0.01);
+			nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
 		});
 		startup();
 		if(window.addEventListener){
-			if(top.browser != "other"){
-				document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
+			if(top.browser != 'other'){
+				document.getElementById('mapimg2').addEventListener('load', function(evt) { moveback(evt); }, true);
 			}
-			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
-			window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
-			window.addEventListener(\'keydown\', suppressZoom, {passive: false});
-			window.addEventListener(\'keyup\', unSuppressZoom, {passive: false});
+			window.addEventListener('mousewheel', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+			window.addEventListener('DOMMouseScroll', mousewheelchange, {passive: false});		//Firefox
+			window.addEventListener('keydown', suppressZoom, {passive: false});
+			window.addEventListener('keyup', unSuppressZoom, {passive: false});
 		}
 		else {
-			top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
+			top.document.getElementById('map').onmousewheel = mousewheelchange;		// <=IE8
 		}
 	}
 	
@@ -789,56 +799,56 @@
 			update_gps_position();
 		}
 		if(polygonfunctions == true){
-			if(enclosingForm.always_draw.checked && !geomload){		// "weiterzeichnen"
-				if(enclosingForm.last_doing2.value == "draw_polygon" || enclosingForm.last_doing2.value == "draw_second_polygon")enclosingForm.last_button.value = "pgon0";
-				if(enclosingForm.last_doing2.value != "")enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
-				if(enclosingForm.secondpoly.value == "started" || enclosingForm.secondpoly.value == "true"){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
-					if(enclosingForm.last_doing2.value == "add_buffered_line")enclosingForm.last_button.value = "buffer1";
-					if(enclosingForm.last_doing2.value == "add_circle")enclosingForm.last_button.value = "buffer3";
-					if(enclosingForm.last_doing2.value == "add_parallel_polygon")enclosingForm.last_button.value = "buffer2";
-					if(enclosingForm.last_doing2.value == "subtract_polygon")enclosingForm.last_button.value = "pgon_subtr0";
+			if(enclosingForm.always_draw.checked && !geomload){		// 'weiterzeichnen'
+				if(enclosingForm.last_doing2.value == 'draw_polygon' || enclosingForm.last_doing2.value == 'draw_second_polygon')enclosingForm.last_button.value = 'pgon0';
+				if(enclosingForm.last_doing2.value != '')enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				if(enclosingForm.secondpoly.value == 'started' || enclosingForm.secondpoly.value == 'true'){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
+					if(enclosingForm.last_doing2.value == 'add_buffered_line')enclosingForm.last_button.value = 'buffer1';
+					if(enclosingForm.last_doing2.value == 'add_circle')enclosingForm.last_button.value = 'buffer3';
+					if(enclosingForm.last_doing2.value == 'add_parallel_polygon')enclosingForm.last_button.value = 'buffer2';
+					if(enclosingForm.last_doing2.value == 'subtract_polygon')enclosingForm.last_button.value = 'pgon_subtr0';
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
-						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
-						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
+						document.getElementById('startvertex').setAttribute('cx', (pathx_second[0]-minx)/scale);
+						document.getElementById('startvertex').setAttribute('cy', (pathy_second[0]-miny)/scale);
 					}
 				}
 				else{																											// am ersten Polygon wird weitergezeichnet
-					if(enclosingForm.last_doing2.value == "add_geom")enclosingForm.last_button.value = "ppquery1";
-					if(enclosingForm.last_doing2.value == "subtract_geom")enclosingForm.last_button.value = "ppquery2";
+					if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
+					if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 					if(pathx.length == 1){							// ersten Punkt darstellen
-						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
-						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
+						document.getElementById('startvertex').setAttribute('cx', (pathx[0]-minx)/scale);
+						document.getElementById('startvertex').setAttribute('cy', (pathy[0]-miny)/scale);
 					}
 				}
 			}
-			else{			// bei nicht "weiterzeichnen" wird alles vom zweiten Polygon geloescht
+			else{			// bei nicht 'weiterzeichnen' wird alles vom zweiten Polygon geloescht
 				var alles = pathx_second.length;
 				for(var i = 0; i < alles; ++i){
 					pathx_second.pop();
 					pathy_second.pop();
 				}
-				enclosingForm.pathx_second.value = "";
-				enclosingForm.pathy_second.value = "";
-				if(enclosingForm.firstpoly.value == "true" && enclosingForm.last_doing.value == "draw_polygon"){
-					enclosingForm.last_doing.value = "draw_second_polygon";
+				enclosingForm.pathx_second.value = '';
+				enclosingForm.pathy_second.value = '';
+				if(enclosingForm.firstpoly.value == 'true' && enclosingForm.last_doing.value == 'draw_polygon'){
+					enclosingForm.last_doing.value = 'draw_second_polygon';
 				}
 			}
 		}
 		if(linefunctions == true){
 			if(enclosingForm.always_draw.checked && !geomload){
-				enclosingForm.last_button.value = "line0";
-				if(enclosingForm.secondline.value == "true"){
-					enclosingForm.last_doing.value = "draw_second_line";
+				enclosingForm.last_button.value = 'line0';
+				if(enclosingForm.secondline.value == 'true'){
+					enclosingForm.last_doing.value = 'draw_second_line';
 					if(pathx_second.length == 1){				// ersten Punkt darstellen
-						document.getElementById("startvertex").setAttribute("cx", (pathx_second[0]-minx)/scale);
-						document.getElementById("startvertex").setAttribute("cy", (pathy_second[0]-miny)/scale);
+						document.getElementById('startvertex').setAttribute('cx', (pathx_second[0]-minx)/scale);
+						document.getElementById('startvertex').setAttribute('cy', (pathy_second[0]-miny)/scale);
 					}
 				}
 				else{
-					enclosingForm.last_doing.value = "draw_line";
+					enclosingForm.last_doing.value = 'draw_line';
 					if(pathx.length == 1){							// ersten Punkt darstellen
-						document.getElementById("startvertex").setAttribute("cx", (pathx[0]-minx)/scale);
-						document.getElementById("startvertex").setAttribute("cy", (pathy[0]-miny)/scale);
+						document.getElementById('startvertex').setAttribute('cx', (pathx[0]-minx)/scale);
+						document.getElementById('startvertex').setAttribute('cy', (pathy[0]-miny)/scale);
 					}
 				}
 			}
@@ -848,32 +858,32 @@
 					pathx_second.pop();
 					pathy_second.pop();
 				}
-				enclosingForm.pathx_second.value = "";
-				enclosingForm.pathy_second.value = "";
-				if(enclosingForm.firstline.value == "true" && enclosingForm.last_doing.value == "draw_line"){
-					enclosingForm.last_doing.value = "draw_second_line";
+				enclosingForm.pathx_second.value = '';
+				enclosingForm.pathy_second.value = '';
+				if(enclosingForm.firstline.value == 'true' && enclosingForm.last_doing.value == 'draw_line'){
+					enclosingForm.last_doing.value = 'draw_second_line';
 				}
 			}
 		}
 		if(enclosingForm.punktfang != undefined && enclosingForm.punktfang.checked)toggle_vertices();
-		if(ortho_point_functions == true && enclosingForm.ortho_point_vertices.value != ""){
+		if(ortho_point_functions == true && enclosingForm.ortho_point_vertices.value != ''){
 			ortho_point();
 		}
 		fachschale();
 		if(polygonfunctions == true){
 			path = enclosingForm.newpath.value;
-			if(enclosingForm.pathwkt.value != ""){
+			if(enclosingForm.pathwkt.value != ''){
 				enclosingForm.firstpoly.value = true;
 			}
 			//enclosingForm.secondpoly.value = false;
 			redrawsecondpolygon();
-			if(enclosingForm.firstpoly.value == "true")polygonarea();
+			if(enclosingForm.firstpoly.value == 'true')polygonarea();
 		}
 		if(linefunctions == true){
 			redrawfirstline();
-			if(enclosingForm.firstline.value == "true")linelength();
+			if(enclosingForm.firstline.value == 'true')linelength();
 		}
-		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == "vertex_edit") || enclosingForm.last_button.value == "vertex_edit1"){
+		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == 'vertex_edit') || enclosingForm.last_button.value == 'vertex_edit1'){
 			edit_vertices();
 		}
 		redrawpoint();
@@ -881,34 +891,30 @@
 
 	function focus_NAV(){
 		// --------------- NAV-canvas aktivieren! ---------------------
-	  document.getElementById("canvas_FS").setAttribute("visibility", "hidden");
-	  document.getElementById("canvas").setAttribute("visibility", "visible");
+	  document.getElementById('canvas_FS').setAttribute('visibility', 'hidden');
+	  document.getElementById('canvas').setAttribute('visibility', 'visible');
 		// --------------- FS-leiste ohne highlight ---------------------
-	 		document.getElementById("text0").style.setProperty("fill","ghostwhite", "");
+	 		document.getElementById('text0').style.setProperty('fill','ghostwhite', '');
 	}
 
 	function focus_FS(){
 		// --------------- NAV-canvas deaktivieren! ---------------------
-	  document.getElementById("canvas").setAttribute("visibility", "hidden");
-	  document.getElementById("canvas_FS").setAttribute("visibility", "visible");
+	  document.getElementById('canvas').setAttribute('visibility', 'hidden');
+	  document.getElementById('canvas_FS').setAttribute('visibility', 'visible');
 		// --------------- NAV-leiste ohne highlight ---------------------
-	  document.getElementById("zoomin0").style.setProperty("fill","ghostwhite", "");
-	  document.getElementById("zoomout0").style.setProperty("fill","ghostwhite", "");
-	  document.getElementById("recentre0").style.setProperty("fill","ghostwhite", "");
+	  document.getElementById('zoomin0').style.setProperty('fill','ghostwhite', '');
+	  document.getElementById('zoomout0').style.setProperty('fill','ghostwhite', '');
+	  document.getElementById('recentre0').style.setProperty('fill','ghostwhite', '');
 	}
 
 	// -------------------------mausinteraktionen auf canvas------------------------------
 	function mousedown(evt){
 		cleartooltip();
 	  if(top.document.GUI.stopnavigation.value == 0){
-		if(mouse_coords_type == "image"){					// Bildkoordinaten (Standardfall)		
-			var g = document.getElementById("moveGroup");
+		if(mouse_coords_type == 'image'){					// Bildkoordinaten (Standardfall)		
+			var g = document.getElementById('moveGroup');
 			zx = g.getCTM().inverse();
-			console.log(zx);
-			console.log(evt.clientX);
-			console.log((evt.clientX * zx.a));
 			client_x = (evt.clientX * zx.a) + zx.e;
-			console.log(client_x);
 			client_y = resy - ((evt.clientY * zx.a) + zx.f);
 	  	world_x = (client_x * scale) + minx;
 	  	world_y = (client_y * scale) + miny;
@@ -922,134 +928,134 @@
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
 			if(evt.preventDefault)evt.preventDefault();
 			else evt.returnValue = false; // IE fix
-			if(enclosingForm.last_doing.value == "measure"){
+			if(enclosingForm.last_doing.value == 'measure'){
 				save_measure_path();
 			}
-			if(enclosingForm.last_doing.value != "vertex_edit" && enclosingForm.always_draw != undefined){
+			if(enclosingForm.last_doing.value != 'vertex_edit' && enclosingForm.always_draw != undefined){
 				enclosingForm.always_draw.checked = true;
 			}
 			enclosingForm.last_doing2.value = enclosingForm.last_doing.value;
-			enclosingForm.last_doing.value = "recentre";
+			enclosingForm.last_doing.value = 'recentre';
 		}
 
 	  switch(enclosingForm.last_doing.value){
-			case "zoomin":
+			case 'zoomin':
 	  		startPoint(client_x, client_y);
 			break;
-			case "zoomout":
+			case 'zoomout':
 				selectPoint(client_x, client_y);
 			break;
-			case "recentre":				
+			case 'recentre':				
 				startMove(client_x, client_y);
 			break;
-			case "ppquery":
+			case 'ppquery':
 				startPoint(client_x, client_y);
 			break;
-			case "edit_other_object":
+			case 'edit_other_object':
 				startPoint(client_x, client_y);
 			break;
 
-			case "draw_point":
+			case 'draw_point':
 	 			choose(world_x, world_y);
 	 			redrawpoint();
 			break;
-			case "draw_box":
+			case 'draw_box':
 	 			startpointFS(world_x, world_y);
 			break;
-			case "draw_line":
+			case 'draw_line':
 				addlinepoint_first(world_x, world_y);
 				redrawfirstline();
 			break;
-			case "draw_second_line":
+			case 'draw_second_line':
 				addlinepoint_second(world_x, world_y);
-				if(enclosingForm.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondline.value == 'true'){
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}
 				redrawsecondline();
 			break;
-			case "delete_lines":
+			case 'delete_lines':
 				addpoint_second(world_x, world_y);
-				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == 'true'){
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=subtract&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}
 				redrawsecondline();
 			break;
 			
-			case "split_geometry":
+			case 'split_geometry':
 				addlinepoint_second(world_x, world_y);
-				if(enclosingForm.secondline.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&geotype=line&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=split&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondline.value == 'true'){
+					top.ahah('index.php', 'go=spatial_processing&geotype=line&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=split&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}
 				//redrawsecondline();
 			break;
 
-			case "draw_polygon":
+			case 'draw_polygon':
 				addpoint_first(world_x, world_y);
 				redrawfirstpolygon();
 			break;
-			case "draw_second_polygon":
+			case 'draw_second_polygon':
 				addpoint_second(world_x, world_y);
-				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == 'true'){
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}
 			break;
-			case "subtract_polygon":
+			case 'subtract_polygon':
 				addpoint_second(world_x, world_y);
-				if(enclosingForm.secondpoly.value == "true"){
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=subtract&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				if(enclosingForm.secondpoly.value == 'true'){
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=subtract&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}
 			break;
-			case "add_geom":
+			case 'add_geom':
 				startPoint(client_x, client_y);
 			break;
-			case "subtract_geom":
+			case 'subtract_geom':
 				startPoint(client_x, client_y);
 			break;		
-			case "vertex_edit":				// nix machen
+			case 'vertex_edit':				// nix machen
 			break;
-			case "add_buffered_line":
+			case 'add_buffered_line':
 				addlinepoint_second(world_x, world_y);
-				enclosingForm.firstpoly.value = "true";
-				enclosingForm.secondpoly.value = "true";
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				enclosingForm.firstpoly.value = 'true';
+				enclosingForm.secondpoly.value = 'true';
+				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_buffered_line&width='+enclosingForm.bufferwidth.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 			break;
-			case "add_circle":
+			case 'add_circle':
 				applypolygons();
 				addlinepoint_second(world_x, world_y);
-				enclosingForm.firstpoly.value = "true";
-				enclosingForm.secondpoly.value = "true";
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_buffered_line&width="+enclosingForm.bufferwidth.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+				enclosingForm.firstpoly.value = 'true';
+				enclosingForm.secondpoly.value = 'true';
+				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_buffered_line&width='+enclosingForm.bufferwidth.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 			break;			
-			case "add_parallel_polygon":
+			case 'add_parallel_polygon':
 				addlinepoint_second(world_x, world_y);
 				if(pathx_second.length > 1){
-					enclosingForm.firstpoly.value = "true";
+					enclosingForm.firstpoly.value = 'true';
 					enclosingForm.secondpoly.value = true;
-					top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&operation=add_parallel_polygon&width="+enclosingForm.bufferwidth.value+"&side="+enclosingForm.bufferside.value+"&subtract="+enclosingForm.buffersubtract.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_parallel_polygon&width='+enclosingForm.bufferwidth.value+'&side='+enclosingForm.bufferside.value+'&subtract='+enclosingForm.buffersubtract.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 				}				
 			break;
-			case "add_buffer_within_polygon":
+			case 'add_buffer_within_polygon':
 				pathx_second.push(world_x);
 				pathy_second.push(world_y);
 				path_second = buildsvglinepath(pathx_second, pathy_second);
 				pathx_second.pop();
 				pathy_second.pop();
 				client_y = resy - client_y;
-				enclosingForm.INPUT_COORD.value  = client_x+","+client_y+";"+client_x+","+client_y;
-				enclosingForm.firstpoly.value = "true";
-				enclosingForm.secondpoly.value = "true";
+				enclosingForm.INPUT_COORD.value  = client_x+','+client_y+';'+client_x+','+client_y;
+				enclosingForm.firstpoly.value = 'true';
+				enclosingForm.secondpoly.value = 'true';
 				buffer_geom = enclosingForm.buffer_geom.value;		// die gesicherte Geometrie, um die gepuffert werden soll
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&path2="+path_second+"&path3="+buffer_geom+"&operation=add_buffer_within_polygon&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&resulttype=svgwkt&geom_from_layer="+enclosingForm.geom_from_layer.value+"&geotype=line&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));				
+				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&path3='+buffer_geom+'&operation=add_buffer_within_polygon&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&resulttype=svgwkt&geom_from_layer='+enclosingForm.geom_from_layer.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));				
 			break;
-			case "move_geometry":
+			case 'move_geometry':
 				startMoveGeom(client_x, client_y);
 			break;
 			
-			case "ortho_point":
+			case 'ortho_point':
 				add_ortho_point(world_x, world_y, null, null, true);
 			break;
 
-			case "measure":
+			case 'measure':
 		    if (measuring){
 		      addpoint(client_x, client_y);
 					measured_distance = new_distance;
@@ -1060,7 +1066,7 @@
 			break;
 
 			default:
-				alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+enclosingForm.last_doing.value);
+				alert('Fehlerhafte Eingabe! Übergebene Daten: '+enclosingForm.last_doing.value);
 			break;
 		}
 		if(polygonfunctions){
@@ -1071,13 +1077,13 @@
 	
 function mousemove(evt){
 	if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
-		document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+		document.getElementById(deactivated_foreign_vertex).setAttribute('pointer-events', 'auto');
 		deactivated_foreign_vertex = 0;
 	}
-	if(enclosingForm.last_doing.value == "vertex_edit" && selected_vertex != undefined && selected_vertex != ""){
-		move_vertex(evt, selected_vertex, "image");
+	if(enclosingForm.last_doing.value == 'vertex_edit' && selected_vertex != undefined && selected_vertex != ''){
+		move_vertex(evt, selected_vertex, 'image');
 	}
-	if(enclosingForm.last_doing.value == "split_geometry" && pathx_second.length < 2){
+	if(enclosingForm.last_doing.value == 'split_geometry' && pathx_second.length < 2){
 		client_x = evt.clientX;
   	client_y = resy - evt.clientY;
   	world_x = (client_x * scale) + minx;
@@ -1086,8 +1092,8 @@ function mousemove(evt){
 	  pathy_second.push(world_y);
 		path_second = buildsvglinepath(pathx_second, pathy_second);
 		pixel_path_second = world2pixelsvg(path_second);
-	  var obj = document.getElementById("line_second");
-	  obj.setAttribute("d", pixel_path_second);
+	  var obj = document.getElementById('line_second');
+	  obj.setAttribute('d', pixel_path_second);
 		pathx_second.pop();
 		pathy_second.pop();
 	} 
@@ -1104,14 +1110,14 @@ function mousemove(evt){
 					moveVector(evt);
 				}
 				else{
-					if(enclosingForm.last_doing.value == "measure"){
+					if(enclosingForm.last_doing.value == 'measure'){
 			      if (measuring){
 							client_x = evt.clientX;
 	  					client_y = resy - evt.clientY;
 			        showMeasurement(client_x, client_y);
 			      }
 			      else {
-			      	show_tooltip(\'Startpunkt setzen\',evt.clientX,evt.clientY)
+			      	show_tooltip('Startpunkt setzen',evt.clientX,evt.clientY)
 			      }
 					}
 					else{
@@ -1123,7 +1129,7 @@ function mousemove(evt){
 			}
 		}
 	}
-	if (enclosingForm.last_doing.value == "edit_other_object") {
+	if (enclosingForm.last_doing.value == 'edit_other_object') {
 		hidetooltip(evt);
 	}
 }
@@ -1131,19 +1137,19 @@ function mousemove(evt){
 function mouseup(evt){
 	if(dragging){
 		endPoint(evt);
-		enclosingForm.secondpoly.value = "true";
-		if(enclosingForm.last_doing.value == "add_geom"){
-			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=add_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&geom_from_layer="+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+		enclosingForm.secondpoly.value = 'true';
+		if(enclosingForm.last_doing.value == 'add_geom'){
+			top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=add_geometry&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 			if(polygonfunctions == true){
-				enclosingForm.firstpoly.value = "true";
+				enclosingForm.firstpoly.value = 'true';
 			}
 			else{
-				enclosingForm.firstline.value = "true";
+				enclosingForm.firstline.value = 'true';
 			}
 		}
 		else{
-			if(enclosingForm.last_doing.value == "subtract_geom"){
-				top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&input_coord="+enclosingForm.INPUT_COORD.value+"&pixsize="+scale+"&operation=subtract_geometry&resulttype=svgwkt&singlegeom="+enclosingForm.singlegeom.checked+"&geom_from_layer="+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+			if(enclosingForm.last_doing.value == 'subtract_geom'){
+				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=subtract_geometry&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 			}
 		}
 	}
@@ -1161,13 +1167,13 @@ function mouseup(evt){
 	// ----------------------ausgewaehlten button highlighten---------------------------
 
 	function highlightbyid(id){
-		if(id != ""){			
-			if(document.querySelector(".active")){
-				//document.querySelector(".active").classList.remove("active");		// kann der IE nicht
-				document.querySelector(".active").className.baseVal = "navbutton_frame";	// deswegen dieser workaround
+		if(id != ''){			
+			if(document.querySelector('.active')){
+				//document.querySelector('.active').classList.remove('active');		// kann der IE nicht
+				document.querySelector('.active').className.baseVal = 'navbutton_frame';	// deswegen dieser workaround
 			}
-			//document.getElementById(id).classList.add("active");						// kann der IE nicht
-			document.getElementById(id).className.baseVal += " active";				// deswegen dieser workaround
+			//document.getElementById(id).classList.add('active');						// kann der IE nicht
+			document.getElementById(id).className.baseVal += ' active';				// deswegen dieser workaround
 		  if(polygonfunctions == true){
 				remove_vertices();
 				remove_in_between_vertices();
@@ -1177,15 +1183,15 @@ function mouseup(evt){
 				remove_in_between_vertices();
 			}
 			enclosingForm.last_button.value = id;
-			if(id == "recentre0"){
-				document.getElementById("canvas").setAttribute("cursor", "move");
-				document.getElementById("canvas").setAttribute("cursor", "grab");
+			if(id == 'recentre0'){
+				document.getElementById('canvas').setAttribute('cursor', 'move');
+				document.getElementById('canvas').setAttribute('cursor', 'grab');
 			}
-			else if(id == "ppquery0" || id == "edit_other_object0"){
-				document.getElementById("canvas").setAttribute("cursor", "help");
+			else if(id == 'ppquery0' || id == 'edit_other_object0'){
+				document.getElementById('canvas').setAttribute('cursor', 'help');
 			}
 			else{
-				document.getElementById("canvas").setAttribute("cursor", "crosshair");
+				document.getElementById('canvas').setAttribute('cursor', 'crosshair');
 			}
 		}
 	}
@@ -1196,29 +1202,29 @@ function mouseup(evt){
 		moving  = false;
 		moved  = false;
 		highlightbyid(enclosingForm.last_button.value);
-		if(enclosingForm.last_doing.value == "recentre"){
-			document.getElementById("canvas").setAttribute("cursor", "move");
-	  	document.getElementById("canvas").setAttribute("cursor", "grab");
+		if(enclosingForm.last_doing.value == 'recentre'){
+			document.getElementById('canvas').setAttribute('cursor', 'move');
+	  	document.getElementById('canvas').setAttribute('cursor', 'grab');
 		}
 		else{
-	  	document.getElementById("canvas").setAttribute("cursor", "crosshair");
+	  	document.getElementById('canvas').setAttribute('cursor', 'crosshair');
 		}
 	}
 	
 	function buildsvglinepath(pathx, pathy){
-		svgpath = "M "+pathx[0]+" "+pathy[0];
+		svgpath = 'M '+pathx[0]+' '+pathy[0];
 		for(var i = 1; i < pathx.length; ++i){
-	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
+	  	svgpath = svgpath+' '+pathx[i]+' '+pathy[i];
 	 	}
 	  return svgpath;
 	}
 
 	function buildsvgpath(pathx, pathy){
-		svgpath = "M "+pathx[0]+" "+pathy[0];
+		svgpath = 'M '+pathx[0]+' '+pathy[0];
 		for(var i = 1; i < pathx.length; ++i){
-	  	svgpath = svgpath+" "+pathx[i]+" "+pathy[i];
+	  	svgpath = svgpath+' '+pathx[i]+' '+pathy[i];
 	 	}
-	 	svgpath = svgpath+" "+pathx[0]+" "+pathy[0];
+	 	svgpath = svgpath+' '+pathx[0]+' '+pathy[0];
 	  return svgpath;
 	}
 	
@@ -1228,21 +1234,21 @@ function mouseup(evt){
 		enclosingForm.lastcoordy.value = world_y;
 	  pathx_second.push(world_x);
 	  pathy_second.push(world_y);
-		if(enclosingForm.pathx_second.value != ""){
-			enclosingForm.pathx_second.value = enclosingForm.pathx_second.value+";"+world_x;
-			enclosingForm.pathy_second.value = enclosingForm.pathy_second.value+";"+world_y;
+		if(enclosingForm.pathx_second.value != ''){
+			enclosingForm.pathx_second.value = enclosingForm.pathx_second.value+';'+world_x;
+			enclosingForm.pathy_second.value = enclosingForm.pathy_second.value+';'+world_y;
 		}
 		else{
 			enclosingForm.pathx_second.value = world_x;
 			enclosingForm.pathy_second.value = world_y;
 		}
 		if(pathx_second.length == 1){
-			document.getElementById("startvertex").setAttribute("cx", (world_x-minx)/scale);
-			document.getElementById("startvertex").setAttribute("cy", (world_y-miny)/scale);
+			document.getElementById('startvertex').setAttribute('cx', (world_x-minx)/scale);
+			document.getElementById('startvertex').setAttribute('cy', (world_y-miny)/scale);
 		}
 		else{
-			document.getElementById("startvertex").setAttribute("cx", -500);
-			document.getElementById("startvertex").setAttribute("cy", -500);
+			document.getElementById('startvertex').setAttribute('cx', -500);
+			document.getElementById('startvertex').setAttribute('cy', -500);
 		}
 	  path_second = buildsvglinepath(pathx_second, pathy_second);
 	  if(pathy_second.length > 1){
@@ -1252,21 +1258,21 @@ function mouseup(evt){
 	
 	function redrawsecondline(){
 	 	// Line um punktepfad erweitern
-	  var obj = document.getElementById("line_first");
+	  var obj = document.getElementById('line_first');
 	  pixel_path = world2pixelsvg(enclosingForm.newpath.value);
-	  obj.setAttribute("d", pixel_path);
+	  obj.setAttribute('d', pixel_path);
 	  pixel_path_second = world2pixelsvg(path_second);
-	  var obj = document.getElementById("line_second");
-	  obj.setAttribute("d", pixel_path_second);		
+	  var obj = document.getElementById('line_second');
+	  obj.setAttribute('d', pixel_path_second);		
 	}
 	
 	function clear_first_line(){
-		var obj = document.getElementById("line_first");
-	  obj.setAttribute("d", "");
+		var obj = document.getElementById('line_first');
+	  obj.setAttribute('d', '');
 	}
 	
 	function remove_second_line(){
-		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
+		if(enclosingForm.secondline.value == 'true' || enclosingForm.secondpoly.value == 'true'){
 			var length = pathx_second.length;
 			for(i = 0; i < length; i++ ){
 				pathx_second.pop();
@@ -1281,12 +1287,11 @@ function mouseup(evt){
 			redrawsecondline();
 			enclosingForm.secondline.value = false;
 			enclosingForm.secondpoly.value = false;
-			enclosingForm.pathx_second.value = "";
-			enclosingForm.pathy_second.value = "";
+			enclosingForm.pathx_second.value = '';
+			enclosingForm.pathy_second.value = '';
 		}
 	}
-	
-	';
+";
 
 
 	$coord_input_functions = '
@@ -1600,7 +1605,6 @@ function mouseup(evt){
 
 	function rotate_point_direction(){
 		angle = 360 - enclosingForm.angle.value.replace(",", ".");
-		console.log(angle);
 		custom_angle = top.document.getElementById("custom_angle");
 		if(custom_angle != undefined)custom_angle.value = angle;
 		dir_arrow = document.getElementById("point_direction");

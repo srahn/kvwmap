@@ -34,31 +34,36 @@
 		}
 	}
 </script>
-<br>
-<h2><?php echo $strTitle; ?></h2>
-<br>
-<table width="700px" border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>" style="margin-bottom: 40px;">
-	<tr>
-		<th><? echo $strLabel_id; ?></th>
-		<th><? echo $strLabel_notification; ?></th>
-		<th><? echo $strLabel_veroeffentlichungsdatum; ?></th>
-		<th><? echo $strLabel_ablaufdatum; ?></th>
-		<th><? echo $strLabel_stellen_filter; ?></th>
-		<th><? echo $strLabel_user_filter; ?></th>
-		<th><div style="width: 60px"><a class="btn btn-new" href="index.php?go=notification_formular&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_notification; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></div></th>
-	<tr><?php
-	foreach ($this->notifications AS $notification) { ?>
-		<tr id="notification_<? echo $notification->get('id'); ?>">
-			<td><? echo $notification->get('id'); ?></td>
-			<td><? echo $notification->get('notification'); ?></td>
-			<td><? echo $notification->get('veroeffentlichungsdatum'); ?></td>
-			<td><? echo $notification->get('ablaufdatum'); ?></td>
-			<td><? echo $notification->get('stellen_filter'); ?></td>
-			<td><? echo $notification->get('user_filter'); ?></td>
-			<td>
-				<a href="index.php?go=notification_formular&id=<?php echo $notification->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
-				<a href="#" style="margin-left: 10px;" onclick="deleteNotification(<?php echo $notification->get('id'); ?>);"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
-			</td>
-		<tr><?php
-	} ?>
-</table>
+
+<div id="nfc_titel" name="titel"><? echo $strTitle; ?></div>
+<div id="nfc_newIcon"><a class="btn btn-new" href="index.php?go=notification_formular&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i titel="<? echo $strTitle_create_new_notification; ?>" class="fa fa-plus" style="color: white;"></i>&nbsp;<? echo $strNewCronJob; ?></a></div>
+<div id="nfc_formular">
+	<div id="nfc_formular_header">
+		<div><? echo $strLabel_id; ?></div>
+		<div><? echo $strLabel_notification; ?></div>
+		<div><? echo $strLabel_veroeffentlichungsdatum; ?></div>
+		<div><? echo $strLabel_ablaufdatum; ?></div>
+		<div><? echo $strLabel_stellen_filter; ?></div>
+		<div><? echo $strLabel_user_filter; ?></div>
+		<div></div>
+	</div>
+<?php
+	foreach ($this->notifications AS $notification) {
+?>
+	<div id="nfc_formular_data">
+		<div><? echo $notification->get('id'); ?></div>
+		<div><? echo $notification->get('notification'); ?></div>
+		<div><? echo $notification->get('veroeffentlichungsdatum'); ?></div>
+		<div><? echo $notification->get('ablaufdatum'); ?></div>
+		<div><? echo $notification->get('stellen_filter'); ?></div>
+		<div><? echo $notification->get('user_filter'); ?></div>
+		<div>
+			<a href="index.php?go=notification_formular&id=<?php echo $notification->get('id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="color: #a82e2e;"></i></a>
+			<a href="#" style="margin-left: 10px;" onclick="deleteNotification(<?php echo $notification->get('id'); ?>);"><i class="fa fa-trash-o fa_lg" style="color: #a82e2e;"></i></a>
+		</div>
+	</div>
+<?php
+	}
+?>
+</div>
+

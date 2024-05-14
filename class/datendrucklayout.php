@@ -679,11 +679,12 @@ class ddl {
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
-							$rect = ms_newRectObj();
-							$rect->minx = $point['pointx'] - $rand;
-							$rect->maxx = $point['pointx'] + $rand;
-							$rect->miny = $point['pointy'] - $rand;
-							$rect->maxy = $point['pointy'] + $rand;
+							$rect = rectObj(
+								$point['pointx'] - $rand,
+								$point['pointy'] - $rand,								 
+								$point['pointx'] + $rand,
+								$point['pointy'] + $rand
+							);
 						}
 						else {
 							include_(CLASSPATH.'polygoneditor.php');

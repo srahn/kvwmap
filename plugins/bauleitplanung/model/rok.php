@@ -433,11 +433,12 @@ class rok {
 		#echo $sql;
 	  $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-    $rect->minx=$rs['minx'];
-    $rect->maxx=$rs['maxx'];
-    $rect->miny=$rs['miny'];
-    $rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+    	$rs['minx'],
+    	$rs['miny'],			
+    	$rs['maxx'],
+    	$rs['maxy']
+		);
     $randx=($rect->maxx-$rect->minx)*$border/100;
     $randy=($rect->maxy-$rect->miny)*$border/100;
     $rect->minx -= $randx;
@@ -452,11 +453,12 @@ class rok {
 		#echo $sql;
 	  $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-    $rect->minx=$rs['minx'];
-    $rect->maxx=$rs['maxx'];
-    $rect->miny=$rs['miny'];
-    $rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+    	$rs['minx'],
+    	$rs['miny'],			
+    	$rs['maxx'],
+    	$rs['maxy']
+		);
     $randx=($rect->maxx-$rect->minx)*$border/100;
     $randy=($rect->maxy-$rect->miny)*$border/100;
     $rect->minx -= $randx;

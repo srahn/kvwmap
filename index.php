@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -128,7 +127,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 
 ob_start ();    // Ausgabepufferung starten
 
@@ -248,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if($GUI->formvars['legendtouched']){
+				if ($GUI->formvars['legendtouched']) {
 					$GUI->neuLaden();
 				}
 				else{
@@ -960,6 +959,10 @@ function go_switch($go, $exit = false) {
 				$GUI->saveOverlayPosition();
 			} break;
 
+			case 'set_last_query_layer' : {
+				$GUI->set_last_query_layer();
+			} break;			
+
 			case 'Administratorfunktionen' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->adminFunctions();
@@ -1645,7 +1648,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompleteness' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				echo $GUI->checkClassCompleteness();
+				echo $GUI->check_class_completeness(true);
 			} break;
 			
 			case 'checkClassCompletenessAll' : {
@@ -1928,7 +1931,14 @@ function go_switch($go, $exit = false) {
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
+				$_SESSION['prev_login_name'] = $_SESSION['login_name'];
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
+				header('location: index.php');
+			} break;
+
+			case 'als_voriger_Nutzer_anmelden' : {
+				$_SESSION['login_name'] = $_SESSION['prev_login_name'];
+				unset($_SESSION['prev_login_name']);
 				header('location: index.php');
 			} break;
 
@@ -2000,7 +2010,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;
+			} break;			
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');

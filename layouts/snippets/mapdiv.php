@@ -125,7 +125,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	</div>
 </div>
 
-<? if ($this->Lagebezeichung['gemeindename'] != '') { ?>
+<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
 <div id="lagebezeichnung_bar">
 	<div id="lagebezeichnung">
 		<span class="fett">Gemeinde:</span>&nbsp;<?php echo $this->Lagebezeichung['gemeindename']; ?>

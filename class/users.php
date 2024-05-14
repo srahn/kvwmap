@@ -716,12 +716,6 @@ class user {
 		) {
 			return true;
 		}
-		elseif (
-			$case == 'chart_speichern' AND
-			$this->funktion == 'admin'
-		) {
-			return true;
-		}
 		else {
 			return false;
 		}
@@ -1189,7 +1183,7 @@ class user {
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
-					, singlequery = '" . (value_of($formvars, 'singlequery') == '' ? '0' : '1') . "'
+					, singlequery = '" . value_of($formvars, 'singlequery') . "'
 					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
 					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
 					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'

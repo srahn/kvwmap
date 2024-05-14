@@ -19,8 +19,8 @@
 	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
-		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 1000, 100, 400);
+		result.success = function(text, visible = 1000) {
+			message([{ type: 'notice', msg: text}], visible, 100, 400);
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -154,7 +154,8 @@
 						konvertierung_id: konvertierung_id,
 						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
-					complete: function () {
+					complete: function (response) {
+						console.log(response);
 						//document.getElementById('sperr_div').style.display = 'none';
 					},
 					error: function(response) {
@@ -168,7 +169,7 @@
 							return;
 						}
 						$('#konvertierungen_table').one('load-success.bs.table', function () {
-							result.success(response.msg);
+							result.success(response.msg, 4000);
 						});
 						$('#konvertierungen_table').bootstrapTable('refresh');
 					}

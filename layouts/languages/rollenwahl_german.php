@@ -32,7 +32,10 @@
 	$strSearchTransparency="eigene Abfragen/Import-Transparenz";
 	$strPolish="Polnisch";
 	$strCoordType="Koordinatendarstellung";
-	$strSingleQuery="nur ein Thema abfragbar";
+	$strMapQuery="Kartenabfrage";
+	$strMapQuery0="mehrere Themen auswählen";
+	$strMapQuery1="ein Thema auswählen";
+	$strMapQuery2="keine Auswahl - alle aktiven Themen abfragen";
 	$strQuerymode="Sachdatenanzeige in extra Fenster";
 	$strNewDatasetOrder="Reihenfolge Datensatz-Erfassung";
 	$strAlwaysCreateNext="Nach dem Speichern einen weiteren Datensatz erfassen";
@@ -68,7 +71,11 @@
 	$strHintRunningCoords="Wenn Sie diese Option auswählen, erscheint unterhalb der Karte die Koordinate der Cursorposition unter Angabe der ausgewählten Kartenprojektion.";
 	$strHintShowMapFunctions="Mit dieser Option können Sie die Menüleiste mit den Kartenfunktionen unterhalb der Karte ein- und ausschalten.";
 	$strHintShowLayerOptions="Wenn Sie diese Option auswählen, erscheint hinter aktiven Themen in der Legende ein Button, der erweiterte Funktionen und Einstellungsmöglichkeiten für das Thema anbietet.";
-	$strHintSingleQuery="Wenn Sie diese Option auswählen, erscheinen die Abfragehäkchenfelder in der Legende als sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.";
+	$strHintMapQuery="mehrere Themen auswählen: Jedes Thema hat eine separate Checkbox um es für die Kartenabfrage auszuwählen. Die Abfrage erfolgt für alle ausgewählten Themen.
+	
+ein Thema auswählen: Jedes Thema hat einen sog. Radiobutton. Es kann dann immer nur genau ein Thema abfragbar geschaltet werden.
+	
+keine Auswahl - alle aktiven Themen abfragen: Hier gibt es keine separate Auswahl für die Kartenabfrage. Alle aktiven Themen werden abgefragt.";
 	$strHintQuerymode="Wenn Sie diese Option auswählen, erscheinen Sachdatenabfragen als eigene Fenster, die über der Karte schweben.";
 	$strHintNewDatasetOrder="Wählen Sie, ob bei der Erfassung neuer Daten der Geometrie-Editor oberhalb der Sachdaten erscheinen soll oder darunter.";
 	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";

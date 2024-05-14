@@ -454,8 +454,6 @@ class Nachweis {
     }
     else {
       # Abfrage fehlerfrei
-      # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -466,8 +464,12 @@ class Nachweis {
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;        
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      $rect = rectObj(
+        $rs['minx'],
+        $rs['miny'],        
+        $rs['maxx'],
+        $rs['maxy']
+      );
       $ret[1]=$rect;
     }
     return $ret;
@@ -1338,7 +1340,7 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur,, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
@@ -1707,11 +1709,14 @@ class Festpunkte {
       $ret[1]='<br>Fehler bei der Abfrage der Datenbank'.$ret[1];
     }
     else {
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
-      $xmin=intval($rs['xmin']); $xmax=intval($rs['xmax']);
-      $ymin=intval($rs['ymin']); $ymax=intval($rs['ymax']);
+      $rect = rectObj(
+        intval($rs['xmin']),
+        intval($rs['ymin']),        
+        intval($rs['xmax']),
+        intval($rs['ymax'])
+      );
       # Aufweiten des Anzeigefensters, wenn nur nach einen Punkt gesucht wurde
       $weite=20;
       if ($xmax-$xmin==0) {

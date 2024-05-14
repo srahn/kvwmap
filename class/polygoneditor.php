@@ -47,11 +47,12 @@ class polygoneditor {
   	$sql.=" FROM " . ($schemaname != '' ? $schemaname . '.' : '') .pg_quote($tablename)." WHERE ".$this->oid_attribute." = '".$oid."') AS foo";
     $ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-    $rect->minx=$rs['minx'];
-    $rect->maxx=$rs['maxx'];
-    $rect->miny=$rs['miny'];
-    $rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['miny'],			
+			$rs['maxx'],
+			$rs['maxy']
+		);
 		if($border == NULL AND defined('ZOOMBUFFER') AND ZOOMBUFFER > 0)$border = ZOOMBUFFER;
 		if($border != NULL){
 			if($this->clientepsg == 4326)$border = $border/10000;
