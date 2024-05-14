@@ -26749,7 +26749,9 @@ BEGIN
 END;
 $BODY$;
 
-CREATE OR REPLACE TRIGGER log_hist_operations_trigger
+DROP TRIGGER IF EXISTS log_hist_operations_trigger ON alkis.delete;
+
+CREATE TRIGGER log_hist_operations_trigger
     BEFORE INSERT
     ON alkis.delete
     FOR EACH ROW
