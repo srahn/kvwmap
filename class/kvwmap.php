@@ -10166,10 +10166,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 			$ddl = new ddl($this->database, $this);
 			$ddl->selectedlayout = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, [], 'only_ids');
-			$this->formvars['aktivesLayout'] = $ddl->selectedlayout[0];
-			$this->formvars['chosen_layer_id'] = $layer_id;
-			$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
-			#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
+			if ($this->formvars['aktivesLayout'] = $ddl->selectedlayout[0]) {
+				$this->formvars['chosen_layer_id'] = $layer_id;
+				$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
+				#echo '<br>Datei gedruckt in Datei: ' . $this->outputfile;
+			}
 		}
 	}
 
