@@ -838,7 +838,10 @@ class ddl {
 
 		if ($this->layout['use_previews']) {
 			$path_parts = pathinfo($dateiname);
-			$dateiname = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_thumb.jpg';
+			$preview_img = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_thumb.jpg';
+			if (file_exists($preview_img)) {
+				$dateiname = $preview_img;
+			}
 		}
 
 		if ($dateiname != '' AND file_exists($dateiname)) {
