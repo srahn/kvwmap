@@ -29908,27 +29908,7 @@ UPDATE alkis.pp_gemeinde a
    );
 
 
-TRUNCATE alkis.pp_amt;
-	 
-INSERT INTO alkis.pp_amt
-  (land, regierungsbezirk, kreis, amt, amtsname, postleitzahlpostzustellung, ort_post, strasse, hausnummer, fax, telefon, weitereadressen)
-  SELECT DISTINCT g.land, g.regierungsbezirk, g.kreis, a.amt_schluessel,
-                  CASE WHEN position('(' in a.amt_name) > 0
-                    THEN substr(a.amt_name, 1, position('(' in a.amt_name)-2)
-                    ELSE a.amt_name
-                  END as amt_name,
-                  postleitzahlpostzustellung,
-                  ort_post,
-                  strasse,
-                  hausnummer,
-                  fax,
-                  telefon,
-                  weitereadressen
-  FROM            alkis.pp_gemeinde g, alkis.lk_aemtergemeinden a
-  LEFT JOIN    	  alkis.ax_dienststelle d ON d.schluesselgesamt = a.dienststelle_schluessel AND stellenart IN (1700, 1900)
-  LEFT JOIN       alkis.ax_anschrift an ON d.hat = an.gml_id
-  WHERE           g.land||g.regierungsbezirk||g.kreis||lpad(g.gemeinde::text, 3,'00') = a.gemeinde_schluessel and an.endet is null and d.endet is null 
-  ORDER BY        g.land, g.regierungsbezirk, g.kreis;
+
 	 
 -- ==============================================================================
 -- Geometrien der Flurstücke schrittweise zu groesseren Einheiten zusammen fassen
@@ -29995,29 +29975,6 @@ UPDATE alkis.pp_gemeinde a
    );
 
 	 
--- Flächen vereinigen (aus der bereits vereinfachten Geometrie)
-UPDATE alkis.pp_amt a
-  SET the_geom = 
-   (SELECT st_multi(st_union(b.the_geom)) AS the_geom			-- angepasst am 10.03.2016
-    FROM alkis.pp_gemeinde b, alkis.lk_aemtergemeinden c
-    WHERE      
-    b.land||b.regierungsbezirk||b.kreis||lpad(b.gemeinde::text,3,'00') = c.gemeinde_schluessel
-       AND c.amt_schluessel = a.amt
-    GROUP BY c.amt_name
-   );
-	 
-
--- Gemeinden zählen
-UPDATE alkis.pp_amt a
-  SET anz_gemeinden = 
-   ( SELECT count(gemeinde) AS anz_gemeinden 
-     FROM    alkis.pp_gemeinde b, alkis.lk_aemtergemeinden c
-     WHERE      
-    
-    b.land||b.regierungsbezirk||b.kreis||lpad(b.gemeinde::text,3,'00') = c.gemeinde_schluessel
-       AND c.amt_schluessel = a.amt
-    GROUP BY c.amt_name
-   );
 
 -- Ämter zu Kreis zusammenfassen
 -- ----------------------------------------
