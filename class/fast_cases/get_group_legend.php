@@ -1361,12 +1361,12 @@ class GUI {
 				</tr>
 				<tr>
 					<td>
-						<div id="layergroupdiv_'.$group_id.'" style="width:100%;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
+						<div id="layergroupdiv_'.$group_id.'" style="width:100%; padding-left: 4px;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
 		$layercount = @count($this->layerset['layers_of_group'][$group_id] ?: []);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
-					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="13" height="1" border="0"></td><td style="width: 100%">';
+					$legend .= '<tr><td colspan="3"><table cellspacing="0" cellpadding="0" style="width:100%"><tr><td><img src="'.GRAPHICSPATH.'leer.gif" width="6" height="1" border="0"></td><td style="width: 100%">';
 					$legend .= $this->create_group_legend($this->groupset[$group_id]['untergruppen'][$u], $status);
 					$legend .= '</td></tr></table></td></tr>';
 				}
@@ -1483,7 +1483,7 @@ class GUI {
 					$legend .= '>';
 				}
 				else{
-					$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
+					#$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
 				}
 				$legend .=  '</td><td valign="top">';
 				// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
