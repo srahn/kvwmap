@@ -15840,25 +15840,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 								$filter .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['Layer_ID']]) . "), true)";
 							}							
-							if($this->formvars['CMD'] == 'touchquery'){
-								$geometrie_tabelle = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
-								if(!empty($layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle])) {
-									$the_geom = $layerset[$i]['attributes']['table_alias_name'][$geometrie_tabelle].'.'.$the_geom;
-								}
-								
-								if(substr_count(strtolower($pfad), ' from ') > 1){			# mehrere froms -> das FROM der Hauptabfrage muss groß geschrieben sein
-									$fromposition = strpos($pfad, ' FROM ');
-								}
-								else{
-									$fromposition = strpos(strtolower($pfad), ' from ');
-								}
-								$new_pfad = $the_geom." ".substr($pfad, $fromposition);
-								#if($the_geom == 'query.the_geom'){
-									$sql = "SELECT * FROM (SELECT " . $new_pfad.") as query WHERE 1=1 " . $sql_where;
-								#}
-								#else{
-								#  $sql = "SELECT " . $new_pfad." " . $sql_where;
-								#}
+							if ($this->formvars['CMD'] == 'touchquery') {
+								$sql = "SELECT " . $the_geom . " FROM (SELECT " . $pfad.") as query WHERE 1=1 " . $sql_where;
 								$ret=$layerdb->execSQL($sql,4, 0);
 								if(!$ret[0]){
 									while($rs=pg_fetch_array($ret[1])){
