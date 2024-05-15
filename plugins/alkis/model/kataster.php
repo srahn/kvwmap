@@ -1203,15 +1203,17 @@ class flurstueck {
     $sql.="SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if ($this->hist_alb) {
 			$sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+			$istgebucht = 'isthistgebucht';
 		}
 		else {
 			$sql.="FROM alkis.ax_flurstueck f ";
+			$istgebucht = 'istgebucht';
 		}
 		if($fiktiv){
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f." . $istgebucht . "] <@ s.an ";
 		}
 		else{
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f.istgebucht] <@ s.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f." . $istgebucht . "] <@ s.an ";
 		}
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE f.flurstueckskennzeichen = '" . $this->FlurstKennz . "' ";
