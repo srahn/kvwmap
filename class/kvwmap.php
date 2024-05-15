@@ -2505,7 +2505,7 @@ echo '			</table>
 							$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
 						}
 						else {
-							$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+							$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
 						}
             $style->linecap = 'butt';
           }
