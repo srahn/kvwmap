@@ -2252,7 +2252,7 @@ class pgdatabase {
 		ini_set("pgsql.ignore_notice", '0');
 		ini_set("display_errors", '0');
 		$error_list = array();
-		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
+		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line) use (&$error_list) {
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
@@ -2352,7 +2352,7 @@ class pgdatabase {
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid]); $j++){
+						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){

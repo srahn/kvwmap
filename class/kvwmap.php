@@ -2123,13 +2123,13 @@ echo '			</table>
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
-						$error = ms_GetErrorObj();
+						$error = msGetErrorObj();
 						while ($error && $error->code != MS_NOERR) {
 							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
 							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
 							$error = $error->next();
 						}
-						ms_ResetErrorList();
+						msResetErrorList();
 					}
 				}
 				if ($this->error_message != '') {
