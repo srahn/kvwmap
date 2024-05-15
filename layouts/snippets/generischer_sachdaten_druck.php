@@ -119,6 +119,7 @@ function back(){
 </table>
 <input type="hidden" name="go_plus" value="">
 <input type="hidden" name="chosen_layer_id" value="<? echo $this->formvars['chosen_layer_id']; ?>">
+<input type="hidden" name="orderby<? echo $this->formvars['chosen_layer_id']; ?>" value="<? echo $this->formvars['orderby' . $this->formvars['chosen_layer_id']]; ?>">
 <input type="hidden" name="<? echo 'checkbox_names_'.$this->formvars['chosen_layer_id']; ?>" value="<? echo $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]; ?>">
 <? 
 	$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
