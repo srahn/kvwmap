@@ -2502,10 +2502,10 @@ echo '			</table>
 							foreach($pattern as &$pat){
 								$pat = $pat * $this->map_factor;
 							}
-							$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+							$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 						}
 						else {
-							$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+							$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
 						}
             $style->linecap = 'butt';
           }

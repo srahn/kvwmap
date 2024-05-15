@@ -1291,7 +1291,7 @@ class GUI {
 						$style->setGeomTransform($dbStyle['geomtransform']);
 					}
           if ($dbStyle['pattern']!='') {
-            $style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+            $style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
             $style->linecap = 'butt';
           }
 					if($dbStyle['gap'] != '') {
