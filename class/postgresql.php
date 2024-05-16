@@ -1340,7 +1340,7 @@ FROM
 			$sql.=", b.bezeichnung as gbname FROM alkis.ax_buchungsblatt g ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
 			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON s.istbestandteilvon = g.gml_id ";
-			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f." . $istgebucht . " = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR (s.buchungsart != 2103 AND f." . $istgebucht . " = ANY(s.an)) ";		# angepasst wegen Gebäudeeigentum (2103) bei 13274300200046______
+			$sql.="LEFT JOIN alkis.ax_flurstueck f ON f.istgebucht = s.gml_id OR f.gml_id = ANY(s.verweistauf) OR (s.buchungsart != 2103 AND f.istgebucht = ANY(s.an)) ";		# angepasst wegen Gebäudeeigentum (2103) bei 13274300200046______
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";		
 		}
