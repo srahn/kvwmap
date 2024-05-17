@@ -289,6 +289,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				value = elements[i].value;
 				name = elements[i].name;
 				type = elements[i].type;
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
