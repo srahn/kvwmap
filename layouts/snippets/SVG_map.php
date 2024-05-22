@@ -1803,7 +1803,7 @@ function highlightbyid(id){
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
   <g id="moveGroup" transform="translate(0 0)">
-    <image id="mapimg" href="{$bg_pic}" height="100%" width="100%" y="0" x="0"/>
+    <image id="mapimg" xlink:href="{$bg_pic}" height="100%" width="100%" y="0" x="0"/>
     <g id="cartesian" transform="translate(0,{$res_y}) scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
