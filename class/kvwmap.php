@@ -14275,9 +14275,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
+		$crontab_dir = '/var/www/cron/';
+		if (!file_exists($crontab_dir . 'gisadmin')) {
+			mkdir($crontab_dir);
+		}
+		if (!file_exists($crontab_dir . 'root')) {
+			mkdir($crontab_dir);
+		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
 		foreach ($crontab_lines AS $user => $lines) {
-			$crontab_file = '/var/www/cron/crontab_' . $user;
+			$crontab_file = $crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
+			echo '<br>' . $user . ':' . $crontab_file;
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
