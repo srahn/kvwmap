@@ -2042,7 +2042,7 @@ class ddl {
 	}
 
 	function output_freetext_form($texts, $layer_id, $ddl_id){
-		for($i = 0; $i < @count($texts); $i++){
+		for($i = 0; $i < count_or_0($texts); $i++){
 			$texts[$i]['text'] = str_replace(';', chr(10), $texts[$i]['text']);
 			echo '
 			<tr>

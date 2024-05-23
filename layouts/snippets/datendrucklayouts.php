@@ -374,7 +374,7 @@
 										<select	name="stelle" style="width:250px">
 										<option value="">--- bitte wählen ---</option>
 											<?
-											for($i = 0; $i < count($this->stellendaten['ID']); $i++){
+											for($i = 0; $i < count_or_0($this->stellendaten['ID']); $i++){
 												echo '<option value="'.$this->stellendaten['ID'][$i].'" ';
 												if($this->formvars['stelle'] == $this->stellendaten['ID'][$i]){
 													echo 'selected';
@@ -465,32 +465,18 @@
 								</tr>
 								<tr>
 									<td colspan="2">
-										<label
-											for="dont_print_empty"
-											class="fett"
-										>
+										<label for="dont_print_empty" class="fett">
 											Leere Attributwerte nicht drucken:
 										</label>
-										<input
-											id="dont_print_empty"
-											type="checkbox"
-											name="dont_print_empty"
-											value="1"<?
+										<input id="dont_print_empty" type="checkbox" name="dont_print_empty" value="1"<?
 											echo ($this->ddl->selectedlayout[0]['dont_print_empty'] == '1' ? ' checked="true"' : ''); ?>
 										/>
-									<td>
-									<td colspan="2">
-										<label
-											for="use_previews"
-											class="fett"
-										>
+									</td>
+									<td colspan="3">
+										<label for="use_previews" class="fett">
 											Vorschaubilder verwenden statt Originale:
 										</label>
-										<input
-											id="use_previews"
-											type="checkbox"
-											name="use_previews"
-											value="1"<?
+										<input id="use_previews" type="checkbox" name="use_previews" value="1"<?
 											echo ($this->ddl->selectedlayout[0]['use_previews'] == '1' ? ' checked="true"' : ''); ?>
 										/>
 										<span data-tooltip="Kann die Größe der zu druckenden PDF-Dokumente deutlich verringern." style="--left: -400px"></span>
@@ -860,7 +846,7 @@
 										<span id="linien">Linien</span>
 									</td>
 								</tr><?
-									for ($i = 0; $i < ($this->formvars['nolines'] == '1' ? 0 : @count($this->ddl->selectedlayout[0]['lines'])); $i++) { ?>
+									for ($i = 0; $i < ($this->formvars['nolines'] == '1' ? 0 : count_or_0($this->ddl->selectedlayout[0]['lines'])); $i++) { ?>
 										<tbody
 											id="line_form_<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>"
 											onmouseenter="highlight_line(<? echo $this->ddl->selectedlayout[0]['lines'][$i]['id']; ?>)"
@@ -924,7 +910,7 @@
 										<span id="rechtecke">Rechtecke</span>
 									</td>
 								</tr>
-								<? for($i = 0; $i < @count($this->ddl->selectedlayout[0]['rectangles']); $i++){
+								<? for($i = 0; $i < count_or_0($this->ddl->selectedlayout[0]['rectangles']); $i++){
 									 ?>
 									<tbody id="rect_form_<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>" onmouseenter="highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)" onmouseleave="de_highlight_rect(<? echo $this->ddl->selectedlayout[0]['rectangles'][$i]['id']; ?>)">
 									<tr>
