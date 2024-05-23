@@ -13,7 +13,7 @@
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '') use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
-		$anzahl_layer = @count($group_layer_ids);
+		$anzahl_layer = count_or_0($group_layer_ids);
 		$group_keywords = [];
 		if ($anzahl_layer > 0 OR $group['untergruppen'] != '') {
 			if ($group['untergruppen'] != '') {

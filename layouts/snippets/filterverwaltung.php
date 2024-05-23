@@ -128,9 +128,9 @@ function showmap(){
       </select>
 		</td>
     <td style="border-bottom:1px solid #C3C7C3;border-right:1px solid #C3C7C3" colspan="4"> 
-      <select style="width:400px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+      <select style="width:400px" multiple size="5"  name="layer" onchange="document.GUI.newpath.value = '';document.GUI.newpathwkt.value = '';document.GUI.pathwkt.value = '';document.GUI.result.value = '';" <?php if(count_or_0($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
         <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
+    		for($i = 0; $i < count_or_0($this->layerdaten['ID']); $i++){
     			echo '<option value="'.$this->layerdaten['ID'][$i].'">'.$this->layerdaten['Bezeichnung'][$i].'</option>';
     		}
     	?>
@@ -145,7 +145,7 @@ function showmap(){
     <td colspan="5">
     	<table align="center" border="0" cellspacing="0" cellpadding="0">
         <?
-    if(count($this->selected_layers) > 1){
+    if(count_or_0($this->selected_layers) > 1){
     	echo '
 					<tr>
 						<td align="center" colspan="3"><span class="fett">Gemeinsame Attribute von '.count($this->selected_layers).' Layern:</span><br><br></td>
