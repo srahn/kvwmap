@@ -719,7 +719,7 @@ FROM
 		$timestamp = rolle::$hist_timestamp;
 		if($timestamp == ''){
 			foreach($tablenames as $tablename){
-				$filter .= ' AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'http://www.lverma-mv.de/_fdv#7040\' = any('.$tablename.'.zeigtaufexternes_art))';
+				$filter .= ' AND (' . $tablename . '.historisch IS NULL OR ' . $tablename . '.historisch != \'true\') AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'urn:mv:fdv:7040\' = any('.$tablename.'.zeigtaufexternes_art))';
 			}
 		}
 		return $filter;
