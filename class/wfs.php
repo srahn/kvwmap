@@ -16,6 +16,7 @@ class wfs{
 		# entweder wird eine fertige request-URL übergeben oder an Hand der bbox bzw. des Filters gebildet
 		if($request == NULL){
 			$request = $this->url.'&service=WFS&request=GetFeature&version='.$this->version.'&typename='.$this->typename;
+			$request .= '&srsName=EPSG:'.$this->epsg;
 			if($bbox != ''){
 				$request .= '&bbox='.$bbox;
 				if($this->version == '1.1.0')$request .= ',EPSG:'.$this->epsg;
