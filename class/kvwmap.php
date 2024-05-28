@@ -20201,7 +20201,7 @@ class db_mapObj{
 						$this->GUI->rolle->language,
 						NULL,
 						NULL,
-						'strtoupper'
+						'strtolower'
 					);
 					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 					if ($ret1[0] == 0) {
@@ -20217,7 +20217,7 @@ class db_mapObj{
 					$language,
 					NULL,
 					NULL,
-					'strtoupper'
+					'strtolower'
 				);
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
