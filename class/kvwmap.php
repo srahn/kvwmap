@@ -12367,7 +12367,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function save_layer_attributes($formvars) {
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, true, false, false);
+		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, true, false, false, false);
 		$mapdb->save_layer_attributes($this->attributes, $this->database, $formvars);
 	}
 
@@ -20182,7 +20182,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20294,49 +20294,51 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 
-			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$replace_params = rolle::$layer_params;
-				if ($this->GUI->formvars['attributenames']) {
-					foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
-						if (
-							in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
-							array_key_exists($attribute, $replace_params)
-						) {
-							# Attribute is predefined or layer_param. Skip to add as replace_param.
-						}
-						else {
-							$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
+			if ($replace) {
+				if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$replace_params = rolle::$layer_params;
+					if ($this->GUI->formvars['attributenames']) {
+						foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
+							if (
+								in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
+								array_key_exists($attribute, $replace_params)
+							) {
+								# Attribute is predefined or layer_param. Skip to add as replace_param.
+							}
+							else {
+								$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
+							}
 						}
 					}
+					$replaced_default = replace_params(
+						$rs['default'],
+						$replace_params,
+						$this->GUI->user->id,
+						$this->GUI->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->GUI->rolle->language
+					);
+					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+					}
 				}
-				$replaced_default = replace_params(
-					$rs['default'],
-					$replace_params,
-					$this->GUI->user->id,
-					$this->GUI->Stelle_ID,
+				else {
+					$attributes['default'][$i] = $rs['default'];
+				}
+				$rs['options'] = replace_params(
+					$rs['options'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->GUI->rolle->language
+					$language
 				);
-				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
-				if ($ret1[0] == 0) {
-					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
-				}
 			}
-			else {
-				$attributes['default'][$i] = $rs['default'];
-			}
-			$attributes['form_element_type'][$i] = $rs['form_element_type'];
-			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$rs['options'] = replace_params(
-				$rs['options'],
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$language
-			);
 			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			#$rs['options'] = str_replace('$language', $language, $rs['options']);
+			$attributes['form_element_type'][$i] = $rs['form_element_type'];
+			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
