@@ -2,6 +2,10 @@
 	<? include(SNIPPETS . 'login_head.php'); ?>
 	<body style="font-family: Arial, Verdana, Helvetica, sans-serif" onload="load()">
 		<form name="login" action="index.php" method="post">
+			<? if (!array_key_exists('browserwidth', $this->formvars)) { ?>
+			<input type="hidden" name="browserwidth">
+			<input type="hidden" name="browserheight">
+			<? } ?>
 			<input type="hidden" name="agreement"><?
 			echo hidden_formvars_fields($this->formvars, $this->expect); ?>
 			<table align="center" cellspacing="4" cellpadding="12" border="0" style="box-shadow: 12px 10px 14px #777; border: 1px solid #bbbbbb;">
