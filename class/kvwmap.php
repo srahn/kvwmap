@@ -20206,27 +20206,16 @@ class db_mapObj{
 
 			if ($replace) {
 				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replace_params = rolle::$layer_params;
-					if ($this->GUI->formvars['attributenames']) {
-						foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
-							if (
-								in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
-								array_key_exists($attribute, $replace_params)
-							) {
-								# Attribute is predefined or layer_param. Skip to add as replace_param.
-							}
-							else {
-								$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
-							}
-						}
-					}
 					$replaced_default = replace_params(
 						$attributes['default'][$i],
 						$replace_params,
 						$this->GUI->user->id,
 						$this->GUI->Stelle_ID,
 						rolle::$hist_timestamp,
-						$this->GUI->rolle->language
+						$this->GUI->rolle->language,
+						NULL,
+						NULL,
+						'strtoupper'
 					);
 					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 					if ($ret1[0] == 0) {
@@ -20239,11 +20228,12 @@ class db_mapObj{
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$language
+					$language,
+					NULL,
+					NULL,
+					'strtoupper'
 				);
 			}
-			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			#$rs['options'] = str_replace('$language', $language, $rs['options']);
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
 			$attributes['options'][$i] = $rs['options'];
