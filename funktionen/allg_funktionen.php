@@ -1932,7 +1932,7 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $case = 'strtolower') {
 	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 	if (is_array($params)) {
 		foreach($params AS $key => $value){
@@ -1941,13 +1941,13 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	}
 	$str = str_replace('$current_date', date('Y-m-d'), $str);
 	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($user_id))							$str = str_replace('$userid', $user_id, $str);  // deprecated
-	if (!is_null($stelle_id))						$str = str_replace('$stelleid', $stelle_id, $str); // deprecated
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
+	if (!is_null($user_id))							$str = str_replace($case('$user_id'), $user_id, $str);
+	if (!is_null($stelle_id))						$str = str_replace($case('$stelle_id'), $stelle_id, $str);
+	if (!is_null($user_id))							$str = str_replace($case('$userid'), $user_id, $str);  // deprecated
+	if (!is_null($stelle_id))						$str = str_replace($case('$stelleid'), $stelle_id, $str); // deprecated
+	if (!is_null($hist_timestamp))			$str = str_replace($case('$hist_timestamp'), $hist_timestamp, $str);
+	if (!is_null($language))						$str = str_replace($case('$language'), $language, $str);
+	if (!is_null($scale))								$str = str_replace($case('$scale'), $scale, $str);
 	return $str;
 }
 
