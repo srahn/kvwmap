@@ -19491,13 +19491,6 @@ class db_mapObj{
 			);
 		}
 
-		if ($this->GUI->plugin_loaded('portal')) {
-			$zero_if_empty_attributes = array_merge(
-				$zero_if_empty_attributes,
-				array('cluster_option')
-			);
-		}
-
 		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
@@ -19577,13 +19570,6 @@ class db_mapObj{
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
 				array('vector_tile_url')
-			);
-		}
-
-		if ($this->GUI->plugin_loaded('portal')) {
-			$column_equal_field_attributes = array_merge(
-				$column_equal_field_attributes,
-				array('cluster_option')
 			);
 		}
 
