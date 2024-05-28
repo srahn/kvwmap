@@ -20293,9 +20293,12 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if ($get_default) {
+				$attributes['default'][$i] = $rs['default'];
+			}
 
 			if ($replace) {
-				if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 					$replace_params = rolle::$layer_params;
 					if ($this->GUI->formvars['attributenames']) {
 						foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
@@ -20311,7 +20314,7 @@ class db_mapObj{
 						}
 					}
 					$replaced_default = replace_params(
-						$rs['default'],
+						$attributes['default'][$i],
 						$replace_params,
 						$this->GUI->user->id,
 						$this->GUI->Stelle_ID,
@@ -20322,9 +20325,6 @@ class db_mapObj{
 					if ($ret1[0] == 0) {
 						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 					}
-				}
-				else {
-					$attributes['default'][$i] = $rs['default'];
 				}
 				$rs['options'] = replace_params(
 					$rs['options'],
