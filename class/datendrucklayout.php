@@ -739,7 +739,7 @@ class ddl {
 					$this->gui->map->scalebar->height = 3;
 					# Parameter $scale in Data ersetzen
 					for($l = 0; $l < count($this->gui->layers_replace_scale); $l++){
-						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$scale', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
+						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
