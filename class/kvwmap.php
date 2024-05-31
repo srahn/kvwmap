@@ -20169,11 +20169,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-<<<<<<< HEAD
-	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false) {
-=======
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
->>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
+    function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
 		global $language;
 		$attributes = array(
 			'name' => array(),
