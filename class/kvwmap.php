@@ -9411,7 +9411,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$path = $layerset[0]['pfad'];
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);	
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true);
 				if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[0]['maintable'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
 				}
@@ -9743,47 +9743,48 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 			case MS_WFS : {
 				include_(CLASSPATH.'wfs.php');
-        $url = $layerset[0]['connection'];
-        $version = $layerset[0]['wms_server_version'];
+				$url = $layerset[0]['connection'];
+				$version = $layerset[0]['wms_server_version'];
 				$epsg = $layerset[0]['epsg_code'];
-        $typename = $layerset[0]['wms_name'];
+				$typename = $layerset[0]['wms_name'];
 				$namespace = substr($typename, 0, strpos($typename, ':'));
 				$username = $layerset[0]['wms_auth_username'];
 				$password = $layerset[0]['wms_auth_password'];
-        $wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
+				$wfs = new wfs($url, $version, $typename, $namespace, $epsg, $username, $password);
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-        $layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames'], false, true);
-        # Filterstring erstellen
-        for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
-          if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
-            $attributenames[] = $layerset[0]['attributes']['name'][$i];
-            $operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
-            $values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
-          }
-        }
-        $filter = $wfs->create_filter($attributenames, $operators, $values);
-        # Abfrage mit Filter absetzen
-        if($this->formvars['anzahl'] == ''){
-          $this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
-        }
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], NULL, $privileges['attributenames'], false, true);
+
+				# Filterstring erstellen
+				for($i = 0; $i < count($layerset[0]['attributes']['name']); $i++){
+				if($this->formvars['value_'.$layerset[0]['attributes']['name'][$i]] != '' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NULL' OR $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]] == 'IS NOT NULL'){
+					$attributenames[] = $layerset[0]['attributes']['name'][$i];
+					$operators[] = $this->formvars['operator_'.$layerset[0]['attributes']['name'][$i]];
+					$values[] = $this->formvars['value_'.$layerset[0]['attributes']['name'][$i]];
+				}
+				}
+				$filter = $wfs->create_filter($attributenames, $operators, $values);
+				# Abfrage mit Filter absetzen
+				if($this->formvars['anzahl'] == ''){
+				$this->formvars['anzahl'] = $layerset[$i]['max_query_rows'] ?: MAXQUERYROWS;
+				}
 				if ($this->last_query != ''){
 					$request = $this->last_query[$layerset[0]['Layer_ID']]['sql'];
 					if($this->formvars['anzahl'] == '')$this->formvars['anzahl'] = $this->last_query[$layerset[0]['Layer_ID']]['limit'];
 				}
-        $wfs->get_feature_request($request, NULL, $filter, $this->formvars['anzahl']);
-        $features = $wfs->extract_features();
-        for($j = 0; $j < count($features); $j++){
-          for($k = 0; $k < count($layerset[0]['attributes']['name']); $k++){
-            $layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
-						$layerset[0]['attributes']['privileg'][$k] = 0;
-						$layerset[0]['attributes']['visible'][$k] = true;
-          }
-          $layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
-					$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
-					if ($features[$j]['geom'] != '') {
-						$geometries_found = true;
-					}
-        }
+				$wfs->get_feature_request($request, NULL, $filter, $this->formvars['anzahl']);
+				$features = $wfs->extract_features();
+				for($j = 0; $j < count($features); $j++){
+				for($k = 0; $k < count($layerset[0]['attributes']['name']); $k++){
+					$layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
+								$layerset[0]['attributes']['privileg'][$k] = 0;
+								$layerset[0]['attributes']['visible'][$k] = true;
+				}
+				$layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+							$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
+							if ($features[$j]['geom'] != '') {
+								$geometries_found = true;
+							}
+				}
 				# last_search speichern
 				if($this->last_query == ''){
 					$this->formvars['search_name'] = '<last_search>';
@@ -9796,7 +9797,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $request, NULL, $this->formvars['anzahl'], NULL);
 				}
 				$layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $this->pgdatabase, $layerset[0]['shape'], true, $this->Stelle->id);
-      }break;
+      		} break;
 		}   # Ende switch connectiontype
 
 		$this->qlayerset[0] = $layerset[0];
@@ -20151,8 +20152,17 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
+
+			$rs['options'] = replace_params(
+				$rs['options'],
+				rolle::$layer_params,
+				$this->User_ID,
+				$this->Stelle_ID,
+				rolle::$hist_timestamp,
+				$this->rolle->language
+			);
+			// $rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
+			// $rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];
@@ -20182,7 +20192,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
+	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20312,10 +20322,10 @@ class db_mapObj{
 				$replaced_default = replace_params(
 					$rs['default'],
 					$replace_params,
-					$this->GUI->user->id,
-					$this->GUI->Stelle_ID,
+					$this->User_ID,
+					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->GUI->rolle->language
+					$this->rolle->language
 				);
 				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 				if ($ret1[0] == 0) {
@@ -20333,7 +20343,7 @@ class db_mapObj{
 				$this->User_ID,
 				$this->Stelle_ID,
 				rolle::$hist_timestamp,
-				$language
+				$this->rolle->language
 			);
 			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			#$rs['options'] = str_replace('$language', $language, $rs['options']);

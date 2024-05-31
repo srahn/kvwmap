@@ -1,4 +1,24 @@
 BEGIN;
+  -- Neuer Typ xplankonverter.xp_spezexternereferenzauslegung
+	DO $$
+	BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'xp_spezexternereferenzauslegung') THEN
+      CREATE TYPE xplankonverter.xp_spezexternereferenzauslegung AS (
+				georefurl character varying,
+				georefmimetype xplan_gml.xp_mimetypes,
+				art xplan_gml.xp_externereferenzart,
+				informationssystemurl character varying,
+				referenzname character varying,
+				referenzurl character varying,
+				referenzmimetype xplan_gml.xp_mimetypes,
+				beschreibung character varying,
+				datum date,
+				typ xplan_gml.xp_externereferenztyp,
+				nurzurauslegung boolean
+			);
+    END IF;
+	END$$;
+
 	-- Funktion zur Konvertierung von xplan_gml.xp_spezexternereferenz nach xplankonverter.xp_spezexternereferenzauslegung
 	CREATE OR REPLACE FUNCTION xplankonverter.to_spezexternereferenzauslegung(
 		externereferenz xplan_gml.xp_spezexternereferenz[],
@@ -41,6 +61,8 @@ BEGIN;
 	$BODY$;
 	COMMENT ON FUNCTION xplankonverter.to_spezexternereferenzauslegung(xplan_gml.xp_spezexternereferenz[], boolean)
     IS 'Wandelt ein Typ xplan_gml.xp_spezexternereferenz[] in xplankonverter.xp_spezexternereferenzauslegung[] um in dem an alle Arrayelemente das Attribut nurzurauslegung angehängt wird. Der Wert der für alle gesetzt werden soll, kann im gleichnamigen Parameter übergeben werden.';
+
+	ALTER TABLE xplan_gml.xp_plan ALTER column externereferenz TYPE xplankonverter.xp_spezexternereferenzauslegung[] USING xplankonverter.to_spezexternereferenzauslegung(externereferenz, false);
 
 	CREATE OR REPLACE FUNCTION xplankonverter.to_spezexternereferenz(
 		externereferenz_mit_nurzurauslegung xplankonverter.xp_spezexternereferenzauslegung
@@ -128,28 +150,6 @@ BEGIN;
 		RETURN NEW;
 	END;
 	$BODY$;
-
-  -- Neuer Typ xplankonverter.xp_spezexternereferenzauslegung
-	DO $$
-	BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'xp_spezexternereferenzauslegung') THEN
-      CREATE TYPE xplankonverter.xp_spezexternereferenzauslegung AS (
-				georefurl character varying,
-				georefmimetype xplan_gml.xp_mimetypes,
-				art xplan_gml.xp_externereferenzart,
-				informationssystemurl character varying,
-				referenzname character varying,
-				referenzurl character varying,
-				referenzmimetype xplan_gml.xp_mimetypes,
-				beschreibung character varying,
-				datum date,
-				typ xplan_gml.xp_externereferenztyp,
-				nurzurauslegung boolean
-			);
-
-			ALTER TABLE xplan_gml.xp_plan ALTER column externereferenz TYPE xplankonverter.xp_spezexternereferenzauslegung[] USING xplankonverter.to_spezexternereferenzauslegung(externereferenz, false);
-    END IF;
-	END$$;
 
 	CREATE OR REPLACE FUNCTION xplankonverter.filter_nurzurauslegung(
 		auslegungsstartdatum date[],
