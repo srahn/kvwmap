@@ -2035,7 +2035,7 @@ class stelle {
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
 		$language_layer_name = "Name" . $language_postfix;
 		# nicht editierbare SubformFKs ausschliessen
-		$condition = ($privileg > 0 AND $no_subform_layers ? "subformfk IS NULL OR privilegfk = 1" : "true");
+		$condition = (($privileg > 0 AND $no_subform_layers) ? "subformfk IS NULL OR privilegfk = 1" : "true");
 		$sql = "
 			SELECT DISTINCT
 				Layer_ID,
