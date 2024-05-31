@@ -20299,15 +20299,6 @@ class db_mapObj{
 						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 					}
 				}
-<<<<<<< HEAD
-				$replaced_default = replace_params(
-					$rs['default'],
-					$replace_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-=======
 				$rs['options'] = replace_params(
 					$rs['options'],
 					rolle::$layer_params,
@@ -20315,24 +20306,10 @@ class db_mapObj{
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
 					$language
->>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
 				);
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-<<<<<<< HEAD
-			$rs['options'] = replace_params(
-				$rs['options'],
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$this->rolle->language
-			);
-			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			#$rs['options'] = str_replace('$language', $language, $rs['options']);
-=======
->>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
