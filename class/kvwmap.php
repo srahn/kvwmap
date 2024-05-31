@@ -20289,10 +20289,10 @@ class db_mapObj{
 					$replaced_default = replace_params(
 						$attributes['default'][$i],
 						rolle::$layer_params,
-						$this->GUI->user->id,
-						$this->GUI->Stelle_ID,
+						$this->User_ID,
+						$this->Stelle_ID,
 						rolle::$hist_timestamp,
-						$this->GUI->rolle->language
+						$this->rolle->language
 					);
 					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 					if ($ret1[0] == 0) {
@@ -20305,7 +20305,7 @@ class db_mapObj{
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$language
+					$this->rolle->language
 				);
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
