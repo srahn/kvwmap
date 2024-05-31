@@ -946,7 +946,7 @@ l.Name AS sub_layer_name
 				}
 			)
 		);
-		$data = str_replace('$scale', '1000', $mapDB->getData($this->get($this->identifier)));
+		$data = str_replace('$SCALE', '1000', $mapDB->getData($this->get($this->identifier)));
 		$this->table_alias = get_table_alias(get_sql_from_mapserver_data($data), $this->get('schema'), $this->get('maintable'));
 
 		// read the attributes from the maintable

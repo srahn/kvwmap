@@ -105,17 +105,22 @@ function compare_legendorder($a, $b){
 	else return 0;
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach($params AS $key => $value){
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -261,7 +266,7 @@ class GUI {
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
 		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
@@ -830,7 +835,7 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$scale') !== false){
+				if(strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -864,7 +869,7 @@ class GUI {
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 				if (substr($layerset['Filter'],0,1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {

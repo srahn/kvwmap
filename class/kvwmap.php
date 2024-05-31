@@ -1118,7 +1118,7 @@ echo '			</table>
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
 		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
@@ -2373,7 +2373,7 @@ echo '			</table>
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$scale') !== false){
+				if(strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -2407,7 +2407,7 @@ echo '			</table>
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 				if (substr($layerset['Filter'],0,1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
@@ -3216,7 +3216,7 @@ echo '			</table>
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
@@ -3625,15 +3625,6 @@ echo '			</table>
 			$where = "lower(output::text) LIKE lower('" . $wildcard . $this->formvars['inputvalue'] . "%')";
 		}
 
-		$sql = replace_params(
-			$sql,
-			rolle::$layer_params,
-			$this->user->id,
-			$this->Stelle->id,
-			rolle::$hist_timestamp,
-			$this->user->rolle->language
-		);
-
 		$sql = "
 			SELECT *
 			FROM (" . $sql . ") as foo
@@ -3879,7 +3870,7 @@ echo '			</table>
 				$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$data_attributes['the_geom'].', '.$extent.')';
 				# Filter hinzufügen
 				if($layer[$i]['Filter'] != ''){
-					$layer[$i]['Filter'] = str_replace('$userid', $this->user->id, $layer[$i]['Filter']);
+					$layer[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layer[$i]['Filter']);
           $fromwhere .= " AND " . $layer[$i]['Filter'];
         }
 				if($data_attributes['the_geom'] != ''){
@@ -3931,7 +3922,7 @@ echo '			</table>
 			$fromwhere = 'from ('.$select.') as foo1 WHERE st_intersects('.$geom.', '.$extent.') ';
 			# Filter hinzufügen
 			if($layer['Filter'] != ''){
-				$layer['Filter'] = str_replace('$userid', $this->user->id, $layer['Filter']);
+				$layer['Filter'] = str_replace('$USER_ID', $this->user->id, $layer['Filter']);
 				$fromwhere .= " AND " . $layer['Filter'];
 			}
 		}
@@ -4397,8 +4388,6 @@ echo '			</table>
     else{
 			$attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, $attributenames);
 		}
-		$attributes['options'][$this->formvars['attribute']] = str_replace('$userid', $this->user->id, $attributes['options'][$this->formvars['attribute']]);
-		$attributes['options'][$this->formvars['attribute']] = str_replace('$stelleid', $this->Stelle->id, $attributes['options'][$this->formvars['attribute']]);
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
     if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
@@ -4409,14 +4398,6 @@ echo '			</table>
 			$sql = str_replace('= <requires>' . $attributenames[$i] . '</requires>', " IN ('" . $attributevalues[$i] . "')", $sql);
 			$sql = str_replace('<requires>' . $attributenames[$i].'</requires>', "'" . $attributevalues[$i] . "'", $sql);	# fallback
 		}
-		$sql = replace_params(
-			$sql,
-			rolle::$layer_params,
-			$this->user->id,
-			$this->Stelle->id,
-			rolle::$hist_timestamp,
-			$this->user->rolle->language
-		);
 		#echo $sql;
 		@$ret = $layerdb->execSQL($sql, 4, 0);
 		if (!$ret[0]) {
@@ -9593,7 +9574,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
 				if ($layerset[0]['Filter'] != '') {
-					$layerset[0]['Filter'] = str_replace('$userid', $this->user->id, $layerset[0]['Filter']);
+					$layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
 
@@ -12340,7 +12321,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS.', '.MS_WFS, 'Name');
 		if($this->formvars['selected_layer_id']){
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true, false, false);
+			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL, true, false, false, false);
 			$this->datatypes = $mapdb->get_datatypes([$this->formvars['selected_layer_id']]);
 			$this->layer = $mapdb->get_Layer($this->formvars['selected_layer_id'], false);
 		}
@@ -12368,7 +12349,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function save_layer_attributes($formvars) {
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, true, false, false);
+		$this->attributes = $mapdb->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, true, false, false, false);
 		$mapdb->save_layer_attributes($this->attributes, $this->database, $formvars);
 	}
 
@@ -15838,7 +15819,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# Filter zur Where-Klausel hinzufügen
 							$filter = '';
 							if($layerset[$i]['Filter'] != ''){
-								$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
+								$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -16553,7 +16534,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
+					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -16776,7 +16757,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Filter berücksichtigen
 				$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
 				if($filter != ''){
-					$filter = str_replace('$userid', $this->user->id, $filter);
+					$filter = str_replace('$USER_ID', $this->user->id, $filter);
 					$subquery .= ' WHERE '.$filter;
 				}
 
@@ -16892,10 +16873,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Haupt-Layer erzeugen
 				$layer = new LayerObj($map);
 				# Parameter $scale in Data ersetzen
-				$layerset['Data'] = str_replace('$scale', $this->map_scaledenom ?: 1000, $layerset['Data']);
+				$layerset['Data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
-					$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
+					$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
 						if(MAPSERVERVERSION > 700){
 							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
@@ -18312,7 +18293,7 @@ class db_mapObj{
 		);
 		$options = array_merge($default_options, $options);
 		global $language;
-		$data = str_replace('$scale', '1000', $this->getData($layer_id));
+		$data = str_replace('$SCALE', '1000', $this->getData($layer_id));
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
@@ -18493,8 +18474,6 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
-											$sql = str_replace('$stelleid', $stelle_id, $sql);
-											#$sql = str_replace('$userid', $this->User_ID, $sql);
 											#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
@@ -18515,8 +18494,6 @@ class db_mapObj{
 								}
 								elseif ($attributes['options'][$i] != '') {
 									$sql = $attributes['options'][$i];
-									$sql = str_replace('$stelleid', $stelle_id, $sql);
-									#$sql = str_replace('$userid', $this->User_ID, $sql);
 									#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -18603,7 +18580,6 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
-									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {
@@ -19492,13 +19468,6 @@ class db_mapObj{
 			);
 		}
 
-		if ($this->GUI->plugin_loaded('portal')) {
-			$zero_if_empty_attributes = array_merge(
-				$zero_if_empty_attributes,
-				array('cluster_option')
-			);
-		}
-
 		foreach ($zero_if_empty_attributes AS $key) {
 			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
@@ -19578,13 +19547,6 @@ class db_mapObj{
 			$column_equal_field_attributes = array_merge(
 				$column_equal_field_attributes,
 				array('vector_tile_url')
-			);
-		}
-
-		if ($this->GUI->plugin_loaded('portal')) {
-			$column_equal_field_attributes = array_merge(
-				$column_equal_field_attributes,
-				array('cluster_option')
 			);
 		}
 
@@ -20036,7 +19998,7 @@ class db_mapObj{
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
   }
 
-  function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false){
+  function read_datatype_attributes($layer_id, $datatype_id, $datatypedb, $attributenames, $all_languages = false, $recursive = false, $replace = true){
 		global $language;
 
 		$alias_column = (
@@ -20150,19 +20112,34 @@ class db_mapObj{
 					$attributes['default'][$i]= $rs['default'];
 				}
 			}
+
+			if ($replace) {
+				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$replaced_default = replace_params(
+						$attributes['default'][$i],
+						rolle::$layer_params,
+						$this->User_ID,
+						$this->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
+					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				$rs['options'] = replace_params(
+					$rs['options'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}
+
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']]= $rs['form_element_type'];
-
-			$rs['options'] = replace_params(
-				$rs['options'],
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$this->rolle->language
-			);
-			// $rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			// $rs['options'] = str_replace('$language', $this->user->rolle->language, $rs['options']);
 			$attributes['options'][$i]= $rs['options'];
 			$attributes['options'][$rs['name']]= $rs['options'];
 			$attributes['alias'][$i]= $rs['alias'];
@@ -20192,7 +20169,11 @@ class db_mapObj{
 		return $attributes;
   }
 
+<<<<<<< HEAD
 	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false) {
+=======
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+>>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20303,22 +20284,26 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
+			if ($get_default) {
+				$attributes['default'][$i] = $rs['default'];
+			}
 
-			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$replace_params = rolle::$layer_params;
-				if ($this->GUI->formvars['attributenames']) {
-					foreach ($this->GUI->formvars['attributenames'] AS $index => $attribute) {
-						if (
-							in_array($attribute, array('language', 'hist_timestamp', 'current_date', 'current_timestamp', 'user_id', 'stelle_id', 'scale')) OR
-							array_key_exists($attribute, $replace_params)
-						) {
-							# Attribute is predefined or layer_param. Skip to add as replace_param.
-						}
-						else {
-							$replace_params[$attribute] = $this->GUI->formvars['values'][$index];
-						}
+			if ($replace) {
+				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$replaced_default = replace_params(
+						$attributes['default'][$i],
+						rolle::$layer_params,
+						$this->GUI->user->id,
+						$this->GUI->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->GUI->rolle->language
+					);
+					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 					}
 				}
+<<<<<<< HEAD
 				$replaced_default = replace_params(
 					$rs['default'],
 					$replace_params,
@@ -20326,17 +20311,20 @@ class db_mapObj{
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
 					$this->rolle->language
+=======
+				$rs['options'] = replace_params(
+					$rs['options'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$language
+>>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
 				);
-				$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
-				if ($ret1[0] == 0) {
-					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
-				}
-			}
-			else {
-				$attributes['default'][$i] = $rs['default'];
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
+<<<<<<< HEAD
 			$rs['options'] = replace_params(
 				$rs['options'],
 				rolle::$layer_params,
@@ -20347,6 +20335,8 @@ class db_mapObj{
 			);
 			#$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
 			#$rs['options'] = str_replace('$language', $language, $rs['options']);
+=======
+>>>>>>> 71ddc8abecd689060ad8674774acf08d1ea70e6b
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
@@ -20700,8 +20690,8 @@ class db_mapObj{
 			$rs = $this->db->result->fetch_assoc();
 		}
 		$params = $rs['params'];
-		$params = str_replace('$user_id', $this->User_ID, $params);
-		$params = str_replace('$stelle_id', $this->Stelle_ID, $params);
+		$params = str_replace('$USER_ID', $this->User_ID, $params);
+		$params = str_replace('$STELLE_ID', $this->Stelle_ID, $params);
 		return (array)json_decode('{' . $params . '}');
 	}
 

@@ -171,17 +171,22 @@ function InchesPerUnit($unit, $center_y){
 	}
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);	
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach($params AS $key => $value){
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -517,7 +522,7 @@ class GUI {
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
+					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -1933,9 +1938,12 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
 		global $language;
-		$attributes = array();
+		$attributes = array(
+			'name' => array(),
+			'tab' => array()
+		);
 		$einschr = '';
 
 		$alias_column = (
@@ -1956,7 +1964,7 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT 
+			SELECT
 				`order`, " .
 				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
 				`layer_id`,
@@ -1964,10 +1972,12 @@ class db_mapObj{
 				`real_name`,
 				`tablename`,
 				`table_alias_name`,
+				a.`schema`,
 				`type`,
 				d.`name` as typename,
 				`geometrytype`,
 				`constraints`,
+				`saveable`,
 				`nullable`,
 				`length`,
 				`decimal_length`,
@@ -1976,6 +1986,7 @@ class db_mapObj{
 				`options`,
 				`tooltip`,
 				`group`,
+				`tab`,
 				`arrangement`,
 				`labeling`,
 				`raster_visibility`,
@@ -1999,23 +2010,21 @@ class db_mapObj{
 				`order`
 		";
 		#echo '<br>Sql read_layer_attributes: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>" . $sql,4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
-			if ($rs['tablename']){
-				if (strpos($rs['tablename'], '.') !== false){
-					$explosion = explode('.', $rs['tablename']);
-					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-				}
-				$attributes['table_name'][$i]= $rs['tablename'];
+			if ($rs['tablename']) {
+				$attributes['table_name'][$i] = $rs['tablename'];
 				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+				$attributes['schema'][$i] = $rs['schema'];
 			}
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
@@ -2035,24 +2044,41 @@ class db_mapObj{
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
 			if ($rs['constraints'] == 'PRIMARY KEY') {
 				$attributes['pk'][] = $rs['real_name'];
-			}			
+			}
+			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-
-			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
-				if ($ret1[0] == 0) {
-					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
-				}
-			}
-			else {
+			if ($get_default) {
 				$attributes['default'][$i] = $rs['default'];
+			}
+
+			if ($replace) {
+				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$replaced_default = replace_params(
+						$attributes['default'][$i],
+						rolle::$layer_params,
+						$this->GUI->user->id,
+						$this->GUI->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->GUI->rolle->language
+					);
+					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				$rs['options'] = replace_params(
+					$rs['options'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$language
+				);
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $language, $rs['options']);
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
@@ -2062,6 +2088,7 @@ class db_mapObj{
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
 			$attributes['group'][$i] = $rs['group'];
+			$attributes['tab'][$i] = $rs['tab'];
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
@@ -2087,13 +2114,13 @@ class db_mapObj{
 		}
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
-			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
 		}
 		else {
 			$attributes['all_table_names'] = array();
 		}
+		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
-  }
+	}
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
@@ -2237,8 +2264,6 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
-											$sql = str_replace('$stelleid', $stelle_id, $sql);
-											$sql = str_replace('$userid', $this->User_ID, $sql);
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
@@ -2262,8 +2287,6 @@ class db_mapObj{
 									else {
 										$sql = $attributes['options'][$i];
 									}
-									$sql = str_replace('$stelleid', $stelle_id, $sql);
-									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
@@ -2344,7 +2367,6 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
-									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {
