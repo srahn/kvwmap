@@ -1524,7 +1524,7 @@ echo '			</table>
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
-			$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
+			$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
 			$legend .=  '<input ';
 			if($layer['selectiontype'] == 'radio'){
 				$legend .=  'type="radio" ';
