@@ -258,8 +258,7 @@ $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($
 	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
 	$projFROM = ms_newprojectionobj("init=epsg:" . $stelle_settings['epsg_code']);
 	$projTO = ms_newprojectionobj("init=epsg:4326");
-	$extent = ms_newRectObj();
-	$extent->setextent($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
+	$extent = rectObj($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
 	$extent->project($projFROM, $projTO);
 	$stelle['west'] = round($extent->minx, 5);
 	$stelle['south'] = round($extent->miny, 5);

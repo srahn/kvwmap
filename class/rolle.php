@@ -13,6 +13,8 @@ class rolle {
 	var $minx;
 	var $language;
 	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
@@ -72,7 +74,7 @@ class rolle {
 		return 1;
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -110,6 +112,10 @@ class rolle {
 				) as privilegfk";
 		}
 
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+		}
+
 		$sql = "
 			SELECT " .
 			$name_column . ",
@@ -122,7 +128,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -160,7 +166,8 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . "
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";
@@ -440,8 +447,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
@@ -478,6 +484,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -545,8 +552,8 @@ class rolle {
 			else {
 				while ($param = $this->database->result->fetch_assoc()) {
 					$sql = $param['options_sql'];
-					$sql = str_replace('$user_id', $this->user_id, $sql);
-					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
+					$sql = str_replace('$USER_ID', $this->user_id, $sql);
+					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);
 					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
@@ -2181,6 +2188,21 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
+
+	function set_last_query_layer($layer_id){
+		$sql = '
+			UPDATE 
+				rolle 
+			SET 
+				last_query_layer = ' . $layer_id . '
+			WHERE 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:set_last_query_layer - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
 		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';

@@ -146,6 +146,15 @@ body {
 	margin: auto;
 }
 
+.collapsed {
+	visibility: collapse;
+  height: 0;
+}
+
+.collapsed *{
+	margin: 0 !important;
+}
+
 #copyrights_div table td {
 	vertical-align: top;
 	padding: 4px;
@@ -790,12 +799,12 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
-a.invisiblelayerlink:hover{
-	color: gray;
-}
-
 .sachdatenanzeige_paging{
 	margin-top: 10px;
+}
+
+a.invisiblelayerlink:hover{
+	color: gray;
 }
 
 select[name="geom_from_layer"] {
@@ -1715,7 +1724,7 @@ span.black {
 }
 
 #layer {
-	margin:0px 8px 8px 8px;
+	margin: 18px 8px 8px 8px;
 	clear: both;
 }
 
@@ -1922,7 +1931,7 @@ thead.gle th {
 }
 
 .gle_tabs > div{
-	padding: 0 5px 0 8px;
+	padding: 1px 5px 0 8px;
 	cursor: pointer;
 	border: 1px solid #bbb;
 	border-left: none;
@@ -1934,7 +1943,7 @@ thead.gle th {
 }
 
 .gle_tabs > div:first-child {
-	padding: 0 5px 0 5px;
+	padding: 1px 5px 0 5px;
 	margin-left: 0;
 }
 
@@ -2870,4 +2879,166 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 #gemkgschl-name-Trennerwort-span {
 	display: none;
 	margin-left: 10px;
+}
+
+.chosen-container-multi {
+  border: none;
+}
+
+.chosen-container-multi .chosen-choices {
+	background-image: none;
+	padding: 7px;
+	border: none !important;
+	border-radius: 4px;
+	-webkit-box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 1px 4px 0 rgba(0, 0, 0, 0.1) !important;
+}
+
+.chosen-container-multi .chosen-choices {
+	position: relative;
+	overflow: hidden;
+	margin: 0;
+	padding: 0 5px;
+	width: 100%;
+	height: auto;
+	border: 1px solid #aaa;
+	background-color: #fff;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(1%, #eee), color-stop(15%, #fff));
+	background-image: linear-gradient(#eee 1%, #fff 15%);
+	cursor: text;
+}
+
+.chosen-container-multi .chosen-choices li.search-choice {
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	padding-top: 7px;
+	padding-bottom: 7px;
+	padding-left: 10px;
+	padding-right: 26px;
+	border: none;
+	background-image: none;
+}
+
+.chosen-container-multi .chosen-choices li.search-choice {
+	position: relative;
+	margin: 3px 5px 3px 0;
+	padding: 3px 20px 3px 5px;
+	border: 1px solid #aaa;
+	max-width: 100%;
+	border-radius: 3px;
+	background-color: #eeeeee;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, #f4f4f4), color-stop(50%, #f0f0f0), color-stop(52%, #e8e8e8), to(#eee));
+	background-image: linear-gradient(#f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
+	background-size: 100% 19px;
+	background-repeat: repeat-x;
+	background-clip: padding-box;
+	-webkit-box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+	box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+	color: #333;
+	line-height: 13px;
+	cursor: default;
+}
+
+.chosen-container-multi .chosen-choices li {
+	float: left;
+	list-style: none;
+}
+
+.chosen-container-multi .chosen-choices li.search-field input[type="text"] {
+	height: 32px;
+	font-size: 14px;
+}
+
+.chosen-container-multi .chosen-choices li.search-field input[type="text"] {
+	margin: 1px 0;
+	padding: 0;
+	height: 25px;
+	outline: 0;
+	border: 0 !important;
+	background: transparent !important;
+	-webkit-box-shadow: none;
+	box-shadow: none;
+	color: #999;
+	font-size: 100%;
+	font-family: sans-serif;
+	line-height: normal;
+	border-radius: 0;
+	width: 25px;
+}
+
+.chosen-container-multi .chosen-choices li.search-field {
+	margin: 0;
+	padding: 0;
+	white-space: nowrap;
+}
+
+.chosen-container-multi .chosen-choices li {
+	float: left;
+	list-style: none;
+}
+
+.selectable-item {
+  color: black;
+}
+
+.selected-item {
+	color: gray;
+	display: none;
+}
+
+.highlighted-item {
+	background-color: #ff9d9d;
+	cursor: pointer;
+}
+
+#chosen-container {
+	width: 93%;
+	float:left;
+}
+
+#chosen-choices {
+	list-style: none;
+	margin-left: -15px;
+}
+
+.chosen-item {
+	position: relative;
+	margin: 3px 5px 3px 0;
+	padding: 3px 20px 3px 5px;
+	border: 1px solid #aaa;
+	max-width: 100%;
+	border-radius: 3px;
+	background-color: #eeeeee;
+	background-image: -webkit-gradient(linear, left top, left bottom, color-stop(20%, #f4f4f4), color-stop(50%, #f0f0f0), color-stop(52%, #e8e8e8), to(#eee));
+	background-image: linear-gradient(#f4f4f4 20%, #f0f0f0 50%, #e8e8e8 52%, #eee 100%);
+	background-size: 100% 19px;
+	background-repeat: repeat-x;
+	background-clip: padding-box;
+	-webkit-box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+	box-shadow: 0 0 2px #fff inset, 0 1px 0 rgba(0, 0, 0, 0.05);
+	color: #333;
+	line-height: 13px;
+	cursor: default;
+}
+
+#chosen-drop {
+	display: none;
+}
+
+#chosen-buttons {
+	float: right;
+	width: 42px;
+	margin-top: 7px;
+}
+
+.chosen-item-close {
+	cursor: pointer;
+}
+
+.delete-button {
+
+}
+
+.delete-button:hover {
+	background-color: #ffa2a2;
 }

@@ -256,8 +256,7 @@ class stelle {
 		$rs = $this->database->result->fetch_array();
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['Bezeichnung'];
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
@@ -751,6 +750,13 @@ class stelle {
 
 	function getStellen($order, $user_id = 0, $where = "1") {
 		global $admin_stellen;
+		$stellen = array(
+			'ID' => array(),
+			'index' => array(),
+			'Bezeichnung' => array(),
+			'show_shared_layers' => array(),
+			'Bezeichnung_parent' => array()
+		);
 		$sql = "
 			SELECT
 				s.ID,
@@ -765,7 +771,15 @@ class stelle {
 					WHERE
 						s.`ID` = h.`child_id` AND 
 						es.ID = h.parent_id
-				) as Bezeichnung_parent
+				) as Bezeichnung_parent,
+				(
+					SELECT
+						max(last_time_id)
+					FROM
+						`rolle`
+					WHERE
+					`rolle`.stelle_id = s.ID
+				) as last_time_id
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
@@ -788,6 +802,7 @@ class stelle {
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}
 		return $stellen;
@@ -2423,7 +2438,7 @@ class stelle {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
 					$layer->minScale = $layer2Stelle->get('minscale');
 					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = 100 - $layer2Stelle->get('transparency');
+					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
 					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
 					return $layer->get_overlays_def($this->id);
 				},

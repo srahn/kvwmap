@@ -4,6 +4,26 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
+
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
 
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
@@ -679,7 +699,7 @@ if(!function_exists('imagerotate')){
 function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
-  $point = ms_newPointObj();
+  $point = new PointObj();
 	$point->setXY($x,$y);
 	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
   $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
@@ -1912,22 +1932,22 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $case = 'strtolower') {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach($params AS $key => $value){
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	$str = str_replace('$current_date', date('Y-m-d'), $str);
-	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
-	if (!is_null($user_id))							$str = str_replace($case('$user_id'), $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace($case('$stelle_id'), $stelle_id, $str);
-	if (!is_null($user_id))							$str = str_replace($case('$userid'), $user_id, $str);  // deprecated
-	if (!is_null($stelle_id))						$str = str_replace($case('$stelleid'), $stelle_id, $str); // deprecated
-	if (!is_null($hist_timestamp))			$str = str_replace($case('$hist_timestamp'), $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace($case('$language'), $language, $str);
-	if (!is_null($scale))								$str = str_replace($case('$scale'), $scale, $str);
 	return $str;
 }
 
@@ -2529,7 +2549,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		} break;
 
 		case 'int_csv' : {
-			$value = explode(',', $value);
+			$value = explode(',', (string)$value);
 			foreach ($value AS &$single_value) {
 				sanitize($single_value, 'int');
 			}
@@ -2627,7 +2647,6 @@ function de_date($date_en) {
 	}
 }
 
-
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
@@ -2646,6 +2665,87 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 	}
 	else {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
+	}
+}
+
+/**
+ * Function read all files recursively from a directory
+ * @param String $dir - The directory
+ * @return Array $files - The files in the directory and below
+ */
+function getAllFiles($dir) {
+	$files = [];
+
+	if (substr($dir, -1) != '/') {
+		$dir .= '/';
+	}
+
+	// Get all files and directories within the directory
+	$items = glob($dir . '*', GLOB_MARK);
+
+	foreach ($items AS $item) {
+		if (is_dir($item)) {
+			$files = array_merge($files, getAllFiles($item));
+		}
+		else {
+			$files[] = $item;
+		}
+	}
+
+	return $files;
+}
+
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Function check if in $files exists files with any of $required extensions.
+ * Default is to check if all required shape files extensions exists in $files
+ * @param Array $files A list of filenames.
+ * @param Array $required (optional) A list of extensions.
+ */
+function required_shape_files_exists($files, $required = array('shp', 'shx', 'dbf')) {
+	$existing = array_intersect(
+		$required,
+		array_map(
+			function($file) {
+				return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+			},
+			$files
+		)
+	);
+
+	if ($required == $existing) {
+		return array(
+			'success' => true,
+			'msg' => 'Alle erforderlichen Dateien vorhanden.'
+		);
+	}
+	else {
+		$missing = array_diff($required, $existing);
+		return array(
+			'success' => false,
+			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
+		);
 	}
 }
 ?>

@@ -1,5 +1,5 @@
 <?php
-$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+$language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
 include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
 

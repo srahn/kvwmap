@@ -30,8 +30,32 @@
 #############################
 
 class ddl {
-    
-  function __construct($database, $gui = NULL) {
+	public $debug;
+	public $database;
+	public $gui;
+	public $din_formats;
+	public $remaining_freetexts;
+	public $remaining_rectangles;
+	public $remaining_lines;
+	public $colors;
+	public $layout;
+	public $transaction_start_y;
+	public $transaction_start_pageid;
+	public $pdf;
+	public $i_on_page;
+	public $miny;
+	public $maxy;
+	public $offsety;
+	public $max_dataset_height;
+	public $page_overflow;
+	public $layerset;
+	public $attributes;
+	public $xoffset_onpage;
+	public $user;
+	public $result;
+	public $Stelle;
+
+	function __construct($database, $gui = NULL) {
     global $debug;
     $this->debug = $debug;
     $this->database = $database;
@@ -590,10 +614,10 @@ class ddl {
 									$x2 = $x;
 									$y2 = $miny_array = $y;
 									for ($v = 0; $v < @count($values); $v++) {
-										if($attributes['form_element_type'][$j] == 'Dokument') {
+										if ($attributes['form_element_type'][$j] == 'Dokument') {
 											# Dokument-Attribute werden im Raster ausgegeben
 											if ($v > 0) {
-												if (($x2 + 2*$width + 20) < ($this->layout['width'] - $this->layout['margin_right'])) {
+												if (($x2 + 2 * $width + 20) < ($this->layout['width'] - $this->layout['margin_right'])) {
 													# neue Spalte
 													$x2 += $width + 20;
 												}
@@ -679,11 +703,12 @@ class ddl {
 							include_(CLASSPATH.'pointeditor.php');
 							$pointeditor = new pointeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
 							$point = $pointeditor->getpoint($oid, $attributes['table_name'][$attributes['the_geom']], $attributes['real_name'][$attributes['the_geom']]);
-							$rect = ms_newRectObj();
-							$rect->minx = $point['pointx'] - $rand;
-							$rect->maxx = $point['pointx'] + $rand;
-							$rect->miny = $point['pointy'] - $rand;
-							$rect->maxy = $point['pointy'] + $rand;
+							$rect = rectObj(
+								$point['pointx'] - $rand,
+								$point['pointy'] - $rand,								 
+								$point['pointx'] + $rand,
+								$point['pointy'] + $rand
+							);
 						}
 						else {
 							include_(CLASSPATH.'polygoneditor.php');
@@ -714,7 +739,7 @@ class ddl {
 					$this->gui->map->scalebar->height = 3;
 					# Parameter $scale in Data ersetzen
 					for($l = 0; $l < count($this->gui->layers_replace_scale); $l++){
-						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$scale', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
+						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
@@ -802,14 +827,23 @@ class ddl {
 		}
 		if (substr($dokumentpfad, 0, 4) == 'http') {
 			$file = file_get_contents($dokumentpfad);
-			$dokumentpfad = IMAGEPATH.rand(0,100000).'.jpg';
+			$dokumentpfad = IMAGEPATH . rand(0, 100000) . '.jpg';
 			file_put_contents($dokumentpfad, $file);
 		}
 		$pfadteil = explode('&original_name=', $dokumentpfad);
 		$dateiname = $pfadteil[0];
 		if ($dateiname == $this->attributes['alias'][$j] AND $preview) {
-			$dateiname = WWWROOT.APPLVERSION.GRAPHICSPATH.'nogeom.png'; # als Platzhalter im Editor
+			$dateiname = WWWROOT . APPLVERSION . GRAPHICSPATH . 'nogeom.png'; # als Platzhalter im Editor
 		}
+
+		if ($this->layout['use_previews']) {
+			$path_parts = pathinfo($dateiname);
+			$preview_img = $path_parts['dirname'] . '/' . $path_parts['filename'] . '_thumb.jpg';
+			if (file_exists($preview_img)) {
+				$dateiname = $preview_img;
+			}
+		}
+
 		if ($dateiname != '' AND file_exists($dateiname)) {
 			$dateinamensteil = pathinfo($dateiname);
 			if (in_array(strtolower($dateinamensteil['extension']), array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
@@ -820,7 +854,10 @@ class ddl {
 					exec($command, $result, $status);
 					#echo '<br>Result of command: ' . print_r($command, true) . ' status: ' . $status;
 				}
-
+				// echo '<br>dateiname: ' . $dateiname;
+				// echo '<br>newfile: ' . $new_filename;
+				// echo '<br>file_exists: ' . file_exists($new_filename);
+				// exit;
 				if (file_exists($new_filename)) {
 					$size = getimagesize($new_filename);
 					$ratio = $size[1] / $size[0];
@@ -1504,6 +1541,7 @@ class ddl {
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
 			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `use_previews` = " . (int)$formvars['use_previews'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
@@ -1685,7 +1723,8 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['use_previews'];
+			$sql .= ", `use_previews` = ".(int)$formvars['no_record_splitting'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
@@ -2003,7 +2042,7 @@ class ddl {
 	}
 
 	function output_freetext_form($texts, $layer_id, $ddl_id){
-		for($i = 0; $i < @count($texts); $i++){
+		for($i = 0; $i < count_or_0($texts); $i++){
 			$texts[$i]['text'] = str_replace(';', chr(10), $texts[$i]['text']);
 			echo '
 			<tr>

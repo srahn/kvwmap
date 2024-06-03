@@ -155,14 +155,14 @@ while ($line = $ret->fetch_assoc()){
 while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
+    $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   }
   catch(Exception $e) {
-    $extent = new rectObj();
+    $extent = new rectObj($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   }
   foreach($params AS $key => $value){
     $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
   }
-  $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   $wgsProjection = ms_newprojectionobj("init=epsg:4326");
   $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);
   $extent->project($wgsProjection, $userProjection);

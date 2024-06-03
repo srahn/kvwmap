@@ -30,7 +30,10 @@
 	$strSearchTransparency="Result/Import-Transparency";
 	$strPolish="Polish";
 	$strCoordType="Coordinate Presentation";
-	$strSingleQuery="only one layer queryable";
+	$strMapQuery="Map Query";
+	$strMapQuery0="select multiple layers";
+	$strMapQuery1="select only one layer";
+	$strMapQuery2="no selection - query all active layers";
 	$strQuerymode="show query-results in window";
 	$strNewDatasetOrder="objectcreation-order";
 	$strAlwaysCreateNext="always capture the next dataset";
@@ -65,7 +68,11 @@
 	$strHintCoordType="Only if you have selected a geographic map projection: Choose the way the geographic coordinates should be displayed.";
 	$strHintRunningCoords="If you activate this option, the coordinates of the cursor position will be shown below the map under specification of the selected map projection.";
 	$strHintShowMapFunctions="Uncheck this field to hide the menu bar below the map with the options to save map image, store properties and max map extent.";
-	$strHintSingleQuery="If you activate this option, the legends request checkboxes will be shown as radiobuttons. You may query only one theme per request.";
+	$strHintMapQuery="select multiple layers: Each layer has a separate checkbox to select it for the map query. The query is carried out for all selected layers.
+
+select only one layer: Each layer has a so-called radio button. Only one layer can then be made queryable at a time.
+	
+no selection - query all active layers: There is no separate selection for the map query. All active layers are queried.";
 	$strHintQuerymode="If you activate this option, a displayed request will appear as a window that is floating above the map.";
 	$strHintNewDatasetOrder="Choose whether you want to edit the geometry or the attributes first, when you are recording a new dataset.";
 	$strAlwaysCreateNext="Keeps the form open to capute the next data set right after save one.";

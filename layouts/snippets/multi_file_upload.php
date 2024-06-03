@@ -21,7 +21,7 @@
 
 	function handleFileDrop(event) {
 		preventDefaults(event);
-		var files = [].slice.call(event.dataTransfer.files);	// ein richtiges Array aus dem FileList-Objekt machen
+		var files = [].slice.call(event.dataTransfer?.files || event.target.files);	// ein richtiges Array aus dem FileList-Objekt machen
 		files.sort(function(a, b) {
 			if (a.name < b.name) { return -1; }
 			if (a.name > b.name) { return 1; }
@@ -95,6 +95,9 @@
 
 <div id="data_import_upload_zone" ondrop="handleFileDrop(event)" ondragover="this.className='dragover';preventDefaults(event);" ondragleave="this.className='';preventDefaults(event);" onmouseout="this.className='';">
 	<div id="text" class="px20 fett"><? echo $strDropFilesHere; ?></div>				
+	<div style="text-align: center;  margin: 10px;  bottom: 5px;  position: absolute;  width: 100%;">
+		<input type="file" multiple oninput="handleFileDrop(event)">
+	</div>
 </div>
 <div id="data_import_upload_progress"></div>
 		

@@ -280,9 +280,9 @@ function setScale(select){
 			  <tr>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="4">
 			    	<div id="classes_div"> 
-			      <select style="width:430px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
+			      <select style="width:430px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten ?: []) == 0){ echo 'disabled';}?>>
 			        <?
-			    		for($i = 0; $i < count($this->allclassdaten); $i++){
+			    		for($i = 0; $i < count($this->allclassdaten ?: []); $i++){
 			    			echo '<option';
 			    			if($this->allclassdaten[$i]['Class_ID'] == $this->formvars['selected_class_id']){
 			    				echo ' selected';
@@ -379,7 +379,7 @@ function setScale(select){
 				<tr>
 					<td valign="top" colspan="2" style="width: 50%; border-right:1px solid #C3C7C3;">
 						<div id="selected_style_div"><?
-							if (count($this->styledaten) > 0) { ?>
+							if (count($this->styledaten ?: []) > 0) { ?>
 								<table align="left" border="0" cellspacing="0" cellpadding="3"><?
 									for ($i = 0; $i < count($this->styledaten); $i++) { ?>
 										<tr>
@@ -404,7 +404,7 @@ function setScale(select){
 					<td valign="top" colspan="2">
 						<div id="selected_label_div">
 				    <?
-				    if(count($this->labeldaten) > 0){
+				    if(count($this->labeldaten ?: []) > 0){
 				  		echo'
 					  		<table align="left" border="0" cellspacing="0" cellpadding="3">';
 							for($i = 0; $i < count($this->labeldaten); $i++){
@@ -456,27 +456,18 @@ function setScale(select){
 								<td><span class="fett">Font:</span></td>
 							</tr>
 							<tr>
-								<td><?
-									if (!function_exists(imagecreatetruecolor)) { ?>
-										<select size="1" name="font"><?
-											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
-												<option id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option><?
-											} ?>
-										</select><?
-									}
-									else { ?>
-										<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');"><?
-											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
-												<option
-													onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));"
-													class="imagebacked"
-													style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');"
-													id="<? echo $this->fonts['name'][$i]; ?>"
-													value="<? echo $this->fonts['name'][$i]; ?>"
-												><? echo $this->fonts['name'][$i]; ?></option><?
-											} ?>
-										</select><?
-									} ?>
+								<td>
+									<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');"><?
+										for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
+											<option
+												onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));"
+												class="imagebacked"
+												style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');"
+												id="<? echo $this->fonts['name'][$i]; ?>"
+												value="<? echo $this->fonts['name'][$i]; ?>"
+											><? echo $this->fonts['name'][$i]; ?></option><?
+										} ?>
+									</select>
 								</td>
 							</tr>
 							<tr>

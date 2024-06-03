@@ -1,4 +1,43 @@
 <?
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
+function mapserverExp2SQL($exp, $classitem) {
+	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
+	$exp = str_replace(' eq ', '=', $exp);
+	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(" = ''", ' IS NULL', $exp);
+	$exp = str_replace('\b', '\y', $exp);
+
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
+		if (strpos($exp, '/') === 0) { # regex
+			$operator = '~';
+			$exp = str_replace('/', '', $exp);
+		}
+		else {
+			$operator = '=';
+		}
+		if (substr($exp, 0, 1) != "'") {
+			$quote = "'";
+		}
+		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
+	}
+	return $exp;
+}
+
+function replace_semicolon($text) {
+	return str_replace(';', '', $text);
+}
+
 function sanitize(&$value, $type) {
 	switch ($type) {
 		case 'int' : {
@@ -132,17 +171,22 @@ function InchesPerUnit($unit, $center_y){
 	}
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);	
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach($params AS $key => $value){
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
 	return $str;
 }
 
@@ -244,6 +288,11 @@ class GUI {
 		$this->trigger_functions = array();
   }
 
+	function plugin_loaded($plugin) {
+		global $kvwmap_plugins;
+		return in_array($plugin, $kvwmap_plugins);
+	}
+
 	function sanitize($vars) {
 		foreach ($vars as $name => $type) {
 			sanitize($this->formvars[$name], $type);
@@ -292,8 +341,7 @@ class GUI {
 		}
 		else{
 			if($this->formvars['rectminx'] != ''){			// ?????????
-				$rect = ms_newRectObj();										// ?????????
-				$rect->setextent($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);		// ?????????
+				$rect = rectObj($this->formvars['rectminx'],$this->formvars['rectminy'],$this->formvars['rectmaxx'],$this->formvars['rectmaxy']);		// ?????????
 			}
 			else{
 				$rect = $this->create_query_rect($this->formvars['INPUT_COORD']);
@@ -325,8 +373,7 @@ class GUI {
 				$miny=$this->user->rolle->oGeorefExt->miny+$this->user->rolle->pixsize*($this->user->rolle->nImageHeight-$ru[1]); # y Wert
 				$maxx=$minx+$width;
 				$maxy=$miny+$height;
-				$rect=ms_newRectObj();
-				$rect->setextent($minx,$miny,$maxx,$maxy);
+				$rect = rectObj($minx,$miny,$maxx,$maxy);
 			}
 			else{
 				$polygon = 'POLYGON((';
@@ -356,14 +403,19 @@ class GUI {
 			$layerset = $this->user->rolle->getLayer('');
 		}
     $anzLayer=count($layerset);
-    $map=ms_newMapObj('');
-    $map->set('shapepath', SHAPEPATH);
+		$disabled_class_expressions = $this->user->rolle->read_disabled_class_expressions($layerset);
+    #$map = new MapObj('');
+    #$map->shapepath = SHAPEPATH;
 		$found = false;
+		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
     for ($i=0;$i<$anzLayer;$i++) {
 			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
-					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
+					(
+						$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+						$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+					) AND
 					(
 						(
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
@@ -470,9 +522,16 @@ class GUI {
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$userid', $this->user->id, $layerset[$i]['Filter']);
+					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
 					$sql_where .= " AND ".$layerset[$i]['Filter'];
 				}
+				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
+				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
+					foreach($disabled_class_expressions[$layerset[$i]['Layer_ID']] as $disabled_class) {
+						$disabled_class_filter[$layerset[$i]['Layer_ID']][] = '(' . (mapserverExp2SQL($disabled_class['Expression'], $layerset[$i]['classitem']) ?: 'true') . ')';
+					}
+					$sql_where .= " AND COALESCE(NOT (" . implode(' OR ', $disabled_class_filter[$layerset[$i]['Layer_ID']]) . "), true)";
+				}	
 								
 				$sql = "SELECT " . $query_parts['select'] . " FROM (SELECT " . $pfad . ") as query WHERE 1=1 ".$sql_where;
 
@@ -1001,41 +1060,127 @@ class stelle {
   }
 
 	function readDefaultValues() {
+		global $language;
+		if ($language != '' AND $language != 'german') {
+			$name_column = "
+			CASE
+				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
+				ELSE s.`Bezeichnung`
+			END AS Bezeichnung";
+		}
+		else {
+			$name_column = "s.`Bezeichnung`";
+		}
+
 		$sql = "
 			SELECT
-				*
+				`ID`," .
+				$name_column . ",
+				`start`,
+				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
+				`ows_namespace`,
+				`ows_title`,
+				`wms_accessconstraints`,
+				`ows_abstract`,
+				`ows_updatesequence`,
+				`ows_geographicdescription`,
+				`ows_fees`,
+				`ows_srs`,
+
+				`ows_contactorganization`,
+				`ows_contactaddress`,
+				`ows_contactpostalcode`,
+				`ows_contactcity`,
+				`ows_contactadministrativearea`,
+				`ows_contactemailaddress`,
+				`ows_contactperson`,
+				`ows_contactposition`,
+				`ows_contactvoicephone`,
+				`ows_contactfacsimile`,
+
+				`ows_distributionorganization`,
+				`ows_distributionaddress`,
+				`ows_distributionpostalcode`,
+				`ows_distributioncity`,
+				`ows_distributionadministrativearea`,
+				`ows_distributionemailaddress`,
+				`ows_distributionperson`,
+				`ows_distributionposition`,
+				`ows_distributionvoicephone`,
+				`ows_distributionfacsimile`,
+
+				`ows_contentorganization`,
+				`ows_contentaddress`,
+				`ows_contentpostalcode`,
+				`ows_contentcity`,
+				`ows_contentadministrativearea`,
+				`ows_contentemailaddress`,
+				`ows_contentperson`,
+				`ows_contentposition`,
+				`ows_contentvoicephone`,
+				`ows_contentfacsimile`,
+
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
 			FROM
-				stelle
+				stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
-		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>' . $sql, 4);
-		$this->database->execSQL($sql);
+		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
+		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return $ret;
 		}
 		$rs = $this->database->result->fetch_array();
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->data = $rs;
+		$this->Bezeichnung = $rs['Bezeichnung'];
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
-		$this->postgres_connection_id = $rs['postgres_connection_id'];
-		# ---> deprecated
-			$this->pgdbhost = ($rs['pgdbhost'] == 'PGSQL_PORT_5432_TCP_ADDR' ? getenv('PGSQL_PORT_5432_TCP_ADDR') : $rs['pgdbhost']);
-			$this->pgdbname = $rs['pgdbname'];
-			$this->pgdbuser = $rs['pgdbuser'];
-			$this->pgdbpasswd = $rs['pgdbpasswd'];
-		# <---
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
 		$this->ows_title = $rs['ows_title'];
 		$this->ows_abstract = $rs['ows_abstract'];
-		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
-		$this->ows_contactperson = $rs['ows_contactperson'];
-		$this->ows_contactorganization = $rs['ows_contactorganization'];
-		$this->ows_contactelectronicmailaddress = $rs['ows_contactemailaddress'];
-		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_namespace = $rs['ows_namespace'];
+		$this->ows_updatesequence = $rs['ows_updatesequence'];
+		$this->ows_geographicdescription = $rs['ows_geographicdescription'];
 		$this->ows_fees = $rs['ows_fees'];
-		$this->ows_srs = $rs['ows_srs'];
+		$this->ows_srs = preg_replace(array('/: +/', '/ +:/'), ':', $rs['ows_srs']);
+
+		$this->ows_contactorganization = $rs['ows_contactorganization'];
+		$this->ows_contactaddress = $rs['ows_contactaddress'];
+		$this->ows_contactpostalcode = $rs['ows_contactpostalcode'];
+		$this->ows_contactcity = $rs['ows_contactcity'];
+		$this->ows_contactadministrativearea = $rs['ows_contactadministrativearea'];
+		$this->ows_contactemailaddress = $rs['ows_contactemailaddress'];
+		$this->ows_contactperson = $rs['ows_contactperson'];
+		$this->ows_contactposition = $rs['ows_contactposition'];
+		$this->ows_contactvoicephone = $rs['ows_contactvoicephone'];
+		$this->ows_contactfacsimile = $rs['ows_contactfacsimile'];
+
+		$this->ows_distributionorganization = $rs['ows_distributionorganization'];
+		$this->ows_distributionaddress = $rs['ows_distributionaddress'];
+		$this->ows_distributionpostalcode = $rs['ows_distributionpostalcode'];
+		$this->ows_distributioncity = $rs['ows_distributioncity'];
+		$this->ows_distributionadministrativearea = $rs['ows_distributionadministrativearea'];
+		$this->ows_distributionemailaddress = $rs['ows_distributionemailaddress'];
+		$this->ows_distributionperson = $rs['ows_distributionperson'];
+		$this->ows_distributionposition = $rs['ows_distributionposition'];
+		$this->ows_distributionvoicephone = $rs['ows_distributionvoicephone'];
+		$this->ows_distributionfacsimile = $rs['ows_distributionfacsimile'];
+
+		$this->ows_contentorganization = $rs['ows_contentorganization'];
+		$this->ows_contentaddress = $rs['ows_contentaddress'];
+		$this->ows_contentpostalcode = $rs['ows_contentpostalcode'];
+		$this->ows_contentcity = $rs['ows_contentcity'];
+		$this->ows_contentadministrativearea = $rs['ows_contentadministrativearea'];
+		$this->ows_contentemailaddress = $rs['ows_contentemailaddress'];
+		$this->ows_contentperson = $rs['ows_contentperson'];
+		$this->ows_contentposition = $rs['ows_contentposition'];
+		$this->ows_contentvoicephone = $rs['ows_contentvoicephone'];
+		$this->ows_contentfacsimile = $rs['ows_contentfacsimile'];
+
+		$this->wms_accessconstraints = $rs['wms_accessconstraints'];
 		$this->check_client_ip = $rs['check_client_ip'];
 		$this->checkPasswordAge = $rs['check_password_age'];
 		$this->allowedPasswordAge = $rs['allowed_password_age'];
@@ -1043,7 +1188,10 @@ class stelle {
 		$this->selectable_layer_params = $rs['selectable_layer_params'];
 		$this->hist_timestamp = $rs['hist_timestamp'];
 		$this->default_user_id = $rs['default_user_id'];
+		$this->show_shared_layers = $rs['show_shared_layers'];
 		$this->style = $rs['style'];
+		$this->reset_password_text = $rs['reset_password_text'];
+		$this->invitation_text = $rs['invitation_text'];
 	}
 
   function checkClientIpIsOn() {
@@ -1092,14 +1240,19 @@ class stelle {
 }
 
 class rolle {
-
-  var $user_id;
-  var $stelle_id;
-  var $debug;
-  var $database;
-  var $loglevel;
-  static $hist_timestamp;
-  static $layer_params;
+	var $user_id;
+	var $stelle_id;
+	var $debug;
+	var $database;
+	var $loglevel;
+	var $hist_timestamp_de;
+	static $hist_timestamp;
+	static $layer_params;
+	var $minx;
+	var $language;
+	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id,$stelle_id,$database) {
 		global $debug;
@@ -1113,6 +1266,31 @@ class rolle {
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
 	}
+
+  function read_disabled_class_expressions($layerset) {
+		$sql = "
+			SELECT 
+				cl.Layer_ID,
+				cl.Class_ID,
+				cl.Expression,
+				cl.classification
+			FROM 
+				classes as cl
+				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
+			WHERE 
+				r2uc.status = 0 AND 
+				r2uc.user_id = " . $this->user_id . "	AND 
+				r2uc.stelle_id = " . $this->stelle_id . "
+		";
+		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
+		$this->database->execSQL($sql);
+    while ($row = $this->database->result->fetch_assoc()) {
+			if ($layerset['layer_ids'][$row['Layer_ID']]['classification'] == $row['classification']) {
+  			$result[$row['Layer_ID']][] = $row;
+			}
+		}
+		return $result ?: [];
+  }	
 
   function readSettings() {
 		global $language;
@@ -1135,8 +1313,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
@@ -1216,10 +1393,11 @@ class rolle {
 		}
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false) {
 		global $language;
 		$layer_name_filter = '';
-		
+		$privilegfk = '';
+
 		# Abfragen der Layer in der Rolle
 		if ($language != 'german') {
 			$name_column = "
@@ -1227,32 +1405,49 @@ class rolle {
 				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
 				ELSE l.`Name`
 			END AS Name";
-		}
-		else {
+		} else {
 			$name_column = "l.Name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
 				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
-			}
-			else {
+			} else {
 				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
+			$privilegfk = ",
+				(
+					SELECT
+						max(las.privileg)
+					FROM
+						layer_attributes AS la,
+						layer_attributes2stelle AS las
+					WHERE
+						la.layer_id = ul.Layer_ID AND
+						form_element_type = 'SubformFK' AND
+						las.stelle_id = ul.Stelle_ID AND
+						ul.Layer_ID = las.layer_id AND
+						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+				) as privilegfk";
 		}
+
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+		}		
 
 		$sql = "
 			SELECT " .
-				$name_column . ",
+			$name_column . ",
 				l.Layer_ID,
-				l.alias, Datentyp, Gruppe, pfad, maintable, oid, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
 					ELSE l.connection 
 				END as connection, 
-				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
-				wfs_geom, write_mapserver_templates, selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				sync,
+				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
+				wfs_geom,
+				write_mapserver_templates,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
 				ul.`queryable`, ul.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -1262,6 +1457,7 @@ class rolle {
 				l.`duplicate_from_layer_id`,
 				l.`duplicate_criterion`,
 				l.`shared_from`,
+				l.`geom_column`,
 				ul.`postlabelcache`,
 				`Filter`,
 				r2ul.gle_view,
@@ -1276,40 +1472,41 @@ class rolle {
 				`start_aktiv`,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
-				r2ul.geom_from_layer,
-				las.privileg as privilegfk 
+				r2ul.geom_from_layer 
+				" . $privilegfk . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
 			FROM
-				layer AS l 
-				JOIN used_layer AS ul ON l.Layer_ID=ul.Layer_ID 
-				JOIN u_rolle2used_layer as r2ul ON r2ul.Stelle_ID=ul.Stelle_ID AND r2ul.Layer_ID=ul.Layer_ID 
-				LEFT JOIN connections as c ON l.connection_id = c.id 
-				LEFT JOIN layer_attributes as la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' 
-				LEFT JOIN layer_attributes2stelle as las ON 
-					las.stelle_id = ul.Stelle_ID AND 
-					ul.Layer_ID = las.layer_id AND 
-					las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+				layer AS l JOIN
+				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
+				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
+				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID= " . $this->stelle_id . " AND
-				r2ul.User_ID= " . $this->user_id .
-				$layer_name_filter . "
+				ul.Stelle_ID = " . $this->stelle_id . " AND
+				r2ul.User_ID = " . $this->user_id .
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
 				ul.drawingorder desc
 		";
-		#echo $sql.'<br>';
-		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>".$sql,4);
+		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		if (!$this->database->success) {
+			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			return 0;
+		}
 		$i = 0;
 		while ($rs = $this->database->result->fetch_assoc()) {
-			if($rs['rollenfilter'] != ''){		// Rollenfilter zum Filter hinzufügen
-				if($rs['Filter'] == ''){
-					$rs['Filter'] = '('.$rs['rollenfilter'].')';
-				}
-				else {
-					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
+				if ($rs['Filter'] == '') {
+					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+				} else {
+					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach(array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -1426,7 +1623,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection: successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -1741,9 +1938,12 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
 		global $language;
-		$attributes = array();
+		$attributes = array(
+			'name' => array(),
+			'tab' => array()
+		);
 		$einschr = '';
 
 		$alias_column = (
@@ -1764,7 +1964,7 @@ class db_mapObj{
 		}
 
 		$sql = "
-			SELECT 
+			SELECT
 				`order`, " .
 				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
 				`layer_id`,
@@ -1772,10 +1972,12 @@ class db_mapObj{
 				`real_name`,
 				`tablename`,
 				`table_alias_name`,
+				a.`schema`,
 				`type`,
 				d.`name` as typename,
 				`geometrytype`,
 				`constraints`,
+				`saveable`,
 				`nullable`,
 				`length`,
 				`decimal_length`,
@@ -1784,6 +1986,7 @@ class db_mapObj{
 				`options`,
 				`tooltip`,
 				`group`,
+				`tab`,
 				`arrangement`,
 				`labeling`,
 				`raster_visibility`,
@@ -1807,23 +2010,21 @@ class db_mapObj{
 				`order`
 		";
 		#echo '<br>Sql read_layer_attributes: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>" . $sql,4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$i = 0;
 		while ($rs = $ret['result']->fetch_array()){
+			$attributes['enum'][$i] = array();
 			$attributes['order'][$i] = $rs['order'];
 			$attributes['name'][$i] = $rs['name'];
 			$attributes['indizes'][$rs['name']] = $i;
+			if($rs['real_name'] == '')$rs['real_name'] = $rs['name'];
 			$attributes['real_name'][$rs['name']] = $rs['real_name'];
-			if ($rs['tablename']){
-				if (strpos($rs['tablename'], '.') !== false){
-					$explosion = explode('.', $rs['tablename']);
-					$rs['tablename'] = $explosion[1];		# Tabellenname ohne Schema
-					$attributes['schema_name'][$rs['tablename']] = $explosion[0];
-				}
-				$attributes['table_name'][$i]= $rs['tablename'];
+			if ($rs['tablename']) {
+				$attributes['table_name'][$i] = $rs['tablename'];
 				$attributes['table_name'][$rs['name']] = $rs['tablename'];
+				$attributes['schema'][$i] = $rs['schema'];
 			}
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$i] = $rs['table_alias_name'];
 			if ($rs['table_alias_name'])$attributes['table_alias_name'][$rs['name']] = $rs['table_alias_name'];
@@ -1843,24 +2044,41 @@ class db_mapObj{
 			$attributes['constraints'][$rs['real_name']]= $rs['constraints'];
 			if ($rs['constraints'] == 'PRIMARY KEY') {
 				$attributes['pk'][] = $rs['real_name'];
-			}			
+			}
+			$attributes['saveable'][$i]= $rs['saveable'];
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-
-			if ($get_default AND $rs['default'] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-				$ret1 = $layerdb->execSQL('SELECT ' . $rs['default'], 4, 0);
-				if ($ret1[0] == 0) {
-					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
-				}
-			}
-			else {
+			if ($get_default) {
 				$attributes['default'][$i] = $rs['default'];
+			}
+
+			if ($replace) {
+				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+					$replaced_default = replace_params(
+						$attributes['default'][$i],
+						rolle::$layer_params,
+						$this->GUI->user->id,
+						$this->GUI->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->GUI->rolle->language
+					);
+					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
+					if ($ret1[0] == 0) {
+						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+					}
+				}
+				$rs['options'] = replace_params(
+					$rs['options'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$language
+				);
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$rs['options'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $rs['options']);
-			$rs['options'] = str_replace('$language', $language, $rs['options']);
 			$attributes['options'][$i] = $rs['options'];
 			$attributes['options'][$rs['name']] = $rs['options'];
 			$attributes['alias'][$i] = $rs['alias'];
@@ -1870,6 +2088,7 @@ class db_mapObj{
 			$attributes['alias_vietnamese'][$i] = $rs['alias_vietnamese'];
 			$attributes['tooltip'][$i] = $rs['tooltip'];
 			$attributes['group'][$i] = $rs['group'];
+			$attributes['tab'][$i] = $rs['tab'];
 			$attributes['arrangement'][$i] = $rs['arrangement'];
 			$attributes['labeling'][$i] = $rs['labeling'];
 			$attributes['raster_visibility'][$i] = $rs['raster_visibility'];
@@ -1895,13 +2114,13 @@ class db_mapObj{
 		}
 		if (value_of($attributes, 'table_name') != NULL) {
 			$attributes['all_table_names'] = array_unique($attributes['table_name']);
-			//$attributes['all_alias_table_names'] = array_values(array_unique($attributes['table_alias_name']));
 		}
 		else {
 			$attributes['all_table_names'] = array();
 		}
+		$attributes['tabs'] = array_values(array_filter(array_unique($attributes['tab']), 'strlen'));
 		return $attributes;
-  }
+	}
 
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
@@ -2045,8 +2264,6 @@ class db_mapObj{
 										# bei Erfassung eines neuen DS hat $k den Wert -1
 										$sql = $attributes['dependent_options'][$i][$k];
 										if ($sql != '') {
-											$sql = str_replace('$stelleid', $stelle_id, $sql);
-											$sql = str_replace('$userid', $this->User_ID, $sql);
 											$ret = $database->execSQL($sql, 4, 0);
 											if ($ret[0]) {
 												$this->GUI->add_message('error', 'Fehler bei der Abfrage der Optionen für das Attribut "' . $attributes['name'][$i] . '"<br>' . err_msg($this->script_name, __LINE__, $ret[1]));
@@ -2070,8 +2287,6 @@ class db_mapObj{
 									else {
 										$sql = $attributes['options'][$i];
 									}
-									$sql = str_replace('$stelleid', $stelle_id, $sql);
-									$sql = str_replace('$userid', $this->User_ID, $sql);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while ($rs = pg_fetch_array($ret[1])) {
@@ -2152,7 +2367,6 @@ class db_mapObj{
 							}
 							elseif (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								if ($attributes['options'][$i] != '') {
-									$sql = str_replace('$stelleid', $stelle_id, $attributes['options'][$i]);
 									$ret = $database->execSQL($sql, 4, 0);
 									if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 									while($rs = pg_fetch_array($ret[1])) {

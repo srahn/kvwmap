@@ -20,14 +20,17 @@
   $strVietnamese="Vietnameesch";
   $strZoomFactor="Zoomfakter";
   $strButtonNext="Wieter";
-  $strTooltipQuery="Objekt-Schnellinfo";
+  $strTooltipQuery="Objektsnellinformatschoon";
   $strPlatt="Plattdüütsch";
   $strSearchColor="Faarf van de Sökergebnis";
-	$strSearchHatching="eigene Abfragen/Import-Schraffur";
-	$strSearchTransparency="eigene Abfragen/Import-Transparenz";
+	$strSearchHatching="egene Affraag/Import-Schraffur";
+	$strSearchTransparency="egene Affraag/Import-Dörsichtigkeit";
   $strPolish="Polnisch";
 	$strCoordType="Utsehn van de Koordinaten";
-	$strSingleQuery="blot een Thema affraagbar";
+	$strMapQuery="Koortaffraag";
+	$strMapQuery0="mehrere Themen ut wähln";
+	$strMapQuery1="een Thema ut wähln";
+	$strMapQuery2="keen Utwahl - all aktive Themen affraagen";
 	$strQuerymode="Tüüchdatenaffraag in en egen Finster";
 	$strNewDatasetOrder="Riegfolg bi de Datensatz griepen";
 	$strAlwaysCreateNext="Nach dem Speichern einen weiteren Datensatz erfassen";
@@ -61,24 +64,28 @@
 	$strHintRunningCoords="Deist du de Optschoon utwähln, krüzt unner de Koort de Cursor-Koordinat op un seggt di de utsökt Koortenpositschoon an.";
 	$strHintShowMapFunctions="Med disse  Opschoon kannst du de Spiesliest  ünner de Koort  an- un utknipsen.";
 	$strHintShowLayerOptions="Sökst du disse Opschoon ut, kümmt achtern de aktiven Themen in de Legend en Knoop, de bed  för dat Thema feerne Funkschoon un Instellungen an.";	
-	$strHintSingleQuery="Deist du de Optschoon utwähln, krüzt de Affraaghakenfeller bi de Legend op as Quasselkistpinökel. Es dürt ümmer blot een Thema affraagt warrn.";
+	$strHintMapQuery="mehrere Themen ut wähln: Jedes Thema hett en egen Checkbox, üm dat för de Koortenfraag uttowählen. De Fraag passeert för all utwählt Themen.
+	
+een Thema ut wähln: Jedes Thema hett en so nöömten Quasselkistpinökel. Dat kann denn ümmer bloot en Thema affraagbor anmaken.
+		
+keen Utwahl - all aktive Themen affraagen: Hier gifft dat keen egen Utwahl för de Koortenfraag. All aktive Themen warrt affraagt.";
 	$strHintQuerymode="Deist du de Optschoon utwähln, krüzen Tüüchdatenaffraag as egen Finster op, de över de Koort fleigen.";
 	$strHintNewDatasetOrder="Sök ut, ob biem Bifaaten nieg Daten de Geometrie-Editor boben or ünern bi de Tüüchdaten sien sall.";
-	$strHintAlwaysCreateNext="Das Datenerfassungsformular bleibt nach dem Speichern geöffnet und man kann gleich den nächsten Datensatz erfassen.";
-	$strHintUploadOnlyFileMetadata="Beim Hochladen von Dokumenten werden zunächst nur die Metadaten Dateiname, Änderungszeit und Dateigröße hochgeladen und gespeichert. Die Dateien selbst werden noch nicht hochgeladen. Als Vorschaubilder erscheinen dann nur Hinweise, dass die Dateien noch fehlen. Die Dateien können nachträglich hochgeladen werden, entweder über den Menüpunkt Dateien nachträglich hochladen oder bei ausgeschalteter Option einzeln im Sachdatenformular. Die Zuordnung der im Menü 'Daten nachträglich hochladen' hochgeladenen Dateien zu den Metadaten funktioniert nur, wenn es der selbe kvwmap-Nutzer macht, der auch die Metadaten hochgeladen hat und sich der Dateiname, die Dateigröße und das Änderungsdatum nicht zwischenzeitlich geändert haben.";
-	$strHintTooltipQuery="Wenn Sie diese Option auswählen, können Sie die Maus über ein Objekt eines abfragbaren Themas halten und erhalten eine kurze Information dazu.";
+	$strHintAlwaysCreateNext="Dat Dateninventschonsformular blifft na dat Sekern apen un man kann gliek den nächsten Datensatz infaten.";
+	$strHintUploadOnlyFileMetadata="Bi dat Hoochladen vun de Dokmenten wurrd tonächst bloot de Metadaten Man, Ännertieden un Dateigrött hoochlaadt un spiekert. De Dateien sülvst wurrn noch nich hoochlaadt. As Vorschaubiller kummt denn bloot Henwiesen rut, dat de Datei noch fehlt. De Dateien laat sik nau över’n Menüpunkt nadräglich hoochladen, oder wenn de Optschoon utmaakt is, eenzeln in’t Sachendatenformular. De Toordnung vun de in dat Menü 'Daten nachträglich hochgeladenen' Dateien to de Metadaten geiht bloot, wenn dat de sülvige kvwmap-Nutzer maakt, de ok de Metadaten hoochlaadt hett un sück dat Utsehn, de Dateigrött un dat Ännerdatum nich tüschen Tiet ännern de.";
+	$strHintTooltipQuery="Wenn du dit aktiveerst, kannst du de Muus över en Objekt vun en affraagbor Thema hollen un dar en beten Informatschonen to kriegen.";
 	$strHinthist_timestamp="Deist du een Dach ingeven, warn de ALKIS-Objekt mit düsse verleden Tied vörstellt. Affraag to´n Flurstück ergewen ok düsse verleden Tied.";
 	$strHintMenueButtons="Sökst du disse Opschoon ut, warrn fake bruken  Spiespuenkte as egens  Knoop över de Spies anwiest.";
 	$strShowRollenFilter="Wies up Themen-Filter";
 	$strHintShowRollenFilter="Sök disse Opschoon ut, denn hest du de Mööglichkeit dat Thema to filtern.";
 	$strRedlineTextOptions = "Free text Opschoon";
-	$strRedlineTextColor = "Textfarbe";
-	$strRedlineFontFamily = "Fontfamilie";
-	$strRedlineFontSize = "Textgröße";
-	$strRedlineFontWeight = "Schriftschnitt";
-	$strDatasetOperationsPosition = "Position der Datensatzfunktionen";
-	$strDatasetOperationsPositionUnten = "unter den Datensätzen";
-	$strDatasetOperationsPositionOben = "über den Datensätzen";
-	$strDatasetOperationsPositionBeide = "unter und über den Datensätzen";
-	$strHintDatasetOperationsPosition = "Legen Sie fest ob die Funktionen für die ausgewählten Datensätze über oder unter den Datensätzen angezeigt werden sollen.";
+	$strRedlineTextColor = "Textklöör";
+	$strRedlineFontFamily = "Schriftfamilie";
+	$strRedlineFontSize = "Textgrött";
+	$strRedlineFontWeight = "Schriftsnitt";
+	$strDatasetOperationsPosition = "Positschoon vun de Datensatzfunktschonen";
+	$strDatasetOperationsPositionUnten = "ünner de Datensetten";
+	$strDatasetOperationsPositionOben = "över de Datensätze";
+	$strDatasetOperationsPositionBeide = "ünner un över de Datensetten";
+	$strHintDatasetOperationsPosition = "Legg an, wat de Funkschonen vun de opstunns markeerten Datensätz baven oder ünner de Datensätz wiest warrn schöölt.";
 ?>

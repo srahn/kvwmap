@@ -200,10 +200,10 @@ function update_stellen_visibility(){
 	<tr>
 		<td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'] ?: [])==0){ echo 'disabled';}?>><?
 			$layer_options = array(); ?>
 			<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
-			for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+			for ($i = 0; $i < count($this->layerdaten['ID'] ?: []); $i++) {
 				$layer_options[] = array(
 					'value' => $this->layerdaten['ID'][$i],
 					'output' => $this->layerdaten['Bezeichnung'][$i]

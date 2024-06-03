@@ -132,6 +132,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			group.style.visibility = 'visible';
 		});
 	}
+
+	toggle_layer = function(tab, layer_id){
+		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
+		active_tab.classList.remove("active_tab");
+		tab.classList.add("active_tab");
+		var layer_to_close = document.querySelectorAll('.layer_results');
+		[].forEach.call(layer_to_close, function (layer){
+			layer.classList.add('collapsed');
+		});
+		var layer_to_open = document.querySelector('#result_' + layer_id);
+		layer_to_open.classList.remove('collapsed');
+		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
+	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;

@@ -20,6 +20,7 @@ class TypeInfo {
 
       // fetch attribute information for all attributes of the type from persitence layer
       $attribInfo = $this->_database->get_attribute_information(TypeInfo::$schema, strtolower($typename));
+      $attribInfo = XP_Plan::convert_xp_spezexternereferenzauslegung($attribInfo);
 
       // build look-up table
       $attribInfo = array_combine(array_column($attribInfo,'name'), $attribInfo);
@@ -28,20 +29,22 @@ class TypeInfo {
       foreach ($uml_attributes as $uml_attrib) {
         $lowercaseName = strtolower($uml_attrib['name']);
         $objekt_attribs[] = array(
-            'uml_name'   => $uml_attrib['name'],
-            'col_name'   => $attribInfo[$lowercaseName]['name'],
-            'type'       => $attribInfo[$lowercaseName]['type'],
-            'type_type'  => $attribInfo[$lowercaseName]['type_type'],
-            'is_array'   => $attribInfo[$lowercaseName]['is_array'] == 't',
-            'stereotype' => $this->getStereotype($attribInfo[$lowercaseName]['type']),
-            'sequence'   => $sequence,
-            'origin'     => $uml_attrib['origin'],
-						'uml_dtype'  => $uml_attrib['dtype']
+            'uml_name'    => $uml_attrib['name'],
+            'col_name'    => $attribInfo[$lowercaseName]['name'],
+            'type'        => $attribInfo[$lowercaseName]['type'],
+            'type_type'   => $attribInfo[$lowercaseName]['type_type'],
+            'type_schema' => $attribInfo[$lowercaseName]['type_schema'],
+            'is_array'    => $attribInfo[$lowercaseName]['is_array'] == 't',
+            'stereotype'  => $this->getStereotype($attribInfo[$lowercaseName]['type']),
+            'sequence'    => $sequence,
+            'origin'      => $uml_attrib['origin'],
+						'uml_dtype'   => $uml_attrib['dtype']
         );
         $sequence++;
       }
       $_typeInfoLUT[$typename] = $objekt_attribs;
-#echo $typename."\n";
+
+      #echo $typename."\n";
 #var_dump($_typeInfoLUT[$typename]);
     }
     return $_typeInfoLUT[$typename];

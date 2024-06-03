@@ -245,6 +245,33 @@ from
 		elm["Data"].value = '';
 	}
 
+	function unselectItem(evt) {
+		console.log('click on ', evt.target);
+		const datasource_id = $(evt).attr('datasource_id');
+		$(evt).parent().remove();
+		//console.log('unselect datasource_id', datasource_id);
+		$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', false);
+		$(`.selected-item[datasource_id="${datasource_id}"]`)
+			.toggleClass('selectable-item selected-item')
+			.on('click', (evt) => {
+				const datasource_id = $(evt.target).attr('datasource_id');
+				//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
+				// add clicked item to chosen-choices and select in select field
+				$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+				$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
+				$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
+				$('#chosen-drop').hide();
+				$('#add-item-button').show();
+			})
+			.on('mouseover', (evt) => {
+				//console.log('mouseover on selectable-item', evt.target);
+				$(evt.target).toggleClass('highlighted-item').siblings().removeClass('highlighted-item');
+			});
+
+		$('#add-item-button').show();
+		$('#chosen-drop').hide();
+	}
+
 	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
 </script>
 
@@ -938,10 +965,11 @@ from
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<div id="datasource_div">
-					<? 		include_once(CLASSPATH . 'DataSource.php');
-								$datasources = DataSource::find($this);
+								<!-- Multiselectformfeld mit ausgewählten Werten.//--><?
+								include_once(CLASSPATH . 'DataSource.php');
+								$datasources = DataSource::find($this, '', "coalesce('name', 'beschreibung')");
 								echo FormObject::createSelectField(
-									'datasource',
+									'datasource_ids',
 									array_map(
 										function($datasource) {
 											return array(
@@ -951,9 +979,43 @@ from
 										},
 										$datasources
 									),
-									$this->formvars['datasource']
+									implode(',', $this->layerdata['datasource_ids']),
+									1,
+									'display: none;
+									width: 93%',
+									'',
+									'',
+									true
 								); ?>
-								<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								<div id="chosen-container">
+									<!-- selectierte Werte //-->
+									<ul id="chosen-choices"><?
+										foreach ($this->layerdata['datasources'] AS $datasource) { ?>
+											<li class="chosen-item"><span><? echo $datasource->get('name') ?? $datasource->get('beschreibung'); ?></span>
+											<a datasource_id="<? echo $datasource->get('id'); ?>" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li><?
+										} ?>
+									</ul>
+								</div>
+								<div id="chosen-buttons">
+									<a id="add-item-button" href="javascript:void(0);"><i class="fa fa-plus fa_lg" style="margin-left: 5px;"></i></a>
+									<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								</div>
+							</div>
+							<div style="clear: both"></div>
+							
+							<div id="chosen-drop">
+								<!-- auswählbare Werte //-->
+								<ul class="chosen-results"><?
+									$selectable_datasources = array_filter(
+										$datasources,
+										function ($datasource) {
+											return !in_array($datasource->get('id'), $this->layerdata['datasource_ids']);
+										}
+									);
+									foreach ($selectable_datasources AS $datasource) { ?>
+										<li datasource_id="<? echo $datasource->get('id'); ?>" class="selectable-item" data-option-array-index="0"><? echo $datasource->get('name') ?? $datasource->get('beschreibung'); ?>(<? echo $datasource->get('id'); ?>)</li><?
+									} ?>
+								</ul>
 							</div>
 						</td>
 					</tr>
@@ -1222,7 +1284,7 @@ from
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
@@ -1417,7 +1479,20 @@ from
 				name="dummy"
 				value="<?php echo $strButtonSaveAsNewLayer; ?>"
 				onclick="mandatoryValuesMissing() || submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
-			>
+			><?
+			if (
+				$this->formvars['selected_layer_id'] > 0 AND
+				$this->formvars['editable']
+			) { ?>
+				<input
+					id="layer_formular_delete_button"
+					type="button"
+					class="delete-button"
+					name="layer_formular_delete_button"
+					value="<?php echo $this->strDelete; ?>"
+					onclick="Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>', '<? echo $this->strDeleteWarningMessage; ?>');"
+				><?
+			} ?>
 		</td>
 	</tr>
 	<tr>
@@ -1435,7 +1510,7 @@ from
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
-	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++){
+	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">
@@ -1443,4 +1518,27 @@ from
 
 <script type="text/javascript">
 	<? if($this->formvars['stellenzuweisung'] == 1){ ?>toggleForm('stellenzuweisung');<? } else { ?>toggleForm('layerform');<? } ?>
+
+	$('.selectable-item').on('mouseover', (evt) => {
+		//console.log('mouseover on selectable-item', evt.target);
+		$(evt.target).toggleClass('highlighted-item').siblings().removeClass('highlighted-item');
+	});
+
+	$('.selectable-item').on('click', (evt) => {
+		const datasource_id = $(evt.target).attr('datasource_id');
+		//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
+		// add clicked item to chosen-choices and select in select field
+		$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+		$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
+		$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
+		$('#chosen-drop').hide();
+		$('#add-item-button').show();
+	});
+
+	$('#add-item-button').on('click', (evt) => {
+		//console.log('click on chosen-container');
+		$('#add-item-button').hide();
+		$('#chosen-drop').show();
+	});
+
 </script>
