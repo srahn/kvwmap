@@ -921,7 +921,6 @@ class data_import_export {
 		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-			$path = $this->layerset[0]['pfad'];
 			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
@@ -1341,7 +1340,7 @@ class data_import_export {
 				}
 			}
 			elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
-				$filter = str_replace('$userid', $user->id, $filter);
+				$filter = str_replace('$USER_ID', $user->id, $filter);
 	    	$where = 'WHERE ' . $filter;
 			}
 			else {
