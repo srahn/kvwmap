@@ -1900,7 +1900,8 @@ class db_mapObj{
 
 		# group by rausnehmen
 		$groupbyposition = strrpos(strtolower($path), 'group by');
-		if($groupbyposition !== false){
+		$lastwhereposition = strrpos(strtolower($path), 'where');
+		if($groupbyposition !== false AND $groupbyposition > $lastwhereposition){
 			$layerset['attributes']['groupby'] = ' '.substr($path, $groupbyposition);
 			$path = substr($path, 0, $groupbyposition);
 		}
