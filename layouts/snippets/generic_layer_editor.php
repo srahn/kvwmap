@@ -413,6 +413,7 @@ if ($doit == true) { ?>
 										<div id="result_filter_<? echo $layer['Layer_ID'] . '_' . $column_name; ?>" class="gle_result_filter">
 											<? 
 											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+												natsort($this->result_values[$layer['Layer_ID']][$column_name]);
 												echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
 															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
 																<option value="#all#">alle</option>';
