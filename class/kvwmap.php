@@ -4605,7 +4605,7 @@ echo '			</table>
 						$td_style = ($this->formvars['style_id'] == $this->classdaten[0]['Style'][$i]['Style_ID'] ? 'background-color:lightsteelblue;' : '');
 						$td_onclick = 'get_style(' . $this->classdaten[0]['Style'][$i]['Style_ID'] . ')'; ?>
 						<td id="<? echo $td_id; ?>" style="<? echo $td_style; ?> cursor: pointer; border-top: 1px solid #aaa;" onclick="<? echo $td_onclick; ?>">
-							<img src="<? echo IMAGEURL . $this->getlegendimage($this->formvars['layer_id'], $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
+							<img src="<? echo IMAGEURL . $this->getlegendimage($this->layer, NULL, $this->classdaten[0]['Style'][$i]['Style_ID']); ?>">
 						</td><?
 						$td_id = 'td2_style_' . $this->classdaten[0]['Style'][$i]['Style_ID']; ?>
 						<td id="<? echo $td_id; ?>" align="right" style="<? echo $td_style; ?> border-top: 1px solid #aaa;"><?
@@ -6775,7 +6775,7 @@ echo '			</table>
     return $legend;
   }
 
-  function getlegendimage($layer_id, $style_id){
+  function getlegendimage($layerset, $class, $style_id){
     # liefert eine url zu einem Legendenbild eines Layers mit einem bestimmten Style
     $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$map = new mapObj(DEFAULTMAPFILE);
@@ -6788,7 +6788,6 @@ echo '			</table>
     $map->setFontSet(FONTSET);
 
     $layer=ms_newLayerObj($map);
-    $layerset = $mapDB->get_Layer($layer_id);
     $layer->set('data',$layerset['Data']);
     $layer->set('status',MS_ON);
     $layer->set('template', ' ');
@@ -6798,84 +6797,93 @@ echo '			</table>
 		$layer->set('connection', $layerset['connection']);
     $klasse = new ClassObj($layer);
     $klasse->set('status', MS_ON);
-    $dbStyle = $mapDB->get_Style($style_id);
-    $style = new StyleObj($klasse);
-		if (substr($dbStyle['symbolname'], 0, 1) == '[') {
-			$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
+		if ($class != NULL) {
+			for ($s = 0; $s < $class->numstyles; $s++) {
+				$styles[] = $class->getStyle($s);
+			}
 		}
 		else {
-			if ($dbStyle['symbolname']!='') {
-				$style->set('symbolname',$dbStyle['symbolname']);
-			}
-			if ($dbStyle['symbol']>0) {
-				$style->set('symbol',$dbStyle['symbol']);
-			}
-		}	
-		if($dbStyle['size'] != ''){
-			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-			else $style->set('size', 16);		# Dummywert 16 da size-Attribut verwendet wird
+    	$styles[] = $mapDB->get_Style($style_id);
 		}
-    if($dbStyle['width']!='') {
-      $style->set('width', $dbStyle['width']);
-    }
-    if($dbStyle['angle']!='') {
-      $style->set('angle', $dbStyle['angle']);
-    }
-  	if(MAPSERVERVERSION >= 620) {
-    	if($dbStyle['geomtransform'] != '') {
-      	$style->setGeomTransform($dbStyle['geomtransform']);
-      }
-      if($dbStyle['pattern']!='') {
-      	$style->setPattern(explode(' ',$dbStyle['pattern']));
-        $style->linecap = 'butt';
-      }
-			if($dbStyle['gap'] != '') {
-				$style->set('gap', $dbStyle['gap']);
+		foreach ($styles as $dbStyle) {
+			$style = new StyleObj($klasse);
+			if (substr($dbStyle['symbolname'], 0, 1) == '[') {
+				$style->updateFromString('STYLE SYMBOL ' .$dbStyle['symbolname']. ' END');
 			}
-			if($dbStyle['initialgap'] != '') {
-        $style->set('initialgap', $dbStyle['initialgap']);
-      }
-			if($dbStyle['linecap'] != '') {
-				$style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
+			else {
+				if ($dbStyle['symbolname']!='') {
+					$style->set('symbolname',$dbStyle['symbolname']);
+				}
+				if ($dbStyle['symbol']>0) {
+					$style->set('symbol',$dbStyle['symbol']);
+				}
+			}	
+			if($dbStyle['size'] != ''){
+				if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
+				else $style->set('size', 16);		# Dummywert 16 da size-Attribut verwendet wird
 			}
-			if($dbStyle['linejoin'] != '') {
-				$style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
+			if($dbStyle['width']!='') {
+				$style->set('width', $dbStyle['width']);
 			}
-			if($dbStyle['linejoinmaxsize'] != '') {
-				$style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+			if($dbStyle['angle']!='') {
+				$style->set('angle', $dbStyle['angle']);
 			}
-    }
-    #######################################################
-    if($layer->type > 0){
-    	$symbol = $map->getSymbolObjectById($style->symbol);
-    	if($symbol->type == 1006){ 	# 1006 == hatch
-    		$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-    		$style->set('maxsize', 2*$style->width);
-    	}
-    	else{
-				if($dbStyle['size'] < 2)$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-    		if($dbStyle['maxsize'] < 2)$style->set('maxsize', 2);
-    	}
-    }
-    else{
-    	$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-    }
-    #######################################################
-    $RGB = array_filter(explode(" ",$dbStyle['color']), 'strlen');
-    if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-    if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-		else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
-    $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
-    $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
-		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-			$style->set('opacity', $dbStyle['opacity']);
-		}
+			if(MAPSERVERVERSION >= 620) {
+				if($dbStyle['geomtransform'] != '') {
+					$style->setGeomTransform($dbStyle['geomtransform']);
+				}
+				if($dbStyle['pattern']!='') {
+					$style->setPattern(explode(' ',$dbStyle['pattern']));
+					$style->linecap = 'butt';
+				}
+				if($dbStyle['gap'] != '') {
+					$style->set('gap', $dbStyle['gap']);
+				}
+				if($dbStyle['initialgap'] != '') {
+					$style->set('initialgap', $dbStyle['initialgap']);
+				}
+				if($dbStyle['linecap'] != '') {
+					$style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
+				}
+				if($dbStyle['linejoin'] != '') {
+					$style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
+				}
+				if($dbStyle['linejoinmaxsize'] != '') {
+					$style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+				}
+			}
+			#######################################################
+			if($layer->type > 0){
+				$symbol = $map->getSymbolObjectById($style->symbol);
+				if($symbol->type == 1006){ 	# 1006 == hatch
+					$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+					$style->set('maxsize', 2*$style->width);
+				}
+				else{
+					if($dbStyle['size'] < 2)$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+					if($dbStyle['maxsize'] < 2)$style->set('maxsize', 2);
+				}
+			}
+			else{
+				$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+			}
+			#######################################################
+			$RGB = array_filter(explode(" ",$dbStyle['color']), 'strlen');
+			if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
+			if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+			else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
+			$RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
+			$style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
+			if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
+				$style->set('opacity', $dbStyle['opacity']);
+			}
 
-		if($dbStyle['colorrange'] != ''){
-			$newname = rand(0, 1000000).'.jpg';
-			$this->colorramp(IMAGEPATH.$newname, 25, 18, $dbStyle['colorrange']);
+			if($dbStyle['colorrange'] != ''){
+				$newname = rand(0, 1000000).'.jpg';
+				$this->colorramp(IMAGEPATH.$newname, 25, 18, $dbStyle['colorrange']);
+			}
 		}
-		else{
+		if ($newname == '') {
 			$image = $klasse->createLegendIcon(25,18);
 			$filename = $this->map_saveWebImage($image,'jpeg');
 			$newname = $this->user->id.basename($filename);
