@@ -48,8 +48,9 @@
 
 	$this->outputLayer = function($i, $indent = 0, $upper_groups = []) use ($GUI) {
 		$keywords = explode(',', str_replace(' ', '_', $GUI->layers['wms_keywordlist'][$i]));
+		$layer_in_stelle = (array_key_exists($GUI->layers['ID'][$i], $GUI->layers_in_stelle['layer_ids']) ? 'layer_in_stelle' : '');
 		$output = '
-				<tr class="layer_tr ' . implode(' ', $keywords) . '" data-upper_groups="' . implode(' ', $upper_groups) . '">
+				<tr class="layer_tr ' . implode(' ', $keywords) . ' ' . $layer_in_stelle . '" data-upper_groups="' . implode(' ', $upper_groups) . '">
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="id-column">
 						<a href="index.php?go=Layereditor&selected_layer_id=' . $GUI->layers['ID'][$i] . '&csrf_token=' . $_SESSION['csrf_token'] . '">' . $GUI->layers['ID'][$i] . '</a>
 					</td>
@@ -157,6 +158,10 @@
 		border-bottom:1px solid #C3C7C3;
 	}
 
+	.layer_in_stelle {
+		background: #d5f2d0;
+	}
+
 	#column_options_button {
 		float: right;
 		margin-right: 5px;
@@ -184,7 +189,10 @@
 			<br>
 			<h2><?php echo $this->titel; ?></h2>
 			<br>
-			Suche: <input type="text" name="search" onkeyup="filter_by_full_text_search();">
+			<div style="text-align: left; margin-left: 5px">
+				Suche: <input type="text" name="search" onkeyup="filter_by_full_text_search();">
+				<span class="layer_in_stelle" style="margin: 0 50px 0 0; padding: 0 20px 0 20px; float: right;">Thema ist in aktueller Stelle enthalten</span>
+			</div>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" onclick="$('#column_options_div').toggle()"></i>
 			<div id="column_options_div">
 				<? if ($this->Stelle->isMenueAllowed('Layer_Anzeigen')) { ?>

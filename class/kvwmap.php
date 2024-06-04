@@ -14367,6 +14367,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->main='layer_uebersicht.php';
     # Abfragen aller Layer
     $this->layers = $mapDB->getall_Layer($this->formvars['order'], true);
+		$this->layers_in_stelle = $mapDB->read_Layer(0);
 		$this->groups = $mapDB->read_Groups(true, 'Gruppenname');
     $this->output();
   }
