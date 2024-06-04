@@ -3118,6 +3118,30 @@ echo '			</table>
 		}
   }
 
+	function get_position_qrcode() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
+		$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL);
+		$query_parts = $mapDB->getQueryParts($layerset[0], []);
+		$sql = "
+			SELECT
+				'geo:' || st_y(position) || ',' || st_x(position) as position
+			FROM (
+				SELECT 
+					st_transform(ST_PointOnSurface(" . $layerset[0]['attributes']['the_geom'] . "), 4326) as position
+				FROM 
+					(SELECT " . $query_parts['query'] . ") as fooo
+				WHERE 
+					" . pg_quote($layerset[0]['maintable'] . '_oid') . " = '" . $this->formvars['oid'] . "'
+				) foo";
+		#echo $sql;
+		$ret = $layerdb->execSQL($sql, 4, 0);
+		$rs = pg_fetch_array($ret[1]);
+		include_once(CLASSPATH . 'phpqrcode.php');
+		QRcode::png($rs['position']);
+	}
+
 	function get_web_header_template($title) {
 		$html = "<!-- MapServer Template -->
 <html lang=\"de\">
@@ -14335,11 +14359,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
   function LayerUebersicht() {
+		$this->sanitize([
+			'order' => 'text'
+		]);
   	$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->titel='Themenübersicht';
     $this->main='layer_uebersicht.php';
     # Abfragen aller Layer
-    $this->layers = $mapDB->getall_Layer('Gruppenname, Name', true);
+    $this->layers = $mapDB->getall_Layer($this->formvars['order'], true);
 		$this->groups = $mapDB->read_Groups(true, 'Gruppenname');
     $this->output();
   }
@@ -20403,7 +20430,7 @@ class db_mapObj{
 		return $datatypes;
 	}
 
-	function getall_Layer($order, $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
+	function getall_Layer($order = 'Gruppenname, Name', $only_listed = false, $user_id = NULL, $stelle_id = NULL) {
 		global $language;
 		global $admin_stellen;
 		$more_from = '';

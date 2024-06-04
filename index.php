@@ -280,6 +280,14 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'get_position_qrcode' : {
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'oid' => 'text'
+				]);				
+				$GUI->get_position_qrcode();
+			} break;
+
 			case 'write_mapserver_templates' : {
 				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');

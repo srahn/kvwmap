@@ -1188,6 +1188,10 @@ a.menuered:hover {
 	flex: 0 0 100%;
 }
 
+.qr_code{
+	background-image: url(<? echo GRAPHICSPATH; ?>qr_code.png);
+}
+
 .use_for_dataset{
 	background-image: url(<? echo GRAPHICSPATH; ?>use_for_dataset.png);
 }
