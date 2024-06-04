@@ -1279,8 +1279,8 @@ class data_import_export {
 			if ($this->formvars['epsg'] != '') {
 				$t_epsg = $this->formvars['epsg'];
 			}
-			elseif ($layerset[0]['epsg'] != '') {
-				$t_epsg = $layerset[0]['epsg'];
+			elseif ($layerset[0]['epsg_code'] != '') {
+				$t_epsg = $layerset[0]['epsg_code'];
 			}
 			else {
 				$t_epsg = '4326';
@@ -1355,6 +1355,13 @@ class data_import_export {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
 			}
+			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
+				$query_parts['select'] = str_replace(
+																	$layerset[0]['attributes']['the_geom'], 
+																	'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
+																	$query_parts['select']
+																);
+			}
 			$sql = "
 				SELECT 
 					" . $query_parts['select'] . "
@@ -1383,7 +1390,7 @@ class data_import_export {
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
 					}
-					$selected_attributes[$s] .= 'as ' . $layerset[0]['attributes']['the_geom'];
+					$selected_attributes[$s] .= ' as ' . $layerset[0]['attributes']['the_geom'];
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
@@ -1442,6 +1449,7 @@ class data_import_export {
 					} break;
 
 					case 'GPX' : {
+						$this->formvars['geomtype'] = ($layerset[0]['Datentyp'] == 2 ? 'LINESTRING' : $this->formvars['geomtype']);
 						$exportfile = $exportfile.'.gpx';
 						$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb, '-lco FORCE_GPX_TRACK=YES -dsco GPX_USE_EXTENSIONS=YES');
 					} break;
