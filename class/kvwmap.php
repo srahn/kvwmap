@@ -6798,9 +6798,7 @@ echo '			</table>
     $klasse = new ClassObj($layer);
     $klasse->set('status', MS_ON);
 		if ($class != NULL) {
-			for ($s = 0; $s < $class->numstyles; $s++) {
-				$styles[] = $class->getStyle($s);
-			}
+			$styles = $class['Style'];
 		}
 		else {
     	$styles[] = $mapDB->get_Style($style_id);
