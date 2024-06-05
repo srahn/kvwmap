@@ -465,6 +465,11 @@ function go_switch($go, $exit = false) {
 				$GUI->close_group_legend();
 			} break;
 
+			# Legende für einen Layer erzeugen
+			case 'get_layer_legend' : {
+				$GUI->get_layer_legend();
+			} break;
+
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');

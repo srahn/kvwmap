@@ -1337,11 +1337,17 @@ class rolle {
 	}
 
 	function setClassStatus($formvars) {
-		if(value_of($formvars, 'layer_id') != ''){
+		if (value_of($formvars, 'only_layer_id') != '' AND $formvars['show_classes'] != ''){
 			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
-			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND layer_id='.$formvars['layer_id'];
+			$sql ='
+				UPDATE 
+					u_rolle2used_layer 
+				SET 
+					showclasses = "' . $formvars['show_classes'] . '"
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id . ' AND 
+					layer_id = ' . $formvars['only_layer_id'];
 			$this->debug->write("<p>file:rolle.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
