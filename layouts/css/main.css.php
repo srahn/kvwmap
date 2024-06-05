@@ -2312,7 +2312,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: relative;
 	float: left;
 	margin: auto;
-	visibility: visible;
 	line-height: 30px;
 }
 
