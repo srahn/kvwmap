@@ -1,5 +1,15 @@
 <?
 
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
+
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	if (MAPSERVERVERSION >= 800) {
 		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
