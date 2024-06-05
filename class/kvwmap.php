@@ -17441,6 +17441,7 @@ class db_mapObj{
 				);
 			}
 			$rs['alias_link'] = $rs['alias'];
+			$rs['Name_or_alias'] = $rs['alias'];
 			$Layer[] = $rs;
 		}
 		return $Layer;
