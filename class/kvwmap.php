@@ -638,7 +638,7 @@ class GUI {
 												</td>
 											</tr>';
 						}
-						$this->get_layer_params_form(NULL, $this->formvars['layer_id']);
+						echo $this->get_layer_params_form(NULL, $this->formvars['layer_id']);
 						if ($layer[0]['connectiontype'] == 6) {
 							if ($this->formvars['layer_id'] < 0 OR $layer[0]['original_labelitem'] != '') {
 								# für Rollenlayer oder normale Layer mit labelitem
@@ -8524,12 +8524,21 @@ SET @connection_id = {$this->pgdatabase->connection_id};
   function Klasseneditor_AutoklassenHinzufuegen() {
     $num_classes = (empty($this->formvars['num_classes'])) ? 5 : $this->formvars['num_classes'];
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-    $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id']);
+    $this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
     $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
     $this->formvars['Datentyp'] = $this->layerdata['Datentyp'];
     $begin = strpos($this->layerdata['Data'], '(') + 1;
     $end = strrpos($this->layerdata['Data'], ')');
     $data_sql = substr($this->layerdata['Data'], $begin, $end - $begin);
+
+		$classification_params = $mapDB->get_layer_params_layer(NULL, $this->formvars['selected_layer_id'], 'classification');
+		if (!empty($classification_params)) {
+			foreach ($classification_params as $classification_param) {
+				$params[$classification_param['key']] = $this->formvars['options_layer_parameter_' . $classification_param['key']];
+			}
+			$data_sql = replace_params($data_sql, $params);
+			$this->formvars['classification_name'] = replace_params($this->layerdata['classification'], $params);
+		}
 
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
@@ -17185,7 +17194,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# - limit for the size of shared layers?
 	}
 
-	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL){
+	function get_layer_params_form($stelle_id = NULL, $layer_id = NULL, $only_from_attribute = '', $hover_preview = true){
+		$output = '';
 		include_once(CLASSPATH.'FormObject.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		if($layer_id == NULL){
@@ -17202,7 +17212,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$selectable_layer_params = $stelle->selectable_layer_params;
 		}
 		else{		# Parameter abfragen, die nur dieser Layer hat
-			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id)));
+			$selectable_layer_params = implode(', ', array_keys($mapDB->get_layer_params_layer(NULL, $layer_id, $only_from_attribute)));
 			$rolle = $this->user->rolle;
 		}
 		$params = $rolle->get_layer_params($selectable_layer_params, $this->pgdatabase);
@@ -17212,7 +17222,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			if (!empty($params)) {
 				if($layer_id == NULL){
-					echo '
+					$output .= '
 						<table style="border: 1px solid #ccc" class="rollenwahl-table" border="0" cellpadding="0" cellspacing="0">
 							<tr>
 								<td colspan="2" class="rollenwahl-gruppen-header"><span class="fett">&nbsp;'.$this->strLayerParameters.'</span></td>
@@ -17222,7 +17232,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									<table>';
 				}
 									foreach($params AS $param) {
-										echo '
+										$output .= '
 										<tr id="layer_parameter_'.$param['key'].'_tr">
 											<td valign="top" class="rollenwahl-option-header">
 												<span>' . $param['alias'] .
@@ -17258,15 +17268,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 														'', 																													# option_style
 														'', 																													# option_class
 														'',																														# onclick
-														"if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}",				# onmouseenter
-														"get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value); get_layer_legend(" . $layer_id . ", '&layer_params[" . $param['key'] . "]=' + this.dataset.value);"		# option_onmouseenter
+														($hover_preview ? "if (document.SVG.getSVGDocument().getElementById('mapimg3') == null) {custom_select_register_keydown();add_split_mapimgs();get_map(mapimg3, 'not_layer_id=" . $layer_id . "');}" : ""),				# onmouseenter
+														($hover_preview ? "get_map(mapimg0, 'only_layer_id=" . $layer_id . "&layer_params[" . $param['key'] . "]=' + this.dataset.value); get_layer_legend(" . $layer_id . ", '&layer_params[" . $param['key'] . "]=' + this.dataset.value);" : "")		# option_onmouseenter
 													)
 												).'
 											</td>
 										</tr>';
 									}
 				if($layer_id == NULL){
-					echo'	</table>
+					$output .='	</table>
 							</td>
 						</tr>
 					</table>
@@ -17274,6 +17284,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 			}
 		}
+		return $output;
 	}
 	
 	function check_class_completenesses($layerdaten = array()) {
@@ -20639,18 +20650,18 @@ class db_mapObj{
 		return $layer_params;
 	}
 
-	function get_layer_params_layer($param_id = NULL, $layer_id = NULL) {
+	function get_layer_params_layer($param_id = NULL, $layer_id = NULL, $only_from_attribute = '') {
 		$params = array();
 		$sql = "
 			SELECT
-				p.id, l.Layer_ID, l.Name, l.alias
+				p.id, p.key, l.Layer_ID, l.Name, l.alias
 			FROM
 				`layer_parameter` as p,
 				layer as l
 			WHERE
 				locate(
 					concat('$', p.key),
-					concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+					concat(" . ($only_from_attribute ?: "l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, '')") . ")
 				) > 0
 		";
 		if ($param_id != NULL) {
@@ -20674,6 +20685,7 @@ class db_mapObj{
 					rolle::$hist_timestamp,
 					$this->rolle->language
 				);
+				$params[$rs['id']]['key'] = $rs['key'];
 				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name_or_alias']];
 			}
 		}

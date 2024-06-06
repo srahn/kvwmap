@@ -125,7 +125,7 @@ if ($this->Fehlermeldung!='') {
 		<figure>
 			<? if ($show_layer_parameter) { ?>
 			<div id="layer_parameters_div" class="tab1">
-					<? $this->get_layer_params_form(); ?>
+					<? echo $this->get_layer_params_form(); ?>
 			</div>
 			<? } ?>
 			<div class="rollenwahl-gruppe tab2">

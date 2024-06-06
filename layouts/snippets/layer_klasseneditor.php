@@ -265,7 +265,7 @@
 							<tr>
 								<td>Klassifizierung:</td>
 								<td>
-									<input type="text" name="classification_name" value="">
+									<? echo $this->get_layer_params_form(NULL, $this->formvars['selected_layer_id'], 'classification', false) ?: '<input type="text" name="classification_name" value="">'; ?>
 								</td>
 							</tr>
 							<tr>
