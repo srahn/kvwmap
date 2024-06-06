@@ -18905,7 +18905,8 @@ class db_mapObj{
 				$err_msg = $ret[1];
 			}
 			else {
-				while ($rs = $database->result->fetch_assoc()) {
+				$result = $database->result;
+				while ($rs = $result->fetch_assoc()) {
 					$stelle_id_var = '@stelle_id_' . $rs['ID'];
 					$stellen[] = array(
 						'id' => $rs['ID'],
