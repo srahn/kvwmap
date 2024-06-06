@@ -40,8 +40,8 @@ $layer_visibility = 'collapsed';
 $zindex = 100;
 
 for ($i = 0; $i < $anzLayer; $i++) {	
-	if ($this->qlayerset[$i]['count'] > 0) {
-		$this->queried_layers[] = $this->qlayerset[$i]['Name_or_alias'];
+	if (!in_array($this->qlayerset[$i]['template'], array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php')) OR $this->qlayerset[$i]['count'] > 0) {
+		$this->queried_layers[$this->qlayerset[$i]['Layer_ID']] = $this->qlayerset[$i]['Name_or_alias'];
 		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['Layer_ID'] == $this->user->rolle->last_query_layer) {
 			# entweder der erste Layer mit Treffern oder der zuletzt angeguckte Layer
 			$active_layer_tab = $this->qlayerset[$i]['Layer_ID'];
@@ -87,7 +87,7 @@ for($i=0;$i<$anzLayer;$i++){
 	   </table>';	 
   }
 
-	if ($gesamt > 0) {
+	if (isset($this->queried_layers[$this->qlayerset[$i]['Layer_ID']])) {
 		if ($active_layer_tab == $this->qlayerset[$i]['Layer_ID']) {
 			$layer_visibility = '';
 			$active_tab = 'active_tab';
@@ -203,7 +203,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <? } ?>
 
 <?
-	if ($this->found != 'false' AND value_of($this->formvars, 'printversion') == '') {	
+	if (value_of($this->formvars, 'printversion') == '') {	
 		if (count($this->queried_layers) > 1) { ?>
 			<script type="text/javascript">
 				document.getElementById('overlayheader2').style.display = '';

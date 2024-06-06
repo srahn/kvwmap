@@ -9804,17 +9804,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				$wfs->get_feature_request($request, NULL, $filter, $this->formvars['anzahl']);
 				$features = $wfs->extract_features();
-				for($j = 0; $j < count($features); $j++){
-				for($k = 0; $k < count($layerset[0]['attributes']['name']); $k++){
-					$layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
-								$layerset[0]['attributes']['privileg'][$k] = 0;
-								$layerset[0]['attributes']['visible'][$k] = true;
-				}
-				$layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
-							$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
-							if ($features[$j]['geom'] != '') {
-								$geometries_found = true;
-							}
+				$layerset[0]['count'] = count($features);
+				for ($j = 0; $j < $layerset[0]['count']; $j++) {
+					for ($k = 0; $k < count($layerset[0]['attributes']['name']); $k++) {
+						$layerset[0]['shape'][$j][$layerset[0]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[0]['attributes']['name'][$k]];
+						$layerset[0]['attributes']['privileg'][$k] = 0;
+						$layerset[0]['attributes']['visible'][$k] = true;
+					}
+					$layerset[0]['shape'][$j]['wfs_geom'] = $features[$j]['geom'];
+					$layerset[0]['shape'][$j]['wfs_bbox'] = $features[$j]['bbox'];
+					if ($features[$j]['geom'] != '') {
+						$geometries_found = true;
+					}
 				}
 				# last_search speichern
 				if($this->last_query == ''){
@@ -16075,7 +16076,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$features = $wfs->extract_features();
 							if (!empty($features)) {
 								$f = 0;
-								for($j = 0; $j < @count($features); $j++){
+								$layerset[$i]['count'] = count($features);
+								for($j = 0; $j < $layerset[$i]['count']; $j++){
 									if (array_key_exists('value', $features[$j])) {
 										foreach($features[$j]['value'] as $attribute => $value){
 											$layerset[$i]['shape'][$f][$attribute] = $value;
@@ -16143,7 +16145,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             # Abfrage absetzen
             $request = $wfs->get_feature_request($request, $bbox, NULL, intval($this->formvars['anzahl']));
             $features = $wfs->extract_features();
-            for($j = 0; $j < @count($features); $j++){
+						$layerset[$i]['count'] = count($features);
+            for($j = 0; $j < $layerset[$i]['count']; $j++){
               for($k = 0; $k < @count($layerset[$i]['attributes']['name']); $k++){
 								$layerset[$i]['shape'][$j][$layerset[$i]['attributes']['name'][$k]] = $features[$j]['value'][$layerset[$i]['attributes']['name'][$k]];
               }
@@ -16154,7 +16157,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$layerset[$i]['attributes']['privileg'][$j] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 							$layerset[$i]['attributes']['privileg'][$layerset[$i]['attributes']['name'][$j]] = $privileges[$layerset[$i]['attributes']['name'][$j]];
 						}
-						if(@count($features) > 0){
+						if($layerset[$i]['count'] > 0){
 							if(!$last_query_deleted){			# damit nur die letzte Query gelöscht wird und nicht eine bereits gespeicherte Query eines anderen Layers der aktuellen Abfrage
 								$this->user->rolle->delete_last_query();
 								$last_query_deleted = true;
