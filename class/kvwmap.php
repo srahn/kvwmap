@@ -8539,6 +8539,8 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['classification_name'] = replace_params($this->layerdata['classification'], $params);
 		}
 
+		$data_sql = replace_params($data_sql, rolle::$layer_params);  # die restlichen Layer-Parameter ersetzen
+
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
     for ($i = 0; $i < count($auto_classes); $i++) {
