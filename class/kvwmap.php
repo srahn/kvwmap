@@ -11392,7 +11392,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			FROM 
 				(SELECT " . $query_parts['query'] . ") as foo
 			WHERE
-				" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN (" . implode(',', $oids) . ")
+				" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids) . "')
 			" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
 		";
 		#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
@@ -11498,7 +11498,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				FROM 
 					(SELECT " . $query_parts['query'] . ") as foo
 				WHERE
-					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN (" . implode(',', $oids ?: []) . ")
+					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids ?: []) . "')
 				" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
 				";
 			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
