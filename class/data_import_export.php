@@ -914,17 +914,6 @@ class data_import_export {
 	}
 
 ################### Export ########################
-	function export($formvars, $stelle, $user, $mapdb) {
-		#echo '<br>export formvars: ' . print_r($formvars, true);
-		$this->formvars = $formvars;
-		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
-		if ($this->formvars['selected_layer_id']) {
-			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
-		}
-	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb, $options = '') {
 		$formvars_nln = ($this->formvars['layer_name'] != '' ? '-nln ' . $this->formvars['layer_name'] : '');

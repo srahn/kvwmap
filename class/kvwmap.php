@@ -12305,7 +12305,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['load'] = true;
 		}
 
-		$this->data_import_export->export($this->formvars, $this->Stelle, $this->user, $this->mapDB);
+		$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
+		if ($this->layerdaten['Gruppe']) {
+			$this->layergruppen['ID'] = array_values(array_unique($this->layerdaten['Gruppe']));
+		}
+		$this->layergruppen = $this->mapDB->get_Groups($this->layergruppen); # Gruppen mit Pfaden versehen
+		# wenn Gruppe ausgewählt, Einschränkung auf Layer dieser Gruppe
+		if (value_of($this->formvars, 'selected_group_id') AND $this->formvars['selected_layer_id'] == '') {
+			$this->layerdaten = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, $this->formvars['selected_group_id']);
+		}
 
 		# Export-Einstellungen speichern
 		if ($this->formvars['go_plus'] == 'Einstellungen_speichern') {
@@ -12315,6 +12323,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->deleteExportSettings($this->formvars);
 		}
 		if ($this->formvars['selected_layer_id'] != '') {
+			$this->layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+			$layerdb = $this->mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
+			$this->attributes = $this->mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 			# die Namen aller gespeicherten Export-Einstellungen dieser Rolle zu diesem Layer laden
 			$this->export_settings = $this->user->rolle->getExportSettings($this->formvars['selected_layer_id']);
 			if ($this->formvars['export_setting'] != '') {
@@ -12337,8 +12349,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->formvars['within'] = $this->selected_export_setting[0]['within'];
 				$this->formvars['singlegeom'] = $this->selected_export_setting[0]['singlegeom'];
 				$attributes = explode(',', $this->selected_export_setting[0]['attributes']);
-				for ($i = 0; $i < count($this->data_import_export->attributes['name']); $i++) {
-					$this->formvars['check_' . $this->data_import_export->attributes['name'][$i]] = 0;
+				for ($i = 0; $i < count($this->attributes['name']); $i++) {
+					$this->formvars['check_' . $this->attributes['name'][$i]] = 0;
 				}
 				foreach ($attributes as $attribute) {
 					$this->formvars['check_' . $attribute] = 1;
@@ -12348,7 +12360,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		if ($this->formvars['epsg'] == '') {
 			# originäres System
-			$this->formvars['epsg'] = $this->data_import_export->layerset[0]['epsg_code'];
+			$this->formvars['epsg'] = $this->layerset[0]['epsg_code'];
 		}
 		$this->saveMap('');
 		$currenttime = date('Y-m-d H:i:s',time());
