@@ -245,7 +245,7 @@
 
 		###### normal #####
 		if ($field_id != NULL) {
-			$id = $field_id; # wenn field_id übergeben wurde (nicht die oberste Ebene)
+			$id = $field_id.'_'.$name; # wenn field_id übergeben wurde (nicht die oberste Ebene)
 		}
 		else {
 			$id = $layer_id.'_'.$name.'_'.$k;	# oberste Ebene ($id kann eigentlich für alle Typen verwendet werden)

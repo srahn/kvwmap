@@ -820,7 +820,7 @@ FROM
 		ini_set("pgsql.ignore_notice", '0');
 		ini_set("display_errors", '0');
 		$error_list = array();
-		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
+		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line) use (&$error_list) {
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
@@ -925,7 +925,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid]); $j++){
+						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -1044,24 +1044,29 @@ FROM
 		";
 		#echo '<br><br>' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($attr_info = pg_fetch_assoc($ret[1])){
-				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){
-					$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';
+		if ($ret[0] == 0) {
+			while ($attr_info = pg_fetch_assoc($ret[1])) {
+				if ($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval') {
+					$attr_info['nullable'] = '0';
 				}
-        if($attr_info['numeric_precision'] != '') {
+				else {
+					$attr_info['nullable'] = '1';
+				}
+        if ($attr_info['numeric_precision'] != '') {
 					$attr_info['length'] = $attr_info['numeric_precision'];
 				}
-        else {
+				else {
 					$attr_info['length'] = $attr_info['character_maximum_length'];
 				}
-	      if($attr_info['decimal_length'] == '') {
+				if ($attr_info['decimal_length'] == '') {
 					$attr_info['decimal_length'] = 'NULL';
-				}	   
+				}
+				/*
 				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
 					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
 					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
 				}
+				*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1802,6 +1807,7 @@ FROM
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
+		$Strassen = [];
     if ($queryret[0]) {
       $ret[0]=1;
       $ret[1]=$queryret[1];

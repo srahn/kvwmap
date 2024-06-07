@@ -100,6 +100,7 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
+		// $rect = ms_newRectObj(); Wird später noch nicht genutzt, deshalb hier auskommentiert.
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -227,6 +228,7 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
+		// $rect = ms_newRectObj(); Wird später noch nicht genutzt, deshalb hier auskommentiert.
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -676,7 +678,13 @@ class Gml_extractor {
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,
 				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				array_to_json(gmlas.planart) AS planart,
-				gmlas.erschliessungsvertrag AS erschliessungsvertrag
+				gmlas.erschliessungsvertrag AS erschliessungsvertrag,
+				to_char(gmlas.versionbaunvodatum, 'DD.MM.YYYY') AS versionbaunvodatum,
+				gmlas.versionbaunvotext AS versionbaunvotext,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 			FROM
 				" . $this->gmlas_schema . ".bp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -696,7 +704,7 @@ class Gml_extractor {
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
 								e_sub.typ::xplan_gml.xp_externereferenztyp,
 								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -777,7 +785,13 @@ class Gml_extractor {
 				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.fp_sonstplanart AS sonstplanart,
 				gmlas.planart::xplan_gml.fp_planart AS planart,
 				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY') AS planbeschlussdatum,
-				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum
+				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
+				to_char(gmlas.versionbaunvodatum, 'DD.MM.YYYY') AS versionbaunvodatum,
+				gmlas.versionbaunvotext AS versionbaunvotext,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 			FROM
 				" . $this->gmlas_schema . ".fp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -797,7 +811,7 @@ class Gml_extractor {
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
 								e_sub.typ::xplan_gml.xp_externereferenztyp,
 								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -863,7 +877,11 @@ class Gml_extractor {
 					ELSE NULL
 				END AS externereferenz,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				to_json((gmlas.planart_codespace, gmlas.planart, NULL)::xplan_gml.so_planart) AS planart
+				to_json((gmlas.planart_codespace, gmlas.planart, NULL)::xplan_gml.so_planart) AS planart,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 				/*ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde*/
 			FROM
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
@@ -884,7 +902,7 @@ class Gml_extractor {
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
 								e_sub.typ::xplan_gml.xp_externereferenztyp,
 								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -980,7 +998,7 @@ class Gml_extractor {
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
 								e_sub.typ::xplan_gml.xp_externereferenztyp,
 								false
-							)::xplan_gml.xp_spezexternereferenzauslegung) AS externereferenz
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid

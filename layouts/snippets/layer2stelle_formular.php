@@ -172,7 +172,7 @@ include_once(CLASSPATH . 'LayerGroup.php');
 				<tr>
 					<th align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $stStartAktiv; ?></th>
 					<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-						<select name="startaktiv">
+						<select name="start_aktiv">
 							<option <? if ($this->formvars['start_aktiv'] == '0') {
 												echo 'selected ';
 											} ?>value="0"><?php echo $this->strNo; ?></option>

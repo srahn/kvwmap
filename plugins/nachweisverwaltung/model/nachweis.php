@@ -466,8 +466,8 @@ class Nachweis {
       }
       $rect = rectObj(
         $rs['minx'],
+        $rs['miny'],        
         $rs['maxx'],
-        $rs['miny'],
         $rs['maxy']
       );
       $ret[1]=$rect;
@@ -1713,8 +1713,8 @@ class Festpunkte {
       $rs=pg_fetch_array($ret[1]);
       $rect = rectObj(
         intval($rs['xmin']),
+        intval($rs['ymin']),        
         intval($rs['xmax']),
-        intval($rs['ymin']),
         intval($rs['ymax'])
       );
       # Aufweiten des Anzeigefensters, wenn nur nach einen Punkt gesucht wurde

@@ -917,7 +917,6 @@ class data_import_export {
 		if ($this->formvars['selected_layer_id']) {
 			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
 			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-			$path = $this->layerset[0]['pfad'];
 			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
 			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
 		}
@@ -1282,8 +1281,8 @@ class data_import_export {
 			if ($this->formvars['epsg'] != '') {
 				$t_epsg = $this->formvars['epsg'];
 			}
-			elseif ($layerset[0]['epsg'] != '') {
-				$t_epsg = $layerset[0]['epsg'];
+			elseif ($layerset[0]['epsg_code'] != '') {
+				$t_epsg = $layerset[0]['epsg_code'];
 			}
 			else {
 				$t_epsg = '4326';
@@ -1343,7 +1342,7 @@ class data_import_export {
 				}
 			}
 			elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
-				$filter = str_replace('$userid', $user->id, $filter);
+				$filter = str_replace('$USER_ID', $user->id, $filter);
 	    	$where = 'WHERE ' . $filter;
 			}
 			else {
@@ -1357,6 +1356,13 @@ class data_import_export {
 				else {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
+			}
+			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
+				$query_parts['select'] = str_replace(
+																	$layerset[0]['attributes']['the_geom'], 
+																	'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
+																	$query_parts['select']
+																);
 			}
 			$sql = "
 				SELECT 
@@ -1386,7 +1392,7 @@ class data_import_export {
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
 					}
-					$selected_attributes[$s] .= 'as ' . $layerset[0]['attributes']['the_geom'];
+					$selected_attributes[$s] .= ' as ' . $layerset[0]['attributes']['the_geom'];
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
@@ -1445,6 +1451,7 @@ class data_import_export {
 					} break;
 
 					case 'GPX' : {
+						$this->formvars['geomtype'] = ($layerset[0]['Datentyp'] == 2 ? 'LINESTRING' : $this->formvars['geomtype']);
 						$exportfile = $exportfile.'.gpx';
 						$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb, '-lco FORCE_GPX_TRACK=YES -dsco GPX_USE_EXTENSIONS=YES');
 					} break;

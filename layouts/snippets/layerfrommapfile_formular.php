@@ -34,7 +34,7 @@ function selectall(count){
 	    	<td style="border-bottom:1px solid #C3C7C3"><input type="submit" name="go_plus" value="<?php echo $strButtonDataLoad; ?>"></td>
 	  	</tr>
 			<?
-			if(count($this->mapfiles) > 0){
+			if(count_or_0($this->mapfiles) > 0){
 				echo '
 					<tr>
 						<td colspan="3" align="center"><span class="fett">'.count($this->mapfiles).'&nbsp;Mapfiles&nbsp;in '.$this->formvars['zipfile'].' gefunden:</span></td>
@@ -51,7 +51,7 @@ function selectall(count){
 				}
 				echo '<tr><td colspan="3" align="right"><input type="submit" name="go_plus" value="Datei laden"></td></tr>';
 			}
-			if(count($this->layers) > 0){
+			if(count_or_0($this->layers) > 0){
 				if($this->mapobject->fontsetfilename != '' OR $this->mapobject->symbolsetfilename != ''){
 					echo '
 						<tr>

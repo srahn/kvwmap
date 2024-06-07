@@ -1,5 +1,7 @@
 <div class="generic_search generic_search_defaults">
 
+<? if ($this->Stelle->isMenueAllowed('Layer-Suche')) { ?>
+
 	<div id="gsl_formular">
 		<div class="gsl_gruppe_waehlen gsl_gruppe_waehlen_name"><?php echo $strGroups; ?></div>
 		<div class="gsl_gruppe_waehlen gsl_gruppe_waehlen_select">
@@ -33,8 +35,11 @@
 			</select>		
 		</div>
 	</div>
-	
-<?php 
+<?
+}
+else {
+	echo '<input type="hidden" name="selected_layer_id" value="' . $this->formvars['selected_layer_id'] . '">';
+}
 if(value_of($this->formvars, 'selected_layer_id') != '') {
 ?>
 	<div id="gsl_suche_speichern">

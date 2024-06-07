@@ -37,7 +37,7 @@ window.onbeforeunload = function(){
 * @param target array ['divname', ...]
 * @param action array ['sethtml'. ...]
 */
-function ahah(url, data, target, action, progress) {
+function ahah(url, data, target, action, progress, loading_img = true) {
 	if (csrf_token && csrf_token !== '') {
 		if (typeof data == 'string') {
 			data = data + '&csrf_token=' + csrf_token;
@@ -46,11 +46,13 @@ function ahah(url, data, target, action, progress) {
 			data.append('csrf_token', csrf_token);
 		}
 	}
-	for (k = 0; k < target.length; ++k) {
-		if (target[k] != null && target[k].tagName == "DIV") {
-			waiting_img = document.createElement("img");
-			waiting_img.src = "graphics/ajax-loader.gif";
-			target[k].appendChild(waiting_img);
+	if (loading_img) {
+		for (k = 0; k < target.length; ++k) {
+			if (target[k] != null && target[k].tagName == "DIV") {
+				waiting_img = document.createElement("img");
+				waiting_img.src = "graphics/ajax-loader.gif";
+				target[k].appendChild(waiting_img);
+			}
 		}
 	}
 	var req = new XMLHttpRequest();
@@ -553,7 +555,7 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 	else {
 		clearTimeout(messageTimeoutID);
-		$('#message_box').stop().fadeIn();
+		$('#message_box').stop().fadeIn().show();
 	}
 }
 
@@ -992,8 +994,8 @@ function update_legend(layerhiddenstring){
 	for(j = 0; j < parts.length-1; j=j+2){
 		if (
 			(parts[j] == 'reload') ||																																																								// wenn Legenden-Reload erzwungen wird oder
-			(document.getElementById('thema_'+parts[j]) != undefined && document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
-			(document.getElementById('thema_'+parts[j]) != undefined && !document.getElementById('thema_'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
+			(document.getElementById('thema'+parts[j]) != undefined && document.getElementById('thema'+parts[j]).disabled && parts[j+1] == 0) || 	// wenn Layer nicht sichtbar war und jetzt sichtbar ist
+			(document.getElementById('thema'+parts[j]) != undefined && !document.getElementById('thema'+parts[j]).disabled && parts[j+1] == 1)) 	// oder andersrum
 		{
 			clearLegendRequests();
 			legende = document.getElementById('legend');
@@ -1003,38 +1005,36 @@ function update_legend(layerhiddenstring){
 	}
 }
 
+function get_layer_legend(layer_id, params, toggle_classes) {
+	var layer_tr = document.getElementById('legend_layer_' + layer_id);
+	if (toggle_classes) {
+		var classes_field = document.getElementById('classes_' + layer_id);
+		classes_field.value = 1 - classes_field.value;
+		params = params + '&show_classes=' + classes_field.value;
+	}
+	ahah("index.php",	"go=get_layer_legend&only_layer_id=" + layer_id + params, new Array(layer_tr), new Array("sethtml"));
+}
+
 /*
 * optional status to set values irrespective of current value and open all subgroups
 */
-function getlegend(groupid, layerid, fremde, status) {
+function getlegend(groupid, status) {
 	status = status || 0;
 	groupdiv = document.getElementById('groupdiv_' + groupid);
-	if (layerid == '') {														// eine Gruppe wurde auf- oder zugeklappt
-		group = document.getElementById('group_' + groupid);
-		var open = status || !parseInt(group.value);
-		if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
-			group.value = 1;
-			ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&nurFremdeLayer=' + fremde + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
-		}
-		else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
-			group.value = 0;
-			layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
-			groupimg = document.getElementById('groupimg_' + groupid);
-			layergroupdiv.style.display = 'none';
-			groupimg.src = 'graphics/plus.gif';
-			ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
-		}
+	group = document.getElementById('group_' + groupid);
+	var open = status || !parseInt(group.value);
+	if (open) {												// eine Gruppe wurde aufgeklappt -> Layerstruktur per Ajax holen
+		group.value = 1;
+		ahah('index.php', 'go=get_group_legend&' + group.name + '=' + group.value + '&group=' + groupid + '&status=' + status, new Array(groupdiv), ['setouterhtml']);
 	}
-	else {																	// eine Klasse wurde auf- oder zugeklappt
-		layer = document.getElementById('classes_'+layerid);
-		if(layer.value == 0){
-			layer.value = 1;
-		}
-		else{
-			layer.value = 0;
-		}
-		ahah('index.php', 'go=get_group_legend&layer_id='+layerid+'&show_classes='+layer.value+'&group='+groupid+'&nurFremdeLayer='+fremde, new Array(groupdiv), ['setouterhtml']);
-	}
+	else {																// eine Gruppe wurde zugeklappt -> Layerstruktur verstecken und Einstellung per Ajax senden
+		group.value = 0;
+		layergroupdiv = document.getElementById('layergroupdiv_' + groupid);
+		groupimg = document.getElementById('groupimg_' + groupid);
+		layergroupdiv.style.display = 'none';
+		groupimg.src = 'graphics/plus.gif';
+		ahah('index.php', 'go=close_group_legend&' + group.name + '=' + group.value, '', '');
+	}	
 }
 
 function updateThema(event, thema, query, groupradiolayers, queryradiolayers, instantreload){
@@ -1057,9 +1057,9 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 		groupradiolayerstring = groupradiolayers.value+'';			// die Radiolayer innerhalb einer Gruppe
 		radiolayer = groupradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
-			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
-				if(document.getElementById('thema_'+radiolayer[i]) != thema){
-					document.getElementById('thema_'+radiolayer[i]).checked = false;
+			if(document.getElementById('thema'+radiolayer[i]) != undefined){
+				if(document.getElementById('thema'+radiolayer[i]) != thema){
+					document.getElementById('thema'+radiolayer[i]).checked = false;
 					if(document.getElementById('qLayer'+radiolayer[i]) != undefined){
 						document.getElementById('qLayer'+radiolayer[i]).checked = false;
 					}
@@ -1083,8 +1083,8 @@ function updateThema(event, thema, query, groupradiolayers, queryradiolayers, in
 		queryradiolayerstring = queryradiolayers.value+'';			// die Radiobuttons für die Abfrage, wenn singlequery-Modus aktiviert
 		radiolayer = queryradiolayerstring.split('|');
 		for(i = 0; i < radiolayer.length-1; i++){
-			if(document.getElementById('thema_'+radiolayer[i]) != undefined){
-				if(document.getElementById('thema_'+radiolayer[i]) != thema){
+			if(document.getElementById('thema'+radiolayer[i]) != undefined){
+				if(document.getElementById('thema'+radiolayer[i]) != thema){
 					if(document.getElementById('qLayer'+radiolayer[i]) != undefined)document.getElementById('qLayer'+radiolayer[i]).checked = false;
 				}
 				else{
@@ -1121,8 +1121,8 @@ function updateQuery(event, thema, query, radiolayers, instantreload){
   	radiolayerstring = radiolayers.value+'';
   	radiolayer = radiolayerstring.split('|');
   	for(i = 0; i < radiolayer.length-1; i++){
-  		if(document.getElementById('thema_'+radiolayer[i]) != thema){
-  			document.getElementById('thema_'+radiolayer[i]).checked = false;
+  		if(document.getElementById('thema'+radiolayer[i]) != thema){
+  			document.getElementById('thema'+radiolayer[i]).checked = false;
 				document.getElementById('thema'+radiolayer[i]).value = 0;		// damit nicht sichtbare Radiolayers ausgeschaltet werden
   		}
   		else{
@@ -1193,7 +1193,7 @@ function selectgroupquery(group, instantreload){
 			query = document.getElementById("qLayer"+layers[i]);
 			if(query){
 				query.checked = check;
-				thema = document.getElementById("thema_"+layers[i]);
+				thema = document.getElementById("thema"+layers[i]);
 				updateThema('', thema, query, '', '', 0);
 			}
 		}
@@ -1215,14 +1215,14 @@ function selectgroupthema(group, instantreload){
   var layers = value.split(",");
 	var check;
   for(i = 0; i < layers.length; i++){			// erst den ersten checkbox-Layer suchen und den check-Status merken
-    thema = document.getElementById("thema_"+layers[i]);
+    thema = document.getElementById("thema"+layers[i]);
 		if(thema && thema.type == 'checkbox' && !thema.disabled){
 			check = !thema.checked;
 			break;
     }
   }
 	for(i = 0; i < layers.length; i++){
-    thema = document.getElementById("thema_"+layers[i]);
+    thema = document.getElementById("thema"+layers[i]);
     if(thema && (!check || thema.type == 'checkbox')){		// entweder alle Layer sollen ausgeschaltet werden oder es ist ein checkbox-Layer
       thema.checked = check;
       query = document.getElementById("qLayer"+layers[i]);
@@ -1241,7 +1241,7 @@ function zoomToMaxLayerExtent(zoom_layer_id){
 
 function getLayerOptions(layer_id){
 	if(document.GUI.layer_options_open.value != '')closeLayerOptions(document.GUI.layer_options_open.value);
-	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'));
+	ahah('index.php', 'go=getLayerOptions&layer_id=' + layer_id, new Array(document.getElementById('options_'+layer_id), ''), new Array('sethtml', 'execute_function'), null, false);
 	document.GUI.layer_options_open.value = layer_id;
 }
 

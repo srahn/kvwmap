@@ -146,6 +146,15 @@ body {
 	margin: auto;
 }
 
+.collapsed {
+	visibility: collapse;
+  height: 0;
+}
+
+.collapsed *{
+	margin: 0 !important;
+}
+
 #copyrights_div table td {
 	vertical-align: top;
 	padding: 4px;
@@ -442,7 +451,7 @@ span[data-tooltip]:hover::after {
   border: 1px solid #888;
 	border-radius: 2px;
   align-items: center;
-	margin: 3px 3px 3px 0;
+	margin: 0 3px 3px 0;
 }
 
 .custom-select .dropdown {
@@ -790,12 +799,12 @@ a.invisiblelayerlink {
 	cursor: context-menu;
 }
 
-a.invisiblelayerlink:hover{
-	color: gray;
-}
-
 .sachdatenanzeige_paging{
 	margin-top: 10px;
+}
+
+a.invisiblelayerlink:hover{
+	color: gray;
 }
 
 select[name="geom_from_layer"] {
@@ -1177,6 +1186,10 @@ a.menuered:hover {
 
 .text-menue{
 	flex: 0 0 100%;
+}
+
+.qr_code{
+	background-image: url(<? echo GRAPHICSPATH; ?>qr_code.png);
 }
 
 .use_for_dataset{
@@ -1715,7 +1728,7 @@ span.black {
 }
 
 #layer {
-	margin:0px 8px 8px 8px;
+	margin: 18px 8px 8px 8px;
 	clear: both;
 }
 
@@ -1922,7 +1935,7 @@ thead.gle th {
 }
 
 .gle_tabs > div{
-	padding: 0 5px 0 8px;
+	padding: 1px 5px 0 8px;
 	cursor: pointer;
 	border: 1px solid #bbb;
 	border-left: none;
@@ -1934,7 +1947,7 @@ thead.gle th {
 }
 
 .gle_tabs > div:first-child {
-	padding: 0 5px 0 5px;
+	padding: 1px 5px 0 5px;
 	margin-left: 0;
 }
 
@@ -2303,7 +2316,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	position: relative;
 	float: left;
 	margin: auto;
-	visibility: visible;
 	line-height: 30px;
 }
 

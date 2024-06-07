@@ -56,6 +56,7 @@ include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php
 	}
 
 	function checkQueryFields() {
+		<? if ($this->user->rolle->singlequery == 2) {echo 'return true;';}	?>
 		var selected = false;
 		query_fields = document.getElementsByClassName('info-select-field');
 		for (var i = 0; i < query_fields.length; i++) {
@@ -349,6 +350,7 @@ if ($this->user->rolle->gps) {
 $conditional_output = function ($condition, $output = '', $else = '') {
 	return ($condition ? $output : $else);
 };
+$EPSGCODE_ALKIS = EPSGCODE_ALKIS;
 $svg .= <<<FUNCTIONDEF
 function startup() {
 	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
@@ -733,7 +735,7 @@ function polygonquery() {
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if ({$this->user->rolle->epsg_code} == {EPSGCODE_ALKIS}) {
+	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	}
 	if (top.document.GUI.str_polypathx.value != "") {
@@ -779,7 +781,7 @@ function measure(){
 	options1 = top.document.getElementById("options");
 	options1.innerHTML='<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang';
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if ({$this->user->rolle->epsg_code} == {EPSGCODE_ALKIS}) {
+	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	}
   doing = "measure";
@@ -1802,7 +1804,7 @@ function highlightbyid(id){
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
   <g id="moveGroup" transform="translate(0 0)">
-    <image id="mapimg" href="{$bg_pic}" height="100%" width="100%" y="0" x="0"/>
+    <image id="mapimg" xlink:href="{$bg_pic}" height="100%" width="100%" y="0" x="0"/>
     <g id="cartesian" transform="translate(0,{$res_y}) scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>

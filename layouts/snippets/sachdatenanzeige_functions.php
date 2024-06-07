@@ -132,6 +132,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			group.style.visibility = 'visible';
 		});
 	}
+
+	toggle_layer = function(tab, layer_id){
+		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
+		active_tab.classList.remove("active_tab");
+		tab.classList.add("active_tab");
+		var layer_to_close = document.querySelectorAll('.layer_results');
+		[].forEach.call(layer_to_close, function (layer){
+			layer.classList.add('collapsed');
+		});
+		var layer_to_open = document.querySelector('#result_' + layer_id);
+		layer_to_open.classList.remove('collapsed');
+		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
+	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
 		if(object == null)return;
@@ -289,6 +302,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				value = elements[i].value;
 				name = elements[i].name;
 				type = elements[i].type;
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
@@ -868,6 +884,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
+	get_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'index.php?go=get_position_qrcode&layer_id=' + layer_id + '&oid=' + oid;
+	}
+
+	remove_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'graphics/leer.gif';
+	}
+
 	zoom2object = function(layer_id, columnname, oid, selektieren){
 		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
