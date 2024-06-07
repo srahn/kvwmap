@@ -24,7 +24,7 @@ class MyObject {
 		$this->tableName = $tableName;
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
-		$this->identifiers = array();
+		$this->identifiers = (($identifier_type = 'array' AND is_array($identifier)) ? $identifier : array());
 		$this->data = array();
 		$this->children_ids = array();
 		$this->validations = array();
@@ -150,6 +150,7 @@ class MyObject {
 			WHERE
 				" . $this->get_identifier_expression() . "
 		";
+		#echo '<br>sql: ' . $sql;
 		$this->debug->show('<p>sql: ' . $sql, MyObject::$write_debug);
 		$this->database->execSQL($sql);
 		$rs = $this->database->result->fetch_assoc();
@@ -398,7 +399,7 @@ class MyObject {
 		$where = array();
 		if (count($this->identifiers) > 0) {
 			$where = array_map(
-				function($identifier) {
+				function ($identifier) {
 					$quote = ($identifier['type'] == 'text' ? "'" : "");
 					return $identifier['key'] . " = " . $quote . $this->get($identifier['key']) . $quote;
 				},
@@ -407,7 +408,6 @@ class MyObject {
 		}
 		else {
 			if (
-				in_array($this->identifier, $this->getKeys()) AND
 				$this->get($this->identifier) != null AND
 				$this->get($this->identifier) != ''
 			) {

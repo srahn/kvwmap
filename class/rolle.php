@@ -20,13 +20,70 @@ class rolle {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
 		#$this->layerset=$this->getLayer('');
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
+	}
+
+	/**
+	 * Function create a rolle for a user with $user_id and all relations to menues, layers and layergroups in stelle with $stelle_id.
+	 * If $default_user_id is given them settings will be used.
+	 * @param database $database MySQL-Database object from class database defined in classes/mysql.php
+	 * @param Integer $stelle_id
+	 * @param Integer $user_id
+	 * @param Integer $default_user_id Die id eines Default-Users.
+	 * @param Layer[] $layer Array with layer_ids to assign rolle to there groups.
+	 * @return Array Result with Boolean success and String $msg.
+	 */
+	public static	function create($database, $stelle_id, $user_id, $default_user_id = 0, $layer = array()) {
+		$rolle = new rolle($user_id, $stelle_id, $database);
+		# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+		if (!$rolle->setRolle($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Anlegen der Rolle.<br>' . $this->errormessage
+			);
+		}
+
+		# Hinzufügen der selektierten Obermenüs zur Rolle
+		if (!$rolle->setMenue($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen der Menüs der Stelle zum Nutzer.<br>' . $this->errormessage
+			);
+		}
+
+		# Hinzufügen der Layer zur Rolle
+		if (!$rolle->setLayer($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen des Layers zur Rolle.<br>' . $this->errormessage
+			);
+		}
+
+		# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
+		if (!$rolle->setGroups($user_id, $stelle_id, $default_user_id, $layer)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Hinzufügen der Layergruppen der selektierten Layer zur Rolle.<br>' . $this->errormessage
+			);
+		};	
+
+		if (!$rolle->setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id)) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Zuordnen von savedLayersFromDefaultUser.<br>' . $this->errormessage
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Anlegen der Rolle erfolgreich.'
+		);
 	}
 
 	/*
@@ -1957,13 +2014,17 @@ class rolle {
 				WHERE
 					stelle_id = ".$stelle_id." AND
 					user_id = ".$default_user_id;
-			#echo '<br>Gruppen: '.$sql;
+			#echo '<br>SQL zum Zuordnen der Rolle zu den Layergruppen: '.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rolle:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$msg = "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__;
+				$this->debug->write($msg, 4);
+				return 0;
+			}
 		}
 		else {
-			for($j = 0; $j < @count($layerids); $j++){
+			for ($j = 0; $j < @count($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
@@ -1981,10 +2042,13 @@ class rolle {
 						WHERE @id IS NOT NULL
 					) AS dat
 					JOIN u_groups ON dat.id = u_groups.id";
-				#echo '<br>Gruppen: '.$sql;
+				#echo '<br>Zuordnen der Rolle zu den Layergruppen: ' . $sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;
@@ -1997,7 +2061,10 @@ class rolle {
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);
-			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+			if (!$this->database->success) {
+				$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+				return 0;
+			}
 		}
 		return 1;
 	}

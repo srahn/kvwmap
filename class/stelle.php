@@ -1448,6 +1448,16 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function assign layers with $layer_ids to this stelle
+	 * If $assign_default_values are defined these will be used for used_layers table
+	 * @param Array{String} $layer_ids
+	 * @param Integer $drawinorder
+	 * @param String $filter
+	 * @param Boolean $assign_default_values
+	 * @param String $privileg default 'default'
+	 * @return Boolean Always 1
+	 */
 	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
@@ -1522,7 +1532,10 @@ class stelle {
 				#echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 			if ($assign_default_values OR $this->database->mysqli->affected_rows == 0) {
 				# wenn nicht von Elternstelle übernommen, Defaulteinstellungen übernehmen bzw. ignorieren, falls schon vorhanden
@@ -1571,7 +1584,10 @@ class stelle {
 				#echo '<br>SQL zur Zuordnung eines Layers zur Stelle: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 
 			if (!$assign_default_values AND $this->database->mysqli->affected_rows > 0) {
@@ -1613,7 +1629,10 @@ class stelle {
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 				if ($this->database->mysqli->affected_rows != 0) {
 					# löschen der Einträge für "kein Zugriff" Rechte
 					$sql = "
@@ -1641,7 +1660,10 @@ class stelle {
 					#echo $sql.'<br>';
 					$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 					$this->database->execSQL($sql);
-					if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+					if (!$this->database->success) {
+						$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+						return 0;
+					}
 				}
 				else {
 					# wenn nicht von Elternstelle übernommen, Defaultrechte übernehmen
@@ -1661,12 +1683,15 @@ class stelle {
 				#echo $sql.'<br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
-				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+				if (!$this->database->success) {
+					$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
+					return 0;
+				}
 			}
 		}
 		return 1;
 	}
-	
+
 	function updateLayerParams() {
 		/*
 		$sql = "
