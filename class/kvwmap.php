@@ -8705,7 +8705,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           // calculate class ranges from cluster centers
           $ranges[] = $data[0][$class_item];
           for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
-            $ranges[] = ($centers[$cIdx-1]+ $centers[$cIdx]) / 2;
+            $ranges[] = round(($centers[$cIdx-1]+ $centers[$cIdx]) / 2, 4);
           }
           $ranges[]= $data[count($data)-1][$class_item];
 
