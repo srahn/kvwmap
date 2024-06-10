@@ -8140,6 +8140,14 @@ echo '			</table>
 		$this->output();
 	}
 
+	function Layer_Zeichenreihenfolge() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->layerdaten = $mapDB->getall_Layer('drawingorder', false, $this->user->id, $this->Stelle->id);
+		$this->titel = 'Zeichenreihenfolge';
+		$this->main = 'layer_zeichenreihenfolge.php';
+		$this->output();
+	}
+
 	function Layer2Stelle_Reihenfolge() {
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';

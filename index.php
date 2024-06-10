@@ -1752,6 +1752,11 @@ function go_switch($go, $exit = false) {
 				}
 			} break;
 
+			case 'Layer_Zeichenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Zeichenreihenfolge();
+			} break;
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();

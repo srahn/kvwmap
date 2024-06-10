@@ -1539,13 +1539,13 @@ a.menuered:hover {
 .dropZone.ready{
 	margin: -12 0 -12 15;
 	height: 24px;
-	transition: height 0.1s ease, margin 0.1s ease;
+	transition: height 0.2s ease, margin 0.2s ease;
 }
 
 .dropZone.over{
 	height: 51px;
 	margin: -13 0 -13 15;
-	transition: height 0.1s ease, margin 0.1s ease;
+	transition: height 0.2s ease, margin 0.2s ease;
 }
 
 .dragObject{
@@ -1558,6 +1558,7 @@ a.menuered:hover {
 	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
+	text-align: start;
 }
 
 .dragObject:hover{
@@ -1574,7 +1575,7 @@ a.menuered:hover {
 	margin: 0 0 0 0;
 	padding: 0 0 0 0;
 	border: none;
-	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
+	transition: height 0.2s ease, margin 0.2s ease, padding 0.2s ease;
 }
 
 .dragObject.over{
