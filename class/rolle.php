@@ -1162,6 +1162,7 @@ class rolle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
+			$rs['Name_or_alias'] = $rs['Name'];
 			$layer[] = $rs;
 		}
 		return $layer;

@@ -822,7 +822,7 @@ class GUI {
 		$width = $width - $width_reduction;
 		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($width_reduction == '' AND $this->user->rolle->hideLegend == 1){$width = $width - 254;}
+		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
 		$this->user->rolle->nImageHeight = $height;
 		return $scale;

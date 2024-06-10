@@ -8763,7 +8763,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
           // calculate class ranges from cluster centers
           $ranges[] = $data[0][$class_item];
           for ($cIdx = 1; $cIdx < count($centers); $cIdx++) {
-            $ranges[] = ($centers[$cIdx-1]+ $centers[$cIdx]) / 2;
+            $ranges[] = round(($centers[$cIdx-1]+ $centers[$cIdx]) / 2, 4);
           }
           $ranges[]= $data[count($data)-1][$class_item];
 
@@ -14974,7 +14974,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$width = $width - $width_reduction;
 		$height = $height - $height_reduction;
 		if($this->user->rolle->hideMenue == 1){$width = $width - 195;}
-		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}	# nur in der Hauptkarte berücksichtigen
+		if($this->user->rolle->hideLegend == 1){$width = $width - 254;}
 		$this->user->rolle->nImageWidth = $width;
 		$this->user->rolle->nImageHeight = $height;
 		return $scale;
@@ -15979,8 +15979,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									$layerset[$i]['shape'][] = $rs;
 								}
 								$num_rows = pg_num_rows($ret[1]);
-								if(value_of($this->formvars, 'offset_'.$layerset[$i]['Layer_ID']) == '' AND $num_rows < $this->formvars['anzahl'])$layerset[$i]['count'] = $num_rows;
-								else{
+								if (
+										value_of($this->formvars, 'offset_'.$layerset[$i]['Layer_ID']) == '' AND 
+										$num_rows < $this->formvars['anzahl']
+									)
+								{
+									$layerset[$i]['count'] = $num_rows;
+								}
+								else {
 									# Anzahl der Datensätze abfragen
 									$sql_count = "SELECT count(*) FROM (" . $sql.") as foo";
 									$ret=$layerdb->execSQL($sql_count,4, 0);
