@@ -1289,8 +1289,10 @@ function closeGroupOptions(group_id) {
 }
 
 function saveLayerOptions(layer_id){	
-	document.GUI.go.value = 'saveLayerOptions';
-	document.GUI.submit();
+	var formdata = new FormData(document.GUI);
+	formdata.set('go', 'saveLayerOptions');
+	ahah("index.php",	formdata, [], []);
+	neuLaden();
 }
 
 function resetLayerOptions(layer_id){	

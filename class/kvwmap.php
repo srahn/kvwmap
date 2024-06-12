@@ -942,11 +942,6 @@ echo '			</table>
 				}
 			}
 		}
-		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
-		$this->output();
 	}
 
 	function resetLayerOptions(){
