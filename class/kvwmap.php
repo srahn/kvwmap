@@ -655,7 +655,7 @@ class GUI {
 																	(	$this->formvars['layer_id'] < 0 		# entweder Rollenlayer oder
 																		OR 
 																		(
-																			$privileges[$attributes[$i]['name']] != '' 									# mind. Leserecht
+																			($privileges[$attributes[$i]['name']] != '' OR $attributes[$i]['name'] == $layer[0]['original_labelitem']) 		# mind. Leserecht oder labelitem
 																			AND 
 																			!in_array($attributes[$i]['name'], ['oid'])	# und Attribut ist nicht die oid
 																		)
