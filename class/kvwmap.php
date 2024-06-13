@@ -18785,7 +18785,10 @@ class db_mapObj{
 			if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		}
 
-		$sql = "select 1 from information_schema.views WHERE table_name = '" . $maintable."' AND table_schema = '" . $schema."'";
+		$sql = "
+			select 1 from information_schema.views WHERE table_name = '" . $maintable."' AND table_schema = '" . $schema."'
+			UNION
+			select 1 from information_schema.foreign_tables WHERE foreign_table_name = '" . $maintable."' AND foreign_table_schema ='" . $schema."'";
 		$query = pg_query($sql);
 		$is_view = pg_num_rows($query);
 		$sql = "UPDATE layer SET maintable_is_view = " . $is_view." WHERE Layer_ID = " . $layer_id;
