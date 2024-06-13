@@ -1660,9 +1660,9 @@ class ALKIS {
                 $Nutzunglangtext.=' ('.$flst->Nutzung[$i]['abkuerzung'].')';
               }
               $ausgabetext=zeilenumbruch($Nutzunglangtext,60);
-              $pdf->addText($col2_1,$row,$fontSize,utf8_decode($ausgabetext[0]));
+              $pdf->addText($col2_2,$row,$fontSize,utf8_decode($ausgabetext[0]));
               for ($j=1;$j<count($ausgabetext);$j++) {
-                $pdf->addText($col2_1,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
+                $pdf->addText($col2_2,$row-=12,$fontSize,utf8_decode($ausgabetext[$j]));
               }
             }
           }
@@ -1792,7 +1792,7 @@ class ALKIS {
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
+								$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
 								$pdf->addText($col2,$row,$fontSize, utf8_decode($BestandStr));
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
@@ -1880,7 +1880,7 @@ class ALKIS {
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
+								$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
 								$pdf->addText($col2,$row,$fontSize, utf8_decode($BestandStr));
 								
 								if($flst->Buchungen[$b]['sondereigentum'] != ''){
@@ -1971,8 +1971,8 @@ class ALKIS {
 								$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 								$BestandStr.=' BVNR'.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
 								$BestandStr.=' ('.$flst->Buchungen[$b]['buchungsart'].')';
-								$BestandStr.=' '.utf8_decode($flst->Buchungen[$b]['bezeichnung']);
-								$pdf->addText($col2,$row,$fontSize,$BestandStr);
+								$BestandStr.=' '.$flst->Buchungen[$b]['bezeichnung'];
+								$pdf->addText($col2,$row,$fontSize, utf8_decode($BestandStr));
 								$row-=18;
 
 							} # ende Schleife Bestand
