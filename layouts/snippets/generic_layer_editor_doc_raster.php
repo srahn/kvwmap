@@ -37,8 +37,6 @@
 		
 </script>
 
-<div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -64,6 +62,15 @@
 </table>
 <?
 		}
+
+		if ($this->formvars['overwrite_layer_name'] != '') {
+			$layer_name = $this->formvars['overwrite_layer_name']; ?>
+			<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
+		}
+		else {
+			$layer_name = $layer['Name_or_alias'];
+		}
+
   	$doit = false;
 	  $anzObj = @count($layer['shape']);
 		if ($anzObj > 0) {
@@ -78,10 +85,12 @@
 		}
 	  if($doit == true){
 ?>
-<table border="0" cellspacing="0" cellpadding="2">
-	<tr>
-		<td>
-			<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
+<div id="layer" align="left" onclick="remove_calendar();">
+	<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
+	<table border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			<td>
+				<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
@@ -519,6 +528,6 @@
 <?
   }
   else {
-  	# nix machen
+  	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
   }
 ?>
