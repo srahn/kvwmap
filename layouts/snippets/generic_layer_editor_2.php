@@ -430,6 +430,6 @@ if ($doit == true) {
 		<input type="hidden" id="geom_privileg_<? echo $layer['Layer_ID']; ?>" value="<? echo $privileg; ?>">
 	</div><?
 }
-elseif ($layer['requires'] == '' AND $layer['required'] == '') {
+elseif ($layer['requires'] == '') {
 	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
 } ?>
