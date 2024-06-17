@@ -125,7 +125,7 @@ if ($this->Fehlermeldung!='') {
 		<figure>
 			<? if ($show_layer_parameter) { ?>
 			<div id="layer_parameters_div" class="tab1">
-					<? $this->get_layer_params_form(); ?>
+					<? echo $this->get_layer_params_form(); ?>
 			</div>
 			<? } ?>
 			<div class="rollenwahl-gruppe tab2">
@@ -604,11 +604,16 @@ if ($this->Fehlermeldung!='') {
 							<table border="0" cellpadding="0" cellspacing="0">
 								<tr>
 									<td class="rollenwahl-option-header">
-										<? echo $strSingleQuery; ?>:
+										<? echo $strMapQuery; ?>:
 									</td>
 									<td  class="rollenwahl-option-data">
-										<input name="singlequery" type="checkbox" value="1" <? if($this->user->rolle->singlequery == '1'){echo 'checked="true"';} ?> >&nbsp;
-										<span data-tooltip="<? echo $strHintSingleQuery; ?>"></span>
+										<select name="singlequery">
+											<option value="0"<? if($this->user->rolle->singlequery == '0') { echo ' selected'; }	?>><? echo $strMapQuery0; ?></option>
+											<option value="1"<? if($this->user->rolle->singlequery == '1') { echo ' selected'; }	?>><? echo $strMapQuery1; ?></option>
+											<option value="2"<? if($this->user->rolle->singlequery == '2') { echo ' selected'; }	?>><? echo $strMapQuery2; ?></option>
+										</select>
+										&nbsp;
+										<span data-tooltip="<? echo $strHintMapQuery; ?>"></span>
 									</td>
 								</tr>
 								<tr>

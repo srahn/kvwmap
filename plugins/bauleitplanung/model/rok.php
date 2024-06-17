@@ -435,8 +435,8 @@ class rok {
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
     	$rs['minx'],
+    	$rs['miny'],			
     	$rs['maxx'],
-    	$rs['miny'],
     	$rs['maxy']
 		);
     $randx=($rect->maxx-$rect->minx)*$border/100;
@@ -455,8 +455,8 @@ class rok {
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
     	$rs['minx'],
+    	$rs['miny'],			
     	$rs['maxx'],
-    	$rs['miny'],
     	$rs['maxy']
 		);
     $randx=($rect->maxx-$rect->minx)*$border/100;

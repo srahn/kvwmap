@@ -1,5 +1,15 @@
 <?
 
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
+
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	if (MAPSERVERVERSION >= 800) {
 		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
@@ -28,19 +38,21 @@ function replace_params_link($str, $params, $layer_id) {
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach($params AS $key => $value){
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	$str = str_replace('$current_date', date('Y-m-d'), $str);
-	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
 
@@ -187,7 +199,7 @@ class GUI {
     include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
   }
 
-  function loadMap($loadMapSource) {
+  function loadMap($loadMapSource, $layerset = array(), $strict_layer_name = false) {
 		$this->group_has_active_layers = array();
     $this->debug->write("<p>Funktion: loadMap('" . $loadMapSource . ")",4);
     switch ($loadMapSource) {
@@ -248,12 +260,9 @@ class GUI {
 
         # layer
         if (is_array($this->formvars['layer'])) {
-          $layerset=array_values($this->formvars['layer']);
+          $layerset = array_values($this->formvars['layer']);
         }
-        else {
-          $layerset=array();
-        }
-        for ($i=0; $i<count($layerset); $i++) {
+        for ($i = 0; $i < count($layerset); $i++) {
 				  if (MAPSERVERVERSION < 600) {
             $layer = ms_newLayerObj($map);
           }
@@ -336,7 +345,7 @@ class GUI {
 					$map = ms_newMapObj(DEFAULTMAPFILE);
 				}
 				else {
-					$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
+					$map = new mapObj(DEFAULTMAPFILE);
 				}
 
         $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -344,21 +353,24 @@ class GUI {
 
 				# Allgemeine Parameter
 				define('MINIMAGESIZE', 10); # prevent error in setextent
-				$map->set('width', ($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth));
-				$map->set('height', ($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight));
-				$map->set('resolution', 96);
+				$map->resolution = 96;
 				#$map->set('transparent', MS_OFF);
 				#$map->set('interlace', MS_ON);
-				$map->set('status', MS_ON);
-				$map->set('name', MAPFILENAME);
+				$map->status = MS_ON;
+				$map->name = MAPFILENAME;
 
 				if (MS_DEBUG_LEVEL > 0) {
 					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
-					$map->set('debug', MS_DEBUG_LEVEL);
+					$map->debug = MS_DEBUG_LEVEL;
 				};
 				$map->imagecolor->setRGB(255,255,255);
 				$map->maxsize = 4096;
-				$map->setProjection('+init=epsg:'.$this->user->rolle->epsg_code,MS_TRUE);
+				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
+
+				$map->setSize(
+					($this->user->rolle->nImageWidth < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageWidth),
+					($this->user->rolle->nImageHeight < MINIMAGESIZE ? MINIMAGESIZE : $this->user->rolle->nImageHeight)
+				);
 
 				$bb = $this->Stelle->MaxGeorefExt;
 
@@ -383,6 +395,8 @@ class GUI {
 						$map->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
 					}
 				}
+
+
 
 				# OWS Metadaten
 				$map->web->metadata->set("ows_title", $this->Stelle->ows_title ?: OWS_TITLE);
@@ -424,24 +438,19 @@ class GUI {
 
         $map->setSymbolSet(SYMBOLSET);
         $map->setFontSet(FONTSET);
-        $map->set('shapepath', SHAPEPATH);
+        $map->shapepath = SHAPEPATH;
 
         # Umrechnen des Stellenextents kann hier raus, weil es schon in start.php gemacht wird
 
         # Webobject
-        $map->web->set('imagepath', IMAGEPATH);
-        $map->web->set('imageurl', IMAGEURL);
-        $map->web->set('log', LOGPATH . 'mapserver.log');
-        $map->web->metadata->set('wms_feature_info_mime_type',  'text/html');
+        $map->web->imagepath = IMAGEPATH;
+        $map->web->imageurl = IMAGEURL;
+        $map->web->log = LOGPATH . 'mapserver.log';
+        $map->web->metadata->set('wms_feature_info_mime_type', 'text/html');
         //$map->web->set('ERRORFILE', LOGPATH.'mapserver_error.log');
 
         # Referenzkarte
-				if(MAPSERVERVERSION < 600){
-					$reference_map = ms_newMapObj(DEFAULTMAPFILE);
-				}
-				else {
-					$reference_map = new mapObj(DEFAULTMAPFILE);
-				}
+				$reference_map = new mapObj(DEFAULTMAPFILE);
 				$this->ref=$mapDB->read_ReferenceMap();
 				if (!is_array($this->ref)) {
 					$this->ref = array(
@@ -452,27 +461,30 @@ class GUI {
 				else {
 					$this->ref['refMapImg'] = REFERENCEMAPPATH.$this->ref['Dateiname'];
 				}
-				$reference_map->web->set('imagepath', IMAGEPATH);
-				$reference_map->setProjection('+init=epsg:'.$this->ref['epsg_code'], MS_FALSE);
-				$reference_map->reference->extent->setextent(round($this->ref['xmin']),round($this->ref['ymin']),round($this->ref['xmax']),round($this->ref['ymax']));
-				$reference_map->reference->set('image', $this->ref['refMapImg']);
-        $reference_map->reference->set('width',$this->ref['width']);
-        $reference_map->reference->set('height',$this->ref['height']);
-        $reference_map->reference->set('status','MS_ON');
+				$reference_map->web->imagepath = IMAGEPATH;
+				$reference_map->setProjection('+init=epsg:' . $this->ref['epsg_code']);
+				$reference_map->reference->extent->minx = round($this->ref['xmin']);
+				$reference_map->reference->extent->miny = round($this->ref['ymin']);
+				$reference_map->reference->extent->maxx = round($this->ref['xmax']);
+				$reference_map->reference->extent->maxy = round($this->ref['ymax']);
+				$reference_map->reference->image = $this->ref['refMapImg'];
+        $reference_map->reference->width = $this->ref['width'];
+        $reference_map->reference->height = $this->ref['height'];
+        $reference_map->reference->status = MS_ON;
 				$reference_map->reference->color->setRGB(-1,-1,-1);
 				$reference_map->reference->outlinecolor->setRGB(255,0,0);
 
         # Scalebarobject
-        $map->scalebar->set('status', MS_ON);
-        $map->scalebar->set('units', MS_METERS);
-        $map->scalebar->set('intervals', 4);
+        $map->scalebar->status = MS_ON;
+        $map->scalebar->units =  MS_METERS;
+        $map->scalebar->intervals = 4;
         $map->scalebar->color->setRGB(0,0,0);
         $r = substr(BG_MENUETOP, 1, 2);
         $g = substr(BG_MENUETOP, 3, 2);
         $b = substr(BG_MENUETOP, 5, 2);
         $map->scalebar->imagecolor->setRGB(hexdec($r), hexdec($g), hexdec($b));
         $map->scalebar->outlinecolor->setRGB(0,0,0);
-				$map->scalebar->label->set('font', 'SourceSansPro');		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
+				$map->scalebar->label->font = 'SourceSansPro';		# Kommentarzeichen wieder entfernt, da sonst auf Metropolplaner Fehler
 				if (MAPSERVERVERSION < 700 ) {
 					$map->scalebar->label->type = 'truetype';
 				}
@@ -483,7 +495,7 @@ class GUI {
 					$this->groupset = $mapDB->read_Groups();
 				}
 
-				# Layer
+				# Filter für read_Layer
 				$mapDB->nurAktiveLayer = value_of($this->formvars, 'nurAktiveLayer');
 				$mapDB->nurAufgeklappteLayer = value_of($this->formvars, 'nurAufgeklappteLayer');
 				$mapDB->nurFremdeLayer = value_of($this->formvars, 'nurFremdeLayer');
@@ -491,17 +503,22 @@ class GUI {
 				$mapDB->nurPostgisLayer = value_of($this->formvars, 'only_postgis_layer');
 				$mapDB->keinePostgisLayer = value_of($this->formvars, 'no_postgis_layer');
 				$mapDB->nurLayerID = value_of($this->formvars, 'only_layer_id');
+				$mapDB->nurLayerIDs = value_of($this->formvars, 'only_layer_ids');
 				$mapDB->nichtLayerID = value_of($this->formvars, 'not_layer_id');
-				
+
         if ($this->class_load_level == '') {
           $this->class_load_level = 1;
         }
-        $layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
-        $rollenlayer = $mapDB->read_RollenLayer();
-        $layerset['list'] = array_merge($layerset['list'], $rollenlayer);
-        $layerset['anzLayer'] = count($layerset['list']);
+
+				if (count($layerset) == 0) {
+					$layerset = $mapDB->read_Layer($this->class_load_level, $this->Stelle->useLayerAliases, $this->list_subgroups(value_of($this->formvars, 'group')));
+					$rollenlayer = $mapDB->read_RollenLayer();
+					$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
+					$layerset['anzLayer'] = count($layerset['list']);
+				}
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
+				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
@@ -520,12 +537,24 @@ class GUI {
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
-						$this->loadlayer($map, $layerset['list'][$i]);
-          }
-        }
+
+						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
+						$error = msGetErrorObj();
+						while ($error && $error->code != MS_NOERR) {
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
+							$error = $error->next();
+						}
+						msResetErrorList();
+					}
+				}
+				if ($this->error_message != '') {
+					$this->error_message .= '<br>';
+					//  throw new ErrorException($this->error_message);
+				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
-					$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers));
+					#$map->setLayersDrawingOrder($this->get_default_layers_top_drawing_order($map->numlayers, $num_default_layers)); geht wohl so in SwigMapscript nicht
 				}
 				$this->map = $map;
 				$this->reference_map = $reference_map;
@@ -535,11 +564,11 @@ class GUI {
 				else {
 					$this->map_scaledenom = $map->scale;
 				}
-        $this->mapDB=$mapDB;
-      } break; # end of lade Karte von Datenbank
-    } # end of switch loadMapSource
-    return 1;
-  }
+				$this->mapDB = $mapDB;
+			} break; # end of lade Karte von Datenbank
+		} # end of switch loadMapSource
+		return 1;
+	}
 
 		/**
 	 * Return a drawing order with default layers to top
@@ -574,21 +603,23 @@ class GUI {
 		else {
 			$layer_name_attribute = 'Name_or_alias';
 		}
-		$layer = ms_newLayerObj($map);
-		$layer->set('name', $layerset[$layer_name_attribute]);
-		$layer->metadata->set('wms_name', $layerset['wms_name']);
+		$layer = new LayerObj($map);
+		$layer->name = $layerset[$layer_name_attribute];
+		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']);
-		$layer->metadata->set('ows_title', $layerset['Name_or_alias']); # required
-		$layer->metadata->set('wms_group_title', $layerset['Gruppenname']);
+		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
+		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
+		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']);
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']);
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']);
+		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -596,34 +627,35 @@ class GUI {
 		}
 		if ($layerset['ows_srs'] == '') {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-		}
+		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
 		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']);
+		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
-		$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']);
-		$layer->set('dump', 0);
-		$layer->set('type',$layerset['Datentyp']);
-		$layer->set('group', umlaute_umwandeln($layerset['Gruppenname']));
+		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
+		$layer->dump = 0;
+		$layer->type = $layerset['Datentyp'];
+		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
 
+
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
 		if ($layerset['aktivStatus'] == 0) {
-			$layer->set('status', 0);
+			$layer->status = 0;
 		}
 		else{
-			$layer->set('status', 1);
+			$layer->status = 1;
 		}
 
 		# fremde Layer werden auf Verbindung getestet
@@ -632,13 +664,13 @@ class GUI {
 			if (!in_array($credentials['host'], array('pgsql', 'localhost'))) {
 				$fp = @fsockopen($credentials['host'], $credentials['port'], $errno, $errstr, 5);
 				if (!$fp) {			# keine Verbindung --> Layer ausschalten
-					$layer->set('status', 0);
+					$layer->status = 0;
 					$layer->metadata->set('queryStatus', 0);
 					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
 				}
 			}
 		}
-
+		
 		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
 			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
@@ -658,18 +690,18 @@ class GUI {
 
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'minscale') >= '0') {
 			if($this->map_factor != ''){
-				$layer->set('minscaledenom', $layerset['minscale']/$this->map_factor*1.414);
+				$layer->minscaledenom = $layerset['minscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('minscaledenom', $layerset['minscale']);
+				$layer->minscaledenom = $layerset['minscale'];
 			}
 		}
 		if(!$this->noMinMaxScaling AND value_of($layerset, 'maxscale') > 0) {
 			if($this->map_factor != ''){
-				$layer->set('maxscaledenom', $layerset['maxscale']/$this->map_factor*1.414);
+				$layer->maxscaledenom = $layerset['maxscale']/$this->map_factor*1.414;
 			}
 			else{
-				$layer->set('maxscaledenom', $layerset['maxscale']);
+				$layer->maxscaledenom = $layerset['maxscale'];
 			}
 		}
 		$layer->setProjection('+init=epsg:' . $layerset['epsg_code']); # recommended
@@ -689,11 +721,11 @@ class GUI {
 				# z.B. für Klassen mit Umlauten
 				$layerset['connection'] .= " options='-c client_encoding=UTF8'";
 			}
-			$layer->set('connection', $layerset['connection']);
+			$layer->connection = $layerset['connection'];
 		}
 
 		if ($layerset['connectiontype'] > 0) {
-			$layer->setConnectionType($layerset['connectiontype']);
+			$layer->setConnectionType($layerset['connectiontype'], '');
 		}
 
 		if ($layerset['connectiontype'] == 6) {
@@ -712,12 +744,18 @@ class GUI {
 				)
 			);
 			foreach ($processings as $processing) {
-				$layer->setProcessing($processing);
+				if (MAPSERVERVERSION >= 800) {
+					$p = explode('=', $processing);
+					$layer->setProcessingKey($p[0], $p[1]);
+				}
+				else {
+					$layer->setProcessing($processing);
+				}
 			}
 		}
 
 		if (value_of($layerset, 'postlabelcache') != 0) {
-			$layer->set('postlabelcache',$layerset['postlabelcache']);
+			$layer->postlabelcache = $layerset['postlabelcache'];
 		}
 
 		if($layerset['Datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
@@ -735,12 +773,12 @@ class GUI {
 				}
 			}
 			if ($layerset['tileindex']!='') {
-				$layer->set('tileindex',SHAPEPATH.$layerset['tileindex']);
+				$layer->tileindex = SHAPEPATH.$layerset['tileindex'];
 			}
 			else {
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
-			$layer->set('tileitem',$layerset['tileitem']);
+			$layer->tileitem = $layerset['tileitem'];
 			if ($layerset['offsite']!='') {
 				$RGB=explode(' ',$layerset['offsite']);
 				$layer->offsite->setRGB($RGB[0],$RGB[1],$RGB[2]);
@@ -749,50 +787,52 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$scale') !== false){
+				if(strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
-				$layer->set('data', $layerset['Data']);
+				$layer->data = $layerset['Data'];
 			}
 			
-			if (value_of($layerset, 'buffer') != 0) {
+			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 				$geom = explode(' ', $layer->data)[0];
 				$data = substr_replace($layer->data, 'geom1', 0, strlen($geom));
 				$geography = (in_array($layerset['epsg_code'], [4326, 4258])? '::geography' : '');
-				$layer->set('data', str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data));
+				$layer->data = str_ireplace('select ', 'select st_buffer(' . $geom . $geography . ', ' . $layerset['buffer'] . ') as geom1, ', $data);
 				$layer->data;
-				$layer->set('type', 2);
+				$layer->type = 2;
 			}
 
 			# Setzen der Templatedateien für die Sachdatenanzeige inclt. Footer und Header.
 			# Template (Body der Anzeige)
 			if (value_of($this->formvars, 'go') == 'OWS') {
-				$layer->set('template', 'dummy');
+				$layer->template = 'dummy';
 			}
 			# Header (Kopfdatei)
 			if (value_of($layerset, 'header') != '') {
-				$layer->set('header',$layerset['header']);
+				$layer->header = $layerset['header'];
 			}
 			# Footer (Fusszeile)
 			if (value_of($layerset, 'footer') != '') {
-				$layer->set('footer',$layerset['footer']);
+				$layer->footer = $layerset['footer'];
 			}
 			# Setzen der Spalte nach der der Layer klassifiziert werden soll
 			if ($layerset['classitem']!='') {
-				$layer->set('classitem', $layerset['classitem']);
-			}
-			else {
-				#$layer->set('classitem','id');
+				$layer->classitem = $layerset['classitem'];
 			}
 			# Setzen des Filters
-			if($layerset['Filter'] != ''){
-				$layerset['Filter'] = str_replace('$userid', $this->user->id, $layerset['Filter']);
-				if(substr($layerset['Filter'],0,1)=='('){
-					if(MAPSERVERVERSION > 700){
-						$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-					}
-					else{
-						$layer->setFilter($layerset['Filter']);
+			if ($layerset['Filter'] != '') {
+				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				if (substr($layerset['Filter'],0,1) == '(') {
+					switch (true) {
+						case MAPSERVERVERSION >= 800 : {
+							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+						}break;
+						case MAPSERVERVERSION >= 700 : {
+							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						}break;
+						default : {
+							$layer->setFilter($layerset['Filter']);
+						}
 					}
 			 }
 			 else {
@@ -801,34 +841,34 @@ class GUI {
 			 }
 			}
 			if ($layerset['styleitem']!='') {
-				$layer->set('styleitem',$layerset['styleitem']);
+				$layer->styleitem = $layerset['styleitem'];
 			}
 			# Layerweite Labelangaben
 			if ($layerset['labelitem']!='') {
-				$layer->set('labelitem',$layerset['labelitem']);
+				$layer->labelitem = $layerset['labelitem'];
 			}
 			if (value_of($layerset, 'labelmaxscale') != '') {
-				$layer->set('labelmaxscaledenom',$layerset['labelmaxscale']);
+				$layer->labelmaxscaledenom = $layerset['labelmaxscale'];
 			}
 			if (value_of($layerset, 'labelminscale') != '') {
-				$layer->set('labelminscaledenom',$layerset['labelminscale']);
+				$layer->labelminscaledenom = $layerset['labelminscale'];
 			}
 			if (value_of($layerset, 'labelrequires') != '') {
-				$layer->set('labelrequires',$layerset['labelrequires']);
+				$layer->labelrequires = $layerset['labelrequires'];
 			}
 			if (value_of($layerset, 'tolerance') != '') {
-				$layer->set('tolerance',$layerset['tolerance']);
+				$layer->tolerance = $layerset['tolerance'];
 			}
 			if (value_of($layerset, 'toleranceunits') != '') {
-				$layer->set('toleranceunits', constant('MS_' . strtoupper($layerset['toleranceunits'])));
+				$layer->toleranceunits = constant('MS_' . strtoupper($layerset['toleranceunits']));
 			}
 			
 			if (value_of($layerset, 'sizeunits') != '') {
-				$layer->set('sizeunits', $layerset['sizeunits']);
+				$layer->sizeunits = $layerset['sizeunits'];
 			}
 			if ($layerset['transparency']!=''){
 				if ($layerset['transparency']==-1) {
-						$layer->set('opacity',MS_GD_ALPHA);
+						$layer->opacity = MS_GD_ALPHA;
 				}
 				else {
 					if (MAPSERVERVERSION > 700) {
@@ -841,14 +881,14 @@ class GUI {
 			}
 			if (value_of($layerset, 'symbolscale') != '') {
 				if($this->map_factor != ''){
-					$layer->set('symbolscaledenom',$layerset['symbolscale']/$this->map_factor*1.414);
+					$layer->symbolscaledenom = $layerset['symbolscale']/$this->map_factor*1.414;
 				}
 				else{
-					$layer->set('symbolscaledenom',$layerset['symbolscale']);
+					$layer->symbolscaledenom = $layerset['symbolscale'];
 				}
 			}
 		} # ende of Vektorlayer
-		$classset=$layerset['Class'];
+		$classset=$layerset['Class'];		
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
@@ -1031,11 +1071,6 @@ class GUI {
 					if(is_numeric($RGB[0]))$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
 					else $style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");					
         }
-        if ($dbStyle['backgroundcolor']!='') {
-          $RGB = array_filter(explode(" ",$dbStyle['backgroundcolor']), 'strlen');
-        	if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-          $style->backgroundcolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
-        }
 				if($dbStyle['colorrange'] != '') {
 					$style->updateFromString("STYLE COLORRANGE " . $dbStyle['colorrange']." END");
 				}
@@ -1214,19 +1249,30 @@ class GUI {
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$scale', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
-		if (!$img_urls) {
-			ob_start();
-			$this->image_map->saveImage();
-			$image = ob_get_clean();
+		#if (!$img_urls) { wegen Bug im Firefox
+		if (false) {
+			if (MAPSERVERVERSION >= 800) {
+				$image = $this->image_map->getBytes();
+			}
+			else {
+				ob_start();
+				$this->image_map->saveImage();
+				$image = ob_get_clean();
+			}
 			$this->img['hauptkarte'] = 'data:image/jpg;base64,'.base64_encode($image);
 		}
 		else {
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.'.$this->map->outputformat->extension;
-			$this->image_map->saveImage(IMAGEPATH . $filename);
+			if (MAPSERVERVERSION >= 800) {
+				$this->image_map->save(IMAGEPATH . $filename);
+			}
+			else {
+				$this->image_map->saveImage(IMAGEPATH . $filename);
+			}
 			$this->img['hauptkarte'] = IMAGEURL . $filename;
 		}
 		if ($this->formvars['go'] == 'getMap'){
@@ -1255,14 +1301,24 @@ class GUI {
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
 		if(!$img_urls){
-			ob_start();
-			$img_scalebar->saveImage();
-			$image = ob_get_clean();
+			if (MAPSERVERVERSION >= 800) {
+				$image = $img_scalebar->getBytes();
+			}
+			else {
+				ob_start();
+				$img_scalebar->saveImage();
+				$image = ob_get_clean();
+			}
 			$this->img['scalebar'] = 'data:image/png;base64,'.base64_encode($image);
 		}
 		else{
 			$filename = $this->user->id.'_'.rand(0, 1000000).'.png';
-			$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
+			if (MAPSERVERVERSION >= 800) {
+				$this->img['scalebar'] = $img_scalebar->save(IMAGEPATH.$filename);
+			}
+			else {
+				$this->img['scalebar'] = $img_scalebar->saveImage(IMAGEPATH.$filename);
+			}
 			$this->img['scalebar'] = IMAGEURL.$filename;
 		}
 		$this->calculatePixelSize();
@@ -1833,7 +1889,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -2163,7 +2219,6 @@ class db_mapObj {
 	}
 
 	function read_Layer($withClasses, $useLayerAliases = false, $groups = NULL) {
-		include_once(CLASSPATH . 'DataSource.php');
 		global $language;
 
 		if ($language != 'german') {
@@ -2319,7 +2374,6 @@ class db_mapObj {
 			if ($rs['minscale'] > 0) {
 				$rs['minscale'] = $rs['minscale'] - 0.3;
 			}
-			$rs['datasource_ids'] = implode(',', array_map(function($datasource) { return $datasource->get('id'); }, DataSource::find_by_layer_id($this->gui_object, $rs['Layer_ID'])));
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
 			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];

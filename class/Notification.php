@@ -125,7 +125,7 @@ class Notification extends MyObject {
 						concat(', ', m.stellen_filter, ',') LIKE '%, " . $gui->Stelle->id . ",%'
 					)
 				",
-				'order' => "veroeffentlichungsdatum, id"
+				'order' => "id desc"
 			)
 		);
 		if ($notification->database->errormessage != '') {

@@ -51,8 +51,8 @@ class jagdkataster {
 		$rs = pg_fetch_array($ret[1]);
 		$rect = rectObj(
 			$rs['minx'],
+			$rs['miny'],			
 			$rs['maxx'],
-			$rs['miny'],
 			$rs['maxy']
 		);
     $randx=($rect->maxx-$rect->minx)*$border/100;
@@ -373,7 +373,7 @@ class jagdkataster {
 				ar.flaeche > 1 
 				" . $this->database->build_temporal_filter(array('g', 'f')) . "
 			ORDER BY 
-				jagdbezirke.name";
+				jagdbezirke.name, f.flurstueckskennzeichen";
 		return $this->database->execSQL($sql, 4, 0);
 	}
 	

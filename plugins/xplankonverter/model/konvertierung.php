@@ -874,14 +874,10 @@ class Konvertierung extends PgObject {
 		include(PLUGINS . 'xplankonverter/model/TypeInfo.php');
 		$typeInfo = new TypeInfo($this->database);
 		$uml_attribs = $typeInfo->getInfo($this->plan->tableName);
-		foreach ($uml_attribs as $uml_attrib) {
-			$select_string .= $uml_attrib['col_name'] . ',';
-		}
-		$select_string = rtrim($select_string, ',');
 
 		$sql = "
 			SELECT " . 
-				$select_string . " 
+				implode(', ', array_column($uml_attribs, 'col_name')) . " 
 			FROM
 				xplan_gml." . $this->plan->tableName . "
 			WHERE

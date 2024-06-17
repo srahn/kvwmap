@@ -6,7 +6,6 @@
 *		getsubmenues($id)
 *		getName()
 *		readDefaultValues()
-*		checkClientIpIsOn()
 *		Löschen()
 *		deleteMenue(text)
 *		deleteLayer($layer, $pgdatabase)
@@ -314,27 +313,6 @@ class stelle {
 		$this->reset_password_text = $rs['reset_password_text'];
 		$this->invitation_text = $rs['invitation_text'];
 	}
-
-  function checkClientIpIsOn() {
-    $sql = "
-			SELECT
-				check_client_ip
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-    $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
-    #echo '<br>'.$sql;
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		$rs = $this->database->result->fetch_array();
-    if ($rs['check_client_ip']=='1') {
-      return 1;
-    }
-    return 0;
-  }
 
 	function delete() {
 		$sql = "
@@ -771,7 +749,15 @@ class stelle {
 					WHERE
 						s.`ID` = h.`child_id` AND 
 						es.ID = h.parent_id
-				) as Bezeichnung_parent
+				) as Bezeichnung_parent,
+				(
+					SELECT
+						max(last_time_id)
+					FROM
+						`rolle`
+					WHERE
+					`rolle`.stelle_id = s.ID
+				) as last_time_id
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
@@ -794,6 +780,7 @@ class stelle {
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}
 		return $stellen;
@@ -2041,7 +2028,7 @@ class stelle {
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
 		$language_layer_name = "Name" . $language_postfix;
 		# nicht editierbare SubformFKs ausschliessen
-		$condition = ($privileg > 0 AND $no_subform_layers ? "subformfk IS NULL OR privilegfk = 1" : "true");
+		$condition = (($privileg > 0 AND $no_subform_layers) ? "subformfk IS NULL OR privilegfk = 1" : "true");
 		$sql = "
 			SELECT DISTINCT
 				Layer_ID,
@@ -2132,7 +2119,7 @@ class stelle {
 					l.connectiontype = 6 OR
 					l.connectiontype = 9
 				) AND "
-				. ($use_geom != NULL ? "ul.use_geom = 1" : "l.queryable = '1'")
+				. ($use_geom != NULL ? "ul.use_geom = 1" : "ul.queryable = '1'")
 				. ($no_query_layers ? " AND l.`Datentyp` != 5" : "")
 				. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 				. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
