@@ -16597,9 +16597,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# SVG-Geometrie abfragen für highlighting
-				if ($layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']] != '') {
-					$geom_table_alias = $layerset[$i]['attributes']['table_alias_name'][$layerset[$i]['attributes']['the_geom']] . '.';
-				}
 				if($layerset[$i]['attributes']['geomtype'][$the_geom] != 'POINT'){
 					$rand = $this->map_scaledenom/1000;
 					$tolerance = $this->map_scaledenom/10000;
@@ -16613,14 +16610,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$box_wkt.=strval($this->user->rolle->oGeorefExt->maxx+$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->maxy+$rand).",";
 					$box_wkt.=strval($this->user->rolle->oGeorefExt->minx-$rand)." ".strval($this->user->rolle->oGeorefExt->miny-$rand)."))";
-					$pfad = "st_assvg(st_transform(st_simplify(st_intersection(" . $geom_table_alias . $the_geom . ", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom, ".$pfad;
+					$query_parts['select'] .= ", st_assvg(st_transform(st_simplify(st_intersection(" . $the_geom . ", st_transform(st_geomfromtext('".$box_wkt."',".$client_epsg."), ".$layer_epsg.")), ".$tolerance."), ".$client_epsg."), 0, 15) AS highlight_geom";
 				}
 				else{
 					$buffer = $this->map_scaledenom/260;
-					$pfad = "st_assvg(st_buffer(st_transform(" . $geom_table_alias . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom, ".$pfad;
+					$query_parts['select'] .= "st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
-
-				$query_parts['select'] .= ', highlight_geom';
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if($layerset[$i]['Filter'] != ''){
