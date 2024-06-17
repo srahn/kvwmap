@@ -46,8 +46,11 @@ class data_import_export {
 	function process_import_file($upload_id, $file_number, $filename, $stelle, $user, $pgdatabase, $epsg, $filetype = NULL, $formvars = NULL) {
 		$this->pgdatabase = $pgdatabase;
 		$this->epsg_codes = read_epsg_codes($pgdatabase);
-		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
-		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
+		// $file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
+		// $file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
+		$pathinfo = pathinfo($filename);
+		$file_name_parts[0] = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
+		$file_name_parts[1] = $pathinfo['extension'];
 		if ($filetype == NULL) {
 			$filetype = strtolower($file_name_parts[1]);
 		}
@@ -73,7 +76,7 @@ class data_import_export {
 				$layers = $this->ogr_get_layers($filename);
 				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
-			} break;				
+			} break;
 			case 'kml' : case 'kmz' : {
 				$layers = $this->ogr_get_layers($filename);
 				$epsg = 4326;

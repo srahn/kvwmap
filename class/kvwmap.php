@@ -2004,7 +2004,12 @@ echo '			</table>
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
-					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
+					if (isset($this->formvars['gast']) AND $this->formvars['gast'] != '') {
+						$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&gast=' . $this->formvars['gast'];
+					}
+					else {
+						$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
+					}
 				}
 				$map->web->metadata->set("ows_onlineresource", $ows_onlineresource);
 				$map->web->metadata->set("ows_service_onlineresource", $ows_onlineresource);
@@ -2169,7 +2174,7 @@ echo '			</table>
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		# $layer->setMetaData('wms_group_title', $layerset['Gruppenname']);
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		# $layer->setMetaData('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
