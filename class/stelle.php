@@ -1326,7 +1326,6 @@ class stelle {
 			$columns = '
 				`Layer_ID`, 
 				`queryable`, 
-				`drawingorder`, 
 				`legendorder`,
 				`minscale`, 
 				`maxscale`, 
@@ -1435,7 +1434,7 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
+	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
@@ -1444,7 +1443,6 @@ class stelle {
 				`Layer_ID`,
 				`queryable`,
 				`use_geom`,
-				`drawingorder`,
 				`legendorder`,
 				`minscale`,
 				`maxscale`,
@@ -1468,7 +1466,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1494,7 +1491,6 @@ class stelle {
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
 						use_geom = l.use_geom, 
-						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
 						maxscale = l.maxscale, 
@@ -1519,7 +1515,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1543,7 +1538,6 @@ class stelle {
 						ON DUPLICATE KEY UPDATE 
 							queryable = l.queryable, 
 							use_geom = l.use_geom, 
-							drawingorder = l.drawingorder, 
 							legendorder = l.legendorder, 
 							minscale = l.minscale, 
 							maxscale = l.maxscale, 
@@ -1846,13 +1840,16 @@ class stelle {
 
 	function updateLayerOrder($formvars){
 		# Aktualisieren der LayerzuStelle-Eigenschaften
-		if($formvars['legendorder'] == '')$formvars['legendorder'] = 'NULL';
-		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
-		$sql .= ', drawingorder = '.$formvars['drawingorder'];
-		$sql .= ', legendorder = '.$formvars['legendorder'];
-		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
+		$sql = '
+			UPDATE 
+				used_layer 
+			SET 
+				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
+			WHERE 
+				Stelle_ID = ' . $formvars['selected_stelle_id'] . ' AND 
+				Layer_ID = ' . $formvars['selected_layer_id'];
 		#echo $sql.'<br>';
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerdrawingorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
+		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 	}
@@ -1878,7 +1875,7 @@ class stelle {
     return $groups;
   }
 
-	function getLayers($group, $order = 'ul.legendorder, ul.drawingorder desc', $return = '') {
+	function getLayers($group, $order = 'ul.legendorder, l.drawingorder desc', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1890,7 +1887,7 @@ class stelle {
 			ul.stelle_id = " . $this->id .
 			($group != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group : "") . "
 		";
-		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY legendorder, drawingorder desc');
+		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
@@ -1899,7 +1896,7 @@ class stelle {
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				l.Name,
 				l.alias,
-				ul.drawingorder,
+				l.drawingorder,
 				ul.legendorder
 			FROM
 				used_layer ul JOIN
@@ -2310,7 +2307,7 @@ class stelle {
 				ul.export_privileg,
 				ul.requires,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 
@@ -2341,7 +2338,7 @@ class stelle {
 			GROUP BY 
 				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 

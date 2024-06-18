@@ -669,6 +669,12 @@ from
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMapParameters; ?></th>
 					</tr>
 					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strDrawingOrder; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="20">&nbsp;
+						</td>
+					</tr>					
+					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="selectiontype" type="text" value="<?php echo $this->formvars['selectiontype']; ?>" size="50" maxlength="20">&nbsp;
@@ -1195,12 +1201,6 @@ from
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strtransparency; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="transparency" type="number" min="0" max="100" onkeyup="enforceMinMax(this)" value="<?php echo $this->formvars['transparency']; ?>" style="width: 95%">
-					</td>
-				</tr>
-				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDrawingOrder; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="15">
 					</td>
 				</tr>
 				<tr>

@@ -8154,9 +8154,9 @@ echo '			</table>
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';
 		if ($this->formvars['order'] == '') {
-			$this->formvars['order'] = 'legendorder, drawingorder desc';
+			$this->formvars['order'] = 'ul.legendorder, l.drawingorder desc';
 		}
-		if ($this->formvars['order'] == 'legendorder, drawingorder desc') {
+		if ($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc') {
 			$this->groups = $this->selected_stelle->getGroups();
 		}
 		$this->layers = $this->selected_stelle->getLayers(NULL, $this->formvars['order']);
@@ -8168,7 +8168,6 @@ echo '			</table>
     $this->layers = $Stelle->getLayers(NULL);
     for($i = 0; $i < count($this->layers['ID']); $i++){
       $this->formvars['selected_layer_id'] = $this->layers['ID'][$i];
-      $this->formvars['drawingorder'] = $this->formvars['drawingorder_layer'.$this->layers['ID'][$i]];
 			$this->formvars['legendorder'] = $this->formvars['legendorder_layer'.$this->layers['ID'][$i]];
       $Stelle->updateLayerOrder($this->formvars);
     }
@@ -9089,7 +9088,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		for ($i = 0; $i < count($stellen_ids); $i++) {
 			if (!isset($this->already_assigned_stellen[$stellen_ids[$i]])) {
 				$stelle = new stelle($stellen_ids[$i], $this->database);
-				$stelle->addLayer($layer_ids,	0, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
+				$stelle->addLayer($layer_ids, $filter, $assign_default_values, (($privileg == 'editable_only_in_this_stelle' AND $stellen_ids[$i] == $this->Stelle->id )? 'editable' : $privileg));
 				$users = $stelle->getUser();
 				for ($j = 0; $j < @count($users['ID']); $j++) {
 					$this->user->rolle->setGroups($users['ID'][$j], $stellen_ids[$i], $stelle->default_user_id, $layer_ids); # Hinzufügen der Layergruppen der selektierten Layer zur Rolle
@@ -12981,7 +12980,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$Stelle->addFunctions($functions, 0); # Hinzufügen der Funktionen zur Stelle
 				}
 				if ($layer[0] != NULL) {
-					$Stelle->addLayer($layer, 0);
+					$Stelle->addLayer($layer);
 				}
 				$document = new Document($this->database);
 				if ($frames[0] != NULL) {
@@ -17568,7 +17567,7 @@ class db_mapObj{
 				rl.`logconsume`,
 				rl.`rollenfilter`,
 				ul.`queryable`,
-				COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder,
+				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
 				ul.legendorder,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -19465,7 +19464,7 @@ class db_mapObj{
 	*		Duplikat von einem anderen Layer handelt:
 	*		alias, Gruppe, duplicate_from_layer_id, duplicate_criterion, Name und alle Namen in anderen Sprachen
 	*		und die Attribute für Default-Werte für Stellen-Zuweisung
-	*		template, queryable, transparency, drawingorder, legendorder, minscale, maxscale, symbolscale, offsite, requires, postlabelcache
+	*		template, queryable, transparency, legendorder, minscale, maxscale, symbolscale, offsite, requires, postlabelcache
 	*/
 	function updateLayer($formvars, $duplicate = false) {
 		global $supportedLanguages;

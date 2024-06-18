@@ -30,9 +30,6 @@
 				&nbsp;<? echo $GUI->layers['Bezeichnung'][$i]; ?>
 			</td>
 			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
-				<input size="7" type="text" name="drawingorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['drawingorder'][$i]; ?>">
-			</td>
-			<td style="border-bottom: 1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
 				<input size="7" type="text" name="legendorder_layer<? echo $GUI->layers['ID'][$i]; ?>" value="<? echo $GUI->layers['legendorder'][$i]; ?>">
 			</td>
 			<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center">
@@ -58,11 +55,8 @@
     		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
 					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strLayer; ?></a>
 				</td>
-    		<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
-					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=drawingorder&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strDrawingOrder; ?></a>
-				</td>
 				<td rowspan="2" style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-top:1px solid #C3C7C3" class="fett">
-					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=legendorder, drawingorder desc&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLegendOrder; ?></a>
+					&nbsp;<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&order=ul.legendorder, l.drawingorder desc&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLegendOrder; ?></a>
 				</td>
     		<td colspan="2" style="border-top:1px solid #C3C7C3; border-right:1px solid #C3C7C3; border-left:1px solid #C3C7C3" align="center" class="fett">
 					<?php echo $strProperties; ?></td>
@@ -72,7 +66,7 @@
     		<td style="border-bottom:1px solid #C3C7C3; border-left:1px solid #C3C7C3; border-right:1px solid #C3C7C3" class="fett"><?php echo $strGlobal; ?></td>
     	</tr>
       <?
-			if($this->formvars['order'] == 'legendorder, drawingorder desc'){
+			if($this->formvars['order'] == 'ul.legendorder, l.drawingorder desc'){
 				foreach($this->groups as $group){
 					if($group['obergruppe'] == ''){
 						$this->outputGroup($group);
