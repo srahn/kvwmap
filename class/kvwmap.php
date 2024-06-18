@@ -20191,7 +20191,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-    function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20302,13 +20302,11 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-			if ($get_default) {
-				$attributes['default'][$i] = $rs['default'];
-			}
+			$attributes['default'][$i] = $rs['default'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replaced_default = replace_params(
+				if ($attributes['default'][$i] != '')	{
+					$attributes['default'][$i] = replace_params(
 						$attributes['default'][$i],
 						rolle::$layer_params,
 						$this->User_ID,
@@ -20316,10 +20314,6 @@ class db_mapObj{
 						rolle::$hist_timestamp,
 						$this->rolle->language
 					);
-					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
-					if ($ret1[0] == 0) {
-						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
-					}
 				}
 				$rs['options'] = replace_params(
 					$rs['options'],
@@ -20329,6 +20323,13 @@ class db_mapObj{
 					rolle::$hist_timestamp,
 					$this->rolle->language
 				);
+			}
+			if ($get_default AND $attributes['default'][$i] != '') {
+				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				}
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
