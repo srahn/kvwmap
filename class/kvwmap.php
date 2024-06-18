@@ -8144,6 +8144,12 @@ echo '			</table>
 		$this->output();
 	}
 
+	function Layer_Zeichenreihenfolge_Speichern() {
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$mapDB->updateDrawingorder($this->formvars);		
+		$this->Layer_Zeichenreihenfolge();
+	}
+
 	function Layer2Stelle_Reihenfolge() {
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';
@@ -19665,6 +19671,24 @@ class db_mapObj{
 		}
 	}
 
+	function updateDrawingorder($formvars){
+		foreach($formvars['layers'] as $i => $layer_id) {
+			$sql = "
+				UPDATE
+					layer
+				SET
+					drawingorder = " . $formvars['orders'][$i] . "
+				WHERE
+					Layer_ID = " . $layer_id;
+			$this->debug->write("<p>file:kvwmap class:db_mapObj->updateLayer - Aktualisieren eines Layers:<br>" . $sql, 4);
+			$ret = $this->db->execSQL($sql, 4, 1, true);
+			if (!$ret['success']) {
+				$this->GUI->add_message('error', $ret[1]);
+				return 0;
+			}
+		}
+	}
+
 	/**
 	* function create a new layer based on layerdata.
 	* layerdata can be an array of parameters from a formular or
@@ -20598,7 +20622,7 @@ class db_mapObj{
 			'uptodateness' => array(),
 			'updatecycle' => array(),
 			'alias' => array(),
-			'default_drawingorder' => array(),
+			'drawingorder' => array(),
 			'layers_of_group' => array(),
 			'shared_from' => array()
 		);
@@ -20626,7 +20650,7 @@ class db_mapObj{
 			$layer['updatecycle'][] = $rs['updatecycle'];
 			$layer['alias'][] = $rs['alias'];
 			$layer['Name_or_alias'][] = $rs[(($rs['alias'] AND $this->GUI->Stelle->useLayerAliases) ? 'alias' : 'Name')];
-			$layer['default_drawingorder'][] = $rs['drawingorder'];
+			$layer['drawingorder'][] = $rs['drawingorder'];
 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
 			$layer['shared_from'][] = $rs['shared_from'];
 			if ($this->GUI->plugin_loaded('mobile')) {
@@ -20647,7 +20671,7 @@ class db_mapObj{
 			$layer['Bezeichnung'] = $sorted_arrays['array'];
 			$layer['GruppeID'] = $sorted_arrays['second_array'];
 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['drawingorder']);
-			$layer['default_drawingorder'] = $sorted_arrays['second_array'];
+			$layer['drawingorder'] = $sorted_arrays['second_array'];
 		}
 		return $layer;
 	}
