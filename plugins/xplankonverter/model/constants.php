@@ -9,5 +9,5 @@
 	define('XPLAN_NS_URI', "http://www.xplanung.de/xplangml/5/1");
 	define('XPLAN_NS_SCHEMA_LOCATION', "http://www.xplanungwiki.de/upload/XPlanGML/5.1/Schema/XPlanung-Operationen.xsd");
 	// max Rekursionstiefe für Nested Composite Types
-	define ('XPLAN_MAX_NESTING_DEPTH', 3);
+	define ('XPLAN_MAX_NESTING_DEPTH', 5);
 ?>

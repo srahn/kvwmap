@@ -99,7 +99,8 @@ class Gml_builder {
 				'GML_' || gml_id::text || '_envelope'
 			) AS envelope
 		";
-					$plan->find_by('konvertierung_id',$konvertierung->get('id'));
+		$plan->find_by('konvertierung_id', $konvertierung->get('id'));
+		$plan->filter_nurzurauslegung();
 
 		# XPlan XSD's sind derzeit unter: http://xplan-raumordnung.de/devk/model/2016-05-06_XSD/ hinterlegt
 		fwrite(
@@ -128,9 +129,11 @@ class Gml_builder {
 		$gmlElemOpenTag = "<{$xplan_ns_prefix}{$plan->umlName}";
 		$gmlElemOpenTag .= " gml:id=\"GML_{$plan->data['gml_id']}\"";
 
-		// fetch information about attributes and their properties
-		//$typeInfo = new TypeInfo($this->database);
+		// fetch information about attributes and their properties and
+		// convert Typ xp_spezexternereferenzauslegung to xp_spezexternereferenz
 		$plan_attribs = $this->typeInfo->getInfo($plan->tableName);
+		// convert data of externereferenz from type xp_spezexternereferenzauslegung to xp_spezexternereferenz
+		$plan->data['externereferenz'] = str_replace(array(',)"', ',f)"', ',t)"'), ')"', $plan->data['externereferenz']);
 
 		// alle Attribute vom Planobjekt ausgeben
 		$gmlElemInner .= $this->generateGmlForAttributes($plan->data, $plan_attribs, XPLAN_MAX_NESTING_DEPTH);
@@ -300,7 +303,9 @@ class Gml_builder {
 
 	function generateGmlForAttributes($gml_object, $uml_attribute_info, $depth) {
 		$this->err_msg = '';
-		if (($depth) < 0) return '';
+		if (($depth) < 0) {
+			return '';
+		}
 		$xplan_ns_prefix = XPLAN_NS_PREFIX ? XPLAN_NS_PREFIX.':' : '';
 		$gmlStr = '';
 		$sequence_attr = 0;
@@ -315,6 +320,7 @@ class Gml_builder {
 			# TODO This might not work for XP_Praesentationsobjekt, as it has no attributes on its own and therefore would not have a sequence 4
 			
 			# for XP_AbstraktesPraesentationsobjekt and children
+			$xp_plan_children = array('BP_Plan','FP_Plan','RP_Plan','SO_Plan','LP_Plan');
 			$abstraktes_praesentationsobjekt_children = array('XP_Praesentationsobjekt','XP_PPO','XP_FPO','XP_LPO','XP_TPO');
 			$prefixes_or_signs_to_remove = array('#','GML_','Gml_','gml_','{','}');
 			
@@ -366,6 +372,28 @@ class Gml_builder {
 				}
 			}
 
+			# for references xp_plan to xp_textabschnitt
+			# sequence 16 = xp_externereferenz in xp_plan (in v 5.4)
+			# which is followed by texte (to xp_textabschnitt)
+			# and begruendungstexte (to xp_begruendungsabschnitt)
+			if ($sequence_attr == 17 && in_array($uml_attribute['origin'], $xp_plan_children)) {
+				$sql = "SELECT gml_id::text FROM xplan_gml.xp_textabschnitt
+								WHERE inverszu_texte_xp_plan IS NOT NULL AND konvertierung_id = " .  $gml_object['konvertierung_id'] .  ";";
+				$xp_textabschnitte_to_xp_plan = pg_query($this->database->dbConn, $sql);
+				
+				while ($xp_textabschnitt_to_xp_plan = pg_fetch_array($xp_textabschnitte_to_xp_plan, NULL, PGSQL_ASSOC)) {
+					$gmlStr .= "<{$xplan_ns_prefix}texte xlink:href=\"#GML_" . $xp_textabschnitt_to_xp_plan['gml_id'] . "\"/>";
+				}
+
+				$sql = "SELECT gml_id::text FROM xplan_gml.xp_begruendungabschnitt
+								WHERE inverszu_begruendungstexte_xp_plan IS NOT NULL AND konvertierung_id = " .  $gml_object['konvertierung_id'] .  ";";
+				$xp_begruendungsabschnitte_to_xp_plan = pg_query($this->database->dbConn, $sql);
+				
+				while ($xp_begruendungsabschnitt_to_xp_plan = pg_fetch_array($xp_begruendungsabschnitte_to_xp_plan, NULL, PGSQL_ASSOC)) {
+					$gmlStr .= "<{$xplan_ns_prefix}begruendungsTexte xlink:href=\"#GML_" . $xp_begruendungsabschnitt_to_xp_plan['gml_id'] . "\"/>";
+				}
+			}
+
 			# Association refTextInhalt (always +12 for XP_Objekt ( in XPlanung 5.4)
 			# Posisition 2 after rechtscharakter in BP_Objekt
 			# Posisition 4 after rechtscharakter, spezifischePraegung, vonGenehmigungAusgenommen in FP_Objekt
@@ -384,18 +412,19 @@ class Gml_builder {
 			#$gmlStr .= "<note>attribut sequenznummer: " . $sequence_attr ."</note>";
 			$sequence_attr++;
 			// leere Felder auslassen
-			if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') continue;
+			if ($gml_object[$uml_attribute['col_name']] == '' OR $gml_object[$uml_attribute['col_name']] == '{}') {
+				continue;
+			}
 
 			// special arraycheck as some attributes with same name can appear twice in same class due to unknown hierarchical depth
 			// only known example currently (xplan 5.1) is: 
 			// XP_Plan: <xplan:name>  and --><xplan:plangeber>--><xplan:XP_Plangeber>--><xplan:name>
 			// plangeber sub-elements has the field kennziffer, which doesn't exist on plan-hierarchy-level
 			// TODO consider solving this in a generic fashion
-			if(is_array($gml_object[$uml_attribute['col_name']]) and array_key_exists('kennziffer', $gml_object)) {
+			if (is_array($gml_object[$uml_attribute['col_name']]) and array_key_exists('kennziffer', $gml_object)) {
 				$gml_object[$uml_attribute['col_name']] = $gml_object[$uml_attribute['col_name']][0];
 			}
 
-			#$gmlStr .= '<note>attributname: ' . $uml_attribute['name'] . ' type_type: ' . $uml_attribute['type_type'] . ' stereotype: ' . $uml_attribute['stereotype'] . ' uml-attribute-type: '. $uml_attribute['type'] . ' uml-attribute-datatype: '. $uml_attribute['uml_dtype'] . '</note>';
 			switch ($uml_attribute['type_type']) {
 				case 'c': // custom datatype
 					switch ($uml_attribute['stereotype']){
@@ -412,19 +441,22 @@ class Gml_builder {
 								$gmlStr .= "<{$xplan_ns_prefix}{$uml_attribute['uml_name']} codeSpace=\"$codeSpaceUri\">$code_value</{$xplan_ns_prefix}{$uml_attribute['uml_name']}>";
 							}
 							break;
-						case "DataType":
+						case "DataType" :
 							$gml_attrib_str = '';
-							// check whether attribute value is already parsed into an array
-							if (is_array($gml_object[$uml_attribute['col_name']]))
-								$value_array = $gml_object[$uml_attribute['col_name']];
-							else // parse attribute value if not yet done
-								$value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
-
 							// fetch information about attributes and their properties
 							$datatype_attribs = $this->typeInfo->getInfo($uml_attribute['type']);
-
+							
 							// retrieve attribute names
-							$value_array_keys = array_column($datatype_attribs,'col_name');
+							$value_array_keys = array_column($datatype_attribs, 'col_name');
+
+							// check whether attribute value is already parsed into an array
+							if (is_array($gml_object[$uml_attribute['col_name']])) {
+								$value_array = $gml_object[$uml_attribute['col_name']];
+							}
+							else { // parse attribute value if not yet done
+								#$value_array = $this->parseCompositeDataType($gml_object[$uml_attribute['col_name']]);
+								$value_array = $this->getValuesFromDataType($gml_object, $uml_attribute, $value_array_keys);
+							}
 
 							// Adds an extra Association for XP_VerbundenerPlan as they are not present with sequences in xplan_uml
 							if($uml_attribute['col_name'] == 'aendert') {
@@ -441,25 +473,30 @@ class Gml_builder {
 								$value_array = $aux_array;
 							}
 							// leere Datentypen auslassen
-							if (!$value_array) break;
+							if (!$value_array) {
+								break;
+							}
 							// process composite data type
 							foreach ($value_array as $single_value) {
 								// associate values with attribute names
 								#$gmlStr .= '<note>single_value: ' . implode(', ', $single_value) . '</note>';
 								#$gmlStr .= '<note>value_array_keys: ' . implode(', ', $value_array_keys) . '</note>';
 								// Null-Array-Werte auslassen
-								if($single_value == null) continue;
+								if ($single_value == null) {
+									continue;
+								}
+
 								$single_value = array_combine($value_array_keys, $single_value);
 								// generate GML output (!!! recursive !!!)
-								$gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs,$depth-1);
+								$gml_attrib_str .= $this->generateGmlForAttributes($single_value, $datatype_attribs, $depth - 1);
 								// leere Datentypen auslassen
 								if (strlen($gml_attrib_str) == 0) break;
 								$typeElementName = end($datatype_attribs)['origin'];
-								$gmlStr .= $this->wrapWithElement(
-								"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
-
 								// wrap all data-types with their data-type-element-tag
-								$this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str));
+								$gmlStr .= $this->wrapWithElement(
+									"{$xplan_ns_prefix}{$uml_attribute['uml_name']}",
+									$this->wrapWithElement("{$xplan_ns_prefix}{$typeElementName}", $gml_attrib_str)
+								);
 								$gml_attrib_str = '';
 							}
 							break;
@@ -661,8 +698,31 @@ class Gml_builder {
     return $result;
   }
 
+	function getValuesFromDataType($gml_attribute, $uml_attribute, $keys) {
+		$data_string = $gml_attribute[$uml_attribute['col_name']];
+		$data_type = $uml_attribute['type'];
+		$type_schema = $uml_attribute['type_schema'];
+		$is_array = $uml_attribute['is_array'];
+		$sql = "
+			SELECT
+				" . implode(
+					', ',
+					array_map(
+						function($key) use ($data_string, $data_type, $type_schema, $is_array) {
+							return "(" . ($is_array ? 'unnest(' : '') . "'" . $data_string . "'::" . $type_schema . "." . $data_type .  ($is_array ? '[])' : '') . ")." . $key . " AS " . $key;
+						},
+						$keys
+					)
+				) . "
+		";
+		#echo '<br>SQL zur Abfrage der Values des DataTypes: ' . $sql;
+		$query = pg_query($this->database->dbConn, $sql);
+		$array_values = pg_fetch_all($query);
+		return $array_values;
+	}
+
 	/*
-	* Diese Funktion parses den Inhalt des übergebenen
+	* Diese Funktion parsed den Inhalt des übergebenen
 	* Query-Results für Spalten vom Typ Composite Datatype
 	* und gibt die Werte in einem (ggf. verschachtelten)
 	* Array zurück.

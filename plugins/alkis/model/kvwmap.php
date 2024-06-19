@@ -63,7 +63,7 @@
 		if ($ret[0]) {
 		}
 		else {
-			if ($ret[1]['flur'] != '') {
+			if (is_array($ret[1]) AND $ret[1]['flur'] != '') {
 				$Flurbezeichnung = $ret[1];
 			}
 		}
@@ -92,44 +92,34 @@
     }
     # zu 2)
     $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$GUI->map_scaledenom = $GUI->map->scaledenom;
-		}
-		else {
-			$GUI->map_scaledenom = $GUI->map->scale;
-		}
+		$GUI->map_scaledenom = $GUI->map->scaledenom;
     # zu 3)
     $GemkgObj=new Gemarkung($Gemkgschl,$GUI->pgdatabase);
-    $layer=ms_newLayerObj($GUI->map);
+    $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
 		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
-    $layer->set('data',$datastring);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$legendentext);
-    $layer->set('type',2);
-    $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->data = $datastring;
+    $layer->status = MS_ON;
+    $layer->template = ' ';
+    $layer->name = $legendentext;
+    $layer->type = 2;
+    $layer->group = 'eigene Abfragen';
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    if (MAPSERVERVERSION < '540') {
-      $layer->set('connectiontype', 6);
-    }
-    else {
-      $layer->setConnectionType(6);
-    }
+    $layer->setConnectionType(6);
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0'); #2005-11-30_pk
-    $klasse=ms_newClassObj($layer);
-    $klasse->set('status', MS_ON);
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
+    $klasse = new ClassObj($layer);
+    $klasse->status = MS_ON;
     $klasse->setexpression($expression);
-    $style=ms_newStyleObj($klasse);
+    $style = new StyleObj($klasse);
     $style->color->setRGB(255,255,128);
     $style->outlinecolor->setRGB(0,0,0);
   };
@@ -155,12 +145,7 @@
     }
     # zu 2)
     $GUI->map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
-  	if(MAPSERVERVERSION >= 600 ) {
-			$GUI->map_scaledenom = $GUI->map->scaledenom;
-		}
-		else {
-			$GUI->map_scaledenom = $GUI->map->scale;
-		}
+		$GUI->map_scaledenom = $GUI->map->scaledenom;
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$GUI->pgdatabase);
     $layer=ms_newLayerObj($GUI->map);
@@ -171,29 +156,24 @@
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
-    $layer->set('data',$datastring);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name',$legendentext);
-    $layer->set('type',2);
-    $layer->set('group','eigene Abfragen');
-    $layer->setMetaData('off_requires',0);
-    $layer->setMetaData('layer_has_classes',0);
+    $layer->data = $datastring;
+    $layer->status = MS_ON;
+    $layer->template = ' ';
+    $layer->name = $legendentext;
+    $layer->type = 2;
+    $layer->group = 'eigene Abfragen';
+    $layer->metadata->set('off_requires',0);
+    $layer->metadata->set('layer_has_classes',0);
     $GUI->map->setMetaData('group_status_eigene Abfragen','0');
     $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    if (MAPSERVERVERSION < '540') {
-      $layer->set('connectiontype', 6);
-    }
-    else {
-      $layer->setConnectionType(6);
-    }
+    $layer->setConnectionType(6);
     $layer->set('connection', $GUI->pgdatabase->get_connection_string());
-    $layer->setMetaData('queryStatus','2');
-    $layer->setMetaData('wms_queryable','0');
-    $layer->setMetaData('layer_hidden','0');
-    $klasse=ms_newClassObj($layer);
+    $layer->metadata->set('queryStatus','2');
+    $layer->metadata->set('wms_queryable','0');
+    $layer->metadata->set('layer_hidden','0');
+    $klasse = new ClassObj($layer);
     $klasse->set('status', MS_ON);
-    $style=ms_newStyleObj($klasse);
+    $style = new StyleObj($klasse);
     $style->color->setRGB(255,255,128);
     $style->outlinecolor->setRGB(0,0,0);
   };
@@ -1007,7 +987,7 @@
 	$GUI->ALKIS_Kartenauszug = function($layout, $formvars) use ($GUI){
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$alkis = new ALKIS($GUI->pgdatabase);
-		$point=ms_newPointObj();
+		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
 		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
 		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);

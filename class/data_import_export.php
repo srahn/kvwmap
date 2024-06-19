@@ -29,6 +29,12 @@
 #############################
 
 class data_import_export {
+	var $pgdatabase;
+	var $debug;
+	var $delimiters;
+	var $epsg_codes;
+	var $unique_column;
+	var $ask_epsg;
 
 	function __construct() {
 		global $debug;
@@ -195,12 +201,19 @@ class data_import_export {
     return $layer_id;
 	}
 
-	function get_shp_epsg($file, $pgdatabase){
-		if(file_exists($file.'.prj')){
-			$prj = file_get_contents($file.'.prj');
+	/**
+	 * Function determine the EPSG-Code number from a prj-file if exists.
+	 * @param String $filename - The name of the file without extension.
+	 * @return Mixed - false if no code found the epsg-code number else.
+	 */
+	function get_shp_epsg($filename, $pgdatabase) {
+		if (file_exists($filename . '.prj')) {
+			$prj = file_get_contents($filename . '.prj');
 			return $this->get_epsg_from_wkt($prj, $pgdatabase);
 		}
-		else return false;
+		else {
+			return false;
+		}
 	}
 
 	function get_gdal_epsg($raster_file, $pgdatabase){
@@ -243,22 +256,37 @@ class data_import_export {
 		return $result[0];
 	}
 
-	function load_shp_into_pgsql($pgdatabase, $uploadpath, $file, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
-		if (file_exists($uploadpath . $file . '.dbf')) {
-			$filename = $uploadpath . $file . '.dbf';
+	/**
+	 * @param pgdatabase $pgdatabase - Die Datenbank in die die Shape-Datei eingelesen werden soll.
+	 * @param String $uploadpath - Das Verzeichnis in dem die hochgeladene Shape-Datei eingelesen werden soll.
+	 * @param String $shapefile - File name of the shapefile (without extention)
+	 * @param Integer $epsg - EPSG-Code
+	 * @param String $schemaname - database schema name
+	 * @param String $tablename - database table name in which the shapes shall be stored
+	 * @param String $encoding - The encoding of the dbf file.
+	 * @param Boolean $adjustments - True if the attribute names and geometry type of the shape file shall be adjusted, see function rename_reserved_attribute_names
+	 * @return Mixed NULL if no dbf file exists.
+	 */
+	function load_shp_into_pgsql($pgdatabase, $uploadpath, $shapefile, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
+		// ToDo: Die nachfolgenden beiden Test mit Groß und Kleinschreibung sind nicht vollständig für z.B. (Dbf, DBf).
+		// Man kann man mit diesem Statement den Test vereinfachen auf eine Zeile
+		$filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
+
+		if (file_exists($uploadpath . $shapefile . '.dbf')) {
+			$filename = $uploadpath . $shapefile . '.dbf';
 		}
-		elseif (file_exists($uploadpath . $file . '.DBF')) {
-			$filename = $uploadpath . $file . '.DBF';
+		elseif (file_exists($uploadpath . $shapefile . '.DBF')) {
+			$filename = $uploadpath . $shapefile . '.DBF';
 		}
 		else {
 			return;
 		}
-		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, $sql, '-lco FID=gid', $encoding, true);
+		$ret = $this->ogr2ogr_import($schemaname, $tablename, $epsg, $filename, $pgdatabase, NULL, NULL, '-lco FID=gid', $encoding, true);
 		if (file_exists('.esri.gz')) {
 			unlink('.esri.gz');
 		}
 		if ($ret !== 0) {
-			$custom_table['error'] = $ret;
+			$custom_table['error'] = (is_array($ret) ? implode(', ', $ret) : $ret);
 			return array($custom_table);
 		}
 		else {
@@ -886,18 +914,6 @@ class data_import_export {
 	}
 
 ################### Export ########################
-	function export($formvars, $stelle, $user, $mapdb) {
-		#echo '<br>export formvars: ' . print_r($formvars, true);
-		$this->formvars = $formvars;
-		$this->layerdaten = $stelle->getqueryableVectorLayers(NULL, $user->id, NULL, NULL, NULL, NULL, false, true);
-		if ($this->formvars['selected_layer_id']) {
-			$this->layerset = $user->rolle->getLayer($this->formvars['selected_layer_id']);
-			$layerdb = $mapdb->getlayerdatabase($this->formvars['selected_layer_id'], $stelle->pgdbhost);
-			$path = $this->layerset[0]['pfad'];
-			$privileges = $stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-			$this->attributes = $mapdb->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames']);
-		}
-	}
 
 	function ogr2ogr_export($sql, $exportformat, $exportfile, $layerdb, $options = '') {
 		$formvars_nln = ($this->formvars['layer_name'] != '' ? '-nln ' . $this->formvars['layer_name'] : '');
@@ -1006,7 +1022,7 @@ class data_import_export {
 			#echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$result = new stdClass();
-			$result->stdout = $output;
+			$result->stdout = implode('', $output);
 			$err_file = file_get_contents(IMAGEPATH . $errorfile);
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
 				$result->exitCode = 1;
@@ -1017,7 +1033,7 @@ class data_import_export {
 	}
 
 	function ogr_get_layers($importfile){
-		$result = $this->ogrinfo($importfile, ' -q' . (get_ogr_version() >= 310 ? ' -nogeomtype' : ''));
+		$result = $this->ogrinfo($importfile, ' -q -nogeomtype');
 		if ($result->exitCode != 0)	{
 			echo 'Fehler beim Lesen der Datei ' . basename($importfile) . ' mit ogrinfo: ' . $result->stderr; 
 			return array();
@@ -1252,8 +1268,8 @@ class data_import_export {
 			if ($this->formvars['epsg'] != '') {
 				$t_epsg = $this->formvars['epsg'];
 			}
-			elseif ($layerset[0]['epsg'] != '') {
-				$t_epsg = $layerset[0]['epsg'];
+			elseif ($layerset[0]['epsg_code'] != '') {
+				$t_epsg = $layerset[0]['epsg_code'];
 			}
 			else {
 				$t_epsg = '4326';
@@ -1313,7 +1329,7 @@ class data_import_export {
 				}
 			}
 			elseif ($filter != '') {		# Filter muss nur dazu, wenn kein $where vorhanden, also keine Abfrage gemacht wurde, sondern der gesamte Layer exportiert werden soll (Filter ist ja schon im $where enthalten)
-				$filter = str_replace('$userid', $user->id, $filter);
+				$filter = str_replace('$USER_ID', $user->id, $filter);
 	    	$where = 'WHERE ' . $filter;
 			}
 			else {
@@ -1327,6 +1343,13 @@ class data_import_export {
 				else {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
+			}
+			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
+				$query_parts['select'] = str_replace(
+																	$layerset[0]['attributes']['the_geom'], 
+																	'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
+																	$query_parts['select']
+																);
 			}
 			$sql = "
 				SELECT 
@@ -1356,7 +1379,7 @@ class data_import_export {
 					if ($this->formvars['precision'] != '') {
 						$selected_attributes[$s] = 'st_snaptogrid(' . $selected_attributes[$s] . ', 0.' . str_repeat('0', $this->formvars['precision'] - 1) . '1) ';
 					}
-					$selected_attributes[$s] .= 'as ' . $layerset[0]['attributes']['the_geom'];
+					$selected_attributes[$s] .= ' as ' . $layerset[0]['attributes']['the_geom'];
 				}
 				# das Abschneiden bei nicht in der Länge begrenzten Textspalten verhindern
 				if ($this->formvars['export_format'] == 'Shape') {
@@ -1415,6 +1438,7 @@ class data_import_export {
 					} break;
 
 					case 'GPX' : {
+						$this->formvars['geomtype'] = ($layerset[0]['Datentyp'] == 2 ? 'LINESTRING' : $this->formvars['geomtype']);
 						$exportfile = $exportfile.'.gpx';
 						$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb, '-lco FORCE_GPX_TRACK=YES -dsco GPX_USE_EXTENSIONS=YES');
 					} break;

@@ -68,11 +68,12 @@ function checkStatus($request, $username, $password){
       $status = false;
       $info = 404;
     }
-		elseif (strpos($header, '301 Moved Permanently') !== false) {
+		elseif (strpos($header, '301 Moved Permanently') !== false OR strpos($header, '307 Temporary Redirect') !== false) {
 			$new_location = trim(get_first_word_after($header, 'Location:', ' ', chr(10)));
-			$info = '<p>301 Moved Permanently Prüfe neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
+			$info = '<p>' . substr($header, 0, strpos($header, 'Location:'));
 			$result = checkStatus($new_location, $username, $password);
-			$result[1] = $info . ' ' . (string)$result[1];
+			$result[1] = $info . '<br>' . (string)$result[1];
+      $result[2] = '<br>neue Location: <a href="' . $new_location . '" target="_blank">' . $new_location . '</a>';
 			return $result;
 		}
     else{
@@ -91,7 +92,7 @@ function checkStatus($request, $username, $password){
       }
     }
   }
-  return array($status,$info);
+  return array($status, $info);
 }
 
 function getExceptionCode($data){
@@ -154,14 +155,14 @@ while ($line = $ret->fetch_assoc()){
 while($line = $result->fetch_assoc()){
   try{
     $extent = ms_newRectObj();
+    $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   }
   catch(Exception $e) {
-    $extent = new rectObj();
+    $extent = new rectObj($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   }
   foreach($params AS $key => $value){
     $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
   }
-  $extent->setextent($bbox['left'],$bbox['bottom'],$bbox['right'],$bbox['top']);
   $wgsProjection = ms_newprojectionobj("init=epsg:4326");
   $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);
   $extent->project($wgsProjection, $userProjection);
@@ -180,8 +181,8 @@ while($line = $result->fetch_assoc()){
   echo '<div style="border: 1px solid black;width: 100%;padding: 10px;background-color: '.$color.'">';  
 	echo '<a href="'.$url.'"target="_blank">'.$line["Name"]."</a><br/>";
   if(!$status[0]){
-    echo 'nicht ok<br>'.$status[1];
-		$query = "UPDATE `layer` SET status = '".$status[1]."' WHERE Layer_ID = ".$line["Layer_ID"];
+    echo 'nicht ok<br>' . $status[1] . $status[2];
+		$query = "UPDATE `layer` SET status = '" . addslashes($status[1]) . "' WHERE Layer_ID = ".$line["Layer_ID"];
   }
   else{
 		echo ($status[0] != '' ? 'info: ' . $status[1] : '');

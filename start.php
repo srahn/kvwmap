@@ -1,5 +1,5 @@
 <?php
-$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+$language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
 include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
 
@@ -676,8 +676,7 @@ function get_permission_in_stelle($GUI) {
 
 			if (CHECK_CLIENT_IP) {
 				$GUI->debug->write('Es wird geprüft ob IP-Adressprüfung in der Stelle durchgeführt werden muss.', 4);
-
-				if ($GUI->Stelle->checkClientIpIsOn()) {
+				if ($GUI->Stelle->check_client_ip) {
 					$GUI->debug->write('IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 
 					if ($GUI->user->clientIpIsValide(get_remote_ip()) == false) {

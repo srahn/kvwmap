@@ -156,6 +156,8 @@ $GUI->mobile_sync = function () use ($GUI) {
 
 		if ($result['success']) {
 			$GUI->debug->write('mobile_sycn_parameter_valid', 5);
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
 			# Layer DB abfragen $layerdb = new ...
 			$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 			$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -163,6 +165,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 			$GUI->debug->write('msg: ' . $result['msg'], 5);
 			$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
 			$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
+			$result['version'] = $layer->get('version');
 			$GUI->debug->write('sync abgeschlossen.');
 		}
 		else {
@@ -207,37 +210,41 @@ $GUI->mobile_sync = function () use ($GUI) {
 
 		if (array_key_exists('client_deltas', $params)) {
 			$deltas = $params['client_deltas'];
+			if (is_object($deltas)) {
+				if (property_exists($deltas, 'rows')) {
+					$rows = $deltas->rows;
+					if (count($rows) > 0) {
+						$first_row = $rows[0];
+						if (property_exists($first_row, 'version')) {
+							$version = $first_row->version;
 
-			if (property_exists($deltas, 'rows')) {
-				$rows = $deltas->rows;
-				if (count($rows) > 0) {
-					$first_row = $rows[0];
-					if (property_exists($first_row, 'version')) {
-						$version = $first_row->version;
-
-						if ($version == '' || $version == 0) {
-							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+							if ($version == '' || $version == 0) {
+								$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+							}
+						}
+						else {
+							$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
+						}
+						if (property_exists($first_row, 'sql')) {
+							$sql = $first_row->sql;
+							if ($sql == '') {
+								$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
+							}
+						}
+						else {
+							$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
 						}
 					}
 					else {
-						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
-					}
-					if (property_exists($first_row, 'sql')) {
-						$sql = $first_row->sql;
-						if ($sql == '') {
-							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
-						}
-					}
-					else {
-						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+						# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
 					}
 				}
 				else {
-					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
+					$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
 				}
 			}
 			else {
-				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+				$err_msg[] = 'Die Deltas Variable ist kein Objekt.';
 			}
 		}
 		else {
@@ -258,8 +265,7 @@ $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($
 	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
 	$projFROM = ms_newprojectionobj("init=epsg:" . $stelle_settings['epsg_code']);
 	$projTO = ms_newprojectionobj("init=epsg:4326");
-	$extent = ms_newRectObj();
-	$extent->setextent($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
+	$extent = rectObj($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
 	$extent->project($projFROM, $projTO);
 	$stelle['west'] = round($extent->minx, 5);
 	$stelle['south'] = round($extent->miny, 5);
@@ -303,7 +309,8 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"vector_tile_url" => $layerset['vector_tile_url'], 
 		"privileg" => $layerset['privileg'],
 		"drawingorder" => $layerset['drawingorder'],
-		"sync" => $layerset['sync']
+		"sync" => $layerset['sync'],
+		"version" => $layerset['version']
 	);
 	# ToDo use $mapDB->getDocument_Path(...) to get the calculated document_path
 	return $layer;
@@ -315,6 +322,14 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 			if ($value == 'kartierergruppe_id') {
 				#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
 			}
+			if ($attr['form_element_type'][$key] == 'Autovervollständigungsfeld') {
+				$sql = $attr['options'][$key];
+				$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+				if ($ret[0]) { echo err_msg($GUI->script_name, __LINE__, $sql); return 0; }
+				while ($rs = pg_fetch_array($ret[1])) {
+					$attr['enum'][$key][$rs['value']] = $rs;
+				}
+			};
 			if ($attr['enum'][$key]) {
 				$attr['enums'][$key] = array();
 				foreach($attr['enum'][$key] AS $enum_key => $enum) {

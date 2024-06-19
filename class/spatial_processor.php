@@ -232,7 +232,7 @@ class spatial_processor {
   
   function process_query($formvars){
 		$formvars['fromwhere'] = str_replace("''", "'", $formvars['fromwhere']);
-		$formvars['fromwhere'] = str_replace('$hist_timestamp', rolle::$hist_timestamp, $formvars['fromwhere']);	
+		$formvars['fromwhere'] = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $formvars['fromwhere']);	
 		if($formvars['path2'] != ''){
       $this->debug->write("path2:".$formvars['path2']."\n",4);
 			if($formvars['geotype'] == 'line'){
@@ -270,7 +270,7 @@ class spatial_processor {
 			case 'transform':{
 		    # Transformation des aktuellen Kartenausschnittes
 		    # in das Koordinatensystem des aktuellen EPSG-Codes
-		    # Geg:	curExtent ... Koordinaten des aktuellen Ausschnittes (ms_newRectObj)
+		    # Geg:	curExtent ... Koordinaten des aktuellen Ausschnittes (RectObj)
 		    #				curSRID		...	Urspr�ngliche SRID (EPSG-Code als int)
 		    #				newSRID		...	Neue SRID (EPSG-Code als int) 
 		    $curExtent=$this->rolle->oGeorefExt;
@@ -425,8 +425,7 @@ class spatial_processor {
 			$miny = $this->rolle->oGeorefExt->miny + $pixsize * ($this->rolle->nImageHeight - $ru[1]); # y Wert
 			$maxx = $minx + $width;
 			$maxy = $miny + $height;
-			$rect = ms_newRectObj();
-			$rect->setextent($minx, $miny, $maxx, $maxy);
+			$rect = rectObj($minx, $miny, $maxx, $maxy);
 		}
 		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
 		return $geom;
@@ -597,7 +596,7 @@ class spatial_processor {
 					rolle::$hist_timestamp,
 					$this->user->rolle->language
 				);
-				$data = str_replace('$scale', 1000, $data);
+				$data = str_replace('$SCALE', 1000, $data);
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
@@ -659,7 +658,7 @@ class spatial_processor {
 				
 	      # 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 	      if($layerset[0]['Filter'] != ''){
-	      	$layerset[0]['Filter'] = str_replace('$userid', $this->rolle->user_id, $layerset[0]['Filter']);
+	      	$layerset[0]['Filter'] = str_replace('$USER_ID', $this->rolle->user_id, $layerset[0]['Filter']);
 	        $sql_where .= " AND ".$layerset[0]['Filter'];
 	      }
 

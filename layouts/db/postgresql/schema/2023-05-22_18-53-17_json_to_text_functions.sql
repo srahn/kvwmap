@@ -197,4 +197,52 @@ BEGIN;
 	$BODY$;
 	COMMENT ON FUNCTION public.gdi_curve_to_polygon(geometry)
 			IS 'Die Funktion wandelt eine curve vom Typ ST_CurvePolygon in ein Polygon vom Typ ST_Polygon um. Die Componenten der curve werden zunächst mit ST_CurveToLine() in LineStrings gewandelt. Mit der Aggregationsfunktion ST_Polygonize() werden aus den sich durch die LineStrings ergebenen Flächen Polygone gemacht, die die gesamte Fläche ausfüllen. Besteht das Resultat aus nur einem Polygon, wird dieses zurückgeliefert. Existieren mehrere in Folge von inneren Ringen, werden im nächsten Schritt die äußeren Ringe der sich ergebenen Polygone extrahiert und geprüft welche vollständig innerhalb der anderen liegen. Ausgegeben werden dann nur die Polygone, die andere Polygone vollständig beinhalten. Damit werden die Polygone, die die Löcher repräsentieren rausgefiltert.';
+
+	CREATE OR REPLACE FUNCTION public.gdi_codelist_json_to_text(
+		codelist json,
+		pg_type text)
+			RETURNS text
+			LANGUAGE 'plpgsql'
+			COST 100
+			STABLE PARALLEL UNSAFE
+	AS $BODY$
+	DECLARE
+		sql text;
+		result text;
+	BEGIN
+		--raise notice 'type: % codelist: %', pg_type, codelist;
+		IF (pg_type LIKE '%[]') THEN
+			SELECT
+				string_agg(gdi_codelist_json_to_text(array_element.cl, replace(pg_type, '[]', '')), ', ')
+			FROM
+				(SELECT json_array_elements(codelist) cl) AS array_element(cl)
+			WHERE
+				array_element.cl IS NOT NULL
+			INTO result;
+		ELSE
+			IF (codelist->>'id' IS NULL) THEN
+				RETURN NULL;
+			ELSE
+				IF (codelist->>'value' IS NULL) THEN
+					sql = FORMAT('
+						SELECT
+							CONCAT_WS('', '', ''codespace: '' || codespace, ''id: '' || id, ''value: '' || value)
+						FROM
+							%2$s
+						WHERE
+							id LIKE %1$L;       
+					', codelist->>'id', pg_type::text);
+					--RAISE NOTICE 'sql: %', sql;
+					EXECUTE sql INTO result;
+					IF (result IS NULL) THEN
+						SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(json_strip_nulls(codelist)::text, '['::text, ''::text), ']', ''), '{', ''), '}', ''), '"', ''), ', ', ','), ',', ', '), ':', ': ') INTO result;        
+					END IF;
+				ELSE
+					SELECT REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(json_strip_nulls(codelist)::text, '['::text, ''::text), ']', ''), '{', ''), '}', ''), '"', ''), ', ', ','), ',', ', '), ':', ': ') INTO result;
+				END IF;
+			END IF;
+		END IF;
+		RETURN result;
+	END
+	$BODY$;
 COMMIT;

@@ -158,7 +158,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-var attributes = new Array(<? echo (@count($this->attributes['name']) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
+var attributes = new Array(<? echo (@count($this->attributes['name'] ?: []) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function takeover_attributes(){
 	if (document.getElementById('for_attributes_selected_layer_id').value == '') {
@@ -264,10 +264,10 @@ function set_all(column){
 	<tr>
     <td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="submitLayerSelector();" <?php if(count($this->layerdaten['ID'] ?: [])==0){ echo 'disabled';}?>><?
 			$layer_options = array(); ?>
       <option value=""><?php echo $strPleaseSelect; ?></option><?
-				for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+				for ($i = 0; $i < count($this->layerdaten['ID'] ?: []); $i++) {
 					$layer_options[] = array('value' => $this->layerdaten['ID'][$i], 'output' => $this->layerdaten['Bezeichnung'][$i]);
     			echo '<option';
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){

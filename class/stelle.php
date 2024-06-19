@@ -6,7 +6,6 @@
 *		getsubmenues($id)
 *		getName()
 *		readDefaultValues()
-*		checkClientIpIsOn()
 *		Löschen()
 *		deleteMenue(text)
 *		deleteLayer($layer, $pgdatabase)
@@ -256,8 +255,7 @@ class stelle {
 		$rs = $this->database->result->fetch_array();
 		$this->data = $rs;
 		$this->Bezeichnung = $rs['Bezeichnung'];
-		$this->MaxGeorefExt = ms_newRectObj();
-		$this->MaxGeorefExt->setextent($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
+		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
 		//---------- OWS Metadaten ----------//
@@ -315,27 +313,6 @@ class stelle {
 		$this->reset_password_text = $rs['reset_password_text'];
 		$this->invitation_text = $rs['invitation_text'];
 	}
-
-  function checkClientIpIsOn() {
-    $sql = "
-			SELECT
-				check_client_ip
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-    $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
-    #echo '<br>'.$sql;
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		$rs = $this->database->result->fetch_array();
-    if ($rs['check_client_ip']=='1') {
-      return 1;
-    }
-    return 0;
-  }
 
 	function delete() {
 		$sql = "
@@ -751,6 +728,13 @@ class stelle {
 
 	function getStellen($order, $user_id = 0, $where = "1") {
 		global $admin_stellen;
+		$stellen = array(
+			'ID' => array(),
+			'index' => array(),
+			'Bezeichnung' => array(),
+			'show_shared_layers' => array(),
+			'Bezeichnung_parent' => array()
+		);
 		$sql = "
 			SELECT
 				s.ID,
@@ -765,7 +749,15 @@ class stelle {
 					WHERE
 						s.`ID` = h.`child_id` AND 
 						es.ID = h.parent_id
-				) as Bezeichnung_parent
+				) as Bezeichnung_parent,
+				(
+					SELECT
+						max(last_time_id)
+					FROM
+						`rolle`
+					WHERE
+					`rolle`.stelle_id = s.ID
+				) as last_time_id
 			FROM
 				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
 				`rolle` AS r ON s.ID = r.stelle_id
@@ -788,6 +780,7 @@ class stelle {
 			$stellen['Bezeichnung'][] = $rs['Bezeichnung'];
 			$stellen['show_shared_layers'][] = $rs['show_shared_layers'];
 			$stellen['Bezeichnung_parent'][] = $rs['Bezeichnung_parent'];
+			$stellen['last_time_id'][] = $rs['last_time_id'];
 			$i++;
 		}
 		return $stellen;
@@ -1333,7 +1326,6 @@ class stelle {
 			$columns = '
 				`Layer_ID`, 
 				`queryable`, 
-				`drawingorder`, 
 				`legendorder`,
 				`minscale`, 
 				`maxscale`, 
@@ -1442,7 +1434,7 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
+	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
@@ -1451,7 +1443,6 @@ class stelle {
 				`Layer_ID`,
 				`queryable`,
 				`use_geom`,
-				`drawingorder`,
 				`legendorder`,
 				`minscale`,
 				`maxscale`,
@@ -1475,7 +1466,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1501,7 +1491,6 @@ class stelle {
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
 						use_geom = l.use_geom, 
-						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
 						maxscale = l.maxscale, 
@@ -1526,7 +1515,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1550,7 +1538,6 @@ class stelle {
 						ON DUPLICATE KEY UPDATE 
 							queryable = l.queryable, 
 							use_geom = l.use_geom, 
-							drawingorder = l.drawingorder, 
 							legendorder = l.legendorder, 
 							minscale = l.minscale, 
 							maxscale = l.maxscale, 
@@ -1853,13 +1840,16 @@ class stelle {
 
 	function updateLayerOrder($formvars){
 		# Aktualisieren der LayerzuStelle-Eigenschaften
-		if($formvars['legendorder'] == '')$formvars['legendorder'] = 'NULL';
-		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
-		$sql .= ', drawingorder = '.$formvars['drawingorder'];
-		$sql .= ', legendorder = '.$formvars['legendorder'];
-		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
+		$sql = '
+			UPDATE 
+				used_layer 
+			SET 
+				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
+			WHERE 
+				Stelle_ID = ' . $formvars['selected_stelle_id'] . ' AND 
+				Layer_ID = ' . $formvars['selected_layer_id'];
 		#echo $sql.'<br>';
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerdrawingorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
+		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 	}
@@ -1885,7 +1875,7 @@ class stelle {
     return $groups;
   }
 
-	function getLayers($group, $order = 'ul.legendorder, ul.drawingorder desc', $return = '') {
+	function getLayers($group, $order = 'ul.legendorder, l.drawingorder desc', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1897,7 +1887,7 @@ class stelle {
 			ul.stelle_id = " . $this->id .
 			($group != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group : "") . "
 		";
-		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY legendorder, drawingorder desc');
+		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
@@ -1906,7 +1896,7 @@ class stelle {
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				l.Name,
 				l.alias,
-				ul.drawingorder,
+				l.drawingorder,
 				ul.legendorder
 			FROM
 				used_layer ul JOIN
@@ -2035,7 +2025,7 @@ class stelle {
 		$language_postfix = ($language == 'german' ? "" : "_" . $language);
 		$language_layer_name = "Name" . $language_postfix;
 		# nicht editierbare SubformFKs ausschliessen
-		$condition = ($privileg > 0 AND $no_subform_layers ? "subformfk IS NULL OR privilegfk = 1" : "true");
+		$condition = (($privileg > 0 AND $no_subform_layers) ? "subformfk IS NULL OR privilegfk = 1" : "true");
 		$sql = "
 			SELECT DISTINCT
 				Layer_ID,
@@ -2126,7 +2116,7 @@ class stelle {
 					l.connectiontype = 6 OR
 					l.connectiontype = 9
 				) AND "
-				. ($use_geom != NULL ? "ul.use_geom = 1" : "l.queryable = '1'")
+				. ($use_geom != NULL ? "ul.use_geom = 1" : "ul.queryable = '1'")
 				. ($no_query_layers ? " AND l.`Datentyp` != 5" : "")
 				. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 				. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
@@ -2317,7 +2307,7 @@ class stelle {
 				ul.export_privileg,
 				ul.requires,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 
@@ -2348,7 +2338,7 @@ class stelle {
 			GROUP BY 
 				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 
@@ -2423,7 +2413,7 @@ class stelle {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
 					$layer->minScale = $layer2Stelle->get('minscale');
 					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = 100 - $layer2Stelle->get('transparency');
+					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
 					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
 					return $layer->get_overlays_def($this->id);
 				},

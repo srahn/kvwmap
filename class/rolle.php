@@ -13,6 +13,8 @@ class rolle {
 	var $minx;
 	var $language;
 	var $newtime;
+	var $gui_object;
+	var $layerset;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
@@ -72,7 +74,7 @@ class rolle {
 		return 1;
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -110,6 +112,10 @@ class rolle {
 				) as privilegfk";
 		}
 
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+		}
+
 		$sql = "
 			SELECT " .
 			$name_column . ",
@@ -122,8 +128,8 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `datasource`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				ul.`queryable`, ul.`drawingorder`,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				ul.`queryable`, l.`drawingorder`,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
@@ -160,9 +166,10 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . "
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
-				ul.drawingorder desc
+				l.drawingorder desc
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
@@ -440,8 +447,7 @@ class rolle {
     }
 		if ($this->database->result->num_rows > 0){
 			$rs = $this->database->result->fetch_assoc();
-			$this->oGeorefExt=ms_newRectObj();
-			$this->oGeorefExt->setextent($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
+			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
 			$this->nImageWidth=$rs['nImageWidth'];
 			$this->nImageHeight=$rs['nImageHeight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
@@ -478,6 +484,7 @@ class rolle {
 			$this->upload_only_file_metadata = $rs['upload_only_file_metadata'];
 			$this->overlayx=$rs['overlayx'];
 			$this->overlayy=$rs['overlayy'];
+			$this->last_query_layer=$rs['last_query_layer'];
 			$this->instant_reload=$rs['instant_reload'];
 			$this->menu_auto_close=$rs['menu_auto_close'];
 			rolle::$layer_params = (array)json_decode('{' . $rs['layer_params'] . '}');
@@ -545,8 +552,8 @@ class rolle {
 			else {
 				while ($param = $this->database->result->fetch_assoc()) {
 					$sql = $param['options_sql'];
-					$sql = str_replace('$user_id', $this->user_id, $sql);
-					$sql = str_replace('$stelle_id', $this->stelle_id, $sql);
+					$sql = str_replace('$USER_ID', $this->user_id, $sql);
+					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);
 					#echo '<br>SQL zur Abfrage der Optionen des Layerparameter ' . $param['key'] . ': ' . $sql;
 					$options_result = $pgdatabase->execSQL($sql, 4, 0, false);
 					if ($options_result['success']) {
@@ -1155,6 +1162,7 @@ class rolle {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		$layer = array();
 		while ($rs = $this->database->result->fetch_assoc()) {
+			$rs['Name_or_alias'] = $rs['Name'];
 			$layer[] = $rs;
 		}
 		return $layer;
@@ -1330,11 +1338,17 @@ class rolle {
 	}
 
 	function setClassStatus($formvars) {
-		if(value_of($formvars, 'layer_id') != ''){
+		if (value_of($formvars, 'only_layer_id') != '' AND $formvars['show_classes'] != ''){
 			# Eintragen des showclasses=1 für Klassen, die angezeigt werden sollen
-			$sql ='UPDATE u_rolle2used_layer set showclasses = "'.$formvars['show_classes'].'"';
-			$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-			$sql.=' AND layer_id='.$formvars['layer_id'];
+			$sql ='
+				UPDATE 
+					u_rolle2used_layer 
+				SET 
+					showclasses = "' . $formvars['show_classes'] . '"
+				WHERE 
+					user_id = ' . $this->user_id . ' AND 
+					stelle_id = ' . $this->stelle_id . ' AND 
+					layer_id = ' . $formvars['only_layer_id'];
 			$this->debug->write("<p>file:rolle.php class:rolle->setClassStatus - Speichern des Status der Klassen zur Rolle:",4);
 			$this->database->execSQL($sql,4, $this->loglevel);
 		}
@@ -1669,7 +1683,6 @@ class rolle {
 					`epsg_code2`,
 					`coordtype`,
 					`active_frame`,
-					`last_time_id`,
 					`gui`,
 					`language`,
 					`hidemenue`,
@@ -1715,7 +1728,6 @@ class rolle {
 					`epsg_code2`,
 					`coordtype`,
 					`active_frame`,
-					`last_time_id`,
 					`gui`,
 					`language`,
 					`hidemenue`,
@@ -2183,6 +2195,21 @@ class rolle {
 		$this->database->execSQL($sql,4, $this->loglevel);
 		return 1;
 	}
+
+	function set_last_query_layer($layer_id){
+		$sql = '
+			UPDATE 
+				rolle 
+			SET 
+				last_query_layer = ' . $layer_id . '
+			WHERE 
+				user_id = ' . $this->user_id . ' AND 
+				stelle_id = ' . $this->stelle_id;
+		#echo $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:set_last_query_layer - :",4);
+		$this->database->execSQL($sql,4, $this->loglevel);
+		return 1;
+	}	
 
 	function getMapComments($consumetime, $public = false, $order) {
 		$sql ='SELECT c.user_id, c.time_id, c.comment, c.public, u.Name, u.Vorname FROM u_consume2comments as c, user as u WHERE c.user_id = u.ID AND (';

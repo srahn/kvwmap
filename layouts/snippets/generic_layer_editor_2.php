@@ -48,8 +48,16 @@ if ($doit == true) {
 		$privileg = $layer['attributes']['privileg'][$index];
 		$nullable = $layer['attributes']['nullable'][$index];
 		if ($this->new_entry == true AND $privileg == 1) {
-			$show_geom_editor = true;
-		}
+			$show_geom_editor = true; ?>
+			<style>
+				#nds_titel p {
+					margin: 0px 0px -32px 0px;
+				}
+				#nds_edit #layer {
+					margin: 0;
+				}
+			</style>
+<?	}
 		if ($nullable === '0'){ ?>
 			<script type="text/javascript">
 				geom_not_null = true;
@@ -348,6 +356,17 @@ if ($doit == true) {
 																		<a title="<? echo $strMapZoom.$strAndHighlight; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'false');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
 																	<td>
 																		<a title="<? echo $strMapZoom.$strAndHide; ?>" href="javascript:zoom2object(<? echo $layer['Layer_ID'];?>, '<? echo $columnname; ?>', '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>', 'true');"><div class="button zoom_select"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+																	</td>
+																	<td style="position: relative">
+																		<a 
+																			title="QR-Code" 
+																			href="javascript:void(0);" 
+																			onmouseenter="get_position_qrcode(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
+																			onmouseleave="remove_position_qrcode(<? echo $layer['Layer_ID']; ?>, '<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>');"
+																		>
+																			<div class="button qr_code"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div>
+																		</a>
+																		<img id="qr_<? echo $layer['Layer_ID']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>" src="<? echo GRAPHICSPATH.'leer.gif'; ?>" style="position: absolute; bottom: 0px; left: 40px; box-shadow: 0px 0px 7px rgba(0, 0, 0, 0.4);">
 																	</td><?
 																}
 															} ?>
@@ -411,6 +430,6 @@ if ($doit == true) {
 		<input type="hidden" id="geom_privileg_<? echo $layer['Layer_ID']; ?>" value="<? echo $privileg; ?>">
 	</div><?
 }
-elseif ($layer['requires'] == '' AND $layer['required'] == '') {
+elseif ($layer['requires'] == '') {
 	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
 } ?>

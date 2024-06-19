@@ -450,6 +450,7 @@ function init_config() {
 	define('WAPPENPATH', 'graphics/wappen/');
 	define('PHPVERSION', 739);
 	define('THIRDPARTY_PATH', '../3rdparty/');
+	define('MAPSERVERVERSION', 800);
 }
 
 function show_constants() { ?>
