@@ -515,7 +515,7 @@ class GUI {
 				}
 				else{
 					$buffer = $this->map_scaledenom/260;
-					$query_parts['select'] .= "st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
+					$query_parts['select'] .= ", st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
