@@ -1132,8 +1132,8 @@
 		if ($privileg == '0') {
 			$auswahlfeld_output = $enums[$value]['output'];
 			$auswahlfeld_output_laenge = (strlen($auswahlfeld_output) > 0 ? strlen($auswahlfeld_output) : 19) + 1;
-			$datapart = '<input readonly id="' . $layer_id . '_' . $name . '_' . $k . '" style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
-			$datapart .= '<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
+			$datapart = '<input readonly style="border:0px;background-color:transparent;" size="' . $auswahlfeld_output_laenge . '" type="text" value="' . htmlspecialchars($auswahlfeld_output) . '">';
+			$datapart .= '<input type="hidden" id="' . $layer_id . '_' . $name . '_' . $k . '" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
