@@ -374,12 +374,27 @@ class GUI {
 			true
 		);
 		$show = false;
-		for ($i = 0; $i < @count($result['features']); $i++) {
-			$coord = $result['features'][$i]['geometry']['coordinates'];
-			if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
-				$show = true;
-				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
-				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+		if (array_key_exists('features', $result)){
+			$features_key = 'features';
+		}
+		if (array_key_exists('results', $result)){
+			$features_key = 'results';
+		}
+		for ($i = 0; $i < @count($result[$features_key]); $i++) {
+			if (array_key_exists('geometry', $result[$features_key][$i])) {
+				if (is_array($result[$features_key][$i]['geometry']) AND array_key_exists('coordinates', $result[$features_key][$i]['geometry'])) {		# geojson
+					$coord = $result[$features_key][$i]['geometry']['coordinates'];
+					if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
+						$show = true;
+						$name = $result[$features_key][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
+						$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+					}
+				}
+				else {		# json (wie bei search.geobasis-bb.de)
+					$show = true;
+					$name = $result[$features_key][$i][GEO_NAME_SEARCH_PROPERTY];
+					$output .= '<li><a href="index.php?go=zoom2wkt&wkt=' . $result[$features_key][$i]['geometry'] . '&epsg=4326&name='.$name.'">'.$name.'</a></li>';
+				}
 			}
 		}
 		if ($show) {
@@ -15181,7 +15196,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
-						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
+						$this->formvars['changed_' . $layer_id . '_' . str_replace(['-', '.'], ['', '_'], $oid)] == 1 OR	# PHP macht diese Ersetzungen selber
 						$this->formvars['embedded']
 					) AND
 					array_key_exists($attributname, $attributes['constraints']) AND 	# Rechte
