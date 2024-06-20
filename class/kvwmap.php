@@ -15119,7 +15119,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
-						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
+						$this->formvars['changed_' . $layer_id . '_' . str_replace(['-', '.'], ['', '_'], $oid)] == 1 OR	# PHP macht diese Ersetzungen selber
 						$this->formvars['embedded']
 					) AND
 					array_key_exists($attributname, $attributes['constraints']) AND 	# Rechte
