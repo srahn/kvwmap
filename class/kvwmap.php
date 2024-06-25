@@ -18446,7 +18446,7 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name'] ?: []); $i++) {
@@ -18616,11 +18616,7 @@ class db_mapObj{
 										if ($rs['requires']) {
 											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
-										// if ($requires_options != '') {
-										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
-										// }
 									}
-									#echo '<br>attr: ' . print_r($attributes['enum'], true);
 								}
 							}
 						}
@@ -18631,6 +18627,44 @@ class db_mapObj{
 							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
 								$attributes['options'][$i] = $optionen[0];
+
+								# ------<required by>------
+								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
+								if ($req_by_start > 0) {
+									$req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
+									$req_by = trim(substr($attributes['options'][$i], $req_by_start + 13, $req_by_end - $req_by_start - 13));
+									$attributes['req_by'][$i] = $req_by; # das abhängige Attribut
+									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start); # required-Tag aus SQL entfernen
+								}
+								# ------<required by>------
+								# -----<requires>------
+								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										foreach ($attributes['name'] as $attributename) {
+											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+										$sql = $attributes['options'][$i];
+										#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
+										$ret = $database->execSQL($sql, 4, 0);
+										if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+										while ($rs = pg_fetch_array($ret[1])) {
+											$attributes['enum'][$i][$rs['value']] = [
+												'value' 	=> $rs['value'],
+												'output' 	=> $rs['output'],
+												'oid'			=> $rs['oid']
+											];
+											if ($rs['requires']) {
+												$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
+											}
+										}
+									}
+								}
+								# -----<requires>------
+
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 										$options_sql = $attributes['options'][$i];
