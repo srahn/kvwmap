@@ -50,6 +50,7 @@ backto = function(go){
 }
 
 show_all = function(){
+	currentform.go.value = 'get_last_query';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
 	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	overlay_submit(currentform, false);
