@@ -802,6 +802,8 @@ SCRIPTDEFINITIONS;
 			if(enclosingForm.always_draw.checked && !geomload){		// 'weiterzeichnen'
 				if(enclosingForm.last_doing2.value == 'draw_polygon' || enclosingForm.last_doing2.value == 'draw_second_polygon')enclosingForm.last_button.value = 'pgon0';
 				if(enclosingForm.last_doing2.value != '')enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
+				if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 				if(enclosingForm.secondpoly.value == 'started' || enclosingForm.secondpoly.value == 'true'){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == 'add_buffered_line')enclosingForm.last_button.value = 'buffer1';
 					if(enclosingForm.last_doing2.value == 'add_circle')enclosingForm.last_button.value = 'buffer3';
@@ -813,8 +815,6 @@ SCRIPTDEFINITIONS;
 					}
 				}
 				else{																											// am ersten Polygon wird weitergezeichnet
-					if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
-					if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 					if(pathx.length == 1){							// ersten Punkt darstellen
 						document.getElementById('startvertex').setAttribute('cx', (pathx[0]-minx)/scale);
 						document.getElementById('startvertex').setAttribute('cy', (pathy[0]-miny)/scale);
