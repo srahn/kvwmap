@@ -8165,6 +8165,28 @@ echo '			</table>
 		$this->Layer_Zeichenreihenfolge();
 	}
 
+	function Layer_Legendenreihenfolge() {
+		$this->main = 'layer_legendenreihenfolge.php';
+		$this->titel = 'Themenbaum bearbeiten';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->groups = $mapDB->read_Groups(true);
+		$this->layers = $mapDB->getall_Layer();
+		$this->output();
+	}
+
+	function Layer_Legendenreihenfolge_Speichern() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		for ($i = 0; $i < count($this->formvars['group_ids']); $i++) {
+			$this->layergruppe = new LayerGroup($this);
+			$this->layergruppe->data = [
+				'id' => $this->formvars['group_ids'][$i],
+				'order' => $this->formvars['group_orders'][$i],
+				'obergruppe' => $this->formvars['group_uppergroups'][$i]
+			];
+			$result = $this->layergruppe->update();
+		}
+	}
+
 	function Layer2Stelle_Reihenfolge() {
 		$this->selected_stelle = new stelle($this->formvars['selected_stelle_id'], $this->user->database);
 		$this->main = 'layer2stelle_order.php';

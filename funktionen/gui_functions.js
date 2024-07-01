@@ -1329,13 +1329,13 @@ function toggleDrawingOrderForm(){
 }
 
 
-// --- html5 Drag and Drop der Layer im drawingOrderForm --- //
+// --- html5 Drag and Drop --- //
  
 var dragSrcEl = null;
 
 function handleDragStart(e){
 	dragSrcEl = e.target;
-	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
+	var dropzones = document.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
     dropzone.classList.add('ready');
   });
@@ -1366,7 +1366,7 @@ function handleDrop(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
 	if(srcDropZone != dstDropZone){
-		dragSrcEl.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
 		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
 	}
   return false;
