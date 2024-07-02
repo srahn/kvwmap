@@ -395,7 +395,7 @@ $j=0;
 					<table cellspacing="7">
 						<tr>
 							<td>
-								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo umlaute_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
+								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo sonderzeichen_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
 							</td>
 						</tr>
 						<tr>

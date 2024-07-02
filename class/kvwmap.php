@@ -486,7 +486,7 @@ class GUI {
 										name="layer_options_name"
 										value="<? echo $layer[0]['Name']; ?>"
 										style="width: 199px;"
-										onchange="$('#shared_layer_table_name').val(umlaute_umwandeln(this.value.toLowerCase()));"
+										onchange="$('#shared_layer_table_name').val(sonderzeichen_umwandeln(this.value.toLowerCase()));"
 									>
 								</div>
 								<div style="clear: both">
@@ -511,7 +511,7 @@ class GUI {
 													name="shared_layer_group_id"
 													value="' . $group['id'] . '"
 													style="vertical-align: text-top"
-													onchange="$(\'#shared_layer_schema_name\').val(umlaute_umwandeln($(this).next().text().toLowerCase()));"
+													onchange="$(\'#shared_layer_schema_name\').val(sonderzeichen_umwandeln($(this).next().text().toLowerCase()));"
 												><span>' . $group['Gruppenname'] . '</span>';
 											},
 											array_filter(
@@ -529,7 +529,7 @@ class GUI {
 											<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
 										</div>
 										<div style="float: left;padding-top: 3px;">
-											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo sonderzeichen_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
 										</div>
 									<? } ?>
 									<div style="clear: both">
@@ -1067,7 +1067,7 @@ echo '			</table>
 				$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
 
 				# load shapes to custom schema
-				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(sonderzeichen_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
 
 				# return name of import table
 				$table_name = $import_result[0]['tablename'];
@@ -2230,7 +2230,7 @@ echo '			</table>
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -2256,7 +2256,7 @@ echo '			</table>
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
-		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -7872,7 +7872,7 @@ echo '			</table>
 		}
 		$dateipfad=IMAGEPATH;
 		$currenttime = date('Y-m-d_H_i_s',time());
-		$name = umlaute_umwandeln($this->user->Name);
+		$name = sonderzeichen_umwandeln($this->user->Name);
 		$dateiname = $name.'-'.$currenttime.'.pdf';
 		$this->outputfile = $dateiname;
 		$fp=fopen($dateipfad.$dateiname,'wb');
@@ -7966,7 +7966,7 @@ echo '			</table>
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
-			$layer->set('name', umlaute_umwandeln($layer->name));
+			$layer->set('name', sonderzeichen_umwandeln($layer->name));
 			$layer->metadata->set("ows_title", $layer->name);
 			$layer->metadata->set("ows_extent", implode(', ', $bb));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
