@@ -1326,7 +1326,7 @@ class ddl {
 				$dateiname = str_replace('/', '_', $dateiname);
 			}
 			if ($dateiname == '') {
-				$dateiname = umlaute_umwandeln($this->user->Name . '-' . $currenttime);
+				$dateiname = sonderzeichen_umwandeln($this->user->Name . '-' . $currenttime);
 			}
 			$dateiname = $dateiname . '.pdf';
 			$this->outputfile = $dateiname;

@@ -1602,7 +1602,7 @@ function htmlspecialchars(value) {
 	return value.replace(/[&<>"']/g, function(m) { return map[m]; });
 }
 
-function umlaute_umwandeln(value) {
+function sonderzeichen_umwandeln(value) {
 	var map = {
 		'ä' : 'ae',
 		'Ä' : 'Ae',
