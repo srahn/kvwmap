@@ -8,7 +8,11 @@
 		if($anzahl_layer > 0 OR $group['untergruppen'] != ''){
 			echo '
         <div id="' . $group['id'] . '" class="llr_group dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-          <div class="groupname"><a href="javascript:void(0)" onclick="this.parentNode.parentNode.classList.toggle(\'closed\')">&nbsp;&nbsp;&nbsp;&nbsp;</a>' . $group['Gruppenname'] . '</div>
+          <div class="groupname">
+            <a href="javascript:void(0)" onclick="this.parentNode.parentNode.classList.toggle(\'closed\')">&nbsp;&nbsp;&nbsp;&nbsp;</a>
+            ' . $group['Gruppenname'] . '
+            <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
+          </div>
           <div class="group_content">
             <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
 
@@ -77,6 +81,7 @@
   }
 
   .llr_group {
+    position: relative;
     border: 1px solid #949ca8;
     margin: 7px 2px 10px 7px;
     text-align: left;
@@ -94,7 +99,8 @@
   .llr_group>.groupname {
     background-color: #DAE4EC;
     border-bottom: 1px solid #ccc;
-    padding: 1 0 1 5px;
+    padding: 5px 0 1px 5px;
+    height: 20px;
   }
 
   .groupname:hover {
@@ -118,6 +124,11 @@
     grid-template-rows: min-content 0fr;
   }
 
+  .llr_edit_link {
+    position: absolute;
+    right: 10px;
+    top: 3px;
+  }
 
 </style>
 
@@ -138,5 +149,5 @@
 <div>
   <input type="button" name="dummy" value="<?php echo $this->strSave; ?>" onclick="save();">
 </div>
-
+<br>
 <input type="hidden" name="go" value="Layer_Legendenreihenfolge">
