@@ -152,7 +152,7 @@ if ($doit == true) {
 									<div class="gle_tabs tab_' . $layer['Layer_ID'] . '_' . $k . '">';
 										$z = 100;
 										foreach ($layer['attributes']['tabs'] as $t => $tab) {
-											$tabname = umlaute_umwandeln($tab);
+											$tabname = sonderzeichen_umwandeln($tab);
 											echo '<div style="z-index: ' . $z . '" class="' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . (($opentab == $tab)? ' active_tab' : '') . '" onclick="toggle_tab(this, ' . $layer['Layer_ID'] . ', ' . $k . ', ' . $t . ', \'' . $tabname . '\');">' . $tab . '</div>';
 											$z--;
 										}
@@ -193,7 +193,7 @@ if ($doit == true) {
 								$groupname_short = str_replace(' ', '_', $groupname_short[0]);
 								if ($layer['attributes']['tab'][$j] != '') {
 									$visibility = '';
-									$tabname = umlaute_umwandeln($layer['attributes']['tab'][$j]);
+									$tabname = sonderzeichen_umwandeln($layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
 										$visibility = 'style="visibility: collapse"';
 									}
