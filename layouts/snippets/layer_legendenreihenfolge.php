@@ -83,7 +83,7 @@
   .llr_group {
     position: relative;
     border: 1px solid #949ca8;
-    margin: 7px 2px 10px 7px;
+    margin: 7px 2px 5px 7px;
     text-align: left;
     height: auto;
     padding: 0 0 2px 0;
@@ -122,6 +122,7 @@
 
   .llr_group.closed{    
     grid-template-rows: min-content 0fr;
+    padding: 0;
   }
 
   .llr_edit_link {
