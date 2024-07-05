@@ -5,30 +5,28 @@
 	$this->outputGroup = function($group) use ($GUI){	
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
 		$anzahl_layer = @count($group_layer_ids);
-		if($anzahl_layer > 0 OR $group['untergruppen'] != ''){
-			echo '
-        <div id="' . $group['id'] . '" class="llr_group dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-          <div class="groupname">
-            <a href="javascript:void(0)" onclick="this.parentNode.parentNode.classList.toggle(\'closed\')">&nbsp;&nbsp;&nbsp;&nbsp;</a>
-            ' . $group['Gruppenname'] . '
-            <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
-          </div>
-          <div class="group_content">
-            <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
-
-            if($group['untergruppen'] != ''){
-              foreach($group['untergruppen'] as $untergruppe){
-                $GUI->outputGroup($GUI->groups[$untergruppe]);
-              }
-            }
-            for($i = 0; $i < $anzahl_layer; $i++){
-              $GUI->outputLayer($group_layer_ids[$i]);
-            }
-      echo '
-          </div>
+    echo '
+      <div id="' . $group['id'] . '" class="llr_group dragObject closed" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
+        <div class="groupname">
+          <a href="javascript:void(0)" onclick="this.parentNode.parentNode.classList.toggle(\'closed\')">&nbsp;&nbsp;&nbsp;&nbsp;</a>
+          ' . $group['Gruppenname'] . '
+          <a title="bearbeiten" class="llr_edit_link" href="index.php?go=Layergruppe_Editor&selected_group_id=' . $group['id'] . '&csrf_token=' . $_SESSION['csrf_token'] . '"><i class="fa fa-pencil" style="padding: 3px"></i></a>
         </div>
-        <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
-		}
+        <div class="group_content">
+          <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
+
+          if($group['untergruppen'] != ''){
+            foreach($group['untergruppen'] as $untergruppe){
+              $GUI->outputGroup($GUI->groups[$untergruppe]);
+            }
+          }
+          for($i = 0; $i < $anzahl_layer; $i++){
+            $GUI->outputLayer($group_layer_ids[$i]);
+          }
+    echo '
+        </div>
+      </div>
+      <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
 	};
 	
 	$this->outputLayer = function($i) use ($GUI) {
@@ -93,7 +91,8 @@
   }
 
   .llr_group>.group_content{
-    overflow: hidden;    
+    overflow: hidden;
+    min-height: 5px;
   }
 
   .llr_group>.groupname {
@@ -123,6 +122,10 @@
   .llr_group.closed{    
     grid-template-rows: min-content 0fr;
     padding: 0;
+  }
+
+  .llr_group.closed>.group_content{
+    min-height: 0;
   }
 
   .llr_edit_link {

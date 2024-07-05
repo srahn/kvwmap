@@ -8185,6 +8185,7 @@ echo '			</table>
 			];
 			$result = $this->layergruppe->update();
 		}
+		rolle::setGroupsForAll($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
