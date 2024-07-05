@@ -1994,7 +1994,7 @@ class rolle {
 		return 1;
 	}
 
-	function setGroupsForAll() {
+	static function setGroupsForAll($database) {
 		$sql = "
 			INSERT IGNORE INTO u_groups2rolle 
 			SELECT DISTINCT 
@@ -2011,8 +2011,7 @@ class rolle {
 				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
 				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
 		#echo '<br>Gruppen: '.$sql;
-		$this->debug->write("<p>file:rolle.php class:rolle function:setGroupsForAll - Setzen der Gruppen der Rollen:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$database->execSQL($sql);
 	}
 
 	function deleteGroups($user_id,$stellen) {
