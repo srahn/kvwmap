@@ -1095,7 +1095,7 @@ class flurstueck {
 			SELECT 
 				amtlicheflaeche, 
 				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
-				sum(fl_geom), 
+				sum(fl_geom) as fl_geom, 
 				flstflaeche, 
 				n.wert, 
 				objart, 
