@@ -9201,6 +9201,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->layergruppe->update();
 		}
 		if ($results[0]['success']) {
+			rolle::setGroupsForAll($this->database);
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
@@ -19414,8 +19415,8 @@ class db_mapObj{
 		foreach (array('pfad', 'Data', 'metalink', 'duplicate_criterion', 'comment') AS $var_name) {
 			$formvars[$var_name] = $this->db->mysqli->real_escape_string($formvars[$var_name]);
 		}
-		if ($formvars['id'] != '') {
-			$formvars['selected_layer_id'] = $formvars['id'];
+		if ($formvars['id'] == '') {
+			$formvars['selected_layer_id'] = $formvars['id'];		// falls man aus Versehen auf Speichern gedrückt hat, obwohl man einen neuen Layer anlegen wollte
 		}
 		$formvars['Layer_ID'] = $formvars['id'];
 		$attribute_sets = array();
