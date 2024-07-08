@@ -16289,10 +16289,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
 		$refmap->set('width', $width);
 		$refmap->set('height', $height);
+		$refmap->setprojection("init=epsg:" . $this->user->rolle->epsg_code);
 		$refmap->setextent($minx, $miny, $maxx, $maxy);
-#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
-#		$refmap->extent->project($projFROM, $projTO);
 		# zoomen
 		$oPixelPos = new PointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
