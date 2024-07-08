@@ -757,9 +757,14 @@ hide_versions = function(flst){
 													<?  } ?>
 																	<tr>
 																		<td align="right"><? echo $flst->Nutzung[$j]['flaeche']; ?> m&sup2;&nbsp;</td>
-																		<td><? echo $flst->Nutzung[$j]['nutzungskennz']; ?></td>
 																		<td>
-																			<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
+																			<? 
+																				$n_parts = str_split($flst->Nutzung[$j]['nutzungskennz'], 2); 
+																				echo implode(' ', $n_parts);
+																			?>
+																		</td>
+																		<td>
+																			<? echo implode(': ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
 																				 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
 																		</td>
 																	</tr>
