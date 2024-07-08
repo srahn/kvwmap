@@ -412,6 +412,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	--top: 24px;
 	font-weight: normal;
 }
 
@@ -426,7 +427,7 @@ span[data-tooltip]:hover::after {
 	right: 0px;
 	left: -300px;		/* IE Fallback */
 	left: var(--left);
-  top: 24px;
+  top: var(--top);
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
 	font-size: <? echo $font_size_factor * 11; ?>px;

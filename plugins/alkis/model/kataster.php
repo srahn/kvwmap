@@ -1379,6 +1379,20 @@ class flurstueck {
     return $Nutzungen;
   }
 
+	static function getNutzungBegriffsbestimmungen($database) {	
+		$sql = "
+			SELECT 
+				*
+			FROM 
+				alkis.n_begriffsbestimmungen";
+		#echo $sql;
+    $query = $database->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($query[1])) {
+			$result[$rs['kennung']] = $rs;
+		}
+		return $result;
+  }
+
   function vermessungsrunden($zahl, $stellen){
   	// Die Funktion rundet eine Gleitkommazahl auf $stellen Stellen nach dem Komma,
   	// wobei bei einer 5 nicht immer aufgerundet, sondern immer zur geraden Zahl gerundet wird.
