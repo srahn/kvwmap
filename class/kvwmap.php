@@ -15057,7 +15057,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
-		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
+		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/gui/', false);
 		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
 			if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
 				$this->guifiles[] = $this->customlayoutfiles[$i];
