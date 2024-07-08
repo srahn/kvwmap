@@ -40,7 +40,7 @@ $layer_visibility = 'collapsed';
 $zindex = 100;
 
 for ($i = 0; $i < $anzLayer; $i++) {	
-	if (!in_array($this->qlayerset[$i]['template'], array('', 'generic_layer_editor.php', 'generic_layer_editor_doc_raster.php')) OR $this->qlayerset[$i]['count'] > 0) {
+	if ($this->qlayerset[$i]['count'] !== 0) {		# entweder größer 0 oder nicht gesetzt, da Template
 		$this->queried_layers[$this->qlayerset[$i]['Layer_ID']] = $this->qlayerset[$i]['Name_or_alias'];
 		if ($active_layer_tab == NULL OR $this->qlayerset[$i]['Layer_ID'] == $this->user->rolle->last_query_layer) {
 			# entweder der erste Layer mit Treffern oder der zuletzt angeguckte Layer
