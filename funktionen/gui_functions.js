@@ -1331,7 +1331,7 @@ function toggleDrawingOrderForm(){
 
 // --- html5 Drag and Drop --- //
  
-var dragSrcEl = null;
+var dragSrcEl, srcDropZone = null;
 
 function handleDragStart(e){
 	dragSrcEl = e.target;
@@ -1342,6 +1342,8 @@ function handleDragStart(e){
   if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
 	dragSrcEl.classList.add('dragging');
 	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+	srcDropZone = dragSrcEl.nextElementSibling;
+	dragSrcEl.parentNode.removeChild(srcDropZone);
 }
 
 function handleDragOver(e){
@@ -1361,12 +1363,11 @@ function handleDragLeave(e){
 function handleDrop(e){
   if (e.stopPropagation)e.stopPropagation();
 	dstDropZone = e.target;
-	srcDropZone = dragSrcEl.nextElementSibling;
 	dstDropZone.classList.remove('over');
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
 	if(srcDropZone != dstDropZone){
-		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// dragSrcEl verschieben
 		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
 	}
   return false;
@@ -1375,7 +1376,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
+	var dropzones = document.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });

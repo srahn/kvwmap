@@ -1571,7 +1571,7 @@ a.menuered:hover {
 
 .dragObject.picked{
 	visibility: hidden;
-	max-height: 8px;
+	max-height: 16px;
 }
 
 .dragObject.over{
