@@ -1532,13 +1532,13 @@ a.menuered:hover {
 	position: relative;
 	z-index: 1000;
 	margin: 0;
-	height: 0px;
+	height: 1px;
 	width: 100%;
 }
 
 .dropZone.ready{
 	margin: -12 0 -12 15;
-	height: 24px;
+	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
@@ -1571,6 +1571,7 @@ a.menuered:hover {
 
 .dragObject.picked{
 	visibility: hidden;
+	max-height: 16px;
 }
 
 .dragObject.over{

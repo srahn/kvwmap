@@ -294,7 +294,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
@@ -381,7 +382,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
@@ -469,7 +471,8 @@ class account {
 		#echo $sql.'<br><br>';
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
@@ -566,7 +569,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';

@@ -1762,6 +1762,17 @@ function go_switch($go, $exit = false) {
 				$GUI->Layer_Zeichenreihenfolge_Speichern();
 			} break;
 
+			case 'Layer_Legendenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Legendenreihenfolge();
+			} break;
+
+			case 'Layer_Legendenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Legendenreihenfolge');
+				$GUI->Layer_Legendenreihenfolge_Speichern();
+			} break;
+
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();

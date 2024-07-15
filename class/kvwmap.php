@@ -374,12 +374,27 @@ class GUI {
 			true
 		);
 		$show = false;
-		for ($i = 0; $i < @count($result['features']); $i++) {
-			$coord = $result['features'][$i]['geometry']['coordinates'];
-			if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
-				$show = true;
-				$name = $result['features'][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
-				$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+		if (array_key_exists('features', $result)){
+			$features_key = 'features';
+		}
+		if (array_key_exists('results', $result)){
+			$features_key = 'results';
+		}
+		for ($i = 0; $i < @count($result[$features_key]); $i++) {
+			if (array_key_exists('geometry', $result[$features_key][$i])) {
+				if (is_array($result[$features_key][$i]['geometry']) AND array_key_exists('coordinates', $result[$features_key][$i]['geometry'])) {		# geojson
+					$coord = $result[$features_key][$i]['geometry']['coordinates'];
+					if ($stellen_extent->minx < $coord[0] AND $coord[0] < $stellen_extent->maxx AND $stellen_extent->miny < $coord[1] AND $coord[1] < $stellen_extent->maxy) {
+						$show = true;
+						$name = $result[$features_key][$i]['properties'][GEO_NAME_SEARCH_PROPERTY];
+						$output .= '<li><a href="index.php?go=zoom2coord&INPUT_COORD='.$coord[0].','.$coord[1].'&epsg_code=4326&name='.$name.'">'.$name.'</a></li>';
+					}
+				}
+				else {		# json (wie bei search.geobasis-bb.de)
+					$show = true;
+					$name = $result[$features_key][$i][GEO_NAME_SEARCH_PROPERTY];
+					$output .= '<li><a href="index.php?go=zoom2wkt&wkt=' . $result[$features_key][$i]['geometry'] . '&epsg=4326&name='.$name.'">'.$name.'</a></li>';
+				}
 			}
 		}
 		if ($show) {
@@ -471,7 +486,7 @@ class GUI {
 										name="layer_options_name"
 										value="<? echo $layer[0]['Name']; ?>"
 										style="width: 199px;"
-										onchange="$('#shared_layer_table_name').val(umlaute_umwandeln(this.value.toLowerCase()));"
+										onchange="$('#shared_layer_table_name').val(sonderzeichen_umwandeln(this.value.toLowerCase()));"
 									>
 								</div>
 								<div style="clear: both">
@@ -496,7 +511,7 @@ class GUI {
 													name="shared_layer_group_id"
 													value="' . $group['id'] . '"
 													style="vertical-align: text-top"
-													onchange="$(\'#shared_layer_schema_name\').val(umlaute_umwandeln($(this).next().text().toLowerCase()));"
+													onchange="$(\'#shared_layer_schema_name\').val(sonderzeichen_umwandeln($(this).next().text().toLowerCase()));"
 												><span>' . $group['Gruppenname'] . '</span>';
 											},
 											array_filter(
@@ -514,7 +529,7 @@ class GUI {
 											<input id="shared_layer_schema_name" type="text" name="shared_layer_schema_name" value="shared" style="width: 80px;">.
 										</div>
 										<div style="float: left;padding-top: 3px;">
-											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo umlaute_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
+											<input id="shared_layer_table_name" type="text" name="shared_layer_table_name" value="<? echo sonderzeichen_umwandeln(strtolower($layer[0]['Name'])); ?>" style="width: 181px;">
 										</div>
 									<? } ?>
 									<div style="clear: both">
@@ -1052,7 +1067,7 @@ echo '			</table>
 				$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
 
 				# load shapes to custom schema
-				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(sonderzeichen_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
 
 				# return name of import table
 				$table_name = $import_result[0]['tablename'];
@@ -1617,12 +1632,12 @@ echo '			</table>
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
+			$layer_url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
 			if ($layer['wms_auth_username'] != '') {
-				$img = url_get_contents($url, $layer['wms_auth_username'], $layer['wms_auth_password']);
-				$url = 'data:image/jpg;base64,'.base64_encode($img);
+				$img = url_get_contents($layer_url, $layer['wms_auth_username'], $layer['wms_auth_password']);
+				$layer_url = 'data:image/jpg;base64,'.base64_encode($img);
 			}
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '" onerror="ImageLoadFailed(this)"></div>';
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $layer_url . '" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}
@@ -2215,7 +2230,7 @@ echo '			</table>
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -2241,7 +2256,7 @@ echo '			</table>
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
-		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -7857,7 +7872,7 @@ echo '			</table>
 		}
 		$dateipfad=IMAGEPATH;
 		$currenttime = date('Y-m-d_H_i_s',time());
-		$name = umlaute_umwandeln($this->user->Name);
+		$name = sonderzeichen_umwandeln($this->user->Name);
 		$dateiname = $name.'-'.$currenttime.'.pdf';
 		$this->outputfile = $dateiname;
 		$fp=fopen($dateipfad.$dateiname,'wb');
@@ -7951,7 +7966,7 @@ echo '			</table>
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
-			$layer->set('name', umlaute_umwandeln($layer->name));
+			$layer->set('name', sonderzeichen_umwandeln($layer->name));
 			$layer->metadata->set("ows_title", $layer->name);
 			$layer->metadata->set("ows_extent", implode(', ', $bb));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
@@ -8148,6 +8163,29 @@ echo '			</table>
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->updateDrawingorder($this->formvars);		
 		$this->Layer_Zeichenreihenfolge();
+	}
+
+	function Layer_Legendenreihenfolge() {
+		$this->main = 'layer_legendenreihenfolge.php';
+		$this->titel = 'Themenbaum bearbeiten';
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$this->groups = $mapDB->read_Groups(true);
+		$this->layers = $mapDB->getall_Layer();
+		$this->output();
+	}
+
+	function Layer_Legendenreihenfolge_Speichern() {
+		include_once(CLASSPATH . 'LayerGroup.php');
+		for ($i = 0; $i < count($this->formvars['group_ids']); $i++) {
+			$this->layergruppe = new LayerGroup($this);
+			$this->layergruppe->data = [
+				'id' => $this->formvars['group_ids'][$i],
+				'order' => $this->formvars['group_orders'][$i],
+				'obergruppe' => $this->formvars['group_uppergroups'][$i]
+			];
+			$result = $this->layergruppe->update();
+		}
+		rolle::setGroupsForAll($this->database);
 	}
 
 	function Layer2Stelle_Reihenfolge() {
@@ -9249,6 +9287,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$results = $this->layergruppe->update();
 		}
 		if ($results[0]['success']) {
+			rolle::setGroupsForAll($this->database);
 			$this->add_message('notice', 'Layergruppe erfolgreich aktualisiert.');
 		}
 		else {
@@ -9518,7 +9557,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 						if ($value != '' OR $operator == 'IS NULL' OR $operator == 'IS NOT NULL') {
 							if (substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_' AND $operator != 'IS NULL') { # Array-Datentyp
-								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(query.'.$layerset[0]['attributes']['name'][$i].'::json) a) foo where true ';
+								$sql_where.=' AND (SELECT DISTINCT true FROM (SELECT json_array_elements_text(to_json(query.'.$layerset[0]['attributes']['name'][$i].')) a) foo where true ';
 								$attr = 'a';
 							}
 							else {
@@ -15020,7 +15059,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 		}
 		# aus dem Customordner (vom Nutzer hinzugefügte Layouts)
-		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/', false);
+		$this->customlayoutfiles = searchdir(CUSTOM_PATH . 'layouts/gui/', false);
 		for ($i = 0; $i < count($this->customlayoutfiles); $i++) {
 			if (strpos($this->customlayoutfiles[$i], '.php') > 0) {
 				$this->guifiles[] = $this->customlayoutfiles[$i];
@@ -15183,7 +15222,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (
 					(
 						$this->formvars['go'] == 'Dokument_Loeschen' OR
-						$this->formvars['changed_' . $layer_id . '_' . str_replace('-', '', $oid)] == 1 OR
+						$this->formvars['changed_' . $layer_id . '_' . str_replace(['-', '.'], ['', '_'], $oid)] == 1 OR	# PHP macht diese Ersetzungen selber
 						$this->formvars['embedded']
 					) AND
 					array_key_exists($attributname, $attributes['constraints']) AND 	# Rechte
@@ -16252,10 +16291,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
 		$refmap->set('width', $width);
 		$refmap->set('height', $height);
+		$refmap->setprojection("init=epsg:" . $this->user->rolle->epsg_code);
 		$refmap->setextent($minx, $miny, $maxx, $maxy);
-#		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-#		$projTO = ms_newprojectionobj("init=epsg:" . EPSG);
-#		$refmap->extent->project($projFROM, $projTO);
 		# zoomen
 		$oPixelPos = new PointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
@@ -16621,7 +16658,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else{
 					$buffer = $this->map_scaledenom/260;
-					$query_parts['select'] .= "st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
+					$query_parts['select'] .= ", st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
@@ -18433,7 +18470,7 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false, $with_requires_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < @count($attributes['name'] ?: []); $i++) {
@@ -18603,11 +18640,7 @@ class db_mapObj{
 										if ($rs['requires']) {
 											$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
 										}
-										// if ($requires_options != '') {
-										// 	$attributes['enum_requires_value'][$i][] = $rs['requires'];
-										// }
 									}
-									#echo '<br>attr: ' . print_r($attributes['enum'], true);
 								}
 							}
 						}
@@ -18618,6 +18651,44 @@ class db_mapObj{
 							if (strpos(strtolower($attributes['options'][$i]), "select") === 0) {		 # SQl-Abfrage wie select attr1 as value, atrr2 as output from table1
 								$optionen = explode(';', $attributes['options'][$i]);	# SQL; weitere Optionen
 								$attributes['options'][$i] = $optionen[0];
+
+								# ------<required by>------
+								$req_by_start = strpos(strtolower($attributes['options'][$i]), "<required by>");
+								if ($req_by_start > 0) {
+									$req_by_end = strpos(strtolower($attributes['options'][$i]), "</required by>");
+									$req_by = trim(substr($attributes['options'][$i], $req_by_start + 13, $req_by_end - $req_by_start - 13));
+									$attributes['req_by'][$i] = $req_by; # das abhängige Attribut
+									$attributes['options'][$i] = substr($attributes['options'][$i], 0, $req_by_start); # required-Tag aus SQL entfernen
+								}
+								# ------<required by>------
+								# -----<requires>------
+								if (strpos(strtolower($attributes['options'][$i]), "<requires>") > 0) {
+									if ($all_options) {
+										# alle Auswahlmöglichkeiten -> where abschneiden
+										foreach ($attributes['name'] as $attributename) {
+											if (strpos($attributes['options'][$i], '<requires>' . $attributename . '</requires>') !== false) {
+												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
+											}
+										}
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+										$sql = $attributes['options'][$i];
+										#echo '<br>SQL zur Abfrage der Optionen: ' . $sql;
+										$ret = $database->execSQL($sql, 4, 0);
+										if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+										while ($rs = pg_fetch_array($ret[1])) {
+											$attributes['enum'][$i][$rs['value']] = [
+												'value' 	=> $rs['value'],
+												'output' 	=> $rs['output'],
+												'oid'			=> $rs['oid']
+											];
+											if ($rs['requires']) {
+												$attributes['enum'][$i][$rs['value']]['requires_value'] = $rs['requires'];
+											}
+										}
+									}
+								}
+								# -----<requires>------
+
 								if ($query_result != NULL) {
 									foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 										$options_sql = $attributes['options'][$i];
@@ -19478,8 +19549,8 @@ class db_mapObj{
 		foreach (array('pfad', 'Data', 'metalink', 'duplicate_criterion', 'comment') AS $var_name) {
 			$formvars[$var_name] = $this->db->mysqli->real_escape_string($formvars[$var_name]);
 		}
-		if ($formvars['id'] != '') {
-			$formvars['selected_layer_id'] = $formvars['id'];
+		if ($formvars['id'] == '') {
+			$formvars['selected_layer_id'] = $formvars['id'];		// falls man aus Versehen auf Speichern gedrückt hat, obwohl man einen neuen Layer anlegen wollte
 		}
 		$formvars['Layer_ID'] = $formvars['id'];
 		$attribute_sets = array();

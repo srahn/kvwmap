@@ -1,6 +1,20 @@
 <br>
 <h2><? echo $this->titel; ?></h2>
 <br>
+
+<style>
+
+  .lzr_type {
+    width: 20px;
+    text-align: center;
+  }
+
+  .lzr_order {
+    margin: 4px 3px 3px 3px
+  }
+  
+</style>
+
 <?
 
 $type_symbols = [
@@ -18,7 +32,7 @@ echo '
 for ($i = 0; $i < count($layer['ID']); $i++) {
   if ($layer['Datentyp'][$i] != 5) {
     echo '<div class="dragObject" style="height: 16px;" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-            <i class="fa fa-' . $type_symbols[$layer['Datentyp'][$i]] . '" aria-hidden="true" style="width: 20px;text-align: center"></i>
+            <i class="fa fa-' . $type_symbols[$layer['Datentyp'][$i]] . ' lzr_type" aria-hidden="true"></i>
             <span>' . $layer['Name_or_alias'][$i] . '</span>
             <input name="layers[]" type="hidden" value="'.$layer['ID'][$i].'">
           </div>';
@@ -30,7 +44,7 @@ echo '
     <div>';
 for ($i = 0; $i < count($layer['ID']); $i++) {
   if ($layer['Datentyp'][$i] != 5) {
-    echo '<div style="margin: 3px"><input name="orders[]" type="text" value="'.$layer['drawingorder'][$i].'"></div>';
+    echo '<div class="lzr_order"><input name="orders[]" type="text" value="'.$layer['drawingorder'][$i].'"></div>';
   }
 }
 echo '

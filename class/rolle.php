@@ -1994,6 +1994,26 @@ class rolle {
 		return 1;
 	}
 
+	static function setGroupsForAll($database) {
+		$sql = "
+			INSERT IGNORE INTO u_groups2rolle 
+			SELECT DISTINCT 
+				r2ul.user_id,
+				r2ul.stelle_id,
+				g5.id,
+				0
+			FROM 
+				`u_rolle2used_layer` r2ul
+				JOIN layer l ON l.Layer_ID = r2ul.layer_id
+				JOIN u_groups g1 ON g1.id = l.Gruppe
+				LEFT JOIN u_groups g2 ON g2.id = g1.obergruppe
+				LEFT JOIN u_groups g3 ON g3.id = g2.obergruppe
+				LEFT JOIN u_groups g4 ON g4.id = g3.obergruppe
+				LEFT JOIN u_groups g5 ON (g5.id = g4.id OR g5.id = g3.id OR g5.id = g2.id OR g5.id = g1.id)";
+		#echo '<br>Gruppen: '.$sql;
+		$database->execSQL($sql);
+	}
+
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < @count($stellen); $i++) {

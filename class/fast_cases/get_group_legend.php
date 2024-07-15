@@ -28,6 +28,11 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('U?', 'ue', $name);
 	$name = str_replace('O?', 'oe', $name);
 	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
 	$name = str_replace('.', '', $name);
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
@@ -661,7 +666,7 @@ class GUI {
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -687,7 +692,7 @@ class GUI {
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
-		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
@@ -1788,12 +1793,12 @@ class GUI {
 		}
 		$layers = explode(',', $layersection);
 		for($l = 0; $l < count($layers); $l++){
-			$url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
+			$layer_url = $url . '&layer=' . $layers[$l] . '&style=' . $styles[$l] . '&service=WMS&request=GetLegendGraphic';
 			if ($layer['wms_auth_username'] != '') {
-				$img = url_get_contents($url, $layer['wms_auth_username'], $layer['wms_auth_password']);
-				$url = 'data:image/jpg;base64,'.base64_encode($img);
+				$img = url_get_contents($layer_url, $layer['wms_auth_username'], $layer['wms_auth_password']);
+				$layer_url = 'data:image/jpg;base64,'.base64_encode($img);
 			}
-			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $url . '" onerror="ImageLoadFailed(this)"></div>';
+			$output .=  '<div id="lg_'.$layer['Layer_ID'].'_'.$l.'"><img src="' . $layer_url . '" onerror="ImageLoadFailed(this)"></div>';
 		}
 		return $output;
 	}

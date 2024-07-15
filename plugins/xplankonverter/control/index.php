@@ -1976,7 +1976,7 @@ function go_switch_xplankonverter($go) {
 			$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
 
 			# load shapes to custom schema
-			$import_result = $importer->load_shp_into_pgsql($GUI->pgdatabase, IMAGEPATH, $shape_file_name, $epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(umlaute_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+			$import_result = $importer->load_shp_into_pgsql($GUI->pgdatabase, IMAGEPATH, $shape_file_name, $epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(sonderzeichen_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
 
 			# return name of import table
 			$response['result'] = $import_result[0]['tablename'];

@@ -1237,6 +1237,11 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('U?', 'ue', $name);
 	$name = str_replace('O?', 'oe', $name);
 	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
 	$name = str_replace('.', '', $name);
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
@@ -1257,7 +1262,7 @@ function umlaute_umwandeln($name) {
 	return $name;
 }
 
-function umlaute_umwandeln_reverse($name){
+function sonderzeichen_umwandeln_reverse($name){
   $name = str_replace('ae', 'ä', $name);
   $name = str_replace('ue', 'ü', $name);
   $name = str_replace('oe', 'ö', $name);
