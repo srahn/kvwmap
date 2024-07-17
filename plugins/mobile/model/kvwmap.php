@@ -21,26 +21,27 @@
  */
 $GUI->mobile_get_stellen = function () use ($GUI) {
 	$sql = "
-			SELECT DISTINCT
-				s.ID,
-				s.Bezeichnung,
-				s.epsg_code,
-				s.minxmax,
-				s.minymax,
-				s.maxxmax,
-				s.maxymax,
-				s.selectable_layer_params
-			FROM
-				rolle r JOIN
-				stelle s ON r.stelle_id = s.ID JOIN
-				used_layer ul ON s.ID = ul.Stelle_ID JOIN
-				layer l ON ul.Layer_ID = l.Layer_ID
-			WHERE
-				r.user_id = " . $GUI->user->id . " AND
-				l.sync = '1'
-			ORDER BY
-				s.Bezeichnung
-		";
+		SELECT DISTINCT
+			s.ID,
+			s.Bezeichnung,
+			s.epsg_code,
+			s.minxmax,
+			s.minymax,
+			s.maxxmax,
+			s.maxymax,
+			s.selectable_layer_params
+		FROM
+			rolle r JOIN
+			stelle s ON r.stelle_id = s.ID JOIN
+			used_layer ul ON s.ID = ul.Stelle_ID JOIN
+			layer l ON ul.Layer_ID = l.Layer_ID
+		WHERE
+			r.user_id = " . $GUI->user->id . " AND
+			l.sync = '1'
+		ORDER BY
+			s.Bezeichnung
+	";
+	#echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
 	$ret = $GUI->database->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
@@ -50,10 +51,9 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		);
 	} else {
 		$stellen = array();
-		while ($rs = $GUI->database->result->fetch_assoc()) {
+		while ($rs = $ret['result']->fetch_assoc()) {
 			$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
 		}
-
 		$result = array(
 			"success" => true,
 			"user_id" => $GUI->user->id,
