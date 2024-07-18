@@ -16097,11 +16097,25 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $request = str_ireplace('getmap','GetFeatureInfo',$request);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
+						if (strpos(strtolower($request), 'version') === false){
+							$request .='&VERSION=' . $layerset[$i]['wms_server_version'];
+						}
+
+						if (strpos(strtolower($request), 'styles') === false){
+							$request .='&STYLES=';
+						}
+
             # Anzufragenden Layernamen
-						if(strpos(strtolower($request), 'query_layers') === false){
-							$reqStr=explode('&',stristr($request,'layers='));
-							$layerStr=explode('=',$reqStr[0]);
-							$request .='&QUERY_LAYERS='.$layerStr[1];
+						if (strpos(strtolower($request), 'query_layers') === false) {
+							if (strpos(strtolower($request), 'layers') === false) {
+								$request .='&QUERY_LAYERS=' . $layerset[$i]['wms_name'];
+								$request .='&LAYERS=' . $layerset[$i]['wms_name'];
+							}
+							else {
+								$reqStr=explode('&',stristr($request,'layers='));
+								$layerStr=explode('=',$reqStr[0]);
+								$request .='&QUERY_LAYERS='.$layerStr[1];
+							}
 						}
 
             # Boundingbox im System des Layers anhängen
