@@ -192,7 +192,9 @@ class NASLoader extends DOMDocument {
 										}
 									}
 
-									$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+									if ($anlaesse[$child_node->nodeValue] != '') {
+										$ff->set_array('anlassarten', $anlaesse[$child_node->nodeValue]);
+									}
 									$ff->set_array($tag, $child_node->nodeValue);
 								}
 								else {
