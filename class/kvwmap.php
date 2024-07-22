@@ -10696,6 +10696,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
 										}
 									}
+
+									if ($table['type'][$i] == 'date') : {
+										// convert from german notation to english '25.12.1966' to '1966-12-25'
+										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y', $insert[$table['attributname'][$i]])->format('Y-m-d');
+									};
+									if ($table['type'][$i] == 'time') : {
+										// do nothing format is same in english and german
+									}
+									if ($table['type'][$i] == 'timestamp') : {
+										// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
+										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
+									};
+
 									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]] . "'"; # Typ "normal"
 								}
 							} break;
@@ -15190,10 +15203,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
 									else {
-										if (in_array($datatype, ['numeric', 'float4', 'float8'])) {
-											$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+										switch ($datatype) {
+											case 'numeric':
+											case 'float4' :
+											case 'float8' : {
+												$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+											} break;
+											case 'date' : {
+												// convert from german notation to english '25.12.1966' to '1966-12-25'
+												$eintrag = DateTime::createFromFormat('d.m.Y', $this->formvars[$form_fields[$i]])->format('Y-m-d');
+											} break;
+											case 'time' : {
+												// do nothing format is same in english and german
+											} break;
+											case 'timestamp' : {
+												// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
+												$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+											} break;
+											default : {
+												$eintrag = $this->formvars[$form_fields[$i]];
+											}
 										}
-										else $eintrag = $this->formvars[$form_fields[$i]];
 									}
 								}
 							}
