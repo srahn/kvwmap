@@ -142,7 +142,7 @@ class NASLoader extends DOMDocument {
 								$flst['flurstueckskennzeichen'] = $child_node->nodeValue;
 							}
 							if ($tag == 'anlass') {
-								$flst['anlass'] = $child_node->nodeValue;
+								$flst['anlass'] = explode('AA_Anlassart/', $child_node->getAttribute('xlink:href'))[1];
 							}
 						}
 						$anlaesse[$flst['flurstueckskennzeichen']] = $flst['anlass'];
