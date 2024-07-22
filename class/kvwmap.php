@@ -10697,14 +10697,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 										}
 									}
 
-									if ($table['type'][$i] == 'date') : {
+									if ($table['type'][$i] == 'date') {
 										// convert from german notation to english '25.12.1966' to '1966-12-25'
 										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y', $insert[$table['attributname'][$i]])->format('Y-m-d');
 									};
-									if ($table['type'][$i] == 'time') : {
+									if ($table['type'][$i] == 'time') {
 										// do nothing format is same in english and german
 									}
-									if ($table['type'][$i] == 'timestamp') : {
+									if ($table['type'][$i] == 'timestamp') {
 										// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
 										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
 									};
