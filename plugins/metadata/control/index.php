@@ -32,7 +32,6 @@ function go_switch_metadata($go){
 
 		case 'Metadaten_update_outdated' : {
 			$GUI->checkCaseAllowed($go);
-
 			Ressource::update_outdated($GUI);
 		} break;
 
