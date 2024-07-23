@@ -15,7 +15,7 @@ class Ressource extends PgObject {
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource', Ressource::$write_debug);
-		parent::__construct($gui, ressource::$schema, ressource::$tableName);
+		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
 		// $this->typen = array(
 		// 	'Punkte',
 		// 	'Linien',
@@ -57,40 +57,71 @@ class Ressource extends PgObject {
    *   )
    * )
    */
-  public static function update_outdated($gui) {
+  public static function update_outdated($gui, $ressource_id = null) {
     echo '<br>update_outdated';
     $ressource = new Ressource($gui);
-    $results = $ressource->getSQLResults("
-      SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0;
-    ");
-    if ($results[0]['num_running'] < 10) {
-      $ressources = $ressource->find_where(
-        "
-          (status_id IS NULL OR status_id = 0) AND
-          auto_update AND
-          (
-            last_update IS NULL OR
+    if ($ressource_id != null) {
+      $ressources = $ressource->find_where('id = ' . $ressource_id);
+    }
+    else {
+      $results = $ressource->getSQLResults("
+        SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0;
+      ");
+      if ($results[0]['num_running'] < 10) {
+        $ressources = $ressource->find_where(
+          "
+            (status_id IS NULL OR status_id = 0) AND
+            auto_update AND
             (
-              last_update IS NOT NULL AND
-              update_interval IS NOT NULL AND
-              last_update + update_interval < now()
+              last_update IS NULL OR
+              (
+                last_update IS NOT NULL AND
+                update_interval IS NOT NULL AND
+                last_update + update_interval < now()
+              )
             )
-          )
-        ",
-        "last_update",
-        "*",
-        1
-      );
+          ",
+          "last_update",
+          "*",
+          1
+        );
+      }
       if (count($ressources) > 0) {
         $ressource = $ressources[0];
-        $ressource->update('status_id = 1');
-        $ressource->download();
-        $ressource->unpack();
-        $ressource->import();
-        $ressource->transform();
-        $ressource->update('status_id = 0');
+        $result = $ressource->run_update();
+        $this->write_update_log($result, $this->get('status_id'));
       }
     }
+  }
+
+  function write_update_log($result, $status_id) {
+
+  }
+
+  function run_update() {
+    $ressource->update_status('status_id = 1');
+
+    $result = $ressource->download();
+    if (!$result['success']) { return $result; }
+
+    $ressource->unpack();
+    if (!$result['success']) { return $result; }
+
+    $ressource->import();
+    if (!$result['success']) { return $result; }
+
+    $ressource->transform();
+    if (!$result['success']) { return $result; }
+
+    $ressource->update_status('status_id = 0');
+    return array(
+      'success' => true,
+      'msg' => 'Ressource erfolgreich aktualisiert.'
+    );
+  }
+
+  function update_status($status_id) {
+    $this->update($status_id);
   }
 
   ####################
@@ -99,46 +130,66 @@ class Ressource extends PgObject {
   function download() {
     if ($this->get('download_method') != '') {
       $method_name = 'download_' . $this->get('download_method');
-      $this->update('status_id = 2');
-      $this->${method_name}();
-      $this->update('status_id = 3');
+      $this->update_status('status_id = 2');
+      $result = $this->${method_name}();
+      if (!$result['success']) { return $result; }
+
+      $this->update_status('status_id = 3');
+      return $result;
     }
+    return array(
+      'success' => true,
+      'msg' => 'Keine Downloadmethode angegeben.'
+    );
   }
   /**
    * Download dataset or its subsets to dest_path
    */
   function download_urls() {
     $download_urls = array();
-    if ($this->get('download_url') != '') {
-      $download_urls = array($this->get('download_url'));
-    }
-    else {
-      if ($this->has_subressources) {
-        $download_urls = array_merge(
-          $download_urls,
-          array_merge(
-            ...array_map(
-              function($subresource) {
-                $urls = $subresource->get_download_urls();
-                return $urls;
-              },
-              $this->subressources
+    try {
+      if ($this->get('download_url') != '') {
+        $download_urls = array($this->get('download_url'));
+      }
+      else {
+        if ($this->has_subressources) {
+          $download_urls = array_merge(
+            $download_urls,
+            array_merge(
+              ...array_map(
+                function($subresource) {
+                  $urls = $subresource->get_download_urls();
+                  return $urls;
+                },
+                $this->subressources
+              )
             )
-          )
-        );
+          );
+        }
+      }
+      echo '<p>Download from URLs:<br>' . implode('<br>', $download_urls);
+      $dest_path = SHAPEPATH . $this->get('dest_path');
+      echo '<br>to destination Verzeichnis:' . $dest_path;
+      if (!file_exists($dest_path)) {
+        echo '<br>Lege Verzeicnis an, weil es noch nicht existiert!';
+        mkdir($dest_path, 0777, true);
+      }
+      foreach($download_urls AS $download_url) {
+        echo '<br>Download ' . basename($download_url) . ' from url: ' . $download_url;
+        copy($download_url, $dest_path . basename($download_url));
       }
     }
-    echo '<p>Download from URLs:<br>' . implode('<br>', $download_urls);
-    $dest_path = SHAPEPATH . $this->get('dest_path');
-    echo '<br>to destination Verzeichnis:' . $dest_path;
-    if (!file_exists($dest_path)) {
-      echo '<br>Lege Verzeicnis an, weil es noch nicht existiert!';
-      mkdir($dest_path, 0777, true);
+    catch (Exception $e) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Download der Daten: ', $e->getMessage()
+      );
     }
-    foreach($download_urls AS $download_url) {
-      echo '<br>Download ' . basename($download_url) . ' from url: ' . $download_url;
-      copy($download_url, $dest_path . basename($download_url));
-    }
+
+    return array(
+      'success' => true,
+      'msg' => 'Download von URLs erfolgreich beendet.'
+    );
   }
 
   /**
@@ -149,6 +200,10 @@ class Ressource extends PgObject {
     // Im Datenpaket werden Ressourcen mit dieser Downloadmethode als Remote WMS beschrieben und mit Metadatend versehen.
     // ToDo: Hier könnte aber ggf. die Verfügbarkeit des Dienstes geprüft werden und im Fehler fall in dem Protokoll des Updates mit ausgegeben werden.
     // letzer_update wäre dann das Datum wann das letzte mal geprüft wurde ob der Lienst funktioniert.
+    return array(
+      'success' => true,
+      'msg' => 'Download von WMS erfolgreich beendet.'
+    );
   }
 
   /**
@@ -156,7 +211,10 @@ class Ressource extends PgObject {
    */
   function download_wfs() {
     // ToDo: implement on demand
-
+    return array(
+      'success' => true,
+      'msg' => 'Download von WFS erfolgreich beendet.'
+    );
   }
 
   ##################
@@ -165,9 +223,9 @@ class Ressource extends PgObject {
   function unpack() {
     if ($this->get('unpack_method') != '') {
       $method_name = 'unpack_' . $this->get('unpack_method');
-      $this->update('status_id = 4');
+      $this->update_status('status_id = 4');
       $this->${method_name}();
-      $this->update('status_id = 5');
+      $this->update_status('status_id = 5');
     }
   }
   /**
@@ -179,28 +237,65 @@ class Ressource extends PgObject {
     # find files in directory (dest_path)
     # extract to dest_path
     $cmd = 'unzip -j *.zip -d ' . $this->get('dest_path');
-    exec($cmd);
-    
+    exec($cmd, $output, $return_var);
+    if ($return_var != '') {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id . ' Rückgabewert: ' . $return_var;
+      );
+    }
+    return array(
+      'success' => true,
+      'msg' => 'Ressource erfolgreich ausgepackt.'
+    );
   }
 
   ##################
   # Import methods #
   ##################
   function import() {
-    if ($this->get('import_method') != '') {
-      $method_name = 'import_' . $this->get('import_method');
-      $this->update('status_id = 6');
-      $this->${method_name}();
-      $this->update('status_id = 7');
+    if ($this->get('import_method') == '') {
+      return array(
+        'success' => true,
+        'msg' => 'Keine Importmethode definiert.'
+      );
     }
+
+    $method_name = 'import_' . $this->get('import_method');
+    $this->update_status('status_id = 6');
+    $result = $this->${method_name}();
+    if (!$result['success']) {
+      $this->update_status('status_id = -1');
+      return $result;
+    }
+
+    $this->update_status('status_id = 7');
+    return $result;
   }
+
   /**
    * Import shape with ogr2ogr to Postgres
    */
-  function import_ogr2ogr_shape() {
+  function import_ogr2ogr_shape($filename) {
     // ToDo: implement on demand
     echo '<br>import_org2ogr_shape';
-
+    if ($this->get('import_table') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
+      );
+    }
+    $result = $this->ogr2ogr_import('import', $this->get('import_table'), $this->get('import_epsg'), $filename, $this->database, '', NULL, NULL, 'UTF-8');
+    if ($result != '') {
+      return array(
+        'success' => false,
+        'msg' => $result
+      );
+    }
+    return array(
+      'success' => true,
+      'msg' => 'Shape-Datei ' . $filename . ' erfolgreich eingelesen'
+    );
   }
 
   /**
@@ -216,9 +311,9 @@ class Ressource extends PgObject {
   function transform() {
     if ($this->get('transform_method') != '') {
       $method_name = 'transform_' . $this->get('transform_method');
-      $this->update('status_id = 8');
+      $this->update_status('status_id = 8');
       $this->${method_name}();
-      $this->update('status_id = 9');
+      $this->update_status('status_id = 9');
     }
   }
   /**
@@ -226,7 +321,10 @@ class Ressource extends PgObject {
    */
   function replace_from_import() {
     // ToDo: implement on demand
-
+    return array(
+      'success' => true,
+      'msg' => 'Transformation in den Zieldatensatz erfolgreich beendet.'
+    );
   }
 
   function waermebedarf() {

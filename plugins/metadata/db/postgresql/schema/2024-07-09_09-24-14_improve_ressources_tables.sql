@@ -18,6 +18,11 @@ BEGIN;
   ALTER TABLE metadata.ressources ADD COLUMN inquiries_responsible character varying;
   ALTER TABLE metadata.ressources ADD COLUMN inquiries_to character varying;
   ALTER TABLE metadata.ressources ADD COLUMN check_required boolean;
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN created_at timestamp without time zone;
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN created_from character varying;
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN updated_at timestamp without time zone; 
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN updated_from character varying;
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN use_for_datapackage boolean;
 
   UPDATE public.spatial_ref_sys_alias SET alias = concat_ws(':', 'EPSG', srid::text) WHERE alias IS NULL;
 
@@ -143,4 +148,47 @@ BEGIN;
     REFERENCES metadata.ressources (id) MATCH SIMPLE
     ON UPDATE NO ACTION
     ON DELETE NO ACTION;
+
+  CREATE TABLE metadata.attributes (
+    id serial NOT NULL Primary Key,
+    ressource_id integer NOT NULL,
+    name character varying,
+    bezeichnung character varying NOT NULL,
+    beschreibung text,
+    datentyp character varying,
+    valuelist character varying[],
+    minvalue character varying,
+    maxvalue character varying,
+    defaultvalue character varying,
+    mandatory boolean,
+  );
+
+  ALTER TABLE metadata.attributes ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
+    REFERENCES metadata.ressources (id) MATCH SIMPLE
+    ON UPDATE CASCADE
+    ON DELETE CASCADE;
+
+  ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN created_at timestamp without time zone NOT NULL DEFAULT NOW();
+  ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN created_from character varying;
+  ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN updated_at timestamp without time zone; 
+  ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN updated_from character varying;
+
+
+CREATE TABLE IF NOT EXISTS metadata.update_log (
+    id serial NOT NULL PRIMARY KEY,
+    ressource_id integer NOT NULL,
+    update_at timestamp without time zone NOT NULL DEFAULT now(),
+    msg text,
+    abbruch_status_id integer
+);
+
+ALTER TABLE metadata.update_log ADD CONSTRAINT abbruch_status_id_fk FOREIGN KEY (abbruch_status_id)
+  REFERENCES metadata.update_status (id) MATCH SIMPLE
+  ON UPDATE CASCADE
+  ON DELETE NO ACTION;
+
+ALTER TABLE metadata.update_log ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
+  REFERENCES metadata.ressources (id) MATCH SIMPLE
+  ON UPDATE CASCADE
+  ON DELETE CASCADE;
 COMMIT;
