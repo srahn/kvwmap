@@ -241,7 +241,7 @@ class Ressource extends PgObject {
     if ($return_var != '') {
       return array(
         'success' => false,
-        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id . ' Rückgabewert: ' . $return_var;
+        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id . ' Rückgabewert: ' . $return_var
       );
     }
     return array(
