@@ -2184,7 +2184,6 @@ echo '			</table>
 		return 1;
 	}
 
-
 	function print($id, $x) {
         $error = ms_GetErrorObj();
         if ($error && $error->code != MS_NOERR) {
@@ -2965,6 +2964,10 @@ echo '			</table>
   function scaleMap($nScale) {
     $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$nScale = $nScale / degree2meter($center_y);
+		}
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
   	if (MAPSERVERVERSION >= 600 ) {
 			$this->map_scaledenom = $this->map->scaledenom;
@@ -3263,7 +3266,7 @@ echo '			</table>
 		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
-    if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
+    if($this->main == 'map.php' AND $this->user->rolle->epsg_code != 4326 AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
@@ -3317,6 +3320,10 @@ echo '			</table>
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
+		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -6574,8 +6581,7 @@ echo '			</table>
 	
 			if($this->user->rolle->epsg_code == 4326){
 				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-				$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+				$this->meter_pro_einheit = degree2meter($center_y);
 			}
 			else{
 				$this->meter_pro_einheit = 1;
@@ -10778,14 +10784,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 										}
 									}
 
-									if ($table['type'][$i] == 'date') : {
+									if ($table['type'][$i] == 'date') {
 										// convert from german notation to english '25.12.1966' to '1966-12-25'
 										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y', $insert[$table['attributname'][$i]])->format('Y-m-d');
 									};
-									if ($table['type'][$i] == 'time') : {
+									if ($table['type'][$i] == 'time') {
 										// do nothing format is same in english and german
 									}
-									if ($table['type'][$i] == 'timestamp') : {
+									if ($table['type'][$i] == 'timestamp') {
 										// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
 										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
 									};
@@ -16143,11 +16149,25 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $request = str_ireplace('getmap','GetFeatureInfo',$request);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
+						if (strpos(strtolower($request), 'version') === false){
+							$request .='&VERSION=' . $layerset[$i]['wms_server_version'];
+						}
+
+						if (strpos(strtolower($request), 'styles') === false){
+							$request .='&STYLES=';
+						}
+
             # Anzufragenden Layernamen
-						if(strpos(strtolower($request), 'query_layers') === false){
-							$reqStr=explode('&',stristr($request,'layers='));
-							$layerStr=explode('=',$reqStr[0]);
-							$request .='&QUERY_LAYERS='.$layerStr[1];
+						if (strpos(strtolower($request), 'query_layers') === false) {
+							if (strpos(strtolower($request), 'layers') === false) {
+								$request .='&QUERY_LAYERS=' . $layerset[$i]['wms_name'];
+								$request .='&LAYERS=' . $layerset[$i]['wms_name'];
+							}
+							else {
+								$reqStr=explode('&',stristr($request,'layers='));
+								$layerStr=explode('=',$reqStr[0]);
+								$request .='&QUERY_LAYERS='.$layerStr[1];
+							}
 						}
 
             # Boundingbox im System des Layers anhängen
@@ -18609,7 +18629,7 @@ class db_mapObj{
 												$attributes['req'][$i][] = $attributename; # die Attribute, die in <requires>-Tags verwendet werden zusammen sammeln
 											}
 										}
-										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where'));
+										$attributes['options'][$i] = substr($attributes['options'][$i], 0, stripos($attributes['options'][$i], 'where')) . substr($attributes['options'][$i], stripos($attributes['options'][$i], 'order by'));;
 									}
 									else {
 										if ($query_result != NULL) {
