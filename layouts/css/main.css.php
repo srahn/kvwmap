@@ -1881,6 +1881,25 @@ a:hover .preview_image{
 	width: 90%;
 }
 
+#overlayheader {
+	z-index: 1000; 
+	background: url(<? echo BG_IMAGE; ?>);
+	box-shadow: inset 0px -1px 0px 0px #ccc; 
+	width: 100%; 
+	position:fixed; 
+	top: 0px; 
+	margin: 0px 0 -11px 0; 
+	padding-top: 0; 
+}
+
+#overlayheader2 {
+	z-index: 1000; 
+	background: url(<? echo BG_IMAGE; ?>);
+	box-shadow: inset 0px -1px 0px 0px #ccc; 
+	width: 100%;
+	margin-top: -2px; 
+}
+
 .dstable{
 	#max-width: 900px;
 	width: 100%;
