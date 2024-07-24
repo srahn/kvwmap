@@ -174,9 +174,9 @@
 		pathy_second = str.split(";");
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
-		let ortho_point_vertices = new Array();
-		let o_p_local_x = [{$ortho_points_x}];
-		let o_p_local_y = [{$ortho_points_y}];
+		var ortho_point_vertices = new Array();
+		var o_p_local_x = [{$ortho_points_x}];
+		var o_p_local_y = [{$ortho_points_y}];
 	}
 	let helmert;
 	let textx = {$text_x};
@@ -1491,6 +1491,7 @@ function mouseup(evt){
 		ortho_point_vertices.push(world_x+" "+world_y);
 		enclosingForm.ortho_point_vertices.value = ortho_point_vertices.join("|");
 		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		vertex.setAttribute("style","fill: #1481F5");
 		if(deactivate){
 			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
 			deactivated_foreign_vertex = id;
