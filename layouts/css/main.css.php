@@ -1885,7 +1885,6 @@ a:hover .preview_image{
 	z-index: 1000; 
 	background: url(<? echo BG_IMAGE; ?>);
 	box-shadow: inset 0px -1px 0px 0px #ccc; 
-	width: 100%; 
 	position:fixed; 
 	top: 0px; 
 	margin: 0px 0 -11px 0; 
