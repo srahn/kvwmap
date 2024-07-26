@@ -23,7 +23,7 @@
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 			<div id="overlayheader" class="gle_tabs px17 fett" style="display: none"></div>
-			<div id="contentdiv" style="background: url(<? echo BG_IMAGE; ?>);width: 100%;position:relative;">
+			<div id="contentdiv">
 				<table border="0" height="100%" cellpadding="0" cellspacing="0" style="width: 100%">
 					<tr>
 						<td align="center" width="100%" valign="top" >
@@ -41,7 +41,7 @@
 					</tr>
 				</table>
 			</div>
-			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);border: 1px solid #cccccc;width: 100%; position:fixed; bottom: 0px">
+			<div id="overlayfooter" style="<? if ($this->noOverlayFooter OR $this->new_entry OR $this->found == 'false' OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>">
 				<table style="width:100%">
 					<tr>
 						<? if (is_array($selectable_limits)) { ?>
