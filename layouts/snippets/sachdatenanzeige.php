@@ -30,7 +30,7 @@ if ($anzLayer==0) {
 } 
 
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
-<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
+<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 
