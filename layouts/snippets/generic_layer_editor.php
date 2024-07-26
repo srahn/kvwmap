@@ -198,7 +198,7 @@ if ($doit == true) { ?>
 							$has_geom = false;
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
-								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
+								$collapsed = ($explosion[1] == 'collapsed');
 								$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
@@ -206,8 +206,7 @@ if ($doit == true) { ?>
 								if($layer['attributes']['visible'][$j] AND $layer['attributes']['name'][$j] != 'lock'){
 									if($this->qlayerset[$i]['attributes']['type'][$j] != 'geometry'){
 										if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-											echo '<td style="position: relative; background-clip: padding-box;" id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
-											if($collapsed)echo 'style="display: none"';
+											echo '<td style="' . ($collapsed ? 'display: none;' : '') . 'position: relative; background-clip: padding-box;" id="column_' . $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '" class="column_head_'. $layer['Layer_ID'] . ' group_'.$groupname.'"';
 											echo ' valign="top" bgcolor="'.BG_GLEATTRIBUTE.'">';									
 											if($layer['attributes']['privileg'][$j] != '0' AND !$lock[$k]){
 												$this->editable = $layer['Layer_ID'];
