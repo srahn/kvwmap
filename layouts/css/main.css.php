@@ -1882,8 +1882,6 @@ a:hover .preview_image{
 }
 
 #overlayheader {
-	z-index: 1000; 
-	background: url(<? echo BG_IMAGE; ?>);
 	box-shadow: inset 0px -1px 0px 0px #ccc; 
 	position:fixed; 
 	top: 0px; 
@@ -1892,11 +1890,17 @@ a:hover .preview_image{
 }
 
 #overlayheader2 {
-	z-index: 1000; 
-	background: url(<? echo BG_IMAGE; ?>);
-	box-shadow: inset 0px -1px 0px 0px #ccc; 
-	width: 100%;
 	margin-top: -2px; 
+}
+
+#overlayheader, #overlayheader2 {
+	background: url(<? echo BG_IMAGE; ?>);
+	z-index: 1000;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 100%;
 }
 
 #contentdiv {
@@ -1959,7 +1963,6 @@ thead.gle th {
 	display: flex;
 	margin: 2px 0 -11px 0;
 	border-left: 1px solid #bbb;
-	height: 27px
 }
 
 .gle_tabs > div{
@@ -1971,12 +1974,7 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	margin-left: -4px;
-}
-
-.gle_tabs > div:first-child {
-	padding: 1px 5px 0 5px;
-	margin-left: 0;
+	height: 21px;
 }
 
 .gle_tabs > div.active_tab{
