@@ -1900,6 +1900,20 @@ a:hover .preview_image{
 	margin-top: -2px; 
 }
 
+#contentdiv {
+	background: url(<? echo BG_IMAGE; ?>);
+	width: 100%;
+	position:relative;
+}
+
+#overlayfooter {
+	background: url(<? echo BG_IMAGE; ?>);
+	border: 1px solid #cccccc;
+	width: 100%; 
+	position:fixed; 
+	bottom: 0px;
+}
+
 .dstable{
 	#max-width: 900px;
 	width: 100%;
