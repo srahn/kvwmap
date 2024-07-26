@@ -142,7 +142,10 @@ if ($doit == true) {
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
-									$visibility_geom = 'style="visibility: collapse"';
+									if ($this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] != count($layer['attributes']['tabs']) - 1) {
+										# wenn Geometrie-Tab nicht aktiv war
+										$visibility_geom = 'style="visibility: collapse"';
+									}
 								}
 							}
 							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: $this->formvars['opentab'] ?: 0];
