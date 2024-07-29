@@ -1685,17 +1685,26 @@ class stelle {
 								(
 									SELECT
 										id
-									FROM
+										FROM
 										`layer_parameter` as p,
 										used_layer as ul,
-										layer as l
+										layer as l,
+										layer_attributes la
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
 										ul.Layer_ID = l.Layer_ID AND
-										locate(
-											concat('$', p.key),
-											concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
-										) > 0
+										la.layer_id = l.Layer_ID AND
+										(
+											locate(
+												concat('$', p.key),
+												concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
+											) > 0
+										OR
+											locate(
+												concat('$', p.key),
+												concat(la.options, la.default)
+											) > 0
+										)
 									UNION
 									SELECT
 										p.id
