@@ -74,7 +74,7 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 	foreach ($layers['ID'] as $layer_id) {
 		if ($layer_id != '') {
 			# Abfragen der Layerdefinition
-			$layerset = $GUI->user->rolle->getLayer($layer_id);
+			$layerset = $GUI->user->rolle->getLayer($layer_id, false, false);
 			if ($layerset and $layerset[0]['connectiontype'] == '6') {
 				# Abfragen der Privilegien der Attribute
 				$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
@@ -305,6 +305,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"table_name" => $layerset['maintable'],
 		"schema_name" => $layerset['schema'],
 		"query" => $layerset['pfad'],
+		"filter" => $layerset['Filter'],
 		"document_path" => $layerset['document_path'],
 		"vector_tile_url" => $layerset['vector_tile_url'], 
 		"privileg" => $layerset['privileg'],

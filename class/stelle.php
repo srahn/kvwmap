@@ -2060,7 +2060,7 @@ class stelle {
 			WHERE
 				" . $condition . "
 		";
-		#echo $sql;
+		#echo 'SQL zur Abfrage der abfragbaren Layer in der Stelle: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {

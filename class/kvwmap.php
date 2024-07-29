@@ -2402,7 +2402,7 @@ echo '			</table>
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$SCALE') !== false){
+				if (strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -2436,15 +2436,24 @@ echo '			</table>
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				if (substr($layerset['Filter'],0,1) == '(') {
+				# 2024-07-28 pk Replace all params in Filter
+				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = replace_params(
+					$layerset['Filter'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
 							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
 						}break;
 						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-						}break;
+							$layer->setProcessing('NATIVE_FILTER=' . $layerset['Filter']);
+						} break;
 						default : {
 							$layer->setFilter($layerset['Filter']);
 						}
@@ -3360,7 +3369,7 @@ echo '			</table>
     }
 	}
 
-	function map_saveWebImage($image,$format) {
+	function map_saveWebImage($image, $format) {
 		if(MAPSERVERVERSION >= 800 ) {
 			$filename = IMAGEPATH . $this->user->id.'_'.rand(0, 1000000) . '.jpg';
 			$image->save($filename);
@@ -6728,7 +6737,7 @@ echo '			</table>
 						}
 					}
         }
-        if($draw == true){
+        if ($draw == true){
           $layer->set('status', 1);
           if($layer->connectiontype != 7){
 	          $classimage = $this->map->drawLegend();
@@ -9680,9 +9689,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 				}
 
-				# 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
+				# 2008-10-22 sr Filter zur Where-Klausel hinzugefügt
+				# 2024-07-28 pk Replace all params from filter
 				if ($layerset[0]['Filter'] != '') {
-					$layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
+					// $layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
+					$layerset[0]['Filter'] = replace_params(
+						$layerset[0]['Filter'],
+						rolle::$layer_params,
+						$this->User_ID,
+						$this->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
 
@@ -15942,9 +15960,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							}
 							# Filter zur Where-Klausel hinzufügen
+							# 2024-07-28 pk Replace all params from filter
 							$filter = '';
-							if($layerset[$i]['Filter'] != ''){
-								$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+							if ($layerset[$i]['Filter'] != '') {
+								// $layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+								$layerset[$i]['Filter'] = replace_params(
+									$layerset[$i]['Filter'],
+									rolle::$layer_params,
+									$this->User_ID,
+									$this->Stelle_ID,
+									rolle::$hist_timestamp,
+									$this->rolle->language
+								);
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -17005,12 +17032,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset['Data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
-					$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+					# 2024-07-28 pk Replace all params from filter
+					// aber auch replace USER_ID muss hier nicht mehr
+					// weil das schon für layerset['Filter'] vor dem Aufruf von createQueryMap gemacht wurde
+					// $layerset['Filter'] = replace_params(
+					// 	$layerset['Filter'],
+					// 	rolle::$layer_params,
+					// 	$this->User_ID,
+					// 	$this->Stelle_ID,
+					// 	rolle::$hist_timestamp,
+					// 	$this->rolle->language
+					// );
+					// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						if(MAPSERVERVERSION > 700){
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						if (MAPSERVERVERSION > 700) {
+							$layer->setProcessing('NATIVE_FILTER = '.$layerset['Filter']);
 						}
-						else{
+						else {
 							$layer->setFilter($layerset['Filter']);
 						}
 					}

@@ -1685,38 +1685,38 @@ function emailcheck($email) {
 }
 
 function buildExpressionString($str) {
-  $intervalle=explode(';',$str);
-  $anzInt=count($intervalle);
-  if ($intervalle[$anzInt-1]=='') { $anzInt--; }
+  $intervalle = explode(';', $str);
+  $anzInt = count($intervalle);
+  if ($intervalle[$anzInt-1] == '') { $anzInt--; }
   # Beginne mit der Erstellung des Ausdrucks
-  $expr.='(';
+  $expr.= '(';
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
-  $grenzen=explode('-',$intervalle[0]);
+  $grenzen = explode('-', $intervalle[0]);
   # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
-  if (count($grenzen)==1) {
+  if (count($grenzen) == 1) {
     # Wenn ja, wird die erste einschränkung geschrieben.
-    $expr.='[ID]='.$grenzen[0];
+    $expr.= '[ID] = ' . $grenzen[0];
   }
   else {
     # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
-    $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+    $expr.='([ID] > '.$grenzen[0].' AND [ID] < ' . $grenzen[1] . ')';
   }
   # weiter geht es mit den nächsten Intervallen
-  for ($i=1;$i<$anzInt;$i++) {
+  for ($i = 1; $i < $anzInt; $i++) {
     # wieder Zerlegen in Anfang und Ende
-    $grenzen=explode('-',$intervalle[$i]);
-    if (count($grenzen)==1) {
+    $grenzen = explode('-', $intervalle[$i]);
+    if (count($grenzen) == 1) {
       # Es gibt nur einen Wert
-      $expr.=' OR [ID]='.$grenzen[0];
+      $expr.=' OR [ID] = ' . $grenzen[0];
     }
     else {
       # Es gibt Anfang und Ende im Intervall
-      $expr.=' OR ([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+      $expr.=' OR ([ID] > ' . $grenzen[0] . ' AND [ID] < ' . $grenzen[1] . ')';
     }
   }
   # Beenden des Ausdrucks
-  $expr.=')';
+  $expr .= ')';
   return $expr;
 }
 
@@ -1941,7 +1941,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
