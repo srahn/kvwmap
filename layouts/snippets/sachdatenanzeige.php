@@ -9,7 +9,7 @@
 	keypress_bound_ctrl_s_button_id = 'sachdatenanzeige_save_button';
 </script>
 
-<div id="overlayheader2" class="gle_tabs px17 fett" style="z-index: 1000; <? if ($this->new_entry OR $this->formvars['printversion'] != '')echo 'display:none;'; ?>background: url(<? echo BG_IMAGE; ?>);box-shadow: inset 0px -1px 0px 0px #ccc; width: 100%;margin-top: -2px; display: none"></div>
+<div id="overlayheader2" class="gle_tabs px17 fett" style="display: none"></div>
 
 <a href="javascript:scrollbottom();" style="float: right; margin-top: 10;" title="<? echo $strToBottom; ?>">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
@@ -30,7 +30,7 @@ if ($anzLayer==0) {
 } 
 
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
-<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; width: 100%;max-height:<? echo $this->user->rolle->nImageHeight; ?>px;position:relative;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
+<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 

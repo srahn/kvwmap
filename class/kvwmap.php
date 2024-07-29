@@ -2184,7 +2184,6 @@ echo '			</table>
 		return 1;
 	}
 
-
 	function print($id, $x) {
         $error = ms_GetErrorObj();
         if ($error && $error->code != MS_NOERR) {
@@ -2974,6 +2973,10 @@ echo '			</table>
   function scaleMap($nScale) {
     $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$nScale = $nScale / degree2meter($center_y);
+		}
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
   	if (MAPSERVERVERSION >= 600 ) {
 			$this->map_scaledenom = $this->map->scaledenom;
@@ -3272,7 +3275,7 @@ echo '			</table>
 		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
-    if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
+    if($this->main == 'map.php' AND $this->user->rolle->epsg_code != 4326 AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
@@ -3326,6 +3329,10 @@ echo '			</table>
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
+		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -6583,8 +6590,7 @@ echo '			</table>
 	
 			if($this->user->rolle->epsg_code == 4326){
 				$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
-				$zoll_pro_einheit = InchesPerUnit(MS_DD, $center_y);
-				$this->meter_pro_einheit = $zoll_pro_einheit / 39.3701;
+				$this->meter_pro_einheit = degree2meter($center_y);
 			}
 			else{
 				$this->meter_pro_einheit = 1;
@@ -9010,7 +9016,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->formvars['sync']
 					);
 					$geom_column = $attributes['the_geom'];
-					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false);
+					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false, false);
 					for ($i = 0; $i < count($attributes)-2; $i++) {
 						$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
 						$attributes[$i]['default'] = $old_attributes['default'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: $attributes[$i]['default'];
@@ -10795,6 +10801,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											$this->formvars[$table['formfield'][$i]] = 'http://' . $this->formvars[$table['formfield'][$i]];
 										}
 									}
+
+									if ($table['type'][$i] == 'date') {
+										// convert from german notation to english '25.12.1966' to '1966-12-25'
+										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y', $insert[$table['attributname'][$i]])->format('Y-m-d');
+									};
+									if ($table['type'][$i] == 'time') {
+										// do nothing format is same in english and german
+									}
+									if ($table['type'][$i] == 'timestamp') {
+										// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
+										if (strlen($insert[$table['attributname'][$i]]) > 19) {
+											$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s.u', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s.u');
+										}
+										else {
+											$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
+										}
+									};
+
 									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]] . "'"; # Typ "normal"
 								}
 							} break;
@@ -10874,6 +10898,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									}
 								}
 							} break;
+							default : {
+								switch ($datatype) {
+									case 'numeric':
+									case 'float4' :
+									case 'float8' : {
+										$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+									} break;
+									case 'date' : {
+										// konvert from german notation to english '25.12.1966' to '1966-12-25'
+										$eintrag = DateTime::createFromFormat('d.m.Y', $this->formvars[$form_fields[$i]])->format('Y-m-d');
+									} break;
+									case 'time' : {
+										// do nothing format is same in english and german
+									} break;
+									case 'timestamp' : {
+										$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+									} break;
+									default : {
+										$eintrag = $this->formvars[$form_fields[$i]];
+									}
+								}
+							}
 						} # end of switch
 					}
 				}
@@ -15304,10 +15350,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 										$eintrag = $this->processJSON($this->formvars[$form_fields[$i]], $layerset[$layer_id][0]['document_path'], $layerset[$layer_id][0]['document_url']); # bei einem custom Datentyp oder Array das JSON in PG-struct umwandeln
 									}
 									else {
-										if (in_array($datatype, ['numeric', 'float4', 'float8'])) {
-											$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+										switch ($datatype) {
+											case 'numeric':
+											case 'float4' :
+											case 'float8' : {
+												$eintrag = str_replace(',', '.', $this->formvars[$form_fields[$i]]);
+											} break;
+											case 'date' : {
+												// convert from german notation to english '25.12.1966' to '1966-12-25'
+												$eintrag = DateTime::createFromFormat('d.m.Y', $this->formvars[$form_fields[$i]])->format('Y-m-d');
+											} break;
+											case 'time' : {
+												// do nothing format is same in english and german
+											} break;
+											case 'timestamp' : {
+												// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
+												if (strlen($this->formvars[$form_fields[$i]]) > 19) {
+													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s.u', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s.u');
+												}
+												else {
+													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+												}
+											} break;
+											default : {
+												$eintrag = $this->formvars[$form_fields[$i]];
+											}
 										}
-										else $eintrag = $this->formvars[$form_fields[$i]];
 									}
 								}
 							}
@@ -15541,7 +15609,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			for ($i = 0; $i < count($json); $i++) {
 				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
 			}
-			$result = '{' . @implode(',', $elems) . '}';
+			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
 		elseif (is_object($json)) { // Nutzer-Datentyp
 			if ($quote == '') {
@@ -16118,11 +16186,25 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             $request = str_ireplace('getmap','GetFeatureInfo',$request);
             $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
 
+						if (strpos(strtolower($request), 'version') === false){
+							$request .='&VERSION=' . $layerset[$i]['wms_server_version'];
+						}
+
+						if (strpos(strtolower($request), 'styles') === false){
+							$request .='&STYLES=';
+						}
+
             # Anzufragenden Layernamen
-						if(strpos(strtolower($request), 'query_layers') === false){
-							$reqStr=explode('&',stristr($request,'layers='));
-							$layerStr=explode('=',$reqStr[0]);
-							$request .='&QUERY_LAYERS='.$layerStr[1];
+						if (strpos(strtolower($request), 'query_layers') === false) {
+							if (strpos(strtolower($request), 'layers') === false) {
+								$request .='&QUERY_LAYERS=' . $layerset[$i]['wms_name'];
+								$request .='&LAYERS=' . $layerset[$i]['wms_name'];
+							}
+							else {
+								$reqStr=explode('&',stristr($request,'layers='));
+								$layerStr=explode('=',$reqStr[0]);
+								$request .='&QUERY_LAYERS='.$layerStr[1];
+							}
 						}
 
             # Boundingbox im System des Layers anhängen
@@ -16568,10 +16650,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
-		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
-			if($this->formvars['querylayer_id'] < 0)$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
-			else $layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
-			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		if ($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined') {
+			if ($this->formvars['querylayer_id'] < 0) {
+				$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
+			}
+			else {
+				$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			}
 		}
 		else{
 			$layerset = $this->user->rolle->getLayer('');
@@ -16581,18 +16666,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     #$map = new MapObj('');
     #$map->shapepath = SHAPEPATH;
 		$found = false;
+		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
     for ($i=0;$i<$anzLayer;$i++) {
 			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
-					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
 					(
-						(
+						(	# Karte
+							(
+								$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
-						) OR 
-						$this->last_query != '' OR
-						$this->formvars['querylayer_id'] != ''
+						)
+						OR
+						(	# Datensatz
+							$this->formvars['querylayer_id'] != ''
+						)
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
@@ -16815,7 +16906,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       echo umlaute_javascript(umlaute_html($output)).'█root.showtooltip(root.document.GUI.result.value, '.$showdata.');';
     }
   }
-
+	
 	function setFullExtent() {
 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
 	}
