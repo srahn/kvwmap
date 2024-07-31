@@ -11,7 +11,7 @@ $geloeschte_nachweise = array();
 switch ($_REQUEST['go']) {
 	case 'LENRIS_get_all_nachweise' : case 'LENRIS_get_new_nachweise' : {
 		ini_set('memory_limit', '8192M');
-		set_time_limit(1800);
+		set_time_limit(3600);
 		$con = pg_connect('host=' . $host . ' dbname=' . $db . ' user=' . $user . ' password=' . $pass) or die ("Could not connect to server\n");
 		pg_set_client_encoding($con, 'UNICODE');
 		leereEntpacktOrdner($data_nwm, $con);
@@ -70,7 +70,7 @@ function leereEntpacktOrdner($data_nwm, $con){
 
 function entpackeZIP($data_nwm){
 	$zip_files = array();
-	$zip_files = rsearch($data_nwm . '/zip', '/.*\.zip/');
+	$zip_files = rsearch($data_nwm . '/home_nwm', '/.*\.zip/');
 	foreach ($zip_files as $zip_file) {
 		exec('unzip -o "' . $zip_file . '" -d ' . $data_nwm . '/entpackt', $output, $ec);
 		if ($ec == 0) {
