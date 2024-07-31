@@ -1213,7 +1213,7 @@
 					$GUI->pdf=$pdf;
 					$dateipfad=IMAGEPATH;
 					$currenttime = date('Y-m-d_H:i:s',time());
-					$name = umlaute_umwandeln($GUI->user->Name);
+					$name = sonderzeichen_umwandeln($GUI->user->Name);
 					$dateiname = $name.'-'.$currenttime.'.pdf';
 					$GUI->outputfile = $dateiname;
 					$fp=fopen($dateipfad.$dateiname,'wb');

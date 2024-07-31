@@ -2309,6 +2309,7 @@ FROM
   function getGrundbuchbezirksliste(){
   	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk WHERE 1=1";
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblattbezirk'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_assoc($ret[1])){

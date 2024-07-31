@@ -174,9 +174,9 @@
 		pathy_second = str.split(";");
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
-		let ortho_point_vertices = new Array();
-		let o_p_local_x = [{$ortho_points_x}];
-		let o_p_local_y = [{$ortho_points_y}];
+		var ortho_point_vertices = new Array();
+		var o_p_local_x = [{$ortho_points_x}];
+		var o_p_local_y = [{$ortho_points_y}];
 	}
 	let helmert;
 	let textx = {$text_x};
@@ -802,6 +802,8 @@ SCRIPTDEFINITIONS;
 			if(enclosingForm.always_draw.checked && !geomload){		// 'weiterzeichnen'
 				if(enclosingForm.last_doing2.value == 'draw_polygon' || enclosingForm.last_doing2.value == 'draw_second_polygon')enclosingForm.last_button.value = 'pgon0';
 				if(enclosingForm.last_doing2.value != '')enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
+				if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 				if(enclosingForm.secondpoly.value == 'started' || enclosingForm.secondpoly.value == 'true'){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == 'add_buffered_line')enclosingForm.last_button.value = 'buffer1';
 					if(enclosingForm.last_doing2.value == 'add_circle')enclosingForm.last_button.value = 'buffer3';
@@ -813,8 +815,6 @@ SCRIPTDEFINITIONS;
 					}
 				}
 				else{																											// am ersten Polygon wird weitergezeichnet
-					if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
-					if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 					if(pathx.length == 1){							// ersten Punkt darstellen
 						document.getElementById('startvertex').setAttribute('cx', (pathx[0]-minx)/scale);
 						document.getElementById('startvertex').setAttribute('cy', (pathy[0]-miny)/scale);
@@ -1491,6 +1491,7 @@ function mouseup(evt){
 		ortho_point_vertices.push(world_x+" "+world_y);
 		enclosingForm.ortho_point_vertices.value = ortho_point_vertices.join("|");
 		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		vertex.setAttribute("style","fill: #1481F5");
 		if(deactivate){
 			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
 			deactivated_foreign_vertex = id;

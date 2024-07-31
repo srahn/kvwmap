@@ -50,6 +50,7 @@ backto = function(go){
 }
 
 show_all = function(){
+	currentform.go.value = 'get_last_query';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
 	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	overlay_submit(currentform, false);
@@ -88,6 +89,7 @@ hide_versions = function(flst){
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + $this->formvars['anzahl'];
   if ($anzObj>0) {
+		$this->begriffsbestimmungen = flurstueck::getNutzungBegriffsbestimmungen($this->pgdatabase);
 		$this->found = 'true';
 	?>
 		<br>
@@ -738,17 +740,23 @@ hide_versions = function(flst){
 												<td>
 											<?php
 											$anzNutzung = @count($flst->Nutzung);
-											if($anzNutzung > 0){
-												for ($j=0;$j<$anzNutzung;$j++){
-													if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
-														if($j > 0){ ?></table></div></div><? } ?>
+											if ($anzNutzung > 0){
+												for ($j = 0; $j < $anzNutzung; $j++) {
+													$nk_parts = str_split($flst->Nutzung[$j]['nutzungskennz'], 2);
+													if ($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
+														if ($j > 0){ ?></table></div></div><? } ?>
 														<div id="nu_bereich">
 															<span id="nu_bereich_span"><? echo $flst->Nutzung[$j]['bereich']; ?></span>
 															<div id="nu_gruppe_nutzungsart">
 													<? }
-															if($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
-																if($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
+															if ($flst->Nutzung[$j]['gruppe'] != $flst->Nutzung[$j-1]['gruppe']){
+																if ($j > 0 AND $flst->Nutzung[$j]['bereich'] == $flst->Nutzung[$j-1]['bereich']){ ?></table><? } ?>
 																<span id="nu_gruppe_nutzungsart_span"><? echo $flst->Nutzung[$j]['gruppe']; ?></span>
+																<?
+																	if (isset($this->begriffsbestimmungen[$nk_parts[0] . '000000']['begriffsbestimmung'])) {
+																		echo '<span style="--left: -200px; --width: 350px;" data-tooltip="' . str_replace('"', '\'', $this->begriffsbestimmungen[$nk_parts[0] . '000000']['begriffsbestimmung']) . '"></span>';
+																	}
+																?>
 																<table id="nu_gruppe_nutzungsart_table">
 																	<tr>
 																		<th>Fläche</th><th>Schlüssel</th><th>Nutzung</th>
@@ -756,10 +764,20 @@ hide_versions = function(flst){
 													<?  } ?>
 																	<tr>
 																		<td align="right"><? echo $flst->Nutzung[$j]['flaeche']; ?> m&sup2;&nbsp;</td>
-																		<td><? echo $flst->Nutzung[$j]['nutzungskennz']; ?></td>
 																		<td>
-																			<? echo implode(', ', array_filter(array($flst->Nutzung[$j]['nutzungsart'], $flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
-																				 if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
+																			<? 
+																				echo implode(' ', $nk_parts);
+																			?>
+																		</td>
+																		<td>
+																			<?
+																				echo $flst->Nutzung[$j]['nutzungsart'];
+																				if ($nk_parts[1] != '00' AND isset($this->begriffsbestimmungen[$nk_parts[0] . $nk_parts[1] . '0000']['begriffsbestimmung'])) {
+																					echo '&nbsp;<span style="--left: -200px; --width: 350px;" data-tooltip="' . str_replace('"', '\'', $this->begriffsbestimmungen[$nk_parts[0] . $nk_parts[1] . '0000']['begriffsbestimmung']) . '"></span>';
+																				}
+																				echo ($flst->Nutzung[$j]['untergliederung1'] ? ' : ' : '');
+																				echo implode(': ', array_filter(array($flst->Nutzung[$j]['untergliederung1'], $flst->Nutzung[$j]['untergliederung2'])));
+																				if($flst->Nutzung[$j]['nutzungsart'] == '' AND $flst->Nutzung[$j]['untergliederung1'] == '' AND $flst->Nutzung[$j]['untergliederung2'] == '')echo '&mdash;'; ?>
 																		</td>
 																	</tr>
 														<? } ?>

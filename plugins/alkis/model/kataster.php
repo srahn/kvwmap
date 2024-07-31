@@ -1095,7 +1095,7 @@ class flurstueck {
 			SELECT 
 				amtlicheflaeche, 
 				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
-				sum(fl_geom), 
+				sum(fl_geom) as fl_geom, 
 				flstflaeche, 
 				n.wert, 
 				objart, 
@@ -1377,6 +1377,20 @@ class flurstueck {
 		$diff = $Nutzungen[$i-1]['amtlicheflaeche'] - $summe;
 		$Nutzungen[$index]['flaeche'] += $diff;		
     return $Nutzungen;
+  }
+
+	static function getNutzungBegriffsbestimmungen($database) {	
+		$sql = "
+			SELECT 
+				*
+			FROM 
+				alkis.n_begriffsbestimmungen";
+		#echo $sql;
+    $query = $database->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($query[1])) {
+			$result[$rs['kennung']] = $rs;
+		}
+		return $result;
   }
 
   function vermessungsrunden($zahl, $stellen){
