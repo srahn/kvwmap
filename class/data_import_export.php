@@ -36,10 +36,11 @@ class data_import_export {
 	var $unique_column;
 	var $ask_epsg;
 
-	function __construct() {
+	function __construct($unique_column = 'gui') {
 		global $debug;
-		$this->debug=$debug;
+		$this->debug = $debug;
 		$this->delimiters = array("\t", ';', ' ', ','); # erlaubte Trennzeichen
+		$this->unique_column = $unique_column;
 	}
 
 	################# Import #################
@@ -269,7 +270,7 @@ class data_import_export {
 	 */
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $shapefile, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
 		// ToDo: Die nachfolgenden beiden Test mit Groß und Kleinschreibung sind nicht vollständig für z.B. (Dbf, DBf).
-		// Man kann man mit diesem Statement den Test vereinfachen auf eine Zeile
+		// Man kann mit diesem Statement den Test vereinfachen auf eine Zeile
 		$filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
 
 		if (file_exists($uploadpath . $shapefile . '.dbf')) {
