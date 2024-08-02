@@ -2401,7 +2401,7 @@ echo '			</table>
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$SCALE') !== false){
+				if (strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -2435,15 +2435,24 @@ echo '			</table>
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				if (substr($layerset['Filter'],0,1) == '(') {
+				# 2024-07-28 pk Replace all params in Filter
+				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = replace_params(
+					$layerset['Filter'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
 							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
 						}break;
 						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-						}break;
+							$layer->setProcessing('NATIVE_FILTER=' . $layerset['Filter']);
+						} break;
 						default : {
 							$layer->setFilter($layerset['Filter']);
 						}
@@ -3367,7 +3376,7 @@ echo '			</table>
     }
 	}
 
-	function map_saveWebImage($image,$format) {
+	function map_saveWebImage($image, $format) {
 		if(MAPSERVERVERSION >= 800 ) {
 			$filename = IMAGEPATH . $this->user->id.'_'.rand(0, 1000000) . '.jpg';
 			$image->save($filename);
@@ -6734,7 +6743,7 @@ echo '			</table>
 						}
 					}
         }
-        if($draw == true){
+        if ($draw == true){
           $layer->set('status', 1);
           if($layer->connectiontype != 7){
 	          $classimage = $this->map->drawLegend();
@@ -9007,7 +9016,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$this->formvars['sync']
 					);
 					$geom_column = $attributes['the_geom'];
-					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false);
+					$old_attributes = $mapDB->read_layer_attributes($formvars['selected_layer_id'], $layerdb, NULL, false, false, false, false);
 					for ($i = 0; $i < count($attributes)-2; $i++) {
 						$attributes[$i]['order'] = $last_order = $old_attributes['order'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: ($last_order +  0.01);
 						$attributes[$i]['default'] = $old_attributes['default'][$old_attributes['indizes'][$attributes[$i]['name']]] ?: $attributes[$i]['default'];
@@ -9686,9 +9695,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 				}
 
-				# 2008-10-22 sr   Filter zur Where-Klausel hinzugefügt
+				# 2008-10-22 sr Filter zur Where-Klausel hinzugefügt
+				# 2024-07-28 pk Replace all params from filter
 				if ($layerset[0]['Filter'] != '') {
-					$layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
+					// $layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
+					$layerset[0]['Filter'] = replace_params(
+						$layerset[0]['Filter'],
+						rolle::$layer_params,
+						$this->User_ID,
+						$this->Stelle_ID,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
 
@@ -10766,7 +10784,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							case (
 								$table['saveable'][$i] AND
 								$table['type'][$i] != 'SubFormPK' AND
-								$table['type'][$i] != 'SubFormFK' AND
 								($this->formvars[$table['formfield'][$i]] != '' OR $table['type'][$i] == 'Checkbox')
 							) : {
 								if ($table['type'][$i] != 'Dokument' AND (substr($table['datatype'][$i], 0, 1) == '_' OR is_numeric($table['datatype'][$i]))){		// bei Dokumenten wurde das JSON schon weiter oben verarbeitet
@@ -10793,7 +10810,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									}
 									if ($table['type'][$i] == 'timestamp') {
 										// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
-										$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
+										if (strlen($insert[$table['attributname'][$i]]) > 19) {
+											$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s.u', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s.u');
+										}
+										else {
+											$insert[$table['attributname'][$i]] = DateTime::createFromFormat('d.m.Y H:i:s', $insert[$table['attributname'][$i]])->format('Y-m-d H:i:s');
+										}
 									};
 
 									$insert[$table['attributname'][$i]] = "'" . $this->formvars[$table['formfield'][$i]] . "'"; # Typ "normal"
@@ -15318,7 +15340,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							if ($eintrag == '')$eintrag = 'NULL';
 						} break;
 						default : {
-							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormFK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
+							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
 								if ($this->formvars[$form_fields[$i]] === '') {
 									$eintrag = 'NULL';
 								}
@@ -15342,7 +15364,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											} break;
 											case 'timestamp' : {
 												// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
-												$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+												if (strlen($this->formvars[$form_fields[$i]]) > 19) {
+													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s.u', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s.u');
+												}
+												else {
+													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+												}
 											} break;
 											default : {
 												$eintrag = $this->formvars[$form_fields[$i]];
@@ -15581,7 +15608,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			for ($i = 0; $i < count($json); $i++) {
 				$elems[] = $this->processJSON($json[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, '"');
 			}
-			$result = '{' . @implode(',', $elems) . '}';
+			$result = '{' . @implode(',', array_filter($elems)) . '}';		# leere Array-Elemente mit array_filter weglassen
 		}
 		elseif (is_object($json)) { // Nutzer-Datentyp
 			if ($quote == '') {
@@ -16000,9 +16027,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								}
 							}
 							# Filter zur Where-Klausel hinzufügen
+							# 2024-07-28 pk Replace all params from filter
 							$filter = '';
-							if($layerset[$i]['Filter'] != ''){
-								$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+							if ($layerset[$i]['Filter'] != '') {
+								// $layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+								$layerset[$i]['Filter'] = replace_params(
+									$layerset[$i]['Filter'],
+									rolle::$layer_params,
+									$this->User_ID,
+									$this->Stelle_ID,
+									rolle::$hist_timestamp,
+									$this->rolle->language
+								);
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -16613,10 +16649,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
-		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
-			if($this->formvars['querylayer_id'] < 0)$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
-			else $layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
-			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		if ($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined') {
+			if ($this->formvars['querylayer_id'] < 0) {
+				$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
+			}
+			else {
+				$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			}
 		}
 		else{
 			$layerset = $this->user->rolle->getLayer('');
@@ -16626,18 +16665,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     #$map = new MapObj('');
     #$map->shapepath = SHAPEPATH;
 		$found = false;
+		$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
     for ($i=0;$i<$anzLayer;$i++) {
 			if ($found)break;		# wenn in einem Layer was gefunden wurde, abbrechen
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
-					($this->formvars['qLayer'.$layerset[$i]['Layer_ID']]=='1' OR $this->formvars['qLayer'.$layerset[$i]['requires']]=='1') 	AND
 					(
-						(
+						(	# Karte
+							(
+								$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
-						) OR 
-						$this->last_query != '' OR
-						$this->formvars['querylayer_id'] != ''
+						)
+						OR
+						(	# Datensatz
+							$this->formvars['querylayer_id'] != ''
+						)
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
@@ -16860,7 +16905,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       echo umlaute_javascript(umlaute_html($output)).'█root.showtooltip(root.document.GUI.result.value, '.$showdata.');';
     }
   }
-
+	
 	function setFullExtent() {
 		$this->map->setextent($this->Stelle->MaxGeorefExt->minx,$this->Stelle->MaxGeorefExt->miny,$this->Stelle->MaxGeorefExt->maxx,$this->Stelle->MaxGeorefExt->maxy);
 	}
@@ -17077,12 +17122,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset['Data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
-					$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+					# 2024-07-28 pk Replace all params from filter
+					// aber auch replace USER_ID muss hier nicht mehr
+					// weil das schon für layerset['Filter'] vor dem Aufruf von createQueryMap gemacht wurde
+					// $layerset['Filter'] = replace_params(
+					// 	$layerset['Filter'],
+					// 	rolle::$layer_params,
+					// 	$this->User_ID,
+					// 	$this->Stelle_ID,
+					// 	rolle::$hist_timestamp,
+					// 	$this->rolle->language
+					// );
+					// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						if(MAPSERVERVERSION > 700){
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+						if (MAPSERVERVERSION > 700) {
+							$layer->setProcessing('NATIVE_FILTER = '.$layerset['Filter']);
 						}
-						else{
+						else {
 							$layer->setFilter($layerset['Filter']);
 						}
 					}
@@ -20431,7 +20487,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20543,26 +20599,21 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{
-					$attributes['default'][$i] = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
+					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
 			}
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
@@ -20573,8 +20624,7 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];

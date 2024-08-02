@@ -398,10 +398,13 @@ class GUI {
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
-		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
-			if($this->formvars['querylayer_id'] < 0)$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
-			else $layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
-			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		if ($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined') {
+			if ($this->formvars['querylayer_id'] < 0) {
+				$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
+			}
+			else {
+				$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			}
 		}
 		else{
 			$layerset = $this->user->rolle->getLayer('');
@@ -417,16 +420,18 @@ class GUI {
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
 					(
-						$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
-						$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
-					) AND
-					(
-						(
+						(	# Karte
+							(
+								$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
-						) OR 
-						$this->last_query != '' OR
-						$this->formvars['querylayer_id'] != ''
+						)
+						OR
+						(	# Datensatz
+							$this->formvars['querylayer_id'] != ''
+						)
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
@@ -1920,7 +1925,7 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -2032,26 +2037,21 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{
-					$attributes['default'][$i] = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
+					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
 			}
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
@@ -2062,8 +2062,7 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
