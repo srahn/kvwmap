@@ -103,8 +103,14 @@ class data_import_export {
 			case 'geotif' : case 'tiff' : case 'tif' : {
 				$custom_tables = $this->import_custom_geotif($filename, $pgdatabase, $epsg);
 			} break;
+			case 'csv' : {
+				$formvars['file1'] = $filename;
+				$formvars['delimiter'] = ';'; 
+				$epsg = -1;
+				$custom_tables = $this->import_custom_csv($formvars, $pgdatabase, true, false);
+			} break;	
 			case 'point' : {
-				$custom_tables = $this->import_custom_pointlist($formvars, $pgdatabase);
+				$custom_tables = $this->import_custom_csv($formvars, $pgdatabase);
 			} break;
 		}
 		if ($custom_tables != NULL) {
@@ -622,22 +628,28 @@ class data_import_export {
 		}
 	}
 
-	function import_custom_pointlist($formvars, $pgdatabase){
+	function import_custom_csv($formvars, $pgdatabase, $headlines = NULL, $with_coords = true){
+		$encoding = $this->getEncoding($formvars['file1']);
 		$rows = file($formvars['file1'], FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 		$tablename = 'a'.strtolower(sonderzeichen_umwandeln(substr(basename($formvars['file1']), 0, 15))). date("_Y_m_d_H_i_s", time());
 		$i = 0;
-		while(trim($rows[$i], $formvars['delimiter']."\n\r") == ''){	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
+		while (trim($rows[$i], $formvars['delimiter']."\n\r") == '') {	// Leerzeilen überspringen bis zur ersten Zeile mit Inhalt
 			$i++;
 		}
 		$columns = explode($formvars['delimiter'], $rows[$i]);
-		for($i = 0; $i < count($columns); $i++){
-			if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i])))$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+		if ($headlines == NULL) {		# unbekannt ob headlines da oder nicht -> rauskriegen
+			for ($i = 0; $i < count($columns); $i++) {
+				if($formvars['column'.$i] == 'x' AND !is_numeric(str_replace(',', '.', $columns[$i]))) {
+					$headlines = true;		// die erste Zeile enthält die Spaltenüberschriften
+				}
+			}
 		}
 
 		for ($i = 0; $i < count($columns); $i++) {
+			$columns[$i] = ($encoding != 'UTF-8' ? utf8_encode($columns[$i]) : $columns[$i]);
 			$j = $i+1;
 			if ($headlines) {
-				$table_column = strtolower(sonderzeichen_umwandeln(utf8_encode($columns[$i])));
+				$table_column = strtolower(sonderzeichen_umwandeln($columns[$i]));
 			}
 			else{
 				$table_column = 'spalte' . $j;
@@ -656,24 +668,27 @@ class data_import_export {
 				gid serial,
 				"' . implode('" varchar, "', $table_columns) . "\" varchar
 			);
-			SELECT AddGeometryColumn('" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "', 'the_geom', " . $formvars['epsg'] . ", 'POINT', 2);
-			CREATE INDEX " . $tablename . "_gist_idx ON " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " USING gist (the_geom );";
+			" . ($with_coords ? "
+				SELECT AddGeometryColumn('" . CUSTOM_SHAPE_SCHEMA . "', '" . $tablename . "', 'the_geom', " . $formvars['epsg'] . ", 'POINT', 2);
+				CREATE INDEX " . $tablename . "_gist_idx ON " . CUSTOM_SHAPE_SCHEMA . "." . $tablename . " USING gist (the_geom );" : "");
 		$i = 0;
 		foreach ($rows as $row) {
 			if ($headlines AND $i == 0 OR trim($row, $formvars['delimiter']."\n\r") == '') {
 				// Überschriftenzeile und Leerzeilen auslassen
 				$i++;continue;
 			}
+			$row = ($encoding != 'UTF-8' ? utf8_encode($row) : $row);
 			$values = explode($formvars['delimiter'], $row);
 			$x = str_replace(',', '.', $values[$index['x']]);
 			$y = str_replace(',', '.', $values[$index['y']]);
-			array_walk($values, function(&$value, $key){$value = "E'" . pg_escape_string(utf8_encode($value)) . "'";});
+			array_walk($values, function(&$value, $key){$value = "E'" . pg_escape_string($value) . "'";});
 			$sql.= '
 				INSERT INTO ' . CUSTOM_SHAPE_SCHEMA . '.' . $tablename .
-				'("' . implode('", "', $table_columns) . '", the_geom)
+				'("' . implode('", "', $table_columns) . '"' . ($with_coords ? ', the_geom' : '') . ')
 				VALUES(
-				' . implode(', ', $values) . ',
-				' . ((!is_numeric($x) OR !is_numeric($y))? "NULL);" : "st_geomfromtext('POINT(" . $x . " " . $y . ")', " . $formvars['epsg'] . "));");
+				' . implode(', ', $values) . 
+				($with_coords ? ',' . ((!is_numeric($x) OR !is_numeric($y))? "NULL);" : "st_geomfromtext('POINT(" . $x . " " . $y . ")', " . $formvars['epsg'] . ")") : '') . 
+				');';
 			$i++;
 		}
 		#echo $sql;
@@ -1091,12 +1106,16 @@ class data_import_export {
 		}
 	}
 
-	function getEncoding($dbf) {
-		$folder = dirname($dbf);
-		$command = OGR_BINPATH . 'ogr2ogr -f CSV "' . $folder . '/test.csv" "' . $dbf . '"';
-		#echo '<br>Command ogr2ogr: ' . $command;
-		exec($command, $output, $ret);
-		$command = 'file --mime-encoding ' . $folder . '/test.csv';
+	function getEncoding($file) {
+		$folder = dirname($file);
+		$filetype = array_pop(explode('.', $file));
+		if ($filetype != 'csv') {
+			$command = OGR_BINPATH . 'ogr2ogr -f CSV "' . $folder . '/test.csv" "' . $file . '"';
+			#echo '<br>Command ogr2ogr: ' . $command;
+			exec($command, $output, $ret);
+			$file = $folder . '/test.csv';
+		}
+		$command = 'file --mime-encoding ' . $file;
 		#echo '<br>Command file: ' . $command;
 		exec($command, $output, $ret);
 		if (file_exists($folder . '/test.csv')) {

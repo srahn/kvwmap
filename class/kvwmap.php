@@ -12292,7 +12292,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				} break;
 
 				default : {
-					echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom&nbsp;auf&nbsp;Layer</a><br>';
+					if (in_array($filetype, array('csv'))) {
+						echo '&nbsp;=>&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$layer_id.'">Datensätze&nbsp;anzeigen</a><br>';
+					}
+					else {
+						echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom&nbsp;auf&nbsp;Layer</a><br>';
+					}
 				}
 			}
 		}
@@ -15953,6 +15958,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$layerset[$i]['attributes']['the_geom'] = $data_attributes['the_geom'];
 							}
 							$the_geom = $layerset[$i]['attributes']['the_geom'];
+
+							if ($the_geom == NULL) {	# z.B. bei Rollenlayern ohne Geometriespalte
+								continue;
+							}
 
 							# Unterscheidung ob mit Suchradius oder ohne gesucht wird
 							if ($this->formvars['searchradius']>0) {
