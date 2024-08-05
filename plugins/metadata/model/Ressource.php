@@ -16,7 +16,9 @@ class Ressource extends PgObject {
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource', Ressource::$write_debug);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
-		// $this->typen = array(
+		include_(CLASSPATH . 'data_import_export.php');
+    $this->gui->data_import_export = new data_import_export('gid');
+    // $this->typen = array(
 		// 	'Punkte',
 		// 	'Linien',
 		// 	'Flächen'
@@ -58,7 +60,7 @@ class Ressource extends PgObject {
    * )
    */
   public static function update_outdated($gui, $ressource_id = null) {
-    echo '<br>update_outdated';
+    $gui->debug->show('<br>Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
     $ressource = new Ressource($gui);
     if ($ressource_id != null) {
       $ressources = $ressource->find_where('id = ' . $ressource_id);
@@ -86,55 +88,73 @@ class Ressource extends PgObject {
           1
         );
       }
-      if (count($ressources) > 0) {
-        $ressource = $ressources[0];
-        $result = $ressource->run_update();
-        $this->write_update_log($result, $this->get('status_id'));
-      }
+    }
+    $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+    if (count($ressources) > 0) {
+      $ressource = $ressources[0];
+      $result = $ressource->run_update();
+      $ressource->log($result, true);
+    }
+    else {
+      return array(
+        'success' => true,
+        'msg' => 'Es sind zur Zeit keine Ressourcen zu aktualisieren.'
+      );
     }
   }
 
-  function write_update_log($result, $status_id) {
-
+  function log($result, $show = false) {
+    UpdateLog::write($this->gui, $this, $result, $show);
   }
 
   function run_update() {
-    $ressource->update_status('status_id = 1');
-
-    $result = $ressource->download();
+    $this->debug->show('Run Update für Ressource id: ' . $this->get_id(), true);
+    $this->update_status(1, $msg);
+    $result = $this->download();
     if (!$result['success']) { return $result; }
 
-    $ressource->unpack();
+    $result = $this->unpack();
     if (!$result['success']) { return $result; }
 
-    $ressource->import();
+    $result = $this->import();
     if (!$result['success']) { return $result; }
 
-    $ressource->transform();
+    $result = $this->transform();
     if (!$result['success']) { return $result; }
 
-    $ressource->update_status('status_id = 0');
+    $this->update_status(0);
     return array(
       'success' => true,
-      'msg' => 'Ressource erfolgreich aktualisiert.'
+      'msg' => $msg . '<br>Ressource erfolgreich aktualisiert.'
     );
   }
 
-  function update_status($status_id) {
-    $this->update($status_id);
+  function update_status($status_id, $msg = '') {
+    if ($msg != '') {
+      echo '<br>Update Status auf ' . $status_id . '<br>Msg: ' . $msg;
+    }
+    $this->update_attr(array('status_id = ' . (string)$status_id));
   }
 
   ####################
   # Download methods #
   ####################
   function download() {
+    $this->debug->show('Starte Funktion download', true);
     if ($this->get('download_method') != '') {
       $method_name = 'download_' . $this->get('download_method');
-      $this->update_status('status_id = 2');
+      if (!method_exists($this, $method_name)) {
+        return array(
+          'success' => false,
+          'msg' => 'Die Funktion ' . $method_name . ' zum Download der Ressource existiert nicht.'
+        );
+      }
+
+      $this->update_status(2);
       $result = $this->${method_name}();
       if (!$result['success']) { return $result; }
 
-      $this->update_status('status_id = 3');
+      $this->update_status(3);
       return $result;
     }
     return array(
@@ -143,9 +163,10 @@ class Ressource extends PgObject {
     );
   }
   /**
-   * Download dataset or its subsets to dest_path
+   * Download dataset or its subsets to download_path
    */
   function download_urls() {
+    $this->debug->show('Starte Funktion download_urls');
     $download_urls = array();
     try {
       if ($this->get('download_url') != '') {
@@ -167,16 +188,27 @@ class Ressource extends PgObject {
           );
         }
       }
-      echo '<p>Download from URLs:<br>' . implode('<br>', $download_urls);
-      $dest_path = SHAPEPATH . $this->get('dest_path');
-      echo '<br>to destination Verzeichnis:' . $dest_path;
-      if (!file_exists($dest_path)) {
-        echo '<br>Lege Verzeicnis an, weil es noch nicht existiert!';
-        mkdir($dest_path, 0777, true);
+      $this->debug->show('Download from URLs:<br>' . implode('<br>', $download_urls), true);
+      if ($this->get('download_path') == '') {
+        return array(
+          'success' => false,
+          'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
+        );
       }
-      foreach($download_urls AS $download_url) {
-        echo '<br>Download ' . basename($download_url) . ' from url: ' . $download_url;
-        copy($download_url, $dest_path . basename($download_url));
+      $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+      if (strpos($download_path, '/var/www/data/') !== 0) {
+        return array(
+          'success' => false,
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/ an.'
+        );
+      }
+      if (!file_exists($download_path)) {
+        $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
+        mkdir($download_path, 0777, true);
+      }
+      foreach ($download_urls AS $download_url) {
+        $this->debug->show('Download ' . basename($download_url) . ' from url: ' . $download_url . ' to ' . $download_path, true);
+        copy($download_url, $download_path . basename($download_url));
       }
     }
     catch (Exception $e) {
@@ -221,12 +253,25 @@ class Ressource extends PgObject {
   # Unpack methods #
   ##################
   function unpack() {
+    $this->debug->show('Starte Funktion unpack', true);
     if ($this->get('unpack_method') != '') {
       $method_name = 'unpack_' . $this->get('unpack_method');
-      $this->update_status('status_id = 4');
-      $this->${method_name}();
-      $this->update_status('status_id = 5');
+      if (!method_exists($this, $method_name)) {
+        return array(
+          'success' => false,
+          'msg' => 'Die Funktion ' . $method_name . ' zum Auspacken der Ressource existiert nicht.'
+        );
+      }
+      $this->update_status(4);
+      $result = $this->${method_name}();
+      if (!$result['success']) { return $result; }
+      $this->update_status(5);
+      return $result;
     }
+    return array(
+      'success' => true,
+      'msg' => 'Keine Auspackmethode angegeben.'
+    );
   }
   /**
    * Function unzip specific or all files of a directory to a destination directory,
@@ -234,14 +279,43 @@ class Ressource extends PgObject {
    * and remove the zip-files afterward
    */
   function unpack_unzip() {
-    # find files in directory (dest_path)
-    # extract to dest_path
-    $cmd = 'unzip -j *.zip -d ' . $this->get('dest_path');
-    exec($cmd, $output, $return_var);
-    if ($return_var != '') {
+    $this->debug->show('Starte Funktion unpack_unzip', true);
+    if ($this->get('dest_path') == '') {
       return array(
         'success' => false,
-        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id . ' Rückgabewert: ' . $return_var
+        'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
+      );
+    }
+    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    if (strpos($dest_path, '/var/www/data/') !== 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Das Auspackverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+      );
+    }
+    if (!file_exists($dest_path)) {
+      $this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+      mkdir($dest_path, 0777, true);
+    }
+    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    $cmd = 'unzip -j -o ' . $download_path . '*.zip -d ' . $dest_path;
+    $this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+    $descriptorspec = [
+      0 => ["pipe", "r"],  // stdin
+      1 => ["pipe", "w"],  // stdout
+      2 => ["pipe", "w"],  // stderr
+    ];
+    $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+    $line = __LINE__;
+    $stdout = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    $stderr = stream_get_contents($pipes[2]);
+    fclose($pipes[2]);
+    #    exec($cmd, $output, $return_var);
+    if ($stderr != '') {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr
       );
     }
     return array(
@@ -262,30 +336,57 @@ class Ressource extends PgObject {
     }
 
     $method_name = 'import_' . $this->get('import_method');
-    $this->update_status('status_id = 6');
+    if (!method_exists($this, $method_name)) {
+      return array(
+        'success' => false,
+        'msg' => 'Die Funktion ' . $method_name . ' zum importieren der Ressource existiert nicht.'
+      );
+    }
+    $this->update_status(6);
     $result = $this->${method_name}();
     if (!$result['success']) {
-      $this->update_status('status_id = -1');
+      $this->update_status(-1);
       return $result;
     }
 
-    $this->update_status('status_id = 7');
+    $this->update_status(7);
     return $result;
   }
 
   /**
    * Import shape with ogr2ogr to Postgres
    */
-  function import_ogr2ogr_shape($filename) {
-    // ToDo: implement on demand
-    echo '<br>import_org2ogr_shape';
+  function import_ogr2ogr_shape() {
+    $this->debug->show('Starte Funktion import_org2ogr_shape', true);
     if ($this->get('import_table') == '') {
       return array(
         'success' => false,
         'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
       );
     }
-    $result = $this->ogr2ogr_import('import', $this->get('import_table'), $this->get('import_epsg'), $filename, $this->database, '', NULL, NULL, 'UTF-8');
+
+
+    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $files = array_filter(
+      scandir($dest_path),
+      function($entry) use ($dest_path) {
+        return is_file($dest_path . $entry);
+      }
+    );
+
+    $this->debug->show('Dateien im Verzeichnis:<br>' . implode('<br>', $files), true);
+    $result = required_shape_files_exists($files);
+    if (!$result['success']) { return $result; }
+    $shp_file = '';
+    foreach($files AS $file) {
+      $info = pathinfo($dest_path . $file);
+      if (strtolower($info['extension']) == 'shp') {
+        $shp_file = $info['basename'];
+      }
+    };
+    $this->debug->show('Der Name des Shapes lautet: ' . $shp_file, true);
+
+    $result = $this->gui->data_import_export->ogr2ogr_import('import', $this->get('import_table'), $this->get('import_epsg'), $dest_path . $shp_file, $this->database, '', NULL, '-overwrite', 'UTF-8', true);
     if ($result != '') {
       return array(
         'success' => false,
@@ -294,7 +395,7 @@ class Ressource extends PgObject {
     }
     return array(
       'success' => true,
-      'msg' => 'Shape-Datei ' . $filename . ' erfolgreich eingelesen'
+      'msg' => 'Shape-Datei ' . $shp_file . ' erfolgreich eingelesen.'
     );
   }
 
@@ -309,12 +410,39 @@ class Ressource extends PgObject {
   # Transform methods #
   #####################
   function transform() {
-    if ($this->get('transform_method') != '') {
-      $method_name = 'transform_' . $this->get('transform_method');
-      $this->update_status('status_id = 8');
-      $this->${method_name}();
-      $this->update_status('status_id = 9');
+    if ($this->get('transform_method') == '') {
+      return array(
+        'success' => true,
+        'msg' => 'Keine Transformationsmethode definiert.'
+      );
     }
+
+    $method_name = 'transform_' . $this->get('transform_method');
+    if (!method_exists($this, $method_name)) {
+      return array(
+        'success' => false,
+        'msg' => 'Die Funktion ' . $method_name . ' zum transformieren der Ressource existiert nicht.'
+      );
+    }
+
+    function transform_exec_sql() {
+
+    }
+
+    function transform_replace_from_import() {
+      $sql = "
+
+      ";
+    }
+
+    $this->update_status(8);
+    $result = $this->${method_name}();
+    if (!$result['success']) {
+      $this->update_status(-1);
+      return $result;
+    }
+    $this->update_status(9);
+    return $result;
   }
   /**
    * Overwrite if exists from import

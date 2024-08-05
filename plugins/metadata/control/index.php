@@ -7,6 +7,7 @@ include_once(PLUGINS . 'metadata/model/MetaDataCreator.php');
 include_once(PLUGINS . 'metadata/model/Ressource.php');
 include_once(PLUGINS . 'metadata/model/SubRessource.php');
 include_once(PLUGINS . 'metadata/model/SubRessourceRange.php');
+include_once(PLUGINS . 'metadata/model/UpdateLog.php');
 
 function go_switch_metadata($go){
 	global $GUI;
@@ -31,8 +32,14 @@ function go_switch_metadata($go){
 		} break;
 
 		case 'Metadaten_update_outdated' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
 			$GUI->checkCaseAllowed($go);
-			Ressource::update_outdated($GUI);
+			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id']);
+			// header('Content-Type: application/json; charset=utf-8');
+			// echo json_encode($result);
+			echo $result['msg'];
 		} break;
 
 		case 'Metadateneingabe' : {

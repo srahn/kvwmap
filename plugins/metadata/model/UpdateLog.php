@@ -14,14 +14,17 @@ class UpdateLog extends PgObject {
 		parent::__construct($gui, UpdateLog::$schema, UpdateLog::$tableName);
 	}
 
-  public static function write($gui, $ressource_id, $result, $status_id) {
+  public static function write($gui, $ressource, $result, $show = false) {
     $update_log = new UpdateLog($gui);
     $update_log->create(
       array(
         'msg' => $result['msg'],
-        'abbruch_status_id' => $status_id,
-        'ressource_id' => $ressource_id
+        'abbruch_status_id' => $ressource->get('status_id'),
+        'ressource_id' => $ressource->get_id()
       )
     );
+    if ($show) {
+      echo '<br>UpdateLog:<br>msg: ' . $result['msg'] . '<br>abbruch_status_id: ' . $ressource->get('status_id') . '<br>ressource_id: ' . $ressource->get_id();
+    }
   }
 } 

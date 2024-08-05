@@ -85,13 +85,18 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					$layer_id,
 					$GUI->Stelle->pgdbhost
 				);
+
 				$attributes = $mapDB->read_layer_attributes(
 					$layer_id,
 					$layerdb,
 					$privileges['attributenames'],
-					false,
-					true
+					false, // all_languages
+					true, // recursive
+					false, // get_default
+					true, // replace
+					array('options') // replace_only
 				);
+				// echo '<p>attributes: ' . print_r($attributes, true);
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
 				for ($j = 0; $j < count($attributes['name']); $j++) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
@@ -373,6 +378,8 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
+				"table_name" => $attr['table_name'][$key],
+				"schema_name" => $attr['schema'][$key],
 				"alias" => $attr['alias'][$key],
 				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],

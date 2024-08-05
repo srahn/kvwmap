@@ -23,6 +23,7 @@ BEGIN;
   ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN updated_at timestamp without time zone; 
   ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN updated_from character varying;
   ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN use_for_datapackage boolean;
+  ALTER TABLE IF EXISTS metadata.ressources ADD COLUMN transform_command text;
 
   UPDATE public.spatial_ref_sys_alias SET alias = concat_ws(':', 'EPSG', srid::text) WHERE alias IS NULL;
 
@@ -95,7 +96,8 @@ BEGIN;
   );
   INSERT INTO metadata.transform_methods (name, beschreibung, reihenfolge) VALUES
   ('replace_from_import', 'Vorhandenes komplett überschreiben vom Import.', 1),
-  ('waermebedarf', 'Berechnung des Wärmebedarfes von Gebäuden.', 2);
+  ('waermebedarf', 'Berechnung des Wärmebedarfes von Gebäuden.', 2),
+  ('exec_sql', 'SQL aus Kommandofeld ausführen.', 3);
 
   ALTER TABLE metadata.ressources ADD COLUMN transform_method character varying;
 
