@@ -36,6 +36,7 @@ class GUI {
 	var $alert;
 	var $group_has_active_layers;
 	var $gui;
+	var $go;
 	var $layerset;
 	var $layout;
 	var $sorted_layerset;

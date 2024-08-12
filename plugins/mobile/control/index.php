@@ -67,6 +67,15 @@ function go_switch_mobile($go) {
 		}
 		break;
 
+		case 'mobile_sync_all': {
+			$GUI->sanitize(['last_client_version' => 'int']);
+			$GUI->checkCaseAllowed($GUI->go);
+			// If the user is allowed to execute the deltas in this stelle will be checkt in GUI->mobile_sync_all() > sync->sync_allowed(delta, sync_layers)
+			$result = $GUI->mobile_sync_all();
+			echo json_encode($result);
+		}
+		break;
+
 		case 'mobile_delete_images': {
 			$GUI->sanitize(['selected_layer_id' => 'int']);
 			$GUI->checkCaseAllowed($GUI->go);

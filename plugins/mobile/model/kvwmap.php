@@ -10,9 +10,10 @@
 	* mobile_reformat_attributes
 	* mobile_reformat_layer
 	* mobile_sync
+	* mobile_sync_all
+	* mobile_sync_all_parameter_valide
 	* mobile_sync_parameter_valide
 	* mobile_upload_image
-	* 
 	*/
 
 /**
@@ -179,6 +180,71 @@ $GUI->mobile_sync = function () use ($GUI) {
 	return $result;
 };
 
+/**
+ * Sync all deltas from Client to Server and vice versa.
+ */
+$GUI->mobile_sync_all = function () use ($GUI) {
+	$GUI->mobile_log = new LogFile('/var/www/logs/kvmobile.log', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
+	$GUI->mobile_err = new LogFile('/var/www/logs/kvmobile.err', 'html', 'error_log', 'Error: ' . date("Y-m-d H:i:s"));
+	include_once(CLASSPATH . 'synchronisation.php');
+	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
+	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
+	# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
+	# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
+	# $client_time muss eigentlich auch nicht, wen interessiert das?
+	# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
+	# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
+	# sql muss vorhanden sein.
+	#		if ($GUI->formvars['selected_layer_id'] != '')
+
+	if (!array_key_exists('client_deltas', $_FILES)) {
+		return array(
+			'success' => false,
+			'err_msg' => ' Es wurde keine Datei mit Änderungsdaten zum Server geschickt.'
+		);
+	}
+
+	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+	$GUI->mobile_log->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
+	$GUI->mobile_log->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
+	$GUI->mobile_log->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
+	move_uploaded_file($_FILES['client_deltas']['tmp_name'], '/var/www/logs/upload_file.json');
+	$GUI->mobile_log->write('Run function mobile_sync_parameter_valide');
+
+	$result = $GUI->mobile_sync_all_parameter_valide($GUI->formvars);
+
+	if ($result['success']) {
+		$GUI->debug->write('mobile_sycn_all_parameter_valid', 5);
+		include_once(CLASSPATH . 'Layer2Stelle.php');
+		# Layer DB abfragen $layerdb = new ...
+		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
+		// In kvmobile müssen derzeit noch alle Layer aus einer Datenbank kommen
+		// daher kann die layerdb vom ersten Post-GIS Layer der Stelle entnommen werden
+		$sync_layers = Layer2Stelle::find_sync_layers($GUI, $GUI->Stelle->id);
+		if (count($sync_layers) == 0) {
+			return array(
+				'success' => true,
+				'syncData' => array(array(
+					'client_id' => $GUI->formvars['device_id'],
+					'client_time' => $GUI->formvars['client_time'],
+					'pull_to_version' => $GUI->formvars['last_client_version']
+				)),
+				'deltas' => array(),
+				'log'	=> 'In der Stelle wurden keine Sync-Layer gefunden. Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
+			);
+		}
+		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
+		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
+		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
+		$result = $sync->sync_all($GUI->formvars['device_id'], $GUI->formvars['username'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas'], $sync_layers);
+		$GUI->debug->write('sync_all abgeschlossen.');
+	}
+	else {
+		$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
+	}
+	return $result;
+};
+
 $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 	$result = array(
 		"success" => true,
@@ -238,6 +304,115 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 					}
 					else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+					}
+				}
+				else {
+					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
+				}
+			}
+			else {
+				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+			}
+		}
+		else {
+			$err_msg[] = 'Die Deltas Variable ist kein Objekt.';
+		}
+	}
+	else {
+		$err_msg[] = 'Die Deltas wurden nicht übertragen.';
+	}
+	$result['msg'] .= ' deltas';
+
+	if (count($err_msg) > 0) {
+		$result['success'] = false;
+		$result['err_msg'] = implode("\n", $err_msg);
+	}
+	return $result;
+};
+
+/**
+ * Check if the $params are valid for sync_all process
+ * @param String[] $params - The parameter to check.
+ * They normaly has been sent from client and comes from formvars var of GUI object.
+ * @return Any[] $result - An array with success, msg and err_msg. Success false indicates not valid parameter.
+ */
+$GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
+	$result = array(
+		"success" => true,
+		"msg" => 'Validierung durchgeführt für Parameter: ',
+		'err_msg' => ''
+	);
+
+	$err_msg = array();
+
+	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
+		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' client_time';
+
+	if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
+		$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' last_client_version';
+
+	// if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
+	// 	$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
+	// }
+	// $result['msg'] .= ' table_name';
+
+	if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
+		$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' device_id';
+
+	// if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
+	// 	$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
+	// }
+	// $result['msg'] .= ' selected_layer_id';
+
+	if (array_key_exists('client_deltas', $params)) {
+		$deltas = $params['client_deltas'];
+		if (is_object($deltas)) {
+			if (property_exists($deltas, 'rows')) {
+				$rows = $deltas->rows;
+				if (count($rows) > 0) {
+					$first_row = $rows[0];
+					if (property_exists($first_row, 'version')) {
+						$version = $first_row->version;
+
+						if ($version == '' || $version == 0) {
+							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
+					}
+					if (property_exists($first_row, 'sql')) {
+						$sql = $first_row->sql;
+						if ($sql == '') {
+							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
+					}
+					if (property_exists($first_row, 'schema_name')) {
+						$schema_name = $first_row->schema_name;
+						if ($schema_name == '') {
+							$err_msg[] = 'Das Attribut table_name in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält keinen schema_name sql: ' . print_r($first_row, true);
+					}
+					if (property_exists($first_row, 'table_name')) {
+						$table_name = $first_row->table_name;
+						if ($table_name == '') {
+							$err_msg[] = 'Das Attribut table in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält keinen table_name sql: ' . print_r($first_row, true);
 					}
 				}
 				else {
