@@ -24,7 +24,7 @@ class UpdateLog extends PgObject {
       )
     );
     if ($show) {
-      echo '<br>UpdateLog:<br>msg: ' . $result['msg'] . '<br>abbruch_status_id: ' . $ressource->get('status_id') . '<br>ressource_id: ' . $ressource->get_id();
+      echo '<br>' . $result['msg'] . ($ressource->get('status_id') ? '<br>abbruch_status_id: ' . $ressource->get('status_id') : '') . '<br>ressource_id: ' . $ressource->get_id();
     }
   }
 } 

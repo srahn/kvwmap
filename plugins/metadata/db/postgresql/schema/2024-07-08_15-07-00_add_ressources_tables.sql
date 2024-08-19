@@ -1,4 +1,6 @@
 BEGIN;
+  CREATE SCHEMA metadata;
+
   DROP TABLE IF EXISTS metadata.ampel CASCADE;
   CREATE TABLE metadata.ampel (
     id serial NOT NULL Primary Key,
