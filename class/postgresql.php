@@ -197,7 +197,7 @@ class pgdatabase {
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
 			SET datestyle TO 'German';
 			";
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret = $this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
   }
