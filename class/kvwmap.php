@@ -15377,6 +15377,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											} break;
 											case 'time' : {
 												// do nothing format is same in english and german
+												$eintrag = $this->formvars[$form_fields[$i]];
 											} break;
 											case 'timestamp' : {
 												// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
