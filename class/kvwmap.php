@@ -103,6 +103,11 @@ class GUI {
 	var $log_mysql;
 	var $log_postgres;
 	static $messages = array();
+	var $t_visible;
+	var $log_loginfail;
+	var $main;
+	var $trigger_functions;
+	var $custom_trigger_functions;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -9033,6 +9038,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$formvars['sync']
 						);
 						$this->mobile_prepare_layer_sync(
+							$layerdb,
+							$formvars['selected_layer_id'],
+							$formvars['sync']
+						);
+						$this->mobile_prepare_layer_sync_all(
 							$layerdb,
 							$formvars['selected_layer_id'],
 							$formvars['sync']

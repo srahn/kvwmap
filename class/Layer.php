@@ -112,6 +112,12 @@ class Layer extends MyObject {
 		return $duplicate_layer_ids;
 	}
 
+	function get_layer_db() {
+		$db_map_obj = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
+		$layer_db = $db_map_obj->getlayerdatabase($this->get_id(), '');
+		return $layer_db;
+	}
+
 	function update_datasources($gui, $datasource_ids) {
 		#echo '<br>update_datasources: ' . implode(', ', $datasource_ids) . ' of layer: ' . $this->get_id(); 
 		foreach(LayerDataSource::find($gui, '`layer_id` = ' . $this->get_id()) AS $layer_datasource) {

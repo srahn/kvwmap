@@ -2,11 +2,14 @@
 /*
 	* Cases:
 	* mobile_create_layer_sync
+	* mobile_create_layer_sync_all
 	* mobile_delete_images
 	* mobile_drop_layer_sync
+	* mobile_drop_layer_sync_all
 	* mobile_get_layers 
 	* mobile_get_stellen
 	* mobile_prepare_layer_sync
+	* mobile_prepare_layer_sync_all
 	* mobile_reformat_attributes
 	* mobile_reformat_layer
 	* mobile_sync
@@ -670,6 +673,36 @@ $GUI->mobile_create_sync_table = function ($layerdb) use ($GUI) {
 	}
 };
 
+$GUI->mobile_prepare_layer_sync_all = function ($layerdb, $id, $sync) use ($GUI) {
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
+
+	$sql = "
+		SELECT EXISTS (
+			SELECT 1
+			FROM information_schema.triggers
+			WHERE
+				trigger_schema = '" . $layer->get('schema') . "' AND
+				trigger_name = 'create_" . $layer->get('maintable') . "_delete_delta_all_trigger'
+		) AS trigger_exists
+	";
+	// echo '<p>Plugin: Mobile, function: prepare_layer_sync_all, Query if delete delta_all trigger exists SQL:<br>' . $sql;
+	$ret = $layerdb->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
+		return 0;
+	}
+
+	$rs = pg_fetch_assoc($ret[1]);
+	if ($rs['trigger_exists'] == 't' and $sync == 0) {
+		$GUI->mobile_drop_layer_sync_all($layer);
+	}
+
+	if ($rs['trigger_exists'] == 'f' and $sync == 1) {
+		$GUI->mobile_create_layer_sync_all($layer);
+	}
+};
+
 $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 	include_once(CLASSPATH . 'Layer.php');
 	$layer = Layer::find($GUI, 'Layer_ID = ' . $id)[0];
@@ -683,7 +716,7 @@ $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 				table_name = '" . $layer->get('maintable') . "_deltas'
 		) AS table_exists
 	";
-	#echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
+	// echo '<p>Plugin: Mobile, function: prepare_layer_sync, Query if delta table exists SQL:<br>' . $sql;
 	$ret = $layerdb->execSQL($sql, 4, 0);
 	if ($ret[0]) {
 		echo "<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . "<br>wegen: " . $sql . "<p>";
@@ -700,26 +733,65 @@ $GUI->mobile_prepare_layer_sync = function ($layerdb, $id, $sync) use ($GUI) {
 	}
 };
 
-$GUI->mobile_drop_layer_sync = function ($layerdb, $layer) use ($GUI) {
+/**
+ * function create trigger for $layer that write deltas in deltas_all table.
+ * @param Layer $layer layer object
+ */
+$GUI->mobile_create_layer_sync_all = function ($layer) use ($GUI) {
 	$sql = "
-		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
-		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
+		--
+		-- INSERT Trigger
+		--
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_insert_delta_all_trigger
+		BEFORE INSERT
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH STATEMENT
+		EXECUTE PROCEDURE create_insert_delta();
 
-		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_update_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
-		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta();
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_update_delta_all_trigger
+		BEFORE UPDATE
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH STATEMENT
+		EXECUTE PROCEDURE create_update_delta();
 
-		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_delete_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
-		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
-
-		DROP TABLE IF EXISTS " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas;
+		CREATE OR REPLACE TRIGGER create_" . $layer->get('maintable') . "_delete_delta_all_trigger
+		BEFORE DELETE
+		ON " . $layer->get('schema') . "." . $layer->get('maintable') . "
+		FOR EACH ROW
+		EXECUTE PROCEDURE create_delete_delta();
 	";
-	#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
-	$ret = $layerdb->execSQL($sql, 4, 0, true);
+	#echo '<p>Plugin: Mobile, function: mobile_create_layer_sync, Create table and trigger for deltas SQL:<br>' . $sql;
+	$layer_db = $layer->get_layer_db();
+	$ret = $layer_db->execSQL($sql, 4, 0, true);
 	if ($ret[0]) {
-		$GUI->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+		$GUI->add_message('error', 'Fehler beim Anlegen der Sync-Trigger!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen ' . $ret['msg']);
 		return 0;
 	}
-	$GUI->add_message('notice', 'Sync-Tabelle und Trigger gelöscht.');
+	$GUI->add_message('info', 'Sync-Trigger für INSERT, UPDATE und DELETE auf Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . ' angelegt.');
+};
+
+/**
+ * Function drop trigger for $layer that wrote changes into deltas_all table.
+ * @param Layer $layer layer object
+ */
+$GUI->mobile_drop_layer_sync_all = function ($layer) use ($GUI) {
+	$sql = "
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_all_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_update_delta_all_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_delete_delta_all_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+
+		DELETE FROM public.deltas_all WHERE schema_name = '" . $layer->get('schema') . "' AND table_name = '" . $layer->get('maintable') . "';
+	";
+	#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
+	$layer_db = $layer->get_layer_db();
+	$ret = $layer_db->execSQL($sql, 4, 0, true);
+	if ($ret[0]) {
+		$GUI->add_message('error', 'Fehler beim Löschen der Sync-Trigger und Deltas!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+		return 0;
+	}
+	$GUI->add_message('notice', 'Sync-Trigger und alle Deltas gelöscht.');
 };
 
 $GUI->mobile_create_layer_sync = function ($layerdb, $layer) use ($GUI) {
@@ -975,6 +1047,34 @@ $GUI->mobile_create_layer_sync = function ($layerdb, $layer) use ($GUI) {
 		return 0;
 	}
 	$GUI->add_message('info', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta<br>und Trigger für INSERT, UPDATE und DELETE angelegt.');
+};
+
+/**
+ * Function drop trigger for $layer that wrote changes into schema.maintable_deltas table.
+ * @param postgresdb $layerdb postgres database object of layer
+ * @param Layer $layer layer object
+ */
+$GUI->mobile_drop_layer_sync = function ($layerdb, $layer) use ($GUI) {
+	$sql = "
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_insert_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_insert_delta();
+
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_update_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_update_delta();
+
+		DROP TRIGGER IF EXISTS create_" . $layer->get('maintable') . "_delete_delta_trigger ON " . $layer->get('schema') . "." . $layer->get('maintable') . ";
+		DROP FUNCTION IF EXISTS " . $layer->get('schema') . ".create_" . $layer->get('maintable') . "_delete_delta();
+
+		DROP TABLE IF EXISTS " . $layer->get('schema') . "." . $layer->get('maintable') . "_deltas;
+	";
+	#echo '<p>Plugin: Mobile, function: mobile_remove_layer_sync, Drop table and trigger for deltas SQL:<br>' . $sql;
+	$ret = $layerdb->execSQL($sql, 4, 0, true);
+	if ($ret[0]) {
+		$GUI->add_message('error', 'Fehler beim Löschen der Sync-Tabelle!<p>Abbruch in Plugin mobile kvwmap.php  Zeile: ' . __LINE__ . '<br>wegen '  . $ret['msg']);
+		return 0;
+	}
+	$GUI->t_visible = 5000;
+	$GUI->add_message('notice', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta und Trigger gelöscht.', );
 };
 
 /**
