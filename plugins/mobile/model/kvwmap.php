@@ -135,7 +135,17 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 };
 
 $GUI->mobile_sync = function () use ($GUI) {
-	$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
+	$deblogdir = LOGPATH . 'kvmobile/';
+	$deblogfile = $GUI->user->login_name . '_debug_log.html';
+	if (!is_dir($deblogdir)) {
+		if (!mkdir($deblogdir, 0770, true)) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
+			);
+		}
+	}
+	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
