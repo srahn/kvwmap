@@ -12,6 +12,7 @@ BEGIN;
 
   CREATE TABLE deltas_all (
     version serial NOT NULL PRIMARY KEY,
+    uuid uuid,
     client_id character varying,
     sql text,
     schema_name character varying,
@@ -76,9 +77,9 @@ BEGIN;
         SElECT *
         FROM information_schema.columns
         WHERE
-          table_schema = %1\$L AND
-          table_name = %2\$L AND
-          column_name = %3\$L
+          table_schema = %1$L AND
+          table_name = %2$L AND
+          column_name = %3$L
         ', TG_TABLE_SCHEMA, TG_TABLE_NAME, 'version'
       )
       INTO version_column;
@@ -162,9 +163,9 @@ BEGIN;
           SElECT *
           FROM information_schema.columns
           WHERE
-            table_schema = %1\$L AND
-            table_name = %2\$L AND
-            column_name = %3\$L
+            table_schema = %1$L AND
+            table_name = %2$L AND
+            column_name = %3$L
           ', TG_TABLE_SCHEMA, TG_TABLE_NAME, 'version'
         )
         INTO version_column;
