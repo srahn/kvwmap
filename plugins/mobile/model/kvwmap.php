@@ -197,13 +197,24 @@ $GUI->mobile_sync = function () use ($GUI) {
  * Sync all deltas from Client to Server and vice versa.
  */
 $GUI->mobile_sync_all = function () use ($GUI) {
-	$GUI->mobile_log = new LogFile('/var/www/logs/kvmobile.log', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
-	$GUI->mobile_err = new LogFile('/var/www/logs/kvmobile.err', 'html', 'error_log', 'Error: ' . date("Y-m-d H:i:s"));
+	$mobile_log_dir = LOGPATH . 'kvmobile/';
+	$mobile_log_file = $GUI->user->login_name . '_debug_log.html';
+	$mobile_err_file = '_error_log.html';
+	if (!is_dir($mobile_log_dir)) {
+		if (!mkdir($mobile_log_dir, 0770, true)) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Logverzeichnis ' . $mobile_log_dir . ' konnte nicht angelegt werden.'
+			);
+		}
+	}
+	$GUI->mobile_log = new LogFile($mobile_log_dir . $mobile_log_file, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
+	$GUI->mobile_err = new LogFile($mobile_log_dir . $mobile_err_file, 'html', 'kvmobile Error-log', 'Debug: ' . date("Y-m-d H:i:s"));
+
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
 	# $client_id sollte vorhanden sein, damit das in die syncs Tabelle eingetragen werden kann.
-	# $username muss eigentlich nicht geprüft werden, weil der ja immer da ist nach Anmeldung
 	# $client_time muss eigentlich auch nicht, wen interessiert das?
 	# $last_client_version sollte 1 oder größer sein. ist das leer oder 0, dann wechseln zu DatenExport_Exportieren oder Exception
 	# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
@@ -238,7 +249,7 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 			return array(
 				'success' => true,
 				'syncData' => array(array(
-					'client_id' => $GUI->formvars['device_id'],
+					'client_id' => $GUI->formvars['client_id'],
 					'client_time' => $GUI->formvars['client_time'],
 					'pull_to_version' => $GUI->formvars['last_client_version']
 				)),
@@ -249,7 +260,7 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
 		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
-		$result = $sync->sync_all($GUI->formvars['device_id'], $GUI->formvars['username'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas'], $sync_layers);
+		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas'], $sync_layers);
 		$GUI->debug->write('sync_all abgeschlossen.');
 	}
 	else {
@@ -277,15 +288,15 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 	}
 	$result['msg'] .= ' last_client_version';
 
-	if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
-		$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
-	}
-	$result['msg'] .= ' table_name';
-
 	if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
 		$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
 	}
 	$result['msg'] .= ' device_id';
+	
+	if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
+		$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' table_name';
 
 	if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
 		$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
@@ -368,15 +379,11 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 	}
 	$result['msg'] .= ' last_client_version';
 
-	// if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
-	// 	$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
-	// }
-	// $result['msg'] .= ' table_name';
 
-	if (!array_key_exists('device_id', $params) || $params['device_id'] == '') {
-		$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
+	if (!array_key_exists('client_id', $params) || $params['client_id'] == '') {
+		$err_msg[] = 'Der Parameter client_id wurde nicht übergeben oder ist leer.';
 	}
-	$result['msg'] .= ' device_id';
+	$result['msg'] .= ' client_id';
 
 	// if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
 	// 	$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
