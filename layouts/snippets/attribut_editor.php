@@ -90,7 +90,13 @@
 		),
 		array(
 			'value' => 'StelleID',
-			'output' => 'StelleID'
+			'output' => 'StelleID',
+			'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch die ID der Stelle ein in der der Nutzer gerade angemeldet ist. Dieser läßt sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'
+		),
+		array(
+			'value' => 'ClientID',
+			'output' => 'ClientID',
+			'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch die ID des Gerätes ein welches der Nutzer gerade benutzt. Wenn der Nutzer mit kvmobile arbeitet wird die Device-ID des Gerätes eingetragen. Arbeit der Nutzer im Browser bleibt die ID leer.'
 		),
 		array(
 			'value' => 'Dokument',

@@ -343,19 +343,19 @@ class synchro {
 		return true;
 	}
 
-	/*
-	* Die Funktion führt folgende Schritte innerhalb einer Transaktion aus:
-	* - Fragt ob die angefragte Syncronisation schon mal abgearbeitet wurde
-	* - Wenn ja:
-	* 	- Legt eine neue Syncronisation in der Datenbank an mit
-	* 		$client_id, $user_name, $pull_from_version, $pull_to_version und $push_from_version.
-	* 	- Trägt alle mitgesendeten Änderungen ($client_deltas) in die Datenbank ein
-	* 	- Trägt die neue letzte Version $push_version_to in die aktuelle Syncronisation ein.
-	* - Ansonsten immer:
-	* 	- Fragt alle Änderungen (deltas) am Layer $layer_id von $pull_version_from bis $pull_version_to ab.
-	* 	- Fragt die Syncronisation ab
-	* 	- liefert die Deltas und Sync-Daten zurück
-	*/
+	/**
+	 * Die Funktion führt folgende Schritte innerhalb einer Transaktion aus:
+	 * - Fragt ob die angefragte Syncronisation schon mal abgearbeitet wurde
+	 * - Wenn ja:
+	 * 	- Legt eine neue Syncronisation in der Datenbank an mit
+	 * 		$client_id, $user_name, $pull_from_version, $pull_to_version und $push_from_version.
+	 * 	- Trägt alle mitgesendeten Änderungen ($client_deltas) in die Datenbank ein
+	 * 	- Trägt die neue letzte Version $push_version_to in die aktuelle Syncronisation ein.
+	 * - Ansonsten immer:
+	 * 	- Fragt alle Änderungen (deltas) am Layer $layer_id von $pull_version_from bis $pull_version_to ab.
+	 * 	- Fragt die Syncronisation ab
+	 * 	- liefert die Deltas und Sync-Daten zurück
+	 */
 	function sync($client_id, $username, $schema_name, $table_name, $client_time, $last_client_version, $client_deltas) {
 		$this->database->gui->deblog->write('client_id: ' . $client_id);
 		$this->database->gui->deblog->write('username: ' . $username);
@@ -436,7 +436,7 @@ class synchro {
 
 		$rs = pg_fetch_array($res[1]);
 		if ($rs['num_sync'] == 0) {
-*/
+		*/
 		if ($pull_from_version > 1) {
 			$sql = "
 				START TRANSACTION;
@@ -583,6 +583,187 @@ class synchro {
 		);
 		$this->database->gui->deblog->write('Result von sync: ' . print_r($result, true));
 		return $result;
+	}
+
+	/**
+	 * Die Funktion syncronisiert im Gegensatz zu sync alle sync-Layer der aktuellen Stelle
+	 */
+	function sync_all($client_id, $username, $client_time, $last_client_version, $client_deltas, $sync_layers) {
+		$this->database->gui->mobile_log->write('client_id: ' . $client_id);
+		$this->database->gui->mobile_log->write('username: ' . $username);
+		$this->database->gui->mobile_log->write('client_time: ' . $client_time);
+		$this->database->gui->mobile_log->write('last_client_version: ' . $last_client_version);
+		$this->database->gui->mobile_log->write('client_deltas: ' . print_r($client_deltas, true));
+		$pull_from_version = $last_client_version + 1;
+		$pull_to_version = $pull_from_version; // initial sind beide gleich (nichts zu holen)
+		$log = '';
+
+		if (count($client_deltas->rows) == 0) {
+			# Because client sent no deltas, request for new deltas starting with pull_from_version in server database before creating a synchronization in sync table
+			$sql = "
+				SELECT
+					*
+				FROM
+					deltas_all
+				WHERE
+					version >= " . $pull_from_version . " AND
+					client_id = '" . $client_id . "'
+			";
+			$res = $this->database->execSQL($sql, 0, 1, true);
+			if ($res[0]) {
+				$result = array(
+					'success' => false,
+					'errMsg' => 'Fehler bei der Abfrage der Deltas auf dem Server. ' . $res[1]
+				);
+				return $result;
+			}
+			if (pg_num_rows($res[1]) == 0) {
+				$result = array(
+					'success' => true,
+					'syncData' => array(array(
+						'clientId' => $client_id,
+						'clientTime' => $client_time,
+						'pullFromVersion' => $pull_from_version,
+						'pullToVersion' => $pull_to_version
+					)),
+					'deltas' => array(),
+					'failedDeltas' => array(),
+					'log'	=> 'Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
+				);
+				return $result;
+			}
+
+			if ($pull_from_version > 1) {
+				$log .= $sql;
+				$this->database->gui->deblog->write('Create sync log with sql: ' . $sql);
+				#echo '<br>Sql: ' . $sql;
+				$res = $this->database->execSQL($sql, 0, 1, true);
+				if ($res[0]) {
+					$result = array(
+						'success' => false,
+						'errMsg' => 'Fehler beim Eintragen des Sync-Log. ' . $res[1]
+					);
+					$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
+					return $result;
+				}
+
+				// Führe die Deltas einzeln aus wenn die Berechtigung dazu besteht und sammel die fehlerhaften ein
+				$failed_deltas = array();
+				foreach ($client_deltas->rows AS $row) {
+					if ($this->sync_allowed($row, $sync_layers)) {
+						$sql = $row->sql;
+						$this->database->gui->deblog->write('Exec Client-Delta with sql: ' . $sql);
+						#echo '<br>Sql: ' . $sql;
+						$res = $this->database->execSQL($sql, 0, 1, true);
+						if ($res[0]) {
+							$failed_deltas[] = $row;
+							$this->database->gui->deblog->write('Fehler bei der Ausführung des Deltas: ' . print_r($row, true) . ' Fehler: ' . $res[1]);
+						}
+					}
+					else {
+						$failed_deltas[] = $row;
+						$this->database->gui->deblog->write('Delta: ' . print_r($row, true) . ' darf auf dem Server nicht ausgeführt werden.');
+					}
+				}
+			}
+
+			# Frage deltas von pull_from bis pull_to ab
+			$sql = "
+				SELECT
+					*
+				FROM
+					deltas_all
+				WHERE
+					version >= " . $pull_from_version . " AND
+					client_id != '" . $client_id . "'
+				ORDER BY version;
+			";
+			$log .= $sql;
+			$this->database->gui->deblog->write('Frage deltas vom Server ab mit sql: ' . $sql);
+			#echo '<br>Sql: ' . $sql;
+			$res = $this->database->execSQL($sql, 0, 1, true);
+			if ($res[0]) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Fehler bei der Abfrage der Deltas vom Server. ' . $res[1]
+				);
+				$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
+				return $result;
+			}
+			$deltas = array();
+			$pull_to_version = 0;
+			while ($rs = pg_fetch_assoc($res[1])) {
+				if (intval($rs['version']) > $pull_to_version) {
+					$pull_to_version = intval($rs['version']);
+				}
+				$deltas[] = $rs;
+			}
+
+			# Lege Datensatz für Synchronisation auf dem Server an und trage ein:
+			# gepullt von bis und gepusht von
+			$sql .= "
+				INSERT INTO syncs_all (client_id, username, client_time, pull_from_version, pull_to_version)
+				VALUES (
+					'" . $client_id . "',
+					'" . $username . "',
+					'" . $client_time . "',
+					" . $pull_from_version  . ",
+					" . $pull_to_version . "
+				);
+			";
+			$res = $this->database->execSQL($sql, 0, 1, true);
+			if ($res[0]) {
+				$result = array(
+					'success' => false,
+					'err_msg' => 'Fehler beim Eintragen des Sync-Vorgangs in syncs_all. ' . $res[1]
+				);
+				$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
+				return $result;
+			}
+
+			# Liefer deltas und syncro data ab
+			$result = array(
+				'success' => true,
+				'syncData' => array(
+					'client_id' => $client_id,
+					'client_time' => $client_time,
+					'pull_from_version' => $pull_from_version,
+					'pull_to_version' => $pull_to_version
+				),
+				'deltas' => $deltas,
+				'failed_deltas' => $failed_deltas,
+				'log'	=> $log
+			);
+			$this->database->gui->deblog->write('Result von sync: ' . print_r($result, true));
+			return $result;
+		}
+	}
+
+	/**
+	 * Function check if loged in user is allowed to execute the $delta in current stelle
+	 * Geprüft wird ob es Layer mit passenden insert und delete Rechten in $sync_layers gibt, bei denen schema und maintable des Layers
+	 * mit schema_name und table_name des Deltas übereinstimmen.
+	 * Ob die Rechte zum Ändern der einzelnen Attribute bestehen wird hier nicht geprüft!
+	 * @param Delta $delta - Das Delta welches geprüft werden soll.
+	 * @param Layer2Stelle[] $sync_layers - Die zur Stelle gehörenden Layer mit der Eigenschaft sync = '1' und editable = 1, abgefragt mit Layer2Stelle::find_sync_layers(GUI, stelle_id)
+	 */
+	function sync_allowed($delta, $sync_layers) {
+		return count(array_filter(
+			$sync_layers,
+			function ($layer) use ($delta) {
+				$privileg = intval($layer['privileg']);
+				return
+					(
+						$layer['schema'] == $delta->schema_name AND
+						$layer['maintable'] == $delta->table_name
+					) AND
+					(
+						($delta->action == 'update') OR
+						($delta->action == 'insert' AND $privileg > 0) OR
+						($delta->action == 'delete' AND $privileg > 1)
+					);
+			}
+		)) > 0;
 	}
 }
 ?>
