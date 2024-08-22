@@ -16779,9 +16779,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
-				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND ".$layerset[$i]['Filter'];
+				if ($layerset[$i]['Filter'] != '') {
+					$layerset[$i]['Filter'] = replace_params(
+						$layerset[$i]['Filter'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->Stelle->id,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
+					// str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {

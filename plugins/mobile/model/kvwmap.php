@@ -315,6 +315,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"vector_tile_url" => $layerset['vector_tile_url'], 
 		"privileg" => $layerset['privileg'],
 		"drawingorder" => $layerset['drawingorder'],
+		'legendorder' => $layerset['legendorder'],
 		"sync" => $layerset['sync'],
 		"version" => $layerset['version']
 	);
