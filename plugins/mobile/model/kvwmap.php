@@ -21,26 +21,27 @@
  */
 $GUI->mobile_get_stellen = function () use ($GUI) {
 	$sql = "
-			SELECT DISTINCT
-				s.ID,
-				s.Bezeichnung,
-				s.epsg_code,
-				s.minxmax,
-				s.minymax,
-				s.maxxmax,
-				s.maxymax,
-				s.selectable_layer_params
-			FROM
-				rolle r JOIN
-				stelle s ON r.stelle_id = s.ID JOIN
-				used_layer ul ON s.ID = ul.Stelle_ID JOIN
-				layer l ON ul.Layer_ID = l.Layer_ID
-			WHERE
-				r.user_id = " . $GUI->user->id . " AND
-				l.sync = '1'
-			ORDER BY
-				s.Bezeichnung
-		";
+		SELECT DISTINCT
+			s.ID,
+			s.Bezeichnung,
+			s.epsg_code,
+			s.minxmax,
+			s.minymax,
+			s.maxxmax,
+			s.maxymax,
+			s.selectable_layer_params
+		FROM
+			rolle r JOIN
+			stelle s ON r.stelle_id = s.ID JOIN
+			used_layer ul ON s.ID = ul.Stelle_ID JOIN
+			layer l ON ul.Layer_ID = l.Layer_ID
+		WHERE
+			r.user_id = " . $GUI->user->id . " AND
+			l.sync = '1'
+		ORDER BY
+			s.Bezeichnung
+	";
+	// echo 'SQL zur Abfrage der Stellen des Nutzers: ' . $sql;
 	$ret = $GUI->database->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
@@ -50,10 +51,9 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		);
 	} else {
 		$stellen = array();
-		while ($rs = $GUI->database->result->fetch_assoc()) {
+		while ($rs = $ret[1]->fetch_assoc()) {
 			$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
 		}
-
 		$result = array(
 			"success" => true,
 			"user_id" => $GUI->user->id,
@@ -126,7 +126,17 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 };
 
 $GUI->mobile_sync = function () use ($GUI) {
-	$GUI->deblog = new LogFile('/var/www/logs/kvmobile_deblog.html', 'html', 'debug_log', 'Debug: ' . date("Y-m-d H:i:s"));
+	$deblogdir = LOGPATH . 'kvmobile/';
+	$deblogfile = $GUI->user->login_name . '_debug_log.html';
+	if (!is_dir($deblogdir)) {
+		if (!mkdir($deblogdir, 0770, true)) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
+			);
+		}
+	}
+	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
 	include_once(CLASSPATH . 'synchronisation.php');
 	# Prüfe ob folgende Parameter mit gültigen Werten übergeben wurden.
 	# $selected_layer_id (existiert und ist in mysql-Datenbank?)
@@ -372,6 +382,8 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 				"index" => $attr['indizes'][$value],
 				"name" => $value,
 				"real_name" => $attr['real_name'][$value],
+				"table_name" => $attr['table_name'][$key],
+				"schema_name" => $attr['schema'][$key],
 				"alias" => $attr['alias'][$key],
 				"group" => $attr['group'][$key],
 				"tooltip" => $attr['tooltip'][$key],

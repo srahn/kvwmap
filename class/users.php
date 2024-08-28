@@ -48,6 +48,7 @@ class account {
 	# Klasse für die Abrechnung und Statistik von Zugriffen
 
 	var $database;
+	var $debug;
 
 	function __construct($database) {
 		global $debug;
@@ -676,6 +677,8 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
 	/**
 	 * Create a user object

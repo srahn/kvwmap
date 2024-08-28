@@ -7,6 +7,8 @@
 
 class Debugger {
 	public $filename, $fp, $level;
+	var $mime_type;
+	var $user_funktion;
 
 	###################### Liste der Funktionen ####################################
 	#
@@ -81,6 +83,8 @@ class LogFile {
 	var $filename; # Dateiname in der gelogt wird
 	var $fp; # filepointer
 	var $format; # Ausgabeformat
+	var $name; # Filename of logfile
+	var $with_timestamp; # Output with timestamp or not
 
 	###################### Liste der Funktionen ####################################
 	#
