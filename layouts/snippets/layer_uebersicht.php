@@ -9,7 +9,7 @@
 		}
 	}
 	$this->keywords = array_unique($this->keywords);
-	sort($this->keywords);
+	natcasesort($this->keywords);
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '') use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
