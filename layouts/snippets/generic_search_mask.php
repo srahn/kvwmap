@@ -41,7 +41,7 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 		<div class="gsm_tabelle_td_third">
 			<div><? echo $strValue; ?></div>
 			<div>
-				<a href="javascript:clear();" title="Suchfelder leeren"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a>
+				<a href="javascript:clear();" title="Suchparameter zurücksetzen"><img style="vertical-align:top;" src="<? echo GRAPHICSPATH.'edit-clear.png'; ?>"></a>
 			</div>
 		</div>
 	</div>
