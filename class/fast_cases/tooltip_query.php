@@ -394,7 +394,7 @@ class GUI {
 		}
 	}
 
-  function tooltip_query($rect){
+	function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
@@ -528,9 +528,17 @@ class GUI {
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
-				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND ".$layerset[$i]['Filter'];
+				if ($layerset[$i]['Filter'] != '') {
+					$layerset[$i]['Filter'] = replace_params(
+						$layerset[$i]['Filter'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->Stelle->id,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
+					// str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
@@ -1379,7 +1387,7 @@ class rolle {
 		}
 	}
 
-	function getLayer($LayerName, $only_active_or_requires = false) {
+	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -1419,7 +1427,7 @@ class rolle {
 
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
-		}		
+		}
 
 		$sql = "
 			SELECT " .
@@ -1433,9 +1441,12 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				ul.`queryable`, l.`drawingorder`,
-				ul.`minscale`, ul.`maxscale`,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				ul.`queryable`,
+				l.`drawingorder`,
+				ul.`legendorder`,
+				ul.`minscale`,
+				ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
@@ -1480,7 +1491,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		}
 		$i = 0;
@@ -1492,20 +1503,22 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-				$rs[$key] = replace_params(
-					$rs[$key],
-					rolle::$layer_params,
-					$this->user_id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$language,
-					$rs['duplicate_criterion']
-				);
+			if ($replace_params) {
+				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+					$rs[$key] = replace_params(
+						$rs[$key],
+						rolle::$layer_params,
+						$this->user_id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$language,
+						$rs['duplicate_criterion']
+					);
+				}
 			}
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
-			$layer[$i]=$rs;
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}

@@ -14,6 +14,23 @@ class Layer2Stelle extends MyObject {
 		return $layer2stelle->find_where($where);
 	}
 
+	/**
+	 * Function find layers that belongs to $stelle_id and are sync and editable
+	 * @param GUI $gui - The current GUI-Objekt.
+	 * @param Integer $stelle_id - The id of the stelle.
+	 * @return Layer2Stelle[] $layer2stelle - The sync layers of the stelle.
+	 */
+	public static function find_sync_layers($gui, $stelle_id) {
+		$layer2stelle = new Layer2Stelle($gui);
+		$layer2stelle->debug->show('<p>Find layers with sync = true for stelle_id: ' . $stelle_id, MyObject::$write_debug);
+		return $layer2stelle->find_by_sql(array(
+			'select' => 'l.Layer_ID, l.schema, l.maintable, ul.privileg',
+			'from' => 'used_layer ul JOIN layer l ON ul.Layer_ID = l.Layer_ID',
+			'where' => 'ul.Stelle_ID = ' . $stelle_id . " AND l.editable = 1 and l.sync = '1'",
+			'order' => 'l.Layer_ID'
+		));
+	}
+
 	public static function find_base_layers($gui, $stelle_id) {
 		$layer2stelle = new Layer2Stelle($gui);
 		$layer2stelle->debug->show('<p>Find base layer with selectiontype = radio for stelle_id: ' . $stelle_id, MyObject::$write_debug);

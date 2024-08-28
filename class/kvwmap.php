@@ -36,6 +36,7 @@ class GUI {
 	var $alert;
 	var $group_has_active_layers;
 	var $gui;
+	var $go;
 	var $layerset;
 	var $layout;
 	var $sorted_layerset;
@@ -102,6 +103,11 @@ class GUI {
 	var $log_mysql;
 	var $log_postgres;
 	static $messages = array();
+	var $t_visible;
+	var $log_loginfail;
+	var $main;
+	var $trigger_functions;
+	var $custom_trigger_functions;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -9036,6 +9042,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$formvars['selected_layer_id'],
 							$formvars['sync']
 						);
+						$this->mobile_prepare_layer_sync_all(
+							$layerdb,
+							$formvars['selected_layer_id'],
+							$formvars['sync']
+						);
 						$this->mobile_validate_layer_sync(
 							$layerdb,
 							$formvars['selected_layer_id'],
@@ -11132,7 +11143,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							if (
 								$element[3] == $oid AND
 								!in_array($layerset[0]['attributes']['constraints'][$element[1]],  array('PRIMARY KEY', 'UNIQUE')) AND  # Primärschlüssel werden nicht mitübergeben
-								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID')) AND # und automatisch generierte Typen auch nicht
+								!in_array($formElementType, array('Time', 'User', 'UserID', 'Stelle', 'StelleID', 'ClientID')) AND # und automatisch generierte Typen auch nicht
 								$dont_use_for_new != 1
 							) {
 								$element[3] = '';
@@ -15366,6 +15377,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											} break;
 											case 'time' : {
 												// do nothing format is same in english and german
+												$eintrag = $this->formvars[$form_fields[$i]];
 											} break;
 											case 'timestamp' : {
 												// convert from german notation to english '25.12.1966 08:01:02' to '1966-12-25 08:01:02'
@@ -16788,9 +16800,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
-				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND ".$layerset[$i]['Filter'];
+				if ($layerset[$i]['Filter'] != '') {
+					$layerset[$i]['Filter'] = replace_params(
+						$layerset[$i]['Filter'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->Stelle->id,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
+					// str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {

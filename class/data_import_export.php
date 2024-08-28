@@ -70,11 +70,11 @@ class data_import_export {
 				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, $this->ogr_unkown_srid($filename), $adjustments);
 			} break;
-			case 'xml' : {
+			case 'xml' : case 'gml' : {
 				$layers = $this->ogr_get_layers($filename);
 				$this->unique_column = 'ogc_fid';
 				$custom_tables = $this->import_custom_file($filename, $layers, $user, $database, $schema, $table, $epsg, true, $adjustments);
-			} break;				
+			} break;
 			case 'kml' : case 'kmz' : {
 				$layers = $this->ogr_get_layers($filename);
 				$epsg = 4326;
@@ -405,6 +405,7 @@ class data_import_export {
 							" . $schema . ".\"" . $table . "\"
 						GROUP BY replace(geometrytype(the_geom), 'MULTI', '')
 					";
+					#echo 'SQL zum replace des Geometriedatentyps: ' . $sql;
 					$ret = $database->execSQL($sql,4, 0);
 					if (!$ret[0]) {
 						$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
@@ -972,12 +973,13 @@ class data_import_export {
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
-			#echo 'url:   ' . $url . '<br><br>';
+			echo '<br>url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			$output = curl_exec($ch);
+			#echo '<br>output: ' . $output;
 			$result = json_decode($output);
 			$ret = $result->exitCode;
 			if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
