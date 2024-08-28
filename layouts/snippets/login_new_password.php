@@ -35,6 +35,23 @@
 										<? echo $this->Fehlermeldung; ?>
 									</td>
 								</tr><?
+							}
+							if ($this->formvars['passwort'] == '') { ?>
+								<tr>
+									<td><span class="px16">Altes Passwort: </span></td>
+									<td>
+										<div style="display: flex">
+											<input style="width: 130px;" type="password" value="" id="passwort" name="passwort" autocomplete="off"/><?
+												if (defined ('PASSWORD_INFO') AND PASSWORD_INFO != '') { ?>
+													<div style="margin-left: 5px;">
+														<span data-tooltip="<? echo PASSWORD_INFO; ?>"></span>
+													</div><?php
+												}
+											?>
+											<i title="Sichtbarkeit des Passwortes" style="margin-left: 5px" class="fa fa-eye-slash pointer" aria-hidden="true" onclick="togglePasswordVisibility(this, 'passwort')"></i>
+										</div>
+									</td>
+								</tr><?
 							} ?>
 							<tr>
 								<td><span class="px16">Neues Passwort: </span></td>
