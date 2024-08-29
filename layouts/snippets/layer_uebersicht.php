@@ -60,7 +60,7 @@
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
 						<div style="width: 300px">
-							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
+							' . htmlentities(str_replace(',', ', ', $GUI->layers['wms_keywordlist'][$i])) . '
 						</div>
 					</td>
 					<td valign="top" class="kurzbeschreibung-column">
