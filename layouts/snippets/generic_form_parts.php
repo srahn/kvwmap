@@ -784,21 +784,20 @@
 			} break;
 			
 			case 'mailto': {
-				if ($value!='') {
-					$datapart .= '<a style="padding: 0 0 0 3;" class="link" target="_blank" href="mailto:' . htmlspecialchars($value) . '">';
-					if($attributes['options'][$j] != ''){
-						$datapart .= $attributes['options'][$j];
-					}
-					else{
-						$datapart .= htmlspecialchars(basename($value));
-					}
-					$datapart .= '</a><br>';
-				}
-				if($attribute_privileg != '0'){
+				if ($attribute_privileg != '0') {
 					$datapart .= '<input class="'.$field_class.'" tabindex="1" onchange="'.$onchange.'" id="'.$layer_id.'_'.$name.'_'.$k.'" size="'.$size.'" type="text" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
-				}else{
+				}
+				else {
 					$datapart .= '<input class="'.$field_class.'" type="hidden" name="'.$fieldname.'" value="'.htmlspecialchars($value).'">';
 				}
+				$datapart .= '<div class="formelement-link"><a class="link" target="_blank" href="mailto:' . htmlspecialchars($value) . '">';
+				if ($attributes['options'][$j] != '') {
+					$datapart .= $attributes['options'][$j];
+				}
+				else {
+					$datapart .= htmlspecialchars(basename($value));
+				}
+				$datapart .= '</a></div>';
 			} break;
 
 			case 'Fläche': {
