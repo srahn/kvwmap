@@ -18,7 +18,6 @@
 				}
 		<? } ?>
 			}
-			document.addEventListener("scroll", (event) => {enclosingForm.gle_scrollposition.value = document.scrollingElement.scrollTop});
 		</script>
 		<form name="GUI2" enctype="multipart/form-data" method="post" action="index.php" id="GUI2">
 			<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
@@ -65,5 +64,10 @@
 			<input type="hidden" name="window_type" value="">
 			<input type="hidden" name="csrf_token" value="<? echo $_SESSION['csrf_token']; ?>">
 		</form>
+
+		<script type="text/javascript">
+			document.addEventListener("scroll", save_scrollposition);
+		</script>
+
 	</body>
 </html>
