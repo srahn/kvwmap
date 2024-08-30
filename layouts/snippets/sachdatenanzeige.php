@@ -30,7 +30,7 @@ if ($anzLayer==0) {
 } 
 
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>
-<div id="contentdiv" onscroll="enclosingForm.gle_scrollposition.value = this.scrollTop;" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
+<div id="contentdiv" onscroll="save_scrollposition();" style="scroll-behavior: smooth; max-height:<? echo $this->user->rolle->nImageHeight; ?>px;overflow-y: auto;overflow-x: hidden; border-bottom: 1px solid #bbb">
 	<div style="margin-right: 10px">
 <? }
 
@@ -282,6 +282,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 					#echo '<input name="qLayer'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="1">';
 					echo '<input id="offset_'.$this->qlayerset[$i]['Layer_ID'].'" name="offset_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.value_of($this->formvars, 'offset_'.$this->qlayerset[$i]['Layer_ID']).'">';
 					echo '<input name="sql_'.$this->qlayerset[$i]['Layer_ID'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[$i]['sql']).'">';
+					echo '<input type="hidden" name="gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->qlayerset[$i]['Layer_ID']] . '">';
 				}
 			}
 			echo '<input name="go" type="hidden" value="Sachdaten">';
@@ -297,6 +298,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
   <input name="rectmaxy" type="hidden" value="<?php echo value_of($this->formvars, 'rectmaxy') ? $this->formvars['rectmaxy'] : $this->queryrect->maxy; ?>">
   <input name="form_field_names" type="hidden" value="<?php echo $this->form_field_names; ?>">
   <input type="hidden" name="chosen_layer_id" value="">
+	<input type="hidden" name="active_layer_id" value="<? echo $active_layer_tab; ?>">
   <input type="hidden" name="layer_tablename" value="">
   <input type="hidden" name="layer_columnname" value="">
   <input type="hidden" name="all" value="">
@@ -323,15 +325,9 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="searchmask_count" value="<? echo $this->formvars['searchmask_count']; ?>">
 <input type="hidden" name="within" value="<? echo value_of($this->formvars, 'within'); ?>">
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
-<input type="hidden" name="gle_scrollposition" value="<? echo $this->formvars['gle_scrollposition']; ?>">
 
 <script type="text/javascript">
-	if (enclosingForm.gle_scrollposition.value > 0) {
-		if (enclosingForm.name == 'GUI2') {
-			document.body.scrollTop = enclosingForm.gle_scrollposition.value;
-		}
-		else {
-			document.getElementById('contentdiv').scrollTop = enclosingForm.gle_scrollposition.value;
-		}
+	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value > 0) {
+		scrollto_saved_position();
 	}
 </script>
