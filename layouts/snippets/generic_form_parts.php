@@ -102,8 +102,10 @@
 		global $strNewEmbeddedPK;
 		global $hover_preview;
 		$layer_id = $layer['Layer_ID'];
-		if($dataset == NULL)$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
-		if($attributes == NULL) {
+		if ($dataset === NULL) {
+			$dataset = $layer['shape'][$k]; 						# der aktuelle Datensatz (wird nur beim Array- oder Nutzer-Datentyp übergeben)
+		}
+		if ($attributes == NULL) {
 			$attributes = $layer['attributes'];			# das Attribut-Array (wird nur beim Array- oder Nutzer-Datentyp übergeben)
 		}
 		$name = $attributes['name'][$j];																# der Name des Attributs
@@ -149,7 +151,7 @@
 			$attributes2['dependents'][$j] = '';		// die Array-Elemente sollen keine Visibility-Changer sein, nur das gemeinsame Hidden-Feld oben
 			$attributes2['table_name'][$attributes2['name'][$j]] = $tablename;
 			$attributes2['type'][$j] = substr($attributes['type'][$j], 1);			
-			$dataset2 = $dataset;
+			$dataset2 = [];
 			$dataset2[$tablename.'_oid'] = $oid;
 			$onchange2 = 'buildJSONString(\''.$id.'\', true);';
 			for($e = -1; $e < count_or_0($elements); $e++){
@@ -189,6 +191,7 @@
 			$datapart .= '<input type="hidden" class="'.$field_class.'" title="'.$alias.'" name="'.$fieldname.'" id="'.$id.'" onchange="'.$onchange.'" value="'.htmlspecialchars($value).'">';
 			$type_attributes = $attributes['type_attributes'][$j];
 			$elements = json_decode($value);	# diese Funktion decodiert immer den kommpletten String
+			$dataset2 = [];
 			if($elements != NULL){
 				foreach($elements as $element => $elem_value){
 					if (is_array($elem_value) OR is_object($elem_value)) {
