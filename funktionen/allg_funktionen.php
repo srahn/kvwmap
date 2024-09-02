@@ -1090,9 +1090,10 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	# 1. Methode über unzip (nur Linux)
-	$output = array();
 	$entries = NULL;
+	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
+	//$output = array();
+	/*
 	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
 	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
 	for($i = 3; $i < count($output)-2; $i++){
@@ -1103,6 +1104,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	}
 	# 2. Methode über php_zip Extension
 	else{
+		*/
 	  if ($zip = zip_open($src_file)){
 	    if ($zip){
 	      $splitter = ($create_zip_name_dir === true) ? "." : "/";
@@ -1129,7 +1131,7 @@ function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite
 	      zip_close($zip);
 	    }
 	  }
-	}
+	//}
 	return $entries;
 }
 
