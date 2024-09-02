@@ -1090,48 +1090,19 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	$entries = NULL;
 	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
-	//$output = array();
-	/*
-	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
-	for($i = 3; $i < count($output)-2; $i++){
-  		$entries[] = array_pop(explode('   ', $output[$i]));
+	$entries = NULL;
+	if ($dest_dir === false) {
+		$dest_dir = dirname($src_file);
 	}
-	if($entries != NULL){
-		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
+	$zip = new ZipArchive;
+	if ($zip->open($src_file)) {
+		for ($i = 0; $i < $zip->numFiles; $i++) {
+			$entries[] = $zip->getNameIndex($i);
+		}
+		$zip->extractTo($dest_dir); 
+		$zip->close(); 
 	}
-	# 2. Methode über php_zip Extension
-	else{
-		*/
-	  if ($zip = zip_open($src_file)){
-	    if ($zip){
-	      $splitter = ($create_zip_name_dir === true) ? "." : "/";
-	      if ($dest_dir === false) $dest_dir = substr($src_file, 0, strrpos($src_file, $splitter))."/";
-	      @mkdir($dest_dir);
-	      while ($zip_entry = zip_read($zip)){
-	        $entries[] = zip_entry_name($zip_entry);
-	        $pos_last_slash = strrpos(zip_entry_name($zip_entry), "/");
-	        if ($pos_last_slash !== false){
-	          @mkdir($dest_dir.substr(zip_entry_name($zip_entry), 0, $pos_last_slash+1));
-	        }
-	        if (zip_entry_open($zip,$zip_entry,"r")){
-	          $file_name = $dest_dir.zip_entry_name($zip_entry);
-	          if ($overwrite === true || $overwrite === false && !is_file($file_name)){
-	            $fstream = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-							$fp = fopen($file_name, 'w');
-	            fwrite($fp, $fstream );
-	            fclose($fp);
-	            chmod($file_name, 0777);
-	          }
-	          zip_entry_close($zip_entry);
-	        }
-	      }
-	      zip_close($zip);
-	    }
-	  }
-	//}
 	return $entries;
 }
 
