@@ -17,7 +17,8 @@ BEGIN;
     sql text,
     schema_name character varying,
     table_name character varying,
-    action character varying
+    action character varying,
+    action_time timestamp without time zone
   );
 
   --
