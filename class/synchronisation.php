@@ -250,10 +250,10 @@ class synchro {
 		fwrite($fp, "SET datestyle TO 'German';".chr(10));
 		fwrite($fp, "COPY ".$layerdb->schema.".".$attributes['all_table_names'][0]." FROM STDIN WITH DELIMITER AS '~' CSV;".chr(10));
 		$i = 0;
-		while($rs = pg_fetch_assoc($ret[1])) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$this->newcount++;
-			for($k = 0; $k < count($rs); $k++) {
-				if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
+			for ($k = 0; $k < count($rs); $k++) {
+				if ($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
 					$i++;
 					$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
 					$name_array=explode('.', $rs[key($rs)]);
@@ -588,154 +588,151 @@ class synchro {
 	/**
 	 * Die Funktion syncronisiert im Gegensatz zu sync alle sync-Layer der aktuellen Stelle
 	 */
-	function sync_all($client_id, $username, $client_time, $last_client_version, $client_deltas, $sync_layers) {
+	function sync_all($client_id, $username, $client_time, $client_deltas, $sync_layers) {
 		$this->database->gui->mobile_log->write('client_id: ' . $client_id);
-		$this->database->gui->mobile_log->write('username: ' . $username);
 		$this->database->gui->mobile_log->write('client_time: ' . $client_time);
-		$this->database->gui->mobile_log->write('last_client_version: ' . $last_client_version);
+		$this->database->gui->mobile_log->write('username: ' . $username);
 		$this->database->gui->mobile_log->write('client_deltas: ' . print_r($client_deltas, true));
-		$pull_from_version = $last_client_version + 1;
-		$pull_to_version = $pull_from_version; // initial sind beide gleich (nichts zu holen)
 		$log = '';
+		$where_last_delta_versions = array_map(
+			function ($last_delta_version) {
+				return "(schema_name = '" . $last_delta_version->schemaName . "' AND " . " table_name = '" . $last_delta_version->tableName . "' AND version > " . $last_delta_version->version . ")";
+			},
+			$client_deltas->lastDeltaVersions
+		);
 
-		if (count($client_deltas->rows) == 0) {
-			# Because client sent no deltas, request for new deltas starting with pull_from_version in server database before creating a synchronization in sync table
-			$sql = "
-				SELECT
-					*
-				FROM
-					deltas_all
-				WHERE
-					version >= " . $pull_from_version . " AND
-					client_id = '" . $client_id . "'
-			";
-			$res = $this->database->execSQL($sql, 0, 1, true);
-			if ($res[0]) {
-				$result = array(
-					'success' => false,
-					'errMsg' => 'Fehler bei der Abfrage der Deltas auf dem Server. ' . $res[1]
-				);
-				return $result;
-			}
-			if (pg_num_rows($res[1]) == 0) {
-				$result = array(
-					'success' => true,
-					'syncData' => array(array(
-						'clientId' => $client_id,
-						'clientTime' => $client_time,
-						'pullFromVersion' => $pull_from_version,
-						'pullToVersion' => $pull_to_version
-					)),
-					'deltas' => array(),
-					'failedDeltas' => array(),
-					'log'	=> 'Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
-				);
-				return $result;
-			}
-
-			if ($pull_from_version > 1) {
-				$log .= $sql;
-				$this->database->gui->deblog->write('Create sync log with sql: ' . $sql);
-				#echo '<br>Sql: ' . $sql;
-				$res = $this->database->execSQL($sql, 0, 1, true);
-				if ($res[0]) {
-					$result = array(
-						'success' => false,
-						'errMsg' => 'Fehler beim Eintragen des Sync-Log. ' . $res[1]
-					);
-					$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
-					return $result;
+		// Führe die Deltas einzeln aus wenn die Berechtigung dazu besteht und sammel die fehlerhaften ein
+		$failed_deltas = array();
+		foreach ($client_deltas->rows AS $row) {
+			if ($this->sync_allowed($row, $sync_layers)) {
+				$later_update = $this->find_later_update($row);
+				if (!$later_update['success']) {
+					return $later_update;
 				}
-
-				// Führe die Deltas einzeln aus wenn die Berechtigung dazu besteht und sammel die fehlerhaften ein
-				$failed_deltas = array();
-				foreach ($client_deltas->rows AS $row) {
-					if ($this->sync_allowed($row, $sync_layers)) {
-						$sql = $row->sql;
-						$this->database->gui->deblog->write('Exec Client-Delta with sql: ' . $sql);
-						#echo '<br>Sql: ' . $sql;
-						$res = $this->database->execSQL($sql, 0, 1, true);
-						if ($res[0]) {
-							$failed_deltas[] = $row;
-							$this->database->gui->deblog->write('Fehler bei der Ausführung des Deltas: ' . print_r($row, true) . ' Fehler: ' . $res[1]);
-						}
-					}
-					else {
+				if ($row->action === 'update' AND $later_update['exists']) {
+					// Führe den Update nicht aus.
+					// Es existiert ein Datensatz mit der gleichen uuid, die später als in dieser action_time aktualisiert wurde.
+					$this->database->gui->mobile_log->write('Update von Datensatz ' . $row->uuid . ' in Tablle ' . $row->schemaName . '.' . $row->tableName . ' ignorieren weil es einen späteren Update von ' . $later_update['updated_at'] . ' gibt der zeitlich nach ' . $row->actionTime . ' ausgeführt wurde.');
+				}
+				else {
+					$sql = $row->sql;
+					$this->database->gui->mobile_log->write('Exec Client-Delta with sql: ' . $sql);
+					#echo '<br>Sql: ' . $sql;
+					$res = $this->database->execSQL($sql, 0, 1, true);
+					if ($res[0]) {
 						$failed_deltas[] = $row;
-						$this->database->gui->deblog->write('Delta: ' . print_r($row, true) . ' darf auf dem Server nicht ausgeführt werden.');
+						$msg = 'Fehler bei der Ausführung des Deltas: ' . print_r($row, true) . ' Fehler: ' . $res[1];
+						$this->database->gui->mobile_log->write($msg);
+						$this->database->gui->mobile_err->write($msg);
+						$log .= $msg;
 					}
 				}
 			}
-
-			# Frage deltas von pull_from bis pull_to ab
-			$sql = "
-				SELECT
-					*
-				FROM
-					deltas_all
-				WHERE
-					version >= " . $pull_from_version . " AND
-					client_id != '" . $client_id . "'
-				ORDER BY version;
-			";
-			$log .= $sql;
-			$this->database->gui->deblog->write('Frage deltas vom Server ab mit sql: ' . $sql);
-			#echo '<br>Sql: ' . $sql;
-			$res = $this->database->execSQL($sql, 0, 1, true);
-			if ($res[0]) {
-				$result = array(
-					'success' => false,
-					'err_msg' => 'Fehler bei der Abfrage der Deltas vom Server. ' . $res[1]
-				);
-				$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
-				return $result;
+			else {
+				$failed_deltas[] = $row;
+				$msg = 'Delta: ' . print_r($row, true) . ' darf auf dem Server nicht ausgeführt werden.';
+				$this->database->gui->mobile_log->write($msg);
+				$this->database->gui->mobile_err->write($msg);
+				$log .= $msg;
 			}
-			$deltas = array();
-			$pull_to_version = 0;
-			while ($rs = pg_fetch_assoc($res[1])) {
-				if (intval($rs['version']) > $pull_to_version) {
-					$pull_to_version = intval($rs['version']);
-				}
-				$deltas[] = $rs;
-			}
+		}
 
-			# Lege Datensatz für Synchronisation auf dem Server an und trage ein:
-			# gepullt von bis und gepusht von
-			$sql .= "
-				INSERT INTO syncs_all (client_id, username, client_time, pull_from_version, pull_to_version)
-				VALUES (
-					'" . $client_id . "',
-					'" . $username . "',
-					'" . $client_time . "',
-					" . $pull_from_version  . ",
-					" . $pull_to_version . "
-				);
-			";
-			$res = $this->database->execSQL($sql, 0, 1, true);
-			if ($res[0]) {
-				$result = array(
-					'success' => false,
-					'err_msg' => 'Fehler beim Eintragen des Sync-Vorgangs in syncs_all. ' . $res[1]
-				);
-				$this->database->gui->deblog->write('Fehler mit result: ' . $res[1]);
-				return $result;
+		# Frage deltas von last_delta_versions an ab.
+		$sql = "
+			SELECT
+				*
+			FROM
+				deltas_all
+			WHERE
+				(
+					" . implode(" OR ", $where_last_delta_versions) . "
+				) AND
+				client_id != '" . $client_id . "'
+			ORDER BY version;
+		";
+		$log .= $sql;
+		$deltas = array();
+		$pull_to_version = 0;
+		while ($rs = pg_fetch_assoc($res[1])) {
+			if (intval($rs['version']) > $pull_to_version) {
+				$pull_to_version = intval($rs['version']);
 			}
+			$deltas[] = $rs;
+		}
 
-			# Liefer deltas und syncro data ab
-			$result = array(
-				'success' => true,
-				'syncData' => array(
-					'client_id' => $client_id,
-					'client_time' => $client_time,
-					'pull_from_version' => $pull_from_version,
-					'pull_to_version' => $pull_to_version
-				),
-				'deltas' => $deltas,
-				'failed_deltas' => $failed_deltas,
-				'log'	=> $log
+		# Lege Datensatz für Synchronisation auf dem Server an und trage ein:
+		# gepullt von bis und gepusht von
+		$sql = "
+			INSERT INTO syncs_all (client_id, username, client_time, pull_from_version, pull_to_version)
+			VALUES (
+			'" . $client_id . "',
+				'" . $username . "',
+				'" . $client_time . "',
+				" . $pull_to_version . "
 			);
-			$this->database->gui->deblog->write('Result von sync: ' . print_r($result, true));
+		";
+		$res = $this->database->execSQL($sql, 0, 1, true);
+		if ($res[0]) {
+			$result = array(
+				'success' => false,
+				'err_msg' => 'Fehler beim Eintragen des Sync-Vorgangs in syncs_all. ' . $res[1]
+			);
+			$msg = 'Fehler mit result: ' . $res[1];
+			$this->database->gui->mobile_log->write($msg);
+			$this->database->gui->mobile_err->write($msg);
 			return $result;
+		}
+
+		# Liefer deltas und syncro data ab
+		$result = array(
+			'success' => true,
+			'syncData' => array(
+				'client_id' => $client_id,
+				'client_time' => $client_time,
+				'pull_to_version' => $pull_to_version
+			),
+			'deltas' => $deltas,
+			'failed_deltas' => $failed_deltas,
+			'log'	=> $log
+		);
+		$this->database->gui->mobile_log->write('Result von sync: ' . print_r($result, true));
+		return $result;
+	}
+
+	function find_later_update($row) {
+		$sql = "
+			SELECT
+				updated_at
+			FROM
+				" . $row->schemaName . "." . $row->tableName . "
+			WHERE
+				uuid = '" . $row->uuid . "'::uuid AND
+				updated_at > '" . $row->actionTime . "'
+		";
+		$ret = $this->database->execSQL($sql, 0, 1, true);
+		if ($ret[0]) {
+			$err_msg = 'Fehler beim Abfragen eines späteren Updates. ' . $ret[1];
+			$result = array(
+				'success' => false,
+				'err_msg' => $err_msg
+			);
+			$this->database->gui->mobile_log->write($err_msg);
+			$this->database->gui->mobile_err->write($err_msg);
+			return $result;
+		}
+		if (pg_num_rows($ret[1]) === 0) {
+			return array(
+				'success' => true,
+				'exists' => false
+			);
+		}
+		else {
+			$rs = pg_fetch_assoc($ret[1]);
+			return array(
+				'success' => true,
+				'exists' => true,
+				'updated_at' => $rs['updated_at']
+			);
 		}
 	}
 
@@ -751,11 +748,11 @@ class synchro {
 		return count(array_filter(
 			$sync_layers,
 			function ($layer) use ($delta) {
-				$privileg = intval($layer['privileg']);
+				$privileg = intval($layer->get('privileg'));
 				return
 					(
-						$layer['schema'] == $delta->schema_name AND
-						$layer['maintable'] == $delta->table_name
+						$layer->get('schema') == $delta->schema_name AND
+						$layer->get('maintable') == $delta->table_name
 					) AND
 					(
 						($delta->action == 'update') OR
