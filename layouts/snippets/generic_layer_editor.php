@@ -151,8 +151,10 @@ if ($doit == true) { ?>
 			<i id="column_options_button" class="fa fa-columns" aria-hidden="true" style="cursor: pointer; margin: 12px" onclick="document.getElementById('gle_column_options_div').classList.toggle('hidden')"></i>
 			<div id="gle_column_options_div" class="hidden" onmouseleave="this.classList.toggle('hidden');">
 				<input type="checkbox" onclick="toggleAll(this, <? echo $layer['Layer_ID']; ?>, 'alle');" checked> --alle--<br>
-<? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) { ?>					
-					<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+<? 			for ($j = 0; $j < count($layer['attributes']['name']); $j++) {
+					if ($layer['attributes']['visible'][$j]) { ?>					
+						<input type="checkbox" onclick="toggleColumn(this, <? echo $layer['Layer_ID']; ?>, '<? echo $layer['attributes']['name'][$j]; ?>');" checked> <? echo ($layer['attributes']['alias'][$j] ?: $layer['attributes']['name'][$j]) . '<br>'; 
+					}
 				}	?>
 			</div>
 		</div>
