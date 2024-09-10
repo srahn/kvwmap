@@ -16211,7 +16211,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
             # GetMap durch GetFeatureInfo ersetzen
             $request = str_ireplace('getmap','GetFeatureInfo',$request);
-            $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
+            $request = $request.'&REQUEST=GetFeatureInfo';
+
+						if (strpos(strtolower($request), 'service=wms') === false){
+							$request .='&SERVICE=WMS';
+						}
 
 						if (strpos(strtolower($request), 'version') === false){
 							$request .='&VERSION=' . $layerset[$i]['wms_server_version'];
