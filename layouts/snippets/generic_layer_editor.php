@@ -2,7 +2,7 @@
 
 	function toggleColumn(checkbox, layer_id, attribute_name){
 		var head = document.getElementById('column_' + layer_id + '_' + attribute_name);
-		var group = head.classList[1].split('_')[1];
+		var group = head.classList[1].substring(6);
 		if (document.getElementById(group)) {
 			if (checkbox.checked) {
 				document.getElementById(group).dataset.colspan = parseInt(document.getElementById(group).dataset.colspan) + 1;
@@ -34,7 +34,7 @@
 	function toggleAll(checkbox, layer_id){
 		var heads = document.querySelectorAll('.column_head_' + layer_id);
 		[].forEach.call(heads, function (head){
-			var group = head.classList[1].split('_')[1];
+			var group = head.classList[1].substring(6);
 			if (checkbox.checked) {
 				head.classList.remove('hidden');
 				if (document.getElementById(group)) {
@@ -167,7 +167,7 @@ if ($doit == true) { ?>
 							if($layer['attributes']['group'][0] != ''){
 								echo '<tr><td style="border:none"></td><td style="border:none"></td>';
 								$explosion = explode(';', $layer['attributes']['group'][0]);
-								$groupname = $explosion[0] . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 								echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 								$colspan = 0;
 								for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
@@ -175,7 +175,7 @@ if ($doit == true) { ?>
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j+1]){
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-										$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+										$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 										if($collapsed)echo '1';
 										else echo $colspan;
 										echo '" data-colspan="'.$colspan.'" data-origcolspan="'.$colspan.'">';
@@ -186,7 +186,7 @@ if ($doit == true) { ?>
 										}
 										if($j < count($this->qlayerset[$i]['attributes']['name'])-1){
 											$explosion = explode(';', $layer['attributes']['group'][$j+1]);
-											$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+											$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 											echo '<td id="'.$groupname.'" style="background: '.BG_GLEATTRIBUTE.'" colspan="';								
 										}
 									}
@@ -201,7 +201,7 @@ if ($doit == true) { ?>
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								$collapsed = ($explosion[1] == 'collapsed');
-								$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
@@ -285,7 +285,7 @@ if ($doit == true) { ?>
 				for($j = 0; $j < count($layer['attributes']['name']); $j++){
 					$explosion = explode(';', $layer['attributes']['group'][$j]);
 					if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-					$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+					$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 					if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 						echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 					}
@@ -369,7 +369,7 @@ if ($doit == true) { ?>
 							for ($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-								$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
@@ -443,7 +443,7 @@ if ($doit == true) { ?>
 					  	for($j = 0; $j < count($this->qlayerset[$i]['attributes']['name']); $j++){
 								$explosion = explode(';', $layer['attributes']['group'][$j]);
 								if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-								$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+								$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 								if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 									echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 								}
@@ -490,7 +490,7 @@ if ($doit == true) { ?>
 								for($j = 0; $j < count($layer['attributes']['name']); $j++){
 									$explosion = explode(';', $layer['attributes']['group'][$j]);
 									if($explosion[1] == 'collapsed')$collapsed = true;else $collapsed = false;
-									$groupname = str_replace(' ', '_', $explosion[0]) . $layer['Layer_ID'];
+									$groupname = str_replace(' ', '-', $explosion[0]) . '_' . $layer['Layer_ID'];
 									if($layer['attributes']['group'][$j] != $layer['attributes']['group'][$j-1]){		# wenn die vorige Gruppe anders ist, Leerspalte einfügen
 										echo '<td class="gap_'.$groupname.'" '.($collapsed? 'colspan="2"' : '').' style="border:none;background: url('.BG_IMAGE.');"></td>';
 									}
