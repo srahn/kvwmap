@@ -21,7 +21,6 @@ class NASLoader extends DOMDocument {
 			#echo '<br>Ja Datei ist eine Zipdatei. Versuche auszupacken.';
 			$unziped_files = unzip($file_name, false, false, true);
 			foreach ($unziped_files AS $unziped_file) {
-				$unziped_file = str_replace('\\', '/', $unziped_file);
 				#echo '<br>Verarbeite ausgepackte Datei: ' . $unziped_file;
 				$pathinfo_unziped_file = pathinfo($unziped_file);
 				if (substr($pathinfo_unziped_file['filename'], -5) == '_2000') {
@@ -31,7 +30,7 @@ class NASLoader extends DOMDocument {
 
 				$rm_file = $file['dirname'] . '/' . $unziped_file;
 				#echo '<br>Lösche Datei: ' . $rm_file;
-				unlink(str_replace('\\', '/', $file['dirname'] . '/' . $unziped_file));
+				unlink($file['dirname'] . '/' . $unziped_file);
 
 				if (!empty($pathinfo_unziped_file['dirname'])) {
 					$rmdir = $file['dirname'] . '/' . $pathinfo_unziped_file['dirname'];
