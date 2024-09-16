@@ -392,8 +392,10 @@ from
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
 					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
+					<? if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])){ ?>
 					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
 					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
+					<? } ?>
 					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
 					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
 					<? } ?>
