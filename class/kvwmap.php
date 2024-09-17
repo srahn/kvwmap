@@ -4210,13 +4210,18 @@ echo '			</table>
 				# Dokumente kopieren
 				for ($p = 0; $p < @count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
 					if ($orig_dataset[$d]['document_paths'][$p] != '') {
-						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
-						$orig_path = $path_parts[0];
-						$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
-						$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
-						$new_path = dirname($orig_path).'/'.$new_file_name;
-						copy($orig_path, $new_path);
-						$complete_new_path = $new_path.'&'.$path_parts[1];
+						$complete_new_path = preg_replace_callback(
+							'|/[^&]+|',
+							function ($orig_path) {
+								$name_parts = explode('.', $orig_path[0]);		# Dateiendung ermitteln
+								$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
+								$new_path = dirname($orig_path[0]).'/'.$new_file_name;
+								copy($orig_path[0], $new_path);
+								return $new_path;
+							},
+							$orig_dataset[$d]['document_paths'][$p]
+						);
+
 						$sql = "
 							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
