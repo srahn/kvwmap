@@ -11716,13 +11716,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
 
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
-				$dokument_attribute = array_keys(array_filter(
-					$layerset[0]['attributes']['form_element_type'],
-					function ($value, $key) {
-						return (!is_int($key) AND $value == 'Dokument');
-					},
-					ARRAY_FILTER_USE_BOTH
-				))[0];
+				for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
+					if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
+						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
+						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
+						break;
+					}
+				}
 
 				# Datei von tmp in das Ziel verschieben
 				if (!is_dir($document_path)) {
@@ -11733,11 +11733,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Wert in Attribut eintragen
 				$sql = "
 					UPDATE
-						" .  $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . "
+						" .  $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
 					SET
-						" . $dokument_attribute . " = '" . $attribute_value . "'
+						" . $dokument_attribute . " = " . ($dokument_is_array ? "array_append(" . $dokument_attribute . ", '" . $attribute_value . "')" : "'" . $attribute_value . "'") . "
 					WHERE
-						".pg_quote($layerset[0]['oid'])." = " . quote($oids[0]) . "
+						" . pg_quote($layerset[0]['oid']) . " = " . quote($oids[0]) . "
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);
