@@ -1311,7 +1311,7 @@ class data_import_export {
 			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
 			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = '';
-			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1) { 
+			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params(
 					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
 					rolle::$layer_params,
