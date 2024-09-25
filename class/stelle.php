@@ -1927,7 +1927,7 @@ class stelle {
 				$layer['Name'][]					= $rs['Name'];
 				$layer['alias'][]					= $rs['alias'];
 				$layer['Name_or_alias']		= $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
-				$layer['Bezeichnung'][]		= $layer['Name_or_alias'];
+				$layer['Bezeichnung'][]		= $rs['Name'] . ($rs['alias']? ' [' . $rs['alias'] . ']' : '');
 				$layer['drawingorder'][]	= $rs['drawingorder'];
 				$layer['legendorder'][]		= $rs['legendorder'];
 				$layer['Gruppe'][]				= $rs['Gruppe'];

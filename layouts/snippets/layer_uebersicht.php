@@ -9,7 +9,7 @@
 		}
 	}
 	$this->keywords = array_unique($this->keywords);
-	sort($this->keywords);
+	natcasesort($this->keywords);
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '', $upper_groups = []) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
@@ -62,7 +62,7 @@
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
 						<div style="width: 300px">
-							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
+							' . htmlentities(str_replace(',', ', ', $GUI->layers['wms_keywordlist'][$i])) . '
 						</div>
 					</td>
 					<td valign="top" class="kurzbeschreibung-column">

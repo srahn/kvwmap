@@ -1335,15 +1335,17 @@ var dragSrcEl, srcDropZone = null;
 
 function handleDragStart(e){
 	dragSrcEl = e.target;
-	var dropzones = document.querySelectorAll('.DropZone');
-	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
-    dropzone.classList.add('ready');
-  });
-  if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
-	dragSrcEl.classList.add('dragging');
-	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
-	srcDropZone = dragSrcEl.nextElementSibling;
-	dragSrcEl.parentNode.removeChild(srcDropZone);
+	if (!dragSrcEl.classList.contains('dragging')) {
+		var dropzones = document.querySelectorAll('.DropZone');
+		[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
+			dropzone.classList.add('ready');
+		});
+		if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
+		dragSrcEl.classList.add('dragging');
+		setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+		srcDropZone = dragSrcEl.nextElementSibling;
+		dragSrcEl.parentNode.removeChild(srcDropZone);
+	}
 }
 
 function handleDragOver(e){

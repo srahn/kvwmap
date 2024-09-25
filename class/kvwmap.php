@@ -4269,13 +4269,18 @@ echo '			</table>
 				# Dokumente kopieren
 				for ($p = 0; $p < @count($orig_dataset[$d]['document_paths']); $p++) { # diese Schleife durchläuft alle Dokument-Attribute innerhalb eines kopierten Datensatzes
 					if ($orig_dataset[$d]['document_paths'][$p] != '') {
-						$path_parts = explode('&', $orig_dataset[$d]['document_paths'][$p]);		# &original_name=... abtrennen
-						$orig_path = $path_parts[0];
-						$name_parts = explode('.', $orig_path);		# Dateiendung ermitteln
-						$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
-						$new_path = dirname($orig_path).'/'.$new_file_name;
-						copy($orig_path, $new_path);
-						$complete_new_path = $new_path.'&'.$path_parts[1];
+						$complete_new_path = preg_replace_callback(
+							'|/[^&]+|',
+							function ($orig_path) {
+								$name_parts = explode('.', $orig_path[0]);		# Dateiendung ermitteln
+								$new_file_name = date('Y-m-d_H_i_s',time()).'-'.rand(100000, 999999).'.'.$name_parts[1];;
+								$new_path = dirname($orig_path[0]).'/'.$new_file_name;
+								copy($orig_path[0], $new_path);
+								return $new_path;
+							},
+							$orig_dataset[$d]['document_paths'][$p]
+						);
+
 						$sql = "
 							UPDATE " . pg_quote($layerset[0]['maintable']) . "
 							SET " . $document_attributes[$p] . " = '" . $complete_new_path . "'
@@ -4550,7 +4555,8 @@ echo '			</table>
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
-		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" xmlns:xlink="http://www.w3.org/1999/xlink" ', $this->formvars['svg_string']);
+		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
+		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
@@ -11710,13 +11716,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
 
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
-				$dokument_attribute = array_keys(array_filter(
-					$layerset[0]['attributes']['form_element_type'],
-					function ($value, $key) {
-						return (!is_int($key) AND $value == 'Dokument');
-					},
-					ARRAY_FILTER_USE_BOTH
-				))[0];
+				for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
+					if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
+						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
+						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
+						break;
+					}
+				}
 
 				# Datei von tmp in das Ziel verschieben
 				if (!is_dir($document_path)) {
@@ -11727,11 +11733,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Wert in Attribut eintragen
 				$sql = "
 					UPDATE
-						" .  $layerset[0]['schema'] . '.' . $layerset[0]['maintable'] . "
+						" .  $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
 					SET
-						" . $dokument_attribute . " = '" . $attribute_value . "'
+						" . $dokument_attribute . " = " . ($dokument_is_array ? "array_append(" . $dokument_attribute . ", '" . $attribute_value . "')" : "'" . $attribute_value . "'") . "
 					WHERE
-						".pg_quote($layerset[0]['oid'])." = " . quote($oids[0]) . "
+						" . pg_quote($layerset[0]['oid']) . " = " . quote($oids[0]) . "
 				";
 				#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 1);
@@ -15689,11 +15695,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$_files = $_FILES;
 		}
 		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
-			$name_array = explode('.', basename($_files[$input_name]['name']));
-			$datei_name = $name_array[0];
-			$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : array_pop($name_array));
-			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
-			$nachDatei = $doc_paths['doc_path'] . '.' . $datei_erweiterung;
+			// $name_array = explode('.', basename($_files[$input_name]['name']));
+			// $datei_name = $name_array[0];
+			// $datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : array_pop($name_array));
+			// $doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
+			// $nachDatei = $doc_paths['doc_path'] . '.' . $datei_erweiterung;
+
+			$pathinfo = pathinfo($_files[$input_name]['name']);
+			$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : $pathinfo['extension']);
+			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $pathinfo['filename']);
+			$nachDatei = $doc_paths['doc_path'] . (substr(trim($doc_paths['doc_path']), -1) === '/' ? $pathinfo['filename'] : '') . '.' . $datei_erweiterung;
+
 			if ($doc_paths['doc_url'] != '') {
 				$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
 			}
@@ -16204,7 +16216,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
             # GetMap durch GetFeatureInfo ersetzen
             $request = str_ireplace('getmap','GetFeatureInfo',$request);
-            $request = $request.'&REQUEST=GetFeatureInfo&SERVICE=WMS';
+            $request = $request.'&REQUEST=GetFeatureInfo';
+
+						if (strpos(strtolower($request), 'service=wms') === false){
+							$request .='&SERVICE=WMS';
+						}
 
 						if (strpos(strtolower($request), 'version') === false){
 							$request .='&VERSION=' . $layerset[$i]['wms_server_version'];

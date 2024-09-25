@@ -260,7 +260,7 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
 		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
-		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas'], $sync_layers);
+		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['client_deltas'], $sync_layers);
 		$GUI->debug->write('sync_all abgeschlossen.');
 	}
 	else {
@@ -369,21 +369,15 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 
 	$err_msg = array();
 
-	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
-		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
-	}
-	$result['msg'] .= ' client_time';
-
-	if (!array_key_exists('last_client_version', $params) || $params['last_client_version'] == '') {
-		$err_msg[] = 'Der Parameter last_client_version wurde nicht übergeben oder ist leer.';
-	}
-	$result['msg'] .= ' last_client_version';
-
-
 	if (!array_key_exists('client_id', $params) || $params['client_id'] == '') {
 		$err_msg[] = 'Der Parameter client_id wurde nicht übergeben oder ist leer.';
 	}
 	$result['msg'] .= ' client_id';
+
+	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
+		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
+	}
+	$result['msg'] .= ' client_time';
 
 	// if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
 	// 	$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
@@ -416,19 +410,19 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 					else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
 					}
-					if (property_exists($first_row, 'schema_name')) {
+					if (property_exists($first_row, 'schemaName')) {
 						$schema_name = $first_row->schema_name;
 						if ($schema_name == '') {
-							$err_msg[] = 'Das Attribut table_name in der ersten row der Deltas ist leer';
+							$err_msg[] = 'Das Attribut schemaName in der ersten row der Deltas ist leer';
 						}
 					}
 					else {
 						$err_msg[] = 'Die erste row enthält keinen schema_name sql: ' . print_r($first_row, true);
 					}
-					if (property_exists($first_row, 'table_name')) {
+					if (property_exists($first_row, 'tableName')) {
 						$table_name = $first_row->table_name;
 						if ($table_name == '') {
-							$err_msg[] = 'Das Attribut table in der ersten row der Deltas ist leer';
+							$err_msg[] = 'Das Attribut tableName in der ersten row der Deltas ist leer';
 						}
 					}
 					else {
@@ -441,6 +435,46 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 			}
 			else {
 				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
+			}
+			if (property_exists($deltas, 'lastDeltaVersions')) {
+				$lastDeltaVersions = $deltas->lastDeltaVersions;
+				if (count($lastDeltaVersions) == 0) {
+					$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut lastDeltaVersions: ' . print_r($deltas, true);
+				}
+				else {
+					$first_row = $rows[0];
+					if (property_exists($first_row, 'version')) {
+						$version = $first_row->version;
+
+						if ($version == '' || $version == 0) {
+							$err_msg[] = 'Die Version in der ersten row der lastDeltaVersions ist ' . $version . ' (leer oder 0)';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
+					}
+					if (property_exists($first_row, 'schemaName')) {
+						$schema_name = $first_row->schema_name;
+						if ($schema_name == '') {
+							$err_msg[] = 'Das Attribut schemaName in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält keinen schema_name sql: ' . print_r($first_row, true);
+					}
+					if (property_exists($first_row, 'tableName')) {
+						$table_name = $first_row->table_name;
+						if ($table_name == '') {
+							$err_msg[] = 'Das Attribut tableName in der ersten row der Deltas ist leer';
+						}
+					}
+					else {
+						$err_msg[] = 'Die erste row enthält keinen table_name sql: ' . print_r($first_row, true);
+					}
+				}
+			}
+			else {
+				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut lastDeltaVersions: ' . print_r($deltas, true);
 			}
 		}
 		else {
