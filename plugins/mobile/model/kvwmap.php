@@ -79,7 +79,7 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 		if ($layer_id != '') {
 			# Abfragen der Layerdefinition
 			$layerset = $GUI->user->rolle->getLayer($layer_id, false, false);
-			if ($layerset and $layerset[0]['connectiontype'] == '6') {
+			if ($layerset and $layerset[0]['connectiontype'] == '6' AND strpos(strtolower($layerset[0]['version']), 'portal') === false) {
 				# Abfragen der Privilegien der Attribute
 				$privileges = $GUI->Stelle->get_attributes_privileges($layer_id);
 
