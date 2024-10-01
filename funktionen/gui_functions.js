@@ -670,7 +670,7 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").offsetWidth);
+		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").scrollWidth);
 		if (contentWidth < screen.width) {
 			window.resizeTo(contentWidth+35, 800);
 		}
