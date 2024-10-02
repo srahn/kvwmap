@@ -49,23 +49,22 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 	$ret = $GUI->database->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
-		$result = array(
+		return array(
 			"success" => false,
 			"err_msg" => "Es konnten keine Stellen mit mobilen Layern abgefragt werden! SQL: " . $sql
 		);
-	} else {
-		$stellen = array();
-		while ($rs = $ret['result']->fetch_assoc()) {
-			$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
-		}
-		$result = array(
-			"success" => true,
-			"user_id" => $GUI->user->id,
-			"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
-			"stellen" => $stellen
-		);
 	}
-	return $result;
+	$stellen = array();
+	while ($rs = $ret['result']->fetch_assoc()) {
+		$stellen[] = $GUI->mobile_reformat_stelle($rs, $GUI->user->rolle->get_layer_params($rs['selectable_layer_params'], $GUI->pgdatabase));
+	}
+
+	return array(
+		"success" => true,
+		"user_id" => $GUI->user->id,
+		"user_name" => $GUI->user->Vorname . ' ' . $GUI->user->Name,
+		"stellen" => $stellen
+	);
 };
 
 /**
@@ -74,7 +73,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 $GUI->mobile_get_layers = function () use ($GUI) {
 	# ToDo get more than only the layer with selected_layer_id
 	$layers = $GUI->Stelle->getLayers('');
-	$mobile_layers = array();	
+	$mobile_layers = array();
 	foreach ($layers['ID'] as $layer_id) {
 		if ($layer_id != '') {
 			# Abfragen der Layerdefinition
@@ -121,9 +120,27 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 	}
 
 	if (count($mobile_layers) > 0) {
+		$sql = "
+			SELECT
+				COALESCE(max(version), 0) AS last_delta_version
+			FROM
+				deltas_all
+		";
+		#echo '<br>SQL zur Abfrage der höchsten deltas Version: ' . $sql;
+		$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+		if ($ret[0]) {
+			return array(
+				"success" => false,
+				"err_msg" => "Die maximale Deltas-Version konnte nicht abgefragt werden! SQL: " . $sql . ' Meldung: ' . $ret['msg']
+			);
+		}
+		$row = pg_fetch_assoc($ret['query']);
+		$last_delta_version = $row['last_delta_version'];
+
 		$result = array(
 			"success" => true,
-			"layers" => $mobile_layers
+			"layers" => $mobile_layers,
+			"last_delta_version" => $last_delta_version
 		);
 	} else {
 		$result = array(
@@ -132,6 +149,31 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 		);
 	}
 	return $result;
+};
+
+$GUI->mobile_get_data_version = function () use ($GUI) {
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
+	$sql = "
+		SELECT
+			gdi_md5_agg() WITHIN GROUP (ORDER BY tab) AS data_version
+		FROM
+			(
+				" . $layer->get('pfad') . "
+			) tab
+	";
+	$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		return array(
+			'success' => false,
+			'err_msg' => err_msg($GUI->script_name, __LINE__, $sql)
+		);
+	}
+	$rs = pg_fetch_array($ret[1]);
+	return array(
+		'success' => true,
+		'dataVersion' => $rs['data_version']
+	);
 };
 
 $GUI->mobile_sync = function () use ($GUI) {
@@ -165,6 +207,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	}
 
 	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+	unset($GUI->formvars['passwort']);
 	$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
 	$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
 	$GUI->deblog->write('File: ' . $_FILES['client_deltas']['tmp_name'] . ' exists? ' . file_exists($_FILES['client_deltas']['tmp_name']) . ', move to /var/www/logs/upload_file.json');
@@ -186,8 +229,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 		$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
 		$result['version'] = $layer->get('version');
 		$GUI->debug->write('sync abgeschlossen.');
-	}
-	else {
+	} else {
 		$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
 	}
 	return $result;
@@ -220,7 +262,6 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 	# $client_deltas Da müssen keine Daten vorhanden sein, aber es könnte geprüft werden ob die die da sind vollständig sind, jeweils mindestens
 	# sql muss vorhanden sein.
 	#		if ($GUI->formvars['selected_layer_id'] != '')
-
 	if (!array_key_exists('client_deltas', $_FILES)) {
 		return array(
 			'success' => false,
@@ -248,28 +289,24 @@ $GUI->mobile_sync_all = function () use ($GUI) {
 		if (count($sync_layers) == 0) {
 			return array(
 				'success' => true,
-				'syncData' => array(array(
-					'client_id' => $GUI->formvars['client_id'],
-					'client_time' => $GUI->formvars['client_time'],
-					'pull_to_version' => $GUI->formvars['last_client_version']
-				)),
+				'last_client_version' => $GUI->formvars['last_delta_version'],
 				'deltas' => array(),
+				'failedDeltas' => array(),
 				'log'	=> 'In der Stelle wurden keine Sync-Layer gefunden. Es wurden keine Änderungen vom Client auf den Server übertragen und es gab auch keine Änderungen vom Server zu holen!'
 			);
 		}
 		$layerdb = $mapDB->getlayerdatabase($sync_layers[0]->get('Layer_ID'), $GUI->Stelle->pgdbhost);
 		$result['msg'] = 'Layerdb abgefragt mit layer_id: ' . $sync_layers[0]->get('Layer_ID');
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
-		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['client_deltas'], $sync_layers);
+		$result = $sync->sync_all($GUI->formvars['client_id'], $GUI->user->Vorname . ' ' . $GUI->user->Name, $GUI->formvars['client_time'], $GUI->formvars['last_delta_version'], $GUI->formvars['client_deltas'], $sync_layers);
 		$GUI->debug->write('sync_all abgeschlossen.');
-	}
-	else {
+	} else {
 		$result['err_msg'] = ' Synchronisation auf dem Server abgebrochen wegen folgenden Fehlern: ' . $result['err_msg'];
 	}
 	return $result;
 };
 
-$GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
+$GUI->mobile_sync_parameter_valide = function ($params) use ($GUI) {
 	$result = array(
 		"success" => true,
 		"msg" => 'Validierung durchgeführt für Parameter: ',
@@ -292,7 +329,7 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 		$err_msg[] = 'Der Parameter device_id wurde nicht übergeben oder ist leer.';
 	}
 	$result['msg'] .= ' device_id';
-	
+
 	if (!array_key_exists('table_name', $params) || $params['table_name'] == '') {
 		$err_msg[] = 'Der Parameter table_name wurde nicht übergeben oder ist leer.';
 	}
@@ -316,8 +353,7 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 						if ($version == '' || $version == 0) {
 							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
 					}
 					if (property_exists($first_row, 'sql')) {
@@ -325,24 +361,19 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 						if ($sql == '') {
 							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
 					}
-				}
-				else {
+				} else {
 					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
 				}
-			}
-			else {
+			} else {
 				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
 			}
-		}
-		else {
+		} else {
 			$err_msg[] = 'Die Deltas Variable ist kein Objekt.';
 		}
-	}
-	else {
+	} else {
 		$err_msg[] = 'Die Deltas wurden nicht übertragen.';
 	}
 	$result['msg'] .= ' deltas';
@@ -360,29 +391,30 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
  * They normaly has been sent from client and comes from formvars var of GUI object.
  * @return Any[] $result - An array with success, msg and err_msg. Success false indicates not valid parameter.
  */
-$GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
-	$result = array(
-		"success" => true,
-		"msg" => 'Validierung durchgeführt für Parameter: ',
-		'err_msg' => ''
-	);
+$GUI->mobile_sync_all_parameter_valide = function ($params) use ($GUI) {
+	$msg ='Validierung durchgeführt für Parameter: ';
 
 	$err_msg = array();
 
 	if (!array_key_exists('client_id', $params) || $params['client_id'] == '') {
 		$err_msg[] = 'Der Parameter client_id wurde nicht übergeben oder ist leer.';
 	}
-	$result['msg'] .= ' client_id';
+	$msg .= ' client_id';
 
 	if (!array_key_exists('client_time', $params) || $params['client_time'] == '') {
 		$err_msg[] = 'Der Parameter client_time wurde nicht übergeben oder ist leer.';
 	}
-	$result['msg'] .= ' client_time';
+	$msg .= ' client_time';
+
+	if (!array_key_exists('last_delta_version', $params) || $params['last_delta_version'] == '') {
+		$err_msg[] = 'Der Parameter last_delta_version wurde nicht übergeben oder ist leer.';
+	}
+	$msg .= ' last_delta_version';
 
 	// if (!array_key_exists('selected_layer_id', $params) || $params['selected_layer_id'] == '' || $params['selected_layer_id'] == 0) {
 	// 	$err_msg[] = 'Der Parameter selected_layer_id wurde nicht übergeben oder ist leer.';
 	// }
-	// $result['msg'] .= ' selected_layer_id';
+	// $msg .= ' selected_layer_id';
 
 	if (array_key_exists('client_deltas', $params)) {
 		$deltas = $params['client_deltas'];
@@ -397,8 +429,7 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 						if ($version == '' || $version == 0) {
 							$err_msg[] = 'Die Version in der ersten row der Deltas ist ' . $version . ' (leer oder 0)';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
 					}
 					if (property_exists($first_row, 'sql')) {
@@ -406,91 +437,50 @@ $GUI->mobile_sync_all_parameter_valide = function($params) use ($GUI) {
 						if ($sql == '') {
 							$err_msg[] = 'Das Attribut sql in der ersten row der Deltas ist leer';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält kein Schlüssel sql: ' . print_r($first_row, true);
 					}
-					if (property_exists($first_row, 'schemaName')) {
+					#version, action, uuid, actionTime
+					if (property_exists($first_row, 'schema_name')) {
 						$schema_name = $first_row->schema_name;
 						if ($schema_name == '') {
-							$err_msg[] = 'Das Attribut schemaName in der ersten row der Deltas ist leer';
+							$err_msg[] = 'Das Attribut schema_name in der ersten row der Deltas ist leer';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält keinen schema_name sql: ' . print_r($first_row, true);
 					}
-					if (property_exists($first_row, 'tableName')) {
+					if (property_exists($first_row, 'table_name')) {
 						$table_name = $first_row->table_name;
 						if ($table_name == '') {
-							$err_msg[] = 'Das Attribut tableName in der ersten row der Deltas ist leer';
+							$err_msg[] = 'Das Attribut table_name in der ersten row der Deltas ist leer';
 						}
-					}
-					else {
+					} else {
 						$err_msg[] = 'Die erste row enthält keinen table_name sql: ' . print_r($first_row, true);
 					}
-				}
-				else {
+				} else {
 					# Wenn Anzahl rows 0 ist, ist das kein Fehler, weil ja ein Client vielleicht nur neue Daten holen will aber nichts schickt.
 				}
-			}
-			else {
+			} else {
 				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut rows: ' . print_r($deltas, true);
 			}
-			if (property_exists($deltas, 'lastDeltaVersions')) {
-				$lastDeltaVersions = $deltas->lastDeltaVersions;
-				if (count($lastDeltaVersions) == 0) {
-					$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut lastDeltaVersions: ' . print_r($deltas, true);
-				}
-				else {
-					$first_row = $rows[0];
-					if (property_exists($first_row, 'version')) {
-						$version = $first_row->version;
-
-						if ($version == '' || $version == 0) {
-							$err_msg[] = 'Die Version in der ersten row der lastDeltaVersions ist ' . $version . ' (leer oder 0)';
-						}
-					}
-					else {
-						$err_msg[] = 'Die erste row enthält kein Schlüssel version: ' . print_r($first_row, true);
-					}
-					if (property_exists($first_row, 'schemaName')) {
-						$schema_name = $first_row->schema_name;
-						if ($schema_name == '') {
-							$err_msg[] = 'Das Attribut schemaName in der ersten row der Deltas ist leer';
-						}
-					}
-					else {
-						$err_msg[] = 'Die erste row enthält keinen schema_name sql: ' . print_r($first_row, true);
-					}
-					if (property_exists($first_row, 'tableName')) {
-						$table_name = $first_row->table_name;
-						if ($table_name == '') {
-							$err_msg[] = 'Das Attribut tableName in der ersten row der Deltas ist leer';
-						}
-					}
-					else {
-						$err_msg[] = 'Die erste row enthält keinen table_name sql: ' . print_r($first_row, true);
-					}
-				}
-			}
-			else {
-				$err_msg[] = 'Das Objekt der Deltas enthält kein Attribut lastDeltaVersions: ' . print_r($deltas, true);
-			}
-		}
-		else {
+		} else {
 			$err_msg[] = 'Die Deltas Variable ist kein Objekt.';
 		}
-	}
-	else {
+	} else {
 		$err_msg[] = 'Die Deltas wurden nicht übertragen.';
 	}
-	$result['msg'] .= ' deltas';
+	$msg .= ' deltas';
 
 	if (count($err_msg) > 0) {
-		$result['success'] = false;
-		$result['err_msg'] = implode("\n", $err_msg);
+		return array(
+			'success' => false,
+			'err_msg' => implode("\n", $err_msg)
+		);
 	}
-	return $result;
+	return array(
+		'success' => true,
+		'msg' => $msg
+	);
 };
 
 $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($GUI) {
@@ -513,7 +503,7 @@ $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($
 
 $GUI->mobile_reformat_tables = function ($mainschema, $attr) use ($GUI) {
 	return array_unique(array_map(
-		function($schema, $table) use ($mainschema) {
+		function ($schema, $table) use ($mainschema) {
 			return ($schema ?: $mainschema) . '.' . $table;
 		},
 		$attr['schema'],
@@ -523,7 +513,9 @@ $GUI->mobile_reformat_tables = function ($mainschema, $attr) use ($GUI) {
 
 $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	$geometry_types = array(
-		"Point", "Line", "Polygon"
+		"Point",
+		"Line",
+		"Polygon"
 	);
 
 	$layer = array(
@@ -541,7 +533,7 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 		"query" => $layerset['pfad'],
 		"filter" => $layerset['Filter'],
 		"document_path" => $layerset['document_path'],
-		"vector_tile_url" => $layerset['vector_tile_url'], 
+		"vector_tile_url" => $layerset['vector_tile_url'],
 		"privileg" => $layerset['privileg'],
 		"drawingorder" => $layerset['drawingorder'],
 		'legendorder' => $layerset['legendorder'],
@@ -552,23 +544,26 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 	return $layer;
 };
 
-$GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
+$GUI->mobile_reformat_attributes = function ($attr) use ($GUI) {
 	$attributes = array();
-	foreach($attr['name'] AS $key => $value) {
+	foreach ($attr['name'] as $key => $value) {
 		if ($value == 'kartierergruppe_id') {
 			#echo '<br>enum: ' . print_r($attr['enum'][$key], true);
 		}
 		if ($attr['form_element_type'][$key] == 'Autovervollständigungsfeld') {
 			$sql = $attr['options'][$key];
 			$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
-			if ($ret[0]) { echo err_msg($GUI->script_name, __LINE__, $sql); return 0; }
+			if ($ret[0]) {
+				echo err_msg($GUI->script_name, __LINE__, $sql);
+				return 0;
+			}
 			while ($rs = pg_fetch_array($ret[1])) {
 				$attr['enum'][$key][$rs['value']] = $rs;
 			}
 		};
 		if ($attr['enum'][$key]) {
 			$attr['enums'][$key] = array();
-			foreach($attr['enum'][$key] AS $enum_key => $enum) {
+			foreach ($attr['enum'][$key] as $enum_key => $enum) {
 				$enum_array = array(
 					'value' => $enum_key,
 					'output' => $enum['output']
@@ -578,8 +573,7 @@ $GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 				}
 				$attr['enums'][$key][] = $enum_array;
 			}
-		}
-		else {
+		} else {
 			$attr['enums'][$key] = array();
 		}
 		// if ($value == 'sorte_id') {
@@ -629,15 +623,14 @@ $GUI->mobile_reformat_attributes = function($attr) use ($GUI) {
 		if ($GUI->formvars['kvmobile_version'] >= '1.13.0') {
 			$attributes[$key]['options'] = $attr['options'][$key];
 			$attributes[$key]['enums'] = $attr['enums'][$key];
-		}
-		else {
+		} else {
 			$attributes[$key]['options'] = ($attr['enum'][$key] ? $attr['enums'][$key] : $attr['options'][$key]);
 		}
 
-		if ($attr['req_by'] AND array_key_exists($key, $attr['req_by']) AND $attr['req_by'][$key] != '') {
+		if ($attr['req_by'] and array_key_exists($key, $attr['req_by']) and $attr['req_by'][$key] != '') {
 			$attributes[$key]['required_by'] = $attr['req_by'][$key];
 		}
-		if ($attr['req'] AND array_key_exists($key, $attr['req']) AND is_array($attr['req'][$key]) AND count($attr['req'][$key]) > 0) {
+		if ($attr['req'] and array_key_exists($key, $attr['req']) and is_array($attr['req'][$key]) and count($attr['req'][$key]) > 0) {
 			$attributes[$key]['requires'] = $attr['req'][$key];
 		}
 	}
@@ -1126,7 +1119,7 @@ $GUI->mobile_drop_layer_sync = function ($layerdb, $layer) use ($GUI) {
 		return 0;
 	}
 	$GUI->t_visible = 5000;
-	$GUI->add_message('notice', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta und Trigger gelöscht.', );
+	$GUI->add_message('notice', 'Sync-Tabelle ' . $layer->get('schema') . '.' . $layer->get('maintable') . '_delta und Trigger gelöscht.',);
 };
 
 /**
@@ -1176,23 +1169,38 @@ $GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($G
 	}
 };
 
-/*
-	* ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
-	* to move the uploaded images to layers document path
-	*/
+/**
+ * ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
+ * to move the uploaded images to layers document path
+ */
 $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
+	$deblogdir = LOGPATH . 'kvmobile/';
+	$deblogfile = $GUI->user->login_name . '_debug_log.html';
+	if (!is_dir($deblogdir)) {
+		if (!mkdir($deblogdir, 0770, true)) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
+			);
+		}
+	}
+	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
+
 	# Bestimme den Uploadpfad des Layers
 	if (intval($layer_id) == 0) {
+		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
-			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			"msg" => $msg
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
 	if (count($layer) == 0) {
+		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
 		return array(
 			"success" => false,
-			"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
+			"msg" => $msg
 		);
 	}
 
@@ -1205,16 +1213,20 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	}
 
 	if ($files['image'] == '') {
+		$msg = 'Es wurde keine Datei hochgeladen!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
-			"msg" => "Es wurde keine Datei hochgeladen!"
+			"msg" => $msg
 		);
 	}
 
 	if (file_exists($doc_path . $files['image']['name'])) {
+		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => true,
-			"msg" => "Datei existiert schon auf dem Server!"
+			"msg" => $msg
 		);
 	}
 
@@ -1222,12 +1234,13 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
 		$success = false;
 		$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
-	} else {
+	}
+	else {
 		$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
 		$success = true;
 		$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 	}
-
+	$GUI->deblog->write($msg);
 	return array(
 		"success" => $success,
 		"msg" => $msg
@@ -1288,4 +1301,3 @@ $GUI->mobile_delete_images = function ($layer_id, $images) use ($GUI) {
 		"msg" => implode(', ', $msg)
 	);
 };
-?>

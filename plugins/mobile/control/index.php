@@ -16,6 +16,24 @@ function go_switch_mobile($go) {
 		}
 		break;
 
+		case 'mobile_get_data_version': {
+			$GUI->sanitize(['selected_layer_id' => 'int']);
+			$result = $GUI->mobile_get_data_version();
+			echo json_encode($result);
+		}
+		break;
+
+		case 'mobile_get_data': {
+			$GUI->sanitize(['selected_layer_id' => 'int', 'version' => 'int']);
+			$GUI->formvars['without_filter'] = 1;
+			$GUI->formvars['export_format'] = 'GeoJSONPlus';
+			$GUI->formvars['all'] = 1;
+			$GUI->formvars['epsg'] = 4326;
+			$GUI->formvars['sql_' . $GUI->formvars['selected_layer_id']] = 'WHERE (version IS NULL OR version <= ' . $GUI->formvars['last_delta_version'] . ')';
+			$GUI->daten_export_exportieren();
+		}
+		break;
+
 		case 'mobile_get_pmtiles_style': {
 			$file = '/var/www/data/pmtiles/Flurstuecke_Style.json';
 			header('Content-Type: application/json; charset=utf-8');
@@ -31,7 +49,7 @@ function go_switch_mobile($go) {
 			# kann X-Sendfile Header gesetzt werden und Apache kümmert sich um die Fileausgabe.
 			# Das geht korrekter als mit PHP file_get_contents und schneller
 			header("X-Sendfile: " . $filename);
-#				header("Content-Type: application/octet-stream");
+			#				header("Content-Type: application/octet-stream");
 			header('Content-Disposition: attachment; filename="Flurstuecke.pmtiles"');
 			exit;
 
@@ -70,7 +88,8 @@ function go_switch_mobile($go) {
 		case 'mobile_sync_all': {
 			$GUI->sanitize([
 				'client_id' => 'text',
-				'client_time' => 'varchar'
+				'client_time' => 'varchar',
+				'last_delta_version' => 'int'
 			]);
 			// If the user is allowed to execute the deltas in this stelle will be checkt in GUI->mobile_sync_all() > sync->sync_allowed(delta, sync_layers)
 			$result = $GUI->mobile_sync_all();
@@ -110,7 +129,7 @@ function go_switch_mobile($go) {
 		}
 		break;
 
-	default: {
+		default: {
 			$GUI->goNotExecutedInPlugins = true; // in diesem Plugin wurde go nicht ausgeführt
 		}
 	}

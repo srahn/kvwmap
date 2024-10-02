@@ -1368,11 +1368,12 @@ class data_import_export {
 			}
 			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
 				$query_parts['select'] = str_replace(
-																	$layerset[0]['attributes']['the_geom'], 
-																	'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
-																	$query_parts['select']
-																);
+					$layerset[0]['attributes']['the_geom'], 
+					'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
+					$query_parts['select']
+				);
 			}
+
 			$sql = "
 				SELECT 
 					" . $query_parts['select'] . "
