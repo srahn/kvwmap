@@ -2736,4 +2736,12 @@ function required_shape_files_exists($files, $required = array('shp', 'shx', 'db
 		);
 	}
 }
+
+function set_href($text) {
+	if (strpos($text, ';http') !== false) {
+		$parts = explode(';http', $text);
+		$text = '<a href="http' . $parts[1] . '" target="Urheber" title="' . $parts[0] . '">' . $parts[0] .'</a>';
+	}
+	return $text;
+}
 ?>
