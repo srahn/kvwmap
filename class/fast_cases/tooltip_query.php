@@ -13,15 +13,21 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
-	$exp = str_replace(' eq ', '=', $exp);
-	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
 			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
 		}
 		else {
 			$operator = '=';

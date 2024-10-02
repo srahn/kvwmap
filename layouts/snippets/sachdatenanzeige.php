@@ -271,6 +271,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 			echo '<input name="go" type="hidden" value="Layer-Suche_Suchen">
 						<input name="sql_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.htmlspecialchars($this->qlayerset[0]['sql']).'">
 						<input id="offset_'.$this->formvars['selected_layer_id'].'" name="offset_'.$this->formvars['selected_layer_id'].'" type="hidden" value="'.$this->formvars['offset_'.$this->formvars['selected_layer_id']].'">
+						<input type="hidden" name="gle_scrollposition_' . $this->formvars['selected_layer_id'] . '" value="' . $this->formvars['gle_scrollposition_' . $this->formvars['selected_layer_id']] . '">
 						<input name="search" type="hidden" value="true">';
 	  	if($this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
 				echo '<a href="javascript:currentform.go.value=\'get_last_search\';currentform.submit();" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" style="margin: 5px" aria-hidden="true"></i></a>';

@@ -1194,7 +1194,7 @@
 					<div class="placeholder" title="' . $alias . '" style="' . $select_width . '">
 						<img src="data:image/jpg;base64,' . base64_encode(@file_get_contents($auswahlfeld_image)) . '">
 						<span>' . $auswahlfeld_output . '</span>
-						<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist>
+						<input type="hidden" name="' . $fieldname . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '"><!-- falls das Attribut ein visibility-changer ist-->
 					</div>
 				</div>';
 			$auswahlfeld_output = '';

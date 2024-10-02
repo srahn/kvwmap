@@ -596,7 +596,7 @@ function init(){
 			document.getElementById('canvas').addEventListener('touchstart', touchstart, false);		//touchstart
 			document.getElementById('canvas').addEventListener('touchmove', touchmove, false);		//touchmove
 			document.getElementById('canvas').addEventListener('touchend', touchend, false);		//touchend
-			document.getElementById('canvas').addEventListener('touchcancel', prevent, false);		//touchcancel
+			document.getElementById('canvas').addEventListener('touchcancel', prevent1, false);		//touchcancel
   }
   else {
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
