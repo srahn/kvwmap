@@ -17,6 +17,13 @@ function go_switch_mobile($go)
 			}
 			break;
 
+		case 'mobile_get_data_version': {
+			$GUI->sanitize(['selected_layer_id' => 'int']);
+			$result = $GUI->mobile_get_data_version();
+			echo json_encode($result);
+		}
+		break;
+
 		case 'mobile_get_pmtiles_style': {
 				$file = '/var/www/data/pmtiles/Flurstuecke_Style.json';
 				header('Content-Type: application/json; charset=utf-8');
