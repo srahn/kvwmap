@@ -6,6 +6,7 @@
 	* mobile_delete_images
 	* mobile_drop_layer_sync
 	* mobile_drop_layer_sync_all
+	* mobile_get_data_version
 	* mobile_get_layers 
 	* mobile_get_stellen
 	* mobile_prepare_layer_sync
@@ -92,6 +93,10 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 				$attributes = $mapDB->read_layer_attributes(
 					$layer_id,
 					$layerdb,
+					null, // $privileges['attributenames'],
+					false,
+					true
+				);
 					$privileges['attributenames'],
 					false, // all_languages
 					true, // recursive
@@ -176,6 +181,31 @@ $GUI->mobile_get_data_version = function () use ($GUI) {
 	);
 };
 
+$GUI->mobile_get_data_version = function () use ($GUI) {
+	include_once(CLASSPATH . 'Layer.php');
+	$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
+	$sql = "
+		SELECT
+			gdi_md5_agg() WITHIN GROUP (ORDER BY tab) AS data_version
+		FROM
+			(
+				" . $layer->get('pfad') . "
+			) tab
+	";
+	$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
+	if ($ret[0]) {
+		return array(
+			'success' => false,
+			'err_msg' => err_msg($GUI->script_name, __LINE__, $sql)
+		);
+	}
+	$rs = pg_fetch_array($ret[1]);
+	return array(
+		'success' => true,
+		'dataVersion' => $rs['data_version']
+	);
+};
+
 $GUI->mobile_sync = function () use ($GUI) {
 	$deblogdir = LOGPATH . 'kvmobile/';
 	$deblogfile = $GUI->user->login_name . '_debug_log.html';
@@ -207,6 +237,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	}
 
 	$GUI->formvars['client_deltas'] = json_decode(file_get_contents($_FILES['client_deltas']['tmp_name']));
+	unset($GUI->formvars['passwort']);
 	unset($GUI->formvars['passwort']);
 	$GUI->deblog->write('Client Deltas formvars: ' . print_r($GUI->formvars, true));
 	$GUI->deblog->write('Client Deltas file name: ' . $_FILES['client_deltas']['tmp_name']);
@@ -1173,7 +1204,23 @@ $GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($G
  * ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
  * to move the uploaded images to layers document path
  */
+/**
+ * ToDo: Use function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db)
+ * to move the uploaded images to layers document path
+ */
 $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
+	$deblogdir = LOGPATH . 'kvmobile/';
+	$deblogfile = $GUI->user->login_name . '_debug_log.html';
+	if (!is_dir($deblogdir)) {
+		if (!mkdir($deblogdir, 0770, true)) {
+			return array(
+				'success' => false,
+				'err_msg' => 'Logverzeichnis ' . $deblogdir . ' konnte nicht angelegt werden.'
+			);
+		}
+	}
+	$GUI->deblog = new LogFile($deblogdir . $deblogfile, 'html', 'kvmobile Logfile für Nutzer: ' . $GUI->user->Vorname . ' ' . $GUI->user->Name . '(' . $GUI->user->login_name . ')', 'Debug: ' . date("Y-m-d H:i:s"));
+
 	$deblogdir = LOGPATH . 'kvmobile/';
 	$deblogfile = $GUI->user->login_name . '_debug_log.html';
 	if (!is_dir($deblogdir)) {
@@ -1190,16 +1237,21 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (intval($layer_id) == 0) {
 		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
 		$GUI->deblog->write($msg);
+		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
+			"msg" => $msg
 			"msg" => $msg
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
 	if (count($layer) == 0) {
 		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
+		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
 		return array(
 			"success" => false,
+			"msg" => $msg
 			"msg" => $msg
 		);
 	}
@@ -1215,8 +1267,11 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if ($files['image'] == '') {
 		$msg = 'Es wurde keine Datei hochgeladen!';
 		$GUI->deblog->write($msg);
+		$msg = 'Es wurde keine Datei hochgeladen!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
+			"msg" => $msg
 			"msg" => $msg
 		);
 	}
@@ -1224,8 +1279,11 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (file_exists($doc_path . $files['image']['name'])) {
 		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
 		$GUI->deblog->write($msg);
+		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
+		$GUI->deblog->write($msg);
 		return array(
 			"success" => true,
+			"msg" => $msg
 			"msg" => $msg
 		);
 	}
@@ -1236,10 +1294,13 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 		$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 	}
 	else {
+	}
+	else {
 		$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
 		$success = true;
 		$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 	}
+	$GUI->deblog->write($msg);
 	$GUI->deblog->write($msg);
 	return array(
 		"success" => $success,
