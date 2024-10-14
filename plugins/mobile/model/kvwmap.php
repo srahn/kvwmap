@@ -97,14 +97,6 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 					false,
 					true
 				);
-					$privileges['attributenames'],
-					false, // all_languages
-					true, // recursive
-					false, // get_default
-					true, // replace
-					array('options') // replace_only
-				);
-				// echo '<p>attributes: ' . print_r($attributes, true);
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
 				for ($j = 0; $j < count($attributes['name']); $j++) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
