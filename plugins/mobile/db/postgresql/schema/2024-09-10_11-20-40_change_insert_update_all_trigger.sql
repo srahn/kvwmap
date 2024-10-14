@@ -1,26 +1,4 @@
 BEGIN;
-  CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
-  CREATE TABLE syncs_all (
-    id serial NOT NULL PRIMARY KEY,
-    client_id character varying,
-    username character varying,
-    client_time timestamp without time zone,
-    pull_from_version integer,
-    pull_to_version integer
-  );
-
-  CREATE TABLE deltas_all (
-    version serial NOT NULL PRIMARY KEY,
-    uuid uuid,
-    client_id character varying,
-    sql text,
-    schema_name character varying,
-    table_name character varying,
-    action character varying,
-    action_time timestamp without time zone
-  );
-
   --
   -- INSERT Trigger
   --
@@ -34,6 +12,8 @@ BEGIN;
       part TEXT;
       search_path_schema TEXT;
       version_column TEXT;
+	  uuid UUID;
+	  action_time timestamp without time zone;
     BEGIN
       _query := current_query();
 
@@ -105,8 +85,19 @@ BEGIN;
         --RAISE notice 'sql nach entfernen von RETURNING uuid %', _sql;
       END IF;
 
-      INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (current_setting('public.client_id'), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'insert');
-      RAISE NOTICE 'Neuen Datensatz mit Version % für Synchronisierung all und client_id % eingetragen.', new_version, current_setting('public.client_id');
+	  -- uuid aus current_setting('public.uuid')
+	  uuid = (SELECT current_setting('public.uuid', true));
+
+	  -- action_time aus current_setting('public.action_time') oder now()
+	  action_time = (SELECT COALESCE(
+		current_setting('public.action_time', true)::timestamp without time zone,
+		now()
+	  ));
+
+      INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action, action_time, uuid) VALUES (current_setting('public.client_id', true), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'insert', action_time, uuid);
+
+      RAISE NOTICE 'Neuen Datensatz mit Version % in Tabelle deltas_all eingetragen.', new_version;
+	  --RAISE NOTICE 'Version: %, action: insert, action_time: %, client_id: %, uuid: %, sql: %', new_version, action_time, current_setting('public.client_id', true), uuid, _sql;
 
       RETURN NEW;
     END;
@@ -126,7 +117,11 @@ BEGIN;
       part TEXT;
       search_path_schema TEXT;
       version_column TEXT;
-    BEGIN
+	  uuid UUID;
+	  updated_at timestamp without time zone;
+	  updated_at_client timestamp without time zone;
+	  action_time timestamp without time zone;
+	BEGIN
       _query := current_query();
 
       --raise notice '_query: %', _query;
@@ -175,64 +170,32 @@ BEGIN;
         IF version_column IS NOT NULL THEN
           _sql := kvw_insert_str_after(_sql, 'version = ' || new_version || ', ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' set ');
           --RAISE NOTICE 'sql nach insert version value %', _sql;
-        END IF;
+        END IF;		
 
-        INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (current_setting('public.client_id'), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'update');
+		-- uuid aus current_setting oder sql ziehen, nach where Part nach uuid, davon Part nach =, davon Part nach '
+		uuid = (SELECT COALESCE(
+		  current_setting('public.uuid', true),
+		  SPLIT_PART(SPLIT_PART(SPLIT_PART(SUBSTRING(_sql, POSITION('where' IN LOWER(_sql)) + 6), 'uuid', '2'), '=', 2), '''', 2)
+		));
 
-        RAISE NOTICE 'Änderung mit Version % für Synchronisierung all und client_id % eingetragen.', new_version, current_setting('public.client_id');
+		-- action_time aus current_setting('public.action_time'), updated_at_client, updated_at or now()
+		updated_at_client = (SELECT (regexp_matches(_sql, 'updated_at_client\s*=\s*''([^'']*)'''))[1])::timestamp without time zone;
+		updated_at = (SELECT (regexp_matches(_sql, 'updated_at\s*=\s*''([^'']*)'''))[1])::timestamp without time zone;
+		action_time = (SELECT COALESCE(
+		  current_setting('public.action_time', true)::timestamp without time zone,
+		  updated_at_client,
+		  updated_at,
+		  now()
+		)::timestamp without time zone);
+
+		INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action, uuid, action_time) VALUES
+		(current_setting('public.client_id', true), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'update', uuid, action_time);
+
+        RAISE NOTICE 'Änderung mit Version % in Tabelle deltas_all eingetragen.', new_version;
+		--RAISE NOTICE 'Version: %, action: update, action_time: %, uuid: %, client_id: %, sql: %', new_version, action_time, uuid, current_setting('public.client_id', true), _sql;
       END IF;
 
       RETURN NEW;
-    END;
-  $$
-  LANGUAGE plpgsql VOLATILE COST 100;
-
-
-  --
-  -- DELETE Trigger
-  --
-  CREATE OR REPLACE FUNCTION create_delete_delta()
-  RETURNS trigger AS
-  $$
-    DECLARE
-      new_version integer := (SELECT (coalesce(max(version), 1) + 1)::integer FROM deltas_all);
-      _query TEXT;
-      _sql TEXT;
-      part TEXT;
-      search_path_schema TEXT;
-    BEGIN
-      _query := current_query();
-
-      --RAISE NOTICE 'Current Query unverändert: %', _query;
-      foreach part in array string_to_array(_query, ';')
-      loop
-        -- replace horizontal tabs, new lines and carriage returns
-        part := trim(regexp_replace(part, E'[\\t\\n\\r]+', ' ', 'g'));
-
-        IF strpos(lower(part), 'set search_path') = 1 THEN
-          search_path_schema := trim(lower(split_part(split_part(part, '=', 2), ',', 1)));
-          --RAISE notice 'schema in search_path %', search_path_schema;
-        END IF;
-
-        part := replace(part, ' \"' || TG_TABLE_NAME || '\" ', ' ' || TG_TABLE_NAME || ' ');
-        --RAISE notice 'Anfuehrungsstriche von Tabellennamen entfernt: %', part;
-
-        IF strpos(lower(part), 'delete from ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME) = 1 OR (strpos(lower(part), 'delete from ' || TG_TABLE_NAME) = 1 AND TG_TABLE_SCHEMA = search_path_schema) THEN
-          _sql := part;
-        END IF;
-      end loop;
-      --raise notice 'sql nach split by ; und select by update: %', _sql;
-
-      _sql := replace(_sql, ' ' || TG_TABLE_NAME || ' ', ' ' || TG_TABLE_SCHEMA || '.' || TG_TABLE_NAME || ' ');
-      --RAISE notice 'sql nach replace tablename by schema and tablename: %', _sql;
-
-      --_sql := split_part(_sql, ' WHERE ', 1) || ' WHERE uuid = ''' || OLD.uuid || '''';
-      --RAISE NOTICE 'sql ohne replace where by uuid: %', _sql;
-
-      INSERT INTO deltas_all (sql, schema_name, table_name, action) VALUES (_sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'delete');
-      --RAISE NOTICE 'Löschung mit Version % für Synchronisierung eingetragen.', new_version;
-
-      RETURN OLD;
     END;
   $$
   LANGUAGE plpgsql VOLATILE COST 100;

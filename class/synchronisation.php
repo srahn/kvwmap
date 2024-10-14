@@ -104,26 +104,26 @@ class synchro {
 		$this->user = $user;
 		$this->database = $database;
 	}
-	
+
 	function export_layer_tables($export_layerset, $formvars) {
 		# geht bisher nur mit Layern mit einer Tabelle
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->count = 0;
-		for($i = 0; $i < count($export_layerset); $i++) {
+		for ($i = 0; $i < count($export_layerset); $i++) {
 			$this->commands = array();
 			$layerdb = $mapDB->getlayerdatabase($export_layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->read_layer_attributes($export_layerset[$i]['Layer_ID'], $layerdb, NULL);
-			$currenttime=date('Y-m-d_H-i-s',time());
-			$this->trans_id[$i] = $this->user->id."_".$currenttime."_".$export_layerset[$i]['Layer_ID'];
-			$where = " WHERE ST_WITHIN(st_transform(".$attributes['all_table_names'][0].".".$attributes['the_geom'].", ".$this->user->rolle->epsg_code."), st_geomfromtext('".$formvars['newpathwkt']."', ".$this->user->rolle->epsg_code."))";
-			if($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['Layer_ID'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
-				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$this->trans_id[$i].".sql ".$this->database->dbName;
+			$currenttime = date('Y-m-d_H-i-s', time());
+			$this->trans_id[$i] = $this->user->id . "_" . $currenttime . "_" . $export_layerset[$i]['Layer_ID'];
+			$where = " WHERE ST_WITHIN(st_transform(" . $attributes['all_table_names'][0] . "." . $attributes['the_geom'] . ", " . $this->user->rolle->epsg_code . "), st_geomfromtext('" . $formvars['newpathwkt'] . "', " . $this->user->rolle->epsg_code . "))";
+			if ($this->export_layer_table_data($mapDB, $this->trans_id[$i], $attributes, $layerdb, $export_layerset[$i]['Layer_ID'], $where, $formvars['leeren'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
+				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $this->trans_id[$i] . ".sql " . $this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
-				foreach($this->commands AS $command) {
+				foreach ($this->commands as $command) {
 					exec($command, $output, $ret);
 				}
 			}
-			if($ret == 0) {
+			if ($ret == 0) {
 				$this->result['count'] = $this->count;
 			}
 		}
@@ -131,21 +131,21 @@ class synchro {
 
 	function import_layer_tables($import_layerset, $formvars) {
 		# geht bisher nur mit Layern mit einer Tabelle
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$this->newcount = 0;
 		$this->oldcount = 0;
-		for($i = 0; $i < count($import_layerset); $i++) {
+		for ($i = 0; $i < count($import_layerset); $i++) {
 			$this->commands = array();
 			$layerdb = $mapDB->getlayerdatabase($import_layerset[$i]['Layer_ID'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['Layer_ID'], $layerdb, NULL);
-			if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
-				$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$import_layerset[$i]['Layer_ID'].".sql ".$this->database->dbName;
+			if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['Layer_ID'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
+				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $import_layerset[$i]['Layer_ID'] . ".sql " . $this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
-				foreach($this->commands AS $command) {
+				foreach ($this->commands as $command) {
 					exec($command, $output, $ret);
 				}
 			}
-			if($ret == 0) {
+			if ($ret == 0) {
 				$this->result['newcount'] = $this->newcount;
 				$this->result['oldcount'] = $this->oldcount;
 			}
@@ -154,21 +154,21 @@ class synchro {
 
 	function export_layer_table_data($mapDB, $trans_id, $attributes, $layerdb, $layer_id, $where, $truncate, $withimages, $username, $passwort) {
 		$this->already_exported_layers[] = $layer_id;
-		$sql = "UPDATE ".$attributes['all_table_names'][0]." SET lock = '".$trans_id."|'||oid ".$where." AND lock IS NULL";
+		$sql = "UPDATE " . $attributes['all_table_names'][0] . " SET lock = '" . $trans_id . "|'||oid " . $where . " AND lock IS NULL";
 		#echo $sql.'<br>';
 		$ret = $layerdb->execSQL($sql, 4, 0);
 		$sql = "SELECT * FROM " . $attributes['all_table_names'][0];
-		$sql.= $where;
-		$sql.= " AND '".$trans_id."' = split_part(lock, '|', 1)";			# nur die mit dem entsprechenden Lock abfragen
+		$sql .= $where;
+		$sql .= " AND '" . $trans_id . "' = split_part(lock, '|', 1)";			# nur die mit dem entsprechenden Lock abfragen
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		if(pg_num_rows($ret[1]) > 0) {
-			$fp = fopen(SYNC_PATH.$trans_id.".sql", "a");
-			fwrite($fp, "SET datestyle TO 'German';".chr(10));
-			if($truncate == 'on') {
-				fwrite($fp, "DELETE FROM ".$layerdb->schema.".".$attributes['all_table_names'][0].";".chr(10));
+		if (pg_num_rows($ret[1]) > 0) {
+			$fp = fopen(SYNC_PATH . $trans_id . ".sql", "a");
+			fwrite($fp, "SET datestyle TO 'German';" . chr(10));
+			if ($truncate == 'on') {
+				fwrite($fp, "DELETE FROM " . $layerdb->schema . "." . $attributes['all_table_names'][0] . ";" . chr(10));
 			}
-			fwrite($fp, "COPY ".$layerdb->schema.".".$attributes['all_table_names'][0]." FROM STDIN WITH DELIMITER AS '~' CSV;".chr(10));
+			fwrite($fp, "COPY " . $layerdb->schema . "." . $attributes['all_table_names'][0] . " FROM STDIN WITH DELIMITER AS '~' CSV;" . chr(10));
 
 			# abhängige Layer auch exportieren, hier erstmal die Verknüpfungsattribute für jeden verknüpften Layer zusammen sammeln
 			$j = 0;
@@ -176,11 +176,11 @@ class synchro {
 				if (in_array($attributes['form_element_type'][$i], array('SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'))) {
 					$options = explode(';', $attributes['options'][$i]);
 					$subform = explode(',', $options[0]);
-					if(!in_array($subform[0], $this->already_exported_layers)) {
+					if (!in_array($subform[0], $this->already_exported_layers)) {
 						$subform_layer[$j]['id'] = $subform[0];
-						if($attributes['form_element_type'][$i] == 'SubFormEmbeddedPK')$minus = 1;
+						if ($attributes['form_element_type'][$i] == 'SubFormEmbeddedPK') $minus = 1;
 						else $minus = 0;
-						for($k = 1; $k < count($subform)-$minus; $k++) {
+						for ($k = 1; $k < count($subform) - $minus; $k++) {
 							$subform_layer[$j]['subform_attribute'][$subform[$k]] = array();
 						}
 						$j++;
@@ -188,45 +188,45 @@ class synchro {
 				}
 			}
 			$count = 0;
-			while($rs = pg_fetch_assoc($ret[1])) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
 				$count++;
 				$this->count++;
-				for($k = 0; $k < count($rs); $k++) {
-					if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != '') { # Bilder vom Server holen und auf lokalem Server speichern
+				for ($k = 0; $k < count($rs); $k++) {
+					if ($withimages == 'on' and $attributes['form_element_type'][key($rs)] == 'Dokument' and $rs[key($rs)] != '') { # Bilder vom Server holen und auf lokalem Server speichern
 						$this->imagecount++;
-						$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
-						$name_array=explode('.', $rs[key($rs)]);
+						$image_string = file_get_contents($attributes['options'][key($rs)] . $rs[key($rs)] . '&username=' . $username . '&passwort=' . $passwort);
+						$name_array = explode('.', $rs[key($rs)]);
 						$datei_erweiterung = array_pop($name_array);
-						$filename = CUSTOM_IMAGE_PATH.rand(10000, 1000000).'.'.$datei_erweiterung;
+						$filename = CUSTOM_IMAGE_PATH . rand(10000, 1000000) . '.' . $datei_erweiterung;
 						$new_image = fopen($filename, 'w');
 						fwrite($new_image, $image_string);
 						fclose($new_image);
 						$rs[key($rs)] = $filename;
 					}
-					if($k > 0) {
+					if ($k > 0) {
 						fwrite($fp, '~');
 					}
 					fwrite($fp, $rs[key($rs)]);
 					# abhängige Layer auch exportieren, hier dann die Werte der Verknüpfungsattribute zu einzelnen WHERE-Bedingungen zusammen bauen
-					for($j = 0; $j < count($subform_layer); $j++) {
-						if(is_array($subform_layer[$j]['subform_attribute'][key($rs)])) {
-							$subform_layer[$j]['where'][$count] .= key($rs)." = '".$rs[key($rs)]."' AND "; 
+					for ($j = 0; $j < count($subform_layer); $j++) {
+						if (is_array($subform_layer[$j]['subform_attribute'][key($rs)])) {
+							$subform_layer[$j]['where'][$count] .= key($rs) . " = '" . $rs[key($rs)] . "' AND ";
 						}
 					}
 					next($rs);
 				}
 				fwrite($fp, chr(10));
 			}
-			fwrite($fp, "\.".chr(10));
+			fwrite($fp, "\." . chr(10));
 			fclose($fp);
 			# abhängige Layer auch exportieren, hier wird diese Funktion für jeden verknüpften Layer rekursiv mit der zusammengesetzten WHERE-Bedingung aufgerufen
 			for ($j = 0; $j < count($subform_layer); $j++) {
-				$subform_layer[$j]['where_gesamt'] = " WHERE (".implode('1=1 OR ', $subform_layer[$j]['where'])." 1=1)";
+				$subform_layer[$j]['where_gesamt'] = " WHERE (" . implode('1=1 OR ', $subform_layer[$j]['where']) . " 1=1)";
 				$attributes = $mapDB->read_layer_attributes($subform_layer[$j]['id'], $layerdb, NULL);
-				$currenttime=date('Y-m-d_H-i-s',time());
-				$trans_id = $this->user->id."_".$currenttime."_".$subform_layer[$j]['id'];
-				if($this->export_layer_table_data($mapDB, $trans_id, $attributes, $layerdb, $subform_layer[$j]['id'], $subform_layer[$j]['where_gesamt'], $truncate, $withimages, $username, $passwort)) {
-					$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$trans_id.".sql ".$this->database->dbName;
+				$currenttime = date('Y-m-d_H-i-s', time());
+				$trans_id = $this->user->id . "_" . $currenttime . "_" . $subform_layer[$j]['id'];
+				if ($this->export_layer_table_data($mapDB, $trans_id, $attributes, $layerdb, $subform_layer[$j]['id'], $subform_layer[$j]['where_gesamt'], $truncate, $withimages, $username, $passwort)) {
+					$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $trans_id . ".sql " . $this->database->dbName;
 				}
 			}
 			return true;
@@ -238,33 +238,33 @@ class synchro {
 		$this->already_imported_layers[] = $layer_id;
 		$layername = $layername ?? $layer_id;
 		# erst alle neuen Datensätze
-		$sql = "SELECT * FROM ".$attributes['all_table_names'][0];
+		$sql = "SELECT * FROM " . $attributes['all_table_names'][0];
 		//for($j = 1; $j < count($attributes['all_table_names']); $j++) {
-			//$sql.= ", ".$attributes['all_table_names'][$j];
+		//$sql.= ", ".$attributes['all_table_names'][$j];
 		//}
-		$sql.= " WHERE lock IS NULL";
+		$sql .= " WHERE lock IS NULL";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
 
-		$fp = fopen(SYNC_PATH.$layer_id.".sql", "w");
-		fwrite($fp, "SET datestyle TO 'German';".chr(10));
-		fwrite($fp, "COPY ".$layerdb->schema.".".$attributes['all_table_names'][0]." FROM STDIN WITH DELIMITER AS '~' CSV;".chr(10));
+		$fp = fopen(SYNC_PATH . $layer_id . ".sql", "w");
+		fwrite($fp, "SET datestyle TO 'German';" . chr(10));
+		fwrite($fp, "COPY " . $layerdb->schema . "." . $attributes['all_table_names'][0] . " FROM STDIN WITH DELIMITER AS '~' CSV;" . chr(10));
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$this->newcount++;
 			for ($k = 0; $k < count($rs); $k++) {
-				if ($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
+				if ($withimages == 'on' and $attributes['form_element_type'][key($rs)] == 'Dokument' and $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
 					$i++;
-					$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
-					$name_array=explode('.', $rs[key($rs)]);
+					$image_string = file_get_contents($attributes['options'][key($rs)] . $rs[key($rs)] . '&username=' . $username . '&passwort=' . $passwort);
+					$name_array = explode('.', $rs[key($rs)]);
 					$datei_erweiterung = array_pop($name_array);
-					$filename = CUSTOM_IMAGE_PATH.rand(10000, 1000000).'.'.$datei_erweiterung;
+					$filename = CUSTOM_IMAGE_PATH . rand(10000, 1000000) . '.' . $datei_erweiterung;
 					$new_image = fopen($filename, 'w');
 					fwrite($new_image, $image_string);
 					fclose($new_image);
 					$rs[key($rs)] = $filename . '&original_name=' . $layername . '_' . $i . '.' . $datei_erweiterung;
 				}
-				if($k > 0) {
+				if ($k > 0) {
 					fwrite($fp, '~');
 				}
 				fwrite($fp, $rs[key($rs)]);
@@ -272,70 +272,69 @@ class synchro {
 			}
 			fwrite($fp, chr(10));
 		}
-		fwrite($fp, "\.".chr(10));
+		fwrite($fp, "\." . chr(10));
 
 		# dann die bearbeiteten
-		$sql = "SELECT * FROM ".$attributes['all_table_names'][0];
+		$sql = "SELECT * FROM " . $attributes['all_table_names'][0];
 		//for($j = 1; $j < count($attributes['all_table_names']); $j++) {
 		//	$sql.= ", ".$attributes['all_table_names'][$j];
 		//}
-		$sql.= " WHERE lock IS NOT NULL";
+		$sql .= " WHERE lock IS NOT NULL";
 		#echo $sql;
 		$ret = $layerdb->execSQL($sql, 4, 0);
-		$fp = fopen(SYNC_PATH.$layer_id.".sql", "a");
-		while($rs = pg_fetch_assoc($ret[1])) {
-			if($rs['lock'] != 'bereits übertragen') {
+		$fp = fopen(SYNC_PATH . $layer_id . ".sql", "a");
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			if ($rs['lock'] != 'bereits übertragen') {
 				$this->oldcount++;
-				$trans_id = $rs['lock']; 
-				fwrite($fp, "UPDATE ".$layerdb->schema.".".$attributes['all_table_names'][0]." SET ");
-				for($k = 0; $k < count($rs); $k++) {
-					if($withimages == 'on' AND $attributes['form_element_type'][key($rs)] == 'Dokument' AND $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
+				$trans_id = $rs['lock'];
+				fwrite($fp, "UPDATE " . $layerdb->schema . "." . $attributes['all_table_names'][0] . " SET ");
+				for ($k = 0; $k < count($rs); $k++) {
+					if ($withimages == 'on' and $attributes['form_element_type'][key($rs)] == 'Dokument' and $rs[key($rs)] != '') {			# Bilder vom Server holen und auf lokalem Server speichern
 						$i++;
-						$image_string = file_get_contents($attributes['options'][key($rs)].$rs[key($rs)].'&username='.$username.'&passwort='.$passwort);
-						$name_array=explode('.', $rs[key($rs)]);
+						$image_string = file_get_contents($attributes['options'][key($rs)] . $rs[key($rs)] . '&username=' . $username . '&passwort=' . $passwort);
+						$name_array = explode('.', $rs[key($rs)]);
 						$datei_erweiterung = array_pop($name_array);
-						$filename = CUSTOM_IMAGE_PATH.rand(10000, 1000000).'.'.$datei_erweiterung;
+						$filename = CUSTOM_IMAGE_PATH . rand(10000, 1000000) . '.' . $datei_erweiterung;
 						$new_image = fopen($filename, 'w');
 						fwrite($new_image, $image_string);
 						fclose($new_image);
-						$rs[key($rs)] = $filename.'&original_name='.$layername.'_'.$i.'.'.$datei_erweiterung;
+						$rs[key($rs)] = $filename . '&original_name=' . $layername . '_' . $i . '.' . $datei_erweiterung;
 					}
-					if($k > 0) {
+					if ($k > 0) {
 						fwrite($fp, ',');
 					}
-					if(key($rs) == 'lock' OR $rs[key($rs)] == '') {
-						fwrite($fp, key($rs)."= NULL");							# lock wieder freigeben
-					}
-					else{
-						fwrite($fp, key($rs)."='".addslashes($rs[key($rs)])."'");
+					if (key($rs) == 'lock' or $rs[key($rs)] == '') {
+						fwrite($fp, key($rs) . "= NULL");							# lock wieder freigeben
+					} else {
+						fwrite($fp, key($rs) . "='" . addslashes($rs[key($rs)]) . "'");
 					}
 					next($rs);
 				}
-				fwrite($fp, " WHERE lock = '".$trans_id."';".chr(10));
+				fwrite($fp, " WHERE lock = '" . $trans_id . "';" . chr(10));
 			}
 		}
 		#die Datensätze in der Spalte lock als bereits übertragen kennzeichnen
-		$sql = "UPDATE ".$attributes['all_table_names'][0]." SET lock = 'bereits übertragen'";
+		$sql = "UPDATE " . $attributes['all_table_names'][0] . " SET lock = 'bereits übertragen'";
 		#echo $sql;
 		$ret1 = $layerdb->execSQL($sql, 4, 0);
 
 		# dann die Datensätze löschen, die exportiert wurden aber nicht wieder zurückgespielt
-		if($trans_id != '') {
+		if ($trans_id != '') {
 			$t_id = explode('|', $trans_id);
-			fwrite($fp, "DELETE FROM ".$layerdb->schema.".".$attributes['all_table_names'][0]." WHERE '".$t_id[0]."' = split_part(lock, '|', 1);".chr(10));
+			fwrite($fp, "DELETE FROM " . $layerdb->schema . "." . $attributes['all_table_names'][0] . " WHERE '" . $t_id[0] . "' = split_part(lock, '|', 1);" . chr(10));
 		}
 		fclose($fp);
 
 		# abhängige Layer auch importieren
-		for($i = 0; $i < count($attributes['name']); $i++) {
-			if(in_array($attributes['form_element_type'][$i], array('SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'))) {
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if (in_array($attributes['form_element_type'][$i], array('SubFormEmbeddedPK', 'SubFormPK', 'SubFormFK'))) {
 				$options = explode(';', $attributes['options'][$i]);
 				$subform = explode(',', $options[0]);
-				if(!in_array($subform[0], $this->already_imported_layers)) {
+				if (!in_array($subform[0], $this->already_imported_layers)) {
 					$subform_layer = $subform[0];
 					$attributes = $mapDB->read_layer_attributes($subform_layer, $layerdb, NULL);
-					if($this->import_layer_table_data($mapDB, $attributes, $layerdb, $subform_layer, '', $withimages, $username, $passwort)) {
-						$this->commands[] = POSTGRESBINPATH."psql -U ".$this->database->user." -f ".SYNC_PATH.$subform_layer.".sql ".$this->database->dbName;
+					if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $subform_layer, '', $withimages, $username, $passwort)) {
+						$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $subform_layer . ".sql " . $this->database->dbName;
 					}
 				}
 			}
@@ -462,7 +461,7 @@ class synchro {
 			$sql .= implode(
 				'; ',
 				array_map(
-					function($row) {
+					function ($row) {
 						return $row->sql;
 					},
 					$client_deltas->rows
@@ -478,7 +477,7 @@ class synchro {
 					client_id = '" . $client_id . "' AND
 					client_time = '" . $client_time . "' AND
 					username = '" . $username . "' AND
-					schema_name = '" . $schema_name ."' AND
+					schema_name = '" . $schema_name . "' AND
 					table_name = '" . $table_name . "' AND
 					pull_from_version = " . $pull_from_version . ";
 			";
@@ -519,7 +518,7 @@ class synchro {
 						client_id = '" . $client_id . "' AND
 						client_time = '" . $client_time . "' AND
 						username = '" . $username . "' AND
-						schema_name = '" . $schema_name ."' AND
+						schema_name = '" . $schema_name . "' AND
 						table_name = '" . $table_name . "' AND
 						pull_from_version = " . $pull_from_version . "
 				)
@@ -538,7 +537,7 @@ class synchro {
 			return $result;
 		}
 		$deltas = array();
-		while($rs = pg_fetch_assoc($res[1])) {
+		while ($rs = pg_fetch_assoc($res[1])) {
 			$deltas[] = $rs;
 		}
 
@@ -552,11 +551,11 @@ class synchro {
 				client_id = '" . $client_id . "' AND
 				client_time = '" . $client_time . "' AND
 				username = '" . $username . "' AND
-				schema_name = '" . $schema_name ."' AND
-				table_name = '" . $table_name ."' AND
+				schema_name = '" . $schema_name . "' AND
+				table_name = '" . $table_name . "' AND
 				pull_from_version = " . $pull_from_version . "
 		";
-		$log.=$sql;
+		$log .= $sql;
 		$this->database->gui->deblog->write('Frage Daten der Synchronisation ab: ' . $sql);
 		#echo '<br>Sql: ' . $sql;
 		$res = $this->database->execSQL($sql, 0, 1, true);
@@ -570,7 +569,7 @@ class synchro {
 			return $result;
 		}
 		$sync_data = array();
-		while($rs = pg_fetch_assoc($res[1])) {
+		while ($rs = pg_fetch_assoc($res[1])) {
 			$sync_data[] = $rs;
 		}
 
@@ -588,40 +587,72 @@ class synchro {
 	/**
 	 * Die Funktion syncronisiert im Gegensatz zu sync alle sync-Layer der aktuellen Stelle
 	 */
-	function sync_all($client_id, $username, $client_time, $client_deltas, $sync_layers) {
+	function sync_all($client_id, $username, $client_time, $last_delta_version, $client_deltas, $sync_layers) {
 		$this->database->gui->mobile_log->write('client_id: ' . $client_id);
 		$this->database->gui->mobile_log->write('client_time: ' . $client_time);
 		$this->database->gui->mobile_log->write('username: ' . $username);
 		$this->database->gui->mobile_log->write('client_deltas: ' . print_r($client_deltas, true));
 		$log = '';
-		$where_last_delta_versions = array_map(
-			function ($last_delta_version) {
-				return "(schema_name = '" . $last_delta_version->schemaName . "' AND " . " table_name = '" . $last_delta_version->tableName . "' AND version > " . $last_delta_version->version . ")";
-			},
-			$client_deltas->lastDeltaVersions
-		);
 
 		// Führe die Deltas einzeln aus wenn die Berechtigung dazu besteht und sammel die fehlerhaften ein
 		$failed_deltas = array();
-		foreach ($client_deltas->rows AS $row) {
+		foreach ($client_deltas->rows as $row) {
 			if ($this->sync_allowed($row, $sync_layers)) {
 				$later_update = $this->find_later_update($row);
 				if (!$later_update['success']) {
 					return $later_update;
 				}
-				if ($row->action === 'update' AND $later_update['exists']) {
-					// Führe den Update nicht aus.
-					// Es existiert ein Datensatz mit der gleichen uuid, die später als in dieser action_time aktualisiert wurde.
-					$this->database->gui->mobile_log->write('Update von Datensatz ' . $row->uuid . ' in Tablle ' . $row->schemaName . '.' . $row->tableName . ' ignorieren weil es einen späteren Update von ' . $later_update['updated_at'] . ' gibt der zeitlich nach ' . $row->actionTime . ' ausgeführt wurde.');
-				}
-				else {
-					$sql = $row->sql;
-					$this->database->gui->mobile_log->write('Exec Client-Delta with sql: ' . $sql);
-					#echo '<br>Sql: ' . $sql;
+				if ($row->action == 'update' AND $later_update['exists']) {
+					// Frage alle Deltas ab, die jünger sind als das Delta vom Client um sie nach dem Ausführen des Deltas vom Client auszuführen.
+					$sql = "
+						SELECT
+							*
+						FROM
+							deltas_all
+						WHERE
+							version > " . $last_delta_version . " AND
+							action = 'update' AND
+							action_time > '" . $row->action_time . "' AND
+							uuid = '" . $row->uuid . "'
+						ORDER BY version;
+					";
 					$res = $this->database->execSQL($sql, 0, 1, true);
 					if ($res[0]) {
 						$failed_deltas[] = $row;
-						$msg = 'Fehler bei der Ausführung des Deltas: ' . print_r($row, true) . ' Fehler: ' . $res[1];
+						$msg = 'Fehler bei der Abfrage der Deltas die jünger sind als das Delta vom Client: ' . print_r($row, true) . ' Fehler: ' . $res[1];
+						$this->database->gui->mobile_log->write($msg);
+						$this->database->gui->mobile_err->write($msg);
+						$log .= $msg;
+					}
+					$later_deltas = [];
+					while ($rs = pg_fetch_assoc($res[1])) {
+						$later_deltas[] = $rs;
+					}
+				}
+
+				// Ausführen des Deltas vom Client
+				$sql = "
+					SET public.client_id='" . $client_id . "';
+					SET public.action_time='" . $row->action_time . "';
+					SET public.uuid='" . $row->uuid . "';
+					" . $row->sql . "
+				";
+				$this->database->gui->mobile_log->write('Exec Client-Delta with sql: ' . $sql);
+				#echo '<br>Sql: ' . $sql;
+				$res = $this->database->execSQL($sql, 0, 1, true);
+				if ($res[0]) {
+					$failed_deltas[] = $row;
+					$msg = 'Fehler bei der Ausführung des Deltas: ' . print_r($row, true) . ' Fehler: ' . $res[1];
+					$this->database->gui->mobile_log->write($msg);
+					$this->database->gui->mobile_err->write($msg);
+					$log .= $msg;
+				}
+
+				// Ausführen der jüngeren Deltas
+				foreach ($later_deltas AS $later_delta) {
+					$res = $this->database->execSQL($later_delta['sql'], 0, 1, true);
+					if ($res[0]) {
+						$msg = 'Fehler bei der Ausführung des jüngeren Deltas ' . $later_delta['sql'] . ' Fehler: ' . $res[1];
 						$this->database->gui->mobile_log->write($msg);
 						$this->database->gui->mobile_err->write($msg);
 						$log .= $msg;
@@ -637,19 +668,21 @@ class synchro {
 			}
 		}
 
-		# Frage deltas von last_delta_versions an ab.
+		// Frage deltas größer last_delta_version an ab.
+		// aber nicht die inserts mit der client_id dieser Sync-Action
 		$sql = "
 			SELECT
 				*
 			FROM
 				deltas_all
 			WHERE
-				(
-					" . implode(" OR ", $where_last_delta_versions) . "
-				) AND
-				client_id != '" . $client_id . "'
+				version > " . $last_delta_version . " AND
+				NOT (action = 'insert' AND COALESCE(client_id, '') = '" . $client_id . "')
 			ORDER BY version;
 		";
+		$this->database->gui->mobile_log->write('Deltas aus deltas_all abfragen mit sql: ' . $sql);
+		#echo 'Deltas aus deltas_all abfragen mit sql: ' . $sql;
+		$res = $this->database->execSQL($sql, 0, 1, true);
 		$log .= $sql;
 		$deltas = array();
 		$pull_to_version = 0;
@@ -660,14 +693,37 @@ class synchro {
 			$deltas[] = $rs;
 		}
 
+		if ($pull_to_version > 0) {
+			$last_delta_version = $pull_to_version;
+		}
+		else {
+			$sql = "
+				SELECT
+					max(version) AS last_delta_version
+				FROM
+					deltas_all
+			";
+			#echo '<br>SQL zur Abfrage der höchsten deltas Version: ' . $sql;
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if ($ret[0]) {
+				return array(
+					"success" => false,
+					"err_msg" => "Die maximale Deltas-Version konnte nicht abgefragt werden! SQL: " . $sql . ' Meldung: ' . $ret['msg']
+				);
+			}
+			$rs = pg_fetch_assoc($ret['query']);
+			$last_delta_version = ($rs === false ? 0 : $rs['last_delta_version']);
+		}
+
 		# Lege Datensatz für Synchronisation auf dem Server an und trage ein:
 		# gepullt von bis und gepusht von
 		$sql = "
 			INSERT INTO syncs_all (client_id, username, client_time, pull_from_version, pull_to_version)
 			VALUES (
-			'" . $client_id . "',
+				'" . $client_id . "',
 				'" . $username . "',
 				'" . $client_time . "',
+				" . ($last_delta_version + 1) . ",
 				" . $pull_to_version . "
 			);
 		";
@@ -675,7 +731,7 @@ class synchro {
 		if ($res[0]) {
 			$result = array(
 				'success' => false,
-				'err_msg' => 'Fehler beim Eintragen des Sync-Vorgangs in syncs_all. ' . $res[1]
+				'err_msg' => 'Fehler beim Eintragen des Sync-Vorgangs in syncs_all mit sql: ' . $sql . ' Fehler: ' . $res[1]
 			);
 			$msg = 'Fehler mit result: ' . $res[1];
 			$this->database->gui->mobile_log->write($msg);
@@ -686,11 +742,7 @@ class synchro {
 		# Liefer deltas und syncro data ab
 		$result = array(
 			'success' => true,
-			'syncData' => array(
-				'client_id' => $client_id,
-				'client_time' => $client_time,
-				'pull_to_version' => $pull_to_version
-			),
+			'last_delta_version' => $last_delta_version,
 			'deltas' => $deltas,
 			'failed_deltas' => $failed_deltas,
 			'log'	=> $log
@@ -704,10 +756,13 @@ class synchro {
 			SELECT
 				updated_at
 			FROM
-				" . $row->schemaName . "." . $row->tableName . "
+				" . $row->schema_name . "." . $row->table_name . "
 			WHERE
 				uuid = '" . $row->uuid . "'::uuid AND
-				updated_at > '" . $row->actionTime . "'
+				(
+					updated_at > '" . $row->action_time . "' OR
+					updated_at_client > '" . $row->action_time . "'
+				)
 		";
 		$ret = $this->database->execSQL($sql, 0, 1, true);
 		if ($ret[0]) {
@@ -725,8 +780,7 @@ class synchro {
 				'success' => true,
 				'exists' => false
 			);
-		}
-		else {
+		} else {
 			$rs = pg_fetch_assoc($ret[1]);
 			return array(
 				'success' => true,
@@ -749,18 +803,16 @@ class synchro {
 			$sync_layers,
 			function ($layer) use ($delta) {
 				$privileg = intval($layer->get('privileg'));
-				return
+				return (
+					$layer->get('schema') == $delta->schema_name and
+					$layer->get('maintable') == $delta->table_name
+				) and
 					(
-						$layer->get('schema') == $delta->schema_name AND
-						$layer->get('maintable') == $delta->table_name
-					) AND
-					(
-						($delta->action == 'update') OR
-						($delta->action == 'insert' AND $privileg > 0) OR
-						($delta->action == 'delete' AND $privileg > 1)
+						($delta->action == 'update') or
+						($delta->action == 'insert' and $privileg > 0) or
+						($delta->action == 'delete' and $privileg > 1)
 					);
 			}
 		)) > 0;
 	}
 }
-?>
