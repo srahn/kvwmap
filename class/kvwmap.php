@@ -14379,7 +14379,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			);
       $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
-							<td>' . $rs['beschreibung'] . '</td>
+							<td>' . set_href($rs['beschreibung']) . '</td>
 						</tr>';
     }
 		$output .= '</table>';
