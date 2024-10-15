@@ -108,6 +108,7 @@ class GUI {
 	var $main;
 	var $trigger_functions;
 	var $custom_trigger_functions;
+	var $goNotExecutedInPlugins;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {

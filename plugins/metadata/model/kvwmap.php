@@ -7,8 +7,7 @@
 	}
 
 #	set_error_handler('exceptions_error_handler');
-
-	$GUI->metadatenSuchen = function() {
+	$GUI->metadatenSuchen = function() use ($GUI) {
 		$GUI->metadata = new metadata($GUI);
 		$GUI->metadaten = $GUI->metadata->findQuickSearch($GUI->formvars);
 		$GUI->main = PLUGINS . 'metadata/view/searchresults.php';
