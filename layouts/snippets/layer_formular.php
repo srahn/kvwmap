@@ -854,12 +854,14 @@ from
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
 								include_once(CLASSPATH . 'Layer.php');
-								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']); ?>
-								<ul><?
-								foreach($this->layer->charts AS $chart) { ?>
-									<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+								if ($this->layer) { ?>
+									<ul><?
+										foreach($this->layer->charts AS $chart) { ?>
+											<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+										} ?>
+									</ul><?php
 								} ?>
-								</ul>
 							</div>
 							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 								<i class="fa fa-pencil" aria-hidden="true" style="margin-top: 5px; margin-left: 5px"></i>

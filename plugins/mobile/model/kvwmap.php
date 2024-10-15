@@ -176,7 +176,6 @@ $GUI->mobile_sync = function () use ($GUI) {
 	if ($result['success']) {
 		$GUI->debug->write('mobile_sycn_parameter_valid', 5);
 		include_once(CLASSPATH . 'Layer.php');
-		$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
 		# Layer DB abfragen $layerdb = new ...
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);
@@ -184,7 +183,10 @@ $GUI->mobile_sync = function () use ($GUI) {
 		$GUI->debug->write('msg: ' . $result['msg'], 5);
 		$sync = new synchro($GUI->Stelle, $GUI->user, $layerdb);
 		$result = $sync->sync($GUI->formvars['device_id'], $GUI->formvars['username'], $layerdb->schema, $GUI->formvars['table_name'], $GUI->formvars['client_time'], $GUI->formvars['last_client_version'], $GUI->formvars['client_deltas']);
-		$result['version'] = $layer->get('version');
+		$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
+		if ($layer) {
+			$result['version'] = $layer->get('version');
+		}
 		$GUI->debug->write('sync abgeschlossen.');
 	}
 	else {
@@ -356,7 +358,7 @@ $GUI->mobile_sync_parameter_valide = function($params) use ($GUI) {
 
 /**
  * Check if the $params are valid for sync_all process
- * @param String[] $params - The parameter to check.
+ * @param string[] $params - The parameter to check.
  * They normaly has been sent from client and comes from formvars var of GUI object.
  * @return Any[] $result - An array with success, msg and err_msg. Success false indicates not valid parameter.
  */
@@ -1109,6 +1111,10 @@ $GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($G
 		include_once(CLASSPATH . 'synchronisation.php');
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find_by_id($GUI, $layer_id);
+		if (!$layer) {
+			$GUI->add_message('error', 'Der Layer mit der ID: ' . $layer_id . ' existiert nicht!');
+			return false;
+		}
 
 		$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
 		foreach ($results as $result) {
@@ -1151,14 +1157,14 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (intval($layer_id) == 0) {
 		return array(
 			"success" => false,
-			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			"msg" => "Sie müssen eine korrekte selected_layer_id angeben!"
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
 	if (count($layer) == 0) {
 		return array(
 			"success" => false,
-			"msg" => "Der Layer mit der ID " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
+			"msg" => "Der Layer mit der ID: " . $layer_id . " wurde in der Stelle mit ID: " . $GUI->Stelle->id . " nicht gefunden!"
 		);
 	}
 
@@ -1205,7 +1211,7 @@ $GUI->mobile_delete_images = function ($layer_id, $images) use ($GUI) {
 	if (intval($layer_id) == 0) {
 		return array(
 			"success" => false,
-			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			"msg" => "Sie müssen eine korrekte selected_layer_id angeben!"
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);

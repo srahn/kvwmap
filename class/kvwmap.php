@@ -1812,7 +1812,7 @@ echo '			</table>
 	 * - nurFremdeLayer
 	 * - nurNameLike
 	 * - class_load_level: 2 = für alle Layer die Klassen laden, 1 = nur für aktive Layer laden, 0 = keine Klassen laden
-	 * @param String $loadMapSource von wo die Daten für die map geladen werden sollen Post, File oder DataBase
+	 * @param string $loadMapSource von wo die Daten für die map geladen werden sollen Post, File oder DataBase
 	 * @param Array $layerset Array der Layer die geladen werden sollen. (optional) mit folgenden keys (siehe result set von function mapDb->read_Layer):
 	 *		list Layer[] Liste von Layerobjekten
 	 *		anzLayer Integer Anzahl der Layer in list
@@ -3785,9 +3785,30 @@ echo '			</table>
 	}
 
 	/**
-		Function check the csrf_token if the user has not logged in with this request
-		HTTP 405 Error is sent if csrf_token is not received or does not match the one in the session.
-	*/
+	 * This functino check if the $constraint to allow a tool script is fullfilled or not
+	 * If the constraint does not fit it or is unknown to the cases in the function it returns false. 
+	 * @param string $constraint. Possible values are only_cli, only_web
+	 * @return Boolean true = allowed, false = not allowed
+	 */
+	function is_tool_allowed($constraint) {
+		$http_response_code = http_response_code();
+		switch ($constraint) {
+			case 'only_cli' : {
+				return $http_response_code === false;
+			} break;
+			case 'only_web' : {
+				return $http_response_code !== false;
+			} break;
+			default : {
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * Function check the csrf_token if the user has not logged in with this request
+	 * HTTP 405 Error is sent if csrf_token is not received or does not match the one in the session.
+	 */
 	function check_csrf_token() {
 		#$csrf_token = filter_input(INPUT_GET, 'csrf_token', FILTER_SANITIZE_STRING);
 		$csrf_token = $this->formvars['csrf_token'];
@@ -8917,7 +8938,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 
 			include_once(CLASSPATH . 'Layer.php');
 			$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
-			if ($layer->get('write_mapserver_templates')) {
+			if ($layer AND $layer->get('write_mapserver_templates')) {
 				$layer->write_mapserver_templates($mapDB, 'Formular');
 			}
 
@@ -9000,7 +9021,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		$mapDB->updateLayer($formvars, $duplicate);
 		$layer = Layer::find_by_id($this, $formvars['selected_layer_id']);
-		$layer->update_datasources($this, ($formvars['datasource_ids'] ?? array()));
+		if ($layer) {
+			$layer->update_datasources($this, ($formvars['datasource_ids'] ?? array()));
+		}
 
 		if ($formvars['connectiontype'] == 6) {
 			if ($formvars['connection_id'] != '') {
@@ -9055,7 +9078,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					}
 					include_once(CLASSPATH . 'Layer.php');
 					$layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
-					if ($layer->get('write_mapserver_templates')) {
+					if ($layer AND $layer->get('write_mapserver_templates')) {
 						$layer->write_mapserver_templates($mapDB);
 					}
 					else {
@@ -9238,7 +9261,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find_by_id($this, $selected_layer_id);
-		if ($layer->get('Layer_ID') == 0) {
+		if (!$layer) {
 			return array(
 				'generic_layer_data_sql' => array(
 					'success' => false,
@@ -10326,7 +10349,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 * function requests oid's of features in zwischenablage from Layer with $layer_id
 	 * for current user with user_id in stelle stelle_id.
 	 * and returns it in an array. If layer_id is empty it returns oids from all features.
-	 * @param Integer layer_id
+	 * @param int layer_id
 	 * @return Array
 	 */
 	function get_gemerkte_oids($layer_id = null) {
@@ -11629,8 +11652,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 * checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
 	 * check;rechnungen;rechnungen;222792641=on
 	 * @param Object $pdfobject Ein PDF-Objekt welches fortgesetzt werden soll. Wenn keines angegeben ist wird eine neues angelegt.
-	 * @param Int $offsetx
-	 * @param Int $offsety
+	 * @param int $offsetx
+	 * @param int $offsety
 	 */
 	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
 		include_(CLASSPATH . 'datendrucklayout.php');
@@ -12512,7 +12535,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			include_(CLASSPATH . 'data_import_export.php');
 			$this->data_import_export = new data_import_export();
-			$this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+			// $this->formvars['filename'] = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+			$result = $this->data_import_export->export_exportieren($this->formvars, $this->Stelle, $this->user);
+			if (!$result['success']) {
+				$GUI->add_message('error', $err);
+				$GUI->daten_export();
+				return $result;
+			}
+			ob_end_clean();
+			header('Content-type: ' . $result['contenttype']);
+			header("Content-disposition:	attachment; filename=" . basename($result['exportfile']));
+			#header("Content-Length: ".filesize($exportfile));			# hat bei großen Datenmengen dazu geführt, dass der Download abgeschnitten wird
+			header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+			header('Pragma: public');
+			readfile($result['exportfile']);
 		}
 	}
 
@@ -14469,7 +14505,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
 		foreach ($crontab_lines AS $user => $lines) {
 			$crontab_file = $crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
-			echo '<br>' . $user . ':' . $crontab_file;
+			// echo '<br>' . $user . ':' . $crontab_file;
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -15972,7 +16008,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$the_geom = $layerset[$i]['attributes']['the_geom'];
 
 							if ($the_geom == NULL) {	# z.B. bei Rollenlayern ohne Geometriespalte
-								continue;
+								continue 2;
 							}
 
 							# Unterscheidung ob mit Suchradius oder ohne gesucht wird
@@ -17365,7 +17401,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$shared_layer_table_name = $shared_layer_table_name  . '_' .  strval(rand(100, 999));
 		}
 		$layer['maintable'] = $shared_layer_table_name;
-		$layer['pfad'] 				= str_replace(
+		$layer['pfad'] = str_replace(
 			$rollenlayer_table,
 			$shared_layer_table_name,
 			$layer['query']
@@ -17397,7 +17433,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Set formvars from layer
 		$this->formvars = array_merge($layer, $this->formvars);
-		$this->LayerAnlegen();
+
+		# Set geom_column from table
+		$geom_info = $pgdatabase->get_geom_column($schema_name, $table_name);
+		$this->formvars['geom_column'] = $geom_info['column'];
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
 		$shared_stellen = $this->Stelle->getStellen('', $this->user->id, '`show_shared_layers`');
@@ -18489,7 +18528,7 @@ class db_mapObj{
 	}
 
 	function getlayerdatabase($layer_id, $host) {
-		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id; exit;
+		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
 		if (@count($rs) == 0) {
@@ -18504,10 +18543,6 @@ class db_mapObj{
 			$this->rolle->language
 		);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
-		# Take hosts from layers connection_id, if empty from $host, if empty 'pgsql'
-		# ToDo: Check if host realy must be set here!
-		# It is not neccessary since get_credentials($connection_id) can be used to get host from everywhere
-		$layerdb->host = ($rs['host'] == '' ? ($host == '' ? 'pgsql' : $host) : $rs['host']);
 		if (!$layerdb->open($rs['connection_id'])) {
 			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
 			exit;
@@ -19416,8 +19451,7 @@ class db_mapObj{
 	function deleteLayer($id, $delete_maintable = false) {
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find_by_id($this->GUI, $id);
-
-		if ($layer->get('write_mapserver_templates')) {
+		if ($layer AND $layer->get('write_mapserver_templates')) {
 			$layer->remove_mapserver_templates($mapDB);
 		}
 

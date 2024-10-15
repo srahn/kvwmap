@@ -16,7 +16,7 @@
   /**
    * Request for the first outdated ressource and update it
    *  status:
-   * -1 - Abbruch wegem Fehler
+   * -1 - Abbruch wegen Fehler
    *  0 - Uptodate
    *  1 - Update gestartet
    *  2 - Download gestartet

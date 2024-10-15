@@ -143,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -679,7 +679,7 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {

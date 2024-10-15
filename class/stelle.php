@@ -84,6 +84,7 @@ class stelle {
 	var $style;
 	var $reset_password_text;
 	var $invitation_text;
+	public $pgdbhost = 'pgsql';
 
 	function __construct($id, $database) {
 		global $debug;
@@ -240,7 +241,11 @@ class stelle {
 				`ows_contentvoicephone`,
 				`ows_contentfacsimile`,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`,
+				`style`,
+				`show_shared_layers`,
+				`reset_password_text`,
+				`invitation_text`
 			FROM
 				stelle s
 			WHERE
@@ -2413,18 +2418,24 @@ class stelle {
 			'baseLayers' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					return $layer->get_baselayers_def($this->id);
+					if ($layer) {
+						// return only baselayer_def if layer has been found
+						return $layer->get_baselayers_def($this->id);
+					}
 				},
 				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
 			),
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					$layer->minScale = $layer2Stelle->get('minscale');
-					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
-					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
-					return $layer->get_overlays_def($this->id);
+					if ($layer) {
+						// return overlay_def only if layer has been found
+						$layer->minScale = $layer2Stelle->get('minscale');
+						$layer->maxScale = $layer2Stelle->get('maxscale');
+						$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
+						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+						return $layer->get_overlays_def($this->id);
+					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
 			)

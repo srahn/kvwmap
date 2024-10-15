@@ -2,19 +2,20 @@
 #############################
 # Klasse Ressource #
 #############################
+include_once(CLASSPATH . 'PgObject.php');
 
 class Ressource extends PgObject {
 	
 	static $schema = 'metadata';
 	static $tableName = 'ressources';
-	static $write_debug = false;
+	public $write_debug = false;
   public $has_subressources = false;
   public $has_ressource_ranges = false;
 
   public $sub_ressources = array();
 
 	function __construct($gui) {
-		$gui->debug->show('Create new Object ressource', Ressource::$write_debug);
+		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
 		include_(CLASSPATH . 'data_import_export.php');
     $this->gui->data_import_export = new data_import_export('gid');
@@ -172,14 +173,17 @@ class Ressource extends PgObject {
    * Download dataset or its subsets to download_path
    */
   function download_urls() {
-    $this->debug->show('Starte Funktion download_urls');
+    $this->debug->show('Starte Funktion download_urls', true);
     $download_urls = array();
     try {
       if ($this->get('download_url') != '') {
         $download_urls = array($this->get('download_url'));
       }
       else {
+        $this->debug->show('download_url ist leer.', true);
+        $this->get_subressources();
         if ($this->has_subressources) {
+          $this->debug->show('Hole urls aus subressources.', true);
           $download_urls = array_merge(
             $download_urls,
             array_merge(
@@ -202,16 +206,20 @@ class Ressource extends PgObject {
         );
       }
       $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
-      if (strpos($download_path, '/var/www/data/') !== 0) {
+      if (strpos($download_path, '/var/www/data/datentool/') !== 0) {
         return array(
           'success' => false,
-          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/ an.'
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/datentool/ an.'
         );
       }
       if (!file_exists($download_path)) {
         $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
         mkdir($download_path, 0777, true);
       }
+
+      array_map('unlink', glob($download_path . "/*"));
+      $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
+
       foreach ($download_urls AS $download_url) {
         $this->debug->show('Download ' . basename($download_url) . ' from url: ' . $download_url . ' to ' . $download_path, true);
         copy($download_url, $download_path . basename($download_url));
@@ -249,10 +257,55 @@ class Ressource extends PgObject {
    */
   function download_wfs() {
     // ToDo: implement on demand
-    return array(
-      'success' => true,
-      'msg' => 'Download von WFS erfolgreich beendet.'
+    $url = $this->get('download_url');
+    $params = array(
+      'Service' => 'WFS',
+      'Version' => '2.0.0',
+      'Request' => 'GetFeature',
+      'TypeNames' => $this->get('import_layer')
     );
+
+    try {
+      $download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
+
+      $this->debug->show('Download from URL:<br>' . $download_url, true);
+      if ($this->get('download_path') == '') {
+        return array(
+          'success' => false,
+          'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
+        );
+      }
+      $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+      if (strpos($download_path, '/var/www/data/datentool/') !== 0) {
+        return array(
+          'success' => false,
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/datentool/ an.'
+        );
+      }
+      if (!file_exists($download_path)) {
+        $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
+        mkdir($download_path, 0777, true);
+      }
+
+      array_map('unlink', glob($download_path . "/*"));
+      $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
+
+
+      $download_file = $this->get('import_table') . '.gml';
+      $this->debug->show('Download ' . $download_file . ' from url: ' . $download_url . ' to ' . $download_path, true);
+      copy($download_url, $download_path .  $download_file);
+
+      return array(
+        'success' => true,
+        'msg' => 'Download von WFS erfolgreich beendet.'
+      );
+    }
+    catch (Exception $e) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Download der Daten: ', $e->getMessage()
+      );
+    }
   }
 
   ##################
@@ -303,25 +356,38 @@ class Ressource extends PgObject {
       $this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
       mkdir($dest_path, 0777, true);
     }
+
     $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
-    $cmd = 'unzip -j -o ' . $download_path . '*.zip -d ' . $dest_path;
-    $this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
-    $descriptorspec = [
-      0 => ["pipe", "r"],  // stdin
-      1 => ["pipe", "w"],  // stdout
-      2 => ["pipe", "w"],  // stderr
-    ];
-    $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-    $line = __LINE__;
-    $stdout = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[2]);
-    #    exec($cmd, $output, $return_var);
-    if ($stderr != '') {
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+    $err_msg = array();
+    foreach (glob($download_path . '*') as $filename) {
+      if (finfo_file($finfo, $filename) == 'application/zip') {
+        echo '<br>filename: ' . $filename;
+        $cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
+        $this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+        $descriptorspec = [
+          0 => ["pipe", "r"],  // stdin
+          1 => ["pipe", "w"],  // stdout
+          2 => ["pipe", "w"],  // stderr
+        ];
+        $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+        $line = __LINE__;
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        #    exec($cmd, $output, $return_var);
+        if ($stderr != '') {
+          $err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
+        }
+      }
+    }
+    finfo_close($finfo);
+    if (count($err_msg) > 0) {
       return array(
         'success' => false,
-        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr
+        'msg' => implode(', ', $err_msg)
       );
     }
     return array(
@@ -336,7 +402,7 @@ class Ressource extends PgObject {
    * and remove the original zip files in destination directory
    */
   function unpack_unzip_unzip() {
-    $this->debug->show('Starte Funktion unpack_unzip', true);
+    $this->debug->show('Starte Funktion unpack_unzip_unzip', true);
     if ($this->get('dest_path') == '') {
       return array(
         'success' => false,
@@ -355,39 +421,118 @@ class Ressource extends PgObject {
       mkdir($dest_path, 0777, true);
     }
     $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
-    $cmd = 'unzip -j -o ' . $download_path . '*.zip -d ' . $dest_path;
-    $this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
-    $descriptorspec = [
-      0 => ["pipe", "r"],  // stdin
-      1 => ["pipe", "w"],  // stdout
-      2 => ["pipe", "w"],  // stderr
-    ];
-    $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
-    $line = __LINE__;
-    $stdout = stream_get_contents($pipes[1]);
-    fclose($pipes[1]);
-    $stderr = stream_get_contents($pipes[2]);
-    fclose($pipes[2]);
-    #    exec($cmd, $output, $return_var);
-    if ($stderr != '') {
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
+    $err_msg = array();
+    foreach (glob($download_path . '*') as $filename) {
+      if (finfo_file($finfo, $filename) == 'application/zip') {
+        echo '<br>filename: ' . $filename;
+        $cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
+        $this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+        $descriptorspec = [
+          0 => ["pipe", "r"],  // stdin
+          1 => ["pipe", "w"],  // stdout
+          2 => ["pipe", "w"],  // stderr
+        ];
+        $process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+        $line = __LINE__;
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+        #    exec($cmd, $output, $return_var);
+        if ($stderr != '') {
+          $err_msg[] = 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
+        }
+      }
+    }
+    finfo_close($finfo);
+    if (count($err_msg) > 0) {
       return array(
         'success' => false,
-        'msg' => 'Fehler bei unzip der Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr
+        'msg' => implode(', ', $err_msg)
       );
-    }
-
-    $entries = scandir($dest_path);
-    forEach($entries AS $entry) {
-      if (strtolower(pathinfo($entry, PATHINFO_EXTENSION)) == 'zip') {
-        // echo '<br>Unzip ' . $dest_path . $entry;
-        unzip($dest_path . $entry, $dest_path);
-        // echo '<br>Lösche ' . $dest_path . $entry;
-        unlink($dest_path . $entry);
-      }
     }
     return array(
       'success' => true,
       'msg' => 'Ressource erfolgreich ausgepackt.'
+    );
+  }
+
+  function unpack_unzip_filter_stelle_extent() {
+    $result = $this->unpack_unzip();
+    if (!$result['success']) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Auspacken in Methode unpack_unzip_filter_stelle_extent: ' . $result['msg']
+      );
+    }
+    $minx = $this->Stelle->MaxGeorefExt->minx;
+    $miny = $this->Stelle->MaxGeorefExt->miny;
+    $maxx = $this->Stelle->MaxGeorefExt->maxx;
+    $maxy = $this->Stelle->MaxGeorefExt->maxy;
+    $this->debug->show('Starte Funktion unpack_filter', true);
+    if ($this->get('dest_path') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Es ist kein relatives Verzeichnis zur Ablage der gefilterten Daten angegeben.'
+      );
+    }
+    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    if (strpos($dest_path, '/var/www/data/') !== 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Das Verzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+      );
+    }
+    if (!file_exists($dest_path)) {
+      $this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+      mkdir($dest_path, 0777, true);
+    }
+
+    $err_msg = array(); 
+    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    forEach(scandir($download_path) AS $entry) {
+      if (is_file($download_path . $entry)) {
+        $fp_dest = fopen($dest_path, $entry, "w");
+        if (!$fp_dest) {
+          $err_msg[] = 'Konnte gefilterte Datei ' . $entry . ' in Verzeichnis ' . $dest_path . ' nicht anlegen.';
+        }
+        $fp_src = fopen($download_path . $entry, "r");
+        if (!$fp_src) {
+          $err_msg[] = 'Konnte Datei ' . $download_path . $entry . ' nicht zum filtern öffnen.';
+        }
+        $i = 0;
+        while (($line = fgets($fp_src)) !== false AND $i < 100) {
+          $n = intval(substr($line, 5, 5)); // y
+          $e = intval(substr($line, 11, 5)); // x
+
+          // $np = explode('N', $s);
+          // $ep = explode('E', $np[1]);
+          // $n = $ep[0];
+          // $epk = explode(',', $ep[1]);
+          // $e = $epk[0];
+
+          if ($minx <= $e AND $e <= $maxx AND $miny <= $n AND $n <= $maxy) { 
+            fwrite($fp_dest, $line);
+            $i++;
+          }
+        }
+        fclose($fp_dest);
+        fclose($fp_src);
+      }
+    };
+
+    if (count($err_msg) > 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Filtern der Dateien aus dem Downloadverzeichnis ' . $download_path . ' in das Zielverzeichnis ' . $dest_path . ' für die Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Meldung: ' . implode(', ', $err_msg)
+      );
+    }
+
+    return array(
+      'success' => true,
+      'msg' => 'Ressource erfolgreich refiltert'
     );
   }
 
@@ -420,7 +565,10 @@ class Ressource extends PgObject {
       if (is_file($download_path . $entry)) {
         if (!copy($download_path . $entry, $dest_path . $entry)) {
           $err_msg[] = 'Fehler beim Kopieren der Datei ' . $entry;
-        };
+        }
+        else {
+          $this->debug->show('Datei ' . $download_path . $entry . ' nach ' . $dest_path . $entry . ' kopiert.', true);
+        }
       }
     };
 
@@ -437,13 +585,49 @@ class Ressource extends PgObject {
     );
   }
 
+  /**
+   * Die Methode prüft nur ob es das Verzeichnis zum manuellen Kopieren von Dateien gibt.
+   * Die Daten die da rein sollen müssen vom Admin selbst dort hinkopiert werden.
+   * Diese Methode gibt es um festlegen zu können wo sich die manuell hochgeladenen Dateien
+   * befinden sollen. Welche Dateien dort liegen sollen und ob sie vorhanden sind
+   * wird in der Importmethode abgefragt und geprüft.
+   */
+  function unpack_manual_copy() {
+    $this->debug->show('Starte Funktion manual_copy', true);
+    if ($this->get('dest_path') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
+      );
+    }
+    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    if (strpos($dest_path, '/var/www/data/') !== 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Das Zielverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+      );
+    }
+    if (!file_exists($dest_path)) {
+      $this->debug->show('Lege Zielverzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+      mkdir($dest_path, 0777, true);
+    }
+
+    $msg = 'Zielverzeichnis zum manuellen Kopieren vorhanden.';
+    $this->debug->show($msg, true);
+
+    return array(
+      'success' => true,
+      'msg' => $msg
+    );
+  }
+
   ##################
   # Import methods #
   ##################
   function import() {
     if ($this->get('import_method') == '') {
       return array(
-        'success' => true,
+        'success' => false,
         'msg' => 'Keine Importmethode definiert.'
       );
     }
@@ -478,25 +662,45 @@ class Ressource extends PgObject {
       );
     }
 
-    // get the files from dest_path
     $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
-    $files = array_filter(
-      scandir($dest_path),
-      function($entry) use ($dest_path) {
-        return is_file($dest_path . $entry);
-      }
-    );
 
-    $this->debug->show('Dateien im Verzeichnis:<br>' . implode('<br>', $files), true);
-    $result = required_shape_files_exists($files);
-    if (!$result['success']) { return $result; }
-    $shp_file = '';
-    foreach($files AS $file) {
-      $info = pathinfo($dest_path . $file);
-      if (strtolower($info['extension']) == 'shp') {
-        $shp_file = $info['basename'];
+    if ($this->get('import_layer') != '') {
+      // shape file is set explicit
+      if (file_exists($dest_path . $this->get('import_layer') . '.shp')) {
+        $shp_ext = 'shp';
       }
-    };
+      elseif (file_exists($dest_path . $this->get('import_layer') . '.SHP')) {
+        $shp_ext = 'SHP';
+      }
+      else {
+        return array(
+          'success' => false,
+          'msg' => 'Die Shape-Datei mit dem Namen ' . $this->get('import_layer') . ' existiert nicht im Verzeichnis ' . $dest_dir
+        );
+      }
+      $shp_file = $this->get('import_layer') . '.' . $shp_ext;
+    }
+    else {
+      // find the shape file name in dest_path
+      $files = array_filter(
+        scandir($dest_path),
+        function($entry) use ($dest_path) {
+          return is_file($dest_path . $entry);
+        }
+      );
+
+      $this->debug->show('Dateien im Verzeichnis:<br>' . implode('<br>', $files), true);
+      $result = required_shape_files_exists($files);
+      if (!$result['success']) { return $result; }
+      $shp_file = '';
+      foreach($files AS $file) {
+        $info = pathinfo($dest_path . $file);
+        if (strtolower($info['extension']) == 'shp') {
+          $shp_file = $info['basename'];
+        }
+      };
+    }
+
     $this->debug->show('Der Name des Shapes lautet: ' . $shp_file, true);
 
     $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $shp_file, $this->database, '', NULL, '-overwrite', 'UTF-8', true);
@@ -525,6 +729,7 @@ class Ressource extends PgObject {
     $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
     $gml_files = array();
     $entries = scandir($dest_path);
+    $i = 1;
     foreach($entries AS $entry) {
       if (is_file($dest_path . $entry)) {
         $path_parts = pathinfo($entry);
@@ -535,6 +740,11 @@ class Ressource extends PgObject {
           $gml_files[] = $path_parts['filename'] . '.gml';
           rename($dest_path . $entry, $dest_path . $path_parts['filename'] . '.gml');
         }
+        else {
+          $gml_files[] = $this->get('import_layer') . '_' . $i . '.gml';
+          rename($dest_path . $entry, $dest_path . $this->get('import_layer') . '_' . $i . '.gml');
+          $i++;
+        }
       }
     }
 
@@ -542,7 +752,19 @@ class Ressource extends PgObject {
     $first = true;
     foreach ($gml_files as $gml_file) {
       echo '<br>Importiere Datei: ' . $dest_path . $gml_file;
-      $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
+      // $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
+      $result = $this->gui->data_import_export->ogr2ogr_import(
+        $this->get('import_schema'),
+        $this->get('import_table'),
+        $this->get('import_epsg'),
+        $dest_path . $gml_file,
+        $this->database,
+        $this->get('import_layer'),
+        NULL,
+        ($first ? '-overwrite' : '-append'),
+        'UTF-8',
+        false
+      );
       $first = false;
       if ($result != '') {
         $err_msg[] = $result;
@@ -565,6 +787,115 @@ class Ressource extends PgObject {
    */
   function import_raster2pgsql() {
 
+  }
+
+  function import_csv_by_header() {
+    $this->debug->show('Starte Funktion import_csv_by_header', true);
+    if ($this->get('import_table') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
+      );
+    }
+
+    // get the files from dest_path
+    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $csv_file = $this->get('import_layer') . '.csv';
+
+    if (!is_file($dest_path . $csv_file)) {
+      return array(
+        'success' => false,
+        'msg' => 'Konnte Datei ' . $dest_path . $csv_file . ' nicht finden!'
+      );
+    }
+
+    echo '<br>Importiere Datei: ' . $dest_path . $csv_file;
+    $err_msg = array();
+    // Lege Tabelle an wenn es sie noch nicht gibt
+    $importer = new data_import_export();
+    $encoding = $importer->getEncoding($dest_path . $csv_file);
+
+    $csv_fp = fopen($dest_path . $csv_file, "r");
+    if (!$csv_fp) {
+      $err_msg[] = 'Konnte Datei ' . $dest_path . $csv_filey . ' nicht zum lesen öffnen.';
+    }
+    $i = 0;
+
+    while (($line = fgets($csv_fp)) !== false AND trim($line, $delimiter ."\n\r") != '' AND $i < 100) {
+      $first_line = $line;
+      break;
+      $i++; // only to prevent from endless loop
+    }
+    fclose($csv_fp);
+
+    $this->debug->show('Analysiere Kopfzeile: ' . $first_line, true);
+    $delimiter = detect_delimiter($first_line);
+    $this->debug->show('Ermittelter Delimiter: ' . $delimiter, true);
+
+    $columns = array_map(
+      function($column) use ($encoding) { 
+        if ($encoding != 'UTF-8') {
+          $column = utf8_encode($column);
+        }
+        return strtolower(sonderzeichen_umwandeln($column));
+      },
+      explode($delimiter, $first_line)
+    );
+
+    $this->debug->show('Ermittelte Spalten: ' . implode(', ', $columns), true);
+
+    $sql = "
+      DROP TABLE IF EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . ";
+      CREATE TABLE IF NOT EXISTS " . $this->get('import_schema') . "." . $this->get('import_table') . " (
+        " . implode(",
+        ", array_map(
+              function($column) {
+                return $column . " character varying";
+              },
+              $columns
+            )
+        ) . "
+      )
+    ";
+    $this->debug->show('SQL zum anlegen der Tabelle: ' . $sql, true);
+    $query = $this->execSQL($sql);
+    if (!$query) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Anlegen der Tabelle: ' . pg_last_error($this->database->dbConn)
+      );
+    }
+
+    $minx = $this->Stelle->MaxGeorefExt->minx;
+    $miny = $this->Stelle->MaxGeorefExt->miny;
+    $maxx = $this->Stelle->MaxGeorefExt->maxx;
+    $maxy = $this->Stelle->MaxGeorefExt->maxy;
+
+    // Lese Daten in die Tabelle ein
+    $where = ($this->get('import_filter') ? 'WHERE ' . $this->get('import_filter') : '');
+    $sql = "
+      COPY " . $this->get('import_schema') . "." . $this->get('import_table') . "(" . implode(', ', $columns) . ")
+      FROM '" . $dest_path . $csv_file . "'
+      WITH (
+        FORMAT CSV,
+        DELIMITER '" . $delimiter . "',
+        HEADER true,
+        ENCODING '" . $encoding . "'
+      )
+      " . $where . "
+    ";
+    $this->debug->show('SQL zum Einlesen der CSV-Daten: ' . $sql, true);
+    $query = $this->execSQL($sql);
+    if (!$query) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Einlesen der CSV-Datei: ' . $csv_file. ' ' . pg_last_error($this->database->dbConn)
+      );
+    }
+    return array(
+      'success' => true,
+      'msg' => 'Anzahl erfolgreich gelesener CSV-Dateien: ' . count($csv_files) . '.'
+    );
   }
 
   function import_gml_dictionary() {

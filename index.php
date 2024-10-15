@@ -14,7 +14,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) { // This error code is included in error_reporting		
+	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -2044,7 +2044,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;			
+			} break;
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');

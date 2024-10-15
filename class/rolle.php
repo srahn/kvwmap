@@ -115,6 +115,9 @@ class rolle {
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
 		}
+		else {
+			$active_filter = '';
+		}
 
 		$sql = "
 			SELECT " .
