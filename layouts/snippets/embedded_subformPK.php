@@ -69,8 +69,9 @@
 			include(SNIPPETS.$layer['template']);
 		}
 		else {
-			if ($this->formvars['list_edit']) { ?>
-				<table border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
+			if ($this->formvars['list_edit']) {
+				$table_id = rand(0, 100000);			 ?>
+				<table id="<? echo $table_id; ?>" border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
 					<tr><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
 							if ($layer['attributes']['privileg'][$j] >= '0') {
@@ -113,7 +114,7 @@
 									if ($layer['attributes']['visible'][$j]) {
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
-											<td <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
+											<td id="value_<? echo $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
 												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname); ?>
 											</td><?
 										}
@@ -132,6 +133,11 @@
 						$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					} ?>
 				</table>
+
+				<script type="text/javascript">
+					var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+					[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+				</script>				
 	<?
 				for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
 					echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
