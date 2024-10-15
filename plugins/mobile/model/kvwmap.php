@@ -1,24 +1,21 @@
 <?php
-/*
-	* Cases:
-	* mobile_create_layer_sync
-	* mobile_create_layer_sync_all
-	* mobile_delete_images
-	* mobile_drop_layer_sync
-	* mobile_drop_layer_sync_all
-	* mobile_get_data_version
-	* mobile_get_layers 
-	* mobile_get_stellen
-	* mobile_prepare_layer_sync
-	* mobile_prepare_layer_sync_all
-	* mobile_reformat_attributes
-	* mobile_reformat_layer
-	* mobile_sync
-	* mobile_sync_all
-	* mobile_sync_all_parameter_valide
-	* mobile_sync_parameter_valide
-	* mobile_upload_image
-	*/
+// mobile_create_layer_sync
+// mobile_create_layer_sync_all
+// mobile_delete_images
+// mobile_drop_layer_sync
+// mobile_drop_layer_sync_all
+// mobile_get_data_version
+// mobile_get_layers 
+// mobile_get_stellen
+// mobile_prepare_layer_sync
+// mobile_prepare_layer_sync_all
+// mobile_reformat_attributes
+// mobile_reformat_layer
+// mobile_sync
+// mobile_sync_all
+// mobile_sync_all_parameter_valide
+// mobile_sync_parameter_valide
+// mobile_upload_image
 
 /**
  * This function return all stellen the authenticated user is assigned to
@@ -46,7 +43,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		ORDER BY
 			s.Bezeichnung
 	";
-	#echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
+	// echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
 	$ret = $GUI->database->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
@@ -1230,8 +1227,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 
 	# Bestimme den Uploadpfad des Layers
 	if (intval($layer_id) == 0) {
-		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
 		$GUI->deblog->write($msg);
 		return array(
@@ -1241,7 +1237,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
 	if (count($layer) == 0) {
-		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
+
 		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
 		return array(
 			"success" => false,
@@ -1258,8 +1254,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	}
 
 	if ($files['image'] == '') {
-		$msg = 'Es wurde keine Datei hochgeladen!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Es wurde keine Datei hochgeladen!';
 		$GUI->deblog->write($msg);
 		return array(
@@ -1269,8 +1264,7 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	}
 
 	if (file_exists($doc_path . $files['image']['name'])) {
-		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
 		$GUI->deblog->write($msg);
 		return array(
@@ -1283,8 +1277,6 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	if (!move_uploaded_file($files['image']['tmp_name'], $doc_path . $files['image']['name'])) {
 		$success = false;
 		$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
-	}
-	else {
 	}
 	else {
 		$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
