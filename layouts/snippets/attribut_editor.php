@@ -312,8 +312,10 @@ function set_all(column){
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
 					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
+					<? if (!in_array($this->layer['Datentyp'], [MS_LAYER_QUERY])){ ?>
 					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
 					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
+					<? } ?>
 					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a></th>
 					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
 					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>

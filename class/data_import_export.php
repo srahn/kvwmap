@@ -975,6 +975,7 @@ class data_import_export {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
 			#echo '<br>url:   ' . urldecode($url) . '<br><br>';
+			#echo '<br>url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
@@ -1311,9 +1312,19 @@ class data_import_export {
 			}
 		}
 		else {
-			// echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
-			// echo '<br>name: ' . $layerset[0]['Name']; exit;
-	 		$filter = ((array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1) ? '' : $mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id));
+			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
+			#echo '<br>name: ' . $layerset[0]['Name']; exit;
+			$filter = '';
+			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
+				$filter = replace_params(
+					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+			}
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
 			$where = substr(
@@ -1375,6 +1386,7 @@ class data_import_export {
 					$query_parts['select']
 				);
 			}
+
 			$sql = "
 				SELECT 
 					" . $query_parts['select'] . "
