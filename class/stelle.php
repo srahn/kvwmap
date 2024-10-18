@@ -1653,7 +1653,7 @@ class stelle {
 		return 1;
 	}
 	
-	function updateLayerParams() {
+	function updateLayerParams($layer_id = NULL) {
 		/*
 		$sql = "
 			UPDATE
@@ -1697,6 +1697,7 @@ class stelle {
 										layer_attributes la
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
+										" . ($layer_id != NULL? 'ul.Layer_ID = ' . $layer_id . ' AND ' : '') . "
 										ul.Layer_ID = l.Layer_ID AND
 										la.layer_id = l.Layer_ID AND
 										(

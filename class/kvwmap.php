@@ -9164,7 +9164,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
 			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->updateLayerParams();
+			$stelle->updateLayerParams($formvars['selected_layer_id']);
 		}
 
 		$this->update_duplicate_layers($formvars);
