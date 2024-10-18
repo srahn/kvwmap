@@ -973,7 +973,8 @@
 									autocomplete1(event, \'' . $layer_id . '\', \'' . $name . '\', \'' . $element_id . '\', this.value);
 								"
 								onchange="
-									if(document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+									if (!document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked && document.getElementById(\'suggests_' . $element_id . '\').style.display == \'block\') {
+										// Abbrechen und Reset bei Danebenklicken
 										this.value = this.backup_value;
 										document.getElementById(\'' . $element_id . '\').value = document.getElementById(\'' . $element_id . '\').backup_value;
 										setTimeout(function(){
