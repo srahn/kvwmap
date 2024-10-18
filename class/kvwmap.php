@@ -5899,8 +5899,19 @@ echo '			</table>
 	function zoomto_selected_datasets(){
     $dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
     $layerdb = $dbmap->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+		if ($this->formvars['chosen_layer_id'] > 0) {
+			$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
+		}
+		else {
+			$layerset = $this->user->rolle->getRollenLayer(-$this->formvars['chosen_layer_id']);
+		}
 		$layerset[0]['attributes'] = $dbmap->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL);
+		if ($layerset[0]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
+			$layerset[0]['maintable'] = $layerset[0]['attributes']['table_name'][$layerset[0]['attributes']['the_geom']];
+		}
+		if ($layerset[0]['oid'] == '' AND @count($layerset[0]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+			$layerset[0]['oid'] = $layerset[0]['attributes']['pk'][0];
+		}
     $checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
 		$this->formvars['selektieren'] = 'false';
     for($i = 0; $i < count($checkbox_names); $i++){
