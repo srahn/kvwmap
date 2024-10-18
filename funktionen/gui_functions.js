@@ -1693,7 +1693,7 @@ function getRandomPassword() {
 	var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
 	var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var numbers = '0123456789';
-	var special_chars = '!@#$_+?%^&)';
+	var special_chars = '@#$_+?%^&)';
 	var length = Math.ceil(password_minlength / check_count);
 	var randomPassword;
 
