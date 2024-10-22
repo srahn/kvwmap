@@ -241,7 +241,7 @@ $(document).on('click', function(e){
 });
 
 function clear(){
-	document.GUI.reset();
+	window.location.href='index.php?go=Layer-Suche&selected_layer_id=' + document.GUI.selected_layer_id.value;
 }
   
 </script>
