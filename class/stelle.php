@@ -1676,30 +1676,7 @@ class stelle {
 		return 1;
 	}
 	
-	function updateLayerParams($layer_id = NULL) {
-		/*
-		$sql = "
-			UPDATE
-				stelle
-			SET
-				selectable_layer_params = COALESCE(
-					(
-						SELECT GROUP_CONCAT(id)
-						FROM (
-							SELECT DISTINCT id
-							FROM `layer_parameter` as p, used_layer as ul, layer as l
-							WHERE
-								ul.Stelle_ID = " . $this->id . " AND
-								ul.Layer_ID = l.Layer_ID AND
-								locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
-						) as foo
-					),
-					''
-				)
-			WHERE
-				stelle.ID = " . $this->id . "
-		";
-		*/
+	function updateLayerParams() {
 		$sql = "
 			UPDATE stelle
 			SET
@@ -1716,13 +1693,11 @@ class stelle {
 										FROM
 										`layer_parameter` as p,
 										used_layer as ul,
-										layer as l,
-										layer_attributes la
+										layer as l
+										LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
-										" . ($layer_id != NULL? 'ul.Layer_ID = ' . $layer_id . ' AND ' : '') . "
 										ul.Layer_ID = l.Layer_ID AND
-										la.layer_id = l.Layer_ID AND
 										(
 											locate(
 												concat('$', p.key),
@@ -1757,36 +1732,6 @@ class stelle {
 		";
 
 		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-
-		$sql = "
-			UPDATE
-				rolle
-			SET
-				layer_params = concat(coalesce(layer_params, ''), 
-					coalesce(
-						concat(
-							CASE WHEN coalesce(layer_params, '') = '' THEN '' ELSE ',' END,
-							(SELECT
-								GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
-							FROM
-								layer_parameter p, stelle
-							WHERE
-								FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
-								locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
-								stelle.ID = rolle.stelle_id
-							)
-						),
-						''
-					)
-				)
-			WHERE
-				rolle.stelle_id = " . $this->id . "
-		";
-		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 
 		$this->database->execSQL($sql);
