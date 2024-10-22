@@ -8320,26 +8320,31 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 		$this->main='layer_parameter.php';
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$mapDB->save_all_layer_params($this->formvars);
-		$this->params = $mapDB->get_all_layer_params();
-		$this->params_layer = $mapDB->get_layer_params_layer();
 		# Ergänze und lösche Layerparameter in Rollen
-		$this->update_layer_parameter_in_rollen($this->params);
-		$this->output();
+		$this->update_layer_parameter_in_rollen();
+		$this->layer_parameter();
 	}
 
 	/**
-	* for all rollen do
-	* add param with default value if not exists
-	* delete param if not defined in given list $params
-	* @param $params Array of layer parameter in structure function get_all_layer_params returns it
+	* for rollen do
+	* delete param if not defined
+	* @param $stelle_id if stelle_id is given, only the params and rollen of this stelle_id are checked and params are added with default value if not exists
 	* @return null
 	*/
-	function update_layer_parameter_in_rollen($params) {
+	function update_layer_parameter_in_rollen($stelle_id = NULL) {
 		$default_params = array();
+		$layer_parameter = new MyObject(
+			$this,
+			'layer_parameter'
+		);
+		$params = $layer_parameter->find_by_sql(array(
+			'select' => '*',
+			'where' => ($stelle_id != NULL? 'locate (layer_parameter.id, (select selectable_layer_params from stelle where id = ' . $stelle_id . '))' : '')
+		));
 		foreach ($params AS $param) {
-			$default_params[$param['key']] = $param['default_value'];
+			$default_params[$param->get('key')] = $param->get('default_value');
 		}
-		$myObject = new MyObject(
+		$rolle = new MyObject(
 			$this,
 			'rolle',
 			array(
@@ -8354,18 +8359,20 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			),
 			'array'
 		);
-		$rollen = $myObject->find_by_sql(array(
-			'select' => 'user_id, stelle_id, layer_params'
+		$rollen = $rolle->find_by_sql(array(
+			'select' => 'user_id, stelle_id, layer_params',
+			'where' => ($stelle_id != NULL? 'stelle_id = ' . $stelle_id : '')
 		));
 		foreach ($rollen AS $rolle) {
 			$rolle_params = (array)json_decode('{' . $rolle->get('layer_params') . '}');
 
-			# Parameter, die die Rolle noch nicht hat anhängen
-			$add = array_diff_key($default_params, $rolle_params);
-			$rolle_params = array_merge($rolle_params, $add);
+			if ($stelle_id != NULL) {
+				# Parameter, die die Rolle noch nicht hat anhängen
+				$add = array_diff_key($default_params, $rolle_params);
+				$rolle_params = array_merge($rolle_params, $add);
+			}
 
-			# Parameter, die der Layer nicht mehr, aber die Rolle noch hat löschen
-			$del = array_diff_key($rolle_params, $default_params);
+			# Parameter, die es nicht mehr gibt oder die Stelle nicht mehr hat, aber die Rolle noch hat löschen
 			$rolle_params = array_intersect_key($rolle_params, $default_params);
 
 			$new_params = array();
@@ -9023,18 +9030,25 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           }
         }
         if($found == false){
+					# Stellenzuordnung wurde entfernt
           $deletestellen[] = $layerstellen['ID'][$i];
         }
       }
       if ($deletestellen != 0){
         $this->removeLayerFromStellen($formvars['selected_layer_id'], $deletestellen);
+				for ($i = 0; $i < count($deletestellen); $i++) {
+					$stelle = new stelle($deletestellen[$i], $this->database);
+					$stelle->updateLayerParams();
+					$this->update_layer_parameter_in_rollen($deletestellen[$i]);
+				}
       }
       # /Löschen der in der Selectbox entfernten Stellen
     }
 
 		for ($i = 0; $i < count($stellen_ids); $i++) {
 			$stelle = new stelle($stellen_ids[$i], $this->database);
-			$stelle->updateLayerParams($formvars['selected_layer_id']);
+			$stelle->updateLayerParams();
+			$this->update_layer_parameter_in_rollen($stellen_ids[$i]);
 		}
 
 		$this->update_duplicate_layers($formvars);
@@ -13947,6 +13961,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
 					# Layerparameter aktualisieren
 					$stelle->updateLayerParams();
+					$this->update_layer_parameter_in_rollen($stelle->id);
 					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
@@ -13981,6 +13996,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->user->rolle->setGroups($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id, $layers['ID']);
 				# Layerparameter aktualisieren
 				$stelle->updateLayerParams();
+				$this->update_layer_parameter_in_rollen($stelle->id);
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
       $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database, '', true);
