@@ -1694,7 +1694,7 @@ class stelle {
 										`layer_parameter` as p,
 										used_layer as ul,
 										layer as l
-										LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
+									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
 										ul.Layer_ID = l.Layer_ID AND
@@ -1703,11 +1703,11 @@ class stelle {
 												concat('$', p.key),
 												concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 											) > 0
-										OR
-											locate(
-												concat('$', p.key),
-												concat(la.options, la.default)
-											) > 0
+										-- OR						-- aus Performancegründen rausgenommen
+										-- 	locate(
+										-- 		concat('$', p.key),
+										-- 		concat(la.options, la.default)
+										-- 	) > 0
 										)
 									UNION
 									SELECT
