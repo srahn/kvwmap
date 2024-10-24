@@ -475,7 +475,7 @@ function go_switch($go, $exit = false) {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
 				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
-					$GUI->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+					$GUI->layers_replace_scale[$i]->data = str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data);
 				}
 				echo $GUI->create_dynamic_legend();
 			} break;
