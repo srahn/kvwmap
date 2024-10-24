@@ -1234,8 +1234,8 @@ class GUI {
 		}
 	}
 
-	function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+  function loadclasses($layer, $layerset, $classset, $map){
+		$anzClass = @count($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -1257,7 +1257,7 @@ class GUI {
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
+			}			
       for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
@@ -1270,7 +1270,7 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -1279,7 +1279,12 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];
@@ -1316,7 +1321,7 @@ class GUI {
 						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -1327,7 +1332,7 @@ class GUI {
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -1415,7 +1420,7 @@ class GUI {
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -1472,14 +1477,14 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -1618,10 +1623,10 @@ class GUI {
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -1875,7 +1880,7 @@ class GUI {
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
