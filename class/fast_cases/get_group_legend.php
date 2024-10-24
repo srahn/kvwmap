@@ -271,7 +271,7 @@ class GUI {
     $this->user->rolle->setClassStatus($this->formvars);
     $this->loadMap('DataBase');
 		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
@@ -595,6 +595,7 @@ class GUI {
 				}
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
+				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
@@ -613,8 +614,20 @@ class GUI {
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
+
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
+						$error = msGetErrorObj();
+						while ($error && $error->code != MS_NOERR) {
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
+							$error = $error->next();
+						}
+						msResetErrorList();
 					}
+				}
+				if ($this->error_message != '') {
+					$this->error_message .= '<br>';
+					//  throw new ErrorException($this->error_message);
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
@@ -680,7 +693,7 @@ class GUI {
 		}
 		if ($layerset['ows_srs'] == '') {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-		}
+		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
 		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
@@ -699,6 +712,7 @@ class GUI {
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
+
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -722,7 +736,7 @@ class GUI {
 				}
 			}
 		}
-
+		
 		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
 			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
@@ -821,7 +835,7 @@ class GUI {
 					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 				}
 				else{
-					$layer->set('opacity',$layerset['transparency']);
+					$layer->opacity = $layerset['transparency'];
 				}
 			}
 			if ($layerset['tileindex']!='') {
@@ -927,7 +941,7 @@ class GUI {
 						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 					}
 					else{
-						$layer->set('opacity',$layerset['transparency']);
+						$layer->opacity = $layerset['transparency'];
 					}
 				}
 			}
@@ -940,12 +954,12 @@ class GUI {
 				}
 			}
 		} # ende of Vektorlayer
-		$classset=$layerset['Class'];
+		$classset=$layerset['Class'];		
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-	function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+  function loadclasses($layer, $layerset, $classset, $map){
+		$anzClass = @count($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -967,7 +981,7 @@ class GUI {
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
+			}			
       for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
@@ -1023,10 +1037,10 @@ class GUI {
 						foreach($pattern as &$pat){
 							$pat = $pat * $this->map_factor;
 						}
-						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -1037,7 +1051,7 @@ class GUI {
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -1125,7 +1139,7 @@ class GUI {
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -1182,14 +1196,14 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -1328,10 +1342,10 @@ class GUI {
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -1592,18 +1606,18 @@ class GUI {
 											$style->maxwidth = 2;
 										}
 										if ($maplayer->type == MS_LAYER_CHART) {
-											$maplayer->set('type', MS_LAYER_POLYGON);		# Bug-Workaround Chart-Typ
+											$maplayer->type = MS_LAYER_POLYGON;		# Bug-Workaround Chart-Typ
 										}
 									}
 									else{		# Punktlayer
 										if($style->size > 14 OR $style->size == -1){
-											$style->set('size', 14);
+											$style->size = 14;
 										}
-										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->maxsize = $style->size;		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->minsize = $style->size;		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-											$style->set('offsety', 0);
-											$style->set('offsetx', 0);
+											$style->offsety = 0;
+											$style->offsetx = 0;
 										}
 									}
 								}
@@ -1706,7 +1720,7 @@ class GUI {
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
-			$legend .=  '<input type="hidden" id="thema'.$layer['Layer_ID'].'" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
+			$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="'.$layer['aktivStatus'].'">';
 			$legend .=  '<input ';
 			if($layer['selectiontype'] == 'radio'){
 				$legend .=  'type="radio" ';
