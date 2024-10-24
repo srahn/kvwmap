@@ -1425,13 +1425,13 @@ echo '			</table>
 									}
 									else{		# Punktlayer
 										if($style->size > 14 OR $style->size == -1){
-											$style->set('size', 14);
+											$style->size = 14;
 										}
-										$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
-										$style->set('minsize', $style->size);		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->maxsize = $style->size;		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+										$style->minsize = $style->size;		# minsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
 										if($class->numstyles == 1){							# wenn es nur einen Style in der Klasse gibt, die Offsets auf 0 setzen, damit man was in der Legende erkennt
-											$style->set('offsety', 0);
-											$style->set('offsetx', 0);
+											$style->offsety = 0;
+											$style->offsetx = 0;
 										}
 									}
 								}
@@ -1857,12 +1857,7 @@ echo '			</table>
           $layerset = array_values($this->formvars['layer']);
         }
         for ($i = 0; $i < count($layerset); $i++) {
-				  if (MAPSERVERVERSION < 600) {
-            $layer = ms_newLayerObj($map);
-          }
-					else {
-					  $layer = new layerObj($map);
-					}
+					$layer = new layerObj($map);
 					$layer->metadata->set('wms_name', $layerset[$i][name]);
           $layer->metadata->set('wms_server_version','1.1.1');
           $layer->metadata->set('wms_format','image/png');
@@ -2363,7 +2358,7 @@ echo '			</table>
 					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 				}
 				else{
-					$layer->set('opacity',$layerset['transparency']);
+					$layer->opacity = $layerset['transparency'];
 				}
 			}
 			if ($layerset['tileindex']!='') {
@@ -2469,7 +2464,7 @@ echo '			</table>
 						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 					}
 					else{
-						$layer->set('opacity',$layerset['transparency']);
+						$layer->opacity = $layerset['transparency'];
 					}
 				}
 			}
@@ -2487,7 +2482,7 @@ echo '			</table>
 	}
 
   function loadclasses($layer, $layerset, $classset, $map){
-	$anzClass = @count($classset);
+		$anzClass = @count($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -2522,7 +2517,7 @@ echo '			</table>
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -2531,7 +2526,12 @@ echo '			</table>
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];
@@ -2724,10 +2724,10 @@ echo '			</table>
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
@@ -2870,10 +2870,10 @@ echo '			</table>
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -3228,7 +3228,7 @@ echo '			</table>
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
@@ -6789,24 +6789,24 @@ echo '			</table>
     $mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$map = new mapObj(DEFAULTMAPFILE);
     $map->setextent(100,100,200,200);
-    $map->set('width',10);
-    $map->set('height',10);
-    $map->web->set('imagepath', IMAGEPATH);
-    $map->web->set('imageurl', IMAGEURL);
+    $map->width = 10;
+    $map->height = 10;
+    $map->web->imagepath = IMAGEPATH;
+    $map->web->imageurl = IMAGEURL;
     $map->setSymbolSet(SYMBOLSET);
     $map->setFontSet(FONTSET);
 
-    $layer=ms_newLayerObj($map);
+    $layer = new layerObj($map);
     $layerset = $mapDB->get_Layer($layer_id);
-    $layer->set('data',$layerset['Data']);
-    $layer->set('status',MS_ON);
-    $layer->set('template', ' ');
-    $layer->set('name', 'test');
-    $layer->set('type', $layerset['Datentyp']);
-    $layer->setConnectionType($layerset['connectiontype']);
-		$layer->set('connection', $layerset['connection']);
+    $layer->data = $layerset['Data'];
+    $layer->status = MS_ON;
+    $layer->template = ' ';
+    $layer->name = 'test';
+    $layer->type = $layerset['Datentyp'];
+    $layer->setConnectionType($layerset['connectiontype'], '');
+		$layer->connection = $layerset['connection'];
     $klasse = new ClassObj($layer);
-    $klasse->set('status', MS_ON);
+    $klasse->status = MS_ON;
     $dbStyle = $mapDB->get_Style($style_id);
     $style = new StyleObj($klasse);
 		if (substr($dbStyle['symbolname'], 0, 1) == '[') {
@@ -6814,21 +6814,26 @@ echo '			</table>
 		}
 		else {
 			if ($dbStyle['symbolname']!='') {
-				$style->set('symbolname',$dbStyle['symbolname']);
+				if (MAPSERVERVERSION < 800) {
+					$style->symbolname = $dbStyle['symbolname'];
+				}
+				else {
+					$style->setSymbolByName($map, $dbStyle['symbolname']);
+				}
 			}
 			if ($dbStyle['symbol']>0) {
-				$style->set('symbol',$dbStyle['symbol']);
+				$style->symbol = $dbStyle['symbol'];
 			}
 		}	
 		if($dbStyle['size'] != ''){
 			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-			else $style->set('size', 16);		# Dummywert 16 da size-Attribut verwendet wird
+			else $style->size = 16;		# Dummywert 16 da size-Attribut verwendet wird
 		}
     if($dbStyle['width']!='') {
-      $style->set('width', $dbStyle['width']);
+      $style->width = $dbStyle['width'];
     }
     if($dbStyle['angle']!='') {
-      $style->set('angle', $dbStyle['angle']);
+      $style->angle = $dbStyle['angle'];
     }
   	if(MAPSERVERVERSION >= 620) {
     	if($dbStyle['geomtransform'] != '') {
@@ -6839,35 +6844,35 @@ echo '			</table>
         $style->linecap = 'butt';
       }
 			if($dbStyle['gap'] != '') {
-				$style->set('gap', $dbStyle['gap']);
+				$style->gap = $dbStyle['gap'];
 			}
 			if($dbStyle['initialgap'] != '') {
-        $style->set('initialgap', $dbStyle['initialgap']);
+        $style->initialgap = $dbStyle['initialgap'];
       }
 			if($dbStyle['linecap'] != '') {
-				$style->set('linecap', constant('MS_CJC_'.strtoupper($dbStyle['linecap'])));
+				$style->linecap = constant('MS_CJC_'.strtoupper($dbStyle['linecap']));
 			}
 			if($dbStyle['linejoin'] != '') {
-				$style->set('linejoin', constant('MS_CJC_'.strtoupper($dbStyle['linejoin'])));
+				$style->linejoin = constant('MS_CJC_'.strtoupper($dbStyle['linejoin']));
 			}
 			if($dbStyle['linejoinmaxsize'] != '') {
-				$style->set('linejoinmaxsize', $dbStyle['linejoinmaxsize']);
+				$style->linejoinmaxsize = $dbStyle['linejoinmaxsize'];
 			}
     }
     #######################################################
     if($layer->type > 0){
     	$symbol = $map->getSymbolObjectById($style->symbol);
     	if($symbol->type == 1006){ 	# 1006 == hatch
-    		$style->set('size', 2*$style->width);					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
-    		$style->set('maxsize', 2*$style->width);
+    		$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
+    		$style->maxsize = 2*$style->width;
     	}
     	else{
-				if($dbStyle['size'] < 2)$style->set('size', 2);					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
-    		if($dbStyle['maxsize'] < 2)$style->set('maxsize', 2);
+				if($dbStyle['size'] < 2)$style->size = 2;					# size und maxsize bei Linien und Polygonlayern immer auf 2 setzen, damit man was in der Legende erkennt
+    		if($dbStyle['maxsize'] < 2)$style->maxsize = 2;
     	}
     }
     else{
-    	$style->set('maxsize', $style->size);		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
+    	$style->maxsize = $style->size;		# maxsize auf size setzen bei Punktlayern, damit man was in der Legende erkennt
     }
     #######################################################
     $RGB = array_filter(explode(" ",$dbStyle['color']), 'strlen');
@@ -6877,7 +6882,7 @@ echo '			</table>
     $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
     $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
 		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-			$style->set('opacity', $dbStyle['opacity']);
+			$style->opacity = $dbStyle['opacity'];
 		}
 
 		if($dbStyle['colorrange'] != ''){
@@ -6885,7 +6890,12 @@ echo '			</table>
 			$this->colorramp(IMAGEPATH.$newname, 25, 18, $dbStyle['colorrange']);
 		}
 		else{
-			$image = $klasse->createLegendIcon(25,18);
+			if (MAPSERVERVERSION >= 800) {
+				$image = $klasse->createLegendIcon($map, $layer, 25,18);
+			}
+			else {
+				$image = $klasse->createLegendIcon(25,18);
+			}
 			$filename = $this->map_saveWebImage($image,'jpeg');
 			$newname = $this->user->id.basename($filename);
 			rename(IMAGEPATH.basename($filename), IMAGEPATH.$newname);
@@ -7428,7 +7438,7 @@ echo '			</table>
 			# copyright-layer aus dem Mapfile
 			@$creditslayer = $this->map->getLayerByName('credits');
 			if($creditslayer != false){
-				$newcredits = ms_newLayerObj($this->map, $creditslayer);
+				$newcredits = new layerObj($this->map, $creditslayer);
 				$feature = $newcredits->getShape(-1, 0);
 				if(MAPSERVERVERSION > 500){
 					$feature=$newcredits->getFeature(0,-1);
@@ -13890,7 +13900,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['layer_data_import_allowed'] 	= $this->userdaten[0]['layer_data_import_allowed'];
 			$this->formvars['agreement_accepted']					= $this->userdaten[0]['agreement_accepted'];
 			# Abfragen der Stellen des Nutzers
-			$this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
+			$this->selected_user = new user('', $this->formvars['selected_user_id'], $this->user->database, '', true);
 			$this->formvars['selstellen'] = $this->selected_user->getStellen(0, true);
 			# Abfragen der aktiven Layer des Nutzers
 			if ($this->userdaten[0]['stelle_id'] != '') {
@@ -15716,7 +15726,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							showAlert('Sie können für die Abfrage von Shape- und Rasterlayern nur die einfache Sachdatenabfrage verwenden.');
 						}
 						else {
-							$layer = ms_newLayerObj($map);
+							$layer = new layerObj($map);
 							$layer->set('data', $layerset[$i]['Data']);
 							if ($layerset[$i]['tileindex'] != '') {
 								$layer->set('tileindex', SHAPEPATH.$layerset[$i]['tileindex']);
@@ -15771,7 +15781,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					} break; # ende Layer ist ein Shapefile
 
 					case MS_OGR : { # OGR Layer (4)
-						$layer=ms_newLayerObj($map);
+						$layer=new layerObj($map);
 						if (MAPSERVERVERSION < '540') {
 							$layer->set('connectiontype',$layerset[$i]['connectiontype']);
 						}
