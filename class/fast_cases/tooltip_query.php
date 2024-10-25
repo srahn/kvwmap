@@ -166,10 +166,10 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
-		return 39.3743;
+		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		return 39.37 * degree2meter($center_y);
+		return 39.3701 * degree2meter($center_y);
 	}
 }
 
