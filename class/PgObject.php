@@ -141,11 +141,16 @@ class PgObject {
 		return $query;
 	}
 
-	/*
-	* Search for an record in the database by the given where clause
-	* @ return an array with all found object
-	*/
+	/**
+	 * Search for an record in the database by the given where clause
+	 * @param string $where
+	 * @param string $order?
+	 * @param string $select?
+	 * @param string $limit?
+	 * @return array PgObject An array with all found object
+	 */
 	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
+		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
 		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
@@ -162,11 +167,11 @@ class PgObject {
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
-		$result = array();
+		$results = array();
 		while($this->data = pg_fetch_assoc($query)) {
-			$result[] = clone $this;
+			$results[] = clone $this;
 		}
-		return $result;
+		return $results;
 	}
 
 	/**
@@ -511,14 +516,13 @@ class PgObject {
 			" . (!empty($params['where']) ? "WHERE " . $params['where'] : "") . "
 			" . (!empty($params['order']) ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
 		";
+		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
 		$this->debug->show('PgObject find_by_sql sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
-
 		while ($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
 		}
-		#print_r($this->database->get_connection_string());
 		return $results;
 	}
 

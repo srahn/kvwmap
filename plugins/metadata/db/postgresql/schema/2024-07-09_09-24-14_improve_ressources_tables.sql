@@ -175,7 +175,7 @@ BEGIN;
   ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN updated_from character varying;
 
 
-CREATE TABLE IF NOT EXISTS metadata.update_log (
+CREATE TABLE IF NOT EXISTS metadata.update_logs (
     id serial NOT NULL PRIMARY KEY,
     ressource_id integer NOT NULL,
     update_at timestamp without time zone NOT NULL DEFAULT now(),
@@ -183,12 +183,12 @@ CREATE TABLE IF NOT EXISTS metadata.update_log (
     abbruch_status_id integer
 );
 
-ALTER TABLE metadata.update_log ADD CONSTRAINT abbruch_status_id_fk FOREIGN KEY (abbruch_status_id)
+ALTER TABLE metadata.update_logs ADD CONSTRAINT abbruch_status_id_fk FOREIGN KEY (abbruch_status_id)
   REFERENCES metadata.update_status (id) MATCH SIMPLE
   ON UPDATE CASCADE
   ON DELETE NO ACTION;
 
-ALTER TABLE metadata.update_log ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
+ALTER TABLE metadata.update_logs ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
   REFERENCES metadata.ressources (id) MATCH SIMPLE
   ON UPDATE CASCADE
   ON DELETE CASCADE;

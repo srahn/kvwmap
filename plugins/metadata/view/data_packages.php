@@ -1,11 +1,21 @@
 <?php
+	list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($this->Stelle->id);
 ?>
 <link rel="stylesheet" href="plugins/metadata/styles/metadata_styles.css">
 <script src="plugins/metadata/model/DataPackage.js"></script>
 <div id="metadata_data_packages_div">
   <!-- style="min-width: <?php echo $this->user->rolle->nImageWidth + $sizes['layouts/gui.php']['legend']['width'] + 22; ?>">//-->
   <h2 style="margin-top: 10px">Datenpakete zum Download</h2>
-  <p>
+  <a href="index.php?go=metadata_show_data_packages" title="Lade Seite neu"><i class="fa fa-refresh" aria-hidden="true" title="Seite neu laden" onMouseOver="this.style.color='black'"
+  onMouseOut="this.style.color='firebrick'" style="
+    /* margin-left: 35px; */
+    font-size: 1.8em;
+    /* float: right; */
+    margin-top: -21px;
+    margin-right: -296px;
+    margin-bottom: 6px;
+    color: firebrick;
+"></i></a>
   <div id="dpt-header-div">
     <div class="dpt-header">
       <div class="dpt-cell dpt-head-cell dpt-checkbox">
@@ -20,30 +30,33 @@
       <div class="dpt-cell dpt-head-cell dpt-status">
         Status
       </div>
-      <div class="dpt-cell dpt-head-cell dpt-action">
+      <div class="dpt-cell-right dpt-head-cell dpt-action">
         Aktion
       </div>
     </div>
   </div>
   <div id="dpt-table-div" style="height: <?php echo $this->user->rolle->nImageHeight - $sizes['layouts/gui.php']['header']['height'] - $sizes['layouts/gui.php']['footer']['height'] - 22; ?>px"><?php
-    foreach ($this->metadata_data_packages AS $package) { ?>
-      <div class="dpt-row">
+    $odd_row = false;
+    $data_packages_exists = false;
+    foreach ($this->metadata_data_packages AS $package) {
+      $data_packages_exists = ($data_packages_exists OR ($package->get('pack_status') == 'fertig')); ?>
+      <div class="dpt-row<? echo ($odd_row ? ' dpt-alt' : ''); ?>">
         <div class="dpt-cell dpt-checkbox">
-          <input id="checkbox_<? echo $package->get('ressource_id'); ?>" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="data_package_checkbox" type="checkbox"/>
+          <input id="checkbox_<? echo $package->get('ressource_id'); ?>" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="data_package_checkbox" type="checkbox" style="margin-top: 1px"/>
         </div>
         <div class="dpt-cell dpt-datatype">
         <i class="fa fa-<?php echo $package->datatype_icon; ?>" aria-hidden="true" title="Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></i>
         </div>
         <div class="dpt-cell dpt-package">
-          <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=3&value_id=<? echo $package->get('ressource_id'); ?>&operator_id==">
+          <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $package->get('layer_id'); ?>">
             <?php echo $package->get('bezeichnung'); ?>
           </a>
           <span class="metadata-tooltip" data-tooltip="Ressource ID: <?php echo $package->get('ressource_id'); ?> Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></span>
         </div>
         <div class="dpt-cell dpt-status">
-          <span id="status_span_<? echo $package->get('ressource_id'); ?>"><?php echo $package->get('status') ?: 'noch nicht erstellt' ; ?></span><span id="package_id_span_<? echo $package->get('ressource_id'); ?>"></span>
+          <span id="status_span_<? echo $package->get('ressource_id'); ?>"><?php echo $package->get('status') ?: '' ; ?></span><span id="package_id_span_<? echo $package->get('ressource_id'); ?>"></span>
         </div>
-        <div class="dpt-cell dpt-action">
+        <div class="dpt-cell-right dpt-action">
           <input id="button_-1_<? echo $package->get('ressource_id'); ?>" type="button" value="Abbrechen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button">
           <input id="button_1_<? echo $package->get('ressource_id'); ?>" type="button" value="Neu erstellen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button order_data_package_button">
           <input id="button_2_<? echo $package->get('ressource_id'); ?>" type="button" value="Zurücknehmen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button">
@@ -52,29 +65,58 @@
         </div>
       </div>
       <div style="clear: both;"></div><?php
+      $odd_row = !$odd_row;
     } ?>
   </div>
   <div id="dpt-footer-div">
-    <div class="dpt-footer">
-      <div class="dpt-cell dpt-foot-cell" style="margin-left: 16px; font-size: 1.5em;">
-        &#8627;
-      </div>
+    <div class="dpt-footer-cell" style="margin-left: 7px; font-size: 1.5em;">
+      &#8627;
+    </div>
 
-      <div class="dpt-cell dpt-foot-cell">
-        <input id="order_data_packages_button" type="button" name="Neu erstellen" value="Neu erstellen"/>
-      </div>
+    <div class="dpt-footer-cell">
+      <input id="order_data_packages_button" type="button" name="Neu erstellen" value="Neu erstellen"/>
+    </div>
 
-      <div class="dpt-cell dpt-foot-cell">
-        <input id="cancel_data_packages_button" type="button" name="Zurücknehmen" value="Zurücknehmen"/>
-      </div>
+    <div class="dpt-footer-cell">
+      <input id="cancel_data_packages_button" type="button" name="Zurücknehmen" value="Zurücknehmen"/>
+    </div>
 
-      <div class="dpt-cell dpt-foot-cell">
-        <input type="button" name="Runterladen" value="Runterladen"/>
-      </div>
+    <div class="dpt-footer-cell">
+      <input id="delete_data_packages_button" type="button" name="Löschen" value="Löschen"/>
+    </div>
 
-      <div class="dpt-cell dpt-foot-cell">
-        <input id="delete_data_packages_button" type="button" name="Löschen" value="Löschen"/>
-      </div>
+    <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
+      <span>Gesamtpaket:</span>
+      <input
+        id="order_bundle_packages_button"
+        type="button"
+        name="order_bundle_package"
+        value="<? echo ($data_packages_exists ? 'Neu ' : ''); ?>Packen"
+        title="Alle vorhandenen Pakete in eine ZIP-Datei zum Download zusammenpacken."
+        style="display: <? echo ($data_packages_exists ? 'inline' : 'none'); ?>"
+        onclick="orderBundlePackage()"
+      />
+      <span
+        id="order_bundle_packages_span"
+        style="display: none;"
+      >Packen beauftragt</span>
+      <input
+        id="download_bundle_packages_button"
+        type="button"
+        name="download_bundle_package"
+        value="Runterladen"
+        style="display: <? echo (file_exists($bundle_package_path . $bundle_package_filename) ? 'inline' : 'none'); ?>"
+        onclick="downloadBundlePackage()"
+      />
+      <input
+        id="delete_bundle_packages_button"
+        type="button"
+        name="delete_bundle_package"
+        value="Löschen"
+        title="Gesamtpaket löschen."
+        style="display: <? echo (file_exists($bundle_package_path . $bundle_package_filename) ? 'inline' : 'none'); ?>"
+        onclick="deleteBundlePackage()"
+      />
     </div>
   </div>
 </div>
@@ -163,38 +205,6 @@
         }
       });
     });
-
-  }
-
-  async function orderDataPackage(ressource_id) {
-    // console.log('call orderDataPackage for ressource_id: ', ressource_id);
-    const params = new URLSearchParams({
-      'go': 'metadata_order_data_package',
-      'ressource_id': [ressource_id],
-      'format' : 'json'
-    });
-    const url = `index.php?${params}`;
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
-      }
-      const json = await response.json();
-      if (!json.success) {
-        message([{
-          'type': 'error',
-          'msg': json.msg
-        }]);
-      }
-      else {
-        // console.log(`Result for Ressource ${ressource_id}: %o`, json);
-        const dataPackage = dataPackages.get(ressource_id);
-        dataPackage.data = json.package;
-        dataPackage.updateGUI();
-      }
-    } catch (error) {
-      console.error(error.message);
-    }
   }
 
   async function cancelDataPackage(ressource_id) {
@@ -267,6 +277,42 @@
     }
   }
 
+  async function deleteBundlePackage() {
+    // console.log('call deleteBundlePackage for Stelle');
+    const params = new URLSearchParams({
+      'go': 'metadata_delete_bundle_package'
+    });
+    const url = `index.php?${params}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      } 
+      const json = await response.json();
+      if (!json.success) {
+        message([{'type': 'error', 'msg': json.msg}]);
+      }
+      else {
+        // console.log(`Result for delete bundle package: %o`, json);
+        message([{'type': 'notice', 'msg' : json.msg}]);
+        document.getElementById('order_bundle_packages_button').style.display = 'inline';
+        document.getElementById('download_bundle_packages_button').style.display = 'none';
+        document.getElementById('delete_bundle_packages_button'). style.display = 'none';
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+  async function downloadBundlePackage() {
+    // console.log('call downloadBundlePackage in this stelle');
+    const params = new URLSearchParams({
+      'go': 'metadata_download_bundle_package'
+    });
+    const url = `index.php?${params}`;
+    window.location.href = url;
+  }
+
   async function downloadDataPackage(ressource_id) {
     // console.log('call downloadDataPackage for ressource_id: ', ressource_id);
     const package_id = dataPackages.get(ressource_id).get('id');
@@ -276,6 +322,68 @@
     });
     const url = `index.php?${params}`;
     window.location.href = url;
+  }
+
+  async function orderDataPackage(ressource_id) {
+    // console.log('call orderDataPackage for ressource_id: ', ressource_id);
+    const params = new URLSearchParams({
+      'go': 'metadata_order_data_package',
+      'ressource_id': [ressource_id],
+      'format' : 'json'
+    });
+    const url = `index.php?${params}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      if (!json.success) {
+        message([{
+          'type': 'error',
+          'msg': json.msg
+        }]);
+      }
+      else {
+        // console.log(`Result for Ressource ${ressource_id}: %o`, json);
+        const dataPackage = dataPackages.get(ressource_id);
+        dataPackage.data = json.package;
+        dataPackage.updateGUI();
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+  async function orderBundlePackage(ressource_id) {
+    // console.log('call orderBundlePackage in this stelle');
+    const params = new URLSearchParams({
+      'go': 'metadata_order_bundle_package'
+    });
+    const url = `index.php?${params}`;
+    try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      if (!json.success) {
+        message([{
+          'type': 'error',
+          'msg': json.msg
+        }]);
+      }
+      else {
+        console.log(`Result for order bundle package: %o`, json);
+        message([{ type: 'notice', 'msg' : json.msg}]);
+        document.getElementById('order_bundle_packages_button').style.display = 'none';
+        document.getElementById('order_bundle_packages_span').style.display = 'inline';
+        document.getElementById('download_bundle_packages_button').style.display = 'none';
+        document.getElementById('delete_bundle_packages_button'). style.display = 'none';
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 
   // create objects for data packages

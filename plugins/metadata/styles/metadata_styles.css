@@ -3,12 +3,12 @@
   overflow-x: hidden;
   overflow-y: auto;
   text-align: justify;
-  padding: 4px;
+  padding-bottom: 4px;
 }
 
 .dpt-header {
   background-color: blue;
-  margin-left: 4px;
+  /* margin-left: 4px; */
   font-family: 'SourceSansPro3';
 }
 
@@ -17,42 +17,53 @@
   overflow-x: hidden;
   overflow-y: auto;
   text-align: left;
-  padding: 4px;
+  /* padding: 4px; */
 }
 
 #dpt-footer-div {
   background: linear-gradient(#DAE4EC 0%, #c7d9e6 100%);
-  height: 36px;
+  height: 38px;
   overflow-x: hidden;
   overflow-y: auto;
-  text-align: justify;
+  /* justify-content: center; */
+  align-items: center;
+  display: flex;
+  /* padding: 4px; */
+}
+
+.dpt-footer-cell {
+  margin-top: 3px;
   padding: 4px;
 }
 
-.dpt-footer {
-  background-color: brown;
+.dpt-row {
+  margin-left: 0px;
 }
 
-.dpt-row {
-  margin-left: 4px;
+.dpt-alt {
+  background-color: #eeeeee;
+  width: auto;
+  height: 32px;
 }
 
 .dpt-cell {
-  margin: 4px;
+  margin-top: 3px;
   padding: 4px;
   float: left;
 }
 
-.dpt-header-cell {
-  background-color: magenta;
+.dpt-cell-right {
+  float: right;
+  /* margin-top: 4px; */
+  padding: 4px;
 }
 
 .dpt-checkbox {
-  width: 5%;
+  width: 3%;
 }
 
 .dpt-datatype {
-  width: 5%
+  width: 3%
 }
 
 .dpt-package {

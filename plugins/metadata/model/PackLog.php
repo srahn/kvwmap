@@ -21,8 +21,8 @@ class PackLog extends PgObject {
 		$this->where = "";
 	}
 
-	public static function write($GUI, $package, $msg) {
-		$packlog = new PackLog($GUI);
+	public static function write($gui, $package, $msg) {
+		$packlog = new PackLog($gui);
     $packlog = $packlog->create(array(
       'msg' => pg_escape_string($msg),
       'package_id' => $package->get_id(),
@@ -30,4 +30,49 @@ class PackLog extends PgObject {
     ));
     return $packlog;
 	}
+
+	public static function find_by_ressource_id($gui, $ressource_id) {
+		// echo '<br>PackLog->find_by_ressource_id ressource_id: ' . $ressource_id;
+		$packlog = new PackLog($gui);
+    $packlogs = $packlog->find_where('ressource_id = ' . $ressource_id);
+		$packlogs = array_map(
+			function ($packlog) {
+				$packlog->get_package();
+				return $packlog;
+			},
+			$packlogs
+		);
+    return $packlogs;
+	}
+
+	function get_package() {
+		// echo '<br>PackLog->get_package for package_id: ' . $this->get('package_id');
+		$this->package = DataPackage::find_by_id($this->gui, $this->get('package_id'));
+		return $this->package;
+	}
+
+	public static function fix($gui, $ressource_id) {
+		$packlog = new Packlog($gui);
+		$sql = "
+			UPDATE " . PackLog::$schema . '.' . PackLog::$tableName . "
+			SET fixed_at = now()
+			WHERE
+				fixed_at IS NULL AND
+				ressource_id = " . $ressource_id . "
+		";
+		try {
+			$packlog->execSQL($sql);
+			return array(
+				'success' => true,
+				'msg' => 'Packlogs mit ressource_id: ' . $ressource_id . ' auf gefixed gesetzt.'
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler bei dem Update der fixed_at in pack_logs für ressource_id: ' . $ressource_id
+			);
+		}
+	}
+
 }
