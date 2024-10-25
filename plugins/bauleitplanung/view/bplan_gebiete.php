@@ -9,7 +9,7 @@
  $select_width = 'width:190px;';
 
   	$doit = false;
-	  $anzObj = count($this->qlayerset[$i]['shape']);
+	  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
 	  if ($anzObj > 0) {
 	  	$this->found = 'true';
 	  	$doit = true;
