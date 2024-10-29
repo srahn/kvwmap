@@ -1461,11 +1461,13 @@ class stelle {
 				`privileg`,
 				`export_privileg`,
 				`postlabelcache`,
-				`requires`
+				`requires`,
+				`start_aktiv`
 			)";
 			if (!$assign_default_values) {
 				# Einstellungen von der Elternstelle übernehmen
-				$sql = "INSERT INTO used_layer " . $insert . "
+				$sql = "
+					INSERT INTO used_layer " . $insert . "
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
@@ -1484,12 +1486,13 @@ class stelle {
 						`privileg`,
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						`start_aktiv`
 					FROM
 						used_layer as l,
 						stellen_hierarchie
 					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						COALESCE((select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . "), 1) AND
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
@@ -1506,8 +1509,9 @@ class stelle {
 						postlabelcache = l.postlabelcache,
 						`privileg` = l.`privileg`,
 						`export_privileg` = l.`export_privileg`,
-						requires = l.requires";
-				#echo $sql.'<br><br>';
+						requires = l.requires
+				";
+				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1533,7 +1537,8 @@ class stelle {
 						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						0
 					FROM
 						layer as l
 					WHERE

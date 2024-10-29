@@ -1,11 +1,16 @@
 <?php
 // Use Cases
 // metadata_cancel_data_package
+// metadata_create_bundle_package
 // metadata_create_data_package
 // metadata_create_data_packages
+// metadata_delete_bundle_package
 // metadata_delete_data_package
+// metadata_download_bundle_package
 // metadata_download_data_package
+// metadata_order_bundle_package
 // metadata_order_data_package
+// metadata_reorder_data_package
 // metadata_show_data_packages
 // Metadaten_Auswaehlen_Senden
 // Metadaten_Recherche
@@ -35,6 +40,11 @@ function go_switch_metadata($go){
 			echo json_encode($response);
 		} break;
 
+		case 'metadata_create_bundle_package': {
+			$response = $GUI->metadata_create_bundle_package($GUI->Stelle->id);
+			echo json_encode($response);
+		} break;
+
 		case 'metadata_create_data_package': {
 			$GUI->sanitize([
 				'package_id' => 'integer'
@@ -44,12 +54,36 @@ function go_switch_metadata($go){
 			echo json_encode($response);
 		} break;
 
+		case 'metadata_delete_bundle_package' : {
+			$response = $GUI->metadata_delete_bundle_package($GUI->Stelle->id);
+			echo json_encode($response);
+		} break;
+
 		case 'metadata_delete_data_package': {
 			$GUI->sanitize([
 				'package_id' => 'integer'
 			]);
 			$response = $GUI->metadata_delete_data_package($GUI->formvars['package_id']);
 			echo json_encode($response);
+		} break;
+
+		case 'metadata_download_bundle_package': {
+			$result = $GUI->metadata_download_bundle_package();
+
+			if (!$result['success']) {
+				echo 'Fehler: ' . $result['msg'];
+			}
+
+			$downloadfile = $result['downloadfile'];
+
+			header('Content-Description: File Transfer');
+			header('Content-Type: application/x-download');
+			header('Content-Disposition: attachment; filename="'.basename($downloadfile).'"');
+			header('Expires: 0');
+			header('Cache-Control: must-revalidate');
+			header('Pragma: public');
+			header('Content-Length: ' . filesize($downloadfile));
+			readfile($downloadfile);
 		} break;
 
 		case 'metadata_download_data_package': {
@@ -74,11 +108,24 @@ function go_switch_metadata($go){
 			readfile($downloadfile);
 		} break;
 
+		case 'metadata_order_bundle_package': {
+			$response = $GUI->metadata_order_bundle_package();
+			echo json_encode($response);
+		} break;
+
 		case 'metadata_order_data_package': {
 			$GUI->sanitize([
 				'ressource_id' => 'integer'
 			]);
 			$response = $GUI->metadata_order_data_package($GUI->formvars['ressource_id'], $GUI->Stelle->id);
+			echo json_encode($response);
+		} break;
+
+		case 'metadata_reorder_data_packages' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
+			$response = $GUI->metadata_reorder_data_packages($GUI->formvars['ressource_id']);
 			echo json_encode($response);
 		} break;
 

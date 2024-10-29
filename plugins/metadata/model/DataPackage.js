@@ -10,7 +10,12 @@ class DataPackage {
   }
 
   getPackStatus = () => {
-    return (this.get('pack_status') ?? '');
+    let pack_status = this.get('pack_status') ?? '';
+
+    if (pack_status == 'Fehler') {
+      pack_status = `<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=140&value_package_id=${this.get('id')}&operator_package_id==">${pack_status}</a>`;
+    }
+    return pack_status;
   }
 
   set = (key, value) => {

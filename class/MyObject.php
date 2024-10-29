@@ -97,11 +97,13 @@ class MyObject {
 */
 	}
 
-	/*
-	* Search for an record in the database
-	* by the given attribut and value
-	* @ return this object with the record in data or empty array if not found
-	*/
+	/**
+	 * Search for an record in the database
+	 * by the given attribut and value
+	 * @param string $attribut Attribute you searching for.
+	 * @param string $value Value that shall fit the attribute.
+	 * @return MyObject This object with the record in data or empty array if not found
+	 */
 	function find_by($attribute, $value) {
 		if (empty($attribute)) {
 			$attribute = $this->identifer;
@@ -173,10 +175,13 @@ class MyObject {
 		}
 	}
 
-	/*
-	* Search for records in the database by the given where clause
-	* @ return all objects
-	*/
+	/**
+	 * Search for records in the database by the given where clause
+	 * @param string $where WHERE clause to find the objects.
+	 * @param string $order? ORDER clause to sort the results.
+	 * @param string $sort_direction? Sort direction to sort the results.
+	 * @return MyObject[] All found objects.
+	 */
 	function find_where($where, $order = '', $sort_direction = '') {
 		$where = ($where == '' ? '' : 'WHERE ' . $where);
 		if(strpos($order, '(') === false){

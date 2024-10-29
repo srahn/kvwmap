@@ -42,11 +42,13 @@ class DataPackage extends PgObject {
 			kvwmap.layer l ON r.layer_id = l.layer_id
 		";
 		$this->where = "
+			r.use_for_datapackage AND
 			r.layer_id IS NOT NULL
 		";
 	}
 
 	public static	function find_by_id($gui, $id) {
+		// echo '<br>DataPackage->find_by_id with id: ' . $id;
 		$package = new DataPackage($gui);
 		$params = array(
 			'select' => $package->select,
@@ -71,7 +73,19 @@ class DataPackage extends PgObject {
 		$package = new DataPackage($gui);
 		$params = array(
 			'select' => $package->select,
-			'from' => $package->from,
+			'from' => "
+				metadata.ressources r LEFT JOIN
+				(
+					SELECT
+						*
+					FROM
+						metadata.data_packages
+					WHERE
+						stelle_id = " . $stelle_id . "
+				) p ON r.id = p.ressource_id LEFT JOIN
+				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
+				kvwmap.layer l ON r.layer_id = l.layer_id
+			",
 			'where' => $package->where . " AND
 				(
 					p.stelle_id IS NULL OR
@@ -94,6 +108,7 @@ class DataPackage extends PgObject {
 	}
 
 	public static	function find_by_ressource_id($gui, $ressource_id) {
+		// echo '<br>DataPackage->find_by_ressource_id: ' . $ressource_id;
 		$package = new DataPackage($gui);
 		$params = array(
 			'select' => $package->select,
@@ -151,31 +166,6 @@ class DataPackage extends PgObject {
 		}
 	}
 
-	public static	function find_first_by_stelle_id_and_status($gui, $stelle_id, $pack_status) {
-		$package = new DataPackage($gui);
-		$params = array(
-			'select' => $package->select,
-			'from' => $package->from,
-			'where' => $this->where . " AND
-				(
-					p.stelle_id IS NULL OR
-					p.stelle_id = " . $stelle_id . "
-				) AND
-				p.pack_status_id = " . $pack_status . "
-			",
-			'order' => "r.bezeichnung"
-		);
-		$packages = $package->find_by_sql($params);
-		if (count($packages) == 0) {
-			return false;
-		}
-		else {
-			$package = $packages[0];
-			$package->get_layer();
-			return $package;
-		}
-	}
-
 	function get_layer() {
 		include_once(CLASSPATH . 'Layer.php');
 		$this->layer = Layer::find_by_id($this->gui, $this->get('layer_id'));
@@ -185,6 +175,19 @@ class DataPackage extends PgObject {
 	function get_export_path() {
 		$this->export_path = SHAPEPATH . 'datentool/datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
 		return $this->export_path;
+	}
+
+	/**
+	 * Function return an array with path and filename of bundle package in stelle $stelle_id
+	 * @param int $stelle_id Id of stelle in which package has to be packed
+	 * @return array{ 0: string, 1: String}
+	 */
+	public static	function get_bundle_package_file($stelle_id) {
+		$bundle_package_file = array(
+			SHAPEPATH . 'datentool/datenpakete/' . $stelle_id . '/',
+			METADATA_BUNDLE_PACKAGE_NAME . '.zip'
+		);
+		return $bundle_package_file;
 	}
 
 	/**

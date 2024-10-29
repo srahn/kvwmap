@@ -1,11 +1,17 @@
 <?php
 	// GUI functions of plugins/metadata
 	// metadata_cancel_data_package
+	// metadata_create_bundle_package
 	// metadata_create_data_package
+	// metadata_delete_bundle_package
 	// metadata_delete_data_package
+	// metadata_download_bundle_package
 	// metadata_download_data_package
+	// metadata_order_bundle_package
 	// metadata_order_data_package
+	// metadata_reorder_data_packages
 	// metadata_show_data_packages
+	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
 	// Metadaten_Recherche
 	// Metadaten_update_outdated
@@ -75,6 +81,31 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Zip all Zip files in datentool directory of Stelle $stelle_id into a bundled zip-file
+	 * @param int $stelle_id Id of Stelle to be packed.
+	 * @return array{ success: boolean, msg: string, zipfile?: string}
+	 */
+	$GUI->metadata_create_bundle_package = function($stelle_id) use ($GUI) {
+		// echo 'metadata_create_bundle_package stelle_id: ' . $stelle_id;
+		list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($stelle_id);
+		$cmd = ZIP_PATH . ' -j ' . $bundle_package_path . $bundle_package_filename . ' ' . $bundle_package_path . '*';
+		$output = array();
+		// echo $cmd;
+		$result = exec($cmd, $output, $result_code);
+		if ($result === false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einpacken der Datenpakete in Datei : ' . $bundle_package_path . $bundle_package_filename . ': ' . implode("\n", $output)
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Gesamtpaket für Stelle ID: ' . $stelle_id . ' erfolgreich gepackt in Datei: ' . $bundle_package_path . $bundle_package_filename,
+			'zipfile' => $bundle_package_path . $bundle_package_filename
+		);
 	};
 
 	/**
@@ -182,11 +213,42 @@
 	};
 
 	/**
+	 * Function delete the bundle package of current stelle.
+	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
+	 */
+	$GUI->metadata_delete_bundle_package = function() use ($GUI) {
+		try {
+			list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($GUI->Stelle->id);
+			if ($bundle_package_path != '' AND $bundle_package_filename != '' AND file_exists($bundle_package_path . $bundle_package_filename)) {
+				unlink($bundle_package_path . $bundle_package_filename);
+			}
+			else {
+				return array(
+					'success' => false,
+					'msg' => 'Gesamtpaket ' . $bundle_package_path . $bundle_package_filename . ' in Stelle ID: ' . $GUI->Stelle->id . ' nicht gefunden.'
+				);
+			}
+
+			return array(
+				'success' => true,
+				'msg' => 'Gesamtpaket der Stelle: ' . $GUI->Stelle->id . ' gelöscht.'
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler: ' . print_r($e, true)
+			);
+		}
+	};
+
+	/**
 	 * Function delete the package with id $package_id.
 	 * @param int $package_id
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
 	 */
 	$GUI->metadata_delete_data_package = function($package_id) use ($GUI) {
+		// echo '<p>metadata_delete_data_package package_id: ' . $package_id;
 		if ($package_id == '') {
 			return array(
 				'success' => false,
@@ -248,6 +310,28 @@
 	};
 
 	/**
+	 * Function download the bundle package of current stelle.
+	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
+	 */
+	$GUI->metadata_download_bundle_package = function() use ($GUI) {
+		try {
+			list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($GUI->Stelle->id);
+
+			return array(
+				'success' => true,
+				'msg' => 'Download-Datei zur Stelle: ' . $GUI->Stelle->id . ' gefunden.',
+				'downloadfile' => $bundle_package_path . $bundle_package_filename
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler: ' . print_r($e, true)
+			);
+		}
+	};
+
+	/**
 	 * Function download the package with id $package_id.
 	 * @param int $package_id
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
@@ -287,8 +371,37 @@
 
 			return array(
 				'success' => true,
-				'msg' => 'Paket ID: ' . $package_id . ' ist gelöscht.',
+				'msg' => 'Downloaddatei zum Paket ID: ' . $package_id . ' gefunden.',
 				'downloadfile' => $downloadfile
+			);
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler: ' . print_r($e, true)
+			);
+		}
+	};
+
+	/**
+	 * Function remove existing bundle package of current Stelle and
+	 * create a new bundle package with all existing zip-files of ressources for current stelle in the background
+	 * by calling the package_cron.php with stelle_id and login_name
+	 * @return array{ success: Boolean, msg: String}
+	 */
+	$GUI->metadata_order_bundle_package = function() use ($GUI) {
+		// echo '<p>metadata_order_bundle_package for stelle_id: ' . $GUI->Stelle->id . ' and login_name: ' . $GUI->user->login_name;
+		try {
+			list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($GUI->Stelle->id);
+			if ($bundle_package_path != '' AND $bundle_package_filename != '' AND file_exists($bundle_package_path . $bundle_package_filename)) {
+				unlink($bundle_package_path . $bundle_package_filename);
+			}
+			$cmd = "cd /var/www/apps/kvwmap/plugins/metadata/tools; php -f packages_cron.php go=metadata_create_bundle_package stelle_id=" . $GUI->Stelle->id . " login_name=" . $GUI->user->login_name . " >> /var/www/logs/cron/packages_cron.log 2>&1 &";
+			// echo $cmd;
+			shell_exec($cmd);
+			return array(
+				'success' => true,
+				'msg' => 'Erstellung des Gesamtpaketes für Stelle Id: ' . $GUI->Stelle->id . ' beauftragt.'
 			);
 		}
 		catch (Exception $e) {
@@ -306,6 +419,7 @@
 	 * @return array{ success: Boolean, msg: String}
 	 */
 	$GUI->metadata_order_data_package = function($ressource_id, $stelle_id) use ($GUI) {
+		// echo '<p>metadata_order_data_package ressource_id: ' . $ressource_id . ' in stelle_id: ' . $stelle_id;
 		try {
 			$package = new DataPackage($GUI);
 			$new_package_id = $package->create(array(
@@ -328,6 +442,50 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Function update all packages related to the $ressource_id.
+	 * This process first delete existing packages and than
+	 * order the packages new to pack_status (beauftragt, ID: 2) and
+	 * closing the error messages in pack_logs with fixed_at = now.
+	 * The packages_cron will than automatically create and replace the packages
+	 * and set the pack_status to ready (fertig, ID: 4).
+	 * @param int $ressource_id The id of the ressource.
+	 * @return array{ success: Boolean, msg: String} 
+	 */
+	$GUI->metadata_reorder_data_packages = function($ressource_id) use ($GUI) {
+		$packages = DataPackage::find_by_ressource_id($GUI, $ressource_id);
+		$results = array();
+		foreach ($packages AS $package) {
+			$package_id = $package->get('id');
+			$stelle_id = $package->get('stelle_id');
+			$results[] = $GUI->metadata_delete_data_package($package_id);
+			$results[] = $GUI->metadata_order_data_package($ressource_id, $stelle_id);
+		}
+		$results[] = PackLog::fix($GUI, $ressource_id);
+
+		$error_results = array_filter(
+			$results,
+			function ($result) {
+				return !$result['success'];
+			}
+		);
+		if (count($error_results) > 0) {
+			return array(
+				'success' => false,
+				'msg' => implode(', ', array_map(
+					function ($error_result) {
+						return $error_result['msg'];
+					},
+					$error_results
+				))
+			);
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Neuerstellung der Pakete beauftragt.'
+		);
 	};
 
 	$GUI->metadata_show_data_packages = function() use ($GUI) {

@@ -2112,7 +2112,7 @@ class rolle {
 	function setLayer($user_id, $stelle_id, $default_user_id) {
 		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
-			echo '<br>Layereinstellungen von Defaultrolle abfragen';
+			// echo '<br>Layereinstellungen von Defaultrolle abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2131,7 +2131,7 @@ class rolle {
 			";
 		}
 		else {
-			echo '<br>Layereinstellungen von Defaultlayerzuordnung abfragen';
+			// echo '<br>Layereinstellungen von Defaultlayerzuordnung abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2162,7 +2162,7 @@ class rolle {
 			) " .
 			$rolle2used_layer_select_sql . "
 		";
-		echo '<br>Sql: ' . $sql;
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }

@@ -50,7 +50,7 @@ class GUI {
 	var $database;
 	var $mysqli;
 	var $flst;
-	var $formvars;
+	var $formvars = array();
 	var $legende;
 	var $map;
 	var $mapdb;
@@ -13089,17 +13089,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->Stelleneditor();
   }
 
-	function create_reference_map() {
-		if (MAPSERVERVERSION < 600) {
-			$map = ms_newMapObj(DEFAULTMAPFILE);
-		}
-		else {
-			$map = new mapObj(DEFAULTMAPFILE, SHAPEPATH);
-		}
-
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-	}
-
 	function StelleAnlegen() {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$_files = $_FILES;
@@ -13115,15 +13104,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					#echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
 				}
 			}
+
 			if ($this->formvars['create_referencemap']) {
 				$refmap_width = 250;
 				$refmap_height = $refmap_width * ($this->formvars['maxymax'] - $this->formvars['minymax']) / ($this->formvars['maxxmax'] - $this->formvars['minxmax']);
 				$refmap = $this->createReferenceMap($refmap_width, $refmap_height, $refmap_width, $refmap_height, 0, $this->formvars['minxmax'], $this->formvars['minymax'], $this->formvars['maxxmax'], $this->formvars['maxymax'], 1, REFMAPFILE, 'png');
 				$refmap_file_name = 'refmap_' . $this->formvars['id'] . '.png';
 				rename(IMAGEPATH . basename($refmap), REFERENCEMAPPATH . $refmap_file_name);
-#				echo '<br>cp refmap: ' . IMAGEPATH . basename($refmap) . ' nach: ' . REFERENCEMAPPATH . $refmap_file_name;
-				$refmap = new Referenzkarte($this);
-				$result = $refmap->create(array(
+				// echo '<br>cp refmap: ' . IMAGEPATH . basename($refmap) . ' nach: ' . REFERENCEMAPPATH . $refmap_file_name;
+				$params = array(
 					'Name' => 'refmap_' . $this->formvars['id'],
 					'Dateiname' => $refmap_file_name,
 					'epsg_code' => $this->formvars['epsg_code'],
@@ -13133,9 +13122,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					'ymax' => $this->formvars['maxymax'],
 					'width' => $refmap_width,
 					'height' => $refmap_height
-				));
-				if ($result[0]['success']) {
+				);
+				$refmaps = Referenzkarte::find($this, "Dateiname LIKE '" . $refmap_file_name . "'");
+				if (count($refmaps) > 0) {
+					// reference map exists already, update it
+					$refmap = $refmaps[0];
+					$result = $refmap->update($params);
+					$refmap_id = $refmap->get_id();
+				}
+				else {
+					// reference map do not exists, create new
+					$refmap = new Referenzkarte($this);
+					$result = $refmap->create($params);
 					$refmap_id = $result[0]['id'];
+				}
+
+				if ($result[0]['success']) {
 					$this->formvars['Referenzkarte_ID'] = $refmap_id;
 				}
 				else {
