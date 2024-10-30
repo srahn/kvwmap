@@ -1,4 +1,15 @@
 <?
+
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
+
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
