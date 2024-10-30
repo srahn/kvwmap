@@ -121,6 +121,7 @@ update_gebietstyp = function(){
 	$this->editable = 'true';
 	$layer = $this->qlayerset[$i];
  	$attributes = $layer['attributes'];
+	$dataset = $layer['shape'][$k];
 ?>
 <input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>">
 <table border="0" cellspacing="0" cellpadding="0">
@@ -144,36 +145,14 @@ update_gebietstyp = function(){
 				<tr>
 					<td>Gemeinde:</td>
 					<td width="240px"><?  $j = 1;
-									$this->qlayerset[$i]['attributes']['name'][$j] = 'gkz';
-			  					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
-									echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="font-size: '.$this->user->rolle->fontsize_gle.'px" ';
-									echo 'onchange="update_require_attribute(\''.$this->qlayerset[$i]['attributes']['req_by'][$j].'\', '.$k.','.$this->qlayerset[$i]['Layer_ID'].', new Array(\''.implode("','", $this->qlayerset[$i]['attributes']['name']).'\'));" ';
-									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">';
-									echo '<option value="">-- Bitte Auswählen --</option>';
-									for($e = 0; $e < @count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
-										echo '<option ';
-										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
-											echo 'selected ';
-										}
-										echo 'value="'.$this->qlayerset[$i]['attributes']['enum_value'][$j][$e].'">'.$this->qlayerset[$i]['attributes']['enum_output'][$j][$e].'</option>';
-									}
-									echo '</select>'; 
+									echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
+									$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 									$j = 0;?>
 					</td>
 					<td>Gemeindekennzahl:</td>
 					<td>
 						<?  $j = 24;
-							$attributes['name'][$j] = 'gemkz';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 					<td rowspan="4"><span style="background-color: <? echo BG_GLEHEADER; ?>" class="titel">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Bebauungsplandaten&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></td>
@@ -182,33 +161,13 @@ update_gebietstyp = function(){
 					<td>Amt:</td>
 					<td>
 					<?  $j = 26;
-							$attributes['name'][$j] = 'amt';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 					<td>Zentrale Orte:</td>
 					<td>
 						<?  $j = 27;
-							$attributes['name'][$j] = 'zentrort';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 				</tr>
@@ -216,32 +175,13 @@ update_gebietstyp = function(){
 					<td>Kreis:</td>
 					<td>
 					<?  $j = 28;
-							$attributes['name'][$j] = 'kreis';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="33" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2); 
 					 ?>
 					</td>
 					<td>Stadt-Umland-Raum:</td>
 					<td>
 					<?  $j = 29;
-							$attributes['name'][$j] = 'sur';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									$auswahlfeld_output_laenge=strlen($auswahlfeld_output)+1;
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="'.$auswahlfeld_output_laenge.'" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 					 ?>
 					</td>
 				</tr>
@@ -249,16 +189,7 @@ update_gebietstyp = function(){
 					<td>Planungsregion:</td>
 					<td>
 						<?  $j = 30;
-							$attributes['name'][$j] = 'pr';
-							for($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++){
-								if($attributes['enum_value'][$j][$k][$e] == $layer['shape'][$k][$attributes['name'][$j]]){
-									$auswahlfeld_output = $attributes['enum_output'][$j][$k][$e];
-									break;
-								}
-							}
-              echo '<input readonly id="'.$attributes['name'][$j].'_'.$k.'" style="border:0px;background-color:transparent;font-size: '.$this->user->rolle->fontsize_gle.'px;" size="33" type="text" name="'.$layer['Layer_ID'].';'.$attributes['real_name'][$attributes['name'][$j]].';'.$attributes['table_name'][$attributes['name'][$j]].';'.$layer['shape'][$k][$attributes['table_name'][$attributes['name'][$j]].'_oid'].';'.$attributes['form_element_type'][$j].';'.$attributes['nullable'][$j].';'.$attributes['type'][$j].'" value="'.$auswahlfeld_output.'">';
-              $auswahlfeld_output = '';
-              $auswahlfeld_output_laenge = ''; 
+							echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
 					 ?>
 					</td>
 				</tr>
@@ -307,18 +238,9 @@ update_gebietstyp = function(){
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'art';
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
-					<td><?  echo '<select onchange="update_planart()" title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="width: 170px;font-size: '.$this->user->rolle->fontsize_gle.'px"';
-									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">';
-									echo '<option value="">-- Bitte Auswählen --</option>';
-									for($e = 0; $e < @count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
-										echo '<option ';
-										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
-											echo 'selected ';
-										}
-										echo 'value="'.$this->qlayerset[$i]['attributes']['enum_value'][$j][$e].'">'.$this->qlayerset[$i]['attributes']['enum_output'][$j][$e].'</option>';
-									}
-									echo '</select>'; 
-									$j = 0;?>
+					<td><?  
+						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
+					?>
 					</td>
 					<td>Plan-ID:</td>
   				<?
@@ -342,18 +264,9 @@ update_gebietstyp = function(){
   					$this->qlayerset[$i]['attributes']['name'][$j] = 'aktuell';
   					$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
   				?>
-					<td><?  echo '<select title="'.$this->qlayerset[$i]['attributes']['alias'][$j].'" style="width: 170px;font-size: '.$this->user->rolle->fontsize_gle.'px"';
-									echo 'id="'.$this->qlayerset[$i]['attributes']['name'][$j].'_'.$k.'" name="'.$layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'">';
-									echo '<option value="">-- Bitte Auswählen --</option>';
-									for($e = 0; $e < @count($this->qlayerset[$i]['attributes']['enum_value'][$j]); $e++){
-										echo '<option ';
-										if($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['name'][$j]] OR ($this->qlayerset[$i]['attributes']['enum_value'][$j][$e] != '' AND $this->qlayerset[$i]['attributes']['enum_value'][$j][$e] == $this->formvars[$this->qlayerset[$i]['Layer_ID'].';'.$this->qlayerset[$i]['attributes']['real_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].';'.$this->qlayerset[$i]['shape'][$k][$this->qlayerset[$i]['attributes']['table_name'][$this->qlayerset[$i]['attributes']['name'][$j]].'_oid'].';'.$this->qlayerset[$i]['attributes']['form_element_type'][$j].';'.$this->qlayerset[$i]['attributes']['nullable'][$j]])){
-											echo 'selected ';
-										}
-										echo 'value="'.$this->qlayerset[$i]['attributes']['enum_value'][$j][$e].'">'.$this->qlayerset[$i]['attributes']['enum_output'][$j][$e].'</option>';
-									}
-									echo '</select>'; 
-									$j = 0;?>
+					<td><?  
+						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
+					?>
 					</td>					
   			</tr>
   			<tr>
@@ -420,63 +333,7 @@ update_gebietstyp = function(){
   							<td>
   								<?
   									$j = 21;
-										echo '<div id="'.$attributes['name'][$j].'_'.$k.'"></div>';
-										$no_query = false;
-										for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-											if($layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]] == ''){
-												$no_query = true;
-											}
-										}
-										if($this->new_entry != true AND $no_query != true){
-											echo '<script type="text/javascript">
-															ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-															$data = '';
-															for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-																$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]];
-																$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-															}
-															$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-															$data .= '&@count='.$k;
-															$data .= '&no_new_window='.$attributes['no_new_window'][$j];
-															echo $data;
-															echo '&data='.str_replace('&', '<und>', $data);
-															echo '&embedded_subformPK=true';
-															if($attributes['embedded'][$j] == true){
-																echo '&embedded=true';
-															}
-															echo '&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j];
-															echo '\', new Array(document.getElementById(\''.$attributes['name'][$j].'_'.$k.'\')), \'\');
-														</script>
-													';
-											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-												if($attributes['embedded'][$j] == true){
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-													$data = '';
-													for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-														echo '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-														$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-														$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-													}
-													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-													echo '&data='.str_replace('&', '<und>', $data);
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;+&nbsp;</a></td></tr></table>';
-													echo '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
-												}
-												else{
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a ';
-													if($attributes['no_new_window'][$j] != true){
-														echo 	' target="_blank"';
-													}
-													echo ' href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz';
-													for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-														echo '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-													}
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\'">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
-												}
-											}
-										}
+										echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
   								?>
   							</td>
   						</tr>
@@ -491,63 +348,7 @@ update_gebietstyp = function(){
   							<td>
   								<?
   									$j = 22;
-										echo '<div id="'.$attributes['name'][$j].'_'.$k.'"></div>';
-										$no_query = false;
-										for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-											if($layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]] == ''){
-												$no_query = true;
-											}
-										}
-										if($this->new_entry != true AND $no_query != true){
-											echo '<script type="text/javascript">
-															ahah(\'index.php\', \'go=Layer-Suche_Suchen&selected_layer_id='.$attributes['subform_layer_id'][$j];
-															$data = '';
-															for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-																$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'='.$layer['shape'][$k][$attributes['subform_pkeys'][$j][$p]];
-																$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-															}
-															$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-															$data .= '&@count='.$k;
-															$data .= '&no_new_window='.$attributes['no_new_window'][$j];
-															echo $data;
-															echo '&data='.str_replace('&', '<und>', $data);
-															echo '&embedded_subformPK=true';
-															if($attributes['embedded'][$j] == true){
-																echo '&embedded=true';
-															}
-															echo '&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j];
-															echo '\', new Array(document.getElementById(\''.$attributes['name'][$j].'_'.$k.'\')), \'\');
-														</script>
-													';
-											if($attributes['subform_layer_privileg'][$j] > 0 AND !$lock[$k]){
-												if($attributes['embedded'][$j] == true){
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a href="javascript:ahah(\'index.php\', \'go=neuer_Layer_Datensatz';
-													$data = '';
-													for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-														echo '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-														$data .= '&value_'.$attributes['subform_pkeys'][$j][$p].'=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-														$data .= '&operator_'.$attributes['subform_pkeys'][$j][$p].'==';
-													}
-													$data .= '&preview_attribute='.$attributes['preview_attribute'][$j];
-													echo '&data='.str_replace('&', '<und>', $data);
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'&embedded=true&fromobject=subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'&targetobject='.$attributes['name'][$j].'_'.$k.'&targetlayer_id='.$layer['Layer_ID'].'&targetattribute='.$attributes['name'][$j].'\', new Array(document.getElementById(\'subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'\')), new Array(\'sethtml\'));clearsubforms();">&nbsp;+</a></td></tr></table>';
-													echo '<div style="display:inline" id="subform'.$layer['Layer_ID'].'_'.$k.'_'.$j.'"></div>';
-												}
-												else{
-													echo '<table width="98%" cellspacing="0" cellpadding="0"><tr><td width="100%" align="right"><a ';
-													if($attributes['no_new_window'][$j] != true){
-														echo 	' target="_blank"';
-													}
-													echo ' href="" onclick="this.href=\'index.php?go=neuer_Layer_Datensatz';
-													for($p = 0; $p < @count($attributes['subform_pkeys'][$j]); $p++){
-														echo '&attributenames['.$p.']='.$attributes['subform_pkeys'][$j][$p];
-														echo '&values['.$p.']=\'+document.getElementById(\''.$attributes['subform_pkeys'][$j][$p].'_'.$k.'\').value+\'';
-													}
-													echo '&selected_layer_id='.$attributes['subform_layer_id'][$j].'\'">&nbsp;'.$strNewEmbeddedPK.'</a></td></tr></table>';
-												}
-											}
-										}
+										echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size2, $select_width2);
   								?>
   							</td>
   						</tr>
