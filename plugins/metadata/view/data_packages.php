@@ -91,7 +91,7 @@
         id="order_bundle_packages_button"
         type="button"
         name="order_bundle_package"
-        value="<? echo ($data_packages_exists ? 'Neu ' : ''); ?>Packen"
+        value="<? echo (file_exists($bundle_package_path . $bundle_package_filename) ? 'Neu ' : ''); ?>Packen"
         title="Alle vorhandenen Pakete in eine ZIP-Datei zum Download zusammenpacken."
         style="display: <? echo ($data_packages_exists ? 'inline' : 'none'); ?>"
         onclick="orderBundlePackage()"
@@ -278,7 +278,7 @@
   }
 
   async function deleteBundlePackage() {
-    // console.log('call deleteBundlePackage for Stelle');
+    console.log('call deleteBundlePackage for Stelle');
     const params = new URLSearchParams({
       'go': 'metadata_delete_bundle_package'
     });

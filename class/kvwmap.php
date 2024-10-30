@@ -13197,7 +13197,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
-					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, ((i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
@@ -14692,6 +14692,26 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       }
     }
   }
+
+	/**
+	 * Function activate only the layer with $layer_id if given
+	 * and zoom to it for rolle if $zoom_to_layer_extent is true
+	 * All other layers has been reseted to status 0.
+	 * And it reads rolle settings.
+	 * @param int $layer_id
+	 * @param bool $zoom_to_layer_extent
+	 */
+	function activate_layer_only($layer_id, $zoom_to_layer_extent = false) {
+		if ($layer_id) {
+			$this->reset_layers(NULL);
+			$this->user->rolle->setOneLayer($layer_id, 1);
+		}
+		$this->user->rolle->readSettings();
+		$this->loadMap('DataBase');
+		if ($zoom_to_layer_extent) {
+			$this->zoomToMaxLayerExtent($layer_id);
+		}
+	}
 
 # 2006-03-20 pk
   function zoomToStoredMapExtent($storetime, $user_id){
@@ -17095,7 +17115,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function zoomToMaxLayerExtent($layer_id) {
 		sanitize($layer_id, 'int');
 		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		if($layer_id > 0){
+		if ($layer_id > 0){
 			$layer = $this->user->rolle->getLayer($layer_id);
 		}
 		else{
@@ -17143,10 +17163,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$ret=$layerdb->execSQL($sql,4,0);
 				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
 				$rs = pg_fetch_array($ret[1]);
-			}break;
+			} break;
 
 			case MS_LAYER_RASTER : {
-				if($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
+				if ($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
 					$raster_file = SHAPEPATH.$layer[0]['Data'];
 					if(file_exists($raster_file)){
 						$output = rand(0, 100000);
@@ -17157,7 +17177,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
-				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
+				elseif ($layer[0]['tileindex'] != ''){		# ein Tile-Index
 					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
 					if(file_exists($shape_file)){
 						$output = rand(0, 100000);
@@ -17179,7 +17199,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$rs['maxx'] = $extent->maxx;
 				$rs['miny'] = $extent->miny;
 				$rs['maxy'] = $extent->maxy;
-			}break;
+			} break;
 		}
 		if($rs['minx'] != ''){
 			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
