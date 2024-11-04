@@ -14454,23 +14454,24 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->cronjobs = CronJob::find($this);
 
 		# erzeugt die Zeilen für den crontab
-		$crontab_lines = array('gisadmin' => array(), 'root' => array());
+		$this->crontab_lines = array('gisadmin' => array(), 'root' => array());
 		foreach ($this->cronjobs AS $cronjob) {
 			if ($cronjob->get('aktiv')) {
-				$crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
+				$this->crontab_lines[$cronjob->get('user')][] = $cronjob->get_crontab_line();
 			}
 		}
-		$crontab_dir = '/var/www/cron/';
-		if (!file_exists($crontab_dir . 'gisadmin')) {
-			mkdir($crontab_dir);
+		$this->crontab_dir = '/var/www/cron/';
+		if (!file_exists($this->crontab_dir . 'gisadmin')) {
+			mkdir($this->crontab_dir . 'gisadmin');
 		}
-		if (!file_exists($crontab_dir . 'root')) {
-			mkdir($crontab_dir);
+		if (!file_exists($this->crontab_dir . 'root')) {
+			mkdir($this->crontab_dir . 'root');
 		}
 		# schreibt die Zeilen in die crontab Dateien von root und gisadmin falls vorhanden
-		foreach ($crontab_lines AS $user => $lines) {
-			$crontab_file = $crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
-			echo '<br>' . $user . ':' . $crontab_file;
+		foreach ($this->crontab_lines AS $user => $lines) {
+			$crontab_file = $this->crontab_dir . $user . '/' . substr(APPLVERSION, 0, -1); 
+			// $crontab_file = $this->crontab_dir . 'crontab_' . $user;
+			// echo '<br>' . $user . ': ' . $crontab_file;
 			$fp = fopen($crontab_file, 'w');
 			if (count($lines) > 0) {
 				foreach($lines AS $line) {
@@ -14490,7 +14491,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 #		unlink($crontab_file);
 
 		# crontab Zeilen anzeigen
-		$this->crontab_lines = $crontab_lines;
 		$this->main = 'crontab.php';
 		$this->output();
 	}
