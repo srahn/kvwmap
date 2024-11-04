@@ -1055,10 +1055,11 @@ class stelle {
 		return $ret;
 	}
 
-	/*
-	* Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
-	* Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
-	*/
+	/**
+	 * Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
+	 * Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
+	 * @param int[] $selected_parents Array of ids from parent stellen.
+	 */
 	function apply_parent_selection(
 		$selected_parents,
 		&$menues,

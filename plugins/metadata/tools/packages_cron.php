@@ -51,7 +51,7 @@
       $GUI->formvars = $_REQUEST;
     }
     $go = (isset($GUI->formvars['go']) ? $GUI->formvars['go'] : '');
-    // echo 'go: ' . $go;
+    //  echo 'go: ' . $go;
     $err_msgs = array();
     switch ($go) {
       case 'metadata_create_bundle_package' : {
@@ -75,6 +75,7 @@
         $GUI->Stelle = new stelle($GUI->formvars['stelle_id'], $GUI->database);
         $GUI->user = new user($GUI->formvars['login_name'], 0, $GUI->database);
         $GUI->user->setRolle($GUI->formvars['stelle_id']);
+        $msg = 'Create bundle package for stelle_id: ' . $GUI->formvars['stelle_id'];
         $response = $GUI->metadata_create_bundle_package($GUI->formvars['stelle_id']);
         if (!$response['success']) {
           $err_msgs[] = $response['msg'];
@@ -136,6 +137,7 @@
     }
 
     if (count($err_msg) == 0) {
+      echoLog($msg);
       return array(
         'success' => true,
         'msg' => $msg

@@ -1681,9 +1681,9 @@ class rolle {
 		return 1;
 	}
 
-	function setRolle($user_id, $stelle_id, $default_user_id) {
+	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1779,7 +1779,7 @@ class rolle {
 					`rolle`
 				WHERE
 					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $stelle_id . "
+					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
 			";
 		}
 		else {
@@ -2109,8 +2109,10 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
+	 */
 	function setLayer($user_id, $stelle_id, $default_user_id) {
-		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			// echo '<br>Layereinstellungen von Defaultrolle abfragen';
 			$rolle2used_layer_select_sql = "

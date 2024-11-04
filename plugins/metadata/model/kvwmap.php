@@ -90,6 +90,11 @@
 	 */
 	$GUI->metadata_create_bundle_package = function($stelle_id) use ($GUI) {
 		// echo 'metadata_create_bundle_package stelle_id: ' . $stelle_id;
+		// ToDo: Set a file that indicate that the bundle package creation is in progress and remove if ready
+		// and or find a way to list the php background process that create packages as well later also find
+		// runing processes that update ressources and pack packages.
+		// Create a list of running processes in Admin GUI
+		// Delete Package logs when deleting stellen
 		list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($stelle_id);
 		$cmd = ZIP_PATH . ' -j ' . $bundle_package_path . $bundle_package_filename . ' ' . $bundle_package_path . '*';
 		$output = array();
@@ -217,10 +222,33 @@
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
 	 */
 	$GUI->metadata_delete_bundle_package = function() use ($GUI) {
+		// echo 'metadata_delete_bundle_package';
 		try {
 			list($bundle_package_path, $bundle_package_filename) = DataPackage::get_bundle_package_file($GUI->Stelle->id);
 			if ($bundle_package_path != '' AND $bundle_package_filename != '' AND file_exists($bundle_package_path . $bundle_package_filename)) {
-				unlink($bundle_package_path . $bundle_package_filename);
+				// echo 'delete: ' . $bundle_package_path . $bundle_package_filename;
+				set_error_handler(function($errno, $errstr, $errfile, $errline) {
+					// error was suppressed with the @-operator
+					if (0 === error_reporting()) {
+							return false;
+					}
+					
+					throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
+				});
+				try {
+					if (!unlink($bundle_package_path . $bundle_package_filename)) {
+						return array(
+							'success' => false,
+							'msg' => 'Fehler beim Löschen der Datei ' . $bundle_package_path . $bundle_package_filename
+						);
+					}
+				}
+				catch (ErrorException $e) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler beim Löschen der Datei ' . $e->getMessage()
+					);
+				}
 			}
 			else {
 				return array(
@@ -398,10 +426,11 @@
 			}
 			$cmd = "cd /var/www/apps/kvwmap/plugins/metadata/tools; php -f packages_cron.php go=metadata_create_bundle_package stelle_id=" . $GUI->Stelle->id . " login_name=" . $GUI->user->login_name . " >> /var/www/logs/cron/packages_cron.log 2>&1 &";
 			// echo $cmd;
-			shell_exec($cmd);
+			$outputs = array();
+			exec($cmd, $outputs, $status);
 			return array(
 				'success' => true,
-				'msg' => 'Erstellung des Gesamtpaketes für Stelle Id: ' . $GUI->Stelle->id . ' beauftragt.'
+				'msg' => 'Erstellung des Gesamtpaketes für Stelle Id: ' . $GUI->Stelle->id . ' beauftragt. ' . implode(', ', $outputs)
 			);
 		}
 		catch (Exception $e) {
