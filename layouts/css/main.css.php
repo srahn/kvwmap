@@ -152,6 +152,7 @@ body {
 }
 
 .collapsed *{
+	visibility: collapse !important;
 	margin: 0 !important;
 }
 
