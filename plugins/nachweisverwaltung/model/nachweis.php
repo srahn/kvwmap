@@ -259,7 +259,7 @@ class Nachweis {
       while($rs=pg_fetch_array($ret[1])){
 				$art[] = $rs['art'];
       }
-			if (@count($art) > 0) {
+			if (count_or_0($art) > 0) {
 				$fp = fopen($pfad.'readme.txt', 'w');
 				fwrite($fp, 'Diese Dokumentarten wurden bei der Berechnung der Flurstückszuordnung und des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
 				fwrite($fp, implode(chr(10), array_unique($art)));
@@ -1145,7 +1145,7 @@ class Nachweis {
 						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['hauptart_abk'].'/'.basename($rs['link_datei']);
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente=@count($nachweise);
+          $this->erg_dokumente=count_or_0($nachweise);
           $this->Dokumente=$nachweise;
         }
       } break;
@@ -1276,7 +1276,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente = @count($nachweise);
+            $this->erg_dokumente = count_or_0($nachweise);
             $this->Dokumente=$nachweise;
           }
         }
@@ -1330,7 +1330,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente = @count($nachweise);
+            $this->erg_dokumente = count_or_0($nachweise);
             $this->Dokumente=$nachweise;      
           }
         }
@@ -1376,7 +1376,7 @@ class Nachweis {
           while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente = @count($nachweise);
+          $this->erg_dokumente = count_or_0($nachweise);
           $this->Dokumente=$nachweise;      
         }
       } break;
@@ -1402,7 +1402,7 @@ class Nachweis {
         while ($rs=pg_fetch_array($queryret[1])) {
           $ergebnis[]=$rs['nachweis_id'];
         }
-        $this->nachweisanz = @count($ergebnis);
+        $this->nachweisanz = count_or_0($ergebnis);
         $this->nachweise_id=$ergebnis;
       }
       else {

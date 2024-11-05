@@ -59,11 +59,11 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	  	$alle_flst_pro_buchung[] = $this->buchungen[$i]['flurstkennz'];
 			$alle_flst[] = $this->buchungen[$i]['flurstkennz'];
 	  	$ret=$flst->readALB_Data($this->buchungen[$i]['flurstkennz'], false, $layerset[0]['oid']);
-	  	for($s=0; $s < @count($flst->Adresse);$s++) {
+	  	for($s=0; $s < count_or_0($flst->Adresse);$s++) {
 	      $Adressbezeichnung.=$flst->Adresse[$s]["strassenname"];
 	      $Adressbezeichnung.='&nbsp;'.$flst->Adresse[$s]["hausnr"];
 	    }
-	    for($s=0; $s < @count($flst->Lage);$s++) {
+	    for($s=0; $s < count_or_0($flst->Lage);$s++) {
       	$Adressbezeichnung .= $flst->Lage[$s];
     	}
 	    for($n=0;$n<count($flst->Nutzung);$n++) {

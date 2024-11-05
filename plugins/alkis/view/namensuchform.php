@@ -2,7 +2,7 @@
 include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
 include('funktionen/input_check_functions.php');
   
-$anzNamen = @count($this->namen);
+$anzNamen = count_or_0($this->namen);
 
 # Blätterfunktion
 if($this->formvars['offset'] == ''){
