@@ -558,7 +558,7 @@ function transformCoordsSVG($path){
     }
   }
   $svgresult = 'M';
-  for($i = 1; $i < @count($newsvgcoords); $i++){
+  for($i = 1; $i < count_or_0($newsvgcoords); $i++){
     $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;

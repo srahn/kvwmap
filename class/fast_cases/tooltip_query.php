@@ -448,7 +448,7 @@ class GUI {
 				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				}
-				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+				if ($layerset[$i]['oid'] == '' AND count_or_0($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
 				$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
@@ -456,7 +456,7 @@ class GUI {
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
-					for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
+					for($j = 0; $j < count_or_0($layerset[$i]['attributes']['name']); $j++){
 						$layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
 						if($layerset[$i]['attributes']['tooltip'][$j] == 1){
 							$show = true;
@@ -1837,7 +1837,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (@count($rs) == 0) {
+		if (count_or_0($rs) == 0) {
 			return null;
 		}
 		$rs['schema'] = replace_params(
@@ -2140,7 +2140,7 @@ class db_mapObj{
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < count_or_0($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
