@@ -6925,8 +6925,8 @@ echo '			</table>
 				if($dbStyle['geomtransform'] != '') {
 					$style->setGeomTransform($dbStyle['geomtransform']);
 				}
-				if($dbStyle['pattern']!='') {
-					$style->setPattern(explode(' ',$dbStyle['pattern']));
+				if ($dbStyle['pattern'] != '') {
+					$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					$style->linecap = 'butt';
 				}
 				if($dbStyle['gap'] != '') {
@@ -6963,10 +6963,23 @@ echo '			</table>
 			#######################################################
 			$RGB = array_filter(explode(" ",$dbStyle['color']), 'strlen');
 			if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
-			if(is_numeric($RGB[0]))$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
-			else $style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
-			$RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
-			$style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
+			if (is_numeric($RGB[0])) {
+				$style->color->setRGB($RGB[0],$RGB[1],$RGB[2]);
+			}
+			else {
+				$style->updateFromString("STYLE COLOR [".$dbStyle['color']."] END");
+			}
+			if ($dbStyle['outlinecolor']!='') {
+				$RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
+				if ($RGB[0]=='') { $RGB[0]=0; $RGB[1]=0; $RGB[2]=0; }
+				if (is_numeric($RGB[0])) {
+					$style->outlinecolor->setRGB($RGB[0],$RGB[1],$RGB[2]);
+				}
+				else {
+					$style->updateFromString("STYLE OUTLINECOLOR [" . $dbStyle['outlinecolor']."] END");
+				}
+			}
+
 			if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
 				$style->opacity = $dbStyle['opacity'];
 			}
