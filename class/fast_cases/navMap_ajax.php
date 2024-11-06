@@ -1,4 +1,14 @@
 <?
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
