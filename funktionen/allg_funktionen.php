@@ -711,8 +711,8 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$y = 54.075214183333;
   $point = new PointObj();
 	$point->setXY($x,$y);
-	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
-  $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
+	$projFROM = new projectionObj("init=epsg:".$from_epsg);
+  $projTO = new projectionObj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
 }

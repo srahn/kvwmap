@@ -163,8 +163,8 @@ while($line = $result->fetch_assoc()){
   foreach($params AS $key => $value){
     $line["connection"] = str_replace('$'.$key, $value, $line["connection"]);
   }
-  $wgsProjection = ms_newprojectionobj("init=epsg:4326");
-  $userProjection = ms_newprojectionobj("init=epsg:".$line["epsg_code"]);
+  $wgsProjection = new projectionObj("init=epsg:4326");
+  $userProjection = new projectionObj("init=epsg:".$line["epsg_code"]);
   $extent->project($wgsProjection, $userProjection);
   $bounding = implode(",", array($extent->minx, $extent->miny, $extent->maxx, $extent->maxy));
   

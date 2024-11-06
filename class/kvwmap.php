@@ -359,8 +359,8 @@ class GUI {
 
 	function geo_name_query() {
 		$stellen_extent = $this->Stelle->MaxGeorefExt;
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+		$projTO = new projectionObj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
 		$result = json_decode(
 			url_get_contents(
@@ -3106,8 +3106,8 @@ echo '			</table>
 			$maxy=$ru[1];
 			$rect = rectObj($minx,$miny,$maxx,$maxy);
 			if($this->formvars['epsg_code'] != '' AND $this->formvars['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = ms_newprojectionobj("init=epsg:" . $this->formvars['epsg_code']);
-				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:" . $this->formvars['epsg_code']);
+				$projTO = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 				$rect->project($projFROM, $projTO);
 			}
 			$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
@@ -3187,8 +3187,8 @@ echo '			</table>
 	 */
 	function setMapExtent() {
 		$extent = rectObj($this->formvars['left'],$this->formvars['bottom'],$this->formvars['right'],$this->formvars['top']);
-		$wgsProjection = ms_newprojectionobj("init=epsg:4326");
-		$userProjection = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+		$wgsProjection = new projectionObj("init=epsg:4326");
+		$userProjection = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 		$extent->project($wgsProjection, $userProjection);
     $this->user->rolle->saveSettings($extent);
 		echo '{
@@ -3944,8 +3944,8 @@ echo '			</table>
 		}
 		elseif($layer['connectiontype'] == MS_WFS){
 			include_(CLASSPATH.'spatial_processor.php');
-			$projFROM = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
-			$projTO = ms_newprojectionobj("init=epsg:".$layer['epsg_code']);
+			$projFROM = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
+			$projTO = new projectionObj("init=epsg:".$layer['epsg_code']);
 			$rect = $this->user->rolle->oGeorefExt;
 			$rect->project($projFROM, $projTO);
 			$request = $layer['connection'].'&service=wfs&version=1.1.0&request=getfeature&srsName=EPSG:'.$layer['epsg_code'].'&typename='.$layer['wms_name'].'&bbox='.$rect->minx.','.$rect->miny.','.$rect->maxx.','.$rect->maxy;
@@ -6592,8 +6592,8 @@ echo '			</table>
 					$this->Document->ausschnitt[0]['center_y'] + $height/2
 				);
 				if($this->Document->ausschnitt[0]['epsg_code'] != '' AND $this->Document->ausschnitt[0]['epsg_code'] != $this->user->rolle->epsg_code){
-					$projFROM = ms_newprojectionobj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
-					$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+					$projFROM = new projectionObj("init=epsg:" . $this->Document->ausschnitt[0]['epsg_code']);
+					$projTO = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 					$rect->project($projFROM, $projTO);
 				}
 				if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
@@ -6826,8 +6826,12 @@ echo '			</table>
 			}
 		}	
 		if($dbStyle['size'] != ''){
-			if(is_numeric($dbStyle['size']))$style->set('size', $dbStyle['size']);
-			else $style->size = 16;		# Dummywert 16 da size-Attribut verwendet wird
+			if (is_numeric($dbStyle['size'])) {
+				$style->size = $dbStyle['size'];
+			}
+			else {
+				$style->size = 16;		# Dummywert 16 da size-Attribut verwendet wird
+			}
 		}
     if($dbStyle['width']!='') {
       $style->width = $dbStyle['width'];
@@ -6861,7 +6865,12 @@ echo '			</table>
     }
     #######################################################
     if($layer->type > 0){
-    	$symbol = $map->getSymbolObjectById($style->symbol);
+			if (MAPSERVERVERSION >= 800) {
+				$symbol = $map->symbolset->getSymbol($style->symbol);
+			}
+			else {
+				$symbol = $map->getSymbolObjectById($style->symbol);
+			}
     	if($symbol->type == 1006){ 	# 1006 == hatch
     		$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
     		$style->maxsize = 2*$style->width;
@@ -7918,8 +7927,8 @@ echo '			</table>
 		}
 		$this->center = new PointObj();
 		$this->center->setXY($bb[0] + ($bb[2] - $bb[0]) / 2, $bb[1] + ($bb[3] - $bb[1]) / 2);
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+		$projTO = new projectionObj("init=epsg:4326");
 		$this->center->project($projFROM, $projTO);
 
 		if (!is_dir(WMS_MAPFILE_PATH . $this->Stelle->id)) {
@@ -14503,8 +14512,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     else {
 			$rect = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
 			if($ret[1]['epsg_code'] != '' AND $ret[1]['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = ms_newprojectionobj("init=epsg:" . $ret[1]['epsg_code']);
-				$projTO = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:" . $ret[1]['epsg_code']);
+				$projTO = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 				$rect->project($projFROM, $projTO);
 			}
       $this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
@@ -15739,8 +15748,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							else {
 								$layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
 							}
-							$projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-							$projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
+							$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+							$projTO = new projectionObj("init=epsg:" . $layerset[$i]['epsg_code']);
 							$rect2 = rectObj($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 							$rect2->project($projFROM, $projTO);
 							if ($layerset[$i]['Datentyp'] == 3) {
@@ -16103,8 +16112,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 
             # Boundingbox im System des Layers anhängen
-            $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-            $projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
+            $projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+            $projTO = new projectionObj("init=epsg:" . $layerset[$i]['epsg_code']);
 
             $bbox = rectObj($this->user->rolle->oGeorefExt->minx,$this->user->rolle->oGeorefExt->miny,$this->user->rolle->oGeorefExt->maxx,$this->user->rolle->oGeorefExt->maxy);
 
@@ -16199,8 +16208,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             if($rect2->minx == $rect2->maxx AND $rect2->miny == $rect2->maxy){
             	$rand=$layerset[$i]['tolerance']*$pixsize;
             }
-            $projFROM = ms_newprojectionobj("init=epsg:" . $this->user->rolle->epsg_code);
-            $projTO = ms_newprojectionobj("init=epsg:" . $layerset[$i]['epsg_code']);
+            $projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
+            $projTO = new projectionObj("init=epsg:" . $layerset[$i]['epsg_code']);
             $rect2->project($projFROM, $projTO);
             $searchbox_minx=strval($rect2->minx-$rand);
             $searchbox_miny=strval($rect2->miny-$rand);
@@ -16942,8 +16951,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				$extent = new rectObj();
 				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
-				$rasterProjection = ms_newprojectionobj("init=epsg:".$layer[0]['epsg_code']);
-				$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
+				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
 				$rs['minx'] = $extent->minx;
 				$rs['maxx'] = $extent->maxx;
@@ -17555,7 +17564,8 @@ class db_mapObj{
 				'' as wms_name,
 				'' as wms_format,
 				'' as wms_server_version,
-				'' as wms_connectiontimeout
+				'' as wms_connectiontimeout,
+				'' as oid
 			FROM
 				rollenlayer AS l JOIN
 				u_groups AS g ON l.Gruppe = g.id LEFT JOIN

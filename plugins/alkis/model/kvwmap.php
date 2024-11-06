@@ -989,8 +989,8 @@
 		$alkis = new ALKIS($GUI->pgdatabase);
 		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
-		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
+		$projFROM = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
+		$projTO = new projectionObj("init=epsg:".EPSGCODE_ALKIS);
 		$point->project($projFROM, $projTO);
 		$print_params['coord'] = $point->x.' '.$point->y;
 		$print_params['printscale'] = $formvars['printscale'];
