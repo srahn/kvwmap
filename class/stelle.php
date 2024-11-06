@@ -2356,8 +2356,8 @@ class stelle {
 		$stelle_id = $this->id;
 		$stellendaten = $this->getstellendaten();
 		$stellenextent = $this->MaxGeorefExt;
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$projFROM = new projectionObj("init=epsg:" . $this->epsg_code);
+		$projTO = new projectionObj("init=epsg:4326");
 		$stellenextent->project($projFROM, $projTO);
 
 		$layerdef = (Object) array(

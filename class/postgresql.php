@@ -527,8 +527,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
