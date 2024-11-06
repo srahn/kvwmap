@@ -1,5 +1,14 @@
 <?
 
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 if (MAPSERVERVERSION < 800) {
 	function msGetErrorObj(){
 		return ms_GetErrorObj();
