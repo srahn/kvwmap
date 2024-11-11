@@ -258,17 +258,17 @@ class Ressource extends PgObject {
   function download_wfs() {
     // ToDo: implement on demand
     $url = $this->get('download_url');
+    $epsg = ($this->get('import_epsg') ? $this->get('import_epsg') : '25832');
     $params = array(
       'Service' => 'WFS',
       'Version' => '2.0.0',
       'Request' => 'GetFeature',
-      'TypeNames' => $this->get('import_layer')
+      'TypeNames' => $this->get('import_layer'),
+      'SRS' => 'urn:ogc:def:crs:EPSG::' . $epsg
     );
 
     try {
-      $download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
-
-      $this->debug->show('Download from URL:<br>' . $download_url, true);
+      $this->debug->show('Download from URL:<br>' . $url, true);
       if ($this->get('download_path') == '') {
         return array(
           'success' => false,
@@ -282,6 +282,7 @@ class Ressource extends PgObject {
           'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/datentool/ an.'
         );
       }
+
       if (!file_exists($download_path)) {
         $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
         mkdir($download_path, 0777, true);
@@ -291,9 +292,28 @@ class Ressource extends PgObject {
       $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
 
-      $download_file = $this->get('import_table') . '.gml';
-      $this->debug->show('Download ' . $download_file . ' from url: ' . $download_url . ' to ' . $download_path, true);
-      copy($download_url, $download_path .  $download_file);
+      if ($this->get('import_table')) {
+        $download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
+        $download_file = $this->get('import_table') . '.gml';
+        $this->debug->show('Download ' . $download_file . ' from url: ' . $download_url . ' to ' . $download_path, true);
+        copy($download_url, $download_path .  $download_file);
+      }
+      else {
+        // query featuretypes from capabilities and download all in separate gml-files.
+        include_once(CLASSPATH . 'wfs.php');
+        $wfs = new wfs($url, $params['Version'], '', '', $this->get('import_epsg'));
+        $wfs->parse_capabilities($url);
+        $featuretypes = $wfs->get_featuretypes();
+        $this->debug->show('Download folgende FeatureTypes in gml files in download path:' . $download_path, true);
+        foreach ($featuretypes AS $featuretype) {
+          $params['TypeNames'] = $featuretype['name'];
+          // $this->debug->show('params: ' . http_build_query($params), true);
+          $download_url = $url . (strpos($url, '?') === false ? '?' : (in_array(substr($url, -1), array('?', '&')) ? '' : '&')) . http_build_query($params);
+          $download_file = strtolower(sonderzeichen_umwandeln(str_replace(':', '_', umlaute_umwandeln($featuretype['name'])))) . '.gml';
+          $this->debug->show($featuretype['name'] . ' (' . $featuretype['title'] . ') => ' . $download_file, true);
+          copy($download_url, $download_path .  $download_file);
+        }
+      }
 
       return array(
         'success' => true,
@@ -728,22 +748,27 @@ class Ressource extends PgObject {
     // get the files from dest_path
     $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
     $gml_files = array();
-    $entries = scandir($dest_path);
-    $i = 1;
-    foreach($entries AS $entry) {
-      if (is_file($dest_path . $entry)) {
-        $path_parts = pathinfo($entry);
-        if (strtolower($path_parts['extension']) == 'gml') {
-          $gml_files[] = $entry;
-        }
-        if (strtolower($path_parts['extension']) == 'xml') {
-          $gml_files[] = $path_parts['filename'] . '.gml';
-          rename($dest_path . $entry, $dest_path . $path_parts['filename'] . '.gml');
-        }
-        else {
-          $gml_files[] = $this->get('import_layer') . '_' . $i . '.gml';
-          rename($dest_path . $entry, $dest_path . $this->get('import_layer') . '_' . $i . '.gml');
-          $i++;
+    if ($this->get('import_file')) {
+      $gml_files[] = $this->get('import_file');
+    }
+    else {
+      $entries = scandir($dest_path);
+      $i = 1;
+      foreach($entries AS $entry) {
+        if (is_file($dest_path . $entry)) {
+          $path_parts = pathinfo($entry);
+          if (strtolower($path_parts['extension']) == 'gml') {
+            $gml_files[] = $entry;
+          }
+          if (strtolower($path_parts['extension']) == 'xml') {
+            $gml_files[] = $path_parts['filename'] . '.gml';
+            rename($dest_path . $entry, $dest_path . $path_parts['filename'] . '.gml');
+          }
+          // else {
+          //   $gml_files[] = $this->get('import_layer') . '_' . $i . '.gml';
+          //   rename($dest_path . $entry, $dest_path . $this->get('import_layer') . '_' . $i . '.gml');
+          //   $i++;
+          // }
         }
       }
     }

@@ -12,6 +12,56 @@ class wfs{
 		$this->epsg = $epsg;
 	}
 	
+	function parse_capabilities($onlineResource, $wms_auth_username = '', $wms_auth_password = '') {
+		$doc = url_get_contents(
+			$onlineResource . (strpos($onlineResource, '?') === false ? '?' : '&') . 'SERVICE=WFS&VERSION=' . $this->version . '&REQUEST=GetCapabilities',
+			$wms_auth_username,
+			$wms_auth_password
+		);
+		$parser = xml_parser_create();
+		xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 1);
+		xml_parse_into_struct($parser, $doc, $this->values, $this->indexes);
+		xml_parser_free($parser);
+		return true;
+	}
+
+	/**
+	 * Die Funktion durchsucht den Inhalt eines getcapabilties xml-dokument nach
+	 * verfügbaren featuretypes. Es nutzt die in parse_capabilities von der Funktion xml_parse_into_struct zurückgegebenen
+	 * und als Objektvariablen gesetzten Arrays values und indexes.
+	 * @return array{ array{ name: string, title: String}} Array mit Arrays mit Name und Titel des Featuretypes
+	 */
+	function get_featuretypes() {
+		$values = $this->values;
+		$indexes = $this->indexes;
+		$featuretype_names = array_map(
+			function ($i) use ($values, $indexes) {
+				return array(
+					'name' => $values[$indexes['NAME'][$i]]['value'],
+					'title' => $values[$indexes['TITLE'][$i]]['value']
+				);
+			},
+			array_keys($indexes['NAME'])
+		);
+		return $featuretype_names;
+	}
+
+	/**
+	 * Die Funktion durchsucht den Inhalt eines getcapabilties xml-dokument nach
+	 * verfügbaren Titeln von featuretypes. Es nutzt die in parse_capabilities von der Funktion xml_parse_into_struct zurückgegebenen
+	 * und als Objektvariablen gesetzten Arrays values und indexes.
+	 */
+	function get_featuretype_titles() {
+		$values = $this->values;
+		$featuretype_names = array_map(
+			function ($index) use ($values) {
+				return $values[$index]['value'];
+			},
+			$this->indexes['TITLE']
+		);
+		return $featuretype_names;
+	}
+
 	function get_feature_request($request, $bbox, $filter, $maxfeatures){
 		# entweder wird eine fertige request-URL übergeben oder an Hand der bbox bzw. des Filters gebildet
 		if($request == NULL){
