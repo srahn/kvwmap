@@ -213,11 +213,11 @@
 		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
 		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
     $legendentext="Flurstück";
-    if (@count($FlurstListe) > 1) {
+    if (count_or_0($FlurstListe) > 1) {
 			$legendentext .= "e";
 		}
     $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
-    for ($i=1; $i < @count($FlurstListe); $i++) {
+    for ($i=1; $i < count_or_0($FlurstListe); $i++) {
       $datastring.=",'" . $FlurstListe[$i]."'";
       $legendentext.=" " . $FlurstListe[$i];
     }
@@ -393,7 +393,7 @@
 			$GemkgListe=$Gemarkung->getGemarkungListe(array_keys($GemeindenStelle['ganze_gemeinde']), array_merge(array_keys($GemeindenStelle['ganze_gemarkung']), array_keys($GemeindenStelle['eingeschr_gemarkung'])));
 		}		
 		# Wenn nur eine Gemeinde zur Auswahl steht, wird diese gewählt; Verhalten so, als würde die Gemeinde vorher gewählt worden sein.
-		if(@count($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
+		if(count_or_0($GemListe['ID'])==1)$GemID=$GemListe['ID'][0];
     // Sortieren der Gemarkungen unter Berücksichtigung von Umlauten
     $sorted_arrays = umlaute_sortieren($GemkgListe['Bezeichnung'], $GemkgListe['GemkgID']);
     $GemkgListe['Bezeichnung'] = $sorted_arrays['array'];
@@ -429,7 +429,7 @@
 		    }
         $HausNrListe=$Adresse->getHausNrListe($GemID,$StrID,'','','hausnr*1,ASCII(REVERSE(hausnr)),quelle');
         # Erzeugen des Formobjektes für die Flurstücksauswahl
-        if (@count($HausNrListe['HausID'])==1){
+        if (count_or_0($HausNrListe['HausID'])==1){
           $HausID=$HausNrListe['HausID'][0];
           $HausID = array($HausID);
         }
@@ -608,7 +608,7 @@
       $Flur=new Flur('','','',$GUI->pgdatabase);
     	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['history_mode']);
       # Erzeugen des Formobjektes für die Flurauswahl
-      if (@count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
+      if (count_or_0($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
       $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
       $FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
       $FlurFormObj->outputHTML();
@@ -679,7 +679,7 @@
 		else {
 			$GemkgListe=$Gemarkung->getGemarkungListeAll(NULL, array($GemkgID));
 		}
-		if(@count($GemkgListe['GemkgID']) > 0){
+		if(count_or_0($GemkgListe['GemkgID']) > 0){
       # Die Gemarkung ist ausgewählt und gültig aber Flur leer, zoom auf Gemarkung
       if ($FlurID === 0 OR $FlurID == '-1') {
 				if($GUI->formvars['ALK_Suche'] == 1){
@@ -989,8 +989,8 @@
 		$alkis = new ALKIS($GUI->pgdatabase);
 		$point = new PointObj();
 		$point->setXY($formvars['center_x'], $formvars['center_y']);
-		$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:".EPSGCODE_ALKIS);
+		$projFROM = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
+		$projTO = new projectionObj("init=epsg:".EPSGCODE_ALKIS);
 		$point->project($projFROM, $projTO);
 		$print_params['coord'] = $point->x.' '.$point->y;
 		$print_params['printscale'] = $formvars['printscale'];
@@ -1344,7 +1344,7 @@
     }
     else {
       $GUI->namen=$ret[1];
-      if (@count($GUI->namen)==0) {
+      if (count_or_0($GUI->namen)==0) {
         $GUI->Fehlermeldung='<br>Es konnten keine Namen gefunden werden, bitte ändern Sie die Anfrage!';
       }
       else {

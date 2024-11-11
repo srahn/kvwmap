@@ -546,8 +546,8 @@ else {
 			if ($user_epsg['minx'] != '') {
 				// Koordinatensystem ist räumlich eingegrenzt
 				if ($GUI->Stelle->epsg_code != 4326) {
-					$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-					$projTO = ms_newprojectionobj("init=epsg:4326");
+					$projFROM = new projectionObj("init=epsg:".$GUI->Stelle->epsg_code);
+					$projTO = new projectionObj("init=epsg:4326");
 					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO); // max. Stellenextent wird in 4326 transformiert
 				}
 				// Vergleich der Extents und ggfs. Anpassung
@@ -555,14 +555,14 @@ else {
 				if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
 				if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
 				if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
-				$projFROM = ms_newprojectionobj("init=epsg:4326");
-				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:4326");
+				$projTO = new projectionObj("init=epsg:".$GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 			}
 			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
-				$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->Stelle->epsg_code);
-				$projTO = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:" . $GUI->Stelle->epsg_code);
+				$projTO = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
 			}
 		}
@@ -576,7 +576,7 @@ else {
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
-		for($i = 0; $i < @count($rollenlayerset); $i++){
+		for($i = 0; $i < count_or_0($rollenlayerset); $i++){
 			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}

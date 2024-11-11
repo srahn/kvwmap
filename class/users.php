@@ -1241,7 +1241,7 @@ class user {
 		# zugeordneten Stellen gehört. Die letzte Stellen_ID wird in beiden Fällen auf die erste von den
 		# dem Nutzer zugeordneten Stellen gesetzt.
 		$stellen= $this->getStellen(0);
-		if(@count($stellen['ID']) > 0){
+		if(count_or_0($stellen['ID']) > 0){
 			$stelle_id = $this->getLastStelle();
 			if($stelle_id != ''){
 				$valid = false;

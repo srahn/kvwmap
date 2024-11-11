@@ -23,9 +23,9 @@
 		if($GUI->formvars['nummer'] != '' AND $GUI->formvars['jahr'] != ''){
 			$GUI->bau = new Bauauskunft($GUI->baudatabase);
 			$GUI->bau->getbaudaten($GUI->formvars);
-			for($i = 0; $i < @count($GUI->bau->baudata); $i++){
+			for($i = 0; $i < count_or_0($GUI->bau->baudata); $i++){
 				$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
-				for($j = 0; $j < @count($flst); $j++){
+				for($j = 0; $j < count_or_0($flst); $j++){
 					$GUI->bau->grundstueck[] = $GUI->bau->formatFlurstKennz($GUI->bau->baudata[$i]['feld39'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j]);
 				}
 			}
@@ -88,7 +88,7 @@
       $GUI->formvars['flur'] = $searchvars['flur'];
       $GUI->formvars['flurstueck'] = $searchvars['flurstueck'];
 
-      for($i = 0; $i < @count($GUI->bau->baudata); $i++){
+      for($i = 0; $i < count_or_0($GUI->bau->baudata); $i++){
         $gemarkungs_searchvars['jahr'] = $GUI->bau->baudata[$i]['feld1'];
         $gemarkungs_searchvars['obergruppe'] = $GUI->bau->baudata[$i]['feld2'];
         $gemarkungs_searchvars['nummer'] = $GUI->bau->baudata[$i]['feld3'];
@@ -108,9 +108,9 @@
 	$GUI->bauauskunftanzeige = function() use ($GUI){
     $GUI->bau = new Bauauskunft($GUI->baudatabase);
     $GUI->bau->getbaudaten($GUI->formvars);
-    for($i = 0; $i < @count($GUI->bau->baudata); $i++){
+    for($i = 0; $i < count_or_0($GUI->bau->baudata); $i++){
 			$flst = explode(', ', $GUI->bau->baudata[$i]['feld14']);
-			for($j = 0; $j < @count($flst); $j++){
+			for($j = 0; $j < count_or_0($flst); $j++){
 				$GUI->bau->grundstueck[] = $GUI->bau->baudata[$i]['feld39'].$GUI->bau->baudata[$i]['feld12'].'-'.$GUI->bau->baudata[$i]['feld13'].'-'.$flst[$j];
 			}
     }

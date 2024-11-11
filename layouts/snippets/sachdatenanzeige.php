@@ -204,7 +204,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 
 <?
 	if (value_of($this->formvars, 'printversion') == '') {	
-		if (count($this->queried_layers) > 1) { ?>
+		if (count_or_0($this->queried_layers) > 1) { ?>
 			<script type="text/javascript">
 				document.getElementById('overlayheader2').style.display = '';
 				document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';

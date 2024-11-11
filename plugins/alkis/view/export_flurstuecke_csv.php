@@ -165,7 +165,7 @@ function delete_selection(){
 			  		<select name="selection" onchange="load_selection();" style="width:220px">
 			  			<option value="">-- Auswahl --</option>
 			  			<?
-			  				for($i = 0; $i < @count($this->attribute_selections); $i++){
+			  				for($i = 0; $i < count_or_0($this->attribute_selections); $i++){
 			  					echo '<option value="'.$this->attribute_selections[$i]['name'].'" ';
 			  					if($this->selection['name'] == $this->attribute_selections[$i]['name'])echo 'selected';
 			  					echo ' >'.$this->attribute_selections[$i]['name'].'</option>';

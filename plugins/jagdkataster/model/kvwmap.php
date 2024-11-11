@@ -218,7 +218,7 @@
 				$csv .= $GUI->flurstuecke[$i]['flur'].';';
 				$csv .= " ".$GUI->flurstuecke[$i]['zaehler'].";";
 				$csv .= " ".$GUI->flurstuecke[$i]['nenner'].";";
-				for($j=0; $j < @count($GUI->flurstuecke[$i]['eigentuemer']); $j++){
+				for($j=0; $j < count_or_0($GUI->flurstuecke[$i]['eigentuemer']); $j++){
 					$csv .= str_replace(';', ',', $GUI->flurstuecke[$i]['eigentuemer'][$j]).' ('.$GUI->flurstuecke[$i]['eigentuemer_nr'][$j].')   ';
 				}
 				$csv .= ';';

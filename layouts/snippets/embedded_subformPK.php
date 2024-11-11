@@ -9,7 +9,7 @@
 	$size = 50;
 
 	$doit = false;
-	$anzObj = @count($layer['shape']);
+	$anzObj = count_or_0($layer['shape']);
   if ($anzObj > 0) {
 		$this->found = 'true';
 		$doit = true;
@@ -139,7 +139,7 @@
 					[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
 				</script>				
 	<?
-				for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+				for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 					echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 				}
 			}

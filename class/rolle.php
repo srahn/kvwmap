@@ -1812,7 +1812,7 @@ class rolle {
 
 	function deleteRollen($user_id, $stellen) {
 		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
 				DELETE FROM `rolle`
 				WHERE
@@ -1915,7 +1915,7 @@ class rolle {
 	function deleteMenue($user_id, $stellen, $menues) {
 		# löscht die Menuepunkte der übergebenen Stellen für einen Benutzer.
 		if($menues == 0) {
-			for ($i = 0; $i < @count($stellen); $i++) {
+			for ($i = 0; $i < count_or_0($stellen); $i++) {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
@@ -1982,7 +1982,7 @@ class rolle {
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
-			for($j = 0; $j < @count($layerids); $j++){
+			for($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
@@ -2031,7 +2031,7 @@ class rolle {
 
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
@@ -2173,7 +2173,7 @@ class rolle {
 
 	function deleteLayer($user_id, $stellen, $layer) {
 		# löscht die Layer der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			if (!is_array($layer)) {
 				$layer = array();
 			}

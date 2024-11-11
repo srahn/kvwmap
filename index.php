@@ -487,7 +487,7 @@ function go_switch($go, $exit = false) {
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
-				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
+				for($i = 0; $i < count_or_0($GUI->layers_replace_scale); $i++){
 					$GUI->layers_replace_scale[$i]->data = str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data);
 				}
 				echo $GUI->create_dynamic_legend();

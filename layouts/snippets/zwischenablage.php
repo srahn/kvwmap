@@ -47,7 +47,7 @@
 
 $print_all = false;
 
-for ($i = 0; $i < @count($this->layer); $i++) { ?>
+for ($i = 0; $i < count_or_0($this->layer); $i++) { ?>
 	<div class="item layer-item">
 		<a href="index.php?go=gemerkte_Datensaetze_anzeigen&layer_id=<? echo $this->layer[$i]['layer_id']; ?>"><? echo $this->layer[$i]['Name_or_alias']; ?></a>
 	</div>

@@ -79,7 +79,7 @@
 		include_once(CLASSPATH . 'Notification.php');
 		$result = Notification::find_for_user($this); ?>
 		<a href="#" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {
-			<? if (@count($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
+			<? if (count_or_0($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
 			<i class="fa fa-bell" aria-hidden="true" style="
 				font-size: 150%;
 				padding: 5px 0px 4px 0;
