@@ -164,7 +164,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-var attributes = new Array(<? echo (@count($this->attributes['name'] ?: []) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
+var attributes = new Array(<? echo (count_or_0($this->attributes['name'] ?: []) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function takeover_attributes(){
 	if (document.getElementById('for_attributes_selected_layer_id').value == '') {
@@ -355,7 +355,7 @@ function set_all(column){
 			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
-					for ($i = 0; $i < @count($this->attributes['type']); $i++){ ?>
+					for ($i = 0; $i < count_or_0($this->attributes['type']); $i++){ ?>
 						<tr class="listen-tr">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
@@ -404,7 +404,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -423,7 +423,7 @@ function set_all(column){
 							<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">' . $strDefault . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'default\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -435,7 +435,7 @@ function set_all(column){
 						<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">' . $strAlias . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a>
 														<a href="javascript:clear_all(\'alias\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
@@ -460,7 +460,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributExplanations . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 													<a href="javascript:clear_all(\'tooltip\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
@@ -472,7 +472,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->strGroup . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 													<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
@@ -484,7 +484,7 @@ function set_all(column){
 						<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">Tab</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'tab\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -499,7 +499,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strArrangement . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'arrangement',
@@ -540,7 +540,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributeLabeling . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'labeling',
@@ -579,7 +579,7 @@ function set_all(column){
 								if($i == 0) {
 									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'mandatory',
@@ -616,7 +616,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strForNewDataset . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'dont_use_for_new',
@@ -653,7 +653,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributeVisible . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 												'visible',

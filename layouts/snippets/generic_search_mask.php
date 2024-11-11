@@ -146,9 +146,9 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							<option title="<? echo $strIsEmptyHint; ?>" value="IS NULL" <? if($operator == 'IS NULL'){ echo 'selected';} ?> ><? echo $strIsEmpty; ?></option>
 							<option title="<? echo $strIsNotEmptyHint; ?>" value="IS NOT NULL" <? if($operator == 'IS NOT NULL'){ echo 'selected';} ?> ><? echo $strIsNotEmpty; ?></option>
 							<? if($this->attributes['type'][$i] != 'geometry'){ ?>
-							<option title="<? echo $strInHint; ?>" value="IN" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
+							<option title="<? echo $strInHint; ?>" value="IN" <? if (count_or_0($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'IN'){ echo 'selected';} ?> ><? echo $strIsIn; ?></option>
 								<? if(!in_array($this->attributes['type'][$i], array('text'))){ ?>
-							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (@count($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
+							<option title="<? echo $strBetweenHint; ?>" value="between" <? if (count_or_0($this->attributes['enum'][$i]) > 0){ echo 'disabled="true"'; } ?> <? if($operator == 'between'){ echo 'selected';} ?> ><? echo $strBetween; ?></option>
 								<? }
 							}
 						} ?>

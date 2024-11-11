@@ -281,8 +281,8 @@ class spatial_processor {
 				$user_epsg = $epsg_codes[$newSRID];
 				if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
 					if($curSRID != 4326){
-						$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-						$projTO = ms_newprojectionobj("init=epsg:4326");
+						$projFROM = new projectionObj("init=epsg:".$curSRID);
+						$projTO = new projectionObj("init=epsg:4326");
 						$curExtent->project($projFROM, $projTO);			// $curExtent wird in 4326 transformiert
 					}
 					// Vergleich der Extents und ggfs. Anpassung
@@ -290,8 +290,8 @@ class spatial_processor {
 					if($user_epsg['miny'] > $curExtent->miny)$curExtent->miny = $user_epsg['miny'];
 					if($user_epsg['maxx'] < $curExtent->maxx)$curExtent->maxx = $user_epsg['maxx'];
 					if($user_epsg['maxy'] < $curExtent->maxy)$curExtent->maxy = $user_epsg['maxy'];
-					$projFROM = ms_newprojectionobj("init=epsg:4326");
-					$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+					$projFROM = new projectionObj("init=epsg:4326");
+					$projTO = new projectionObj("init=epsg:".$newSRID);
 					$curExtent->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 					$result=$curExtent->minx.' '.$curExtent->miny.', '.$curExtent->maxx.' '.$curExtent->maxy;
 				}
@@ -746,8 +746,8 @@ class spatial_processor {
     	
     	case 9 : {
     		# Abfrage eines WFS-Layers
-		    $projFROM = ms_newprojectionobj("init=epsg:".$this->rolle->epsg_code);
-        $projTO = ms_newprojectionobj("init=epsg:".$layerset[0]['epsg_code']);
+		    $projFROM = new projectionObj("init=epsg:".$this->rolle->epsg_code);
+        $projTO = new projectionObj("init=epsg:".$layerset[0]['epsg_code']);
     		$rect->project($projFROM, $projTO);
     		$searchbox_minx=strval($rect->minx-$rand);
 	      $searchbox_miny=strval($rect->miny-$rand);

@@ -46,7 +46,7 @@ class wfs{
 	function create_filter($attributenames, $operators, $values){
 		# Diese Funktion generiert aus Attributnamen, Operatoren und Werten einen über 'And' verknüpften WFS-Filterstring
 		if($this->namespace != '')$namespace = $this->namespace.':';
-		$count = @count($attributenames);
+		$count = count_or_0($attributenames);
 		if($count > 0){
 			$filter = '<ogc:Filter xmlns:ogc="http://www.opengis.net/ogc">';
 			if($count > 1){
@@ -161,7 +161,7 @@ class wfs{
 		else {
 			$geomtag = 'gml:pos';
 		}
-		for ($i = 0; $i < @count($this->objects); $i++) {
+		for ($i = 0; $i < count_or_0($this->objects); $i++) {
 			# durchläuft alle Objekte
 			for ($j = 0; $j < count($this->objects[$i]); $j++) {
 				# durchläuft alle Tags im Objekt

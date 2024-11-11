@@ -414,7 +414,7 @@ class textdocument {
 					@array_shift($options);
 
 					$o = array();
-					for ($j = 0; $j < @count($options); $j++) {
+					for ($j = 0; $j < count_or_0($options); $j++) {
 							$options[$j] = preg_replace("#\s+#", " ", trim($options[$j]));
 							if (strpos($options[$j], " ") !== false) {
 									$parts = explode(" ", $options[$j]);

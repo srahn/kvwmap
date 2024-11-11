@@ -1,7 +1,7 @@
 <?php
 
   $doit = false;
-  $anzObj = @count($this->qlayerset[$i]['shape']);
+  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
   if ($anzObj > 0) {
   	$this->found = 'true';
   	$doit = true;
@@ -128,7 +128,7 @@ update_gebietstyp = function(){
 	<tr>
 		<td>&nbsp;&nbsp;</td>
 		<td>  
-	<? /*for($a = 0; $a < @count($this->qlayerset[$i]['attributes']['name']); $a++){
+	<? /*for($a = 0; $a < count_or_0($this->qlayerset[$i]['attributes']['name']); $a++){
 		echo $this->qlayerset[$i]['attributes']['name'][$a].'  '.$a.'<br>';
 	}*/
 	if($this->formvars['value_b_plan_stammdaten_oid'] != '' OR $this->new_entry == true){
