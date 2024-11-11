@@ -92,7 +92,7 @@ class lineeditor {
 	 * @return string The WKT MultiLineString
 	 */
 	function get_multi_linestring($line) {
-		return "ST_Multi(" . $this->get_linestring($line) . ")";
+		return "ST_Multi(ST_GeometryFromText('" . $line . "', " . $this->clientepsg . "))";
 	}
 
 	/**
@@ -101,7 +101,7 @@ class lineeditor {
 	 * @return string The WKT LineString
 	 */
 	function get_linestring($line) {
-		return "ST_GeometryFromText('" . $line . "', " . $this->clientepsg . ")";
+		return "ST_geometryN(ST_GeometryFromText('" . $line . "', " . $this->clientepsg . "), 1)";
 	}
 
 	/**
