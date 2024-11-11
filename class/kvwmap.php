@@ -8684,7 +8684,16 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->formvars['classification_name'] = replace_params($this->layerdata['classification'], $params);
 		}
 
-		$data_sql = replace_params($data_sql, rolle::$layer_params);  # die restlichen Layer-Parameter ersetzen
+		$duplicate_criterion = $this->formvars['duplicate_criterion'];
+		$data_sql = replace_params(
+			$data_sql,
+			rolle::$layer_params,
+			$this->user->id,
+			$this->Stelle->id,
+			rolle::$hist_timestamp,
+			$this->user->rolle->language,
+			$duplicate_criterion
+		);  # die restlichen Layer-Parameter ersetzen
 
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
