@@ -100,7 +100,7 @@ else {
 	$layer_name = $layer['Name_or_alias'];
 }
 $doit = false;
-$anzObj = @count($layer['shape']);
+$anzObj = count_or_0($layer['shape']);
 if ($anzObj > 0) {
 	$this->found = 'true';
 	$k = 0;
@@ -635,7 +635,7 @@ if ($doit == true) { ?>
 				</tr>
 			</table><?
 		}
-		for ($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++) {
+		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++) {
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
 		<script type="text/javascript">

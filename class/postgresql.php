@@ -527,8 +527,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
@@ -925,7 +925,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
+						for($j = 0; $j < count_or_0($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -2103,7 +2103,7 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
+		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
@@ -2696,7 +2696,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst = @count($flurstkennz);
+    $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {

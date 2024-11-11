@@ -1286,7 +1286,7 @@ from
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
+						for ($i = 0; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
@@ -1512,7 +1512,7 @@ from
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
-	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
+	for($i=1; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">
