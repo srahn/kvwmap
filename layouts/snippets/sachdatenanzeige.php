@@ -328,7 +328,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
 
 <script type="text/javascript">
-	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value > 0) {
+	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0]?.value > 0) {
 		scrollto_saved_position();
 	}
 </script>
