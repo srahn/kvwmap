@@ -76,6 +76,7 @@ class rolle {
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
