@@ -1451,62 +1451,116 @@ class flurstueck {
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
-		$sql = "SELECT 
-							DISTINCT ON (nachfolger) nachfolger, c.endet 
-						FROM (
-							SELECT 
-								unnest(coalesce(zeigtaufneuesflurstueck, ARRAY['BOV'])) as nachfolger 
-							FROM 
-								alkis.ax_fortfuehrungsfall 
-							WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck 
-							AND (NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck OR zeigtaufneuesflurstueck IS NULL)
-						)	as foo
-						LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
-						ORDER BY nachfolger, c.endet DESC";
-    $queryret=$this->database->execSQL($sql, 4, 0);
-    if (!$queryret[0]) {      
-			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet FROM (";		# der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
-				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '" . $this->FlurstKennz . "') as foo ";
-				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
-				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
-				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";
+		$sql = "
+			SELECT 
+				DISTINCT ON (nachfolger) nachfolger, c.endet 
+			FROM (
+				SELECT 
+					unnest(coalesce(zeigtaufneuesflurstueck, ARRAY['BOV'])) as nachfolger 
+				FROM 
+					alkis.ax_fortfuehrungsfall 
+				WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck 
+				AND (NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck OR zeigtaufneuesflurstueck IS NULL)
+			)	as foo
+			LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
+			ORDER BY nachfolger, c.endet DESC";
+    $queryret=$this->database->execSQL($sql, 4, 0);  
+		if (pg_num_rows($queryret[1]) == 0) {
+			$sql = "
+				SELECT 
+					DISTINCT ON (nachfolger) nachfolger, c.endet 
+				FROM (
+					SELECT 
+						unnest(coalesce(nachfolgerflurstueckskennzeichen, ARRAY['BOV'])) as nachfolger 
+					FROM 
+						alkis.ax_historischesflurstueck 
+					WHERE flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+				)	as foo
+				LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
+				ORDER BY nachfolger, c.endet DESC";
+			$queryret=$this->database->execSQL($sql, 4, 0); 
+			if (pg_num_rows($queryret[1]) == 0) {		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
+				$sql = "
+					SELECT 
+						nachfolger, 
+						bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, 
+						CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet -- der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
+					FROM (
+						SELECT 
+							unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger 
+						FROM 
+							alkis.ax_historischesflurstueckohneraumbezug as a 
+						WHERE 
+							a.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+						) as foo 
+						LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger 	
+						LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 			-- falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
+					GROUP BY 
+						nachfolger 
+					ORDER BY 
+						nachfolger";
 				$queryret=$this->database->execSQL($sql, 4, 0);	
-				while($rs=pg_fetch_assoc($queryret[1])){
-					$Nachfolger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])){
-					$Nachfolger[]=$rs;
-				}
 			}
     }
+		while ($rs=pg_fetch_assoc($queryret[1])) {
+			$Nachfolger[]=$rs;
+		}
     return $Nachfolger;
   }
 
-  function getVorgaenger() {
+	function getVorgaenger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVorgaenger (vom Flurstück):<br>",4);
-		$sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
+		$sql = "
+			SELECT 
+				unnest(zeigtaufaltesflurstueck) as vorgaenger, 
+				array_to_string(array_agg(value), ';') as anlass 
+			FROM 
+				alkis.ax_fortfuehrungsfall, 
+				alkis.aa_anlassart 
+			WHERE 
+				ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND 
+				NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND 
+				id = ANY(ueberschriftimfortfuehrungsnachweis) 
+			GROUP BY 
+				zeigtaufaltesflurstueck 
+			ORDER BY 
+				vorgaenger";
     $queryret=$this->database->execSQL($sql, 4, 0);
-    if(!$queryret[0]) {
+    if(pg_num_rows($queryret[1]) == 0){
+			$sql = "
+				SELECT 
+					flurstueckskennzeichen as vorgaenger, 
+					array_to_string(array_agg(value), ';') as anlass 
+				FROM 
+					alkis.ax_historischesflurstueck, 
+					alkis.aa_anlassart 
+				WHERE 
+					ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen and
+					id = ANY(anlass) 
+				GROUP BY
+					flurstueckskennzeichen
+				ORDER BY 
+					vorgaenger";
+    	$queryret=$this->database->execSQL($sql, 4, 0);
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-				$sql.= "WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
-				$sql.= $this->database->build_temporal_filter(array('f'));
-				$sql.= " ORDER BY vorgaenger";
+				$sql = "
+					SELECT 
+						flurstueckskennzeichen as vorgaenger, 
+						TRUE as hist_alb 
+					FROM 
+						alkis.ax_historischesflurstueckohneraumbezug f 
+					WHERE 
+						ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen 
+						" . $this->database->build_temporal_filter(array('f')) . "
+					ORDER BY 
+						vorgaenger";
 				$queryret=$this->database->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
 			}
     }
+		while($rs=pg_fetch_assoc($queryret[1])) {
+			$Vorgaenger[]=$rs;
+		}
     return $Vorgaenger;
   }
 
