@@ -5282,11 +5282,11 @@ echo '			</table>
 		else{
 			$this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
 			$this->class_load_level = 2;    # die Klassen von allen Layern laden
-			$this->loadMap('DataBase');
+			$this->loadMap('DataBase', array(), true);
 			$requestobject = ms_newOwsRequestObj();
 			$params = array_keys($this->formvars);
-			for($i = 0; $i < count($this->formvars); $i++){
-				$requestobject->setParameter($params[$i],$this->formvars[$params[$i]]);
+			for ($i = 0; $i < count($this->formvars); $i++){
+				$requestobject->setParameter($params[$i], $this->formvars[$params[$i]]);
 			}
 			//$requestobject->loadparams();   # geht nur wenn php als cgi läuft
 			ms_ioinstallstdouttobuffer();
@@ -14695,7 +14695,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$mapDB->deleteRollenlayer(NULL, $this->formvars['delete_rollenlayer_type']);
 		}
 		# Karteninformationen lesen
-		$this->loadMap('DataBase');
+		$this->loadMap('DataBase', array(), ($this->formvars['strict_layer_name'] ? true : false));
 		# zwischenspeichern des vorherigen Maßstabs
 		$oldscale=round($this->map_scaledenom);
 		# zoomToMaxLayerExtent

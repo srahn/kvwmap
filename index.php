@@ -2257,7 +2257,7 @@ function go_switch($go, $exit = false) {
 
 			default : {
 				# Karteninformationen lesen
-				$GUI->loadMap('DataBase');
+				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();
