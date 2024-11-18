@@ -9912,7 +9912,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				# Hier nach der Abfrage der Sachdaten die weiteren Attributinformationen hinzufügen
 				# Steht an dieser Stelle, weil die Auswahlmöglichkeiten von Auswahlfeldern abhängig sein können
-				$layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, value_of($layerset[0], 'shape'), true, $this->Stelle->id);
+				$layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 				# Datendrucklayouts abfragen
 				include_(CLASSPATH.'datendrucklayout.php');
 				$ddl = new ddl($this->database);
@@ -18778,22 +18778,24 @@ class db_mapObj{
 		return $pathAttributes;
 	}
 
-	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
+	/**
+	 * Function query and set required attribute values pending on form element type
+	 */
+	function add_attribute_values($attributes, $database, &$query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < count_or_0($attributes['name'] ?: []); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp
-				$query_result2 = array();
+				$type_attributes = $attributes['type_attributes'][$i];
 				foreach ($query_result as $k => $record) {	# bei Erfassung eines neuen DS hat $k den Wert -1
 					$json = str_replace('}"', '}', str_replace('"{', '{', str_replace("\\", "", $query_result[$k][$attributes['name'][$i]])));	# warum diese Zeichen dort reingekommen sind, ist noch nicht klar...
 					@$datatype_query_result = json_decode($json, true);
-					if ($attributes['type'][$i] != $type) {
-						$datatype_query_result = $datatype_query_result[0];		# falls das Attribut ein Array von Datentypen ist, behelfsweise erstmal nur das erste Array-Element berücksichtigen
+					if (!empty($datatype_query_result) AND $type == $attributes['type'][$i]) {	# kein Array von Datentypen --> zur weiteren einheitlichen Verarbeitung num. Array draus machen
+						$datatype_query_result = [$datatype_query_result];
 					}
-					$query_result2[$k] = $datatype_query_result;
+					$attributes['type_attributes'][$i][$k] = $this->add_attribute_values($type_attributes, $database, $datatype_query_result, $withvalues, $stelle_id, $only_current_enums);
 				}
-				$attributes['type_attributes'][$i] = $this->add_attribute_values($attributes['type_attributes'][$i], $database, $query_result2, $withvalues, $stelle_id, $only_current_enums);
 			}
 			if (
 				$attributes['options'][$i] == '' AND
@@ -18930,6 +18932,7 @@ class db_mapObj{
 													'image'		=> value_of($rs, 'image')
 												];
 											}
+											$query_result[$k]['enum_' .  $attributes['name'][$i]] = $enum;
 										}
 									}
 								}
