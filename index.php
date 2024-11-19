@@ -14,7 +14,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() AND is_array($err) AND array_key_exists('type', $err) AND $err['type']) { // This error code is included in error_reporting		
+	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
