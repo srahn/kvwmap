@@ -16312,7 +16312,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$oPixelPos = new PointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
 		//$refmap->zoomscale($scale,$oPixelPos,$width,$height,$refmap->extent,$this->Stelle->MaxGeorefExt);
-		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent, NULL);
+		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent, $refmap->extent);
 		if ($output_format == '' AND $refmap->selectOutputFormat('jpeg_print') == 1) {
 			$refmap->selectOutputFormat('jpeg');
 		}
