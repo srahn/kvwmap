@@ -2041,7 +2041,12 @@ echo '			</table>
 					$ows_onlineresource = $_REQUEST['onlineresource'];
 				}
 				else {
-					$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
+					if (isset($this->formvars['gast']) AND $this->formvars['gast'] != '') {
+						$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&gast=' . $this->formvars['gast'];
+					}
+					else {
+						$ows_onlineresource = OWS_SERVICE_ONLINERESOURCE . '&Stelle_ID=' . $this->Stelle->id .'&login_name=' . value_of($_REQUEST, 'login_name') . '&passwort=' .  urlencode(value_of($_REQUEST, 'passwort'));
+					}
 				}
 				$map->web->metadata->set("ows_onlineresource", $ows_onlineresource);
 				$map->web->metadata->set("ows_service_onlineresource", $ows_onlineresource);
