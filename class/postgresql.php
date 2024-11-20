@@ -143,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -197,7 +197,7 @@ class pgdatabase {
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
 			SET datestyle TO 'German';
 			";
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret = $this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
   }
@@ -527,8 +527,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
@@ -679,7 +679,7 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
@@ -878,7 +878,7 @@ FROM
 					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					
+					// Frage die attribute informationen der Tablle falls noch nicht geschehen
 					if(!is_array($attribute_infos[$schemaname][$tablename])){
 						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
 					}
@@ -895,8 +895,12 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL) {
+							$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL) {
+							$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						}
 					}
 					# realer Name der Spalte in der Tabelle
 					$fields[$i]['real_name'] = $attr_info['name'];
@@ -925,7 +929,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
+						for($j = 0; $j < count_or_0($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -1042,7 +1046,7 @@ FROM
 				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
-		#echo '<br><br>' . $sql;
+		#echo '<br>SQL zur Abfrage der Attributinformationen aus der Datenbank: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0] == 0) {
 			while ($attr_info = pg_fetch_assoc($ret[1])) {
@@ -2103,7 +2107,7 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
+		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
@@ -2696,7 +2700,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst = @count($flurstkennz);
+    $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {

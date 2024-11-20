@@ -281,8 +281,8 @@ class spatial_processor {
 				$user_epsg = $epsg_codes[$newSRID];
 				if($user_epsg['minx'] != ''){							// Koordinatensystem ist räumlich eingegrenzt
 					if($curSRID != 4326){
-						$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-						$projTO = ms_newprojectionobj("init=epsg:4326");
+						$projFROM = new projectionObj("init=epsg:".$curSRID);
+						$projTO = new projectionObj("init=epsg:4326");
 						$curExtent->project($projFROM, $projTO);			// $curExtent wird in 4326 transformiert
 					}
 					// Vergleich der Extents und ggfs. Anpassung
@@ -290,8 +290,8 @@ class spatial_processor {
 					if($user_epsg['miny'] > $curExtent->miny)$curExtent->miny = $user_epsg['miny'];
 					if($user_epsg['maxx'] < $curExtent->maxx)$curExtent->maxx = $user_epsg['maxx'];
 					if($user_epsg['maxy'] < $curExtent->maxy)$curExtent->maxy = $user_epsg['maxy'];
-					$projFROM = ms_newprojectionobj("init=epsg:4326");
-					$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+					$projFROM = new projectionObj("init=epsg:4326");
+					$projTO = new projectionObj("init=epsg:".$newSRID);
 					$curExtent->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 					$result=$curExtent->minx.' '.$curExtent->miny.', '.$curExtent->maxx.' '.$curExtent->maxy;
 				}
@@ -329,6 +329,10 @@ class spatial_processor {
 		
 			case 'add_buffered_line':{
 				$result = $this->add_buffered_line($polywkt1, $polywkt2, $formvars['width'] ?: 50);
+			}break;
+
+			case 'add_buffered_vertices':{
+				$result = $this->add_buffered_vertices($polywkt1, $formvars);
 			}break;
 			
 			case 'add_parallel_polygon':{
@@ -467,7 +471,7 @@ class spatial_processor {
 		";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -487,7 +491,7 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT (st_union(st_geomfromtext('".$geom_1."'), st_intersection(st_geomfromtext('".$querygeometryWKT."'),  st_buffer(st_geomfromtext('".$formvars['path3']."'), (select st_distance(st_geomfromtext('".$formvars['path3']."'), st_geomfromtext('".$geom_2."'))), 16)))) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -495,6 +499,41 @@ class spatial_processor {
 			return $result;
     }
   }
+
+	function add_buffered_vertices($geom_1, $formvars) {
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false);
+		if($querygeometryWKT == '') {
+			header('warning: true');
+			echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
+			return;
+		}
+		if($geom_1 == ''){
+			$geom_1 = 'GEOMETRYCOLLECTION EMPTY';
+		}
+		$sql = "
+			SELECT 
+				st_astext(geom) as wkt, 
+				st_assvg(geom, 0, 15) as svg 
+			FROM (
+				SELECT
+					st_union(st_geomfromtext('".$geom_1."'), st_buffer(st_union(geom), " . $formvars['width'] . ")) as geom
+				FROM (
+					SELECT
+						(st_dumppoints(st_geomfromtext('" . $querygeometryWKT . "'))).geom as geom					
+				) f
+			) ff
+		";
+		#echo $sql;
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_assoc($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+    }
+	}
 	
 	function add_buffered_line($geom_1, $geom_2, $width){
   	if(substr_count($geom_2, ',') == 0){			# wenn Linestring nur aus einem Eckpunkt besteht -> in POINT umwandeln -> Kreis entsteht
@@ -512,7 +551,7 @@ class spatial_processor {
 		}
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -707,8 +746,8 @@ class spatial_processor {
     	
     	case 9 : {
     		# Abfrage eines WFS-Layers
-		    $projFROM = ms_newprojectionobj("init=epsg:".$this->rolle->epsg_code);
-        $projTO = ms_newprojectionobj("init=epsg:".$layerset[0]['epsg_code']);
+		    $projFROM = new projectionObj("init=epsg:".$this->rolle->epsg_code);
+        $projTO = new projectionObj("init=epsg:".$layerset[0]['epsg_code']);
     		$rect->project($projFROM, $projTO);
     		$searchbox_minx=strval($rect->minx-$rand);
 	      $searchbox_miny=strval($rect->miny-$rand);

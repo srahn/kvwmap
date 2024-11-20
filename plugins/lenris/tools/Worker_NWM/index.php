@@ -167,7 +167,9 @@ function verarbeiteXML($data_nwm, $con, $go){
 						}
 						else {
 							if ($endet != '') {
-								$geloeschte_nachweise[] = array('id_nachweis' => $nachweis['id']);
+								if (!in_array(array('id_nachweis' => $nachweis['id']), $geloeschte_nachweise)) {
+									$geloeschte_nachweise[] = array('id_nachweis' => $nachweis['id']);
+								}
 							}
 							else {
 								$geaenderte_nachweise[] = $nachweis;

@@ -154,7 +154,7 @@ class adresse {
   
 	function getStrNamefromID($GemID,$StrID) {
     $ret=$this->database->getStrNameByID($GemID,$StrID);
-    if ($ret[0]==0 AND @count($ret[1])>0) {
+    if ($ret[0]==0 AND count_or_0($ret[1])>0) {
       # liefert die erste gefundene Strasse zurück
       return $ret[1];
     }
@@ -1294,7 +1294,7 @@ class flurstueck {
     $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum Flurstück:",4);
 		$ret=$this->database->getStrassen($this->FlurstKennz);
     $Strassen=$ret[1];
-    for ($i=0; $i < @count($Strassen);$i++) {
+    for ($i=0; $i < count_or_0($Strassen);$i++) {
       $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum Flurstück:",4);
       $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
       $HausNr=$ret[1];

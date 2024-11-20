@@ -51,12 +51,12 @@ if(value_of($this->formvars, 'selected_layer_id') != '') {
 			</div>		
 		</div>
 		<div id="gsl_abfrage_laden" <?php if(empty($this->searchset)){echo 'style="display: none"'; } ?>>
-			<div><a id="gsl_abfrage_laden_form_link" onclick="showform('gsl_abfrage_laden_form');"><?php echo $strSearches; ?></a><?php if(@count($this->searchset) > 0)echo ' ('.count($this->searchset).')'; ?></div>
+			<div><a id="gsl_abfrage_laden_form_link" onclick="showform('gsl_abfrage_laden_form');"><?php echo $strSearches; ?></a><?php if(count_or_0($this->searchset) > 0)echo ' ('.count($this->searchset).')'; ?></div>
 			<div id="gsl_abfrage_laden_form">
 				<select name="searches">
 					<option value="">  -- <?php echo $this->strPleaseSelect; ?> --  </option>
 <?php
-						for($i = 0; $i < @count($this->searchset); $i++){
+						for($i = 0; $i < count_or_0($this->searchset); $i++){
 							echo '<option value="'.$this->searchset[$i]['name'].'" ';
 							if($this->selected_search[0]['name'] == $this->searchset[$i]['name']){echo 'selected ';}
 							echo '>'.$this->searchset[$i]['name'].'</option>';

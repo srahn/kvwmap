@@ -90,7 +90,13 @@
 		),
 		array(
 			'value' => 'StelleID',
-			'output' => 'StelleID'
+			'output' => 'StelleID',
+			'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch die ID der Stelle ein in der der Nutzer gerade angemeldet ist. Dieser läßt sich nicht ändern, auch wenn das Recht des Attributes auf Editieren gesetzt ist.'
+		),
+		array(
+			'value' => 'ClientID',
+			'output' => 'ClientID',
+			'title' => 'Trägt beim Anlegen und Speichern eines Datensatzes automatisch die ID des Gerätes ein welches der Nutzer gerade benutzt. Wenn der Nutzer mit kvmobile arbeitet wird die Device-ID des Gerätes eingetragen. Arbeit der Nutzer im Browser bleibt die ID leer.'
 		),
 		array(
 			'value' => 'Dokument',
@@ -158,7 +164,7 @@
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
-var attributes = new Array(<? echo (@count($this->attributes['name'] ?: []) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
+var attributes = new Array(<? echo (count_or_0($this->attributes['name'] ?: []) == 0 ? "" : "'" . implode("', '", $this->attributes['name']) . "'"); ?>);
 
 function takeover_attributes(){
 	if (document.getElementById('for_attributes_selected_layer_id').value == '') {
@@ -305,12 +311,31 @@ function set_all(column){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a></th>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a></th>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a></th>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a></th>
+					<th>
+						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a>
+					</th><?
+					if (!in_array($this->layer['Datentyp'], [MS_LAYER_QUERY])){ ?>
+						<th>
+							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a>
+						</th>
+						<th>
+							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStylesLabels; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="background-color: #c7d9e6; color: #111; width: 100%"><? echo $strAttributes; ?></div></a>
+					</th>
+					<th>
+						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strStellenAsignment; ?></div></a>
+					</th>
+					<th>
+						<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a>
+					</th><?
+					if (!in_array($this->layer['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>
@@ -330,7 +355,7 @@ function set_all(column){
 			<table align="center" border="0" cellspacing="0" class="scrolltable attribute-editor-table">
 				<tbody style="max-height: <? echo ($this->user->rolle->nImageHeight - 162); ?>px">
 		<?	if ((count($this->attributes))!=0) { 
-					for ($i = 0; $i < @count($this->attributes['type']); $i++){ ?>
+					for ($i = 0; $i < count_or_0($this->attributes['type']); $i++){ ?>
 						<tr class="listen-tr">
 							<td align="left" valign="top">
 								<? if($i == 0)echo '<div class="fett scrolltable_header" title="Reihenfolge">#</div>'; ?>
@@ -379,7 +404,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->layerOptions . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'options\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -398,7 +423,7 @@ function set_all(column){
 							<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">' . $strDefault . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'default\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -410,7 +435,7 @@ function set_all(column){
 						<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">' . $strAlias . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a title="aus Attributname erzeugen" href="javascript:create_aliasnames();"><img src="graphics/autogen.png"></a>
 														<a href="javascript:clear_all(\'alias\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
@@ -435,7 +460,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributExplanations . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 													<a href="javascript:clear_all(\'tooltip\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
@@ -447,7 +472,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $this->strGroup . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 													<a href="javascript:clear_all(\'group\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 												</div>';
@@ -459,7 +484,7 @@ function set_all(column){
 						<? 	if ($i == 0) {
 										echo '<div class="fett scrolltable_header">Tab</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer">
 														<a href="javascript:clear_all(\'tab\');" title="alle Einträge entfernen"><i style="font-size: 19px;vertical-align: text-bottom;" class="fa fa-trash-o"></i></a>
 													</div>';
@@ -474,7 +499,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strArrangement . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'arrangement',
@@ -515,7 +540,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributeLabeling . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'labeling',
@@ -554,7 +579,7 @@ function set_all(column){
 								if($i == 0) {
 									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strAttributeAtSearch . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'mandatory',
@@ -591,7 +616,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div style="margin-top: -9px;" class="fett scrolltable_header">' . $strForNewDataset . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 													'dont_use_for_new',
@@ -628,7 +653,7 @@ function set_all(column){
 								if ($i == 0) {
 									echo '<div class="fett scrolltable_header">' . $strAttributeVisible . '</div>';
 								}
-								if ($i == @count($this->attributes['type']) - 1) {
+								if ($i == count_or_0($this->attributes['type']) - 1) {
 									echo '<div class="fett scrolltable_footer" style="padding: 0">' . 
 													FormObject::createSelectField(
 												'visible',

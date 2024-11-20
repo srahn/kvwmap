@@ -85,6 +85,26 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}	
 
+	save_scrollposition = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			pos.value = document.scrollingElement.scrollTop;
+		}
+		else {
+			pos.value = document.getElementById('contentdiv').scrollTop;
+		}
+	}
+
+	scrollto_saved_position = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			window.scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+		else {
+			document.getElementById('contentdiv').scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+	}
+
 	scrolltop = function(){
 		if(querymode == 1){
 			window.scrollTo(0, 0);
@@ -134,6 +154,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	toggle_layer = function(tab, layer_id){
+		enclosingForm.active_layer_id.value = layer_id;
 		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
 		active_tab.classList.remove("active_tab");
 		tab.classList.add("active_tab");
@@ -143,6 +164,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		});
 		var layer_to_open = document.querySelector('#result_' + layer_id);
 		layer_to_open.classList.remove('collapsed');
+		scrollto_saved_position();
 		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
 	
@@ -428,7 +450,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -449,7 +471,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -470,7 +492,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -488,7 +510,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
-			enclosingForm.gle_scrollposition.value = 0;
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){

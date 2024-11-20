@@ -65,7 +65,7 @@
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
 		$map = new mapObj(NULL);
-		$map->set('debug', 5);
+		$map->debug = 5;
 		# Auf den Datensatz zoomen
 		$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 		$sql.=" FROM (SELECT box2D(st_transform(the_geom, ".$GUI->user->rolle->epsg_code.")) as bbox";
@@ -92,11 +92,16 @@
 			$layer->type = 2;
 			$layer->symbolscaledenom = 10000;
 			$layer->labelitem = 'fsnum';
-			$layer->setConnectionType(6);
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -124,11 +129,16 @@
 			$layer->maxscaledenom = 2000;
 			$layer->symbolscaledenom = 10000;
 			$layer->opacity = 5;
-			$layer->setConnectionType(6);
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -137,7 +147,7 @@
 			$style->maxwidth = 1;
 			$style->outlinecolor->setRGB(0,0,0);
 			# Flur-Layer erzeugen
-			$layer=ms_newLayerObj($map);
+			$layer= new layerObj($map);
 			$layer->data = 'the_geom from alkis.pp_flur as foo using unique gid using srid='.EPSGCODE_ALKIS;
 			$layer->status = MS_ON;
 			$layer->template = ' ';
@@ -145,11 +155,16 @@
 			$layer->type = 2;
 			$layer->symbolscaledenom = 10000;
 			$layer->opacity = 80;
-			$layer->setConnectionType(6);
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -169,11 +184,16 @@
 			$layer->name = 'querymap'.$k;
 			$layer->type = 2;
 			$layer->opacity = 50;
-			$layer->setConnectionType(6);
+			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
 			$layer->metadata->set('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
 			$klasse = new ClassObj($layer);
 			$klasse->status = MS_ON;
 			$style = new StyleObj($klasse);
@@ -181,11 +201,11 @@
 			$style->width = 2;
 			$style->outlinecolor->setRGB(-1,-1,-1);
 			# Karte rendern
-			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
-			$map->web->set('imagepath', IMAGEPATH);
-			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 300);
-			$map->set('height', 300);
+			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code);
+			$map->web->imagepath = IMAGEPATH;
+			$map->web->imageurl = IMAGEURL;
+			$map->width = 300;
+			$map->height = 300;
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);
@@ -286,7 +306,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      elseif(@count($festpunkte->liste) > 0){
+      elseif(count_or_0($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -419,7 +439,7 @@
 		#echo $sql;
 		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
 		$GUI->database->execSQL($sql,4, 1);
-		if (@count($nachweis_ids) > 0) {
+		if (count_or_0($nachweis_ids) > 0) {
 			$sql = '
 				INSERT INTO 
 					rolle_nachweise_rechercheauswahl 
@@ -1213,7 +1233,7 @@
 					$GUI->pdf=$pdf;
 					$dateipfad=IMAGEPATH;
 					$currenttime = date('Y-m-d_H:i:s',time());
-					$name = umlaute_umwandeln($GUI->user->Name);
+					$name = sonderzeichen_umwandeln($GUI->user->Name);
 					$dateiname = $name.'-'.$currenttime.'.pdf';
 					$GUI->outputfile = $dateiname;
 					$fp=fopen($dateipfad.$dateiname,'wb');

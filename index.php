@@ -14,7 +14,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) { // This error code is included in error_reporting		
+	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -351,6 +351,19 @@ function go_switch($go, $exit = false) {
 				$GUI->loadDrawingOrderForm();
 			} break;
 
+			case 'show_layer_in_map' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'zoom_to_layer_extent' => 'boolean'
+				]);
+				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->saveMap('');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'show_snippet' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->show_snippet();
@@ -474,8 +487,8 @@ function go_switch($go, $exit = false) {
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
-				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
-					$GUI->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				for($i = 0; $i < count_or_0($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->data = str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data);
 				}
 				echo $GUI->create_dynamic_legend();
 			} break;
@@ -1757,6 +1770,22 @@ function go_switch($go, $exit = false) {
 				$GUI->Layer_Zeichenreihenfolge();
 			} break;
 
+			case 'Layer_Zeichenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Zeichenreihenfolge');
+				$GUI->Layer_Zeichenreihenfolge_Speichern();
+			} break;
+
+			case 'Layer_Legendenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Legendenreihenfolge();
+			} break;
+
+			case 'Layer_Legendenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Legendenreihenfolge');
+				$GUI->Layer_Legendenreihenfolge_Speichern();
+			} break;
+
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
@@ -2028,7 +2057,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;			
+			} break;
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');
@@ -2228,7 +2257,7 @@ function go_switch($go, $exit = false) {
 
 			default : {
 				# Karteninformationen lesen
-				$GUI->loadMap('DataBase');
+				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();

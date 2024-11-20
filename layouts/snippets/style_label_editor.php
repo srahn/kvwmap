@@ -254,16 +254,33 @@ function setScale(select){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a></th>
-					<th><a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a></th>
-					<? } ?>
-					<th><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a></th>
-					<? } ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a>
+					</th>
+					<th>
+						<a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a>
+					</th>
+					<th class="navigation-selected">
+						<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a>
+						</th><?
+					}
+					if (!in_array($this->layerdata['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>

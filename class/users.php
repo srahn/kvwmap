@@ -48,6 +48,7 @@ class account {
 	# Klasse für die Abrechnung und Statistik von Zugriffen
 
 	var $database;
+	var $debug;
 
 	function __construct($database) {
 		global $debug;
@@ -294,7 +295,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
@@ -381,7 +383,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
@@ -469,7 +472,8 @@ class account {
 		#echo $sql.'<br><br>';
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
@@ -566,7 +570,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
@@ -672,6 +677,8 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
 	/**
 	 * Create a user object
@@ -825,7 +832,6 @@ class user {
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
-		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
@@ -1235,7 +1241,7 @@ class user {
 		# zugeordneten Stellen gehört. Die letzte Stellen_ID wird in beiden Fällen auf die erste von den
 		# dem Nutzer zugeordneten Stellen gesetzt.
 		$stellen= $this->getStellen(0);
-		if(@count($stellen['ID']) > 0){
+		if(count_or_0($stellen['ID']) > 0){
 			$stelle_id = $this->getLastStelle();
 			if($stelle_id != ''){
 				$valid = false;

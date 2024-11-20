@@ -1,4 +1,14 @@
 <?
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
@@ -80,12 +90,16 @@ function InchesPerUnit($unit, $center_y){
 		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		if($center_y != 0.0){
-			$cos_lat = cos(pi() * $center_y/180.0);
-			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-		}
-		return 4374754 * $lat_adj;
+		return 39.3701 * degree2meter($center_y);
 	}
+}
+
+function degree2meter($center_y) {
+	if($center_y != 0.0){
+		$cos_lat = cos(pi() * $center_y/180.0);
+		$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+	}
+	return 111319 * $lat_adj;
 }
 
 function in_subnet($ip,$net) {
@@ -150,30 +164,43 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	return $str;
 }
 
-function umlaute_umwandeln($name){
-  $name = str_replace('ä', 'ae', $name);
-  $name = str_replace('ü', 'ue', $name);
-  $name = str_replace('ö', 'oe', $name);
-  $name = str_replace('Ä', 'Ae', $name);  
-  $name = str_replace('Ü', 'Ue', $name);
-  $name = str_replace('Ö', 'Oe', $name);
-  $name = str_replace('a?', 'ae', $name);
-  $name = str_replace('u?', 'ue', $name);
-  $name = str_replace('o?', 'oe', $name);
-  $name = str_replace('A?', 'ae', $name);
-  $name = str_replace('U?', 'ue', $name);
-  $name = str_replace('O?', 'oe', $name);
-  $name = str_replace('ß', 'ss', $name);
-  $name = str_replace('.', '', $name);
-  $name = str_replace(':', '', $name);
-  $name = str_replace('/', '-', $name);
-  $name = str_replace(' ', '', $name);
-  $name = str_replace('-', '_', $name);
-  $name = str_replace('?', '_', $name);
+function umlaute_umwandeln($name) {
+	$name = str_replace('ä', 'ae', $name);
+	$name = str_replace('ü', 'ue', $name);
+	$name = str_replace('ö', 'oe', $name);
+	$name = str_replace('Ä', 'Ae', $name);
+	$name = str_replace('Ü', 'Ue', $name);
+	$name = str_replace('Ö', 'Oe', $name);
+	$name = str_replace('a?', 'ae', $name);
+	$name = str_replace('u?', 'ue', $name);
+	$name = str_replace('o?', 'oe', $name);
+	$name = str_replace('A?', 'ae', $name);
+	$name = str_replace('U?', 'ue', $name);
+	$name = str_replace('O?', 'oe', $name);
+	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
+	$name = str_replace('.', '', $name);
+	$name = str_replace(':', '', $name);
+	$name = str_replace('(', '', $name);
+	$name = str_replace(')', '', $name);
+	$name = str_replace('[', '', $name);
+	$name = str_replace(']', '', $name);
+	$name = str_replace('/', '-', $name);
+	$name = str_replace(' ', '_', $name);
+	$name = str_replace('-', '_', $name);
+	$name = str_replace('?', '_', $name);
 	$name = str_replace('+', '_', $name);
 	$name = str_replace(',', '_', $name);
 	$name = str_replace('*', '_', $name);
-  return $name;
+	$name = str_replace('$', '', $name);
+	$name = str_replace('&', '_', $name);
+	$name = str_replace('#', '_', $name);
+	$name = iconv("UTF-8", "UTF-8//IGNORE", $name);
+	return $name;
 }
 
 class GUI {
@@ -410,8 +437,8 @@ class GUI {
 				}
 				$extent = new rectObj();
 				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
-				$rasterProjection = ms_newprojectionobj("init=epsg:".$layer[0]['epsg_code']);
-				$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
+				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
+				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
 				$rs['minx'] = $extent->minx;
 				$rs['maxx'] = $extent->maxx;
@@ -472,7 +499,7 @@ class GUI {
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', umlaute_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
@@ -484,7 +511,7 @@ class GUI {
 		}
 		if ($layerset['ows_srs'] == '') {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
-		}
+		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
 		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
@@ -498,11 +525,12 @@ class GUI {
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
 		$layer->type = $layerset['Datentyp'];
-		$layer->group = umlaute_umwandeln($layerset['Gruppenname']);
+		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
+
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -526,7 +554,7 @@ class GUI {
 				}
 			}
 		}
-
+		
 		if($layerset['aktivStatus'] != 0){
 			$collapsed = false;
 			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
@@ -643,7 +671,7 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$SCALE') !== false){
+				if (strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -677,15 +705,24 @@ class GUI {
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				if (substr($layerset['Filter'],0,1) == '(') {
+				# 2024-07-28 pk Replace all params in Filter
+				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = replace_params(
+					$layerset['Filter'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
 							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
 						}break;
 						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-						}break;
+							$layer->setProcessing('NATIVE_FILTER=' . $layerset['Filter']);
+						} break;
 						default : {
 							$layer->setFilter($layerset['Filter']);
 						}
@@ -744,7 +781,7 @@ class GUI {
 				}
 			}
 		} # ende of Vektorlayer
-		$classset=$layerset['Class'];
+		$classset=$layerset['Class'];		
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
@@ -1215,8 +1252,8 @@ class GUI {
 		}
 	}
 
-	function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+  function loadclasses($layer, $layerset, $classset, $map){
+		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -1238,8 +1275,8 @@ class GUI {
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
-      for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
+			}			
+      for ($k = 0; $k < count_or_0($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
 				if ($dbStyle['geomtransform'] != '') {
@@ -1251,7 +1288,7 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -1260,7 +1297,12 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];
@@ -1297,7 +1339,7 @@ class GUI {
 						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -1308,7 +1350,7 @@ class GUI {
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -1396,7 +1438,7 @@ class GUI {
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -1453,14 +1495,14 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -1599,10 +1641,10 @@ class GUI {
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -1850,13 +1892,13 @@ class GUI {
 		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 		}
-    if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
+		if($this->main == 'map.php' AND $this->user->rolle->epsg_code != 4326 AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){			
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
     }
 		# Parameter $scale in Data ersetzen
 		for($i = 0; $i < count($this->layers_replace_scale); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
 
     $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
@@ -1903,6 +1945,10 @@ class GUI {
 
 		# Erstellen des Maßstabes
 		$this->map_scaledenom = $this->map->scaledenom;
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$this->map_scaledenom = degree2meter($center_y) * $this->map_scaledenom;
+		}
     $this->switchScaleUnitIfNecessary();
 		$this->map->selectOutputFormat('png');
     $img_scalebar = $this->map->drawScaleBar();
@@ -1929,6 +1975,10 @@ class GUI {
   function scaleMap($nScale) {
     $oPixelPos = new PointObj();
     $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+		if ($this->user->rolle->epsg_code == 4326) {
+			$center_y = ($this->user->rolle->oGeorefExt->maxy + $this->user->rolle->oGeorefExt->miny) / 2;
+			$nScale = $nScale / degree2meter($center_y);
+		}
     $this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
   	if (MAPSERVERVERSION >= 600 ) {
 			$this->map_scaledenom = $this->map->scaledenom;
@@ -2689,7 +2739,7 @@ class rolle {
 		return 1;
 	}
 
-	function getLayer($LayerName) {
+	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -2727,6 +2777,10 @@ class rolle {
 				) as privilegfk";
 		}
 
+		if ($only_active_or_requires) {
+			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+		}
+
 		$sql = "
 			SELECT " .
 			$name_column . ",
@@ -2739,9 +2793,12 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				ul.`queryable`, ul.`drawingorder`,
-				ul.`minscale`, ul.`maxscale`,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				ul.`queryable`,
+				l.`drawingorder`,
+				ul.`legendorder`,
+				ul.`minscale`,
+				ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
@@ -2777,15 +2834,16 @@ class rolle {
 			WHERE
 				ul.Stelle_ID = " . $this->stelle_id . " AND
 				r2ul.User_ID = " . $this->user_id .
-			$layer_name_filter . "
+			$layer_name_filter . 
+			$active_filter . "
 			ORDER BY
-				ul.drawingorder desc
+				l.drawingorder desc
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		}
 		$i = 0;
@@ -2797,17 +2855,20 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-				$rs[$key] = replace_params(
-					$rs[$key],
-					rolle::$layer_params,
-					$this->user_id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$language,
-					$rs['duplicate_criterion']
-				);
+			if ($replace_params) {
+				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+					$rs[$key] = replace_params(
+						$rs[$key],
+						rolle::$layer_params,
+						$this->user_id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$language,
+						$rs['duplicate_criterion']
+					);
+				}
 			}
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 			$layer[$i] = $rs;
 			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
@@ -3452,7 +3513,7 @@ class db_mapObj{
     return $filter;
   }		
 	
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -3547,7 +3608,7 @@ class db_mapObj{
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true, $replace);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
@@ -3563,38 +3624,33 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-			if ($get_default) {
-				$attributes['default'][$i] = $rs['default'];
-			}
+			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replaced_default = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->GUI->user->id,
-						$this->GUI->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->GUI->rolle->language
-					);
-					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
-					if ($ret1[0] == 0) {
-						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
 					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$language
-				);
+			}
+			if ($get_default AND $attributes['default'][$i] != '') {
+				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				}
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
@@ -3732,7 +3788,7 @@ class db_mapObj{
 				rl.`logconsume`,
 				rl.`rollenfilter`,
 				ul.`queryable`,
-				COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder,
+				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
 				ul.legendorder,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
@@ -3952,7 +4008,7 @@ class db_mapObj{
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
 					$rs['Status'] = 1;
-					for($i = 0; $i < @count($rs['Style']); $i++) {
+					for($i = 0; $i < count_or_0($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
 							$rs['Style'][$i]['color'] = '-1 -1 -1';
@@ -4012,7 +4068,7 @@ class db_mapObj{
 		return $Labels;
 	}
 
-	function read_RollenLayer($id = NULL, $typ = NULL) {
+	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
 			SELECT DISTINCT
 				l.`id`,
@@ -4037,7 +4093,7 @@ class db_mapObj{
 				END as connection,
 				l.`epsg_code`,
 				l.`transparency`,
-				l.`buffer`,				
+				l.`buffer`,
 				l.`labelitem`,
 				l.`classitem`,
 				l.`gle_view`,
@@ -4048,7 +4104,12 @@ class db_mapObj{
 				-l.id AS Layer_ID,
 				1 as showclasses,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
-				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter
+				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
+				'' as wms_name,
+				'' as wms_format,
+				'' as wms_server_version,
+				'' as wms_connectiontimeout,
+				'' as oid
 			FROM
 				rollenlayer AS l JOIN
 				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
@@ -4057,16 +4118,17 @@ class db_mapObj{
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . "
+				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
+				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
-		# echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
+		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
 		$ret = $this->db->execSQL($sql);
 		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
 		$Layer = array();
 		while ($rs = $ret['result']->fetch_array()) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params(
 					$rs[$key],
 					rolle::$layer_params,
@@ -4077,6 +4139,8 @@ class db_mapObj{
 					$rs['duplicate_criterion']
 				);
 			}
+			$rs['alias_link'] = $rs['alias'];
+			$rs['Name_or_alias'] = $rs['alias'];
 			$Layer[] = $rs;
 		}
 		return $Layer;

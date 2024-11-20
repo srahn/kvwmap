@@ -174,9 +174,9 @@
 		pathy_second = str.split(";");
 	}
 	if(enclosingForm.ortho_point_vertices != undefined){
-		let ortho_point_vertices = new Array();
-		let o_p_local_x = [{$ortho_points_x}];
-		let o_p_local_y = [{$ortho_points_y}];
+		var ortho_point_vertices = new Array();
+		var o_p_local_x = [{$ortho_points_x}];
+		var o_p_local_y = [{$ortho_points_y}];
 	}
 	let helmert;
 	let textx = {$text_x};
@@ -390,13 +390,13 @@ SCRIPTDEFINITIONS;
 	function endPoint(evt) {
 	  cmd = enclosingForm.last_doing.value;
 	  if (!dragdone){
-	  		cmd  = cmd+"_point";}
-	  	else {
-	  		cmd  = cmd+"_box";
+			cmd  = cmd+"_point";}
+		else {
+			cmd  = cmd+"_box";
 
-		  // Reihenfolge pruefen
-		  checkOrder(cmd,boxx,boxy);
-			}
+		// Reihenfolge pruefen
+		checkOrder(cmd,boxx,boxy);
+		}
 	  dragging  = false;
 	  dragdone  = false;
 	  sendpath(cmd,boxx,boxy);
@@ -611,6 +611,13 @@ SCRIPTDEFINITIONS;
       enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
       enclosingForm.CMD.value = cmd;
      break;
+     case 'add_circle_box':
+      enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[2]+','+navY[2];
+      enclosingForm.CMD.value = cmd;
+     break;
+     case 'add_circle_point':
+      enclosingForm.CMD.value = cmd;
+     break;		  
      case 'add_geom_point':
       enclosingForm.INPUT_COORD.value  = navX[0]+','+navY[0]+';'+navX[0]+','+navY[0];
       enclosingForm.CMD.value = cmd;
@@ -802,6 +809,8 @@ SCRIPTDEFINITIONS;
 			if(enclosingForm.always_draw.checked && !geomload){		// 'weiterzeichnen'
 				if(enclosingForm.last_doing2.value == 'draw_polygon' || enclosingForm.last_doing2.value == 'draw_second_polygon')enclosingForm.last_button.value = 'pgon0';
 				if(enclosingForm.last_doing2.value != '')enclosingForm.last_doing.value = enclosingForm.last_doing2.value;
+				if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
+				if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 				if(enclosingForm.secondpoly.value == 'started' || enclosingForm.secondpoly.value == 'true'){	// am zweiten Polygon oder an einer gepufferten Linie wird weitergezeichnet
 					if(enclosingForm.last_doing2.value == 'add_buffered_line')enclosingForm.last_button.value = 'buffer1';
 					if(enclosingForm.last_doing2.value == 'add_circle')enclosingForm.last_button.value = 'buffer3';
@@ -813,8 +822,6 @@ SCRIPTDEFINITIONS;
 					}
 				}
 				else{																											// am ersten Polygon wird weitergezeichnet
-					if(enclosingForm.last_doing2.value == 'add_geom')enclosingForm.last_button.value = 'ppquery1';
-					if(enclosingForm.last_doing2.value == 'subtract_geom')enclosingForm.last_button.value = 'ppquery2';
 					if(pathx.length == 1){							// ersten Punkt darstellen
 						document.getElementById('startvertex').setAttribute('cx', (pathx[0]-minx)/scale);
 						document.getElementById('startvertex').setAttribute('cy', (pathy[0]-miny)/scale);
@@ -1021,10 +1028,7 @@ SCRIPTDEFINITIONS;
 			break;
 			case 'add_circle':
 				applypolygons();
-				addlinepoint_second(world_x, world_y);
-				enclosingForm.firstpoly.value = 'true';
-				enclosingForm.secondpoly.value = 'true';
-				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_buffered_line&width='+enclosingForm.bufferwidth.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
+				startPoint(client_x, client_y);
 			break;			
 			case 'add_parallel_polygon':
 				addlinepoint_second(world_x, world_y);
@@ -1138,19 +1142,40 @@ function mouseup(evt){
 	if(dragging){
 		endPoint(evt);
 		enclosingForm.secondpoly.value = 'true';
-		if(enclosingForm.last_doing.value == 'add_geom'){
-			top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=add_geometry&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
-			if(polygonfunctions == true){
-				enclosingForm.firstpoly.value = 'true';
+		switch (enclosingForm.last_doing.value) {
+
+			case 'add_geom': {
+				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=add_geometry&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value,new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
+				if(polygonfunctions == true){
+					enclosingForm.firstpoly.value = 'true';
+				}
+				else{
+					enclosingForm.firstline.value = 'true';
+				}
 			}
-			else{
-				enclosingForm.firstline.value = 'true';
-			}
-		}
-		else{
-			if(enclosingForm.last_doing.value == 'subtract_geom'){
+			break;
+
+			case 'subtract_geom': {
 				top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=subtract_geometry&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
 			}
+			break;
+			
+			case 'add_circle': {		
+				if (enclosingForm.CMD.value == 'add_circle_box') {
+					// Rechteck aufgezogen => an allen Stützpunkten der abgefragten Geometrie Kreise erzeugen
+					enclosingForm.firstpoly.value = 'true';
+					enclosingForm.secondpoly.value = 'true';
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&input_coord='+enclosingForm.INPUT_COORD.value+'&pixsize='+scale+'&operation=add_buffered_vertices&width='+enclosingForm.bufferwidth.value+'&resulttype=svgwkt&singlegeom='+enclosingForm.singlegeom.checked+'&geom_from_layer='+enclosingForm.geom_from_layer.value, new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
+				}
+				else {
+					// einfacher Klick => einen Kreis erzeugen
+					addlinepoint_second(world_x, world_y);
+					enclosingForm.firstpoly.value = 'true';
+					enclosingForm.secondpoly.value = 'true';
+					top.ahah('index.php', 'go=spatial_processing&path1='+enclosingForm.pathwkt.value+'&path2='+path_second+'&operation=add_buffered_line&width='+enclosingForm.bufferwidth.value+'&geotype=line&resulttype=svgwkt', new Array(enclosingForm.result, ''), new Array('setvalue', 'execute_function'));
+				}
+			}
+			break;
 		}
 	}
 	if(moving){
@@ -1491,6 +1516,7 @@ function mouseup(evt){
 		ortho_point_vertices.push(world_x+" "+world_y);
 		enclosingForm.ortho_point_vertices.value = ortho_point_vertices.join("|");
 		vertex = create_catch_vertex(document.getElementById("kreis3"), id, world_x, world_y);
+		vertex.setAttribute("style","fill: #1481F5");
 		if(deactivate){
 			vertex.setAttribute("pointer-events", "none");		// Events bei diesem Vertex deaktivieren, sonst wird durch den Mouseup gleich noch einer angelegt
 			deactivated_foreign_vertex = id;
@@ -2513,7 +2539,7 @@ function mouseup(evt){
 		if(enclosingForm.secondline != undefined && enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if(enclosingForm.last_doing.value == "add_geom" || enclosingForm.last_doing.value == "subtract_geom" || enclosingForm.last_doing.value == "move_geometry"){
+			if (["add_geom", "subtract_geom", "add_circle", "move_geometry"].includes(enclosingForm.last_doing.value)){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				if(enclosingForm.secondpoly.value == "true" && must_redraw){
 					applypolygons();

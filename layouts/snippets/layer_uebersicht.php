@@ -9,7 +9,7 @@
 		}
 	}
 	$this->keywords = array_unique($this->keywords);
-	sort($this->keywords);
+	natcasesort($this->keywords);
 	
 	$this->outputGroup = function($group, $indent = 0, $prefix = '', $upper_groups = []) use ($GUI) {
 		$group_layer_ids = $GUI->layers['layers_of_group'][$group['id']];
@@ -57,12 +57,12 @@
 					<td style="padding-left: ' . $indent . 'px;" valign="top" class="layer-column">
 						' . $GUI->layers['Name_or_alias'][$i] . '
 					</td>
-					<td style="padding-left: ' . $indent . 'px;" valign="top" class="default_drawingorder-column">
-						' . $GUI->layers['default_drawingorder'][$i] . '
+					<td style="padding-left: ' . $indent . 'px;" valign="top" class="drawingorder-column">
+						' . $GUI->layers['drawingorder'][$i] . '
 					</td>
 					<td valign="top" class="wms_keywordlist-column">
 						<div style="width: 300px">
-							' . htmlentities($GUI->layers['wms_keywordlist'][$i]) . '
+							' . htmlentities(str_replace(',', ', ', $GUI->layers['wms_keywordlist'][$i])) . '
 						</div>
 					</td>
 					<td valign="top" class="kurzbeschreibung-column">
@@ -143,7 +143,7 @@
 	}
 <? } ?>
 
-	.default_drawingorder-column {
+	.drawingorder-column {
 		display: none;
 	}
 	
@@ -199,7 +199,7 @@
 				<input type="checkbox" onclick="$('.id-column').toggle(); $('#column_options_div').toggle();" checked> ID<br>
 				<? } ?>
 				<input type="checkbox" onclick="$('.layer-column').toggle(); $('#column_options_div').toggle();" checked> Thema<br>
-				<input type="checkbox" onclick="$('.default_drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
+				<input type="checkbox" onclick="$('.drawingorder-column').toggle(); $('#column_options_div').toggle();"> Zeichenreihenfolge<br>
 				<input type="checkbox" onclick="$('.wms_keywordlist-column').toggle(); $('#column_options_div').toggle();" checked> Stichworte<br>
 				<input type="checkbox" onclick="$('.kurzbeschreibung-column').toggle(); $('#column_options_div').toggle();" checked> Kurzbeschreibung<br>
 				<input type="checkbox" onclick="$('.metadatenlink-column').toggle(); $('#column_options_div').toggle();" checked> Metadatenlink<br>
@@ -213,7 +213,7 @@
 				<tr>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="id-column"><a href="index.php?go=Layer_Uebersicht&order=Layer_ID">ID</a></th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="layer-column"><a href="index.php?go=Layer_Uebersicht">Thema</a></th>
-					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="default_drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
+					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="drawingorder-column">Default<br>Zeichen-<br>reihenfolge</th>
 					<th style="border-right:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3" class="wms_keywordlist-column">
 						Stichworte&nbsp;
 						<select name="keyword_filter" onchange="filter_by_keyword();">

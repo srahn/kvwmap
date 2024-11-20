@@ -266,7 +266,9 @@ class GUI {
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					if (pg_num_rows($ret[1]) > 1) {
+						$html .= '<option value="">-- Bitte Auswählen --</option>';
+					}
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
@@ -1005,7 +1007,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -1100,7 +1102,7 @@ class db_mapObj{
 			$attributes['typename'][$i] = $rs['typename'];
 			$type = ltrim($rs['type'], '_');
 			if ($recursive AND is_numeric($type)){
-				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true);
+				$attributes['type_attributes'][$i] = $this->read_datatype_attributes($layer_id, $type, $layerdb, NULL, $all_languages, true, $replace);
 			}
 			if ($rs['type'] == 'geometry'){
 				$attributes['the_geom'] = $rs['name'];
@@ -1116,38 +1118,33 @@ class db_mapObj{
 			$attributes['nullable'][$i]= $rs['nullable'];
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
-			if ($get_default) {
-				$attributes['default'][$i] = $rs['default'];
-			}
+			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replaced_default = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->GUI->user->id,
-						$this->GUI->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->GUI->rolle->language
-					);
-					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
-					if ($ret1[0] == 0) {
-						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
 					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$language
-				);
+			}
+			if ($get_default AND $attributes['default'][$i] != '') {
+				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
+				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
+				if ($ret1[0] == 0) {
+					$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
+				}
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];

@@ -38,7 +38,7 @@ class Konvertierung extends PgObject {
 	/**
 	 * Die Funktion setzt Einstellungen entsprechen der $planart.
 	 * Wenn $planart nicht übergeben wurde wird die Planart aus $this->data abgefragt.
-	 * @param String $planart (pptional) Planart der Konvertierung
+	 * @param string $planart (pptional) Planart der Konvertierung
 	 */
 	// MARK: Konfiguration
 	function set_config($planart = null) {
@@ -224,7 +224,7 @@ class Konvertierung extends PgObject {
 		$bb = $gui->Stelle->MaxGeorefExt;
 
 		# Setze Metadaten
-		$gui->map->set('name', umlaute_umwandeln($this->plan->get('name')));
+		$gui->map->set('name', sonderzeichen_umwandeln($this->plan->get('name')));
 		$gui->map->extent->setextent($this->plan->extent['minx'], $this->plan->extent['miny'], $this->plan->extent['maxx'], $this->plan->extent['maxy']);
 		$gui->map->setMetaData("ows_extent", implode(' ', $this->plan->extent));
 		$gui->map->setMetaData("ows_abstract", $gui->map->getMetaData('ows_abstract') . ' Rechtskraft ' . $this->get_aktualitaetsdatum());
@@ -257,7 +257,14 @@ class Konvertierung extends PgObject {
 				# Hier eingeführt und nicht in GUI->loadlayer, weil führt dort beim WebAtlas-WMS zu einem Fehler
 				$layer->setMetaData('ows_extent', $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				# Set Data sql for layer
-				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($gui, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
 				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
@@ -2516,7 +2523,7 @@ class Konvertierung extends PgObject {
 		$md->set('id_cite_date', en_date($this->get_aktualitaetsdatum()));
 		$md->set('version', $this->get_version_from_ns_uri(XPLAN_NS_URI));
 		$md->set('extents', $plan->extents);
-		$md->set('service_layer_name', umlaute_umwandeln($plan->get('name')));
+		$md->set('service_layer_name', sonderzeichen_umwandeln($plan->get('name')));
 		$md->set('onlineresource', URL . 'ows/' . $this->gui->Stelle->id . '/fplan?');
 		$md->set('download_name', 'Download der XPlan-GML Dateien');
 		$md->set('download_url', URL . APPLVERSION . 'index.php?go=xplankonverter_download_uploaded_xplan_gml&amp;konvertierung_id=' . $this->get_id());
