@@ -7535,7 +7535,7 @@ echo '			</table>
 				}
 			}
 	*/
-			$this->saveMap('');
+			#$this->saveMap('');		# wenn man das macht, wird der Druckextent als neuer Extent des Users übernommen
 			#$this->debug->write("<p>Maßstab des Drucks:" . $this->map_scaledenom,4);
 			$this->drawMap('true');
 
