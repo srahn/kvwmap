@@ -219,7 +219,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 							//document.getElementById('overlayfooter').style.display = 'block';
 							//document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
-						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
+						document.title = '<? echo implode(' - ', $this->queried_layers ?: []); ?>';
 						document.getElementById('overlayheader').style.display = document.getElementById('overlayheader2').style.display;
 						document.getElementById('overlayheader').innerHTML = document.getElementById('overlayheader2').innerHTML;
 					</script>

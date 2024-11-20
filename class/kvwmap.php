@@ -2693,7 +2693,12 @@ echo '			</table>
 					else $style->updateFromString("STYLE COLOR [" . $dbStyle['color']."] END");
         }
 				if ($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-					$style->opacity = $dbStyle['opacity'];
+					if (MAPSERVERVERSION >= 800) {
+						$style->updateFromString("STYLE OPACITY " . $dbStyle['opacity'] . " END");
+					}
+					else {
+						$style->opacity = $dbStyle['opacity'];
+					}
 				}
         if ($dbStyle['outlinecolor']!='') {
           $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
@@ -6660,17 +6665,14 @@ echo '			</table>
   }
 
   function createlegend($size, $all_active_layers = false){
-    $this->map->set('resolution',72);
-    $this->map->legend->set("keysizex", $size*1.8*$this->map_factor);
-    $this->map->legend->set("keysizey", $size*1.8*$this->map_factor);
-    $this->map->legend->set("keyspacingx", $size*$this->map_factor);
-    $this->map->legend->set("keyspacingy", $size*0.83*$this->map_factor);
-    $this->map->legend->label->set("size", $size*$this->map_factor);
-		if(MAPSERVERVERSION < '700'){
-			$this->map->legend->label->set("type", 'truetype');
-		}
-		$this->map->legend->label->set("font", 'arial');
-    $this->map->legend->label->set("position", MS_CC);
+    $this->map->resolution = 72;
+    $this->map->legend->keysizex = $size*1.8*$this->map_factor;
+    $this->map->legend->keysizey = $size*1.8*$this->map_factor;
+    $this->map->legend->keyspacingx = $size*$this->map_factor;
+    $this->map->legend->keyspacingy = $size*0.83*$this->map_factor;
+    $this->map->legend->label->size = $size*$this->map_factor;
+		$this->map->legend->label->font = 'arial';
+    $this->map->legend->label->position = MS_CC;
     #$this->map->legend->label->set("offsetx", $size*-5*$this->map_factor);
     #$this->map->legend->label->set("offsety", -1*$size*$this->map_factor);
     $this->map->legend->label->color->setRGB(0,0,0);
@@ -6682,7 +6684,7 @@ echo '			</table>
 		$layerset['list'] = array_merge($layerset['list'], $rollenlayer);
     for($i = 0; $i < $this->map->numlayers; $i++){
       $layer = $this->map->getlayer($i);
-      $layer->set('status', 0);
+      $layer->status = 0;
     }
     $scale = $this->map_scaledenom * $this->map_factor / 1.414;
     $legendimage = imagecreatetruecolor(1,1);
@@ -6708,7 +6710,7 @@ echo '			</table>
 					}
         }
         if($draw == true){
-          $layer->set('status', 1);
+          $layer->status = 1;
           if($layer->connectiontype != 7){
 	          $classimage = $this->map->drawLegend();
 	          $filename = $this->map_saveWebImage($classimage,'jpeg');
@@ -6761,7 +6763,7 @@ echo '			</table>
           ImageCopy($newlegendimage, $legendimage, 0, $size*3.3*$this->map_factor+$classheight, 0, 0, imagesx($legendimage), imagesy($legendimage));
           $legendimage = $newlegendimage;
 
-          $layer->set('status', 0);
+          $layer->status = 0;
           $draw = false;
           $classheight = 0;
         }
@@ -7439,8 +7441,8 @@ echo '			</table>
 				$widthratio = 1;
 				$heightratio = 1;
 			}
-			$this->map->set('width', $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor);
-			$this->map->set('height', $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor);
+			$this->map->width = $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor;
+			$this->map->height = $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor;
 
 			# errorhandler required for credits and grid
 			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
@@ -7464,7 +7466,7 @@ echo '			</table>
 			# Koordinatengitter-Layer aus dem Mapfile
 			@$gridlayer = $this->map->getLayerByName('grid');
 			if($gridlayer != false){
-				$gridlayer->set('status', MS_ON);
+				$gridlayer->status = MS_ON;
 			}
 
 			$this->map->setextent($minx,$miny,$maxx,$maxy);
@@ -9487,7 +9489,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				$sql_where = '';
 				$spatial_sql_where = '';
-				for ($m = 0; $m <= value_of($this->formvars, 'searchmask_count'); $m++){
+				for ($m = 0; $m <= (value_of($this->formvars, 'searchmask_count') ?: 0); $m++){
 					if ($m > 0){				// es ist nicht die erste Suchmaske, sondern eine weitere hinzugefügte
 						$prefix = $m . '_';
 						$sql_where .= ' ' . $this->formvars['boolean_operator_'.$m].' ';			// mit AND/OR verketten
@@ -16301,16 +16303,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function createReferenceMap($width, $height, $refwidth, $refheight, $angle, $minx, $miny, $maxx, $maxy, $zoomfactor, $refmapfile, $output_format = '') {
-		$refmap = (MAPSERVERVERSION < 600) ? ms_newMapObj($refmapfile) : new mapObj($refmapfile);
-		$refmap->set('width', $width);
-		$refmap->set('height', $height);
+		$refmap = new mapObj($refmapfile);
+		$refmap->width = $width;
+		$refmap->height = $height;
 		$refmap->setprojection("init=epsg:" . $this->user->rolle->epsg_code);
 		$refmap->setextent($minx, $miny, $maxx, $maxy);
 		# zoomen
 		$oPixelPos = new PointObj();
 		$oPixelPos->setXY($width / 2, $height / 2);
 		//$refmap->zoomscale($scale,$oPixelPos,$width,$height,$refmap->extent,$this->Stelle->MaxGeorefExt);
-		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent);
+		$refmap->zoompoint($zoomfactor, $oPixelPos, $width, $height, $refmap->extent, NULL);
 		if ($output_format == '' AND $refmap->selectOutputFormat('jpeg_print') == 1) {
 			$refmap->selectOutputFormat('jpeg');
 		}
@@ -16347,7 +16349,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function spatial_processing() {
 		include_(CLASSPATH . 'spatial_processor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		if (in_array($this->formvars['operation'], array('area', 'length'))) {
+		if (in_array($this->formvars['operation'], array('area', 'length', 'transformPoint'))) {
 			$layerdb = $this->pgdatabase; # wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
 		}
 		else {
@@ -17029,11 +17031,16 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if ($layerset['Filter'] != '') {
 					$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
-						if(MAPSERVERVERSION > 700){
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-						}
-						else{
-							$layer->setFilter($layerset['Filter']);
+						switch (true) {
+							case MAPSERVERVERSION >= 800 : {
+								$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
+							}break;
+							case MAPSERVERVERSION >= 700 : {
+								$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
+							}break;
+							default : {
+								$layer->setFilter($layerset['Filter']);
+							}
 						}
 					}
 					else {

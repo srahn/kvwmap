@@ -1571,7 +1571,7 @@ class data_import_export {
 				if ($this->formvars['export_format'] != 'CSV') {
 					$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 				}
-				if ($err == '') {
+				if ($err == 0) {
 					// Update timestamp formular_element_types having option export
 					$time_attributes = array();
 					foreach ($layerset[0]['attributes']['name'] AS $key => $value) {
@@ -1607,7 +1607,7 @@ class data_import_export {
 			}
 		}
 
-		if ($err == '') {
+		if ($err == 0) {
 			ob_end_clean();
 			header('Content-type: ' . $contenttype);
 			header("Content-disposition:	attachment; filename=" . basename($exportfile));

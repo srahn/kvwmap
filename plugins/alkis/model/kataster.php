@@ -79,9 +79,7 @@ class Flur {
       $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
     }
     else {
-      if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_assoc($ret[1]);
-      }
+      $ret[1]=pg_fetch_assoc($ret[1]);
     }
     return $ret;
   }

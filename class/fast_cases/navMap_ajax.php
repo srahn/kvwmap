@@ -1730,7 +1730,7 @@ class GUI {
           }
           else {
 						$consumetime = $prevtime;
-						$prevextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+						$prevextent = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
           }
         }
       }
@@ -1770,7 +1770,7 @@ class GUI {
         $this->errmsg="Der nächste Kartenausschnitt konnte nicht abgefragt werden.<br>" . $ret[1];
       }
       else {
-        $nextextent->setextent($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
+        $nextextent = rectObj($ret[1]['minx'],$ret[1]['miny'],$ret[1]['maxx'],$ret[1]['maxy']);
         #echo '<br>gewechselt auf Einstellung von:'.$this->consumetime;
       }
       $i++;

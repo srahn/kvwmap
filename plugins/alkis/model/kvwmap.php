@@ -1337,7 +1337,7 @@
 		}
     $formvars = $GUI->formvars;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
+		$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {
       $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $GUI->namenWahl();
