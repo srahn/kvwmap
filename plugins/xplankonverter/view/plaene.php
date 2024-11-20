@@ -19,8 +19,8 @@
 	$('#gui-table').css('width', '100%');
 	$(function () {
 		result = $('#eventsResult');
-		result.success = function(text) {
-			message([{ type: 'notice', msg: text}], 1000, 100, 400);
+		result.success = function(text, visible = 1000) {
+			message([{ type: 'notice', msg: text}], visible, 100, 400);
 /*			result.text(text);
 			result.removeClass('alert-danger');
 			result.addClass('alert-success');*/
@@ -154,7 +154,8 @@
 						konvertierung_id: konvertierung_id,
 						csrf_token: '<? echo $_SESSION['csrf_token']; ?>'
 					},
-					complete: function () {
+					complete: function (response) {
+						console.log(response);
 						//document.getElementById('sperr_div').style.display = 'none';
 					},
 					error: function(response) {
@@ -168,7 +169,7 @@
 							return;
 						}
 						$('#konvertierungen_table').one('load-success.bs.table', function () {
-							result.success(response.msg);
+							result.success(response.msg, 4000);
 						});
 						$('#konvertierungen_table').bootstrapTable('refresh');
 					}
@@ -426,7 +427,7 @@
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['GML_VALIDIERUNG_ERR'			 ]; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_ERR']; ?>"
 								 || row.konvertierung_status == "<?php echo Konvertierung::$STATUS['INSPIRE_GML_ERSTELLUNG_OK' ]; ?>";
-		output += '<a title="Konvertierung durchführen & validieren" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
+		output += '<a title="Validieren und Konvertierung durchführen" class="btn btn-link btn-xs' + (funcIsAllowed ? ' xpk-func-btn' : disableFrag) + '" href="index.php?go=xplankonverter_konvertierung&konvertierung_id=' + value + '&planart=<?php echo $this->formvars['planart']; ?>" onclick="document.getElementById(\'sperr_div\').innerHTML = \'Anfrage gesendet. Bitte warten.\'; document.getElementById(\'sperr_div\').style.display = \'block\';"><i class="fa fa-lg fa-cogs"></i></a>';
 
 		// Validierungsergebnisse anzeigen
 		funcIsAllowed = row.konvertierung_status == "<?php echo Konvertierung::$STATUS['ERSTELLT'					]; ?>"
@@ -654,8 +655,9 @@
 	}
 
 	function konvertierungWirksamkeitsdatumSorter(fieldA, fieldB, rowA, rowB) {
-		const dateA = fieldA.split(".").reverse().join("");
-		const dateB = fieldB.split(".").reverse().join("");
+		
+		const dateA = fieldA == null ? "000000" : fieldA.split(".").reverse().join("");
+		const dateB = fieldB == null ? "000000" : fieldB.split(".").reverse().join("");
 		console.log('A: ' + dateA + ' > B: ' + dateB);
 		return dateA > dateB ? 1 : -1;
 	}
@@ -722,7 +724,7 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					data-formatter="konvertierungHtmlSpecialchars"
 					class="col-md-7"
 					data-filter-control="input"
-					data-filter-control-placeholder="Suchen"
+					data-filter-control-placeholder="Filtern"
 				>Name</th>
 				<th
 					data-field="nummer"
@@ -762,7 +764,8 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 						data-filter-control="select"
 						data-filter-control-placeholder="Filtern nach"
 					>Status</th><?php
-				} ?>
+				}
+				if ($this->plan_layer_id == XPLANKONVERTER_FP_PLAENE_LAYER_ID) { ?>
 				<th
 					data-field="wirksamkeitsdatum"
 					data-sortable="true"
@@ -771,6 +774,17 @@ Liegt das Datum in der Zukunft, wird der Plan automatisch zu diesem Datum veröf
 					class="col-md-2"
 					data-filter-control="input"
 				>Wirksamkeit</th><?
+				}
+				if ($this->plan_layer_id == XPLANKONVERTER_BP_PLAENE_LAYER_ID) { ?>
+				<th
+					data-field="inkrafttretensdatum"
+					data-sortable="true"
+					data-visible="true"
+					data-sorter="konvertierungWirksamkeitsdatumSorter"
+					class="col-md-2"
+					data-filter-control="input"
+				>Inkrafttretensdatum</th><?
+				}
 				/*
 				if (XPLANKONVERTER_ENABLE_PUBLISH) { ?>
 					<th

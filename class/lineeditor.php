@@ -47,11 +47,12 @@ class lineeditor {
 		$sql.=" FROM " . $tablename." WHERE ".$this->oid_attribute." = '" . $oid."') AS foo";
 		$ret = $this->database->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-		$rect->minx=$rs['minx']; 
-		$rect->maxx=$rs['maxx'];
-		$rect->miny=$rs['miny']; 
-		$rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['miny'],			
+			$rs['maxx'],
+			$rs['maxy']
+		);
 		if(defined('ZOOMBUFFER') AND ZOOMBUFFER > 0) {
 			if($this->clientepsg == 4326)$randx = $randy = ZOOMBUFFER/10000;
 			else $randx = $randy = ZOOMBUFFER;
@@ -91,7 +92,7 @@ class lineeditor {
 	 * @return string The WKT MultiLineString
 	 */
 	function get_multi_linestring($line) {
-		return "ST_Multi(" . $this->get_linestring($line) . ")";
+		return "ST_Multi(ST_GeometryFromText('" . $line . "', " . $this->clientepsg . "))";
 	}
 
 	/**
@@ -100,7 +101,7 @@ class lineeditor {
 	 * @return string The WKT LineString
 	 */
 	function get_linestring($line) {
-		return "ST_GeometryFromText('" . $line . "', " . $this->clientepsg . ")";
+		return "ST_geometryN(ST_GeometryFromText('" . $line . "', " . $this->clientepsg . "), 1)";
 	}
 
 	/**

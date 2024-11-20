@@ -2,14 +2,14 @@
 	<td colspan="2"><?php $maxRows = ($this->formvars['anzahl'] > MAXQUERYROWS ? $this->formvars['anzahl'] : MAXQUERYROWS); ?>
 		<i><? echo $layer['Name']; ?></i>:
 		<a href="javascript:selectall(<? echo $layer['Layer_ID']; ?>);">
-			<span id="sellectDatasetsLinkText"><?
+			<span id="selectDatasetsLinkText_<? echo $layer['Layer_ID']; ?>"><?
 			if ($layer['count'] > $maxRows) {
 				echo $strSelectAllShown;
 			} else {
 				echo $strSelectAll;
 			} ?>
 		</span>
-		<span id="desellectDatasetsLinkText" style="display: none"><?
+		<span id="deselectDatasetsLinkText_<? echo $layer['Layer_ID']; ?>" class="hidden"><?
 			if ($layer['count'] > $maxRows) {
 				echo $strDeselectAllShown;
 			} else {

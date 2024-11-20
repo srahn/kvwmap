@@ -1,6 +1,5 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
-
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -15,7 +14,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) {		// This error code is included in error_reporting		
+	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -33,7 +32,7 @@ register_shutdown_function(function () {
       header('Content-Type: application/json');
 			$response = array(
 				'success' => false,
-				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line']
+				'msg' => $err['message'] . ' in Datei: ' . $err['file'] . ' in Zeile: ' . $err['line'] . ' Fehlermeldungen: ' . print_r($errors, true)
 			);
 			echo json_encode($response);
     }
@@ -128,7 +127,7 @@ $log_loginfail = new LogFile(LOGFILE_LOGIN, 'text', 'Log-Datei Login Failure', '
 // $starttime = $executiontimes['time'][] = microtime_float1();
 // $executiontimes['action'][] = 'Start';
 
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE));
+error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED|E_WARNING));
 
 ob_start ();    // Ausgabepufferung starten
 
@@ -174,7 +173,7 @@ define('CASE_COMPRESS', false);
 #																																																				  #
 ###########################################################################################################
 
-$non_spatial_cases = array('getLayerOptions', 'get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
+$non_spatial_cases = array('get_select_list');		// für non-spatial cases wird in start.php keine Verbindung zur PostgreSQL aufgebaut usw.
 $spatial_cases = array('navMap_ajax', 'getMap', 'tooltip_query', 'get_group_legend');
 $fast_loading_cases = array_merge($spatial_cases, $non_spatial_cases);
 $fast_loading_case = array();
@@ -248,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if($GUI->formvars['legendtouched']){
+				if ($GUI->formvars['legendtouched']) {
 					$GUI->neuLaden();
 				}
 				else{
@@ -279,6 +278,14 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
+			} break;
+
+			case 'get_position_qrcode' : {
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'oid' => 'text'
+				]);				
+				$GUI->get_position_qrcode();
 			} break;
 
 			case 'write_mapserver_templates' : {
@@ -342,6 +349,19 @@ function go_switch($go, $exit = false) {
 
 			case 'loadDrawingOrderForm' : {
 				$GUI->loadDrawingOrderForm();
+			} break;
+
+			case 'show_layer_in_map' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'zoom_to_layer_extent' => 'boolean'
+				]);
+				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->saveMap('');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'show_snippet' : {
@@ -422,7 +442,7 @@ function go_switch($go, $exit = false) {
 			}break;
 
 			case 'getLayerParamsForm' : {
-				$GUI->get_layer_params_form($GUI->formvars['stelle_id']);
+				echo $GUI->get_layer_params_form($GUI->formvars['stelle_id']);
 			} break;
 
 			case 'setLayerParams' : {
@@ -458,12 +478,17 @@ function go_switch($go, $exit = false) {
 				$GUI->close_group_legend();
 			} break;
 
+			# Legende für einen Layer erzeugen
+			case 'get_layer_legend' : {
+				$GUI->get_layer_legend();
+			} break;
+
 			# Legende erzeugen
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
-				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
-					$GUI->layers_replace_scale[$i]->set('data', str_replace('$scale', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				for($i = 0; $i < count_or_0($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->data = str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data);
 				}
 				echo $GUI->create_dynamic_legend();
 			} break;
@@ -627,8 +652,8 @@ function go_switch($go, $exit = false) {
 					'style_angle' => 'text',
 					'style_angleitem' => 'text',
 					'style_width' => 'text',
-					'style_minwidth' => 'int',
-					'style_maxwidth' => 'int',
+					'style_minwidth' => 'float',
+					'style_maxwidth' => 'float',
 					'style_offsetx' => 'text',
 					'style_offsety' => 'text',
 					'style_polaroffset' => 'text',
@@ -959,6 +984,10 @@ function go_switch($go, $exit = false) {
 			case 'saveOverlayPosition' : {
 				$GUI->saveOverlayPosition();
 			} break;
+
+			case 'set_last_query_layer' : {
+				$GUI->set_last_query_layer();
+			} break;			
 
 			case 'Administratorfunktionen' : {
 				$GUI->checkCaseAllowed($go);
@@ -1337,6 +1366,11 @@ function go_switch($go, $exit = false) {
 				$GUI->gemerkte_Datensaetze_anzeigen($GUI->formvars['layer_id']);
 			} break;
 
+			case 'gemerkte_Datensaetze_drucken' : {
+				$GUI->sanitize(['chosen_layer_id' => 'int']);
+				$GUI->gemerkte_Datensaetze_drucken($GUI->formvars['chosen_layer_id']);
+			} break;
+
 			case 'Datensatz_dublizieren' : {
 				$GUI->dublicate_dataset();
 			} break;
@@ -1400,7 +1434,9 @@ function go_switch($go, $exit = false) {
 					'aggregate_function' => 'text',
 					'value_attribute_label' => 'text',
 					'value_attribute_name' => 'text',
-					'label_attribute_name' => 'text'
+					'label_attribute_name' => 'text',
+					'beschreibung' => 'text',
+					'breite' => 'text'
 				]);
 				include_once(CLASSPATH . 'LayerChart.php');
 				$chart = LayerChart::find_by_id($GUI, $GUI->formvars['id']);
@@ -1415,11 +1451,12 @@ function go_switch($go, $exit = false) {
 				}
 				if ($result['success']) {
 					$GUI->add_message('notice', $result['msg']);
+					$GUI->layer_charts_Anzeigen();
 				}
 				else {
 					$GUI->add_message('error', $result['err_msg']);
+					$GUI->layer_chart_editor();
 				}
-				$GUI->layer_charts_Anzeigen();
 			} break;
 
 			case 'layer_chart_Loeschen' : {
@@ -1552,6 +1589,51 @@ function go_switch($go, $exit = false) {
 				$GUI->Layereditor();
 			} break;
 
+			case 'Layereditor_info_from_maintable' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer',
+					'schema_name' => 'text',
+					'table_name' => 'text'
+				]);
+				header('Content-Type: application/json');
+				echo json_encode($GUI->pgdatabase->get_table_infos(
+					$GUI->formvars['connection_id'],
+					$GUI->formvars['schema_name'],
+					$GUI->formvars['table_name']
+				));
+			} break;
+
+			case 'Layereditor_get_maintables' : {
+				$GUI->checkCaseAllowed('Layereditor');
+				$GUI->sanitize([
+					'connection_id' => 'integer'
+				]);
+				if ($GUI->formvars['connection_id'] == '') {
+					$result = array(
+						'success' => true,
+						'tables' => array()
+					);
+				}
+				else {
+					$connection = Connection::find_by_id($GUI, $GUI->formvars['connection_id']);
+					if ($connection) {
+						$result = array(
+							'success' => true,
+							'tables' => $connection->get_tables()
+						);
+					}
+					else {
+						$result = array(
+							'success' => false,
+							'msg' => 'Connection mit id ' . $GUI->formvars['connection_id'] . ' nicht gefunden.'
+						);
+					}
+				}
+				header('Content-Type: application/json');
+				echo json_encode($result);
+			} break;
+
 			case 'Layereditor_Als neuen Layer eintragen' : {
 				$GUI->checkCaseAllowed('Layereditor');
 				$GUI->LayerAnlegen();
@@ -1592,7 +1674,7 @@ function go_switch($go, $exit = false) {
 			
 			case 'checkClassCompleteness' : {
 				$GUI->checkCaseAllowed('Layereditor');
-				echo $GUI->checkClassCompleteness();
+				echo $GUI->check_class_completeness(true);
 			} break;
 			
 			case 'checkClassCompletenessAll' : {
@@ -1682,6 +1764,27 @@ function go_switch($go, $exit = false) {
 					$GUI->output();
 				}
 			} break;
+
+			case 'Layer_Zeichenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Zeichenreihenfolge();
+			} break;
+
+			case 'Layer_Zeichenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Zeichenreihenfolge');
+				$GUI->Layer_Zeichenreihenfolge_Speichern();
+			} break;
+
+			case 'Layer_Legendenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Legendenreihenfolge();
+			} break;
+
+			case 'Layer_Legendenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Legendenreihenfolge');
+				$GUI->Layer_Legendenreihenfolge_Speichern();
+			} break;
+
 
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
@@ -1875,7 +1978,14 @@ function go_switch($go, $exit = false) {
 			case 'als_nutzer_anmelden' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->als_nutzer_anmelden_allowed($GUI->formvars['selected_user_id'], $GUI->user->id);
+				$_SESSION['prev_login_name'] = $_SESSION['login_name'];
 				$_SESSION['login_name'] = $GUI->formvars['loginname'];
+				header('location: index.php');
+			} break;
+
+			case 'als_voriger_Nutzer_anmelden' : {
+				$_SESSION['login_name'] = $_SESSION['prev_login_name'];
+				unset($_SESSION['prev_login_name']);
 				header('location: index.php');
 			} break;
 
@@ -2147,7 +2257,7 @@ function go_switch($go, $exit = false) {
 
 			default : {
 				# Karteninformationen lesen
-				$GUI->loadMap('DataBase');
+				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();

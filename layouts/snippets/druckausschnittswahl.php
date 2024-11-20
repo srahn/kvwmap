@@ -237,9 +237,10 @@ function rotate_print_extent(angle){
 								for($i = 0; $i < count($layerset); $i++){
 									if($layerset[$i]['aktivStatus'] != 0 
 									AND !empty($layerset[$i]['Class'])){
-										if($layerset[$i]['alias'] != '')$name = $layerset[$i]['alias'];
-										else $name = $layerset[$i]['Name'];
-										if($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == '' AND $layerset[$i]['Layer_ID'] > 0)$this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] = 'on';
+										$name = $layerset[$i]['Name_or_alias'];
+										if ($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == '' AND $layerset[$i]['Layer_ID'] > 0) {
+											$this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] = 'on';
+										}
 										echo '<input type="checkbox" name="legendlayer'.$layerset[$i]['Layer_ID'].'" '.($this->formvars['legendlayer'.$layerset[$i]['Layer_ID']] == 'on' ? 'checked="true"' : '').' >&nbsp;'.$name.'<br>';
 									}
 								}
@@ -305,11 +306,13 @@ function rotate_print_extent(angle){
 						<td>
 							<div id="legend_layer" style="display: inline-block">
 								<div id="legendcontrol">
+								<? if ($this->user->rolle->singlequery < 2) { ?>
 									<a href="index.php?go=reset_querys">
 										<div class="button_background" style="width: 26px; height: 26px">
 											<div class="button tool_info" style="width: 26px; height: 26px" title="<? echo $strClearAllQuerys; ?>"></div>
 										</div>
 									</a>
+								<? } ?>
 									<a href="index.php?go=reset_layers" style="padding: 0 0 0 6">
 										<div class="button_background" style="width: 26px; height: 26px">
 											<div class="button layer" style="width: 26px; height: 26px" title="<? echo $strDeactivateAllLayer; ?>"></div>

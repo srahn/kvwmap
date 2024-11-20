@@ -1,6 +1,7 @@
 <?
 	$xplan_version = '5.4';
-/* Beispiel für einen Aufruf
+
+	/* Beispiel für einen Aufruf
 	https://testportal-plandigital.de/kvwmap/index.php?go=xplankonverter_zusammenzeichnung&planart=FP-Plan
 	Process steps xplankonverter
 		_upload_zusammenzeichnung
@@ -14,11 +15,10 @@
 	*/
 ?>
 	<link rel="stylesheet" href="plugins/xplankonverter/styles/styles.css">
-	<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script>
-<?
+	<script src="plugins/xplankonverter/model/Zusammenzeichnung.js"></script><?
 	if ($this->plan_title === 'Plan') { ?>
 		<br>
-		<h2>Zusammenzeichnungen</h2>
+		<h2><? echo $this->konvertierung->config['title']; ?></h2>
 		<br>
 		<br>
 		Sie müssen im Parameter planart eine gültige Planart angeben.
@@ -46,7 +46,7 @@
 		}
 		if ($zusammenzeichnung_exists) {
 			if ($zusammenzeichnung->plan === false) {
-				$this->add_message('error', 'Die Zusammenzeichnung ' . $zusammenzeichnung->get('id') . ' hat keinen zugeordneten Plan!');
+				$this->add_message('error', $this->konvertierung->config['artikel'] . ' ' . $this->konvertierung->config['singular'] . ' ' . $zusammenzeichnung->get('id') . ' hat keinen zugeordneten Plan!');
 				$plandaten = array(
 					'name' => $zusammenzeichnung->get('bezeichnung'),
 					'aktualitaet' => 'Die gefundene Zusammenzeichnung hat keinen zugeordneten Plan',
@@ -61,7 +61,7 @@
 				$zusammenzeichnung->plan->get_center_coord();
 				$plandaten = array(
 					'name' => $zusammenzeichnung->plan->get('name'),
-					'aktualitaet' => $zusammenzeichnung->plan->get($this->plan_attribut_aktualitaet),
+					'aktualitaet' => $zusammenzeichnung->get_aktualitaetsdatum(),
 					'gml_id' => $zusammenzeichnung->plan->get('gml_id'),
 					'first_ags' => $zusammenzeichnung->plan->get_first_ags(),
 					'first_gemeinde_name' => $zusammenzeichnung->plan->get_first_gemeinde_name(),
@@ -69,14 +69,14 @@
 					'rechtsstand' => $zusammenzeichnung->plan->get('rechtsstand')
 				);
 
-				$result = $zusammenzeichnung->plan->get_layers_with_content(
-						$this->xplankonverter_get_xplan_layers($zusammenzeichnung->get('planart')),
-						$zusammenzeichnung->get($zusammenzeichnung->identifier)
-				);
-				if (! $result['success']) {
-					$this->add_message('error', $result['msg']);
-				}
-				$layers_with_content = $result['layers_with_content'];
+				#$result = $zusammenzeichnung->plan->get_layers_with_content(
+				#		$this->xplankonverter_get_xplan_layers($zusammenzeichnung->get('planart')),
+				#		$zusammenzeichnung->get($zusammenzeichnung->identifier)
+				#);
+				#if (! $result['success']) {
+				#	$this->add_message('error', $result['msg']);
+				#}
+				#$layers_with_content = $result['layers_with_content'];
 			}
 		}
 
@@ -101,7 +101,8 @@
 			let zz = new Zusammenzeichnung(
 				<? echo ($zusammenzeichnung_exists ? $zusammenzeichnung->get_id() : 0); ?>,
 				'<? echo $this->formvars['planart']; ?>',
-				'<? echo $_SESSION['csrf_token']; ?>'
+				'<? echo $_SESSION['csrf_token']; ?>',
+				<? echo json_encode($zusammenzeichnung->config); ?>
 			);
 
 			function show_upload_zusammenzeichnung(msg) {
@@ -115,8 +116,24 @@
 				}
 			}
 
+			function show_class_completenesses(konvertierung_id) {
+				let url = `index.php?go=xplankonverter_show_class_completenesses&konvertierung_id=${konvertierung_id}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`;
+				$('#sperr_div, #waitingdiv').show();
+				fetch(url)
+					.then(response => response.text())
+					.then((data) => {
+						let e = document.createElement('div');
+						e.innerHTML = data;
+						document.getElementById('class_completeness_div').prepend(e);
+						$('#sperr_div, #waitingdiv').hide();
+					})
+					.catch((error) => {
+						message('error', 'Fehler bei der Abfrage der Vollständigkeit der Styles für die Klassen der Layer!');
+						$('#sperr_div, #waitingdiv').hide();
+					});
+			}
 		</script>
-		<h2 style="margin-top: 15px; margin-bottom: 10px">Zusammenzeichnung <?php echo $this->plan_title; ?> <? echo $this->Stelle->Bezeichnung; ?></h2>
+		<h2 style="margin-top: 15px; margin-bottom: 10px"><? echo $konvertierung->config['singular']  ?> <? echo $this->plan_title; ?> <? echo $this->Stelle->Bezeichnung; ?></h2>
 		<style>
 			#container_paint {
 				min-height: 500px;
@@ -154,6 +171,7 @@
 			.centered_div {
 				overflow: hidden;
 				text-align: center;
+				margin-top: 15px;
 			}
 
 			.head_div {
@@ -249,7 +267,7 @@
 	
 		if (! $zusammenzeichnung_exists) { ?>
 			<div id="keine_zusammenzeichnung" class="centered_div">
-				In dieser Stelle gibt es noch keine veröffentlichte Zusammenzeichnung vom <? echo $this->plan_title; ?>.<p><?
+				In dieser Stelle gibt es noch <? echo $this->konvertierung->config['keine_zusammenzeichnung']; ?> vom <? echo $this->konvertierung->config['akkusativ']; ?>.<p><?
         if (count($this->zusammenzeichnungen['faulty']) > 0) { ?>
           <div id="faulty_head" class="head_div" onclick="toggle_head(this)">
             <i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Fehlgeschlagene Upload-Versuche
@@ -258,7 +276,7 @@
             foreach ($this->zusammenzeichnungen['faulty'] AS $konvertierung) {
               if ($konvertierung->plan) {
                 $list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_FP_PLAENE_LAYER_ID . "&value_plan_gml_id=" . $konvertierung->plan->get('gml_id') . "&operator_plan_gml_id==&csrf_token=" . $_SESSION['csrf_token'];
-                $list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->plan->get('wirksamkeitsdatum')} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
+                $list_text = "{$konvertierung->get('bezeichnung')} Stand: {$konvertierung->get_aktualitaetsdatum()} Versuch vom: " . date_format(date_create($konvertierung->get('created_at')), 'd.m.Y H:i');
               }
               else {
                 $list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_KONVERTIERUNGEN_LAYER_ID . "&value_konvertierung_id=" . $konvertierung->get_id() . "&operator_konvertierung_id==&csrf_token=" . $_SESSION['csrf_token'];
@@ -271,11 +289,11 @@
             } ?>
           </div><?
         } ?>
-        <input id="upload_zusammenzeichnung_button" type="button" value="Zusammenzeichnung hochladen" onclick="show_upload_zusammenzeichnung('Zusammenzeichnung hier reinziehen.')" style="margin-top: 20px">
+        <input id="upload_zusammenzeichnung_button" type="button" value="<? echo $this->konvertierung->config['akkusativ']; ?> hochladen" onclick="show_upload_zusammenzeichnung('<? echo $this->konvertierung->config['akkusativ']; ?> hier reinziehen.')" style="margin-top: 20px">
 			</div><?
 		} ?>
 
-		<div id="neue_zusammenzeichnung" class="centered_div hidden">
+		<div id="neue_zusammenzeichnung" class="centered_div" style="display: none">
 			<div
 				id="upload_zusammenzeichnung_div"
 				ondrop="zz.upload_zusammenzeichnung(event)"
@@ -285,9 +303,26 @@
 				<span id="upload_zusammenzeichnung_msg"></span>
 			</div><p><?
 			if ($this->user->id == 3) { ?>
-				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
+				<input id="suppress_ticket_and_notification" type="checkbox" name="suppress_ticket_and_notification" value="1"<? if ($this->user->id == 3) echo ' checked'; ?>> im Fehlerfall kein Ticket anlegen und keine Benachrichtigung senden<p><?
 			} ?>
-			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()">
+			<p style="margin-bottom: 8px;">Die hoch zu ladenden Daten müssen folgende Eigenschaften aufweisen:</p>
+			<div style="
+				text-align: left;
+				margin-left: 129px;
+				width: 75%;
+				margin-bottom: 20px;
+			">
+				<ul style="
+					color: black;
+					margin: 0px;
+					padding: 0px;
+					list-style: circle;
+				"><?
+					echo $this->konvertierung->config['upload_bedingungen']; ?>
+					<li>Die XPlan-GML Datei muss eine Version 5.x haben.</li>
+				</ul>
+			</div>
+			<input id="cancel_zusammenzeichnung_button" type="button" value="Hochladen abbrechen" onclick="cancel_upload_zusammenzeichnung()" style="margin-bottom: 20px">
 			<div id="upload_result_msg_div" class="hidden"></div>
 		</div><?
 
@@ -311,14 +346,19 @@
 						<tr>
 							<td>GML-ID:</td><td><? echo $plandaten['gml_id']; ?><td>
 						</tr>
-						<tr>
-							<td>Gemeinde:</td><td><? echo $plandaten['first_gemeinde_name']; ?> (<? echo $plandaten['first_gemeinde_ags']; ?>)<td>
+						<tr><?
+							if ($zusammenzeichnung->get('planart') == 'RP-Plan') { ?>
+								<td>Planungsregion:</td><td><? echo $zusammenzeichnung->plan->get('planungsregion'); ?><td><?
+							}
+							else { ?>
+								<td>Gemeinde:</td><td><? echo $plandaten['first_gemeinde_name']; ?> (<? echo $plandaten['first_gemeinde_ags']; ?>)<td><?
+							} ?>
 						</tr>
 						<tr>
 							<td>Rechtsstand:</td><td><? echo get_rechtsstand($plandaten['rechtsstand']); ?> (<? echo $plandaten['rechtsstand']; ?>)<td>
 						</tr>
 						<tr>
-							<td>Datum der Wirksamkeit<br>der letzten Änderung:</td><td><? echo $plandaten['aktualitaet']; ?><td>
+							<td>Aktualitätsdatum (<? echo $zusammenzeichnung->get_plan_attribut_aktualitaet(); ?>)</td><td><? echo $plandaten['aktualitaet']; ?><td>
 						</tr>
 						<tr>
 							<td>Konvertierung ID:</td><td><? echo $zusammenzeichnung->get_id(); ?><td>
@@ -328,8 +368,10 @@
 							<td><?
 								if ($zusammenzeichnung->plan != false) { ?>
 									<a title="Details zum Plan im Sachdatenformular anzeigen." href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&operator_plan_gml_id==&value_plan_gml_id=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-list-alt" aria-hidden="true"></i> Plandetails anzeigen</a><br>
-									<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><br>
-									<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a><?
+									<a title="Zusammenzeichnung in der Karte anzeigen." href="index.php?go=zoomto_dataset&oid=<? echo $zusammenzeichnung->plan->get('gml_id'); ?>&layer_columnname=raeumlichergeltungsbereich&layer_id=<? echo XPLANKONVERTER_FP_PLAENE_LAYER_ID; ?>&selektieren=0"><i class="fa fa-map" aria-hidden="true"></i> In Karte anzeigen</a><?
+									if ($zusammenzeichnung->planart == 'FP-Plan') { ?><br>
+										<a title="Plan im UVP-Portal anzeigen." target="uvp" href="https://uvp.niedersachsen.de/kartendienste?layer=blp&N=<? echo $zusammenzeichnung->plan->center_coord['lat']; ?>&E=<? echo $zusammenzeichnung->plan->center_coord['lon']; ?>&zoom=13"><i class="fa fa-globe" aria-hidden="true"></i> Im UVP-Portal Anzeigen</a><?
+									}
 								} ?>
 							</td>
 						</tr>
@@ -338,7 +380,7 @@
 				<div id="dokumente_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Dokumente
 				</div>
-				<div id="dokumente_div" class="content_div hidden">
+				<div id="dokumente_div" class="content_div" style="display: none;">
 					<table>
 						<tr>
 							<td>Hochgeladene XPlanGML-Datei:</td><td><a href="index.php?go=xplankonverter_download_uploaded_xplan_gml&page=zusammenzeichnung&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>"><i class="fa fa-file-archive-o" aria-hidden="true"></i> Download</a><td>
@@ -360,37 +402,43 @@
 				<div id="dienst_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Dienst
 				</div>
-				<div id="dienst_div" class="content_div hidden">
-					<table>
+				<div id="dienst_div" class="content_div" style="display: none;">
+					<table style="width: 100%">
 						<tr>
-							<td>Metadaten über den Geodatensatz:</td><td><?
+							<td style="border-right: 0px solid gray">Metadaten über den Geodatensatz:</td>
+							<td style="border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_dataset_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Geodatensatz runterladen" target="metadata" href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_dataset_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
+							<td rowspan="3" style="border-bottom: solid 1px gray;">
+								<a href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="Metadaten aktualisieren" target="metadata">Metadaten aktualisieren</a>
+							</td>
 						</tr>
 						<tr>
-							<td>Metadaten über den Darstellungsdienst (WMS):</td><td><?
+							<td style="border-right: 0px solid gray">Metadaten über den Darstellungsdienst (WMS):</td>
+							<td style="border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_viewservice_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Darstellungsdienst runterladen" target="metadata" href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_viewservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 						<tr>
-							<td>Metadaten über Downloaddienst (WFS):</td><td><?
+							<td style="border-bottom: solid 1px gray; border-right: 0px solid gray">Metadaten über Downloaddienst (WFS):</td>
+							<td style="border-bottom: solid 1px gray; border-right: 0px solid gray"><?
 								if ($zusammenzeichnung->get('metadata_downloadservice_uuid') == '') { ?>
 									<a title="Metadaten über Geodatensatz anlegen" target="metadata" href="index.php?go=xplankonverter_create_metadata&planart=<?php echo $zusammenzeichnung->get('planart'); ?>&konvertierung_id=<? echo $zusammenzeichnung->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">Jetzt Anlegen</a><?
 								}
 								else { ?>
 									<a title="Metadaten über Downloaddienst runterladen" target="metadata"href="https://mis.testportal-plandigital.de/geonetwork/srv/api/records/<? echo $zusammenzeichnung->get('metadata_downloadservice_uuid'); ?>/formatters/xml"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 						<tr>
 							<td>Capabilities zum WMS:</td>
@@ -402,7 +450,10 @@
 								else { ?>
 									<a title="Capabilities zum WMS runterladen" target="metadata" href="<?php echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
+							<td rowspan="2">
+								&nbsp;
+							</td>
 						</tr>
 						<tr>
 							<td>Capabilities zum WFS:</td>
@@ -414,46 +465,22 @@
 								else { ?>
 									<a title="Capabilities zum WFS runterladen" target="metadata" href="<? echo $capabilities_url; ?>"><i class="fa fa-file-code-o" aria-hidden="true"></i> XML-Datei</a><?
 								} ?>
-							<td>
+							</td>
 						</tr>
 					</table>
 				</div>
 				<div id="class_completeness_head" class="head_div" onclick="toggle_head(this)">
 					<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Planzeichen (Objektklassen)
 				</div>
-				<div id="class_completeness_div" class="content_div hidden"><?php
-					$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-          foreach($layers_with_content AS $layer) {
-						$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
-						$this->formvars['layer_id'] = $layer['id'];
-						$classes = $mapDB->read_Classes($layer['id']);
-						$class_completeness_result .= '<table id="class_expressions_layer_' . $layer['id'] . '" style="display: none">
-							<th class="class-th" style="width: 30%">Klasse</th>
-							<th class="class-th" style="width: 70%">Definition</th>' . implode(
-								'',
-								array_map(
-									function($class) {
-										return '
-											<tr>
-												<td class="class-td">' . $class['Name'] . '</td>
-												<td class="class-td">' . $class['Expression'] . '</td>
-											</tr>
-										';
-									},
-									$classes
-								)
-							) . '
-						</table>';
-						$result = $this->check_class_completeness();
-						$class_completeness_result .= $result['html'];
-					}
-					echo $class_completeness_result; ?>
+				<div id="class_completeness_div" class="content_div" style="display: none; text-align: center; padding-top: 20px">
+					<p>
+					<input type="button" name="load_class_completeness" value="Lade Objektklassen" onclick="show_class_completenesses(<? echo $zusammenzeichnung->get_id(); ?>)"/>
 				</div><?
 				if (count($this->zusammenzeichnungen['archived']) > 0) { ?>
 					<div id="alte_staende_head" class="head_div" onclick="toggle_head(this)">
 						<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Ältere Versionen
 					</div>
-					<div id="alte_staende_div" class="content_div hidden"><?
+					<div id="alte_staende_div" class="content_div" style="display: none"><?
 						foreach ($this->zusammenzeichnungen['archived'] AS $archivdatei) { ?>
 							<div class="zusammenzeichnung-list-div"><a href="index.php?go=xplankonverter_download_alte_zusammenzeichnung&datei=<? echo basename($archivdatei); ?>&page=zusammenzeichnung&planart=<? echo $this->formvars['planart']; ?>"><i class="fa fa-file-archive-o" aria-hidden="true"></i> <? echo basename($archivdatei); ?></a></div><?
 						} ?>
@@ -463,7 +490,7 @@
 					<div id="faulty_head" class="head_div" onclick="toggle_head(this)">
 						<i class="fa fa-caret-down head_icon" aria-hidden="true"></i>Fehlgeschlagene Upload-Versuche
 					</div>
-					<div id="faulty_div" class="content_div hidden"><?
+					<div id="faulty_div" class="content_div" style="display: none"><?
 						foreach ($this->zusammenzeichnungen['faulty'] AS $konvertierung) {
 							if ($konvertierung->plan) {
 								$list_url = "index.php?go=Layer-Suche_Suchen&selected_layer_id=" . XPLANKONVERTER_FP_PLAENE_LAYER_ID . "&value_plan_gml_id=" . $konvertierung->plan->get('gml_id') . "&operator_plan_gml_id==&csrf_token=" . $_SESSION['csrf_token'];
@@ -481,7 +508,7 @@
 					</div><?
 				} ?>
 				<p>
-				<input type="button" value="Neue Version hochladen" onclick="show_upload_zusammenzeichnung('Neue Version der Zusammenzeichnung hier reinziehen.')">
+				<input type="button" value="Neue Version hochladen" onclick="show_upload_zusammenzeichnung('Neue Version <? echo $this->konvertierung->config['genitiv']; ?> hier reinziehen.')">
 			</div><?
 		} ?>
 		<script>

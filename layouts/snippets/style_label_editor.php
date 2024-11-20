@@ -43,7 +43,26 @@ function get_style(style_id){
 	if(document.getElementById('td2_style_'+style_id))document.getElementById('td2_style_'+style_id).style.backgroundColor='lightsteelblue';
 	layer_id = document.GUI.selected_layer_id.value;
 	document.GUI.selected_style_id.value = style_id;
-	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div')), "");
+	ahah('index.php', 'go=get_style&style_id='+style_id+'&layer_id='+layer_id, new Array(document.getElementById('selected_style_div'), ''), ['', 'execute_function']);
+}
+
+function replace_symbolname_field(){
+	var symbolname_field = document.querySelector('#selected_style_div input[name=\'style_symbolname\']');
+	var custom_select_template = document.querySelector('#custom_select_style_symbolname, #custom_select_style_symbolname_template');
+	var custom_select = custom_select_template.cloneNode(true);
+	custom_select_template.id = 'custom_select_style_symbolname_template';
+	custom_select.id = 'custom_select_style_symbolname';
+	symbolname_field.insertAdjacentElement('afterend', custom_select);
+	var options = custom_select.querySelectorAll('.dropdown li');
+	var found = false;
+	[].forEach.call(options, function (option){
+		if (!found && option.dataset.value == symbolname_field.value) {
+			custom_select_click(option);
+			toggle_custom_select('style_symbolname');
+			found = true;
+		}
+	});
+	symbolname_field.remove();
 }
 
 function get_label(label_id){
@@ -120,7 +139,7 @@ function save_style(style_id){
 	formData.append('layer_id', document.GUI.selected_layer_id.value);
 	formData.append('class_id', document.GUI.class_1.value);
 	formData.append('style_id', style_id);	
-	ahah('index.php', formData, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div')), "");
+	ahah('index.php', formData, new Array(document.getElementById('style_div'), document.getElementById('selected_style_div'), ''), ['', '', 'execute_function']);
 }
 
 function save_label(label_id){
@@ -202,7 +221,7 @@ function setScale(select){
 		color: #111;
 	}
 	#selected_style_div {
-		width: 213px;
+		width: 248px;
 	}
 	.fa-clipboard:hover {
 		cursor: pointer;
@@ -221,7 +240,7 @@ function setScale(select){
     			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
     				echo ' selected';
     			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
     		}
     	?>
       </select>
@@ -235,16 +254,33 @@ function setScale(select){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a></th>
-					<th><a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a></th>
-					<? } ?>
-					<th><a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a></th>
-					<? if(in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a></th>
-					<? } ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor');"><div><? echo $strCommonData; ?></div></a>
+					</th>
+					<th>
+						<a href="javascript:navigate('go=Klasseneditor');"><div><? echo $strClasses; ?></div></a>
+					</th>
+					<th class="navigation-selected">
+						<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Attributeditor');"><div><? echo $strAttributes; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="javascript:navigate('go=Layereditor&stellenzuweisung=1');"><div><? echo $strStellenAsignment; ?></div></a>
+					</th><?
+					if (in_array($this->layerdata['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a>
+						</th><?
+					}
+					if (!in_array($this->layerdata['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>
@@ -261,9 +297,9 @@ function setScale(select){
 			  <tr>
 			    <td style="border-bottom:1px solid #C3C7C3;" colspan="4">
 			    	<div id="classes_div"> 
-			      <select style="width:430px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten)==0){ echo 'disabled';}?>>
+			      <select style="width:430px" size="4"  name="class_1" onchange="change_class();" <?php if(count($this->allclassdaten ?: []) == 0){ echo 'disabled';}?>>
 			        <?
-			    		for($i = 0; $i < count($this->allclassdaten); $i++){
+			    		for($i = 0; $i < count($this->allclassdaten ?: []); $i++){
 			    			echo '<option';
 			    			if($this->allclassdaten[$i]['Class_ID'] == $this->formvars['selected_class_id']){
 			    				echo ' selected';
@@ -272,6 +308,7 @@ function setScale(select){
 			    		}
 			    		?>
 			      </select>
+						<? $this->create_symbol_list_template($this->layerdata); ?>
 			      </div> 
 			  	</td>
 			  </tr>
@@ -359,7 +396,7 @@ function setScale(select){
 				<tr>
 					<td valign="top" colspan="2" style="width: 50%; border-right:1px solid #C3C7C3;">
 						<div id="selected_style_div"><?
-							if (count($this->styledaten) > 0) { ?>
+							if (count($this->styledaten ?: []) > 0) { ?>
 								<table align="left" border="0" cellspacing="0" cellpadding="3"><?
 									for ($i = 0; $i < count($this->styledaten); $i++) { ?>
 										<tr>
@@ -384,7 +421,7 @@ function setScale(select){
 					<td valign="top" colspan="2">
 						<div id="selected_label_div">
 				    <?
-				    if(count($this->labeldaten) > 0){
+				    if(count($this->labeldaten ?: []) > 0){
 				  		echo'
 					  		<table align="left" border="0" cellspacing="0" cellpadding="3">';
 							for($i = 0; $i < count($this->labeldaten); $i++){
@@ -436,27 +473,18 @@ function setScale(select){
 								<td><span class="fett">Font:</span></td>
 							</tr>
 							<tr>
-								<td><?
-									if (!function_exists(imagecreatetruecolor)) { ?>
-										<select size="1" name="font"><?
-											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
-												<option id="<? echo $this->fonts['name'][$i]; ?>" value="<? echo $this->fonts['name'][$i]; ?>"><? echo $this->fonts['name'][$i]; ?></option><?
-											} ?>
-										</select><?
-									}
-									else { ?>
-										<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');"><?
-											for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
-												<option
-													onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));"
-													class="imagebacked"
-													style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');"
-													id="<? echo $this->fonts['name'][$i]; ?>"
-													value="<? echo $this->fonts['name'][$i]; ?>"
-												><? echo $this->fonts['name'][$i]; ?></option><?
-											} ?>
-										</select><?
-									} ?>
+								<td>
+									<select size="1" class="imagebacked" name="font" style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][0], $this->fonts['name'][0]); ?>');"><?
+										for ($i = 0; $i < count($this->fonts['name']); $i++) { ?>
+											<option
+												onclick="this.parentNode.setAttribute('style',this.getAttribute('style'));"
+												class="imagebacked"
+												style="background-image:url('<? echo @$this->createFontSampleImage($this->fonts['filename'][$i], $this->fonts['name'][$i]); ?>');"
+												id="<? echo $this->fonts['name'][$i]; ?>"
+												value="<? echo $this->fonts['name'][$i]; ?>"
+											><? echo $this->fonts['name'][$i]; ?></option><?
+										} ?>
+									</select>
 								</td>
 							</tr>
 							<tr>

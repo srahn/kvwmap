@@ -34,7 +34,7 @@
 						<td style="border:1px solid #C3C7C3"><input name="default_value[]" type="text" value="<? echo $this->params[$i]['default_value'];; ?>" size="20"></td>
 						<td style="border:1px solid #C3C7C3"><textarea name="options_sql[]" style="height: 22px"><? echo $this->params[$i]['options_sql']; ?></textarea></td>
 						<td style="border:1px solid #C3C7C3"><?
-							$layer_count = @count($this->params_layer[$this->params[$i]['id']]);
+							$layer_count = count_or_0($this->params_layer[$this->params[$i]['id']]) - 1;
 							if($layer_count > 0){
 								echo '<ul>';
 								for ($j = 0; $j < $layer_count; $j++){

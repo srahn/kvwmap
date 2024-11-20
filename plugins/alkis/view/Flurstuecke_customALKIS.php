@@ -50,6 +50,7 @@ backto = function(go){
 }
 
 show_all = function(){
+	currentform.go.value = 'get_last_query';
 	currentform.offset_<? echo $this->qlayerset[$i]['Layer_ID']; ?>.value = 0;
 	currentform.anzahl.value = currentform.anzahl.options[currentform.anzahl.options.length-1].value;
 	overlay_submit(currentform, false);
@@ -67,7 +68,7 @@ hide_versions = function(flst){
 }
 
 </script>
-<br>
+<br><br>
 <a name="anfang"></a>
 <h2>Flurst&uuml;cke</h2>
 <table border="0" cellpadding="2" cellspacing="0">
@@ -83,7 +84,7 @@ hide_versions = function(flst){
 	$forall = false;
 	if($i == '')$i = 0;
 	$gesamt = $this->qlayerset[$i]['count'];
-  $anzObj = @count($this->qlayerset[$i]['shape']);
+  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
 	if($gesamt == '')$gesamt = $anzObj;
 	$von = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + 1;
 	$bis = $this->formvars['offset_'.$this->qlayerset[$i]['Layer_ID']] ?: 0 + $this->formvars['anzahl'];
@@ -129,6 +130,11 @@ hide_versions = function(flst){
       $flst->readALB_Data($flurstkennz_a, $this->formvars['without_temporal_filter'], $this->qlayerset[$i]['oid']);	# bei without_temporal_filter=true, wird unabhängig vom Zeitstempel abgefragt (z.B. bei der historischen Flurstückssuche oder Flst.-Listenimport oder beim Sprung zum Vorgänger/Nachfolger)
 			$flst->Grundbuecher=$flst->getGrundbuecher();
 			$flst->Buchungen=$flst->getBuchungen(NULL,NULL,$flst->hist_alb);
+			if ($privileg_['bestandsnr'] and $privileg_['eigentuemer']) {
+				for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
+					$flst->Buchungen[$b]['eigentuemerliste'] = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr']);
+				}
+			}
 			$flst_array[] = $flst;
 		}
 		usort($flst_array, 'sort_flst');
@@ -291,7 +297,7 @@ hide_versions = function(flst){
 										<tr>
 											<td align="right" valign="top"><span class="fett">Amtsgericht</span>&nbsp;</td>
 											<td><? 
-												for ($a = 0; $a < @count($flst->Amtsgerichte); $a++) {
+												for ($a = 0; $a < count_or_0($flst->Amtsgerichte); $a++) {
 													if ($privileg_['amtsgerichtname']) { 
 														echo $flst->Amtsgerichte[$a]['name'];
 													}
@@ -308,7 +314,7 @@ hide_versions = function(flst){
 										<tr>
 											<td align="right" valign="top"><span class="fett">Grundbuchbezirk</span>&nbsp;</td>
 											<td><? 
-												for ($a = 0; $a < @count($flst->Grundbuchbezirke); $a++) {
+												for ($a = 0; $a < count_or_0($flst->Grundbuchbezirke); $a++) {
 													if ($privileg_['grundbuchbezirkname']) { 
 														echo $flst->Grundbuchbezirke[$a]['name'];
 													}
@@ -325,14 +331,14 @@ hide_versions = function(flst){
 												<td align="right" valign="top"><span class="fett">Lage&nbsp;</span></td>
 												<td>
 												<?php
-												$anzStrassen = @count($flst->Adresse);
+												$anzStrassen = count_or_0($flst->Adresse);
 												for ($s=0;$s<$anzStrassen;$s++) {
 													$flst->selHausID[] = $flst->Adresse[$s]["gemeinde"].'-'.$flst->Adresse[$s]["strasse"].'-'.$flst->Adresse[$s]["hausnr"];	# für die Adressensuche
 													echo $flst->Adresse[$s]["gemeindename"]; ?><br><?php
 													echo $flst->Adresse[$s]["strassenname"]; ?>&nbsp;<?php
 													echo $flst->Adresse[$s]["hausnr"]; ?><br><?php
 												}
-												$anzLage = @count($flst->Lage);
+												$anzLage = count_or_0($flst->Lage);
 												$Lage='';
 												for ($j=0;$j<$anzLage;$j++) {
 													$Lage.= $flst->Lage[$j].'<br>';
@@ -456,7 +462,7 @@ hide_versions = function(flst){
 												$this->bau = new Bauauskunft($this->baudatabase);
 												$searchvars['flurstkennz'] = $flst->Flurstkennz_alt;
 												$this->bau->getbaudaten($searchvars);
-												if(@count($this->bau->baudata) != 0){
+												if(count_or_0($this->bau->baudata) != 0){
 												?>
 											<tr>
 												<td align="right"><span class="fett"> Baudaten&nbsp;</span></td>
@@ -564,7 +570,7 @@ hide_versions = function(flst){
 										}
 								} ?>
 								
-								 <? if($privileg_['festlegungen'] AND (@count($flst->Strassenrecht) > 0 OR @count($flst->Wasserrecht) > 0 OR @count($flst->Schutzgebiet) > 0 OR @count($flst->NaturUmweltrecht) > 0 OR @count($flst->BauBodenrecht) > 0 OR @count($flst->Denkmalschutzrecht) > 0 OR @count($flst->Forstrecht) > 0 OR @count($flst->Sonstigesrecht) > 0)){
+								 <? if($privileg_['festlegungen'] AND (count_or_0($flst->Strassenrecht) > 0 OR count_or_0($flst->Wasserrecht) > 0 OR count_or_0($flst->Schutzgebiet) > 0 OR count_or_0($flst->NaturUmweltrecht) > 0 OR count_or_0($flst->BauBodenrecht) > 0 OR count_or_0($flst->Denkmalschutzrecht) > 0 OR count_or_0($flst->Forstrecht) > 0 OR count_or_0($flst->Sonstigesrecht) > 0)){
 									?>
 										<tr>
 											<td colspan="2">
@@ -575,19 +581,19 @@ hide_versions = function(flst){
 											<td>
 												<table border="0" cellspacing="0" cellpadding="2">
 												<?
-												for($j = 0; $j < @count($flst->Strassenrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->Strassenrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->Strassenrecht[$j]['flaeche'].' m²</td><td>'.$flst->Strassenrecht[$j]['art'].': '.$flst->Strassenrecht[$j]['bezeichnung'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->Wasserrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->Wasserrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->Wasserrecht[$j]['flaeche'].' m²</td><td>'.$flst->Wasserrecht[$j]['art'].': '.$flst->Wasserrecht[$j]['bezeichnung'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->Schutzgebiet); $j++){
+												for($j = 0; $j < count_or_0($flst->Schutzgebiet); $j++){
 													echo '<tr><td valign="top">'.$flst->Schutzgebiet[$j]['flaeche'].' m²</td><td>'.$flst->Schutzgebiet[$j]['art'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->NaturUmweltrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->NaturUmweltrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->NaturUmweltrecht[$j]['flaeche'].' m²</td><td>'.$flst->NaturUmweltrecht[$j]['art'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->BauBodenrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->BauBodenrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->BauBodenrecht[$j]['flaeche'].' m²</td><td>'.$flst->BauBodenrecht[$j]['art'];
 													if($flst->BauBodenrecht[$j]['bezeichnung'] != '')echo ': '.$flst->BauBodenrecht[$j]['bezeichnung'];
 													if($flst->BauBodenrecht[$j]['stelle'] != '')echo ' ('.$flst->BauBodenrecht[$j]['stelle'].')';
@@ -595,13 +601,13 @@ hide_versions = function(flst){
 												}
 												if($flst->abweichenderrechtszustand == 'ja')echo '<tr><td colspan="2" width="600px">In einem durch Gesetz geregelten Verfahren der Bodenordnung ist für das Flurstück ein neuer Rechtszustand eingetreten. Die Festlegungen des Verfahrens sind noch nicht in das Liegenschaftskataster übernommen. Dieser Nachweis entspricht deshalb nicht dem aktuellen Stand.</td></tr>';
 												if($flst->zweifelhafterflurstuecksnachweis == 'ja')echo '<tr><td colspan="2" width="600px">Zweifelhafter Flurstücksnachweis</td></tr>';
-												for($j = 0; $j < @count($flst->Denkmalschutzrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->Denkmalschutzrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->Denkmalschutzrecht[$j]['flaeche'].' m²</td><td>'.$flst->Denkmalschutzrecht[$j]['art'].' '.$flst->Denkmalschutzrecht[$j]['name'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->Forstrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->Forstrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->Forstrecht[$j]['flaeche'].' m²</td><td>'.$flst->Forstrecht[$j]['art'].': '.$flst->Forstrecht[$j]['funktion'].'</td></tr>';
 												}
-												for($j = 0; $j < @count($flst->Sonstigesrecht); $j++){
+												for($j = 0; $j < count_or_0($flst->Sonstigesrecht); $j++){
 													echo '<tr><td valign="top">'.$flst->Sonstigesrecht[$j]['flaeche'].' m²</td><td>'.$flst->Sonstigesrecht[$j]['art'].' '.$flst->Sonstigesrecht[$j]['name'].'</td></tr>';
 												}
 												?>
@@ -612,7 +618,7 @@ hide_versions = function(flst){
 								} ?>
 								
 
-								<?php if ($privileg_['freitext'] AND @count($flst->FreiText)>0) { ?>
+								<?php if ($privileg_['freitext'] AND count_or_0($flst->FreiText)>0) { ?>
 								<tr>
 									<td colspan="2">
 										<table border="0" cellspacing="0" cellpadding="2">
@@ -646,7 +652,7 @@ hide_versions = function(flst){
 									</td>
 									</tr>
 								<?php } ?>
-								<?php if ($privileg_['baulasten'] != '' AND @count($flst->Baulasten)>0) { ?>
+								<?php if ($privileg_['baulasten'] != '' AND count_or_0($flst->Baulasten)>0) { ?>
 								<tr>
 									<td colspan="2">
 										<table border="0" cellspacing="0" cellpadding="2">
@@ -732,7 +738,7 @@ hide_versions = function(flst){
 											<tr>
 												<td>
 											<?php
-											$anzNutzung = @count($flst->Nutzung);
+											$anzNutzung = count_or_0($flst->Nutzung);
 											if($anzNutzung > 0){
 												for ($j=0;$j<$anzNutzung;$j++){
 													if($flst->Nutzung[$j]['bereich'] != $flst->Nutzung[$j-1]['bereich']){
@@ -776,7 +782,7 @@ hide_versions = function(flst){
 								<td colspan="2">
 										<table border="0" cellspacing="0" cellpadding="2">
 										<? 
-										for ($b=0; $b < @count($flst->Buchungen);$b++) {
+										for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
 											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
 											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
@@ -806,8 +812,7 @@ hide_versions = function(flst){
 												<td colspan="2">Im Grundbuch noch nicht gebucht.</td>
 											</tr>
 										<? }
-										if($privileg_['eigentuemer'] AND $Eigentuemerliste = $flst->getEigentuemerliste($flst->Buchungen[$b]['bezirk'],$flst->Buchungen[$b]['blatt'],$flst->Buchungen[$b]['bvnr'])){
-											reset($Eigentuemerliste);
+										if ($privileg_['eigentuemer']) {
 											?>
 											<tr>
 												<td class="fett">
@@ -823,7 +828,7 @@ hide_versions = function(flst){
 											<tr>
 												<td colspan="3">
 													<table>				<?
-											echo $flst->outputEigentuemer(key($Eigentuemerliste), $Eigentuemerliste, 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
+											echo $flst->outputEigentuemer(key($flst->Buchungen[$b]['eigentuemerliste']), $flst->Buchungen[$b]['eigentuemerliste'], 'Long', $this->Stelle->isFunctionAllowed('Adressaenderungen'), NULL, $this->database);
 											?>	</table>
 												</td>
 											</tr>
@@ -865,7 +870,7 @@ hide_versions = function(flst){
 													if($set_timestamp != '')$zoomlink = $set_timestamp.'&go_next='.$zoomlink;else $zoom_all = true;
 											?>
 													&nbsp;&nbsp;
-													<a title="Zoom auf Flurstück und andere Flurstücke ausblenden" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
+													<a title="Zoom auf Flurstück" href="javascript:zoom2object(<? echo $this->qlayerset[$i]['Layer_ID'];?>, 'wkb_geometry', '<?php echo $flst->oid; ?>', 'zoomonly');"><div class="button zoom_normal"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;
 													<a target="root" title="Zoom auf Flurstück und Flurstück hervorheben" href="index.php?go=<? echo $zoomlink;?>"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a>
 													&nbsp;&nbsp;

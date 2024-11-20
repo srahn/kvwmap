@@ -193,6 +193,21 @@ function addMenues(){
 		<td><h2><? echo ($this->formvars['go'] == 'Dienstmetadaten' ? $this->strTask . ' ' . $this->Stelle->Bezeichnung : $strTitle); ?></h2></td>
 	</tr>
 	<tr>
+    <td style="text-align: center">
+		<span class="px17 fetter"><? echo $this->strTask;?>:</span>
+			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
+				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+				for ($i = 0; $i < count($this->allstellendaten['ID']); $i++){
+					echo '<option';
+					if ($this->allstellendaten['ID'][$i] == $this->formvars['selected_stelle_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->allstellendaten['ID'][$i].'">' . $this->allstellendaten['Bezeichnung'][$i] . '</option>';
+				} ?>
+			</select>
+		</td>
+	</tr	
+	<tr>
 		<td align="center"><?php
 if ($this->Meldung=='Daten der Stelle erfolgreich eingetragen!' OR $this->Meldung=='') {
 	$bgcolor=BG_FORM;
@@ -364,7 +379,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 											<select name="selectedmenues" size="12" onchange="select_submenues();" multiple style="width: 340px">
 											<?
-											for($i=0; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+											for($i=0; $i < count_or_0($this->formvars['selmenues']["Bezeichnung"]); $i++){
 												echo '<option id="'.$this->formvars['selmenues']["ORDER"][$i].'_sel_'.$this->formvars['selmenues']["menueebene"][$i].'_'.$i.'" title="'.str_replace(' ', '&nbsp;', $this->formvars['selmenues']["Bezeichnung"][$i]).'" value="'.$this->formvars['selmenues']["ID"][$i].'">'.$this->formvars['selmenues']["Bezeichnung"][$i].'</option>';
 											}
 											?>
@@ -409,7 +424,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedfunctions" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < @count($this->formvars['selfunctions']); $i++){
+											for($i=0; $i < count_or_0($this->formvars['selfunctions']); $i++){
 													echo '<option title="'.str_replace(' ', '&nbsp;', $this->formvars['selfunctions'][$i]["bezeichnung"]).'" value="'.$this->formvars['selfunctions'][$i]["id"].'">'.$this->formvars['selfunctions'][$i]["bezeichnung"].'</option>';
 												 }
 											?>
@@ -449,7 +464,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedframes" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < @count($this->formvars['selframes']); $i++){
+											for($i=0; $i < count_or_0($this->formvars['selframes']); $i++){
 													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['selframes'][$i]["Name"]).' value="'.$this->formvars['selframes'][$i]["id"].'">'.$this->formvars['selframes'][$i]["Name"].'</option>';
 												 }
 											?>
@@ -489,7 +504,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedlayouts" size="6" multiple style="width: 340px">
 											<?
-											for($i=0; $i < @count($this->formvars['sellayouts']); $i++){
+											for($i=0; $i < count_or_0($this->formvars['sellayouts']); $i++){
 													echo '<option title='.str_replace(' ', '&nbsp;', $this->formvars['sellayouts'][$i]["name"]).' value="'.$this->formvars['sellayouts'][$i]["id"].'">['.$this->formvars['sellayouts'][$i]["layer_id"].'] '.$this->formvars['sellayouts'][$i]["name"].'</option>';
 												 }
 											?>
@@ -517,7 +532,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 						<table border="0" cellspacing="0" cellpadding="0">
 							<tr>
 									<th class="fetter" align="right">
-									<? if(@count($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
+									<? if(count_or_0($this->formvars['sellayer']["Bezeichnung"]) > 0){?>
 										<a href="index.php?go=Layer2Stelle_Reihenfolge&selected_stelle_id=<? echo $this->formvars['selected_stelle_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strEdit; ?></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 									<?}?>
 									<?php echo $strLayer; ?></th>
@@ -533,7 +548,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 										<td>
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
-											for($i=0; $i < @count($this->formvars['sellayer']["Bezeichnung"]); $i++){
+											for($i=0; $i < count_or_0($this->formvars['sellayer']["Bezeichnung"]); $i++){
 													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
@@ -581,7 +596,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 							<tr valign="top">
 								<td>
 									<select name="selectedusers" size="6" multiple style="position: relative; width: 340px"><?
-										for ($i = 0; $i < @count($this->formvars['selusers']["Bezeichnung"]); $i++) {
+										for ($i = 0; $i < count_or_0($this->formvars['selusers']["Bezeichnung"]); $i++) {
 											$seluseroptions[] = array(
 												'value'	=> $this->formvars['selusers']["ID"][$i],
 												'output' => $this->formvars['selusers']["Bezeichnung"][$i]
@@ -757,7 +772,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 
 			<tr class="group-metadata">
 				<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3">
-					<?php echo $strOwsNameSpace; ?>*&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
+					<?php echo $strOwsNameSpace; ?>&nbsp;<span data-tooltip="<?php echo $strOwsNameSpaceHint; ?>"></span>
 				</th>
 				<td colspan="2" style="border-bottom:1px solid #C3C7C3">
 					<input name="ows_namespace" type="text" value="<?php echo $this->formvars['ows_namespace']; ?>" size="50" maxlength="100">
@@ -1202,7 +1217,6 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 				<input type="button" onclick="location.href='index.php?go=Stellen_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>'" value="<?php echo $this->strButtonBack; ?>">&nbsp;<?
 			}
 			if ($this->formvars['selected_stelle_id'] > 0) {
-				?><input type="hidden" name="selected_stelle_id" value="<?php echo $this->formvars['selected_stelle_id']; ?>"><?php
 				?><input type="button" name="dummy" value="<?php echo $strButtonUpdate; ?>" onclick="submitWithValue('GUI','go_plus','Ändern')"><?php
 			}
 			if ($this->formvars['go'] != 'Dienstmetadaten') {
@@ -1216,25 +1230,25 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 if ($this->formvars['go'] != 'Dienstmetadaten') { ?>
 	<input type="hidden" name="selmenues" value="<?
 					echo $this->formvars['selmenues']["ID"][0];
-					for($i=1; $i < @count($this->formvars['selmenues']["Bezeichnung"]); $i++){
+					for($i=1; $i < count_or_0($this->formvars['selmenues']["Bezeichnung"]); $i++){
 						echo ', '.$this->formvars['selmenues']["ID"][$i];
 					}
 				?>">
 	<input type="hidden" name="selfunctions" value="<?
 					echo $this->formvars['selfunctions'][0]["id"];
-					for($i=1; $i < @count($this->formvars['selfunctions']); $i++){
+					for($i=1; $i < count_or_0($this->formvars['selfunctions']); $i++){
 						echo ', '.$this->formvars['selfunctions'][$i]["id"];
 					}
 				?>">
 	<input type="hidden" name="selframes" value="<?
 					echo $this->formvars['selframes'][0]["id"];
-					for($i=1; $i < @count($this->formvars['selframes']); $i++){
+					for($i=1; $i < count_or_0($this->formvars['selframes']); $i++){
 						echo ', '.$this->formvars['selframes'][$i]["id"];
 					}
 				?>">			
 	<input type="hidden" name="sellayouts" value="<?
 					echo $this->formvars['sellayouts'][0]["id"];
-					for($i=1; $i < @count($this->formvars['sellayouts']); $i++){
+					for($i=1; $i < count_or_0($this->formvars['sellayouts']); $i++){
 						echo ', '.$this->formvars['sellayouts'][$i]["id"];
 					}
 				?>">

@@ -4,28 +4,58 @@
  * Funktionenumfang nicht existieren, in älteren Versionen nicht existiert haben,
  * nicht gefunden wurden, nicht verstanden wurden oder zu umfrangreich waren.
  */
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
 
- /**
-  * 
-  */
-function mapserverExp2SQL($exp, $classitem){
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
+function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
+	if (MAPSERVERVERSION >= 800) {
+		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
+	}
+	else {
+		$rect = new RectObj();
+		$rect->setextent($minx, $miny, $maxx, $maxy);
+		return $rect;
+	}
+}
+
+/**
+ * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
+ * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
+ * @param string $exp Die MapServer-Expression
+ * @param string $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
+ */
+function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
-	$exp = str_replace(' eq ', '=', $exp);
-	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
-	
-	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') {		# Classitem davor setzen
-		if (strpos($exp, '/') === 0) {		# regex
+
+	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
+		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
 			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
 		}
 		else {
 			$operator = '=';
 		}
 		if (substr($exp, 0, 1) != "'") {
 			$quote = "'";
-		}						
+		}
 		$exp = '"' . $classitem . '"::text ' . $operator . ' ' . $quote . $exp . $quote;
 	}
 	return $exp;
@@ -169,16 +199,6 @@ function versionFormatter($version) {
 }
 
 /**
- * Function request gdal version with gdalinfo command and return the number as 3 digit integer value
- * @return integer 3 digit version number of gdal
- */
-function get_ogr_version() {
-	exec('gdalinfo --version', $output, $ret);
-	$version_str = explode(' ', explode(',', $output[0])[0])[1];
-	return intVal(versionFormatter($version_str));
-}
-
-/**
  * This function return the absolute path to a document in the file system of the server
  * @param string $document_attribute_value The value of the document attribute stored in the dataset. Can be a path and original name or an url.
  * @param string $layer_document_path The document path of the layer the attribute belongs to.
@@ -307,17 +327,17 @@ function float_from_slash_text($slash_text) {
 }
 
 function compare_layers($a, $b){
-	$a['alias'] = strtoupper($a['alias']);
-	$b['alias'] = strtoupper($b['alias']);
-	$a['alias'] = str_replace('Ä', 'A', $a['alias']);
-	$a['alias'] = str_replace('Ü', 'U', $a['alias']);
-	$a['alias'] = str_replace('Ö', 'O', $a['alias']);
-	$a['alias'] = str_replace('ß', 's', $a['alias']);
-	$b['alias'] = str_replace('Ä', 'A', $b['alias']);
-	$b['alias'] = str_replace('Ü', 'U', $b['alias']);
-	$b['alias'] = str_replace('Ö', 'O', $b['alias']);
-	$b['alias'] = str_replace('ß', 's', $b['alias']);
-	return strcmp($a['alias'], $b['alias']);
+	$a['Name_or_alias'] = strtoupper($a['Name_or_alias']);
+	$b['Name_or_alias'] = strtoupper($b['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ä', 'A', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ü', 'U', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('Ö', 'O', $a['Name_or_alias']);
+	$a['Name_or_alias'] = str_replace('ß', 's', $a['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ä', 'A', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ü', 'U', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('Ö', 'O', $b['Name_or_alias']);
+	$b['Name_or_alias'] = str_replace('ß', 's', $b['Name_or_alias']);
+	return strcmp($a['Name_or_alias'], $b['Name_or_alias']);
 }
 
 function compare_names($a, $b){
@@ -371,12 +391,16 @@ function InchesPerUnit($unit, $center_y){
 		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		if($center_y != 0.0){
-			$cos_lat = cos(pi() * $center_y/180.0);
-			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-		}
-		return 4374754 * $lat_adj;
+		return 39.3701 * degree2meter($center_y);
 	}
+}
+
+function degree2meter($center_y) {
+	if($center_y != 0.0){
+		$cos_lat = cos(pi() * $center_y/180.0);
+		$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+	}
+	return 111319 * $lat_adj;
 }
 
 function ie_check(){
@@ -471,6 +495,7 @@ function formatFlurstkennzALK($FlurstKennz){
 
 function tausenderTrenner($number){
 	if($number != ''){
+		$number = str_replace(',', '.', $number);
 		$explo = explode('.', $number);
 		$formated_number = number_format((float)$explo[0], 0, ',', '.');
 		if($explo[1] != '')$formated_number .= ','.$explo[1];
@@ -533,7 +558,7 @@ function transformCoordsSVG($path){
     }
   }
   $svgresult = 'M';
-  for($i = 1; $i < @count($newsvgcoords); $i++){
+  for($i = 1; $i < count_or_0($newsvgcoords); $i++){
     $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;
@@ -684,10 +709,10 @@ if(!function_exists('imagerotate')){
 function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$x = 12.099281283333;
 	#$y = 54.075214183333;
-  $point = ms_newPointObj();
+  $point = new PointObj();
 	$point->setXY($x,$y);
-	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
-  $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
+	$projFROM = new projectionObj("init=epsg:".$from_epsg);
+  $projTO = new projectionObj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
 }
@@ -1071,45 +1096,18 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	# 1. Methode über unzip (nur Linux)
-	$output = array();
+	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
 	$entries = NULL;
-	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
-	for($i = 3; $i < count($output)-2; $i++){
-  		$entries[] = array_pop(explode('   ', $output[$i]));
+	if ($dest_dir === false) {
+		$dest_dir = dirname($src_file);
 	}
-	if($entries != NULL){
-		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
-	}
-	# 2. Methode über php_zip Extension
-	else{
-	  if ($zip = zip_open($src_file)){
-	    if ($zip){
-	      $splitter = ($create_zip_name_dir === true) ? "." : "/";
-	      if ($dest_dir === false) $dest_dir = substr($src_file, 0, strrpos($src_file, $splitter))."/";
-	      @mkdir($dest_dir);
-	      while ($zip_entry = zip_read($zip)){
-	        $entries[] = zip_entry_name($zip_entry);
-	        $pos_last_slash = strrpos(zip_entry_name($zip_entry), "/");
-	        if ($pos_last_slash !== false){
-	          @mkdir($dest_dir.substr(zip_entry_name($zip_entry), 0, $pos_last_slash+1));
-	        }
-	        if (zip_entry_open($zip,$zip_entry,"r")){
-	          $file_name = $dest_dir.zip_entry_name($zip_entry);
-	          if ($overwrite === true || $overwrite === false && !is_file($file_name)){
-	            $fstream = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-							$fp = fopen($file_name, 'w');
-	            fwrite($fp, $fstream );
-	            fclose($fp);
-	            chmod($file_name, 0777);
-	          }
-	          zip_entry_close($zip_entry);
-	        }
-	      }
-	      zip_close($zip);
-	    }
-	  }
+	$zip = new ZipArchive;
+	if ($zip->open($src_file)) {
+		for ($i = 0; $i < $zip->numFiles; $i++) {
+			$entries[] = $zip->getNameIndex($i);
+		}
+		$zip->extractTo($dest_dir); 
+		$zip->close(); 
 	}
 	return $entries;
 }
@@ -1222,6 +1220,11 @@ function umlaute_umwandeln($name) {
 	$name = str_replace('U?', 'ue', $name);
 	$name = str_replace('O?', 'oe', $name);
 	$name = str_replace('ß', 'ss', $name);
+	return $name;
+}
+
+function sonderzeichen_umwandeln($name) {
+	$name = umlaute_umwandeln($name);
 	$name = str_replace('.', '', $name);
 	$name = str_replace(':', '', $name);
 	$name = str_replace('(', '', $name);
@@ -1242,7 +1245,7 @@ function umlaute_umwandeln($name) {
 	return $name;
 }
 
-function umlaute_umwandeln_reverse($name){
+function sonderzeichen_umwandeln_reverse($name){
   $name = str_replace('ae', 'ä', $name);
   $name = str_replace('ue', 'ü', $name);
   $name = str_replace('oe', 'ö', $name);
@@ -1665,38 +1668,38 @@ function emailcheck($email) {
 }
 
 function buildExpressionString($str) {
-  $intervalle=explode(';',$str);
-  $anzInt=count($intervalle);
-  if ($intervalle[$anzInt-1]=='') { $anzInt--; }
+  $intervalle = explode(';', $str);
+  $anzInt = count($intervalle);
+  if ($intervalle[$anzInt-1] == '') { $anzInt--; }
   # Beginne mit der Erstellung des Ausdrucks
-  $expr.='(';
+  $expr.= '(';
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
-  $grenzen=explode('-',$intervalle[0]);
+  $grenzen = explode('-', $intervalle[0]);
   # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
-  if (count($grenzen)==1) {
+  if (count($grenzen) == 1) {
     # Wenn ja, wird die erste einschränkung geschrieben.
-    $expr.='[ID]='.$grenzen[0];
+    $expr.= '[ID] = ' . $grenzen[0];
   }
   else {
     # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
-    $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+    $expr.='([ID] > '.$grenzen[0].' AND [ID] < ' . $grenzen[1] . ')';
   }
   # weiter geht es mit den nächsten Intervallen
-  for ($i=1;$i<$anzInt;$i++) {
+  for ($i = 1; $i < $anzInt; $i++) {
     # wieder Zerlegen in Anfang und Ende
-    $grenzen=explode('-',$intervalle[$i]);
-    if (count($grenzen)==1) {
+    $grenzen = explode('-', $intervalle[$i]);
+    if (count($grenzen) == 1) {
       # Es gibt nur einen Wert
-      $expr.=' OR [ID]='.$grenzen[0];
+      $expr.=' OR [ID] = ' . $grenzen[0];
     }
     else {
       # Es gibt Anfang und Ende im Intervall
-      $expr.=' OR ([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+      $expr.=' OR ([ID] > ' . $grenzen[0] . ' AND [ID] < ' . $grenzen[1] . ')';
     }
   }
   # Beenden des Ausdrucks
-  $expr.=')';
+  $expr .= ')';
   return $expr;
 }
 
@@ -1918,19 +1921,21 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
-	if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
-	if (is_array($params)) {
-		foreach($params AS $key => $value){
-			$str = str_replace('$'.$key, $value, $str);
+	if (strpos($str, '$') !== false) {
+		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
+		if (is_array($params)) {
+			foreach ($params AS $key => $value) {
+				$str = str_replace('$'.$key, $value, $str);
+			}
 		}
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		if (!is_null($user_id))							$str = str_replace('$USER_ID', $user_id, $str);
+		if (!is_null($stelle_id))						$str = str_replace('$STELLE_ID', $stelle_id, $str);
+		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
+		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
+		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
 	}
-	$str = str_replace('$current_date', date('Y-m-d'), $str);
-	$str = str_replace('$current_timestamp', date('Y-m-d G:i:s'), $str);
-	if (!is_null($user_id))							$str = str_replace('$user_id', $user_id, $str);
-	if (!is_null($stelle_id))						$str = str_replace('$stelle_id', $stelle_id, $str);
-	if (!is_null($hist_timestamp))			$str = str_replace('$hist_timestamp', $hist_timestamp, $str);
-	if (!is_null($language))						$str = str_replace('$language', $language, $str);
-	if (!is_null($scale))								$str = str_replace('$scale', $scale, $str);
 	return $str;
 }
 
@@ -2333,6 +2338,23 @@ function get_name_from_thump($thumb) {
 }
 
 /**
+ * Function return the most likely delimiter of $line
+ * @param string $line The line to test.
+ * @return string The detected delimiter.
+ */
+function detect_delimiter($line) {
+	$delimiters = [',', ';', "\t", '|', ':'];
+	$delimiter_counts = [];
+	foreach ($delimiters as $delimiter) {
+
+		$delimiter_counts[$delimiter] = substr_count($line, $delimiter);
+	}
+	// Find the delimiter with the highest count
+	$most_likely_delimiter = array_keys($delimiter_counts, max($delimiter_counts));
+	return $most_likely_delimiter[0];
+}
+
+/**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
 * Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
 * z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
@@ -2354,29 +2376,75 @@ function before_last($txt, $delimiter) {
 	return implode($delimiter , $parts);
 }
 
-function attributes_from_select($sql) {
-	include_once(WWWROOT. APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
-	$parser = new PHPSQLParser($sql, true);
-	$attributes = array();
-	foreach ($parser->parsed['SELECT'] AS $key => $value) {
-		$name = $alias = '';
-		if (
-			is_array($value['alias']) AND
-			array_key_exists('no_quotes', $value['alias']) AND
-			$value['alias']['no_quotes'] != ''
-		) {
-			$name = $value['alias']['no_quotes'];
-			$alias = $value['alias']['no_quotes'];
-		}
-		else {
-			$name = $alias = $value['base_expr'];
-		}
-		$attributes[$name] = array(
-			'base_expr' => $value['base_expr'],
-			'alias' => $alias
-		);
+/**
+ * Function return the inner part of the select in a mapserver data statement
+ * normaly looks like this:
+ * the_geom (select id, the_geom from schema.tabelle where true) using unique id using srid=25832
+ * Function extract from first select until last closing bracket.
+ * If no open pracket is before select like in this example:
+ * select id, the_geom from schema.tabelle where true, return $data as it is
+ * @param string $data Mapserver data statement
+ * @return String inner sql
+ */
+function get_sql_from_mapserver_data($data) {
+	$pos_select = stripos($data, 'select');
+	if (strpos(substr($data, 0, $pos_select), '(') === false) {
+		return $data;
 	}
-	return $attributes;
+	$pos_last_closing_bracket = strrpos($data, ')');
+	$data = substr($data, $pos_select, $pos_last_closing_bracket - $pos_select);
+	return $data;
+}
+
+/**
+ * Function return the alias of the first $schema_name.$table_name in from expression of $sql.
+ * Returns an empty string if $schema_name.$table_name not exists in $sql.
+ * Returns $table_name if $schema_name.$table_name exists but no alias for it.
+ * Befor parsing the sql all select expressions will be replaced by *
+ * @param string $sql The SQL-Statement to parse.
+ * @param string $schema_name The schema name of the table.
+ * @param string $table_name The table name.
+ * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
+ */
+function get_table_alias($sql, $schema_name, $table_name) {
+	include_once(WWWROOT . APPLVERSION . THIRDPARTY_PATH . 'PHP-SQL-Parser/src/PHPSQLParser.php');
+
+	// sql für parser aufbereiten, select ausdrücke durch * ersetzen.
+	$words = preg_split('/\s+/', $sql); // in Wörter zerhacken
+	$sql = '';
+	for ($i = count($words) - 1; $i > -1; $i--) {
+		$sql = $words[$i] . ' ' . $sql;
+		// sql auffüllen mit Wörtern der from - Klausel
+		if (strtolower($words[$i]) == 'from') {
+			// Schluss bei from select * davor, damit es ein valides sql wird
+			$sql = 'select * ' . $sql;
+			$i = -1; // Abbruch
+		}
+	};
+	$parser = new PHPSQLParser($sql, true);
+
+	// Extrahiere den from-Ausdruck der zu $schema.$table_name passt
+	$table_expression = array_filter(
+		$parser->parsed['FROM'],
+		function($from) use ($schema_name, $table_name) {
+			return $from['table'] == $schema_name . '.' . $table_name;
+		}
+	);
+
+	if (count($table_expression) == 0) {
+		// $schema_name.$table_name kommt nicht im $sql FROM vor
+		return '';
+	}
+
+	// $schema_name.$table kommt in FROM vor, nimmt den ersten
+	$table_expression = $table_expression[0];
+
+	if ($table_expression['alias']) {
+		return $table_expression['alias']['name']; // wenn es einen alias gibt
+	}
+	else {
+		return $table_name; // wenn es keinen gibt
+	}
 }
 
 function get_requires_options($sql, $requires) {
@@ -2486,7 +2554,7 @@ function sanitize(&$value, $type, $removeTT = false) {
 		} break;
 
 		case 'int_csv' : {
-			$value = explode(',', $value);
+			$value = explode(',', (string)$value);
 			foreach ($value AS &$single_value) {
 				sanitize($single_value, 'int');
 			}
@@ -2571,6 +2639,19 @@ function en_date($date_de) {
 	return date('Y-m-d', strtotime($date_de));
 }
 
+/**
+*	Convert English date format 2022-12-25
+*	to German date format 25.12.2022
+*/
+function de_date($date_en) {	
+	if (strlen($date_en) > 10) {
+		return date('d.m.Y G:i:s', strtotime($date_en));
+	}
+	else {
+		return date('d.m.Y', strtotime($date_en));
+	}
+}
+
 function layer_name_with_alias($name, $alias, $options = array()) {
 	$default_options = array(
 		'alias_first' => false,
@@ -2590,5 +2671,94 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 	else {
 		return $name . ($alias != '' ? $options['delimiter'] . $brace[$options['brace_type']][0] . $alias . $brace[$options['brace_type']][1] : '');
 	}
+}
+
+/**
+ * Function read all files recursively from a directory
+ * @param string $dir - The directory
+ * @return Array $files - The files in the directory and below
+ */
+function getAllFiles($dir) {
+	$files = [];
+
+	if (substr($dir, -1) != '/') {
+		$dir .= '/';
+	}
+
+	// Get all files and directories within the directory
+	$items = glob($dir . '*', GLOB_MARK);
+
+	foreach ($items AS $item) {
+		if (is_dir($item)) {
+			$files = array_merge($files, getAllFiles($item));
+		}
+		else {
+			$files[] = $item;
+		}
+	}
+
+	return $files;
+}
+
+function in_date_range($startzeiten, $endzeiten, $x) {
+	$num_start = count($startzeiten);
+	$num_ende = count($endzeiten);
+	if (
+		($num_start == 0 AND $num_ende == 0) OR
+		($num_start == 0 AND $num_ende > 0 AND $endzeiten[0] > $x) OR # vor dem Ende
+		($num_ende == 0 AND $num_start > 0 AND $startzeiten[$num_start - 1] < $x) # nach dem Anfang
+	) {
+		return true;
+	}
+
+	if ($num_start != $num_ende) {
+		return false;
+	}
+
+	for ($i = 0; $i < $num_start; $i++) {
+		if ($startzeiten[$i] <= $x AND $x <= $endzeiten[$i]) return true;
+	}
+
+	return false;
+}
+
+/**
+ * Function check if in $files exists files with any of $required extensions.
+ * Default is to check if all required shape files extensions exists in $files
+ * @param Array $files A list of filenames.
+ * @param Array $required (optional) A list of extensions.
+ */
+function required_shape_files_exists($files, $required = array('shp', 'shx', 'dbf')) {
+	$existing = array_intersect(
+		$required,
+		array_map(
+			function($file) {
+				return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+			},
+			$files
+		)
+	);
+
+	if ($required == $existing) {
+		return array(
+			'success' => true,
+			'msg' => 'Alle erforderlichen Dateien vorhanden.'
+		);
+	}
+	else {
+		$missing = array_diff($required, $existing);
+		return array(
+			'success' => false,
+			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
+		);
+	}
+}
+
+function set_href($text) {
+	if (strpos($text, ';http') !== false) {
+		$parts = explode(';http', $text);
+		$text = '<a href="http' . $parts[1] . '" target="Urheber" title="' . $parts[0] . '">' . $parts[0] .'</a>';
+	}
+	return $text;
 }
 ?>

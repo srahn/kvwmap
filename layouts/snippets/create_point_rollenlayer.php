@@ -16,7 +16,7 @@ function load(){
 
 function show(){
 	var x, y, label;
-	for(i = 0; i < <? echo @count($this->data_import_export->columns); ?>; i++){
+	for(i = 0; i < <? echo count_or_0($this->data_import_export->columns); ?>; i++){
 		if(document.getElementById('column'+i).value == 'x')x = true;
 		if(document.getElementById('column'+i).value == 'y')y = true;
 	}

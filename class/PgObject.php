@@ -37,6 +37,11 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
+
+	private $select;
+	private $from;
+	private $where;
+
 	function __construct($gui, $schema, $tableName) {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, false);
 		$this->debug = $gui->debug;
@@ -47,6 +52,8 @@ class PgObject {
 		$this->qualifiedTableName = $schema . '.' . $tableName;
 		$this->data = array();
 		$this->select = '*';
+		$this->from = $schema . '.' . $tableName;
+		$this->where = '';
 		$this->identifier = 'id';
 		$this->identifier_type = 'integer';
 		$this->identifiers = array(
@@ -60,6 +67,17 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+	}
+
+	/**
+	 * Dis function can be used to find if a function is called in static context
+	 */
+	public static function _isStatic() {
+		$backtrace = debug_backtrace();
+
+		// The 0th call is to _isStatic(), so we need to check the next
+		// call down the stack.
+		return $backtrace[1]['type'] == '::';
 	}
 
 	public static	function postgis_version($gui) {
@@ -123,11 +141,16 @@ class PgObject {
 		return $query;
 	}
 
-	/*
-	* Search for an record in the database by the given where clause
-	* @ return an array with all found object
-	*/
+	/**
+	 * Search for an record in the database by the given where clause
+	 * @param string $where
+	 * @param string $order?
+	 * @param string $select?
+	 * @param string $limit?
+	 * @return array PgObject An array with all found object
+	 */
 	function find_where($where, $order = NULL, $select = '*', $limit = NULL) {
+		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
 		$where = (empty($where) ? "true": $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
@@ -144,23 +167,23 @@ class PgObject {
 		";
 		$this->debug->show('find_where sql: ' . $sql, false);
 		$query = pg_query($this->database->dbConn, $sql);
-		$result = array();
+		$results = array();
 		while($this->data = pg_fetch_assoc($query)) {
-			$result[] = clone $this;
+			$results[] = clone $this;
 		}
-		return $result;
+		return $results;
 	}
 
 	/**
-		Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
-		additional it query and set the extents in epsg given in $ows_srs string
-		@params string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
-		e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
-		with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
-		@return array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
-		$this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
-		$this->extent['25832'] eg. contains the same extent in EPSG:25832
-	*/
+	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
+	 * additional it query and set the extents in epsg given in $ows_srs string
+	 * @param string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+	 * e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
+	 * with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
+	 * @return Array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
+	 * $this->extent contains the array of minx, miny, maxx, maxy in srs of geom_column
+	 * $this->extent['25832'] eg. contains the same extent in EPSG:25832
+	 */
 	function get_extent($ows_srs = '', $where = '') {
 		if ($where == '') {
 			$where = $this->get_id_condition(array($this->get($this->identifier)));
@@ -438,7 +461,7 @@ class PgObject {
 			WHERE
 				" . $this->identifier . " = {$quote}" . $this->get($this->identifier) . "{$quote}
 		";
-		#echo $sql; exit;
+		#echo $sql;
 		$this->debug->show('update sql: ' . $sql, false);
 		try {
 			pg_query($this->database->dbConn, $sql);
@@ -474,6 +497,31 @@ class PgObject {
 		$results = array();
 		while ($rs = pg_fetch_assoc($query)) {
 			$results[] = $rs;
+		}
+		return $results;
+	}
+
+	/**
+	 * 
+	 * Function searching for records in the database by the given sql params
+	 * @param array $params: Array with select, from, where and order parts of sql.
+	 * @return array $results: All found objects.
+	 */
+	function find_by_sql($params) {
+		$sql = "
+			SELECT
+				" . (!empty($params['select']) ? $params['select'] : '*') . "
+			FROM
+				" . (!empty($params['from']) ? $params['from'] : $this->schema . '.' . $this->tableName) . "
+			" . (!empty($params['where']) ? "WHERE " . $params['where'] : "") . "
+			" . (!empty($params['order']) ? "ORDER BY " . replace_semicolon($params['order']) : "") . "
+		";
+		// echo '<br>PgObject->find_by_sql with sql: ' . $sql;
+		$this->debug->show('PgObject find_by_sql sql: ' . $sql, false);
+		$query = pg_query($this->database->dbConn, $sql);
+		$results = array();
+		while ($this->data = pg_fetch_assoc($query)) {
+			$results[] = clone $this;
 		}
 		return $results;
 	}
@@ -591,13 +639,13 @@ class PgObject {
 		return $this->attribute_types;
 	}
 
-	/*
+	/**
 	* Query all child elementes of a table related over given fk_id
-	* @params $child_schema string - Name of the schema of child table
-	* @params $child_table string - Name of the table of child table
-	* @params $fkey_column string - Name of the column where the fkeys resists in child table
-	* @params $fk_id string - ID of the parent to filter the childs that belongs to the parent
-	* @return array(PgObject) - The childs that belongs to the parent over this fkey constraint
+	* @param string $child_schema - Name of the schema of child table
+	* @param string $child_table - Name of the table of child table
+	* @param string $fkey_column - Name of the column where the fkeys resists in child table
+	* @param string $fk_id - ID of the parent to filter the childs that belongs to the parent
+	* @return Array(PgObject) - The childs that belongs to the parent over this fkey constraint
 	*/
 	function find_childs($child_schema, $child_table, $fkey_column, $fk_id) {
 		$table = new PgObject($this->gui, $child_schema, $child_table);

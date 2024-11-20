@@ -122,10 +122,10 @@ class Notification extends MyObject {
 					(
 						m.stellen_filter IS NULL OR
 						m.stellen_filter = '' OR
-						concat(',', m.stellen_filter, ',') LIKE '%," . $gui->Stelle->id . ",%'
+						concat(', ', m.stellen_filter, ',') LIKE '%, " . $gui->Stelle->id . ",%'
 					)
 				",
-				'order' => "veroeffentlichungsdatum, id"
+				'order' => "id desc"
 			)
 		);
 		if ($notification->database->errormessage != '') {

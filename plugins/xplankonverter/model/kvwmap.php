@@ -123,10 +123,15 @@
 				$konvertierung = $konvertierung->find_by_id($GUI, 'id', $konvertierung_id);
 				//$GUI->debug->show('Trigger ' . $fired . ' ' . $event . ' konvertierung planart: ' . $konvertierung->get('planart') . ' plan planart: ' . $konvertierung->plan->get('planart'), false);
 				$konvertierung->set_status();
-
+				#echo '<script>console.log("' . print_r($GUI->formvars) . '")</script>';
 				# layer_schemaname needs to be an empty textfield in the layer definition
 				# 03.11.21 change from ... layer_schemaname;;;Text;;unknown;0' to ... layer_schemaname;;;Text;;text;0'
-				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
+				if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) ||
+				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || 
+				($GUI->formvars[$layer['Layer_ID'] . ';;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)
+				) {
+				#if (($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;unknown;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id) || ($GUI->formvars[$layer['Layer_ID'] . ';layer_schemaname;;;Text;;text;0'] == 'xplan_gmlas_tmp_' . $GUI->user->id)) {
 					# renames to xplan_gmlas_ + konvertierung_id to make schema permanent
 					//$konvertierung->rename_xplan_gmlas($GUI->user->id, $konvertierung_id);
 					$sql = "
@@ -308,6 +313,7 @@
 	$GUI->xplankonverter_validate_uploaded_zusammenzeichnungen = function($upload_file, $tmp_dir) use ($GUI) {
 		$success = false;
 		if (!file_exists($tmp_dir)) {
+			$deb_msg = '<br>Dir ' . $tmp_dir . ' angelegt.';
 			try {
 				mkdir($tmp_dir, 0775);
 			} catch (Exception $ex) {
@@ -319,6 +325,7 @@
 		}
 
 		try {
+			$deb_msg .= '<br>move ' . $upload_file['tmp_name'] . ' nach ' . $tmp_dir . $upload_file['name'];
 			move_uploaded_file($upload_file['tmp_name'], $tmp_dir . $upload_file['name']);
 		} catch (Exception $ex) {
 			return array(
@@ -336,6 +343,7 @@
 				);
 			}
 			$msg .= 'Extract ' . $tmp_dir . $upload_file['name'] . ' nach ' . $tmp_dir;
+
 			try {
 				$zip->extractTo($tmp_dir);
 			} catch (Exception $ex) {
@@ -365,29 +373,37 @@
 			);
 		}
 
-
 		#TODO: Hier kann man die hochgeladenen Datei ggf. noch umbenennen in Zusammenzeichnung.gml falls die anders heißt
 		# Aber wie rausbekommen wie die Zusammenzeichnung heißt. Vorerst bleibt es bei der Konvention dass die Datei
 		# Zusammenzeichnung.gml heißen muss.
 
-		$konvertierung = new Konvertierung($GUI); # Create empty Konvertierungsobjekt
+		$konvertierung = new Konvertierung($GUI, $GUI->formvars['planart']); # Create empty Konvertierungsobjekt
 
-		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . 'Zusammenzeichnung.gml');
+		$upload_validation_result = $konvertierung->validate_uploaded_files($tmp_dir);
+		if (!$upload_validation_result['success']) {
+			return $upload_validation_result;
+		}
+
+		$result_zusammenzeichnung = $konvertierung->xplanvalidator($tmp_dir . $konvertierung->config['plan_file_name']);
+
 		if (!$result_zusammenzeichnung['success']) {
 			return $result_zusammenzeichnung;
-      $msg = 'Zusammenzeichnung';
 		}
 
-		if (file_exists($tmp_dir . 'Einzelfassungen.gml')) {
-			rename($tmp_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
-		}
+		$msg = $konvertierung->config['title'];
 
-		if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
-			$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
-			if (!$result_geltungsbereiche['success']) {
-				return $result_geltungsbereiche;
+		if ($konvertierung->get('planart') == 'FP-Plan') {
+			if (file_exists($tmp_dir . $zip_dir . 'Einzelfassungen.gml')) {
+				rename($tmp_dir . $zip_dir . 'Einzelfassungen.gml', $tmp_dir . 'Geltungsbereiche.gml');
 			}
-			$msg .= ' und Geltungsbereiche';
+
+			if (file_exists($tmp_dir . 'Geltungsbereiche.gml')) {
+				$result_geltungsbereiche = $konvertierung->xplanvalidator($tmp_dir . 'Geltungsbereiche.gml');
+				if (!$result_geltungsbereiche['success']) {
+					return $result_geltungsbereiche;
+				}
+				$msg .= ' und Geltungsbereiche';
+			}
 		}
 		$msg .= ' valide.';
 
@@ -395,7 +411,7 @@
 		# Create Konvertierung and get konvertierung_id
 		# Bezeichnung wird später wenn die Zusammenzeichnung eingelesen wurde noch entsprechend der Zusammenzeichnung.gml aktualisiert.
 		$konvertierung_id = $konvertierung->create(
-			'Neue Zusammenzeichnung aus Datei ' . $upload_file['name'],
+			$GUI->konvertierung->config['title'] . ' aus Datei ' . $upload_file['name'],
 			$GUI->Stelle->epsg_code,
 			$GUI->user->rolle->epsg_code,
 			$GUI->formvars['planart'],
@@ -408,6 +424,7 @@
 
 		# move files from tmp to upload folder from konvertierung
 		rename($tmp_dir, $konvertierung->get_file_path('uploaded_xplan_gml'));
+		$msg .= '<br>Temporäre Dateien von ' . $tmp_dir . ' nach ' .  $konvertierung->get_file_path('uploaded_xplan_gml') . ' kopiert.';
 
 		$result = $konvertierung->save_validation_report('Zusammenzeichnung', $result_zusammenzeichnung['report']);
 		# Der Validierungsreport der Geltungsbereiche wird nicht gespeichert, weil es nur einen Report pro Konvertierung geben kann und für die Geltungsbereiche
@@ -416,6 +433,7 @@
     if (!$result['success']) {
       return $result;
     }
+		$msg .= $result['msg'];
 
 		return array(
 			'success' => true,
@@ -437,8 +455,8 @@
 		if (! file_exists($reindexed_xplan_gml_path)) {
 			mkdir($reindexed_xplan_gml_path, 0777);
 		}
-		$read_handle = fopen($uploaded_xplan_gml_path . 'Zusammenzeichnung.gml', "r");
-		$write_handle = fopen($reindexed_xplan_gml_path . 'Zusammenzeichnung.gml', "w");
+		$read_handle = fopen($uploaded_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "r");
+		$write_handle = fopen($reindexed_xplan_gml_path . $GUI->konvertierung->config['plan_file_name'], "w");
 		$GUI->xplan_gml_ids = array();
 		if ($read_handle) {
 			while (($line = fgets($read_handle)) !== false) {
@@ -454,7 +472,7 @@
 		else {
 			return array(
 				'success' => false,
-				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}Zusammenzeichnung.gml zum Umbenennen der gml_id's."
+				'msg' => "Fehler beim Öffnen der Datei ${uploaded_xplan_gml_path}${$GUI->konvertierung->config['plan_file_name']} zum Umbenennen der gml_id's."
 			);
 		}
 		return array(
@@ -463,43 +481,154 @@
 		);
 	};
 
+	// MARK: create_geoweb_service
 	$GUI->xplankonverter_create_geoweb_service = function($xplan_layers, $ows_onlineresource) use ($GUI) {
 		global $admin_stellen;
 
-		$GUI->class_load_level = 2;
-		$GUI->loadMap('DataBase');
-
-		# Setze Metadaten
-		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
-		$bb = $admin_stelle->MaxGeorefExt;
-		$GUI->map->set('name', umlaute_umwandeln(PUBLISHERNAME));
-		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
-		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
-		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('d.m.Y'));
-		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
-		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
-		$GUI->map->web->set('header', 'templates/header.html');
-		$GUI->map->web->set('footer', 'templates/footer.html');
-
+		# Frage xplan_layer_with_content ab
 		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
 		$result = $xp_plan->get_layers_with_content($xplan_layers);
 		if (! $result['success']) {
 			return $result;
 		}
+
+		# Lade das MapObjekt (nur mit $LayerIds)
+		$GUI->class_load_level = 2;
+		$GUI->formvars['only_layer_ids'] = implode(', ', array_map(function($layer) { return $layer['id']; }, $result['layers_with_content']));
+		$GUI->service_layernames = array_keys($result['layers_with_content']); // set layernames array for output in view show_service_data.php
+		$start_stelle_id = $GUI->Stelle_ID; // speichern für späteren Gebrauch
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$GUI->Stelle_ID = $admin_stelle->id; // setze Stelle_ID von Adminstelle zur Erzeugung des MapFiles der Adminstelle
+		$GUI->loadMap('DataBase', array(), true); // Layer name immer aus Attribute Name
+
+		# Setze globale Metadaten im MapObjekt des Dienstes der Adminstelle
+		#$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+		$bb = $admin_stelle->MaxGeorefExt;
+		$GUI->map->set('name', sonderzeichen_umwandeln(PUBLISHERNAME));
+		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
+		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		#$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht ' . $GUI->konvertierung->config['genitiv_plural']);
+		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_contactorganization", $admin->stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+		$GUI->map->setMetaData("ows_contactperson", $admin->stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+		$GUI->map->setMetaData("ows_contactposition", $admin->stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+		$GUI->map->setMetaData("ows_contactelectronicmailaddress", $admin->stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+		$GUI->map->setMetaData("ows_contactvoicetelephone", $admin->stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+		$GUI->map->setMetaData("ows_contactfacsimiletelephone", $admin->stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+		$GUI->map->setMetaData("ows_stateorprovince", $admin->stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+		$GUI->map->setMetaData("ows_address", $admin->stelle->ows_contactaddress ?: OWS_ADDRESS);
+		$GUI->map->setMetaData("ows_postcode", $admin->stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+		$GUI->map->setMetaData("ows_city", $admin->stelle->ows_contactcity ?: OWS_CITY);
+		$GUI->map->setMetaData("ows_country", OWS_COUNTRY);
+		$GUI->map->web->set('header', 'templates/header.html');
+		$GUI->map->web->set('footer', 'templates/footer.html');
+		# Setze Metadaten der Layer
+		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
+			$layer = $GUI->map->getLayer($i);
+			$layer->set('header', 'templates/' . $layer->name . '_head.html');
+			$layer->set('template', 'templates/' . $layer->name . '_body.html');
+			# Extent mit Ausdehnung von adminstelle überschreiben
+			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+
+			$layer_id = $layer->getMetadata('kvwmap_layer_id');
+			$layerObj = Layer::find_by_id($GUI, $layer_id);
+			if (!$layerObj) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+				);
+			}
+			if ($layerObj->get('write_mapserver_templates') == 'generic') {
+				# Set generic Data sql for layer
+				$result = $layerObj->get_generic_data_sql();
+				if ($result['success']) {
+					$layer->set('data', $result['data_sql']);
+				}
+				else {
+					$result['msg'] = 'Fehler bei der Erstellung der Map-Datei in Funktion get_generic_data_sql! ' . $result['msg'];
+					return $result;
+				}
+			}
+			$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layer->data));
+			if (strpos($layer->data, 'xplankonverter.konvertierungen k') !== false) {
+				$layer->set('data', str_ireplace(' WHERE ', ' WHERE (', $layer->data));
+				$layer->set('data', str_ireplace(') as foo using unique', ') AND k.veroeffentlicht) AS foo using unique', $layer->data)); 
+			}
+		}
+
+		$GUI->Stelle_ID = $start_stelle_id; // setze Stelle_ID zurück auf die ID der Stelle die diese Funktion aufgerufen hat.
+		$geoweb_service_updated_at = Date('Y-m-d H:i:s');
+		return array(
+			'success' => true,
+			'mapfile' => $GUI->konvertierung->config['mapfile_name'],
+			'geoweb_service_updated_at' => $geoweb_service_updated_at
+		);
+	};
+
+	$GUI->xplankonverter_create_geoweb_service_alt = function($xplan_layers, $ows_onlineresource) use ($GUI) {
+		global $admin_stellen;
+
+		$GUI->class_load_level = 2;
+		$GUI->loadMap('DataBase');
+
+		$GUI->xlog->write('Setze Metadaten im MapObjekt des Landesdienstes.');
+
+		$admin_stelle = new Stelle($admin_stellen[0], $GUI->database);
+		$bb = $admin_stelle->MaxGeorefExt;
+		$GUI->map->set('name', sonderzeichen_umwandeln(PUBLISHERNAME));
+		$GUI->map->extent->setextent($bb->minx, $bb->miny, $bb->maxx, $bb->maxy);
+		$GUI->map->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->write_xlog('create_geoweb_service Landesdienst, set ows_extent: ' . $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+		$GUI->map->setMetaData("ows_title", $admin_stelle->ows_title);
+		$GUI->map->setMetaData("ows_abstract", $admin_stelle->ows_abstract . ' Letzte Aktualisierung: ' . date('m.Y') . ' (letzte Aktualisierung des landesweiten Dienstes, nicht der einzelnen Zusammenzeichnungen der Flächennutzungspläne)');
+		$GUI->map->setMetaData("ows_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_service_onlineresource", $ows_onlineresource);
+		$GUI->map->setMetaData("ows_contactorganization", $admin->stelle->ows_contactorganization ?: OWS_CONTACTORGANIZATION);
+		$GUI->map->setMetaData("ows_contactperson", $admin->stelle->ows_contactperson ?: OWS_CONTACTPERSON);
+		$GUI->map->setMetaData("ows_contactposition", $admin->stelle->ows_contactposition ?: OWS_CONTACTPOSITION);
+		$GUI->map->setMetaData("ows_contactelectronicmailaddress", $admin->stelle->ows_contactelectronicmailaddress ?: OWS_CONTACTELECTRONICMAILADDRESS);
+		$GUI->map->setMetaData("ows_contactvoicetelephone", $admin->stelle->ows_contactvoicephone ?: OWS_CONTACTVOICETELEPHONE);
+		$GUI->map->setMetaData("ows_contactfacsimiletelephone", $admin->stelle->ows_contactfacsimile ?: OWS_CONTACTFACSIMILETELEPHONE);
+		$GUI->map->setMetaData("ows_stateorprovince", $admin->stelle->ows_contactadministrativearea ?: OWS_STATEORPROVINCE);
+		$GUI->map->setMetaData("ows_address", $admin->stelle->ows_contactaddress ?: OWS_ADDRESS);
+		$GUI->map->setMetaData("ows_postcode", $admin->stelle->ows_contactpostalcode ?: OWS_POSTCODE);
+		$GUI->map->setMetaData("ows_city", $admin->stelle->ows_contactcity ?: OWS_CITY);
+		$GUI->map->setMetaData("ows_country", OWS_COUNTRY);
+		$GUI->map->web->set('header', 'templates/header.html');
+		$GUI->map->web->set('footer', 'templates/footer.html');
+
+		$xp_plan = new XP_Plan($GUI, $GUI->formvars['planart']);
+	
+		$result = $xp_plan->get_layers_with_content($xplan_layers);
+		if (! $result['success']) {
+			return $result;
+		}
+
 		$GUI->service_layers = $result['layers_with_content'];
-
 		$GUI->service_layernames = array_keys($GUI->service_layers);
-		#echo '<br>pk service_layernames: ' . print_r($GUI->service_layernames, true);
-
+		$GUI->xlog->write('service_layernames: ' . implode(', ' . $GUI->service_layer_names));
 		$layers_to_remove = array();
 
 		for ($i = 0; $i < $GUI->map->numlayers; $i++) {
 			$layer = $GUI->map->getLayer($i);
+			#$GUI->xlog->write('gui map layer: ' . $layer->name);	
 			if (in_array($layer->name, $GUI->service_layernames)) {
 				$layer->set('header', 'templates/' . $layer->name . '_head.html');
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
-				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+				# Extent mit Ausdehnung von adminstelle überschreiben
+				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($GUI, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
+
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
 					$result = $layerObj->get_generic_data_sql();
@@ -511,12 +640,16 @@
 						return $result;
 					}
 				}
+				else {
+					$layer->set('data', str_replace('< 9999 OR', '> 0 OR', $layer->data));
+				}
 			}
 			else {
 				$GUI->map->removeLayer($i);
 				$i--;
-			}
+			}	
 		}
+
 		return array(
 			'success' => true,
 			'mapfile' => MAPFILENAME . '.map'
@@ -534,7 +667,12 @@
 		$pg_object = new PgObject($GUI, 'xplankonverter', 'plan_services');
 
 		$plan_object = new XP_Plan($GUI, $GUI->formvars['planart']);
-		$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
+		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
+			$plan_object->get_extent(OWS_SRS, 'zusammenzeichnung'); # Pläne mit Attribut zusammenzeichnung = true
+		}
+		else {
+			$plan_object->get_extent(OWS_SRS); # Alle Pläne in Tabelle der Planart
+		}
 		$plan_service = $pg_object->find_by('planart', $GUI->formvars['planart']);
 
 		if (! $plan_service) {
@@ -558,13 +696,26 @@
 		$md->set('date_title', 'Datum');
 		$md->set('date_de', date('d.m.Y', $current_time));
 		$md->set('id_cite_date', date('Y-m-d', $current_time));
+		if ($GUI->konvertierung->get('planart') == 'FP-Plan') {
+			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Zusammenzeichnung von Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '. Die Umringe der Änderungspläne sind im Layer Geltungsbereiche zusammengefasst.';
+		}
+		else {
+			$abstract_zusatz = ' Es handelt sich um einen Gebrauchsdienst der Planelementen mit je einem Layer pro XPlanung-Klasse. Das ' . ucfirst($md->get('date_title')) . " der letzten Änderung ist " . $md->get('date_de') . '.';
+		}
+
+		$md->set('id_abstract', array(
+			'dataset' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'viewservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+			'downloadservice' => $admin_stelle->ows_abstract . $abstract_zusatz,
+		));
 		$md->set('version', floatval(implode('.', array_slice(explode('/', XPLAN_NS_URI), -2))));
 		$md->set('extents', $plan_object->extents);
-		$md->set('service_layer_name', umlaute_umwandeln($admin_stelle->get('Bezeichnung')));
+		$md->set('service_layer_name', sonderzeichen_umwandeln($admin_stelle->get('Bezeichnung')));
 		$md->set('onlineresource', URL . 'ows/fplaene?');
 		$md->set('dataset_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Datensatz.png');
 		$md->set('viewservice_browsegraphic', $md->get('onlineresource') . "Service=WMS&amp;Request=GetMap&amp;Version=1.1.0&amp;Layers=" . $plan_object->tableName . "&amp;FORMAT=image/png&amp;SRS=EPSG:" . $md->get('stellendaten')['epsg_code'] . "&amp;BBOX=" . implode(',', $md->get('extents')[$md->get('stellendaten')['epsg_code']]) . "&amp;WIDTH=300&amp;HEIGHT=300");
 		$md->set('downloadservice_browsegraphic', URL . APPLVERSION . 'custom/graphics/Vorschau_Downloadservice.png');
+		$md->set('geographicIdentifier', '');
 
 		$metaDataCreator = new MetaDataCreator($md);
 		return array(

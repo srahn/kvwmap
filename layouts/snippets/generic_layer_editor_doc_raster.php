@@ -37,8 +37,6 @@
 		
 </script>
 
-<div id="layer" align="left" onclick="remove_calendar();">
-<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
 <? if($this->formvars['embedded_subformPK'] == '' AND $this->new_entry != true){ ?>
 <table width="100%" border="0" cellpadding="0" cellspacing="0">
 	<tr>
@@ -64,8 +62,17 @@
 </table>
 <?
 		}
+
+		if ($this->formvars['overwrite_layer_name'] != '') {
+			$layer_name = $this->formvars['overwrite_layer_name']; ?>
+			<input type="hidden" value="<? echo $this->formvars['overwrite_layer_name']; ?>" name="overwrite_layer_name"><?
+		}
+		else {
+			$layer_name = $layer['Name_or_alias'];
+		}
+
   	$doit = false;
-	  $anzObj = @count($layer['shape']);
+	  $anzObj = count_or_0($layer['shape']);
 		if ($anzObj > 0) {
 			$this->found = 'true';
 			$k = 0;
@@ -78,10 +85,12 @@
 		}
 	  if($doit == true){
 ?>
-<table border="0" cellspacing="0" cellpadding="2">
-	<tr>
-		<td>
-			<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
+<div id="layer" align="left" onclick="remove_calendar();">
+	<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" onchange="activate_save_button(this.closest('#layer').parentElement, '<? echo $layer['Layer_ID']; ?>');" name="changed_<? echo $layer['Layer_ID']; ?>">
+	<table border="0" cellspacing="0" cellpadding="2">
+		<tr>
+			<td>
+				<div style="<? if($this->new_entry != true)echo 'max-width: 735px;'; ?> display: flex; flex-wrap: wrap; align-items: flex-start">
 <?
 	$hover_preview = true;
 	$checkbox_names = '';
@@ -241,7 +250,7 @@
 						echo '</td><td '.get_td_class_or_style(array($layer['shape'][$k][$layer['attributes']['style']], 'gle_attribute_value')).'><div id="formelement">';
 						echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname);
 						if($layer['attributes']['privileg'][$j] >= '0' AND !($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld')){
-							$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
+							$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].';'.$layer['attributes']['type'][$j].';'.$layer['attributes']['saveable'][$j].'|';
 						}
 		  		}
 		  		else {
@@ -250,7 +259,7 @@
 		  			$geomtype = $layer['attributes']['geomtype'][$layer['attributes']['name'][$j]];
 		  			$dimension = $layer['attributes']['dimension'][$j];
 		  			$privileg = $layer['attributes']['privileg'][$j];
-		  			$this->form_field_names .= $layer['Layer_ID'].';'.$layer['attributes']['real_name'][$layer['attributes']['name'][$j]].';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].'|';
+		  			$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';'.$layer['attributes']['form_element_type'][$j].';'.$layer['attributes']['nullable'][$j].'|';
 		  		}
 ?>
 						</div>
@@ -507,7 +516,7 @@
 
 <?
 
-	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 
@@ -519,6 +528,6 @@
 <?
   }
   else {
-  	# nix machen
+  	$this->noMatchLayers[$layer['Layer_ID']] = $layer_name;
   }
 ?>

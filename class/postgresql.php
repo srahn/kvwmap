@@ -45,6 +45,7 @@ class pgdatabase {
 	var $version = POSTGRESVERSION;
 	var $connection_id;
 	var $error;
+	var $dbName;
 
 	function __construct() {
 		global $debug;
@@ -88,14 +89,22 @@ class pgdatabase {
 			$this->connection_id = $connection_id;
 			$connection_string = $this->get_connection_string();
 		}
-		$this->dbConn = pg_connect($connection_string, $flag);
+		try {
+			$this->dbConn = pg_connect($connection_string, $flag);
+		}
+		catch (Exception $e) {
+			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
+				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; })) . '<br>Exception: ' . $e;
+			return false;
+		}
+
 		if (!$this->dbConn) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
 				. implode(' ' , array_filter(explode(' ', $connection_string), function($part) { return strpos($part, 'password') === false; }));
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -134,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -188,7 +197,7 @@ class pgdatabase {
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
 			SET datestyle TO 'German';
 			";
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret = $this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
   }
@@ -198,11 +207,31 @@ class pgdatabase {
     return pg_close($this->dbConn);
   }
 
+	function get_schemata($user_name) {
+		$schemata = array();
+		$sql = "
+			SELECT
+				schema_name
+			FROM
+			  information_schema.schemata
+			WHERE
+				schema_owner = '" . $user_name . "'
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret['success']){
+			while($row = pg_fetch_assoc($ret[1])){
+				$schemata[] = $row['schema_name'];
+			}
+		}
+		return $schemata;
+	}
+
 	function get_tables($schema) {
 		$tables = array();
 		$sql = "
 			SELECT
 			  ('{$schema}.' || table_name)::regclass::oid AS oid,
+				table_schema AS schema_name,
 			  table_name AS name
 			FROM
 			  information_schema.tables
@@ -211,14 +240,152 @@ class pgdatabase {
 				table_name NOT LIKE 'enum_%'
 			ORDER BY table_name
 		";
-
 		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($row = pg_fetch_assoc($ret[1])){
+		if ($ret['success']) {
+			while ($row = pg_fetch_assoc($ret[1])){
 				$tables[] = $row;
 			}
 		}
 		return $tables;
+	}
+
+	/**
+	 * Return an array with information about the table $schema_name.$table_name in
+	 * database represented by $connection_id. The attributes of the array are:
+	 * success true if the request was successful else false.
+	 * table_name The requested $table_name.
+	 * schema_name The requested $schema_name.
+	 * oid_column The name of the column that is a primary column or can be used as a unique column for mapserver.
+	 * geom_column The first geometry column.
+	 * Datentyp The MapServer layer datatyp that fits the geometry column type. If no geometry column found return the type for a MS_LAYER_QUERY.
+	 * epsg_code The EPSG-Code of the geometry column found.
+	 */
+	function get_table_infos($connection_id, $schema_name, $table_name) {
+		$table_infos = array(
+			'success' => false,
+			'err_msg' => ''
+		);
+		$pgdatabase = new pgdatabase();
+		if ($pgdatabase->open($connection_id)) {
+			$oid_column = $pgdatabase->get_pk($schema_name, $table_name);
+			if ($oid_column == '') {
+				$oid_column = $pgdatabase->get_id($schema_name, $table_name);
+			}
+			$geom = $pgdatabase->get_geom_column($schema_name, $table_name);
+			# Abfragen des Datentyps
+			# Abfragen des epsg_codes
+			$table_infos = array(
+				'success' => true,
+				'table_name' => $table_name,
+				'schema_name' => $schema_name,
+				'oid_column' => $oid_column,
+				'geom_column' => $geom['column'],
+				'Datentyp' =>  $geom['Datentyp'],
+				'epsg_code' => $geom['epsg_code']
+			);
+		}
+		else {
+			$table_infos['err_msg'] = 'Die Datenbank mit der connection_id: ' . $connection_id . ' konnte nicht geöffent werden.';
+		}
+		return $table_infos;
+	}
+
+	/**
+	 * Return the name of the first column found that is valid to be used as an id
+	 * Search for a column of type serial,
+	 * Search for a column with name id, gid, fid, oid, ogc_fid or gml_id and if all values are unique
+	 */
+	function get_id($schema_name, $table_name) {
+		$id_column = '';
+		return $id_column;
+	}
+
+	/**
+	 * Return the name of the primary key column of the table $schema_name.$table_name
+	 */
+	function get_pk($schema_name, $table_name) {
+		$pk_column = '';
+		$sql = "
+			SELECT
+				pg_attribute.attname,
+				format_type(pg_attribute.atttypid, pg_attribute.atttypmod)
+			FROM pg_index, pg_class, pg_attribute, pg_namespace
+			WHERE
+				pg_class.oid = '" . $schema_name . "." . $table_name . "'::regclass AND
+				indrelid = pg_class.oid AND
+				nspname = '" . $schema_name . "' AND
+				pg_class.relnamespace = pg_namespace.oid AND
+				pg_attribute.attrelid = pg_class.oid AND
+				pg_attribute.attnum = any(pg_index.indkey) AND
+				indisprimary
+		";
+		$ret = $this->execSQL($sql, 4, 0);
+		if ($ret['success']) {
+			if (pg_num_rows($ret[1]) > 0) {
+				$row = pg_fetch_assoc($ret[1]);
+				$pk_column = $row['attname'];
+			}
+		}
+		return $pk_column;
+	}
+
+	/**
+	 * Return an array with following information about first geometry column in table $schema_name.$table_name
+	 * 	column Name of the geometry column
+	 *  Datentyp MapServer datatype of the layer witch have that table in data
+	 *  epsg_code EPSG-Code of the geometry column
+	 * ToDo: Query these information from the table and geometry column
+	 */
+	function get_geom_column($schema_name, $table_name) {
+		$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
+		$geom = array(
+			'column' => '',
+			'Datentyp' => 5,
+			'epsg_code' => null
+		);
+		$sql = "
+			SELECT
+				*
+			FROM
+				" . $schema_name . '.' . $table_name . "
+		";
+		$fields_from_select = $this->getFieldsfromSelect($sql);
+		if ($fields_from_select['success']) {
+			if ($fields_from_select[1]['the_geom']) {
+				$geometry_column = $fields_from_select[1]['the_geom'];
+				$the_geom_id = $fields_from_select[1]['the_geom_id'];
+				$geom = array(
+					'column' => $geometry_column,
+					'Datentyp' => $geom_types[$fields_from_select[1][$the_geom_id]['geomtype']]
+				);
+				$sql = "
+					SELECT
+						srid
+					FROM
+						geometry_columns 
+					WHERE 
+						f_table_schema = '" . $schema_name . "' AND 
+						f_table_name = '" . $table_name . "' AND
+						f_geometry_column = '" . $geometry_column . "'
+				";
+				$ret = $this->execSQL($sql, 4, 0);
+				if ($ret['success']) {
+					$rs = pg_fetch_assoc($ret[1]);
+					$geom['epsg_code'] = $rs['srid'];
+				}
+				else {
+					$err_msg = 'Fehler bei der Abfrage der srid der Geometriespalte ' . $geometry_column . ': ' . $ret[1];
+				}
+			}
+			else {
+				# Keine Geometriespalte in Tabelle gefunden.
+			}
+		}
+		else {
+			$err_msg = 'Fehler bei der Abfrage der Tabellenfelder mit der Funktion getFieldsfromSelect. ' . $ret[1];
+		}
+
+		return $geom;
 	}
 
 	/*
@@ -360,8 +527,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
@@ -369,11 +536,14 @@ FROM
   }
 
 	/**
-		Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
-		For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
-		and in correct order.
+	*	Execute the sql. Executes the sql as prepared query if $prepared_params has been passed.
+	*	For prepared queries the sql string must have the same amount of placeholder as elements in prepared_params array
+	*	and in correct order.
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
+		if (!$this->dbConn) {
+			echo '<p>pgconn: ' . $this->dbConn; exit;
+		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
 		$strip_context = true;
@@ -410,8 +580,7 @@ FROM
 			if ($query === false) {
 				$this->error = true;
 				$ret['success'] = false;
-        $ret['sql'] = $sql;
-				# erzeuge eine Fehlermeldung;
+				$ret['sql'] = $sql;
 				$last_error = pg_last_error($this->dbConn);
 				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
 					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
@@ -510,13 +679,18 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
 				# mache nichts, denn die Fehlermeldung wird unterdrückt
 			}
 			else {
+				if (strpos(strtolower($this->gui->formvars['export_format']), 'json') !== false) {
+					header('Content-Type: application/json; charset=utf-8');
+					echo utf8_decode(json_encode($ret));
+					exit;
+				}
 				# gebe Fehlermeldung aus.
 				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:', $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
 				$this->gui->add_message($ret['type'], $ret['msg']);
@@ -624,6 +798,20 @@ FROM
 		return $table_alias_names;
 	}
 
+	function get_target_entries($parse_tree){
+		$target_entry_parts = explode("\n      {TARGETENTRY", $parse_tree);
+		#$statement_begin = get_first_word_after($parse_tree, "\n   :stmt_location");
+		array_shift($target_entry_parts);
+		foreach ($target_entry_parts as $target_entry_part){
+			# Spaltennummer in der Tabelle
+			$target_entry['col_num'] = get_first_word_after($target_entry_part, "\n      :resorigcol");
+			# Beginn im Statement (funktioniert nicht zuverlässig z.B. bei cast(...))
+			#$target_entry['attribute_begin'] = get_first_word_after($target_entry_part, "\n         :location") - $statement_begin;
+			$target_entries[] = $target_entry;
+		}
+		return $target_entries;
+	}
+
 	function getFieldsfromSelect($select, $assoc = false, $pseudo_realnames = false) {
 		$err_msgs = array();
 		$error_reporting = error_reporting();
@@ -632,7 +820,7 @@ FROM
 		ini_set("pgsql.ignore_notice", '0');
 		ini_set("display_errors", '0');
 		$error_list = array();
-		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line, $error_context) use (&$error_list) {
+		$myErrorHandler = function ($error_level, $error_message, $error_file, $error_line) use (&$error_list) {
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
@@ -654,21 +842,23 @@ FROM
 		error_reporting($error_reporting);
 		ini_set("display_errors", '1');
 		if ($ret['success']) {
-			$query_plan = $error_list[0];
-			$table_alias_names = $this->get_table_alias_names($query_plan);
-			$field_plan_info = explode("\n      :resno", $query_plan);
+			$parse_tree = $error_list[0];
+			$table_alias_names = $this->get_table_alias_names($parse_tree);
+			$target_entries = $this->get_target_entries($parse_tree);
 			if ($pseudo_realnames) {
-				$select_attr = attributes_from_select($select);
+				include_once(CLASSPATH . 'sql.php');
+				$sql_object = new SQL($select);
+				$select_attr = $sql_object->get_attributes();
 			}
 			for ($i = 0; $i < pg_num_fields($ret[1]); $i++) {
 				# Attributname
 				$fields[$i]['name'] = $fieldname = pg_field_name($ret[1], $i);
 				
 				# Spaltennummer in der Tabelle
-				$col_num = get_first_word_after($field_plan_info[$i+1], ':resorigcol');				
+				$col_num = $target_entries[$i]['col_num'];
 				
 				# Tabellen-oid des Attributs
-				$table_oid = pg_field_table($ret[1], $i, true);			
+				$table_oid = pg_field_table($ret[1], $i, true);
 
 				# wenn das Attribut eine Tabellenspalte ist -> weitere Attributeigenschaften holen
 				if ($table_oid > 0) {
@@ -688,7 +878,7 @@ FROM
 					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					
+					// Frage die attribute informationen der Tablle falls noch nicht geschehen
 					if(!is_array($attribute_infos[$schemaname][$tablename])){
 						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
 					}
@@ -705,8 +895,12 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL) {
+							$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL) {
+							$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						}
 					}
 					# realer Name der Spalte in der Tabelle
 					$fields[$i]['real_name'] = $attr_info['name'];
@@ -735,7 +929,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid]); $j++){
+						for($j = 0; $j < count_or_0($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -781,6 +975,7 @@ FROM
 		if (count($err_msgs) > 0) {
 			# Wenn Fehler auftraten liefer nur die Fehler zurück
 			$ret[0] = 1;
+			$ret['success'] = false;
 			$ret[1] = implode('<br>', $err_msgs);
 		}
 		return $ret;
@@ -851,14 +1046,31 @@ FROM
 				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
-		#echo '<br><br>' . $sql;
+		#echo '<br>SQL zur Abfrage der Attributinformationen aus der Datenbank: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
-		if($ret[0]==0){
-			while($attr_info = pg_fetch_assoc($ret[1])){
-				if($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval'){$attr_info['nullable'] = '0';}else{$attr_info['nullable'] = '1';}
-        if($attr_info['numeric_precision'] != '')$attr_info['length'] = $attr_info['numeric_precision'];
-        else $attr_info['length'] = $attr_info['character_maximum_length'];
-	      if($attr_info['decimal_length'] == ''){$attr_info['decimal_length'] = 'NULL';}	      
+		if ($ret[0] == 0) {
+			while ($attr_info = pg_fetch_assoc($ret[1])) {
+				if ($attr_info['nullable'] == 'f' AND substr($attr_info['default'], 0, 7) != 'nextval') {
+					$attr_info['nullable'] = '0';
+				}
+				else {
+					$attr_info['nullable'] = '1';
+				}
+        if ($attr_info['numeric_precision'] != '') {
+					$attr_info['length'] = $attr_info['numeric_precision'];
+				}
+				else {
+					$attr_info['length'] = $attr_info['character_maximum_length'];
+				}
+				if ($attr_info['decimal_length'] == '') {
+					$attr_info['decimal_length'] = 'NULL';
+				}
+				/*
+				if (strpos($attr_info['type_name'], 'xp_spezexternereferenzauslegung') !== false) {
+					$attr_info['type_name'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type_name']);
+					$attr_info['type'] = str_replace('xp_spezexternereferenzauslegung', 'xp_spezexternereferenz', $attr_info['type']);
+				}
+				*/
 				$attributes[$attr_info['ordinal_position']] = $attr_info;
 			}
 		}
@@ -1015,44 +1227,7 @@ FROM
 		}
 		return $geom_type;
 	}
-  
-  function eliminate_star($query, $offset){
-		$query = str_replace([chr(13), chr(10)], [' ', ''], $query);
-  	if(substr_count(strtolower($query), ' from ') > 1){
-  		$whereposition = strrpos($query, ' WHERE ');
-  		$withoutwhere = substr($query, 0, $whereposition);
-  		$fromposition = strrpos($withoutwhere, ' FROM ');
-  	}
-  	else{
-  		$whereposition = strpos(strtolower($query), ' where ');
-  		if($whereposition){
-  			$withoutwhere = substr($query, 0, $whereposition);
-  		}
-  		else{
-  			$withoutwhere = $query;
-  		}
-  		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-  	}
-    $select = substr($query, $offset, $fromposition-$offset);
-    $from = substr($query, $fromposition);
-    $column = get_select_parts($select);
-    for($i = 0; $i < count($column); $i++){
-      if(strpos(trim($column[$i]), '*') === 0 OR strpos($column[$i], '.*') !== false){
-        $sql = "SELECT ".$column[$i]." ".$from." LIMIT 0";
-        $ret = $this->execSQL($sql, 4, 0);
-        if($ret[0]==0){
-        	$tablename = str_replace('*', '', trim($column[$i]));
-          $columns = $tablename.pg_quote(pg_field_name($ret[1], 0));
-          for($j = 1; $j < pg_num_fields($ret[1]); $j++){
-            $columns .= ', ' . $tablename.pg_quote(pg_field_name($ret[1], $j));
-          }
-          $query = str_replace(trim($column[$i]), $columns, $query);
-        }
-      }
-    }
-    return $query;
-  }
-	
+  	
   function pg_table_constraints($table_oid){
   	if($table_oid != ''){
 			$constraints = array();
@@ -1129,7 +1304,6 @@ FROM
     else {
       # Abfrage fehlerfrei
       # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_assoc($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -1140,8 +1314,12 @@ FROM
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+			$rect = rectObj(
+      	$rs['minx'],
+				$rs['miny'],
+      	$rs['maxx'], 
+				$rs['maxy']
+			);
       $ret[1]=$rect;
     }
     return $ret;
@@ -1152,12 +1330,13 @@ FROM
     $sql.=" FROM (select st_extent(st_transform(st_geomfromtext('".$wkt."', ".$fromsrid."), ".$tosrid.")) as geom) as foo";
     $ret=$this->execSQL($sql,4, 0);
     if($ret[0] == 0){
-      $rect= ms_newRectObj();
       $rs=pg_fetch_assoc($ret[1]);
-      $rect->minx=$rs['minx']-30; 
-			$rect->miny=$rs['miny']-30;
-      $rect->maxx=$rs['maxx']+30; 
-			$rect->maxy=$rs['maxy']+30;
+      $rect = rectObj(
+				$rs['minx']-30,
+				$rs['miny']-30,
+      	$rs['maxx']+30,
+				$rs['maxy']+30
+			);
       return $rect;
     }
   }
@@ -1477,7 +1656,7 @@ FROM
   
   function getALBData($FlurstKennz, $without_temporal_filter = false, $oid_column){		
 		$sql ="
-			SELECT distinct 
+			SELECT  
 				f." . $oid_column . "::text as oid, 
 				f.gml_id, 
 				0 as hist_alb, 
@@ -1498,7 +1677,9 @@ FROM
 				zeitpunktderentstehung::date as entsteh, 
 				a.kennzeichen as antragsnummer, 
 				f.beginnt, 
-				f.endet 
+				f.endet,
+				gem.endet as gem_endet,
+				g.endet as g_endet 
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
@@ -1521,7 +1702,7 @@ FROM
 		else {
 			$sql.= " 
 				UNION 
-				SELECT distinct 
+				SELECT  
 					NULL, 
 					f.gml_id, 
 					1 as hist_alb, 
@@ -1542,7 +1723,9 @@ FROM
 					zeitpunktderentstehung::date as entsteh, 
 					'' as antragsnummer, 
 					f.beginnt, 
-					f.endet 
+					f.endet,
+					gem.endet as gem_endet,
+					g.endet as g_endet 
 				FROM 
 					alkis.ax_historischesflurstueckohneraumbezug as f 
 					LEFT JOIN alkis.ax_gemarkung AS gem ON f.gemarkungsnummer=gem.gemarkungsnummer AND f.land = gem.land 
@@ -1550,7 +1733,7 @@ FROM
 					LEFT JOIN alkis.ax_gemeinde g ON f.gemeindezugehoerigkeit_gemeinde=g.gemeinde AND ppg.kreis = g.kreis 
 				WHERE 
 					f.flurstueckskennzeichen = '" . $FlurstKennz . "'
-				order by endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
+				order by endet DESC, gem_endet DESC, g_endet DESC";		# damit immer die jüngste Version eines Flurstücks gefunden wird
 		}		
     #echo $sql.'<br><br>';
     $queryret=$this->execSQL($sql, 4, 0);
@@ -1628,6 +1811,7 @@ FROM
 		$sql.= $this->build_temporal_filter(array('g', 'f', 'l', 's'));
     #echo $sql;
     $queryret=$this->execSQL($sql, 4, 0);
+		$Strassen = [];
     if ($queryret[0]) {
       $ret[0]=1;
       $ret[1]=$queryret[1];
@@ -1923,7 +2107,7 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
+		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
@@ -2516,7 +2700,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst = @count($flurstkennz);
+    $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {

@@ -60,7 +60,7 @@ class LayerStyle extends MyObject {
 		return $icondef;
 	}
 
-	function get_styledef($datentyp = 0) {
+	function get_styledef($datentyp = 0, $layer_opacity = 1) {
 		switch ($datentyp) {
 			case 1 : {
 				$layerdef = (Object) array(
@@ -78,7 +78,7 @@ class LayerStyle extends MyObject {
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
 					'fill'				=> ($this->get('color') != '' AND $this->get('color') != '-1 -1 -1'),
 					'fillColor'		=> (($this->get('color') == '' OR $this->get('color') == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $this->get('color') . ')'),
-					'fillOpacity'	=> ($this->get('opacity') == '' ? 0.6 : $this->get('opacity') / 100)
+					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
 				);
 			} break;
 			default : {
@@ -90,7 +90,7 @@ class LayerStyle extends MyObject {
 					'color'				=> 'rgb(' . $this->get('outlinecolor') . ')',
 					'fill'				=> ($this->get('color') != '' AND $this->get('color') != '-1 -1 -1'),
 					'fillColor'		=> (($this->get('color') == '' OR $this->get('color') == '-1 -1 -1') ? '#0000ff' : 'rgb(' . $this->get('color') . ')'),
-					'fillOpacity'	=> ($this->get('opacity') == '' ? 0.6 : $this->get('opacity') / 100)
+					'fillOpacity'	=> ($this->get('opacity') == '' ? $layer_opacity / 100 : $this->get('opacity') / 100)
 				);
 			}
 		}

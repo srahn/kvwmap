@@ -1,5 +1,5 @@
 <?php
-$language = (in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese')) ? $_REQUEST['language'] : 'german');
+$language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
 include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
 $errors = array();
 
@@ -107,7 +107,7 @@ if (is_logout($GUI->formvars)) {
 		logout();
 	}
 	else {
-		$GUI->add_message('info', $strLoggedOutAlready);
+		#$GUI->add_message('info', $strLoggedOutAlready);
 		$GUI->debug->write('Ist schon logged out.', 4, $GUI->echo);
 	}
 	$GUI->formvars['go'] = '';
@@ -115,12 +115,14 @@ if (is_logout($GUI->formvars)) {
 
 # login
 $show_login_form = false;
+$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 if (is_logged_in()) {
 	$GUI->debug->write('Ist angemeldet an: ' . $_SERVER['HTTP_HOST'] . $_SERVER['SCRIPT_URL'], 4, $GUI->echo);
 	if ($_SESSION['login_name'] == '') {
 		$GUI->debug->write('login_name in Session ist leer', 4, $GUI->echo);
 		logout();
 		$show_login_form = true;
+		$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 		$go = 'login';
 	}
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
@@ -130,12 +132,14 @@ if (is_logged_in()) {
 		$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
 		logout();
 		$show_login_form = true;
+		$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 		$go = 'login';
 	}
 	else {
 		$GUI->debug->write('Nutzerdaten gelesen von: ' . $GUI->user->login_name, 4, $GUI->echo);
 	}
 	# login case 1
+	$GUI->debug->write('login case 1', 4, $GUI->echo);
 }
 else {
 	header('logout: true');		// damit ajax-Requests das auch mitkriegen
@@ -155,13 +159,16 @@ else {
 			$GUI->user->stelle_id = $GUI->formvars['gast']; # set new stelle
 			set_session_vars($GUI->formvars);
 			# login case 2
+			$GUI->debug->write('login case 2', 4, $GUI->echo);
 		}
 		else {
 			$GUI->debug->write('Hat kein width und height. Frage sie ab.', 4, $GUI->echo);
 			# // ToDo: frage browser width und height ab.
 			$show_login_form = true;
+			$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 			$go = 'login_browser_size';
 			# Test case 3
+			$GUI->debug->write('login case 3', 4, $GUI->echo);
 		}
 	}
 	else { # ist keine gastanmeldung
@@ -207,27 +214,32 @@ else {
 							$GUI->user->num_login_failed 		= $GUI->formvars['num_failed'] = $nutzer->get('num_login_failed');
 							$GUI->user->login_locked_until 	= $nutzer->get('login_locked_until');
 							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
-#							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
+              #							sleep($GUI->formvars['num_failed'] * $GUI->formvars['num_failed']);
 						}
 						if ($GUI->login_failed_reason == 'login_is_locked') {
 							$nutzer = Nutzer::find_by_login_name($GUI, $GUI->formvars['login_name']);
 							$GUI->user->language = ($nutzer->get_rolle() ? $nutzer->rolle->get('language') : '');
 						}
 						$show_login_form = true;
+						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 						$go = 'login_failed';
 						# login case 7
+						$GUI->debug->write('login case 7', 4, $GUI->echo);
 					}
 				}
 				else {
 					$GUI->add_message('error', 'Fehler bei der Abfrage des Nutzers. ' . $GUI->database->mysqli->error);
 					$show_login_form = true;
+					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 					$go = 'login_failed';
 					# login case 7 b
+					$GUI->debug->write('login case 7b', 4, $GUI->echo);
 				}
 			}
 			else {
 				$GUI->add_message('error', 'Fehler beim Eintragen des SHA1 Passwortes. ' . $GUI->database->mysqli->error);
 				$show_login_form = true;
+				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 				$go = 'login_failed';
 			};
 		}
@@ -273,40 +285,50 @@ else {
 							unset($GUI->formvars['Namenszusatz']);
 							unset($GUI->formvars['phon']);
 							# login case 9
+							$GUI->debug->write('login case 9', 4, $GUI->echo);
 						}
 						else {
 							$GUI->add_message('error', 'Datenbankfehler beim Anlegen des Nutzers.<br>' . $result['msg']);
 							$show_login_form = true;
+							$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 							$go = 'login_registration';
 							# login case 10
+							$GUI->debug->write('login case 10', 4, $GUI->echo);
 						}
 					}
 					else {
 						$GUI->debug->write('Registrierung ist nicht valid.', 4, $GUI->echo);
 						$GUI->add_message('error', $new_registration_err . '<br>Die Registrierung ist nicht erfolgreich.<br>Versuchen Sie es erneut oder lassen Sie sich erneut einladen.');
 						$show_login_form = true;
+						$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 						$go = 'login_registration';
 						# login case 11
+						$GUI->debug->write('login case 11', 4, $GUI->echo);
 					}
 				}
 				else {
 					$GUI->debug->write('Es wurde noch kein neues Passwort für die Registrierung vergeben.', 4, $GUI->echo);
 					$show_login_form = true;
+					$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 					$go = 'login_registration';
-					# login case 10
+					# login case 12
+					$GUI->debug->write('login case 12', 4, $GUI->echo);
 				}
 			}
 			else { # keine Registrierung
 				$GUI->debug->write('Es ist keine Registrierung.', 4, $GUI->echo);
 				$show_login_form = true;
+				$GUI->debug->write('$show_login_form = ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 				$go = 'login';
 				# login case 8
+				$GUI->debug->write('login case 8', 4, $GUI->echo);
 			} # ende keine Registrierung
 		} # ende keine Anmeldung
 	} # ende keine gastanmeldung
 } # ende nicht angemeldet
 
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10
+$GUI->debug->write('$show_login_form is ' . ($show_login_form ? 'true' : 'false') . ', Zeile: ' . __LINE__, 4, $GUI->echo);
 if (!$show_login_form) {
 	if (is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
@@ -337,10 +359,11 @@ if (!$show_login_form) {
 			$GUI->user->updateStelleID($GUI->Stelle->id);
 			$_SESSION['stelle_angemeldet'] = true;
 			# login case 15
+			$GUI->debug->write('login case 15', 4, $GUI->echo);
 		}
 		else {
-			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'] . '<br>', 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
-			if($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
+			$GUI->debug->write('Zugang zur Stelle ' . $GUI->Stelle->id . ' für Nutzer fehlgeschlagen weil: ' . $permission['reason'], 4, ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.' ? true : $GUI->echo));
+			if ($permission['reason'] == 'Der Nutzer ist keiner aktiven Stelle zugeordnet.') {
 				exit;
 			}
 
@@ -349,12 +372,14 @@ if (!$show_login_form) {
 				$GUI->Fehlermeldung .= ' Der Zugang zur URL: ' . URL . ' ist mit dem Login oder in der Stelle nicht möglich. Melden Sie sich über einen Browser an dieser Adresse an und aktualisieren Sie ggf. Ihr Passwort oder passen Sie die URL an.';
 				$go = 'OWS_Exception';
 				# login case 13
+				$GUI->debug->write('login case 13', 4, $GUI->echo);
 			}
 			else {
-				$GUI->debug->write('Kein OWS Request.', 4);
+				$GUI->debug->write('Kein OWS Request.', 4, $GUI->echo);
 
-				if ($permission['reason'] == 'password expired') {
+				if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
 					logout();
+					$GUI->debug->write('Formvars nach logout in line ' . __LINE__ . ': ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 					if (is_new_password($GUI->formvars)) {
 						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
@@ -362,10 +387,13 @@ if (!$show_login_form) {
 						if (is_new_password_valid($new_password_err)) {
 							$GUI->debug->write('Neues Password ist valid.', 4, $GUI->echo);
 							update_password($GUI);
-							$GUI->debug->write('Set Session', 4, $GUI->echo);
+							$GUI->debug->write('Set Session mit vars: ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 							session_start();
 							set_session_vars($GUI->formvars);
+							$GUI->debug->write('Setze stelle_id: ' . $GUI->Stelle->id . ' für user ' . $GUI->user->id, 4, $GUI->echo);
+							$GUI->user->stelle_id = $GUI->Stelle->id;
 							# login case 17
+							$GUI->debug->write('login case 17', 4, $GUI->echo);
 						}
 						else { # new password is not ok
 							$GUI->debug->write('Neues Password ist nicht valid. Zurück zur Anmeldung mit Fehlermeldung.', 4, $GUI->echo);
@@ -373,27 +401,37 @@ if (!$show_login_form) {
 							$show_login_form = true;
 							$go = 'login_new_password';
 							# login case 6
+							$GUI->debug->write('login case 6', 4, $GUI->echo);
 						}
 					}
 					else {
-						$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
-						if ($GUI->formvars['format'] == 'json') {
-							header('Content-Type: application/json; charset=utf-8');
-							$json = json_encode(
-								array(
-									'success' => false,
-									'err_msg' => $permission['errmsg']
-								)
-							);
-							echo utf8_decode($json);
-							exit;
+						if ($permission['reason'] == 'password_expired' AND is_temporary_password_expired($GUI->user)) {
+							$GUI->add_message('error', 'Dieser Link zur Passwortvergabe ist nicht mehr gültig. Bitte fordern Sie bei Ihrem Administrator einen neuen Link an.');
+							$show_login_form = true;
+							$go = 'login';
 						}
 						else {
-							$GUI->add_message('error', $permission['errmsg']);
+							$GUI->debug->write('Passwort ist abgelaufen. Frage neues ab.', 4, $GUI->echo);
+							if ($GUI->formvars['format'] == 'json') {
+								header('Content-Type: application/json; charset=utf-8');
+								$json = json_encode(
+									array(
+										'success' => false,
+										'err_msg' => $permission['errmsg']
+									)
+								);
+								echo utf8_decode($json);
+								exit;
+							}
+							else {
+								$GUI->add_message('error', $permission['errmsg']);
+							}
+							$GUI->formvars['Stelle_id'] = $GUI->Stelle->id;
+							$show_login_form = true;
+							$go = 'login_new_password';
+							# login case 19
+							$GUI->debug->write('login case 19', 4, $GUI->echo);
 						}
-						$show_login_form = true;
-						$go = 'login_new_password';
-						# login case 19
 					}
 				}
 				else {
@@ -403,6 +441,7 @@ if (!$show_login_form) {
 					$go = 'Stelle_waehlen';
 					$GUI->formvars['csrf_token'] = $_SESSION['csrf_token'];
 					# login case 14
+					$GUI->debug->write('login case 14', 4, $GUI->echo);
 				}
 			}
 		}
@@ -418,6 +457,7 @@ if (is_logged_in()) {
 	) {
 		$GUI->debug->write('Agreement ist akzeptiert.', 4, $GUI->echo);
 		# login case 4
+		$GUI->debug->write('login case 4', 4, $GUI->echo);
 	}
 	else {
 		$GUI->debug->write('Agreement wurde noch nicht akzeptiert.', 4, $GUI->echo);
@@ -426,6 +466,7 @@ if (is_logged_in()) {
 				$GUI->debug->write('Nutzer bestätigt Agreement. Trage das ein.', 4, $GUI->echo);
 				$GUI->user->update_agreement_accepted($GUI->formvars['agreement_accepted']);
 				# login case 18
+				$GUI->debug->write('login case 18', 4, $GUI->echo);
 			}
 			else {
 				$GUI->debug->write('Agreement wurde abgelehnt, logout.', 4, $GUI->echo);
@@ -434,6 +475,7 @@ if (is_logged_in()) {
 				$show_login_form = true;
 				$go = 'login';
 				# login case 16
+				$GUI->debug->write('login case 16', 4, $GUI->echo);
 			}
 		}
 		else {
@@ -454,6 +496,7 @@ if (is_logged_in()) {
 else {
 	$GUI->debug->write('is_logged_in liefert false', 4, $GUI->echo);
 }
+
 # $show_login_form = true nach login cases 3, 6, 7, 8, 9, 10, 11
 if ($show_login_form) {
 	$GUI->debug->write('Zeige Login-Form', 4, $GUI->echo);
@@ -503,8 +546,8 @@ else {
 			if ($user_epsg['minx'] != '') {
 				// Koordinatensystem ist räumlich eingegrenzt
 				if ($GUI->Stelle->epsg_code != 4326) {
-					$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-					$projTO = ms_newprojectionobj("init=epsg:4326");
+					$projFROM = new projectionObj("init=epsg:".$GUI->Stelle->epsg_code);
+					$projTO = new projectionObj("init=epsg:4326");
 					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO); // max. Stellenextent wird in 4326 transformiert
 				}
 				// Vergleich der Extents und ggfs. Anpassung
@@ -512,14 +555,14 @@ else {
 				if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
 				if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
 				if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
-				$projFROM = ms_newprojectionobj("init=epsg:4326");
-				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:4326");
+				$projTO = new projectionObj("init=epsg:".$GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 			}
 			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
-				$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->Stelle->epsg_code);
-				$projTO = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:" . $GUI->Stelle->epsg_code);
+				$projTO = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
 			}
 		}
@@ -533,7 +576,7 @@ else {
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
-		for($i = 0; $i < @count($rollenlayerset); $i++){
+		for($i = 0; $i < count_or_0($rollenlayerset); $i++){
 			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}
@@ -597,6 +640,11 @@ function is_logout($formvars) {
 }
 
 function is_logged_in() {
+	GLOBAL $GUI;
+	$GUI->debug->write('Function is_logged_in()', 4, $GUI->echo);	
+	$GUI->debug->write('SESSION hat key angemeldet: ' . array_key_exists('angemeldet', $_SESSION), 4, $GUI->echo);
+	$GUI->debug->write("SESSION['angemeldet']: " . $_SESSION['angemeldet'], 4, $GUI->echo);
+	$GUI->debug->write("SESSION['login_name']: " . $_SESSION['login_name'], 4, $GUI->echo);
 	return (
 		array_key_exists('angemeldet', $_SESSION) AND
 		$_SESSION['angemeldet'] === true AND
@@ -669,8 +717,7 @@ function get_permission_in_stelle($GUI) {
 
 			if (CHECK_CLIENT_IP) {
 				$GUI->debug->write('Es wird geprüft ob IP-Adressprüfung in der Stelle durchgeführt werden muss.', 4);
-
-				if ($GUI->Stelle->checkClientIpIsOn()) {
+				if ($GUI->Stelle->check_client_ip) {
 					$GUI->debug->write('IP-Adresse des Clients wird in dieser Stelle geprüft.', 4);
 
 					if ($GUI->user->clientIpIsValide(get_remote_ip()) == false) {
@@ -685,20 +732,20 @@ function get_permission_in_stelle($GUI) {
 		else  {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
-			$reason = 'password expired';
+			$reason = $expiration_info;
 			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
 			switch ($expiration_info) {
 				case 'password_age_expired' : {
 					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
 				} break;
-				case 'password_age_expired' : {
+				case 'password_expired' : {
 					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
 				} break;
 				default : {
 					$errmsg .= 'abgelaufen.';
 				}
 			}
-			$errmsg .= ' Geben Sie im Portal ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
+			$errmsg .= ' Geben Sie jetzt ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
 		}
 	}
 	else {
@@ -739,6 +786,10 @@ function is_password_expired($user, $stelle) {
 		}
 	}
 	return 'not_expired';
+}
+
+function is_temporary_password_expired($user){
+	return (((time() - strtotime($user->password_setting_time)) / 3600) > 72);
 }
 
 function is_registration($formvars) {

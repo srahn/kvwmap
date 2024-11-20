@@ -259,7 +259,7 @@ class Nachweis {
       while($rs=pg_fetch_array($ret[1])){
 				$art[] = $rs['art'];
       }
-			if (@count($art) > 0) {
+			if (count_or_0($art) > 0) {
 				$fp = fopen($pfad.'readme.txt', 'w');
 				fwrite($fp, 'Diese Dokumentarten wurden bei der Berechnung der Flurstückszuordnung und des Gesamtpolygons nicht berücksichtigt:'.chr(10).chr(10));
 				fwrite($fp, implode(chr(10), array_unique($art)));
@@ -454,8 +454,6 @@ class Nachweis {
     }
     else {
       # Abfrage fehlerfrei
-      # Erzeugen eines RectObject
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
       if ($rs['maxx']-$rs['minx']==0) {
@@ -466,8 +464,12 @@ class Nachweis {
         $rs['maxy']=$rs['maxy']+1;
         $rs['miny']=$rs['miny']-1;        
       }
-      $rect->minx=$rs['minx']; $rect->miny=$rs['miny'];
-      $rect->maxx=$rs['maxx']; $rect->maxy=$rs['maxy'];
+      $rect = rectObj(
+        $rs['minx'],
+        $rs['miny'],        
+        $rs['maxx'],
+        $rs['maxy']
+      );
       $ret[1]=$rect;
     }
     return $ret;
@@ -972,7 +974,7 @@ class Nachweis {
 		$stelle_id = $explosion[1];
 		$n = 'n';
 		if($order==''){
-			$order="n.flurid, n.stammnr, n.datum";
+			$order="gemarkung, flur, n.stammnr, n.datum";
 		}
 		$order_rissnummer1 = "(regexp_matches(coalesce(n.rissnummer, ''), '^\D*'))[1]";
 		$order_rissnummer2 = "NULLIF(regexp_replace(n.rissnummer, '\D', '', 'g'), '')::bigint";
@@ -1073,6 +1075,8 @@ class Nachweis {
 					SELECT distinct " .
 						($this->lenris_plugin? 'cn.client_nachweis_id, c.email, ' : "n.id as client_nachweis_id, '" . NACHWEISE_EMAIL . "' as email, ") . "
 						n.*,
+            substr(flurid::text, 1, 6) as gemarkung, 
+            substr(flurid::text, 7, 3) as flur,
 						st_astext(st_multi(st_transform(n.the_geom, ".$this->client_epsg."))) AS wkt_umring,
 						v.name AS vermst, 
 						h.id as hauptart, 
@@ -1141,7 +1145,7 @@ class Nachweis {
 						if($rs['link_datei'] != '')$rs['dokument_path']='../Nachweise/'.$rs['flurid'].'/'.$this->buildNachweisNr($rs[NACHWEIS_PRIMARY_ATTRIBUTE], $rs[NACHWEIS_SECONDARY_ATTRIBUTE]).'/'.$rs['hauptart_abk'].'/'.basename($rs['link_datei']);
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente=@count($nachweise);
+          $this->erg_dokumente=count_or_0($nachweise);
           $this->Dokumente=$nachweise;
         }
       } break;
@@ -1158,7 +1162,7 @@ class Nachweis {
           # Suchparameter sind gültig
           # Suche nach individueller Nummer
           #echo '<br>Suche nach individueller Nummer.';
-          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+          $sql ="SELECT DISTINCT ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei,n. format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM ";
 					if($gemarkung != '' AND $flur_thematisch == 0){
 						$sql.=" alkis.pp_flur as flur, ";
@@ -1272,7 +1276,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente = @count($nachweise);
+            $this->erg_dokumente = count_or_0($nachweise);
             $this->Dokumente=$nachweise;
           }
         }
@@ -1290,7 +1294,7 @@ class Nachweis {
           # Suche mit Suchpolygon
           #echo '<br>Suche mit Suchpolygon.';
           $this->debug->write('Abfragen der Nachweise die das Polygon schneiden',4);
-					$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+					$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.id, n.flurid, substr(n.flurid::text, 1, 6) as gemarkung, substr(n.flurid::text, 7, 3) as flur, n.blattnummer, n.datum, n.vermstelle, n.gueltigkeit, n.link_datei, n.format, n.stammnr, n.fortfuehrung, n.rissnummer, n.bemerkungen, n.bearbeiter, n.zeit, n.erstellungszeit, n.bemerkungen_intern, n.geprueft, n.art, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
           $sql.=" FROM nachweisverwaltung.n_nachweise AS n";
 					$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
           $sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";					
@@ -1326,7 +1330,7 @@ class Nachweis {
             while ($rs=pg_fetch_assoc($ret[1])) {
               $nachweise[]=$rs;
             }
-            $this->erg_dokumente = @count($nachweise);
+            $this->erg_dokumente = count_or_0($nachweise);
             $this->Dokumente=$nachweise;      
           }
         }
@@ -1336,7 +1340,7 @@ class Nachweis {
         # Suche nach Antragsnummer
         # echo '<br>Suche nach Antragsnummer.';
         $this->debug->write('Abfragen der Nachweise die zum Antrag gehören',4);
-				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*,v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
+				$sql ="SELECT distinct ".$order_rissnummer.", NULLIF(regexp_replace(n.blattnummer, '\D', '', 'g'), '')::bigint, n.*, substr(flurid::text, 1, 6) as gemarkung, substr(flurid::text, 7, 3) as flur, v.name AS vermst, h.id as hauptart, n.art AS unterart, d.art AS unterart_name";
         $sql.=" FROM nachweisverwaltung.n_nachweise2antraege AS n2a, nachweisverwaltung.n_nachweise AS n";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_vermstelle v ON CAST(n.vermstelle AS integer)=v.id ";
 				$sql.=" LEFT JOIN nachweisverwaltung.n_dokumentarten d ON n.art = d.id";
@@ -1372,7 +1376,7 @@ class Nachweis {
           while ($rs=pg_fetch_assoc($ret[1])) {
             $nachweise[]=$rs;
           }
-          $this->erg_dokumente = @count($nachweise);
+          $this->erg_dokumente = count_or_0($nachweise);
           $this->Dokumente=$nachweise;      
         }
       } break;
@@ -1398,7 +1402,7 @@ class Nachweis {
         while ($rs=pg_fetch_array($queryret[1])) {
           $ergebnis[]=$rs['nachweis_id'];
         }
-        $this->nachweisanz = @count($ergebnis);
+        $this->nachweisanz = count_or_0($ergebnis);
         $this->nachweise_id=$ergebnis;
       }
       else {
@@ -1705,11 +1709,14 @@ class Festpunkte {
       $ret[1]='<br>Fehler bei der Abfrage der Datenbank'.$ret[1];
     }
     else {
-      $rect= ms_newRectObj();
       # Abfragen und zuordnen der Koordinaten der Box
       $rs=pg_fetch_array($ret[1]);
-      $xmin=intval($rs['xmin']); $xmax=intval($rs['xmax']);
-      $ymin=intval($rs['ymin']); $ymax=intval($rs['ymax']);
+      $rect = rectObj(
+        intval($rs['xmin']),
+        intval($rs['ymin']),        
+        intval($rs['xmax']),
+        intval($rs['ymax'])
+      );
       # Aufweiten des Anzeigefensters, wenn nur nach einen Punkt gesucht wurde
       $weite=20;
       if ($xmax-$xmin==0) {

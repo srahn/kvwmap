@@ -91,7 +91,7 @@
 
       # Bildung der Textposition zur SVG-Ausgabe
       $point_teil=strrpos($GUI->formvars['wkt_textposition'],'(')+1;
-      $point_paar=substr($GUI->formvars['wkt_textposition'],$point_teil, @count($point_teil)-2);
+      $point_paar=substr($GUI->formvars['wkt_textposition'],$point_teil, count_or_0($point_teil)-2);
       $point_xy=explode(' ',$point_paar);
       $GUI->formvars['loc_x']=$point_xy[0];
       $GUI->formvars['loc_y']=$point_xy[1];
@@ -111,6 +111,8 @@
 			'bodenrichtwertnummer' => 'int',
 			'oertliche_bezeichnung' => 'text',
 			'bodenrichtwert' => 'float',
+      'bodenrichtwert_qualitaetsstichtag' => 'float',
+      'qualitaetsstichtag' => 'text',
 			'brwu' => 'float',
 			'brws' => 'float',
 			'brwb' => 'float',
@@ -122,7 +124,9 @@
 			'ergaenzende_nutzung' => 'text',
 			'bauweise' => 'text',
 			'geschosszahl' => 'text',
+      'ogeschosszahl' => 'text',
 			'grundflaechenzahl' => 'text',
+      'wgeschossflaechenzahl' => 'text',
 			'geschossflaechenzahl' => 'text',
 			'baumassenzahl' => 'text',
 			'flaeche' => 'text',

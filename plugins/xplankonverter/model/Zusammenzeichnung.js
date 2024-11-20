@@ -1,22 +1,29 @@
 class Zusammenzeichnung {
-  constructor(id = null, planart, csrf_token) {
+  constructor(
+    id = null,
+    planart,
+    csrf_token,
+    config
+  ) {
+    this.config = config; console.log(config);
     this.xplan_version = '5.4';
+    // MARK: process definition
     this.process = {
       upload_zusammenzeichnung: {
         nr: 1,
-        msg: 'Hochladen und Validieren der Zusammenzeichnung auf den Server',
+        msg: `Hochladen und Validieren ${this.config.genitiv} auf den Server`,
         description: 'Die Datei wird auf den Server hochgeladen und temporär abgelegt.<br>\
         Die ZIP-Datei wird entpackt und geprüft ob die notwendigen Dateien enthalten sind.<br>\
         Dann werden die Dateien an den XPlan-Validator der XPlanung-Leitstelle gesendet.<br>\
-        Wenn die Validierung keinen Fehler liefert, wird eine Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>\
+        Wenn die Validierung keinen Fehler liefert, wird ein Konvertierungsobjekt in der Datenbank angelegt und es geht weiter mit dem nächsten Schritt.<br>\
         Im Fehlerfall bekommen Sie eine Fehlermeldung und einen Link auf den Fehlerbericht.<br>\
-        Sie müssten dann Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen Ihrer Zusammenzeichnung starten.'
+        Sie müssen in Folge Ihre Dateien entsprechend des Fehlerberichtes korrigieren und können einen erneuten Versuch zum Hochladen Ihrer Zusammenzeichnung starten.'
       },
       import_zusammenzeichnung: {
         nr: 2,
         msg: 'Importieren der GML-Datei in die Portaldatenbank',
         description: 'Die Zusammenzeichnung wird in die Postgres-Datenbank mit dem Programm ogr2ogr eingelesen.<br>\
-        Danach wird geprüft ob es in der Datenbank schon einen Plan gibt mit der gleichen gml-id.<br>\
+        Danach wird geprüft ob es in der Datenbank schon einen Plan mit der gleichen gml-id gibt.<br>\
         Wenn ja, abbrechen und im nächsten Schritt die gml-ids in der Zusammenzeichnung ändern.<br>\
         Wenn nicht, wird das temporär angelegte Schema umbenannt und der Plan und der Bereich angelegt sowie die Datei mit den Geltungsbereichen eingelesen.<br>\
         War das erfolgreich, werden die Geometrien in die Tabelle der Geltungsbereiche für die Konvertierung übernommen.'
@@ -30,15 +37,15 @@ class Zusammenzeichnung {
       convert_zusammenzeichnung: {
         nr: 4,
         msg: `Konvertierung der Plandaten in die Version ${this.xplan_version}`,
-        description: `Die Fachdaten der eingelesenen Zusammenzeichnung werden nun in die entsprechenden Tabellen übernommen.<br>\
-        Dabei erfolgt das mapping zwischen dem Import-Datenmodell von ogr2ogr in das XPlanung-Datenmodell des xplankonverters.<br>\
-        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.\
+        description: `Die Fachdaten der eingelesenen Zusammenzeichnung werden nun in die entsprechenden Tabellen übernommen.<br>
+        Dabei erfolgt das mapping zwischen dem Import-Datenmodell von ogr2ogr in das XPlanung-Datenmodell des xplankonverters.<br>
+        Bei der Konvertierung wird auch auf die Version ${this.xplan_version} gewechselt.
         `
       },
       gml_generieren: {
         nr: 5,
         msg: 'Erzeugen der GML-Datei in Version 5.4',
-        description: `In diesem Schritt wird eine neue XPlan-GML Datei in der Version ${this.xplan_version} auf den Server geschrieben.<br>\
+        description: `In diesem Schritt wird eine neue XPlan-GML Datei in der Version ${this.xplan_version} auf den Server geschrieben.<br>
         Diese kann später vom Nutzer heruntergeladen werden. Der Downloadlink befindet sich in dem Abschnitt Dokumente in der Ansicht der Zusammenzeichnung.`
       },
       create_geoweb_service: {
@@ -72,14 +79,14 @@ class Zusammenzeichnung {
         msg: 'Prüfen ob sich alle Objekte vorhandenen Planzeichenklassen zuordnen lassen.',
         description: 'Es wird geprüft ob Objekte zu definierten Klassen gehören.<br>\
         Solche, die nicht zu definierten Klassen gehören, werden aufaddiert und die Summe derer angezeigt.<br>\
-        Um welche Layer und Objekte sich handelt kann im nachhinein in der Ansicht der Zusammenzeichnung evaluiert werden.<br>\
+        Um welche Layer und Objekte sich handelt kann im Nachhinein in der Ansicht der Zusammenzeichnung evaluiert werden.<br>\
         Des Weiteren wird der Support benachrichtigt um die fehlenden Klassen anzulegen.'
       },
       replace_zusammenzeichnung: {
         nr: 11,
         msg: 'Ersetzen der alten Zusammenzeichnung durch die neue',
         description: 'Archivierung der original hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
-        Lösche die hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
+        Löschen der hochgeladenen Dateien der alten Zusammenzeichnung.<br>\
         Löschen der alten Zusammenzeichnung in der Datenbank.\
         '
       },
@@ -93,7 +100,7 @@ class Zusammenzeichnung {
       import_reindexed_zusammenzeichnung: {
         nr: 13,
         msg: 'Importieren der neu indizierten GML-Datei in die Portaldatenbank',
-        description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit mit den umbenannten GML-IDs.<br>\
+        description: 'Die Zusammenzeichnung wird erneut in die Datenbank eingelesen jedoch mit den umbenannten GML-IDs.<br>\
         Es laufen die gleichen Teilschritte ab wie im Schritt Importieren der GML-Datei in die Portaldatenbank.'
       },
     };
@@ -114,12 +121,13 @@ class Zusammenzeichnung {
     this.numSteps = Object.keys(this.process).length - 2;
   }
 
+  // MARK: upload_zusammenzeichnung
   upload_zusammenzeichnung = (event) => {
-    console.log('upload_zusammenzeichnung');
+    //console.log('upload_zusammenzeichnung');
     event.preventDefault();
     const file_obj = event.dataTransfer.files[0];
     if (file_obj != undefined) {
-      console.log('file_obj exists');
+      //console.log('file_obj exists');
       var form_data = new FormData();
       form_data.append('go', 'xplankonverter_upload_zusammenzeichnung');
       if (this.id) {
@@ -133,21 +141,22 @@ class Zusammenzeichnung {
       var xhttp = new XMLHttpRequest();
       xhttp.open("POST", "index.php", true);
       xhttp.onload = (event) => {
+				//console.log(event.target.responseText);
         if (xhttp.status == 200) {
-          try {
+					try {
             const response = JSON.parse(event.target.responseText);
             if (!Array.isArray(response.msg)) { response.msg = [response.msg]; }
             if (response.success) {
-              this.confirm_step('upload_zusammenzeichnung', 'ok');
               this.id = response.konvertierung_id;
               $('#konvertierung_id_span').html(`Konvertierung ID: ${this.id}`).show();
-              this.import_zusammenzeichnung();
+              this.nextStep('upload_zusammenzeichnung', 'ok');
             }
             else {
-              this.confirm_step('upload_zusammenzeichnung', 'error');
+              this.nextStep('upload_zusammenzeichnung', 'error');
               message([{ type: 'error', msg: response.msg }]);
             }
           } catch (err) {
+
             if (event.target.responseText.indexOf('<input id="login_name"') > 0) {
               window.location = 'index.php';
             }
@@ -155,39 +164,40 @@ class Zusammenzeichnung {
           }
         }
         else {
-          this.confirm_step('upload_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler ' + xhttp.status + ' aufgetreten beim Versuch die Datei hochzuladen! ' + event.target.responseText }]);
+          this.nextStep('upload_zusammenzeichnung', 'error');
+          message([{ type: 'error', msg: 'Fehler "' + xhttp.status + '" aufgetreten beim Versuch die Datei hochzuladen! ' + event.target.responseText }]);
         }
         //$('#upload_result_msg_div').show();
       }
 
       //      show_upload_zusammenzeichnung('Zusammenzeichnung wird verarbeitet');
       $('#sperr_div').show();
-      $('#sperr_div').html('\
-        <div class="xplankonverter-upload-zusammenzeichnung-div">\
-          <div id="upload_zusammenzeichnung_progress_div">\
-            <h2 style="margin-bottom: 20px; float: left;">Neue Zusammenzeichnung <span id="konvertierung_id_span" style="display:none"></span></h2>\
-            <i class="fa fa-times" aria-hidden="true" style="float:right; margin: -5px;" onclick="cancel_upload_zusammenzeichnung()"></i>\
-            <div style="clear: both"></div>\
-          </div>\
-          <input\
-            id="upload_zusammenzeichnung_finish_button"\
-            style="display: none"\
-            type="button"\
-            value="Zur neuen Zusammenzeichnung"\
-            onclick="window.location=\'index.php?go=xplankonverter_zusammenzeichnung&planart=' + this.planart + '&csrf_token=' + this.csrf_token + '\';"\
-          >\
-        </div>\
-      ');
-      this.next_step('upload_zusammenzeichnung');
+      $('#sperr_div').html(`
+        <div class="xplankonverter-upload-zusammenzeichnung-div">
+          <div id="upload_zusammenzeichnung_progress_div">
+            <h2 style="margin-bottom: 20px; float: left; line-height: 1;">Neue ${this.config.title} <span id="konvertierung_id_span" style="display:none"></span></h2>
+            <i class="fa fa-times" aria-hidden="true" style="float:right; margin: -5px;" onclick="cancel_upload_zusammenzeichnung()"></i>
+            <div style="clear: both"></div>
+          </div>
+          <input
+            id="upload_zusammenzeichnung_finish_button"
+            style="display: none"
+            type="button"
+            value="Zur neuen Zusammenzeichnung"
+            onclick="window.location='index.php?go=xplankonverter_zusammenzeichnung&planart=${this.planart}&csrf_token=${this.csrf_token}'"
+          >
+        </div>
+      `);
+      this.startStep('upload_zusammenzeichnung');
       // $('#upload_zusammenzeichnung_msg').addClass('blink');
-      console.log('send_data', form_data);
+      //console.log('send_data', form_data);
       xhttp.send(form_data);
     }
   }
 
+  // MARK: import_zusammenzeichnung
   import_zusammenzeichnung = () => {
-    this.next_step('import_zusammenzeichnung');
+    this.startStep('import_zusammenzeichnung');
     //console.log('import_zusammenzeichnung konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -201,34 +211,33 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        //console.log('Response import_zusammenzeichnung: %o', result);
+        console.log('Response import_zusammenzeichnung: %o', result);
         if (result.success) {
-          this.confirm_step('import_zusammenzeichnung', 'ok')
-          this.create_plaene();
+          this.nextStep('import_zusammenzeichnung', 'ok')
         }
         else {
-          if (result.msg.includes('Warnung')) {
+          if (result.msg && result.msg.includes('Warnung')) {
             // Auch diese Warnung soll als ok dargestellt werden.
-            this.confirm_step('import_zusammenzeichnung', 'ok');
+            this.nextStep('import_zusammenzeichnung', 'ok');
             this.numSteps = this.numSteps + 2;
             this.reindex_gml_ids();
           }
           else {
-            this.confirm_step('import_zusammenzeichnung', 'error');
+            this.nextStep('import_zusammenzeichnung', 'error');
             console.error(result.msg);
-            message([{ type: 'error', msg: 'Fehler beim Import der Zusammenzeichnung!<br>' + result.msg }]);
+            message([{ type: 'error', msg: `Fehler beim Import ${$this.config.genitiv}!<br>${result.msg}` }]);
           }
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('import_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
+        this.nextStep('import_zusammenzeichnung', 'error');
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   create_plaene = () => {
-    this.next_step('create_plaene');
+    this.startStep('create_plaene');
     //console.log('create_plaene konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -243,32 +252,31 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response create_plaene: %o', result);
         if (result.success) {
-          this.confirm_step('create_plaene', 'ok')
-          this.convert_zusammenzeichnung();
+          this.nextStep('create_plaene', 'ok')
         }
         else {
           if (result.msg.includes('Warnung')) {
             // Auch diese Warnung soll als ok dargestellt werden.
-            this.confirm_step('create_plaene', 'ok');
+            this.nextStep('create_plaene', 'ok');
             this.numSteps = this.numSteps + 2;
             this.reindex_gml_ids();
           }
           else {
-            this.confirm_step('create_plaene', 'error');
+            this.nextStep('create_plaene', 'error');
             console.error(result.msg);
-            message([{ type: 'error', msg: 'Fehler beim Anlegen der Pläne der Zusammenzeichnung!<br>' + result.msg }]);
+            message([{ type: 'error', msg: `Fehler beim Anlegen der Pläne ${this.config.genitiv}!<br>${result.msg}` }]);
           }
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('create_plaene', 'error');
-        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown + ' Antwort: ' + result}]);
+        this.nextStep('create_plaene', 'error');
+        message([{ type: 'error', msg: 'Fehler: ' + textStatus + '. Aufgetreten beim Versuch die Datei zu importieren! Fehlerart: ' + errorThrown}]);
       }
     })
   }
 
   reindex_gml_ids = () => {
-    this.next_step('reindex_gml_ids');
+    this.startStep('reindex_gml_ids');
     //console.log('reindex_gml_ids konvertierung_id: ', this.id);
     let formData = new FormData();
     formData.append('go', 'xplankonverter_reindex_gml_ids');
@@ -280,28 +288,28 @@ class Zusammenzeichnung {
       method: 'POST',
       body: formData
     })
-    .then(response => response.text())
-    .then(text => {
-      try {
-        const result = JSON.parse(text);
-        if (result.success) {
-          //console.log('Response reindex_gml_ids: %o', result);
-          this.confirm_step('reindex_gml_ids', 'ok');
-          this.import_reindexed_zusammenzeichnung('reindexed_xplan_gml');
+      .then(response => response.text())
+      .then(text => {
+        try {
+          const result = JSON.parse(text);
+          if (result.success) {
+            //console.log('Response reindex_gml_ids: %o', result);
+            this.nextStep('reindex_gml_ids', 'ok');
+            this.import_reindexed_zusammenzeichnung('reindexed_xplan_gml');
+          }
+          else {
+            this.nextStep('reindex_gml_ids', 'error');
+            message([{ type: 'error', msg: 'Fehler beim Umenennen der GML-ID\'s.<br>' + result.msg }]);
+          }
+        } catch (err) {
+          this.nextStep('reindex_gml_ids', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Parsen des Ergebnisses von xplankonverter_reindex_gml_id.<br>' + result.msg }]);
         }
-        else {
-          this.confirm_step('reindex_gml_ids', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Umenennen der GML-ID\'s.<br>' + result.msg }]);
-        }
-      } catch(err) {
-        this.confirm_step('reindex_gml_ids', 'error');
-        message([{ type: 'error', msg: 'Fehler beim Parsen des Ergebnisses von xplankonverter_reindex_gml_id.<br>' + result.msg }]);
-      }
-    });
+      });
   }
 
   import_reindexed_zusammenzeichnung = () => {
-    this.next_step('import_reindexed_zusammenzeichnung');
+    this.startStep('import_reindexed_zusammenzeichnung');
     //console.log('import_reindexed_zusammenzeichnung konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -317,24 +325,24 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response import_reindexed_zusammenzeichnung: %o', result);
         if (result.success) {
-          this.confirm_step('import_reindexed_zusammenzeichnung', 'ok')
+          this.nextStep('import_reindexed_zusammenzeichnung', 'ok')
           this.create_plaene();
         }
         else {
-            this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
-            console.error(result.msg);
-            message([{ type: 'error', msg: 'Fehler beim Import der reindizierten Zusammenzeichnung.<br>' + result.msg }]);
+          this.nextStep('import_reindexed_zusammenzeichnung', 'error');
+          console.error(result.msg);
+          message([{ type: 'error', msg: `Fehler beim Import der ${this.config.genitiv} (reindiziert).<br>${result.msg}` }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('import_reindexed_zusammenzeichnung', 'error');
+        this.nextStep('import_reindexed_zusammenzeichnung', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die reindizierte Datei zu importieren! Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   convert_zusammenzeichnung = () => {
-    this.next_step('convert_zusammenzeichnung');
+    this.startStep('convert_zusammenzeichnung');
     //console.log('convert_zusammenzeichnung konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -349,23 +357,22 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response convert_zusammenzeichnung: %o', result);
         if (result.success) {
-          this.confirm_step('convert_zusammenzeichnung', 'ok');
-          this.gml_generieren();
+          this.nextStep('convert_zusammenzeichnung', 'ok');
         }
         else {
-          this.confirm_step('convert_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Konvertieren der Zusammenzeichnung ' + this.id + ' .<br>' + result.msg }]);
+          this.nextStep('convert_zusammenzeichnung', 'error');
+          message([{ type: 'error', msg: `Fehler beim Konvertieren ${this.config.genitiv} ${this.id}.<br>${result.msg}` }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('convert_zusammenzeichnung', 'error');
-        message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch den Zusammenzeichnung zu konvertieren! Fehlerart: ' + errorThrown }]);
+        this.nextStep('convert_zusammenzeichnung', 'error');
+        message([{ type: 'error', msg: `Fehler "${textStatus}" aufgetreten beim Versuch der Konvertierung ${this.config.genitiv}! Fehlerart: ${errorThrown}` }]);
       }
     })
   }
 
   gml_generieren = () => {
-    this.next_step('gml_generieren');
+    this.startStep('gml_generieren');
     //console.log('gml_generieren konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -380,22 +387,22 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response gml_generieren: %o', result);
         if (result.success) {
-            this.confirm_step('gml_generieren', 'ok');
-            this.create_geoweb_service();
-         } else {
-            this.confirm_step('gml_generieren', 'error');
-            message([{ type: 'error', msg: 'Fehler beim Erzeugen der GML-Datei in Zielversion.<br>' + result.msg }]);
+          this.nextStep('gml_generieren', 'ok');
+        } else {
+          this.nextStep('gml_generieren', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der GML-Datei in Zielversion.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('gml_generieren', 'error');
+        this.nextStep('gml_generieren', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die GML-Datei in der Zielversion zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
+  // MARK: create_geoweb_service
   create_geoweb_service = () => {
-    this.next_step('create_geoweb_service');
+    this.startStep('create_geoweb_service');
     //console.log('create_geoweb_service konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -410,23 +417,22 @@ class Zusammenzeichnung {
       success: (result) => {
         //console.log('Response create_geoweb_service: %o', result);
         if (result.success) {
-            this.confirm_step('create_geoweb_service', 'ok');
-            this.create_metadata();
+          this.nextStep('create_geoweb_service', 'ok');
         }
         else {
-         this.confirm_step('create_geoweb_service', 'error');
-         message([{ type: 'error', msg: 'Fehler beim Erzeugen der GeoWeb-Dienste.<br>' + result.msg }]);
+          this.nextStep('create_geoweb_service', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der GeoWeb-Dienste.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('create_geoweb_service', 'error');
+        this.nextStep('create_geoweb_service', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die GeoWeb-Dienste zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   create_metadata = () => {
-    this.next_step('create_metadata');
+    this.startStep('create_metadata');
     //console.log('create_metadata konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -439,32 +445,31 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response create_metadata: %o', result);
+        //console.log('Response create_metadata: %o', result);
         if (result.success) {
-          this.confirm_step('create_metadata', 'ok');
-          this.update_full_geoweb_service();
+          this.nextStep('create_metadata', 'ok');
         }
         else {
-          this.confirm_step('create_metadata', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten in Zielversion.<br>' + result.msg }]);
+          this.nextStep('create_metadata', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten für den Plan.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('create_metadata', 'error');
-/*
-  Das ist die Meldung die in dem Step zurück kommt und deshalb einen parseerror auslößt.
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-     connecting: https:/mis.testportal-plandigital.de/geonetwork
-    {"success":true,"msg":"Metadaten \u00fcber Daten und Dienste erfolgreich in das Metainformationssystem hochgeladen."}
- */
+        this.nextStep('create_metadata', 'error');
+        /*
+          Das ist die Meldung die in dem Step zurück kommt und deshalb einen parseerror auslößt.
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+             connecting: https:/mis.testportal-plandigital.de/geonetwork
+            {"success":true,"msg":"Metadaten \u00fcber Daten und Dienste erfolgreich in das Metainformationssystem hochgeladen."}
+         */
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   update_full_geoweb_service = () => {
-    this.next_step('update_full_geoweb_service');
+    this.startStep('update_full_geoweb_service');
     //console.log('update_full_geoweb_service konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -476,25 +481,24 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response update_full_geoweb_service: %o', result);
+        //console.log('Response update_full_geoweb_service: %o', result);
         if (result.success) {
-          this.confirm_step('update_full_geoweb_service', 'ok');
-          this.update_full_metadata();
+          this.nextStep('update_full_geoweb_service', 'ok');
         }
         else {
-          this.confirm_step('update_full_geoweb_service', 'error');
+          this.nextStep('update_full_geoweb_service', 'error');
           message([{ type: 'error', msg: 'Fehler beim Aktualisieren der Landesdienste.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('update_full_geoweb_service', 'error');
+        this.nextStep('update_full_geoweb_service', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Landesdienste zu aktualisieren. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   update_full_metadata = () => {
-    this.next_step('update_full_metadata');
+    this.startStep('update_full_metadata');
     //console.log('update_full_metadata konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -506,25 +510,24 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response update_full_metadata: %o', result);
+        //console.log('Response update_full_metadata: %o', result);
         if (result.success) {
-          this.confirm_step('update_full_metadata', 'ok');
-          this.check_class_completeness();
+          this.nextStep('update_full_metadata', 'ok');
         }
         else {
-          this.confirm_step('update_full_metadata', 'error');
+          this.nextStep('update_full_metadata', 'error');
           message([{ type: 'error', msg: 'Fehler beim Erzeugen der Daten- und Dienstemetadaten über den Landesdienst in Zielversion.<br>' + result.msg }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('update_full_metadata', 'error');
+        this.nextStep('update_full_metadata', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch Daten- und Dienstemetadaten des Landesdienstes zu erzeugen. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   check_class_completeness = () => {
-    this.next_step('check_class_completeness');
+    this.startStep('check_class_completeness');
     //console.log('check_class_completeness konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -537,26 +540,25 @@ class Zusammenzeichnung {
         suppress_ticket_and_notification: $('#suppress_ticket_and_notification').val()
       },
       success: (result) => {
-        console.log('Response check_class_completeness: %o', result);
+        //console.log('Response check_class_completeness: %o', result);
         if (result.success) {
-          this.confirm_step('check_class_completeness', 'ok');
+          this.nextStep('check_class_completeness', 'ok');
           message([{ type: (result.num_unclassified == 0 ? 'notice' : 'warning'), msg: result.msg }]);
-          this.replace_zusammenzeichnung();
         }
         else {
-          this.confirm_step('check_class_completeness', 'error');
-          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data}]);
+          this.nextStep('check_class_completeness', 'error');
+          message([{ type: 'error', msg: 'Fehler bei der Prüfung der Planzeichenzuordnung.<br>' + result.msg + ' gesendet mit data: ' + data }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('check_class_completeness', 'error');
+        this.nextStep('check_class_completeness', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten bei der Prüfung der Planzeichenzuordnung. Fehlerart: ' + errorThrown }]);
       }
     })
   }
 
   replace_zusammenzeichnung = () => {
-    this.next_step('replace_zusammenzeichnung');
+    this.startStep('replace_zusammenzeichnung');
     //console.log('replace_zusammenzeichnung konvertierung_id: ', this.id);
     $.ajax({
       url: 'index.php',
@@ -573,33 +575,34 @@ class Zusammenzeichnung {
         try {
           const result = JSON.parse(response);
           if (result.success) {
-            this.confirm_step('replace_zusammenzeichnung', 'ok');
+            this.nextStep('replace_zusammenzeichnung', 'ok');
             $('#upload_zusammenzeichnung_finish_button').show();
           }
           else {
-            this.confirm_step('replace_zusammenzeichnung', 'error');
+            this.nextStep('replace_zusammenzeichnung', 'error');
             message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>' + result.msg }]);
           }
         }
         catch (err) {
-          this.confirm_step('replace_zusammenzeichnung', 'error');
-          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>Konnte Antwort vom Server nicht auswerten: ' + response + ' ' + err}]);
+          this.nextStep('replace_zusammenzeichnung', 'error');
+          message([{ type: 'error', msg: 'Fehler beim Ersetzen der Vorgängerversion.<br>Konnte Antwort vom Server nicht auswerten: ' + response + ' ' + err }]);
         }
       },
       error: (jqXHR, textStatus, errorThrown) => {
-        this.confirm_step('replace_zusammenzeichnung', 'error');
+        this.nextStep('replace_zusammenzeichnung', 'error');
         message([{ type: 'error', msg: 'Fehler ' + textStatus + ' aufgetreten beim Versuch die Vorgängerversion zu ersetzen. Fehlerart: ' + errorThrown }]);
       },
       dataType: "text"
     })
   }
 
-  next_step = (step) => {
+  startStep = (step) => {
     //console.log('next_step %o', step);
     this.lfdNrStep++;
+    $('.num-steps').html(this.lfdNrStep);
     $('#upload_zusammenzeichnung_progress_div').append(`\
       <div class="step">\
-        <div id="upload_zusammenzeichnung_step_${this.process[step].nr}" style="float:left; font-weight: bold">Schritt ${this.lfdNrStep} von ${this.numSteps} ${this.process[step].msg}</div>\
+        <div id="upload_zusammenzeichnung_step_${this.process[step].nr}" style="float:left; font-weight: bold">Schritt ${this.lfdNrStep} von <span class="numSteps">${this.numSteps}</span> ${this.process[step].msg}</div>\
         <div id="upload_zusammenzeichnung_step_confirm_${this.process[step].nr}" style="float: right"><i class="fa fa-spinner fa-spin" aria-hidden="true" ></i></div>\
         <div style="clear: both"></div>\
         <div id="xplankonverter-step-description-${this.process[step].nr}" class="xplankonverter-step-description"></div>\
@@ -608,11 +611,16 @@ class Zusammenzeichnung {
     add_text_with_delay(this.process[step].description, $(`#xplankonverter-step-description-${this.process[step].nr}`));
   }
 
-  confirm_step = (step, success) => {
+  nextStep = (step, success) => {
+    // confirm step
     //console.log('confirm_step: %o', this.process[step]);
     $('#upload_zusammenzeichnung_step_' + this.process[step].nr).addClass(this.confirm_class[success]);
-    $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success]  + '" aria-hidden="true" ></i>');
-    if (!success) {
+    $('#upload_zusammenzeichnung_step_confirm_' + this.process[step].nr).html('<i class="fa fa-' + this.confirm_fa_class[success] + ' ' + this.confirm_class[success] + '" aria-hidden="true" ></i>');
+    if (success == 'ok') {
+      // call next step
+      this[this.config.upload_steps[this.config.upload_steps.indexOf(step) + 1]];
+    }
+    else {
       $('#upload_zusammenzeichnung_msg').removeClass('blink');
       $('#upload_zusammenzeichnung_div').removeClass('dragover');
     }

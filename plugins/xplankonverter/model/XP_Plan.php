@@ -45,8 +45,90 @@ class XP_Plan extends PgObject {
 		return $plaene;
 	}
 
+	/**
+	 * Funktion konvertiert den Typ vom Attribut externereferenz
+	 * von xp_spezexternereferenzauslegung nach xp_spezexternereferenz
+	 * $plan_attribs wird bearbeitet und zurückgeliefert.
+	 * @param Array $plan_attribs Die mit der Funktion pgdatabase->get_attribute_information() abgefragten Attributdaten
+	 * @return Array Das modifizierte Array von $plan_attribs
+	 */
+	public static function convert_xp_spezexternereferenzauslegung($plan_attribs) {
+		// Entfernt den textteil auslegung in Planattribut type und type_name für typ xp_spezexternereferenzauslegung
+		foreach ($plan_attribs AS $i => $plan_attribut) {
+			if ($plan_attribut['type'] == 'xp_spezexternereferenzauslegung' AND $plan_attribut['type_type'] == 'c') {
+				$plan_attribs[$i]['type'] = str_replace('auslegung', '', $plan_attribs[$i]['type']);
+				$plan_attribs[$i]['type_name'] = str_replace('auslegung', '', $plan_attribs[$i]['type_name']);
+				$plan_attribs[$i]['type_schema'] = 'xplan_gml';
+			}
+		}
+		return $plan_attribs;
+	}
+
+	/**
+	 * Die Funktion filtert dokumente aus dem Attribut externereferenz die laut Angaben zur Auslegung
+	 * nicht veröffentlicht werden sollen raus. Rausgefiltert wird wenn das Attribut nurzurauslegung der externenreferenz true ist und der Zeitraum nicht zu den Planattributen auslegungsstartdatum und auslegungsenddatum passen.
+	 * Bei denen, die veröffentlicht werden sollen, wird das Attribut nurzurauslegung abgezogen.
+	 * ToDo: so wie es jetzt ist, ist externereferenzen schon mit der Funktion parseCompositeDataType zerlegt worden.
+	 * Besser ist es wohl wenn externereferenzen so übergeben wird wie von Postgres geliefert als spezexternereferenzauslegung und das ganze dann
+	 * umgewandelt wird in spezexternereferenz
+	 * ToDo: Möglicherweise ist es aber auch insgesammt besser wenn wie eine Triggerfunktion bauen, die
+	 * zusätzlich zu externereferenz ein Attribut externereferenzauslegung einführen. In kvwmap wird letzteres verwaltet
+	 * und die Triggerfunktion belegt das dazugehörige externereferenz ohne nurzurauslegung
+	 * Bei der Abfrage wird externereferenz dann entsprechend externereferenzauslegung gefiltert.
+	 * Dann muss man den Typ von externereferenz nicht anpassen. externereferenzauslegung wird
+	 * beim Export ignoriert weil es in gml nicht vorkommt und externereferenz wird so exportiert
+	 * wie nach der Filterung reduziert. externereferenzauslegung ist dann also zur Bearbeitung und
+	 * externereferenz für den GML-Export. Die find Funktion von XP_Plan filtert dann immer externereferenz
+	 * entsprechend er Angaben in externereferenzauslegung und den Planattributen auslegungsstart und enddatum.
+	 */
+	function filter_nurzurauslegung() {
+		$start = explode(',', str_replace(['{', '}'], '', $this->get('auslegungsstartdatum')));
+		$ende = explode(',', str_replace(['{', '}'], '', $this->get('auslegungsenddatum')));
+		$now = date('d.m.Y');
+		$externereferenzen_mit_nurzurauslegung_json = json_decode($this->get_json('externereferenz'));
+		// Die, die nicht zur Auslegung sind rausfiltern
+		$externereferenzen_mit_nurzurauslegung_json_gefiltert = array_filter(
+			$externereferenzen_mit_nurzurauslegung_json,
+			function ($externereferenz_mit_nurzurauslegung_json) use ($start, $ende, $now) {
+				$keep_referenz = true;
+				if ($externereferenz_mit_nurzurauslegung_json->nurzurauslegung) {
+					$im_zeitraum = in_date_range($start, $ende, $now);
+					if (!$im_zeitraum) {
+						$keep_referenz = false;
+					}
+				}
+				return $keep_referenz;
+			}
+		);
+		// Entferne die Eigenschaft nurzurauslegung aus externen Referenzen
+		$externereferenzen_json_gefiltert = array_map(
+			function ($externereferenz_mit_nurzurauslegung_json_gefiltert) {
+				unset($externereferenz_mit_nurzurauslegung_json_gefiltert->nurzurauslegung);
+				return $externereferenz_mit_nurzurauslegung_json_gefiltert;
+			},
+			$externereferenzen_mit_nurzurauslegung_json_gefiltert
+		);
+		$externereferenzen_gefiltert = $this->gui->processJSON($externereferenzen_json_gefiltert);
+		$this->set('externereferenz', $externereferenzen_gefiltert);
+	}
+
 	function get_anzeige_name() {
 		return $this->get_first_planart_name() . ' ' . $this->get_first_gemeinde_name() . ' ' . $this->get('name') . ' Nr. ' . $this->get('nummer');
+	}
+
+	/**
+	 * Function extract regionalschlüssel from first gemeinde if exists.
+	 * @return 12 stelliger Regionalschlüssel or null if not exists
+	 */
+	function get_regionalschluessel() {
+		$schl = $this->get('gemeinde');
+		if (!empty($schl)) {
+			$parts = explode(',', $schl);
+			if (count($parts) > 1 AND !empty($parts[1])) {
+				return $parts[1];
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -56,20 +138,28 @@ class XP_Plan extends PgObject {
 	function get_layers_with_content($xplan_layers, $konvertierung_id = '') {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
-			#echo '<br>' . $xplan_layer['Name'] . ' ' . $xplan_layer['geom_column'];
-
+			if ($xplan_layer['geom_column'] == '') {
+				$msg = 'In der Layerdefinition des Layers ' . $xplan_layer['Name'] . ' ist keine geom_column angegeben.';
+				$ret[0] = 1;
+				$ret[1] = $msg;
+				$ret['success'] = false;
+				$ret['msg'] = $msg;
+				return $ret;
+			}
 			$sql = "
 				SELECT
 					'" . $xplan_layer['Name'] . "',
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
-					count(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
+					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
 				FROM
 					" . $xplan_layer['schema'] . '.' . $xplan_layer['maintable'] . "
 				WHERE
 					" . ($konvertierung_id == '' ? "true" : "konvertierung_id = " . $this->get('konvertierung_id')) . "
 			";
+
 			#echo '<p>' . $sql;
+			
 			set_error_handler(function($e) {
 				return true;
 			});
@@ -79,14 +169,16 @@ class XP_Plan extends PgObject {
 				return $ret;
 			}
 			$content = pg_fetch_array($ret[1]);
+
 			if (
-				($xplan_layer['Datentyp'] = 0 AND $content['num_points'] > 0) OR
-				($xplan_layer['Datentyp'] = 1 AND $content['num_lines'] > 0) OR
-				($xplan_layer['Datentyp'] = 2 AND $content['num_polygons'] > 0)
+				($xplan_layer['Datentyp'] == 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['Datentyp'] == 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['Datentyp'] == 2 AND $content['num_polygons'] > 0)
 			) {
 				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
 			}
 		}
+
 		return array(
 			'success' => true,
 			'layers_with_content' => $layers_with_content
@@ -182,6 +274,20 @@ class XP_Plan extends PgObject {
 		$results = $this->getSQLResults($sql);
 		$this->center_coord = $results[0];
 		return $this->center_coord;
+	}
+
+	function get_json($attribute) {
+		$sql = "
+			SELECT
+				to_json(" . $attribute . ") AS " . $attribute . "
+			FROM
+				" . $this->qualifiedTableName . "
+			WHERE
+				gml_id = '" . $this->get($this->identifier) . "'
+		";
+		#echo 'SQL zur Abfrage des Attributes: ' . $attribute . ' mit to_json: '. $sql;
+		$results = $this->getSQLResults($sql);
+		return $results[0][$attribute];
 	}
 
 	function get_bereiche() {

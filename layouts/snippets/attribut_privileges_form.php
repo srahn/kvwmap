@@ -200,10 +200,10 @@ function update_stellen_visibility(){
 	<tr>
 		<td align="center">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>><?
+			<select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'] ?: [])==0){ echo 'disabled';}?>><?
 			$layer_options = array(); ?>
 			<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
-			for ($i = 0; $i < count($this->layerdaten['ID']); $i++) {
+			for ($i = 0; $i < count($this->layerdaten['ID'] ?: []); $i++) {
 				$layer_options[] = array(
 					'value' => $this->layerdaten['ID'][$i],
 					'output' => $this->layerdaten['Bezeichnung'][$i]
@@ -226,12 +226,31 @@ function update_stellen_visibility(){
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
-					<th><a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStellenAsignment; ?></div></a></th>
-					<th class="navigation-selected"><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
+					<th>
+						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strCommonData; ?></div></a>
+					</th><?
+					if (!in_array($this->layer[0]['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a>
+						</th>
+						<th>
+							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a>
+					</th>
+					<th>
+						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&stellenzuweisung=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStellenAsignment; ?></div></a>
+					</th>
+					<th class="navigation-selected">
+						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a>
+					</th><?
+					if (!in_array($this->layer[0]['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>

@@ -65,125 +65,147 @@
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerset = $GUI->user->rolle->getLayer(LAYER_ID_NACHWEISE);
 		$map = new mapObj(NULL);
-		$map->set('debug', 5);
+		$map->debug = 5;
 		# Auf den Datensatz zoomen
 		$sql ="SELECT st_xmin(bbox) AS minx,st_ymin(bbox) AS miny,st_xmax(bbox) AS maxx,st_ymax(bbox) AS maxy";
 		$sql.=" FROM (SELECT box2D(st_transform(the_geom, ".$GUI->user->rolle->epsg_code.")) as bbox";
 		$sql.=" FROM nachweisverwaltung.n_nachweise WHERE id = ".$id.") AS foo";
 		$ret = $GUI->pgdatabase->execSQL($sql, 4, 0);
 		$rs = pg_fetch_array($ret[1]);
-		$rect = ms_newRectObj();
-		$rect->minx=$rs['minx'];
-		$rect->maxx=$rs['maxx'];
-		$rect->miny=$rs['miny'];
-		$rect->maxy=$rs['maxy'];
+		$rect = rectObj(
+			$rs['minx'],
+			$rs['miny'],			
+			$rs['maxx'],
+			$rs['maxy']
+		);
 		$randx=($rect->maxx-$rect->minx)*0.02;
 		$randy=($rect->maxy-$rect->miny)*0.02;
 		if($rect->minx != ''){
 			$map->setextent($rect->minx-$randx,$rect->miny-$randy,$rect->maxx+$randx,$rect->maxy+$randy);
 			$map->setFontSet(FONTSET);
 			# FST-Layer erzeugen
-			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from (SELECT ogc_fid, zaehler||coalesce(\'/\'||nenner, \'\') as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
-			$layer->set('status',MS_ON);
-			$layer->set('template', ' ');
-			$layer->set('name','querymap'.$k);
-			$layer->set('type', 2);
-			$layer->set('symbolscaledenom', 10000);
-			$layer->set('labelitem', 'fsnum');
-			$layer->setConnectionType(6);
-			$layer->set('connection',$layerset[0]['connection']);
+			$layer = new LayerObj($map);
+			$layer->data = 'the_geom from (SELECT ogc_fid, zaehler||coalesce(\'/\'||nenner, \'\') as fsnum, wkb_geometry as the_geom FROM alkis.ax_flurstueck WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS;
+			$layer->status = MS_ON;
+			$layer->template = ' ';
+			$layer->name = 'querymap'.$k;
+			$layer->type = 2;
+			$layer->symbolscaledenom = 10000;
+			$layer->labelitem = 'fsnum';
+			$layer->setConnectionType(6, '');
+			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
-			$klasse=ms_newClassObj($layer);
-			$klasse->set('status', MS_ON);
-			$style=ms_newStyleObj($klasse);
+			$layer->metadata->set('wms_queryable','0');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
+			$klasse = new ClassObj($layer);
+			$klasse->status = MS_ON;
+			$style = new StyleObj($klasse);
 			$style->color->setRGB(-1,-1,-1);
-			$style->set('width', 0.2);
-			$style->set('maxwidth', 0.2);
+			$style->width = 0.2;
+			$style->maxwidth = 0.2;
 			$style->outlinecolor->setRGB(100,100,100);
-			$label=new labelObj();
+			$label = new labelObj();
 			if (MAPSERVERVERSION < 700 ) {
-				$label->set('type', 'truetype');
+				$label->type = 'truetype';
 			}			
-			$label->set('size', 8);
-			$label->set('minsize', 8);
-			$label->set('maxsize', 8);
+			$label->size = 8;
+			$label->minsize = 8;
+			$label->maxsize = 8;
 			$label->color->setRGB(40, 40, 40);
-			$label->set('font', 'arial');
+			$label->font = 'arial';
 			$klasse->addLabel($label);
 			# Gebäude-Layer erzeugen
-			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from (SELECT ogc_fid, wkb_geometry as the_geom FROM alkis.ax_gebaeude WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS);
-			$layer->set('status',MS_ON);
-			$layer->set('template', ' ');
-			$layer->set('name','querymap'.$k);
-			$layer->set('type', 2);
-			$layer->set('maxscaledenom', 2000);
-			$layer->set('symbolscaledenom', 10000);
-			$layer->set('opacity', 5);
-			$layer->setConnectionType(6);
-			$layer->set('connection',$layerset[0]['connection']);
+			$layer = new LayerObj($map);
+			$layer->data = 'the_geom from (SELECT ogc_fid, wkb_geometry as the_geom FROM alkis.ax_gebaeude WHERE endet IS NULL) as foo using unique ogc_fid using srid='.EPSGCODE_ALKIS;
+			$layer->status = MS_ON;
+			$layer->template = ' ';
+			$layer->name = 'querymap'.$k;
+			$layer->type = 2;
+			$layer->maxscaledenom = 2000;
+			$layer->symbolscaledenom = 10000;
+			$layer->opacity = 5;
+			$layer->setConnectionType(6, '');
+			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
-			$klasse=ms_newClassObj($layer);
-			$klasse->set('status', MS_ON);
-			$style=ms_newStyleObj($klasse);
+			$layer->metadata->set('wms_queryable','0');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
+			$klasse = new ClassObj($layer);
+			$klasse->status = MS_ON;
+			$style = new StyleObj($klasse);
 			$style->color->setRGB(40,40,40);
-			$style->set('width', 1);
-			$style->set('maxwidth', 1);
+			$style->width = 1;
+			$style->maxwidth = 1;
 			$style->outlinecolor->setRGB(0,0,0);
 			# Flur-Layer erzeugen
-			$layer=ms_newLayerObj($map);
-			$layer->set('data', 'the_geom from alkis.pp_flur as foo using unique gid using srid='.EPSGCODE_ALKIS);
-			$layer->set('status',MS_ON);
-			$layer->set('template', ' ');
-			$layer->set('name','querymap'.$k);
-			$layer->set('type', 2);
-			$layer->set('symbolscaledenom', 10000);
-			$layer->set('opacity', 80);
-			$layer->setConnectionType(6);
-			$layer->set('connection',$layerset[0]['connection']);
+			$layer= new layerObj($map);
+			$layer->data = 'the_geom from alkis.pp_flur as foo using unique gid using srid='.EPSGCODE_ALKIS;
+			$layer->status = MS_ON;
+			$layer->template = ' ';
+			$layer->name = 'querymap'.$k;
+			$layer->type = 2;
+			$layer->symbolscaledenom = 10000;
+			$layer->opacity = 80;
+			$layer->setConnectionType(6, '');
+			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
-			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
-			$klasse=ms_newClassObj($layer);
-			$klasse->set('status', MS_ON);
-			$style=ms_newStyleObj($klasse);
+			$layer->metadata->set('wms_queryable','0');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
+			$klasse = new ClassObj($layer);
+			$klasse->status = MS_ON;
+			$style = new StyleObj($klasse);
 			$style->color->setRGB(-1,-1,-1);
-			$style->set('width', 1);
-			$style->set('maxwidth', 1);
+			$style->width = 1;
+			$style->maxwidth = 1;
 			$style->outlinecolor->setRGB(40,80,165);
 			# Datensatz-Layer erzeugen
-			$layer=ms_newLayerObj($map);
+			$layer = new LayerObj($map);
 			$datastring = "the_geom from (select id, the_geom from nachweisverwaltung.n_nachweise";
 			$datastring.=" WHERE id = '".$id."'";
 			$datastring.=") as foo using unique id using srid=".$layerset[0]['epsg_code'];
-			$layer->set('data',$datastring);
-			$layer->set('status',MS_ON);
-			$layer->set('template', ' ');
-			$layer->set('name','querymap'.$k);
-			$layer->set('type', 2);
-			$layer->set('opacity', 50);
-			$layer->setConnectionType(6);
-			$layer->set('connection',$layerset[0]['connection']);
+			$layer->data = $datastring;
+
+			$layer->status = MS_ON;
+			$layer->template = ' ';
+			$layer->name = 'querymap'.$k;
+			$layer->type = 2;
+			$layer->opacity = 50;
+			$layer->setConnectionType(6, '');
+			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
-			$layer->setMetaData('wms_queryable','0');
-			$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
-			$klasse=ms_newClassObj($layer);
-			$klasse->set('status', MS_ON);
-			$style=ms_newStyleObj($klasse);
+			$layer->metadata->set('wms_queryable','0');
+			if (MAPSERVERVERSION >= 800) {
+				$layer->setProcessingKey('CLOSE_CONNECTION', 'ALWAYS');
+			}
+			else {
+				$layer->setProcessing('CLOSE_CONNECTION=ALWAYS');
+			}
+			$klasse = new ClassObj($layer);
+			$klasse->status = MS_ON;
+			$style = new StyleObj($klasse);
 			$style->color->setRGB(252,101,84);
-			$style->set('width', 2);
+			$style->width = 2;
 			$style->outlinecolor->setRGB(-1,-1,-1);
 			# Karte rendern
-			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code,MS_TRUE);
-			$map->web->set('imagepath', IMAGEPATH);
-			$map->web->set('imageurl', IMAGEURL);
-			$map->set('width', 300);
-			$map->set('height', 300);
+			$map->setProjection('+init=epsg:'.$GUI->user->rolle->epsg_code);
+			$map->web->imagepath = IMAGEPATH;
+			$map->web->imageurl = IMAGEURL;
+			$map->width = 300;
+			$map->height = 300;
 			$image_map = $map->draw();
 			$filename = $GUI->map_saveWebImage($image_map,'jpeg');
 			$newname = $GUI->user->id.basename($filename);
@@ -284,7 +306,7 @@
       if ($ret[0]) {
         $errmsg="Festpunkte konnten nicht abgefragt werden.";
       }
-      elseif(@count($festpunkte->liste) > 0){
+      elseif(count_or_0($festpunkte->liste) > 0){
         $ret=$antrag->EinmessungsskizzenInOrdnerZusammenstellen($festpunkte);
         $msg.=$ret;
       }
@@ -417,7 +439,7 @@
 		#echo $sql;
 		$GUI->debug->write("<p>nachweiseAuswahlSpeichern - Speichern der aktuellen Auswahl im Rechercheergebnis",4);
 		$GUI->database->execSQL($sql,4, 1);
-		if (@count($nachweis_ids) > 0) {
+		if (count_or_0($nachweis_ids) > 0) {
 			$sql = '
 				INSERT INTO 
 					rolle_nachweise_rechercheauswahl 
@@ -1211,7 +1233,7 @@
 					$GUI->pdf=$pdf;
 					$dateipfad=IMAGEPATH;
 					$currenttime = date('Y-m-d_H:i:s',time());
-					$name = umlaute_umwandeln($GUI->user->Name);
+					$name = sonderzeichen_umwandeln($GUI->user->Name);
 					$dateiname = $name.'-'.$currenttime.'.pdf';
 					$GUI->outputfile = $dateiname;
 					$fp=fopen($dateipfad.$dateiname,'wb');

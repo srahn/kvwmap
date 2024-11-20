@@ -1,4 +1,4 @@
-<?php
+ <?php
 	global $supportedLanguages;
 	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
 ?>
@@ -52,7 +52,7 @@
 						class="user-option"
 						style="margin-left: 0px" <?
 						if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
-							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>'" <?
+							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value" <?
 						} ?>
 					><? echo $this->user->Stellen['Bezeichnung'][$id];
 					if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {
@@ -79,7 +79,7 @@
 		include_once(CLASSPATH . 'Notification.php');
 		$result = Notification::find_for_user($this); ?>
 		<a href="#" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {
-			<? if (@count($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
+			<? if (count_or_0($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
 			<i class="fa fa-bell" aria-hidden="true" style="
 				font-size: 150%;
 				padding: 5px 0px 4px 0;
@@ -134,6 +134,12 @@
 
 	<div style="padding: 4px; float: right; width: 30%;"><?
 		include(SNIPPETS . 'geo_name_search.php'); ?>
+	</div>
+
+	<div><? 
+		if (array_key_exists('prev_login_name', $_SESSION)) {
+			echo '<a href="index.php?go=als_voriger_Nutzer_anmelden" class="fett" style="white-space: nowrap;">zurück zum vorigen Nutzer wechseln</a>';
+		} ?>
 	</div>
 </div>
 

@@ -15,8 +15,8 @@ class Gml_extractor {
 	}
 
 	/**
-	* Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
-	*/
+	 * Import der in $this->gml_location angegebenen GML-Datei in das in $this->gmlas_schema angegebene Schema
+	 */
 	function import_gml_to_db() {
 		global $GUI;
 		$result = $this->get_source_srid();
@@ -100,7 +100,7 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
+		// $rect = ms_newRectObj(); Wird später noch nicht genutzt, deshalb hier auskommentiert.
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -155,8 +155,8 @@ class Gml_extractor {
 		#$this->import_gml_to_db();
 		#$this->extract_to_form($classname);
 		/**
-			ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
-		*/
+		 *ToDo das folgende löschen wenn das obige freigeschaltet ist und an den Stellen wo extract_gml_class aufgerufen wird die anderen beiden aufrufen und diese Funktion dann löschen nach Test.
+		 */
 		global $GUI;
 		
 		$result = $this->get_source_srid();
@@ -228,7 +228,7 @@ class Gml_extractor {
 		$formdata = array();
 		$fill_form_table = 'fill_form_' . $tablename;
 		$formdata = $this->$fill_form_table($gml_id);
-		$rect = ms_newRectObj();
+		// $rect = ms_newRectObj(); Wird später noch nicht genutzt, deshalb hier auskommentiert.
 
 		# iterate over all attributes as formvars
 		foreach ($formdata as $r_key => $r_value) {
@@ -338,15 +338,17 @@ class Gml_extractor {
 		$version = '5.1'; //default
 		$lines = file($this->gml_location);
 		$matched_ns_str;
-		$is_within_auszug = false; // check within auszug with linebreaks
+		$xml_bracket_is_opened = false; // check within auszug with linebreaks
 		foreach ($lines as $lineNumber => $line) {
-			if (strpos($line, 'XPlanAuszug') === false and $is_within_auszug === false) {
+			if (strpos($line, 'XPlanAuszug') === false AND $xml_bracket_is_opened == false) {
 				continue;
 			}
-			$is_within_auszug = true;
-			if (strpos($line, '>')) {
-				$is_within_auszug = false;
-			};
+			
+			# to also match formatted multiline XPlanAuszug
+			$xml_bracket_is_opened = true;
+			if (strpos($line, '>') !== false) {
+				$xml_bracket_is_opened = false;
+			}
 			# needs to check for both single and double quotes as both are permitted by XML spec
 			if (preg_match('/xplan="([^"]+)"/', $line, $matched_ns_str)) {
 				break; #found it
@@ -358,14 +360,13 @@ class Gml_extractor {
 				break; #found it
 			}
 			else {
-				$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
-				$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
+				#$msg  = 'Konnte XPlanAuszug oder Namespace xplan nicht in Datei finden.<br>';
+				#$msg .= 'Überprüfen Sie die Validität der XPlanung-Datei';
 				#$GUI->add_message('warning', $msg);
 				#$GUI->main = '../../plugins/xplankonverter/view/upload_xplan_gml.php';
 				#$GUI->output();
-				#echo 'Could not find XPlanAuszug. XPlan-file is not valid';
+				#echo 'Could not find XPlanAuszug. XPlan-file is not valid.<br>';
 			}
-			#echo 'could not find XPlan srsName within double quotes. checking single quotes:<br>';
 		}
 		#echo $matched_ns_str[1] . '<br>';
 
@@ -677,7 +678,13 @@ class Gml_extractor {
 				to_json((gmlas.status_codespace, gmlas.status, NULL)::xplan_gml.bp_status) AS status,
 				array_to_json(ARRAY[to_char(tbed.value, 'DD.MM.YYYY')]::date[]) AS traegerbeteiligungsenddatum,
 				array_to_json(gmlas.planart) AS planart,
-				gmlas.erschliessungsvertrag AS erschliessungsvertrag
+				gmlas.erschliessungsvertrag AS erschliessungsvertrag,
+				to_char(gmlas.versionbaunvodatum, 'DD.MM.YYYY') AS versionbaunvodatum,
+				gmlas.versionbaunvotext AS versionbaunvotext,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 			FROM
 				" . $this->gmlas_schema . ".bp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".bp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -695,8 +702,9 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp
-							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp,
+								false
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".bp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -777,7 +785,13 @@ class Gml_extractor {
 				(gmlas.sonstplanart_codespace, gmlas.sonstplanart, NULL)::xplan_gml.fp_sonstplanart AS sonstplanart,
 				gmlas.planart::xplan_gml.fp_planart AS planart,
 				to_char(gmlas.planbeschlussdatum, 'DD.MM.YYYY') AS planbeschlussdatum,
-				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum
+				to_char(gmlas.aufstellungsbeschlussdatum, 'DD.MM.YYYY') AS aufstellungsbeschlussdatum,
+				to_char(gmlas.versionbaunvodatum, 'DD.MM.YYYY') AS versionbaunvodatum,
+				gmlas.versionbaunvotext AS versionbaunvotext,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 			FROM
 				" . $this->gmlas_schema . ".fp_plan gmlas LEFT JOIN
 				" . $this->gmlas_schema . ".fp_plan_gemeinde gemeindelink ON gmlas.id = gemeindelink.parent_id LEFT JOIN
@@ -795,8 +809,9 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp
-							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp,
+								false
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".fp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -862,7 +877,11 @@ class Gml_extractor {
 					ELSE NULL
 				END AS externereferenz,
 				to_json((pg.name, pg.kennziffer)::xplan_gml.xp_plangeber) AS plangeber,
-				to_json((gmlas.planart_codespace, gmlas.planart, NULL)::xplan_gml.so_planart) AS planart
+				to_json((gmlas.planart_codespace, gmlas.planart, NULL)::xplan_gml.so_planart) AS planart,
+				to_char(gmlas.versionbaugbdatum, 'DD.MM.YYYY') AS versionbaugbdatum,
+				gmlas.versionbaugbtext AS versionbaugbtext,
+				to_char(gmlas.versionsonstrechtsgrundlagedatum, 'DD.MM.YYYY') AS versionsonstrechtsgrundlagedatum,
+				gmlas.versionsonstrechtsgrundlagetext AS versionsonstrechtsgrundlagetext
 				/*ARRAY[(g.ags,g.rs,g.gemeindename,g.ortsteilname)]::xplan_gml.xp_gemeinde[] AS gemeinde*/
 			FROM
 				" . $this->gmlas_schema . ".so_plan gmlas LEFT JOIN
@@ -881,8 +900,9 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp
-							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp,
+								false
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".so_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -916,6 +936,7 @@ class Gml_extractor {
 				"'" . $this->trim_gml_prefix_if_exists($gml_id) . "'::text::uuid AS plan_gml_id,
 				gmlas.xplan_name AS name,
 				gmlas.nummer AS nummer,
+				array_to_json(gmlas.bundesland::xplan_gml.xp_bundeslaender[]) AS bundesland,
 				gmlas.internalid AS internalid,
 				gmlas.beschreibung AS beschreibung,
 				gmlas.kommentar AS kommentar,
@@ -975,8 +996,9 @@ class Gml_extractor {
 								(e_sub.referenzmimetype_codespace, e_sub.referenzmimetype, NULL)::xplan_gml.xp_mimetypes,
 								e_sub.beschreibung,
 								to_char(e_sub.datum, 'DD.MM.YYYY'),
-								e_sub.typ::xplan_gml.xp_externereferenztyp
-							)::xplan_gml.xp_spezexternereferenz) AS externereferenz
+								e_sub.typ::xplan_gml.xp_externereferenztyp,
+								false
+							)::xplankonverter.xp_spezexternereferenzauslegung) AS externereferenz
 					FROM
 						" . $this->gmlas_schema . ".rp_plan_externereferenz externereferenzlink_sub LEFT JOIN
 						" . $this->gmlas_schema . ".xp_spezexternereferenz e_sub ON externereferenzlink_sub.xp_spezexternereferenz_pkid = e_sub.ogr_pkid
@@ -1115,16 +1137,30 @@ class Gml_extractor {
 					GROUP BY
 						externereferenzlink_sub.parent_id
 				) externeref ON ta.id = externeref.parent_id" : "");
-		$inverszu_texte_xp_plan = "CASE WHEN plan_texte.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM plan_texte.parent_id)))::text::uuid END";
+
+		if ($this->check_if_table_exists_in_schema($prefix . "_plan_texte", $this->gmlas_schema)) {
+			$inverszu_texte_xp_plan_insert = ",
+				inverszu_texte_xp_plan";
+			$inverszu_texte_xp_plan_select = ",
+				CASE WHEN plan_texte.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM plan_texte.parent_id)))::text::uuid END AS inverszu_texte_xp_plan";
+			$inverszu_texte_xp_plan_table = "
+				LEFT JOIN " . $this->gmlas_schema . "." . $prefix . "_plan_texte plan_texte ON ta.id = plan_texte.href_" . $prefix . "_textabschnitt_pkid";
+		}
+
 		if ($prefix == 'bp' AND $this->check_if_table_exists_in_schema("bp_wohngebaeudeflaeche_abweichungtext", $this->gmlas_schema)) {
-			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "
-				CASE WHEN wgf_at.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM wgf_at.parent_id)))::text::uuid END";
-			$bp_wohngebaeudeflaeche_abweichungtext = "
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert = ",
+				inverszu_abweichungtext_bp_wohngebaeudeflaeche";
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_select = ",
+				CASE WHEN wgf_at.parent_id IS NULL THEN NULL ELSE trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM wgf_at.parent_id)))::text::uuid END AS inverszu_abweichungtext_bp_wohngebaeudeflaeche";
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_table = "
 				LEFT JOIN " . $this->gmlas_schema . ".bp_wohngebaeudeflaeche_abweichungtext AS wgf_at ON ta.id = wgf_at.bp_textabschnitt_pkid";
+			for ($i = 0;$i < count($all_tables_with_reftextinhalt_suffix);$i++) {
+				#$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".href_" . $prefix . "_textabschnitt_pkid";
+				$sql .= " LEFT JOIN " . $this->gmlas_schema . "." . $all_tables_with_reftextinhalt_suffix[$i] . " ref" . $i. " ON " . "gmlas.id = ref" . $i . ".reftextinhalt_pkid";
+			}
 		}
 		else {
-			$inverszu_abweichungtext_bp_wohngebaeudeflaeche = "NULL";
-			$bp_wohngebaeudeflaeche_abweichungtext = '';
+			$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert = $inverszu_abweichungtext_bp_wohngebaeudeflaeche_select = $inverszu_abweichungtext_bp_wohngebaeudeflaeche_table = "";
 		}
 		# Textabschnitte zum Planobjekt, Assoziation: texte
 		$sql = "
@@ -1136,9 +1172,9 @@ class Gml_extractor {
 				rechtscharakter,
 				reftext,
 				user_id,
-				konvertierung_id,
-				inverszu_texte_xp_plan,
-				inverszu_abweichungtext_bp_wohngebaeudeflaeche
+				konvertierung_id" .
+				$inverszu_texte_xp_plan_insert .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_insert . "
 			)
 			SELECT
 				trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM ta.id)))::text::uuid AS gml_id,
@@ -1148,13 +1184,13 @@ class Gml_extractor {
 				ta.rechtscharakter::xplan_gml." . $prefix . "_rechtscharakter AS rechtscharakter,
 				" . $reftext . " AS reftext,
 				" . $user_id . " AS user_id,
-				" . $konvertierung_id . " AS konvertierung_id,
-				" . $inverszu_texte_xp_plan . " AS inverszu_texte_xp_plan,
-				" . $inverszu_abweichungtext_bp_wohngebaeudeflaeche . " AS inverszu_abweichungtext_bp_wohngebaeudeflaeche
+				" . $konvertierung_id . " AS konvertierung_id" .
+				$inverszu_texte_xp_plan_select .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_select . "
 			FROM
-				" . $this->gmlas_schema . "." . $table . " ta
-				LEFT JOIN " . $this->gmlas_schema . "." . $prefix . "_plan_texte plan_texte ON ta.id = plan_texte.href_" . $prefix . "_textabschnitt_pkid" .
-				$bp_wohngebaeudeflaeche_abweichungtext .
+				" . $this->gmlas_schema . "." . $table . " ta" .
+				$inverszu_texte_xp_plan_table .
+				$inverszu_abweichungtext_bp_wohngebaeudeflaeche_table .
 				$reftext_table . "
 		";
 		#echo '<br>SQL zum Eintragen der Textabschnitte zum Plan: ' . $sql; exit;
@@ -1169,14 +1205,21 @@ class Gml_extractor {
 		# Textabschnitte zu Fachobjekten, Assoziation: reftextinhalt
 		$tables_with_reftextinhalt = array_filter(
 			$this->get_all_tables_in_schema($this->gmlas_schema),
-			function($table_in_schema) {
+			function ($table_in_schema) {
 				return $this->string_ends_with($table_in_schema['table_name'], "_reftextinhalt");
 			}
 		);
+		$selects_reftextinhalt = array();
 		if(!empty($table_with_reftextinhalt)) {
-			$select_reftextinhalte = array();
-			foreach($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
-				$select_reftextinhalte[] = "
+			foreach ($tables_with_reftextinhalt AS $table_with_reftextinhalt) {
+				#$select_reftextinhalte[] = "
+				#	SELECT
+				#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
+				#		trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
+				#	FROM
+				#		" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
+				#";
+				$selects_reftextinhalt[] = "
 					SELECT
 						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM parent_id)))::text::uuid AS " . $prefix . "_objekt_gml_id,
 						trim(leading 'Gml_' FROM (trim(leading 'GML_' FROM href_" . $prefix . "_textabschnitt_pkid)))::text::uuid AS " . $prefix . "_textabschnitt_gml_id
@@ -1184,11 +1227,15 @@ class Gml_extractor {
 						" . $this->gmlas_schema . "." . $table_with_reftextinhalt['table_name'] . "
 				";
 			}
+		}
+		$this->pgdatabase->gui->write_xlog('tables_with_reftextinhalt: ' . print_r($tables_with_reftextinhalt, true));
+		$this->pgdatabase->gui->write_xlog('select_reftextinhalte: ' . print_r($selects_reftextinhalt, true));
+		if (count($selects_reftextinhalt) > 0) {
 			$sql = "
 				INSERT INTO xplan_gml." . $prefix . "_objekt_zu_" . $prefix . "_textabschnitt (
 					" . $prefix . "_objekt_gml_id,
 					" . $prefix . "_textabschnitt_gml_id
-				) SELECT * FROM (" . implode(' UNION ', $select_reftextinhalte) . ") AS reftextinhalte
+				) SELECT * FROM (" . implode(' UNION ', $selects_reftextinhalt) . ") AS reftextinhalte
 			";
 			#echo '<br>SQL zum Eintragen der Textabschnitte zu den Fachobjekten: ' . $sql; exit;
 			$ret = $this->pgdatabase->execSQL($sql, 4, 0);
@@ -1257,8 +1304,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* This function builds the basic xplan_gmlas tables for the basisobjekte of all schemas (xp, bp, fp, lp, rp, so)
-	*/
+	 * This function builds the basic xplan_gmlas tables for the basisobjekte of all schemas (xp, bp, fp, lp, rp, so)
+	 */
 	function build_basic_tables() {
 		# Prepare schema 
 		if ($this->check_if_schema_exists($this->gmlas_schema)) {
@@ -2019,6 +2066,27 @@ class Gml_extractor {
 			)
 			;
 
+			CREATE TABLE " . $this->gmlas_schema . ".xp_spezexternereferenzauslegung
+			(
+				ogc_fid serial NOT NULL,
+				ogr_pkid character varying NOT NULL,
+				georefurl character varying,
+				georefmimetype_codespace character varying,
+				georefmimetype character varying,
+				art character varying,
+				informationssystemurl character varying,
+				referenzname character varying,
+				referenzurl character varying,
+				referenzmimetype_codespace character varying,
+				referenzmimetype character varying,
+				beschreibung character varying,
+				datum date,
+				typ character varying NOT NULL,
+				nurzurauslegung boolean,
+				CONSTRAINT xp_spezexternereferenzauslegung_pkey PRIMARY KEY (ogc_fid)
+			)
+			;
+
 			CREATE TABLE " . $this->gmlas_schema . ".bp_plan_externereferenz
 			(
 				ogc_fid serial NOT NULL,
@@ -2224,8 +2292,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
-	*/
+	 * Finds and inserts all regeln from a specific konvertierung into the xplankonverter.regeln table
+	 */
 	function insert_all_regeln_into_db($konvertierung_id, $stelle_id) {
 		$geometry_type = ''; # Default
 		$bereiche_ids = $this->get_all_bereiche_ids_of_konvertierung($konvertierung_id);
@@ -2255,8 +2323,10 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns all bereiche of a specific konvertierung
-	*/
+	 * Returns all bereiche of a specific konvertierung
+	 * @param integer $konvertierung_id Die ID der Konvertierung für die die ids der Bereiche abgefragt werden.
+	 * @return array Ein assoziatives Array mit dem Schlüssel gml_id welches die gml_ids der Bereiche enthält.
+	 */
 	function get_all_bereiche_ids_of_konvertierung($konvertierung_id) {
 		# requests xp_bereich to work for all schemata
 		$sql = "
@@ -2273,8 +2343,8 @@ class Gml_extractor {
 	}
 
 	/*
-	* Returns the SQL of a specified regel for a specific class in a specific bereich with a specific geometry type
-	*/
+	 * Returns the SQL of a specified regel for a specific class in a specific bereich with a specific geometry type
+	 */
 	function get_gmlas_to_gml_regel_for_class_in_bereich_with_geom($gmlas_class, $bereich_id, $geom_type) {
 		$gml_class = $gmlas_class; # Is this always the case?
 		$gmlas_attributes = $this->get_attributes_with_values_for_class_in_schema($gmlas_class, $this->gmlas_schema);
@@ -2333,13 +2403,19 @@ class Gml_extractor {
 		$i = 0;
 		foreach ($norm_attributes AS $n_a) {
 			$i++;
+			$class_and_attr = $gml_class . "_" . $n_a;
+			// class is shortened by ogr if class+attribute are longer than 60 characters, currently only known for the following exception)
+			if($gml_class == "bp_verkehrsflaechebesondererzweckbestimmung" && $n_a == "wirddargestelltdurch") {
+				$class_and_attr = "bp_verkehrsflaecbesondererzweckbestimmu_wirddargestelltdurch";
+			}
+			
 			# check if table exists
 			$sql_checkexists_norm_table = "
 				SELECT 
 					EXISTS (
 						SELECT FROM information_schema.tables 
 						WHERE table_schema = '" . $this->gmlas_schema . "'
-						AND table_name = '" . $gml_class . '_' . $n_a . "'
+						AND table_name = '" . $class_and_attr . "'
 					)
 			";
 			$ret = $this->pgdatabase->execSQL($sql_checkexists_norm_table, 4, 0);
@@ -2348,7 +2424,9 @@ class Gml_extractor {
 				# single ' escaped later
 				$norm_1 = "norm_table_" . $i;
 				if ($n_a == "wirddargestelltdurch" OR $n_a == "dientzurdarstellungvon" OR $n_a == "reftextinhalt") {
-					$select_sql .= "(SELECT string_agg(href,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
+					
+					
+					$select_sql .= "(SELECT string_agg(lower(href),',') FROM " . $this->gmlas_schema . "." . $class_and_attr . " ". $norm_1 . " WHERE gmlas.id = " .$norm_1 . ".parent_id) AS " . $n_a . ",";
 					$gml_attributes[] = $n_a;
 				}
 				if ($n_a == "detailliertezweckbestimmung" OR $n_a == "zweckbestimmung") {
@@ -2378,8 +2456,8 @@ class Gml_extractor {
 						$norm_2 = "norm_table_" . $i . "_" . $i;
 						$norm_3 = "norm_table_" . $i . "_" . $i . "_" . $i;
 						$norm_4 = "norm_table_" . $i . "_" . $i . "_" . $i . "_" . $i;
-						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
-						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $gml_class . "_" . $n_a . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . '[]';
+						$select_sql .= "CASE WHEN (SELECT TRUE FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_2 . " WHERE " . $norm_2 . ".parent_id = gmlas.id LIMIT 1) THEN ARRAY[((SELECT DISTINCT codespace FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_3 . " WHERE gmlas.id = " . $norm_3 . ".parent_id LIMIT 1),";
+						$select_sql .= "(SELECT string_agg(value,',') FROM " . $this->gmlas_schema . "." . $class_and_attr . " " . $norm_4 . " WHERE gmlas.id = " . $norm_4 . ".parent_id),NULL)]::xplan_gml." . $special_datatype . '[]';
 						$select_sql .= " ELSE NULL END AS " . $n_a . ",";
 						$gml_attributes[] = $n_a;
 					}

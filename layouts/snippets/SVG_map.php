@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -8,221 +8,239 @@
 ###################################################################
 #
 ?>
-	
-	<script language="JavaScript">
-		var hasSVGSupport = false;
-		var useVBMethod = false;
 
-		if(navigator.appName != 'Microsoft Internet Explorer'){
-			hasSVGSupport = true;
-		}	
-//		if(navigator.mimeTypes != null && navigator.mimeTypes.length > 0){
-//			if(navigator.mimeTypes["image/svg-xml"] != null)	hasSVGSupport = true;
-//		}
-		else{
-		  useVBMethod = true;
-		}
-	</script>
+<script language="JavaScript">
+	var hasSVGSupport = false;
+	var useVBMethod = false;
 
-	<script language="VBScript">
-		' VB Script method to detect SVG viewer in IE
-		' this will not be run by browsers with no support for VB Script
-		On Error Resume Next
-		If useVBMethod = true Then
-    	hasSVGSupport = IsObject(CreateObject("Adobe.SVGCtl"))
-		End If
-	</script>
-	
-	<script language="JavaScript">
-		if (hasSVGSupport == true) {
-		// alles ok, nix machen
-		}
-		else{
-			document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/devnet/svg/adobe-svg-viewer-download-area.html">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
-		}
-	</script>
-		   
-		   
-  <SCRIPT type="text/ecmascript"><!--
-
-	var nbh = new Array();
-	
-  function go_cmd(cmd){
-    document.GUI.CMD.value  = cmd;
-		get_map_ajax('go=navMap_ajax', '', '');
-  }
-	
-	function moveback(){	
-		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	if (navigator.appName != 'Microsoft Internet Explorer') {
+		hasSVGSupport = true;
 	}
-	
-	function checkQueryFields(){
+	//		if(navigator.mimeTypes != null && navigator.mimeTypes.length > 0){
+	//			if(navigator.mimeTypes["image/svg-xml"] != null)	hasSVGSupport = true;
+	//		}
+	else {
+		useVBMethod = true;
+	}
+</script>
+
+<script language="VBScript">
+	' VB Script method to detect SVG viewer in IE
+	' this will not be run by browsers with no support for VB Script
+	On Error Resume Next
+	If useVBMethod = true Then
+	hasSVGSupport = IsObject(CreateObject("Adobe.SVGCtl"))
+	End If
+</script>
+
+<script language="JavaScript">
+	if (hasSVGSupport == true) {
+		// alles ok, nix machen
+	} else {
+		document.write('Ihr Browser hat keine SVG-Unterst&uuml;tzung. Bitte installieren Sie den <a target="_blank" href="http://www.adobe.com/devnet/svg/adobe-svg-viewer-download-area.html">Adobe SVG Viewer</a> oder verwenden Sie den Firefox Browser.');
+	}
+</script>
+
+
+<SCRIPT type="text/ecmascript">
+	<!--
+	var nbh = new Array();
+
+	function go_cmd(cmd) {
+		document.GUI.CMD.value = cmd;
+		get_map_ajax('go=navMap_ajax', '', '');
+	}
+
+	function moveback() {
+		document.getElementById("svghelp").SVGmoveback(); // das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}
+
+	function checkQueryFields() {
+		<? if ($this->user->rolle->singlequery == 2) {echo 'return true;';}	?>
 		var selected = false;
 		query_fields = document.getElementsByClassName('info-select-field');
-		for(var i = 0; i < query_fields.length; i++){
-			if(query_fields[i].checked){
+		for (var i = 0; i < query_fields.length; i++) {
+			if (query_fields[i].checked) {
 				selected = true;
 				break;
 			}
 		}
-		if(selected == false)message([{ 'type': 'warning', 'msg': '<? echo $strNoLayer; ?>' }]);
+		if (selected == false) message([{
+			'type': 'warning',
+			'msg': '<? echo $strNoLayer; ?>'
+		}]);
 		return selected;
 	}
-	
-  function sendpath(cmd,pathx,pathy)   {
-    path  = "";
-    switch(cmd) 
-    {
-     case "zoomin_point":
-      path = pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "zoomin";
-			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax', '', '');
-     break;
-     case "zoomout":
-      path = pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = cmd;
-			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax', '', '');
-     break;
-     case "zoomin_box":
-      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "zoomin";
-			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax', '', '');
-     break;
-		 case "zoomin_wheel":
-      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "zoomin_wheel";
-			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax', '', '');
-     break;
-     case "recentre":
-      path = pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = cmd;
-			document.GUI.go.value = "neu Laden";
-      get_map_ajax('go=navMap_ajax', '', '');
-     break;
-     case "pquery_point":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-      path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "pquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "pquery_box":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-      path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "pquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "touchquery_point":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-     	top.document.GUI.searchradius.value = "";
-      path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "touchquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "touchquery_box":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-     	top.document.GUI.searchradius.value = "";
-      path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "touchquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "ppquery_point":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-      document.GUI.searchradius.value = "";
-      path = pathx[0]+","+pathy[0]+";"+pathx[0]+","+pathy[0];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "ppquery";
-			document.GUI.go.value = "Sachdaten";
-			overlay_submit(document.GUI, true);
-     break;
-     case "ppquery_box":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-      top.document.GUI.searchradius.value = "";
-      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "ppquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "pquery_polygon":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-      path = pathx[0]+","+pathy[0]+";"+pathx[2]+","+pathy[2];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "pquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     case "polygonquery":
-			if(!checkQueryFields() || !checkForUnsavedChanges())break;
-     	for(i = 0; i < pathx.length-1; i++){
-     		path = path+pathx[i]+","+pathy[i]+";";
-     	}
-     	path = path+pathx[i]+","+pathy[i];
-      document.GUI.INPUT_COORD.value  = path;
-      document.GUI.CMD.value          = "polygonquery";
-			document.GUI.go.value = "Sachdaten";
-      overlay_submit(document.GUI, true);
-     break;
-     default:
-      path = pathx[0]+","+pathy[0];
-      alert("Keine Bearbeitung moeglich! \nUebergebene Daten: "+cmd+", "+path);
-     break;
-    }
+
+	function sendpath(cmd, pathx, pathy) {
+		path = "";
+		switch (cmd) {
+			case "zoomin_point": {
+				path = pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "zoomin";
+				document.GUI.go.value = "neu Laden";
+				get_map_ajax('go=navMap_ajax', '', '');
+			}
+			break;
+			case "zoomout": {
+				path = pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = cmd;
+				document.GUI.go.value = "neu Laden";
+				get_map_ajax('go=navMap_ajax', '', '');
+			}
+			break;
+			case "zoomin_box": {
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[2] + "," + pathy[2];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "zoomin";
+				document.GUI.go.value = "neu Laden";
+				get_map_ajax('go=navMap_ajax', '', '');
+			}
+			break;
+			case "zoomin_wheel": {
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[2] + "," + pathy[2];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "zoomin_wheel";
+				document.GUI.go.value = "neu Laden";
+				get_map_ajax('go=navMap_ajax', '', '');
+			}
+			break;
+			case "recentre": {
+				path = pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = cmd;
+				document.GUI.go.value = "neu Laden";
+				get_map_ajax('go=navMap_ajax', '', '');
+			}
+			break;
+			case "pquery_point": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "pquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "pquery_box": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "pquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "touchquery_point": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				top.document.GUI.searchradius.value = "";
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "touchquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "touchquery_box": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				top.document.GUI.searchradius.value = "";
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "touchquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "ppquery_point": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				document.GUI.searchradius.value = "";
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[0] + "," + pathy[0];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "ppquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "ppquery_box": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				top.document.GUI.searchradius.value = "";
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[2] + "," + pathy[2];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "ppquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "pquery_polygon": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				path = pathx[0] + "," + pathy[0] + ";" + pathx[2] + "," + pathy[2];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "pquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			case "polygonquery": {
+				if (!checkQueryFields() || !checkForUnsavedChanges()) break;
+				for (i = 0; i < pathx.length - 1; i++) {
+					path = path + pathx[i] + "," + pathy[i] + ";";
+				}
+				path = path + pathx[i] + "," + pathy[i];
+				document.GUI.INPUT_COORD.value = path;
+				document.GUI.CMD.value = "polygonquery";
+				document.GUI.go.value = "Sachdaten";
+				overlay_submit(document.GUI, true);
+			}
+			break;
+			default: {
+				path = pathx[0] + "," + pathy[0];
+				alert("Keine Bearbeitung moeglich! \nUebergebene Daten: " + cmd + ", " + path);
+			}
+			break;
+		}
 		document.GUI.go.value = "neu Laden";
-		document.GUI.legendtouched.value = 0;		// nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
-  }
-  
-  --></SCRIPT>
+		document.GUI.legendtouched.value = 0; // nach dem Submit kann das legendtouched-flag wieder auf 0 gesetzt werden
+	}
+	-->
+</SCRIPT>
 
 <?php
 #
 # PHP-Variabeln der SVG 
 #
-  $randomnumber = rand(0, 1000000);
-  $svgfile  = $randomnumber.'SVG_map.svg';
-	
-	global $last_x;$last_x = 0;
-	global $events;$events = true;
-	
-  include(LAYOUTPATH.'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
-	include(LAYOUTPATH.'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
-  include(LAYOUTPATH.'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
-  include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
-  include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
-  include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
-  $bg_pic   = $this->img['hauptkarte'];
-  $res_x    = $this->map->width;
-  $res_y    = $this->map->height;
-  $res_xm   = $this->map->width/2;
-  $res_ym   = $this->map->height/2;
-  $dx       = $this->map->extent->maxx-$this->map->extent->minx;
-  $dy       = $this->map->extent->maxy-$this->map->extent->miny;
-  $scale    = ($dx/$res_x+$dy/$res_y)/2;
-  $radius = $this->formvars['searchradius'] / $scale;	
+$randomnumber = rand(0, 1000000);
+$svgfile  = $randomnumber . 'SVG_map.svg';
+
+global $last_x;
+$last_x = 0;
+global $events;
+$events = true;
+
+include(LAYOUTPATH . 'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
+include(LAYOUTPATH . 'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
+include(LAYOUTPATH . 'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
+include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
+include(LAYOUTPATH . 'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
+include(LAYOUTPATH . 'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
+$bg_pic   = $this->img['hauptkarte'];
+$res_x    = $this->map->width;
+$res_y    = $this->map->height;
+$res_xm   = $this->map->width / 2;
+$res_ym   = $this->map->height / 2;
+$dx       = $this->map->extent->maxx - $this->map->extent->minx;
+$dy       = $this->map->extent->maxy - $this->map->extent->miny;
+$scale    = ($dx / $res_x + $dy / $res_y) / 2;
+$radius = (float)$this->formvars['searchradius'] / $scale;
 
 
-$fpsvg = fopen(IMAGEPATH.$svgfile,'w') or die('fail: fopen('.$svgfile.')');
-chmod(IMAGEPATH.$svgfile, 0666);
-$svg='<?xml version="1.0"?>
+$fpsvg = fopen(IMAGEPATH . $svgfile, 'w') or die('fail: fopen(' . $svgfile . ')');
+chmod(IMAGEPATH . $svgfile, 0666);
+$svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg id="svgmap" zoomAndPan="disable" width="'.$res_x.'" height="'.$res_y.'" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" onmouseup="top.dragstop(evt)"
+<svg id="svgmap" zoomAndPan="disable" width="' . $res_x . '" height="' . $res_y . '" onload="init();" onmousemove="mouse_move(evt);top.drag(evt);" onmouseup="top.dragstop(evt)" onmouseenter="mouse_enter(evt)" onmouseleave="mouse_leave(evt)"
   xmlns="http://www.w3.org/2000/svg" version="1.1"
   xmlns:xlink="http://www.w3.org/1999/xlink">
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>
@@ -235,10 +253,10 @@ $svg='<?xml version="1.0"?>
 	catch(e){
 	} 
 
-  var resx  = '.$res_x.';
-  var resy  = '.$res_y.';
-  var resx_m  = '.$res_xm.';
-  var resy_m  = '.$res_ym.';
+  var resx  = ' . $res_x . ';
+  var resy  = ' . $res_y . ';
+  var resx_m  = ' . $res_xm . ';
+  var resy_m  = ' . $res_ym . ';
   var pathx = new Array();
   var pathy = new Array();
 	var pathx_world = new Array();
@@ -258,7 +276,7 @@ $svg='<?xml version="1.0"?>
 	var current_freearrow;
   moving  = false;
   moved  = false;
-  var doing = "'.$this->user->rolle->selectedButton.'";
+  var doing = "' . $this->user->rolle->selectedButton . '";
 	var doing_save;
 	mouse_down = false;
   var cmd   = ""; 
@@ -293,12 +311,12 @@ $svg='<?xml version="1.0"?>
 			touchPanZoomThreshold = 17 // differences of drag vectors, to distinguish between pan and zoom on touch gestures;
 	';
 
-if($this->user->rolle->gps){
-	$svg.= '  
+if ($this->user->rolle->gps) {
+	$svg .= '  
   function update_gps_position(){
 		navigator.geolocation.getCurrentPosition(
 			function(position){		//success
-				var Projection = "'.$this->epsg_codes[$this->user->rolle->epsg_code]['proj4text'].'";
+				var Projection = "' . $this->epsg_codes[$this->user->rolle->epsg_code]['proj4text'] . '";
 				pos = top.proj4(Projection,[position.coords.longitude,position.coords.latitude]);
 				top.document.GUI.gps_posx.value = pos[0];
 				top.document.GUI.gps_posy.value = pos[1];
@@ -329,14 +347,14 @@ if($this->user->rolle->gps){
  	}
  	window.setInterval("update_gps_position()", 1000);';
 }
-$svg .='
-
-function startup(){';
-	if($this->user->rolle->gps){
-		$svg .='update_gps_position();';
-	}
-	$svg .='
-	if(get_measure_path()){
+$conditional_output = function ($condition, $output = '', $else = '') {
+	return ($condition ? $output : $else);
+};
+$EPSGCODE_ALKIS = EPSGCODE_ALKIS;
+$svg .= <<<FUNCTIONDEF
+function startup() {
+	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
+	if (get_measure_path()) {
 		redrawPL();
 	}
 	get_polygon_path();	
@@ -362,35 +380,51 @@ function prevent1(evt){
 	};
 }
 
-function applyZoom(){
-	var g = document.getElementById("moveGroup");
-	zx = g.getCTM().inverse();
-	pathx[0] = Math.round(zx.e);
-	pathy[0] = Math.round(zx.f);
-	pathx[2] = Math.round(zx.e + resx*zx.a); 
-	pathy[2] = Math.round(zx.f + resy*zx.a);
+function applyZoom() {
+	let g = document.getElementById("moveGroup");
+	let ctm = g.getCTM();
+	// prevent ctm.inverse() error due to a and d is 0
+	if (ctm.a == 0) {
+		ctm.a = 0.0001;
+	}
+	if (ctm.d == 0) {
+		ctm.d = 0.0001;
+	}
+	ctm = ctm.inverse();
+	pathx[0] = Math.round(ctm.e);
+	pathy[0] = Math.round(ctm.f);
+	pathx[2] = Math.round(ctm.e + resx * ctm.a);
+	pathy[2] = Math.round(ctm.f + resy * ctm.a);
+	// prevent no zoom due to pathx[0] and pathx[2] are equal
+	if (pathx[0] == pathx[2]) {
+		pathx[2] += 1;
+	}
 	sendpath("zoomin_wheel", pathx, pathy);
 }
 
-function mousewheelchange(evt){
-	if(doing == "polygonquery"){
+function mousewheelchange(evt) {
+	if (doing == "polygonquery") {
 		save_polygon_path();
 	}
-	if(doing == "measure"){
+	if (doing == "measure") {
 		save_measure_path();
 	}
 	remove_vertices();
-	if(!evt)evt = window.event; // For IE
-	if(top.document.GUI.stopnavigation.value == 0){
+	if (!evt) {
+		evt = window.event; // For IE
+	}
+	if (top.document.GUI.stopnavigation.value == 0) {
 		window.clearTimeout(mousewheelloop);
 		prevent1(evt);
-		if(evt.wheelDelta)
+		if (evt.wheelDelta) {
 			delta = evt.wheelDelta / 3600; // Chrome/Safari
-		else if(evt.detail)
+		}
+		else if (evt.detail) {
 			delta = evt.detail / -90; // Mozilla
-		var z = 1 + delta*5;
-		var p = getEventPoint(evt);
-		if(p.x > 0 && p.y > 0){
+		}
+		let z = 1 + delta * 5;
+		let p = getEventPoint(evt);
+		if (p.x > 0 && p.y > 0) {
 			zoomTransform(p, null, z, null);
 			mousewheelloop = window.setTimeout("applyZoom()", 400);
 		}
@@ -400,13 +434,23 @@ function mousewheelchange(evt){
 function zoomTransform(p, t, z, ctm) {
 	var g = document.getElementById("moveGroup");
 
-	if (t == null) t = { \'dx\': 0, \'dy\': 0 }
+	if (t == null) {
+		t = { 'dx': 0, 'dy': 0 }
+	}
 
-	if(ctm == null) ctm = g.getCTM();
-
+	if (ctm == null) {
+		ctm = g.getCTM();
+	}
+	// prevent ctm.inverse() error due to a and d is 0
+	if (ctm.a == 0) {
+		ctm.a = 0.0001;
+	}
+	if (ctm.d == 0) {
+		ctm.d = 0.0001;
+	}
 	p = p.matrixTransform(ctm.inverse());
 	var k = root.createSVGMatrix().translate(p.x, p.y).scale(z).translate(-p.x + t.dx, -p.y + t.dy);
-	setCTM(g, ctm.multiply(k)); 
+	setCTM(g, ctm.multiply(k));
 }
 
 /*
@@ -419,11 +463,11 @@ function getPinchDistance(evt) {
 
 function getTouchPositions(evt) {
 	var touchPositions = [{
-			\'x\': evt.touches[0].pageX,
-			\'y\': evt.touches[0].pageY
+			'x': evt.touches[0].pageX,
+			'y': evt.touches[0].pageY
 		}, {
-			\'x\': evt.touches[1].pageX,
-			\'y\': evt.touches[1].pageY
+			'x': evt.touches[1].pageX,
+			'y': evt.touches[1].pageY
 		}
 	]
 	return touchPositions
@@ -476,19 +520,19 @@ function touchmove(evt) {
 			
 			if (evt.touches.length == 2) {
 				var v = updateDragVectors(evt.touches),
-						doing = ((Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dx - v[0].dx))) > touchPanZoomThreshold ? \' zoom\' : \'pan\');
+						doing = ((Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dx - v[0].dx))) > touchPanZoomThreshold ? ' zoom' : 'pan');
 
 /*				console.log(
-					\'v1(\' + v[0].dx + \', \' + v[0].dy + \') \' +
-					\'v2(\' + v[1].dx + \', \' + v[1].dy + \') \' +
-					\'dv(\' + (v[1].dx - v[0].dx) + \', \' + (v[1].dy - v[0].dy) + \') \' +
-					\'s(\' + (Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dy - v[0].dy))) + \')\' +
-					\'doing: \' + doing
+					'v1(' + v[0].dx + ', ' + v[0].dy + ') ' +
+					'v2(' + v[1].dx + ', ' + v[1].dy + ') ' +
+					'dv(' + (v[1].dx - v[0].dx) + ', ' + (v[1].dy - v[0].dy) + ') ' +
+					's(' + (Math.abs((v[1].dx - v[0].dx)) + Math.abs((v[1].dy - v[0].dy))) + ')' +
+					'doing: ' + doing
 				);
 */
 			}
 			if(p.x > 0 && p.y > 0){
-				if (doing == \'pan\') {
+				if (doing == 'pan') {
 					t = v[0];
 				}
 				zoomTransform(p, t, z, start_ctm);
@@ -540,19 +584,19 @@ function getEventPoint(evt) {
 
 function init(){
 	// Bug Workaround fuer Firefox
-	var nav_button_bg = document.querySelector(\'.navbutton_bg\');
-	nav_button_bg.setAttribute(\'width\', parseInt(nav_button_bg.getAttribute(\'width\')) + 0.01);
+	var nav_button_bg = document.querySelector('.navbutton_bg');
+	nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
 	startup();
 	if(top.browser != "ie"){
 		document.getElementById("mapimg2").addEventListener("load", function(evt) { moveback(evt); }, true);
 	}
 	if (window.addEventListener) {
-			window.addEventListener(\'mousewheel\', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
-  		window.addEventListener(\'DOMMouseScroll\', mousewheelchange, {passive: false});		//Firefox
-			document.getElementById(\'canvas\').addEventListener(\'touchstart\', touchstart, false);		//touchstart
-			document.getElementById(\'canvas\').addEventListener(\'touchmove\', touchmove, false);		//touchmove
-			document.getElementById(\'canvas\').addEventListener(\'touchend\', touchend, false);		//touchend
-			document.getElementById(\'canvas\').addEventListener(\'touchcancel\', prevent, false);		//touchcancel
+			window.addEventListener('mousewheel', mousewheelchange, {passive: false}); // Chrome/Safari//IE9
+  		window.addEventListener('DOMMouseScroll', mousewheelchange, {passive: false});		//Firefox
+			document.getElementById('canvas').addEventListener('touchstart', touchstart, false);		//touchstart
+			document.getElementById('canvas').addEventListener('touchmove', touchmove, false);		//touchmove
+			document.getElementById('canvas').addEventListener('touchend', touchend, false);		//touchend
+			document.getElementById('canvas').addEventListener('touchcancel', prevent1, false);		//touchcancel
   }
   else {
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
@@ -568,7 +612,7 @@ top.document.getElementById("svghelp").SVGmoveback = moveback;
 function moveback(evt){
 	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
-	window.setTimeout(\'document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();\', 200);
+	window.setTimeout('document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();', 200);
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -578,8 +622,8 @@ function moveback(evt){
 	hidetooltip(evt);
 	// Navigation wieder erlauben
 	top.stopwaiting();
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("href", "")\', 400);
-	window.setTimeout(\'document.getElementById("mapimg2").setAttribute("style", "display:none")\', 400);	
+	window.setTimeout('document.getElementById("mapimg2").setAttribute("href", "")', 400);
+	window.setTimeout('document.getElementById("mapimg2").setAttribute("style", "display:none")', 400);	
 }
 
 
@@ -674,7 +718,7 @@ function pquery(){
 
 // in pquery() und pquery_prompt() aufgeteilt, da der Promt sonst auch bei jedem reload erscheint   
 function pquery_prompt(){     
-  top.document.GUI.searchradius.value=prompt("' . $strRequestForSearchRadius . '.",top.document.GUI.searchradius.value);
+  top.document.GUI.searchradius.value=prompt("{$strRequestForSearchRadius}",top.document.GUI.searchradius.value);
   set_suchkreis();
 }
 
@@ -683,21 +727,23 @@ function set_suchkreis(){
   document.getElementById("suchkreis").setAttribute("r", radius);
 }
 
-function polygonquery(){
-	if((measuring || polydrawing) && (top.document.GUI.punktfang.checked)){
+function polygonquery() {
+	if ((measuring || polydrawing) && (top.document.GUI.punktfang.checked)) {
 		remove_vertices();
 		request_vertices();
 	}
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
-	if(top.document.GUI.str_polypathx.value != ""){
+	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
+		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
+	}
+	if (top.document.GUI.str_polypathx.value != "") {
 		polydrawing = true;
 		top.document.GUI.str_polypathx.value = "";
 		top.document.GUI.str_polypathy.value = "";
 	}
-	else{
+	else {
 		deletepolygon();
 	}
 }
@@ -733,9 +779,11 @@ function measure(){
 		request_vertices();
 	}
 	options1 = top.document.getElementById("options");
-	options1.innerHTML=\'<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang\';
+	options1.innerHTML='<input type="checkbox" onclick="toggle_vertices()" name="orthofang">&nbsp;Ortho-Fang';
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
-	if('.$this->user->rolle->epsg_code.' == '.EPSGCODE_ALKIS.')top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
+	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
+		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
+	}
   doing = "measure";
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
@@ -852,13 +900,21 @@ function world2pixelsvg(pathWelt){
 
 // -------------------------mausinteraktionen auf canvas------------------------------
 
+function mouse_enter(evt){
+	prevent = 0;		// Objektschnellinfo wieder mehr machen
+}
+
+function mouse_leave(evt){
+	prevent = 1;		// Objektschnellinfo nicht mehr machen
+}
+
 function mouse_move(evt){
 	top.coords_anzeige(evt, null);
 	if(doing == "ppquery"){
 		hidetooltip(evt);
 	}
 	if (top.compare_clipping) {
-		document.getElementById(\'compare_clipper_rect\').setAttribute(\'width\', evt.clientX);
+		document.getElementById('compare_clipper_rect').setAttribute('width', evt.clientX);
 	}
 }		
 
@@ -950,7 +1006,7 @@ function mousedown(evt){
 	    }
 	   break;
 	   default:
-	    alert("Fehlerhafte Eingabe! \nUebergebene Daten: "+cmd+", "+doing);
+	    alert(`Fehlerhafte Eingabe!\nÜbergebene Daten: \${cmd}, \${doing}`);
 	   break;
 	  }
 	}
@@ -963,7 +1019,7 @@ function mousemove(evt){
 	      add_current_point(evt);
 	    }
 	    else {
-	    show_tooltip(\'' . $strSetStartPoint . '\',evt.clientX,evt.clientY)
+	    show_tooltip('{$strSetStartPoint}',evt.clientX,evt.clientY)
 	    }
 	 break;
 	 		
@@ -1024,7 +1080,7 @@ function addnewtext(evt){
 
 function create_new_freetext(x, y){
 	var newtext = document.createElementNS("http://www.w3.org/2000/svg","text");
-  newtext.setAttributeNS(null, "style", "fill:' . $this->user->rolle->redline_text_color . '; font-size:' . $this->user->rolle->redline_font_size . 'px; font-family:' . $this->user->rolle->redline_font_family . '; font-weight:' . $this->user->rolle->redline_font_weight . ';");
+  newtext.setAttributeNS(null, "style", "fill: {$this->user->rolle->redline_text_color}; font-size: {$this->user->rolle->redline_font_size}px; font-family: {$this->user->rolle->redline_font_family}; font-weight: {$this->user->rolle->redline_font_weight};");
 	newtext.setAttributeNS(null, "transform", "scale(1,-1)");
 	newtext.setAttributeNS(null, "x", x);
 	newtext.setAttributeNS(null, "y", -y);
@@ -1494,8 +1550,8 @@ function calculate_reduction(pathx, pathy){
 	return k;
 }
 
-function calculate_distance(x1, y1, x2, y2){
-	if('.$this->user->rolle->epsg_code.' == 4326){
+function calculate_distance(x1, y1, x2, y2) {
+	if ({$this->user->rolle->epsg_code} == 4326) {
 		distance = '.EARTH_RADIUS.' * Math.acos(Math.sin(y1*Math.PI/180) * Math.sin(y2*Math.PI/180) + Math.cos(y1*Math.PI/180) * Math.cos(y2*Math.PI/180) * Math.cos((x2 - x1)*Math.PI/180))
 	}
 	else{
@@ -1528,12 +1584,12 @@ function showSectionMeasurement(j){
 	top.document.getElementById("measurement").value = top.format_number(new_distance, false, freehand_measuring, true);
 }
 
-function showMeasurement(evt){
+function showMeasurement(evt) {
   var track = 0, output = "";
-	j = pathx_world.length-1;
+	j = pathx_world.length - 1;
   new_distance = measured_distance + calculate_distance(pathx_world[j-1], pathy_world[j-1], pathx_world[j], pathy_world[j]);
   track = top.format_number(new_distance, false, freehand_measuring, true);
-  output = "' . $strDistanceTotal . ': " + track + " m";
+  output = "{$strDistanceTotal}: " + track + " m";
   show_tooltip(output, evt.clientX, evt.clientY);
 }
 
@@ -1741,34 +1797,32 @@ function highlightbyid(id){
 
 
 // ----------------------koordinatenausgabe in statuszeile---------------------------
-'.$SVGvars_coordscript.'
+{$SVGvars_coordscript}
 
 // -------------------------tooltip-ausgabe fuer buttons------------------------------
-'.$SVGvars_tooltipscript.'
+{$SVGvars_tooltipscript}
 
 // -------------------------querytooltip------------------------------
-'.$SVGvars_querytooltipscript.'
+{$SVGvars_querytooltipscript}
 
 ]]></script>
 
   <defs id="defs">
-'.$SVGvars_defs.'	
+		{$SVGvars_defs}
   </defs> 
   <rect id="background" style="fill:white" width="100%" height="100%"/>
   <g id="moveGroup" transform="translate(0 0)">
-    <image id="mapimg" href="'.$bg_pic.'" height="100%" width="100%" y="0" x="0"/>
-    <g id="cartesian" transform="translate(0,'.$res_y.') scale(1,-1)">
+    <image id="mapimg" xlink:href="{$bg_pic}" height="100%" width="100%" y="0" x="0"/>
+    <g id="cartesian" transform="translate(0,{$res_y}) scale(1,-1)">
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
 			<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
       <polyline points="" id="polyline" marker-start="url(#measure_start)" marker-end="url(#measure_end)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
-      <circle id="suchkreis" cx="-100" cy="-100" r="'.$radius.'" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
+      <circle id="suchkreis" cx="-100" cy="-100" r="{$radius}" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">
-			</g>';
-if($this->user->rolle->gps){
-	 $svg.=' <use id="gps_position" xlink:href="#crosshair_red" x="-100000" y="-100000"/>';
-}
-$svg.='
+			</g>
+
+			{$conditional_output($this->user->rolle->gps, '<use id="gps_position" xlink:href="#crosshair_red" x="-100000" y="-100000"/>')}
     </g>
   </g>
 	<g id="mapimg2_group">
@@ -1776,39 +1830,40 @@ $svg.='
   </g>
 	
   <rect id="canvas" cursor="crosshair" onmousedown="mousedown(evt)" onmousemove="mousemove(evt);" onmouseup="mouseup(evt);" width="100%" height="100%" opacity="0"/>
-		<g id="vertices" transform="translate(0,'.$res_y.') scale(1,-1)">
+		<g id="vertices" transform="translate(0,{$res_y}) scale(1,-1)">
 			<circle id="kreis" cx="-500" cy="-500" r="7" opacity="0.1" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="add_vertex(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.8" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
 		</g>
     <g id="buttons" onmouseout="hide_tooltip()" onmousemove="get_bbox();" onmousedown="hide_tooltip()" cursor="pointer">
-			<rect x="0" y="0" rx="3" ry="3" width="'.$last_x.'" height="36" class="navbutton_bg"/>
-'.$SVGvars_mainnavbuttons.'
+			<rect x="0" y="0" rx="3" ry="3" width="{$last_x}" height="36" class="navbutton_bg"/>
+			{$SVGvars_mainnavbuttons}
     </g>
 		<g id="tooltipgroup" onmouseover="prevent=1;" onmouseout="prevent=0;">
     	<rect id="frame" width="0" height="20" rx="5" ry="5" style="fill-opacity:0.8;fill:rgb(255, 250, 240);stroke:rgb(140, 140, 140);stroke-width:1.5"/>
     	<text id="querytooltip" x="100" y="100" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
-    	<text id="link0" cursor="pointer" onmousedown="top.document.body.style.cursor=\'pointer\';" onmousemove="top.document.body.style.cursor=\'pointer\';" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
+    	<text id="link0" cursor="pointer" onmousedown="top.document.body.style.cursor='pointer';" onmousemove="top.document.body.style.cursor='pointer';" style="text-anchor:start;fill:rgb(0,0,200);stroke:none;font-size:10px;font-family:Arial;font-weight:bold"></text>
 			<g id="tooltipcontent">
 			</g>	
     </g>
 
-'.$SVGvars_tooltipblank.'
-</svg>';
+		{$SVGvars_tooltipblank}
+</svg>
+FUNCTIONDEF;
 
 #
 # erstellen der SVG
-  fputs($fpsvg, $svg);
-  fclose($fpsvg);
+fputs($fpsvg, $svg);
+fclose($fpsvg);
 
 #
 # aufrufen der SVG
 # 
 # EMBED-Tag in externe Datei Embed.js ausgelagert, da man sonst im IE die SVG erst aktivieren (anklicken) muss (MS-Update vom 11.04.2006)
 # Variablen die dann in Embed.js benutzt werden:
-echo'
-  <input type="hidden" name="srcpath1" value = "'.TEMPPATH_REL.$svgfile.'">
-  <input type="hidden" name="breite1" value = "'.$res_x.'">
-  <input type="hidden" name="hoehe1" value = "'.$res_y.'">
+echo '
+  <input type="hidden" name="srcpath1" value = "' . TEMPPATH_REL . $svgfile . '">
+  <input type="hidden" name="breite1" value = "' . $res_x . '">
+  <input type="hidden" name="hoehe1" value = "' . $res_y . '">
 ';
 #                  >>> object-tag: wmode="transparent" (hoehere anforderungen beim rendern!) <<<
 #echo '<EMBED align="center" SRC="'.TEMPPATH_REL.$svgfile.'" TYPE="image/svg+xml" width="'.$res_x.'" height="'.$res_y.'" PLUGINSPAGE="http://www.adobe.com/svg/viewer/install/"/>';
@@ -1816,5 +1871,3 @@ echo'
 echo '<script src="funktionen/Embed.js" language="JavaScript" type="text/javascript"></script>';
 
 ?>
-
-		

@@ -47,8 +47,8 @@ class ShapeFile extends PgObject {
 	}
 
 	function dataTableName() {
-		#$this->debug->show('Wandel ' . $this->get('filename') . ' to ' . 'shp_'. strtolower(umlaute_umwandeln($this->get('filename'))));
-		return 'shp_'. strtolower(umlaute_umwandeln($this->get('filename')));
+		#$this->debug->show('Wandel ' . $this->get('filename') . ' to ' . 'shp_'. strtolower(sonderzeichen_umwandeln($this->get('filename'))));
+		return 'shp_'. strtolower(sonderzeichen_umwandeln($this->get('filename')));
 	}
 
 	function uploadShapePath() {

@@ -153,14 +153,9 @@ function fortfuehrungslisten_add_user_names($GUI) {
 			{$field_name}
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
-	$user_names = array_map(
-		function($row) {
-			return $row[array_keys($row)[0]];
-		},
-		pg_fetch_all($result[1])
-	);
-	$GUI->attributes['enum_value'][$GUI->attributes['indizes'][$field_name]] = $user_names;
-	$GUI->attributes['enum_output'][$GUI->attributes['indizes'][$field_name]] = $user_names;
+	while ($rs = pg_fetch_assoc($result[1])) {
+		$GUI->attributes['enum'][$GUI->attributes['indizes'][$field_name]][$rs['username']]['output'] = $rs['username'];
+	}
 	return $GUI->attributes;
 }
 
@@ -193,8 +188,7 @@ function fortfuehrungslisten_add_flurstuecke($GUI) {
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
 	while ($rs = pg_fetch_assoc($result[1])) {
-		$GUI->attributes['enum_value'][$GUI->attributes['indizes'][$field_name]][] = $rs['value'];
-		$GUI->attributes['enum_output'][$GUI->attributes['indizes'][$field_name]][] = $rs['output'];
+		$GUI->attributes['enum'][$GUI->attributes['indizes'][$field_name]][$rs['value']]['output'] = $rs['output'];
 	}
 
 	return $GUI->attributes;
@@ -223,8 +217,7 @@ function fortfuehrungslisten_add_fluren($GUI) {
 	";
 	$result = $GUI->pgdatabase->execSQL($sql, 4, 0);
 	while ($rs = pg_fetch_assoc($result[1])) {
-		$GUI->attributes['enum_value'][$GUI->attributes['indizes'][$field_name]][] = $rs['flur'];
-		$GUI->attributes['enum_output'][$GUI->attributes['indizes'][$field_name]][] = $rs['flur'];
+		$GUI->attributes['enum'][$GUI->attributes['indizes'][$field_name]][$rs['flur']]['output'] = $rs['flur'];
 	}
 
 	return $GUI->attributes;

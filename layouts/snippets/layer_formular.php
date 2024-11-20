@@ -1,9 +1,16 @@
 <?php
 	global $supportedLanguages;
-	$language_file = 'languages/layer_formular_' . $this->user->rolle->language . '.php';
-	include(LAYOUTPATH . $language_file);
-	include(PLUGINS . 'mobile/' . $language_file);
-	include(PLUGINS . 'portal/' . $language_file);
+	$language_file_name = 'layer_formular_' . $this->user->rolle->language . '.php';
+
+	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'mobile/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
+	$language_file = PLUGINS . 'portal/languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 	include_once(CLASSPATH . 'FormObject.php'); ?>
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <script type="text/javascript">
@@ -102,6 +109,169 @@
 		document.getElementById(id+'_link').style.color = '#111';
 	}
 
+	function mandatoryValuesMissing() {
+		if (document.getElementById('gruppe-select').value == '') {
+			message([{ type: 'error', msg: 'Es muss eine Gruppe ausgewählt sein!'}]);
+			return true;
+		}
+		return false;
+	}
+
+	function loadMaintables(connection_id) {
+		fetch(`index.php?go=Layereditor_get_maintables&connection_id=${connection_id}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`)
+		.then(response => {
+				if (!response.ok) {
+					message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection.<p>HTTP-Status Code: ${response.status} ${response.statusText}` }]);
+					response.text().then(text => {
+						message([{ type: 'error', msg: `<p>${text}` }]);
+					});
+				}
+
+				const contentType = response.headers.get("content-type");
+				if (contentType && contentType.indexOf("application/json") !== -1) {
+					response.json().then(data => {
+						if (data.success) {
+							if (data.tables.length == 0) {
+								$('#maintables_tr').hide();
+								resetForm('GUI');
+								message([{ type: 'info', msg: `<? echo $strNoConnectionIdSelected; ?>`}]);
+							}
+							else {
+								let maintableSelectField = document.getElementById("maintable_select");
+								data.tables.forEach((maintable) => {
+									let option = document.createElement("option");
+									option.text = `${connection_id}.${maintable.schema_name}.${maintable.name}`;
+									maintableSelectField.add(option);
+								});
+								$('#maintables_tr').show();
+							}
+						}
+						else {
+							message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection. ${data.err_msg}` }]);
+						}
+					});
+				}
+				else {
+					console.log('Es ist kein JSON');
+					response.text().then(text => {
+						console.log(text);
+						message([{ type: 'error', msg: `Fehler bei der Abfrage der Tabellen der Connection.<p>${text}` }]);
+					});
+				}
+			})
+			.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+	}
+
+	function fillFromMaintable(value) {
+		let elm = document.getElementById("GUI").elements;
+		if (value) {
+			let [connection_id, schema_name, table_name] = value.split('.');
+			elm["Name"].value = table_name;
+			elm["alias"].value = table_name.split('_').map((word) => { return word[0].toUpperCase() + word.substring(1); }).join(" ");
+			elm["connectiontype"].value = 6;
+			elm["connectiontype"].onchange();
+			elm["connection_id"].value = connection_id;
+			elm["maintable"].value = table_name;
+			elm["schema"].value = schema_name;
+			elm["sizeunits"].value = 6;
+
+			fetch(`index.php?go=Layereditor_info_from_maintable&connection_id=${connection_id}&schema_name=${schema_name}&table_name=${table_name}&csrf_token=<? echo $_SESSION['csrf_token']; ?>`)
+				.then(response => {
+					if (!response.ok) {
+						message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>HTTP-Status Code: ${response.status} ${response.statusText}` }]);
+						response.text().then(text => {
+							message([{ type: 'error', msg: `<p>${text}` }]);
+						});
+					}
+
+					const contentType = response.headers.get("content-type");
+					if (contentType && contentType.indexOf("application/json") !== -1) {
+						response.json().then(data => {
+							console.log(data);
+							if (data.success) {
+								let elm = document.getElementById("GUI").elements;
+								elm["epsg_code"].value = data.epsg_code || '';
+								elm["oid"].value = data.oid_column;
+								elm["Datentyp"].value = data.Datentyp;
+								elm["pfad"].value =
+`SELECT
+  *
+FROM
+  ${data.table_name}
+WHERE
+  true`;
+								elm["Data"].value = (data.geom_column ? `${data.geom_column} from (
+select
+  ${data.oid_column},
+  ${data.geom_column}
+from
+  ${data.schema_name}.${data.table_name}
+) as foo using unique ${data.oid_column} using srid=${data.epsg_code}` : '');
+							}
+							else {
+								message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten. ${data.err_msg}` }]);
+							}
+						});
+					}
+					else {
+						console.log('Es ist kein JSON');
+						response.text().then(text => {
+							console.log(text);
+							message([{ type: 'error', msg: `Fehler bei der Abfrage der Maintable-Daten.<p>${text}` }]);
+						});
+					}
+				})
+				.catch(error => message([ { type: 'error', msg: `${error.message}`}]));
+		}
+		else {
+			resetForm('GUI');
+		}
+	}
+
+	function resetForm(form) {
+		let elm = document.getElementById(form).elements;
+		elm["Name"].value = '';
+		elm["alias"].value = '';
+		elm["connectiontype"].value = '';
+		elm["connectiontype"].onchange();
+		elm["connection_id"].value = '';
+		elm["maintable"].value = '';
+		elm["schema"].value = '';
+		elm["sizeunits"].value = '';
+		elm["epsg_code"].value = '';
+		elm["oid"].value = '';
+		elm["Datentyp"].value = '';
+		elm["pfad"].value = '';
+		elm["Data"].value = '';
+	}
+
+	function unselectItem(evt) {
+		console.log('click on ', evt.target);
+		const datasource_id = $(evt).attr('datasource_id');
+		$(evt).parent().remove();
+		//console.log('unselect datasource_id', datasource_id);
+		$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', false);
+		$(`.selected-item[datasource_id="${datasource_id}"]`)
+			.toggleClass('selectable-item selected-item')
+			.on('click', (evt) => {
+				const datasource_id = $(evt.target).attr('datasource_id');
+				//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
+				// add clicked item to chosen-choices and select in select field
+				$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+				$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
+				$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
+				$('#chosen-drop').hide();
+				$('#add-item-button').show();
+			})
+			.on('mouseover', (evt) => {
+				//console.log('mouseover on selectable-item', evt.target);
+				$(evt.target).toggleClass('highlighted-item').siblings().removeClass('highlighted-item');
+			});
+
+		$('#add-item-button').show();
+		$('#chosen-drop').hide();
+	}
+
 	keypress_bound_ctrl_s_button_id = 'layer_formular_submit_button';
 </script>
 
@@ -158,24 +328,60 @@
 
 <table>
 	<tr>
-		<td style="">
+		<th align="right">
 			<span class="px17 fetter"><? echo $strLayer;?>:</span>
-      <select id="selected_layer_id" style="width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
-      <option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option>
-        <?
-    		for($i = 0; $i < count($this->layerdaten['ID']); $i++){
-    			echo '<option';
-    			if($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
-    				echo ' selected';
-    			}
-    			echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
-    		}
-    	?>
-      </select>
 		</td>
-  </tr>
+    <td>
+			<select id="selected_layer_id" style="min-width:250px" size="1" name="selected_layer_id" onchange="document.GUI.submit();" <?php if(count($this->layerdaten['ID'])==0){ echo 'disabled';}?>>
+				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
+				for ($i = 0; $i < count($this->layerdaten['ID']); $i++){
+					echo '<option';
+					if ($this->layerdaten['ID'][$i] == $this->formvars['selected_layer_id']){
+						echo ' selected';
+					}
+					echo ' value="'.$this->layerdaten['ID'][$i].'">' . $this->layerdaten['Bezeichnung'][$i] . ($this->layerdaten['alias'][$i] != '' ? ' [' . $this->layerdaten['alias'][$i] . ']' : '') . '</option>';
+				} ?>
+			</select>
+		</td>
+	</tr><?
+	if (!$this->formvars['selected_layer_id']) { ?>
+		<tr>
+			<td align="right">
+				<span class="px17 fetter"><?php echo $strConnection; ?>:</span>
+			</td>
+			<td><?
+				echo FormObject::createSelectField(
+					'connection_select',
+					array_map(
+						function($connection) {
+							return array('value' => $connection->get('id'), 'output' => $connection->get_connection_string() . ' id: ' . $connection->get_id());
+						},
+						$this->connections
+					),
+					$this->formvars['connection_select'],
+					1,
+					'style="margin-left: 5px"',
+					'loadMaintables(this.value)',
+					'',
+					'',
+					'',
+					'--------- ' . $this->strPleaseSelect . '--------'
+				); ?>
+			</td>
+		</tr>
+		<tr id="maintables_tr" style="display: none">
+			<td align="right">
+				<span class="px17 fetter"><? echo $strMaintable; ?>:</span>
+			</td>
+			<td>
+				<select id="maintable_select" onchange="fillFromMaintable(this.value)">
+					<option value="">--------- <? echo $this->strPleaseSelect; ?>--------</option>
+				</select>
+				<span data-tooltip="<? echo $strNewLayerFromMaintableHint; ?>"></span>
+			</td>
+		</tr><?
+	} ?>
 </table>
-
 <a style="float: right; margin-top: -30px; margin-right: 10px;" href="javascript:window.scrollTo(0, document.body.scrollHeight);"	title="nach unten">
 	<i class="fa fa-arrow-down hover-border" aria-hidden="true"></i>
 </a>
@@ -185,16 +391,35 @@
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
-					<? } ?>
-					<th><a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
-					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
-					<? } ?>
+					<th>
+						<a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a>
+					</th><?
+					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a>
+						</th>
+						<th>
+							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+						</th><?
+					}
+					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a>
+					</th><?
+					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a>
+						</th><?
+					}
+					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>
@@ -289,7 +514,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strGroup; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 							$group_options = array_map(
 								function($group) {
@@ -310,16 +535,16 @@
 								);
 							}
 							echo FormObject::createSelectField(
-								'Gruppe',																# name
-								$group_options,													# options
-								$this->formvars['Gruppe'],							# value
-								1,																			# size
-								'',																			# style
-								'',			# onchange
-								'gruppe-select',												# id
-								'',																			# multiple
-								'',																			# class
-								'-- ' . $this->strPleaseSelect . ' --'	# first option
+								'Gruppe',																	# name
+								$group_options,														# options
+								$this->formvars['Gruppe'],								# value
+								1,																				# size
+								'',																				# style
+								'document.GUI.gruppenaenderung.value=1',	# onchange
+								'gruppe-select',													# id
+								'',																				# multiple
+								'',																				# class
+								'-- ' . $this->strPleaseSelect . ' --'		# first option
 							); ?>
 							<i class="fa fa-pencil" aria-hidden="true" onclick="showGruppenEditor($('#gruppe-select').val(), <? echo $this->formvars['selected_layer_id']; ?>)" style="margin-left: 5px"></i>
 						</td>
@@ -362,7 +587,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strConnection; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<div id="connection_div" <? if($this->formvars['connectiontype'] == MS_POSTGIS){echo 'style="display: none"';} ?>>
 								<textarea id="connection" name="connection" cols="33" rows="2"><?	echo $this->formvars['connection']; ?></textarea>
@@ -462,6 +687,12 @@
 					<tr align="center">
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strMapParameters; ?></th>
 					</tr>
+					<tr>
+						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strDrawingOrder; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="20">&nbsp;
+						</td>
+					</tr>					
 					<tr>
 						<th class="fetter" align="right" style="width:300px; border-bottom:1px solid #C3C7C3"><?php echo $strSelectionType; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
@@ -614,7 +845,7 @@
 					</tr>
 					<? } ?>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTolerance; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="tolerance" type="text" value="<?php echo $this->formvars['tolerance']; ?>" size="50" maxlength="100">
 						</td>
@@ -642,12 +873,14 @@
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
 								include_once(CLASSPATH . 'Layer.php');
-								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']); ?>
-								<ul><?
-								foreach($this->layer->charts AS $chart) { ?>
-									<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+								if ($this->layer) { ?>
+									<ul><?
+										foreach($this->layer->charts AS $chart) { ?>
+											<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+										} ?>
+									</ul><?php
 								} ?>
-								</ul>
 							</div>
 							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 								<i class="fa fa-pencil" aria-hidden="true" style="margin-top: 5px; margin-left: 5px"></i>
@@ -661,7 +894,7 @@
 						<th class="fetter layerform_header"  style="border-bottom:1px solid #C3C7C3" colspan="3"><?php echo $strOWSParameter; ?></th>
 					</tr>
 					<tr>
-						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?></th>
+						<th class="fetter" width="300" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strOwsSrs; ?>*</th>
 						<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="ows_srs" type="text" value="<?php echo $this->formvars['ows_srs']; ?>" size="50" maxlength="255">
 						</td>
@@ -679,7 +912,7 @@
 						</td>
 					</tr>				
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSServerVersion; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="wms_server_version">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -691,7 +924,7 @@
 						</td>
 					</tr>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strWMSFormat; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="wms_format">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
@@ -759,10 +992,11 @@
 						<th class="fetter" align="right" style="width: 300px; border-bottom:1px solid #C3C7C3"><?php echo $strDataSource; ?></th>
 						<td style="border-bottom:1px solid #C3C7C3">
 							<div id="datasource_div">
-					<? 		include_once(CLASSPATH . 'DataSource.php');
-								$datasources = DataSource::find($this);
+								<!-- Multiselectformfeld mit ausgewählten Werten.//--><?
+								include_once(CLASSPATH . 'DataSource.php');
+								$datasources = DataSource::find($this, '', "coalesce('name', 'beschreibung')");
 								echo FormObject::createSelectField(
-									'datasource',
+									'datasource_ids',
 									array_map(
 										function($datasource) {
 											return array(
@@ -772,9 +1006,43 @@
 										},
 										$datasources
 									),
-									$this->formvars['datasource']
+									implode(',', $this->layerdata['datasource_ids']),
+									1,
+									'display: none;
+									width: 93%',
+									'',
+									'',
+									true
 								); ?>
-								<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								<div id="chosen-container">
+									<!-- selectierte Werte //-->
+									<ul id="chosen-choices"><?
+										foreach ($this->layerdata['datasources'] AS $datasource) { ?>
+											<li class="chosen-item"><span><? echo $datasource->get('name') ?? $datasource->get('beschreibung'); ?></span>
+											<a datasource_id="<? echo $datasource->get('id'); ?>" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li><?
+										} ?>
+									</ul>
+								</div>
+								<div id="chosen-buttons">
+									<a id="add-item-button" href="javascript:void(0);"><i class="fa fa-plus fa_lg" style="margin-left: 5px;"></i></a>
+									<a href="index.php?go=datasources_anzeigen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-pencil fa_lg" style="margin-left: 5px;"></i></a>
+								</div>
+							</div>
+							<div style="clear: both"></div>
+							
+							<div id="chosen-drop">
+								<!-- auswählbare Werte //-->
+								<ul class="chosen-results"><?
+									$selectable_datasources = array_filter(
+										$datasources,
+										function ($datasource) {
+											return !in_array($datasource->get('id'), $this->layerdata['datasource_ids']);
+										}
+									);
+									foreach ($selectable_datasources AS $datasource) { ?>
+										<li datasource_id="<? echo $datasource->get('id'); ?>" class="selectable-item" data-option-array-index="0"><? echo $datasource->get('name') ?? $datasource->get('beschreibung'); ?>(<? echo $datasource->get('id'); ?>)</li><?
+									} ?>
+								</ul>
 							</div>
 						</td>
 					</tr>
@@ -957,12 +1225,6 @@
 					</td>
 				</tr>
 				<tr>
-					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDrawingOrder; ?></th>
-					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="drawingorder" type="text" value="<?php echo $this->formvars['drawingorder']; ?>" size="50" maxlength="15">
-					</td>
-				</tr>
-				<tr>
 					<th class="fetter" width="200" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLegendOrder; ?></th>
 					<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3">
 							<input name="legendorder" type="text" value="<?php echo $this->formvars['legendorder']; ?>" size="50" maxlength="15">
@@ -1043,7 +1305,7 @@
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++) {
+						for ($i = 0; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
@@ -1237,8 +1499,21 @@
 				id="saveAsNewLayerButton"
 				name="dummy"
 				value="<?php echo $strButtonSaveAsNewLayer; ?>"
-				onclick="submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
-			>
+				onclick="mandatoryValuesMissing() || submitWithValue('GUI','go_plus','Als neuen Layer eintragen')"
+			><?
+			if (
+				$this->formvars['selected_layer_id'] > 0 AND
+				$this->formvars['editable']
+			) { ?>
+				<input
+					id="layer_formular_delete_button"
+					type="button"
+					class="delete-button"
+					name="layer_formular_delete_button"
+					value="<?php echo $this->strDelete; ?>"
+					onclick="Bestaetigung('index.php?go=Layer_Löschen&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>', '<? echo $this->strDeleteWarningMessage; ?>');"
+				><?
+			} ?>
 		</td>
 	</tr>
 	<tr>
@@ -1250,12 +1525,13 @@
 	<i class="fa fa-arrow-up hover-border" aria-hidden="true"></i>
 </a>
 
+<input type="hidden" name="gruppenaenderung" value="">
 <input type="hidden" name="stellenzuweisung" value="<? echo $this->formvars['stellenzuweisung']; ?>">
 <input type="hidden" name="go" value="Layereditor">
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
-	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"]); $i++){
+	for($i=1; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">
@@ -1263,4 +1539,27 @@
 
 <script type="text/javascript">
 	<? if($this->formvars['stellenzuweisung'] == 1){ ?>toggleForm('stellenzuweisung');<? } else { ?>toggleForm('layerform');<? } ?>
+
+	$('.selectable-item').on('mouseover', (evt) => {
+		//console.log('mouseover on selectable-item', evt.target);
+		$(evt.target).toggleClass('highlighted-item').siblings().removeClass('highlighted-item');
+	});
+
+	$('.selectable-item').on('click', (evt) => {
+		const datasource_id = $(evt.target).attr('datasource_id');
+		//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
+		// add clicked item to chosen-choices and select in select field
+		$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+		$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
+		$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
+		$('#chosen-drop').hide();
+		$('#add-item-button').show();
+	});
+
+	$('#add-item-button').on('click', (evt) => {
+		//console.log('click on chosen-container');
+		$('#add-item-button').hide();
+		$('#chosen-drop').show();
+	});
+
 </script>

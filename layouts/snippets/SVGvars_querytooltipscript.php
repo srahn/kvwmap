@@ -11,6 +11,9 @@ for($i = 0; $i < count($layerset); $i++){
 		';
 	}
 }
+
+$queryfield = ($this->user->rolle->singlequery == 2? 'thema' : 'qLayer');
+
 $SVGvars_querytooltipscript .= '
 
 		var oldmousey, oldmousex, mousey, mousex, tooltipstate = "ready_for_request", counter = 0, prevent;
@@ -274,9 +277,9 @@ $SVGvars_querytooltipscript .= '
 				if(Math.abs(oldmousex-mousex) < 1 && Math.abs(oldmousey-mousey) < 1){		// Maus stillhalten
 					tooltipstate = "request_sent";
 					for(i = 0; i < layernumber.length; i++){
-						query_layer_field = top.document.getElementById("qLayer"+layernumber[i]);
+						query_layer_field = top.document.getElementById("' . $queryfield . '"+layernumber[i]);
 						if(query_layer_field != undefined && query_layer_field.checked){
-							querylayer += "&qLayer"+layernumber[i]+"=1";
+							querylayer += "&' . $queryfield . '"+layernumber[i]+"=1";
 						}
 					}
 					counter++;

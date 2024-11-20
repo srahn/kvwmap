@@ -48,6 +48,7 @@ class account {
 	# Klasse für die Abrechnung und Statistik von Zugriffen
 
 	var $database;
+	var $debug;
 
 	function __construct($database) {
 		global $debug;
@@ -294,7 +295,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeCSV.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeCSV';
@@ -320,7 +322,7 @@ class account {
 			#echo $sql.'<br><br>';
 			$this->debug->write("<p>file:kvwmap class:account->getAccessToCSV:<br>".$sql,4);
 			$query_array[] = $this->database->execSQL($sql);
-			if (!$this->database->success) { echo "<br>Abbruch in ".$htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
+			if (!$this->database->success) { echo "<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__."<br>wegen: ".$sql."<p>".INFO1; return 0; }
 			$NumbOfAccessTimeIDs = array();
 			while ($rs = $this->database->result->fetch_array()) {
 				$NumbOfAccessTimeIDs[] = $rs;
@@ -381,7 +383,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToShape:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeShape.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeShape';
@@ -469,7 +472,8 @@ class account {
 		#echo $sql.'<br><br>';
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALB.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM user AS u, stelle AS s, u_consumeALB';
@@ -566,7 +570,8 @@ class account {
 		$this->debug->write("<p>file:kvwmap class:account->getAccessToALK:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$result = $this->database->result;
+		while ($rs = $result->fetch_array()) {
 			$NumbOfAccess[]=$rs;
 			$sql ='SELECT u_consumeALK.time_id, concat(u.Vorname, " ", u.Name) as Name';
 			$sql.=' FROM druckrahmen, user AS u, stelle AS s, u_consumeALK';
@@ -606,10 +611,14 @@ class account {
 
 	function getLayer($logged) {
 		# Abfrage der Anzahl der Layer
-		$sql ='SELECT COUNT(Layer_ID) AS layers FROM layer';
-		if ($logged) {
-			$sql.=' WHERE logconsume="1"';
-		}
+		$sql = "
+			SELECT
+				COUNT(Layer_ID) AS layers
+			FROM
+				layer
+			WHERE
+				" . ($logged ? "logconsume = '1'" : "true") . "
+		";
 		$this->debug->write("<p>file:users.php class:user->getLayer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
@@ -668,6 +677,8 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
 	/**
 	 * Create a user object
@@ -712,12 +723,6 @@ class user {
 		) {
 			return true;
 		}
-		elseif (
-			$case == 'chart_speichern' AND
-			$this->funktion == 'admin'
-		) {
-			return true;
-		}
 		else {
 			return false;
 		}
@@ -748,7 +753,9 @@ class user {
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
         $ip=trim($ip);
-				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+				if (!is_numeric(explode('.', $ip)[0])) {
+					$ip = gethostbyname($ip);			# für dyndns-Hosts
+				}
         if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
@@ -810,6 +817,7 @@ class user {
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];
 		$this->organisation = $rs['organisation'];
+		$this->position = $rs['position'];
 		if (CHECK_CLIENT_IP) {
 			$this->ips = $rs['ips'];
 		}
@@ -824,7 +832,6 @@ class user {
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
-		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
@@ -1184,7 +1191,7 @@ class user {
 					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
 					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
-					, singlequery = '" . (value_of($formvars, 'singlequery') == '' ? '0' : '1') . "'
+					, singlequery = '" . value_of($formvars, 'singlequery') . "'
 					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
 					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
 					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
@@ -1234,7 +1241,7 @@ class user {
 		# zugeordneten Stellen gehört. Die letzte Stellen_ID wird in beiden Fällen auf die erste von den
 		# dem Nutzer zugeordneten Stellen gesetzt.
 		$stellen= $this->getStellen(0);
-		if(@count($stellen['ID']) > 0){
+		if(count_or_0($stellen['ID']) > 0){
 			$stelle_id = $this->getLastStelle();
 			if($stelle_id != ''){
 				$valid = false;

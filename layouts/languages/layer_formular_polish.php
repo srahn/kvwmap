@@ -10,10 +10,10 @@
 	$strClasses = "klasa";
 	$strClassItem = "klasa";
 	$strCommonData = "ogólne dane";
-	$strConnection = "połączenie*";
+	$strConnection = "połączenie";
 	$strConnectionType = "rodzaj połączenia";
 	$strData = "dane";
-	$strDataBankID = "warstwa ID*";
+	$strDataBankID = "warstwa ID";
 	$strDataOwnerName = 'Data owner';
 	$strDataType = "rodzaj danych";
 	$strDdlAttribute = "DDL Default Attribute";
@@ -25,8 +25,7 @@
 	$strDrawingOrder = "kolejność znaków";
 	$strEpsgCode = "kod układu odniesienia Epsg";
 	$strExpression = "wyrażenie";
-	$strFilterItem = "filtr*";
-	$strGroup = "grupa*";
+	$strGroup = "grupa";
 	$strID = "ID";
 	$strIdAttribute = "ID-Column";
 	$strLabelAngleItem = "powierzchnia etykiety";
@@ -41,11 +40,11 @@
 	$strMaintable = "Main Table";
 	$strmaxscale = "maksymalna skal";
 	$strminscale = "minimalna skala";
-	$strName = "nazwa*";
+	$strName = "nazwa";
 	$stroffsite = "Offsite";
 	$strOrder = "kolejność";
 	$strOWSParameter = "parametry OWS";
-	$strOwsSrs = "OWS-SRS*";
+	$strOwsSrs = "OWS-SRS";
 	$strPath = "ścieżka";
 	$strPrintConnection = "podłączenie do drukarki";
 	$strPrivileges = "Privileges";
@@ -66,7 +65,7 @@
 	$strTemplate = "wzorzec";
 	$strTileIndex = "Tileindex";
 	$strTileItem = "Tileitem";
-	$strTolerance = "tolerancja*";
+	$strTolerance = "tolerancja";
 	$strToleranceUnits = "jednostki toleracji";
 	$strtransparency = "przejrzystość";
 	$strTriggerFunction = "Trigger function";
@@ -76,9 +75,9 @@
 	$strWMSAuthPassword = "wms_autor._kod";
 	$strWMSAuthUsername = "wms_autor._nazwa użytkownika";
 	$strWMSConnectionTimeout = "czas wygaszenia połączenia usługi WMS";
-	$strWMSFormat = "format WMS*";
+	$strWMSFormat = "format WMS";
 	$strWMSName = "nazwa usługi WMS/rodzaj nazwy";
-	$strWMSServerVersion = "WMS-wersja serwera*";
+	$strWMSServerVersion = "WMS-wersja serwera";
 	$strWriteMapserverTemplatesOption1 = "derive fom data statement";
 	$strWriteMapserverTemplatesOption2 = "derive from maintable";
 	$strWriteMapserverTemplatesHelp = "If this option is selected, a data statement or main table related MapServer header and template file will be created in directory ". WMS_MAPFILE_PATH . "templates/ after the layer has been saved. The generic approach that based on the main table create additional descriptive attributes for codelists and enumerations with text including also descriptions and codespaces if exists. The path of the template directory is defined in the constant WMS_MAPFIlE_PATH. If the directory not already exists, it will be created. The filename consists of the layer name and the postfix _head.html and _body.html. If the file exists already, it will be overwritten. The used layer name is the one of the choosen language in the moment the layer is saved.";

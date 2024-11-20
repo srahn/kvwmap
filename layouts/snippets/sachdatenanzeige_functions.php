@@ -85,6 +85,26 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		}
 	}	
 
+	save_scrollposition = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			pos.value = document.scrollingElement.scrollTop;
+		}
+		else {
+			pos.value = document.getElementById('contentdiv').scrollTop;
+		}
+	}
+
+	scrollto_saved_position = function(){
+		var pos = document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0];
+		if (enclosingForm.name == 'GUI2') {
+			window.scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+		else {
+			document.getElementById('contentdiv').scrollTo({top: pos.value, left: 0, behavior: "instant"});
+		}
+	}
+
 	scrolltop = function(){
 		if(querymode == 1){
 			window.scrollTo(0, 0);
@@ -131,6 +151,21 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		[].forEach.call(groups_to_open, function (group){
 			group.style.visibility = 'visible';
 		});
+	}
+
+	toggle_layer = function(tab, layer_id){
+		enclosingForm.active_layer_id.value = layer_id;
+		var active_tab = document.querySelector('.gle_layer_tab.active_tab');
+		active_tab.classList.remove("active_tab");
+		tab.classList.add("active_tab");
+		var layer_to_close = document.querySelectorAll('.layer_results');
+		[].forEach.call(layer_to_close, function (layer){
+			layer.classList.add('collapsed');
+		});
+		var layer_to_open = document.querySelector('#result_' + layer_id);
+		layer_to_open.classList.remove('collapsed');
+		scrollto_saved_position();
+		ahah('index.php?go=set_last_query_layer', 'layer_id=' + layer_id, [], []);
 	}
 	
 	check_visibility = function(layer_id, object, dependents, k){
@@ -289,6 +324,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				value = elements[i].value;
 				name = elements[i].name;
 				type = elements[i].type;
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
@@ -412,6 +450,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -432,6 +471,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch weiterblättern?');
 		}
 		if(sure){
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -452,6 +492,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -469,6 +510,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			sure = confirm('Die Daten in diesem Thema wurden verändert aber noch nicht gespeichert. Wollen Sie dennoch zurückblättern?');
 		}
 		if(sure){
+			document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value = 0;
 			enclosingForm.target = '';
 			enclosingForm.go.value = 'get_last_query';
 			if(enclosingForm.go_backup.value != ''){
@@ -853,14 +895,27 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				status = obj.checked;
 
 		while (obj != undefined) {
-			obj.checked = !status;
+			if (obj.offsetParent !== null) {	// nur wenn Datensatz sichtbar
+				obj.checked = !status;
+			}
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
-		$('#sellectDatasetsLinkText, #desellectDatasetsLinkText').toggle();
+		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
+		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
+	get_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'index.php?go=get_position_qrcode&layer_id=' + layer_id + '&oid=' + oid;
+	}
+
+	remove_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'graphics/leer.gif';
+	}
+
 	zoom2object = function(layer_id, columnname, oid, selektieren){
 		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
@@ -1177,6 +1232,38 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		if(button && button.style.display == 'none'){
 			button.style.display = '';
 		}		
+	}
+
+	filter_results = function(attribute_class, select){
+		var options = select.selectedOptions;
+		var values = Array.from(options).map(({ value }) => value);
+		var fields = document.querySelectorAll('.gle_attribute_value .' + attribute_class);
+		var value;
+		if (values[0] != '#all#'){
+			select.previousElementSibling.style.color = 'gray';
+		}
+		else {
+			select.previousElementSibling.style.color = '#bfbfbf';
+		}
+		[].forEach.call(fields, function (field){
+			if (field.type == 'checkbox' && !field.checked) {
+				value = 'f';
+			}
+			else {
+				value = field.value;
+			}
+			var tr = field.closest('tr');
+			if (values[0] != '#all#' && !values.includes(value)) {
+				tr.style.display = 'none';
+				tr.classList.add(attribute_class);
+			}
+			else {
+				tr.classList.remove(attribute_class);
+				if (tr.className == '') {
+					tr.style.display = '';
+				}
+			}
+		});
 	}
 
 </script>

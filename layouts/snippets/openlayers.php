@@ -2,8 +2,8 @@
 # 2007-12-30 pk
   include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
 	
-$userProjection = ms_newprojectionobj("init=epsg:".$this->user->rolle->epsg_code);
-$wgsProjection = ms_newprojectionobj("init=epsg:4326");
+$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
+$wgsProjection = new projectionObj("init=epsg:4326");
 $userExtent = $this->map->extent;
 $userExtent->project($userProjection, $wgsProjection);
 ?>

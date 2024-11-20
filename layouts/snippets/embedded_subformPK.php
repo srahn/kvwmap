@@ -9,7 +9,7 @@
 	$size = 50;
 
 	$doit = false;
-	$anzObj = @count($layer['shape']);
+	$anzObj = count_or_0($layer['shape']);
   if ($anzObj > 0) {
 		$this->found = 'true';
 		$doit = true;
@@ -69,8 +69,9 @@
 			include(SNIPPETS.$layer['template']);
 		}
 		else {
-			if ($this->formvars['list_edit']) { ?>
-				<table border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
+			if ($this->formvars['list_edit']) {
+				$table_id = rand(0, 100000);			 ?>
+				<table id="<? echo $table_id; ?>" border="1" cellspacing="0" cellpadding="2" style="border-collapse: collapse" width="100%">
 					<tr><?
 						for ($j = 0; $j < count($attributes['name']); $j++) {
 							if ($layer['attributes']['privileg'][$j] >= '0') {
@@ -113,7 +114,7 @@
 									if ($layer['attributes']['visible'][$j]) {
 										$explosion = explode(';', $layer['attributes']['group'][$j]);
 										if ($explosion[1] != 'collapsed') { ?>
-											<td <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
+											<td id="value_<? echo $layer['Layer_ID'] . '_' . $layer['attributes']['name'][$j] . '_' . $k; ?>" <? echo get_td_class_or_style(array($layer['shape'][$k][$attributes['style']])); ?>><?
 												echo attribute_value($this, $layer, NULL, $j, $k, NULL, $size, $select_width, false, NULL, NULL, NULL, $this->subform_classname); ?>
 											</td><?
 										}
@@ -132,8 +133,13 @@
 						$layer['attributes']['privileg'] = $definierte_attribute_privileges;
 					} ?>
 				</table>
+
+				<script type="text/javascript">
+					var vchangers = document.getElementById(<? echo $table_id; ?>).querySelectorAll('.visibility_changer');
+					[].forEach.call(vchangers, function(vchanger){vchanger.oninput();});
+				</script>				
 	<?
-				for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+				for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 					echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 				}
 			}
@@ -179,23 +185,12 @@
 							switch ($attributes['form_element_type'][$j]) {
 								case 'Auswahlfeld' : case 'Auswahlfeld_Bild' : case 'Radiobutton' : {
 									if (is_array($attributes['dependent_options'][$j])) {		# mehrere Datensätze und ein abhängiges Auswahlfeld --> verschiedene Auswahlmöglichkeiten
-										for ($e = 0; $e < @count($attributes['enum_value'][$j][$k]); $e++) {
-											if ($attributes['enum_value'][$j][$k][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$k][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$k][$e];
-												break;
-											}
-										}
+										$enum = $attributes['enum'][$j][$k][$dataset[$attributes['name'][$j]]];
 									}
 									else {
-										for ($e = 0; $e < @count($attributes['enum_value'][$j]); $e++) {
-											if ($attributes['enum_value'][$j][$e] == $dataset[$attributes['name'][$j]]) {
-												$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($attributes['enum_image'][$j][$e])) . '">&nbsp;' : '') .
-																			$attributes['enum_output'][$j][$e];
-												break;
-											}
-										}
-									} 
+										$enum = $attributes['enum'][$j][$dataset[$attributes['name'][$j]]];
+									}
+									$output[$p] = ($attributes['form_element_type'][$j] == 'Auswahlfeld_Bild'? '<img style="width: 30px" src="data:image/jpg;base64,' . base64_encode(@file_get_contents($enum['image'])) . '">&nbsp;' : '') . $enum['output'];
 								} break;
 								
 								case 'Autovervollständigungsfeld' : case 'Autovervollständigungsfeld_zweispaltig' :{

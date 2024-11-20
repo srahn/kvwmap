@@ -10,6 +10,7 @@ class MyObject {
 	public $tableName;
 	public $identifier;
 	public $identifier_type;
+	public $identifiers;
 	public $field_types;
 	public $data;
 	public $has_many;
@@ -23,9 +24,9 @@ class MyObject {
 		$this->tableName = $tableName;
 		$this->identifier = $identifier;
 		$this->identifier_type = $identifier_type;
+		$this->identifiers = ($this->identifier_type == 'array' ? $identifier : array());
 		$this->data = array();
 		$this->children_ids = array();
-		$this->debug->show('<p>New MyObject for table: '. $this->tableName, MyObject::$write_debug);
 		$this->validations = array();
 		if (!empty($this->has_many)) {
 			foreach ($this->has_many AS $key => $relation) {
@@ -96,11 +97,13 @@ class MyObject {
 */
 	}
 
-	/*
-	* Search for an record in the database
-	* by the given attribut and value
-	* @ return this object with the record in data or empty array if not found
-	*/
+	/**
+	 * Search for an record in the database
+	 * by the given attribut and value
+	 * @param string $attribut Attribute you searching for.
+	 * @param string $value Value that shall fit the attribute.
+	 * @return MyObject This object with the record in data or empty array if not found
+	 */
 	function find_by($attribute, $value) {
 		if (empty($attribute)) {
 			$attribute = $this->identifer;
@@ -172,10 +175,13 @@ class MyObject {
 		}
 	}
 
-	/*
-	* Search for records in the database by the given where clause
-	* @ return all objects
-	*/
+	/**
+	 * Search for records in the database by the given where clause
+	 * @param string $where WHERE clause to find the objects.
+	 * @param string $order? ORDER clause to sort the results.
+	 * @param string $sort_direction? Sort direction to sort the results.
+	 * @return MyObject[] All found objects.
+	 */
 	function find_where($where, $order = '', $sort_direction = '') {
 		$where = ($where == '' ? '' : 'WHERE ' . $where);
 		if(strpos($order, '(') === false){
@@ -395,19 +401,13 @@ class MyObject {
 	function get_identifier_expression() {
 		$this->debug->show('<br>Class MyObject Method get_identifier_expression', MyObject::$write_debug);
 		$where = array();
-		if ($this->identifier_type == 'array' AND getType($this->identifier) == 'array') {
-			$this->debug->show('<br>identifier: ' . print_r($this->identifier, true), MyObject::$write_debug);
+		if (count($this->identifiers) > 0) {
 			$where = array_map(
-				function($id) {
-					$quote = ($id['type'] == 'text' ? "'" : "");
-					return $id['key'] . " = " . $quote . $this->get($id['key']) . $quote;
+				function($identifier) {
+					$quote = ($identifier['type'] == 'text' ? "'" : "");
+					return $identifier['key'] . " = " . $quote . $this->get($identifier['key']) . $quote;
 				},
-				array_filter(
-					$this->identifier,
-					function($id) {
-						return in_array($id['key'], $this->getKeys()) AND $this->get($id['key']) != null AND $this->get($id['key']) != '';
-					}
-				)
+				$this->identifiers
 			);
 		}
 		else {
@@ -446,7 +446,7 @@ class MyObject {
 				if ($options['escaped']) {
 					$value = str_replace("'", "''", $value);
 				}
-				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false OR stripos($types[$key], 'time') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
+				$kvp[] = "`" . $key . "` = " . (((stripos($types[$key], 'int') !== false OR stripos($types[$key], 'date') !== false OR stripos($types[$key], 'time') !== false OR stripos($types[$key], 'varchar') !== false) AND $value == '') ? 'NULL' : "'" . $value . "'");
 			}
 		}
 		return $kvp;
@@ -465,7 +465,7 @@ class MyObject {
 	}
 
 	function create($data = array()) {
-		$this->debug->show('<p>MyObject create ' . $this->tablename, MyObject::$write_debug);
+		$this->debug->show('<p>MyObject create ' . $this->tableName, MyObject::$write_debug);
 
 		$results = array();
 		if (!empty($data)) {
@@ -603,7 +603,7 @@ class MyObject {
 			WHERE
 				" . $this->get_identifier_expression() . "
 		";
-		$this->debug->show('MyObject delete sql: ' . $sql, MyObject::$write_debug);
+		#$this->debug->show('MyObject delete sql: ' . $sql, true);
 		$result = $this->database->execSQL($sql);
 		$err_msg = $this->database->errormessage;
 		$results[] = array(

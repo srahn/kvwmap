@@ -1,6 +1,9 @@
 <?php
-# 2007-12-30 pk
-  include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+	$language_file_name = 'map_' . $this->user->rolle->language . '.php';
+
+	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
+	include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 	$show_legend_graphic = (defined('LEGEND_GRAPHIC_FILE') AND LEGEND_GRAPHIC_FILE != '' AND file_exists(SNIPPETS.LEGEND_GRAPHIC_FILE));
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
@@ -8,7 +11,7 @@
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];
 	$size['map_functions_bar']['height'] = ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
-	$size['lagebzeichnung_bar']['height'] = (@count($this->Lagebezeichnung) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
+	$size['lagebzeichnung_bar']['height'] = (count_or_0($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$legend_hide_width = $size['legend']['hide_width'];
