@@ -6893,7 +6893,12 @@ echo '			</table>
     $RGB = array_filter(explode(" ",$dbStyle['outlinecolor']), 'strlen');
     $style->outlinecolor->setRGB(intval($RGB[0]),intval($RGB[1]),intval($RGB[2]));
 		if($dbStyle['opacity'] != '') {		# muss nach color gesetzt werden
-			$style->opacity = $dbStyle['opacity'];
+			if (MAPSERVERVERSION >= 800) {
+				$style->updateFromString("STYLE OPACITY " . $dbStyle['opacity'] . " END");
+			}
+			else {
+				$style->opacity = $dbStyle['opacity'];
+			}
 		}
 
 		if($dbStyle['colorrange'] != ''){
@@ -12692,7 +12697,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->user->rolle->setLayer($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 			$this->user->rolle->setGroups($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id, $layer); 											# Hinzufügen der Layergruppen der selektierten Layer zur Rolle
 			$this->user->rolle->setSavedLayersFromDefaultUser($selectedusers[$i], $new_stelle->id, $new_stelle->default_user_id);
-			$this->selected_user = new user(0,$selectedusers[$i],$this->user->database);
+			$this->selected_user = new user(NULL,$selectedusers[$i],$this->user->database);
 			$this->selected_user->checkstelle();
 		}
 		// ToDo: Löschen der Einträge in u_menue2rolle, bei denen der Menüpunkt nicht mehr der Stelle zugeordnet ist
@@ -12746,7 +12751,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->user->rolle->deleteMenue($deleteuser[$i], array($Stelle->id), 0);
 				$this->user->rolle->deleteGroups($deleteuser[$i], array($Stelle->id));
 				$this->user->rolle->deleteLayer($deleteuser[$i], array($Stelle->id), 0);
-				$this->selected_user = new user(0,$deleteuser[$i],$this->user->database);
+				$this->selected_user = new user('',$deleteuser[$i],$this->user->database);
 				$this->selected_user->checkstelle();
 			}
 		}
@@ -13013,7 +13018,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
 					$this->user->rolle->setSavedLayersFromDefaultUser($users[$i], $Stelle->id, $Stelle->default_user_id);
-					$this->selected_user = new user(0,$users[$i],$this->user->database);
+					$this->selected_user = new user('',$users[$i],$this->user->database);
 					$this->selected_user->checkstelle();
 				}
 				$Stelle->updateLayerParams();
@@ -13927,7 +13932,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
   function BenutzerLöschen(){
-    $this->selected_user = new user(0, $this->formvars['selected_user_id'], $this->user->database, '', true);
+    $this->selected_user = new user('', $this->formvars['selected_user_id'], $this->user->database, '', true);
 		if (NUTZER_ARCHIVIEREN) {
 			$this->selected_user->archivieren();
 		}
@@ -14020,7 +14025,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->update_layer_parameter_in_rollen($stelle->id);
 				$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 			}
-      $this->selected_user = new user(0,$this->formvars['selected_user_id'],$this->user->database, '', true);
+      $this->selected_user = new user('',$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
       $userstellen =  $this->selected_user->getStellen(0);
 			$deletestellen = array();
