@@ -1471,7 +1471,7 @@ FROM
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
     $sql.=" FROM alkis.ax_gemeinde AS g WHERE 1=1";
-    if(is_array($Gemeinden)){
+    if(!empty($Gemeinden)){
 			$sql.=" AND g.schluesselgesamt IN ('".implode("','", $Gemeinden)."')";
     }
 		$sql.= $this->build_temporal_filter(array('g'));

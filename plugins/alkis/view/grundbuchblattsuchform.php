@@ -116,7 +116,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 		<div>
 			<select name="Bezirk" onchange="updateBezirksschluessel();" tabindex="2">
 				<option value="">--- Auswahl ---</option>
-				<?for($i = 0; $i < count($this->gbliste['schluessel']); $i++){?>
+				<?for($i = 0; $i < count_or_0($this->gbliste['schluessel']); $i++){?>
 					<option 
 				<?if($this->formvars['Bezirk'] == $this->gbliste['schluessel'][$i]){?>
 				selected
