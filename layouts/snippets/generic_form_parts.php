@@ -1156,8 +1156,15 @@
 		}
 		if ($privileg == '0') {
 			$auswahlfeld_output = $enums[$value]['output'];
-			$datapart = '<div class="readonly_text">' . htmlspecialchars($auswahlfeld_output) . '</div>';
-			$datapart .= '<input type="hidden" name="' . $fieldname . '" id="' . $layer_id . '_' . $name . '_' . $k . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
+			$datapart  = '<div class="readonly_text">' . htmlspecialchars($auswahlfeld_output) . '</div>';
+			$datapart .= '<input
+				type="hidden"
+				id="' . $layer_id . '_' . $name . '_' . $k . '"
+				name="' . $fieldname . '"
+				class="' . $field_class . '"
+				onchange="' . $onchange . '"
+				value="' . htmlspecialchars($value) . '"
+			>'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
