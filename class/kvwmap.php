@@ -9778,9 +9778,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					value_of($this->formvars, 'embedded') == '' AND
 					value_of($this->formvars, 'no_output') == ''
 				) {
-					# last_query speichern
-					$this->user->rolle->delete_last_query();
-					$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
+					if ($this->formvars['no_last_query'] == '') {
+						# last_query speichern
+						$this->user->rolle->delete_last_query();
+						$this->user->rolle->save_last_query('Layer-Suche_Suchen', $this->formvars['selected_layer_id'], $sql, $sql_order, $this->formvars['anzahl'], value_of($this->formvars, 'offset_' . $layerset[0]['Layer_ID']));
+					}
 
 					# Querymaps erzeugen
 					if (
