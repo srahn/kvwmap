@@ -3672,7 +3672,14 @@ echo '			</table>
 					$count = 2;		# weil ein select-Feld bei size 1 anders funktioniert
 				}
 				pg_result_seek($ret[1], 0);
-				echo'<select size="'.$count.'" class="suggests" onmousedown="this.dataset.clicked=true;" onchange="document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;document.getElementById(\''.$this->formvars['field_id'].'\').onchange();document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';
+				echo'<select size="'.$count.'" class="suggests" 
+					onmousedown="this.dataset.clicked=true;" 
+					onchange="
+						document.getElementById(\'suggests_'.$this->formvars['field_id'].'\').style.display=\'none\';
+						document.getElementById(\''.$this->formvars['field_id'].'\').value=this.value;
+						document.getElementById(\''.$this->formvars['field_id'].'\').onchange();
+						document.getElementById(\'output_'.$this->formvars['field_id'].'\').value=this.options[this.selectedIndex].text;
+						document.getElementById(\'output_'.$this->formvars['field_id'].'\').onchange();">';
 				while($rs=pg_fetch_array($ret[1])) {
 					echo '<option onmouseover="this.selected = true;" onclick="this.parentElement.onchange();" value="'.$rs['value'].'">'.$rs['output'].'</option>';
 				}
