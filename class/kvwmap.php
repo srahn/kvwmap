@@ -6291,8 +6291,8 @@ echo '			</table>
     $this->Document->selectedframe = $this->Document->load_frames(NULL, $this->formvars['aktiverRahmen']);
     if($this->Document->selectedframe != NULL){
       $ratio = $this->Document->selectedframe[0]['mapwidth']/$this->Document->selectedframe[0]['mapheight'];
-      $this->formvars['worldprintwidth'] = $this->Document->selectedframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
-      $this->formvars['worldprintheight'] = $this->Document->selectedframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
+      $this->formvars['worldprintwidth'] = $this->Document->selectedframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.00035277;
+      $this->formvars['worldprintheight'] = $this->Document->selectedframe[0]['mapheight'] * $this->formvars['printscale'] * 0.00035277;
 			$this->formvars['map_factor'] = 1;
       if ($this->Document->selectedframe[0]['dhk_call'] == '') {
       	$this->previewfile = $this->createMapPDF($this->formvars['aktiverRahmen'], true, true);
@@ -7418,8 +7418,8 @@ echo '			</table>
 				$this->formvars['printscale'] = round($this->map_scaledenom);
 				$this->formvars['refpoint_x'] = $this->formvars['center_x'] = $this->map->extent->minx + ($this->map->extent->maxx-$this->map->extent->minx)/2;
 				$this->formvars['refpoint_y'] = $this->formvars['center_y'] = $this->map->extent->miny + ($this->map->extent->maxy-$this->map->extent->miny)/2;
-				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.0003526;
-				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.0003526;
+				$this->formvars['worldprintwidth'] = $this->Docu->activeframe[0]['mapwidth'] * $this->formvars['printscale'] * 0.00035277;
+				$this->formvars['worldprintheight'] = $this->Docu->activeframe[0]['mapheight'] * $this->formvars['printscale'] * 0.00035277;
 			}
 			elseif ($this->user->rolle->print_scale != 'auto') {
 				$this->user->rolle->savePrintScale($this->formvars['printscale']);
@@ -16965,8 +16965,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$ur = explode(', ', trim($corners[1], '() '));
 					}
 				}
-				$extent = new rectObj();
-				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
+				$extent = new rectObj($ll[0],$ll[1],$ur[0],$ur[1]);
 				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
