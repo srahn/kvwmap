@@ -984,6 +984,10 @@
 								autocomplete="off"
 								title="' . $alias . '"
 								onkeydown="
+									if(event.keyCode == 13){
+										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+									}
 									if (this.backup_value == undefined) {
 										this.backup_value = this.value;
 										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
