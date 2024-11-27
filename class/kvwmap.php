@@ -2157,17 +2157,19 @@ echo '			</table>
 
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
 						$error = msGetErrorObj();
-						while ($error && $error->code != MS_NOERR) {
+						$test = 0;
+						while ($test < 100 AND $error && $error->code != MS_NOERR) {
 							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
 							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
 							$error = $error->next();
+							$test++;
 						}
 						msResetErrorList();
 					}
 				}
 				if ($this->error_message != '') {
 					$this->error_message .= '<br>';
-					//  throw new ErrorException($this->error_message);
+					throw new ErrorException($this->error_message);
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
