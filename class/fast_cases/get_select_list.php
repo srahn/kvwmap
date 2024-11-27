@@ -1299,7 +1299,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection:  successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -1307,7 +1307,7 @@ class pgdatabase {
 	}
 	
   function close() {
-    $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
+    $this->debug->write("<br>PostgreSQL Verbindung  schließen.",4);
     return pg_close($this->dbConn);
   }	
 

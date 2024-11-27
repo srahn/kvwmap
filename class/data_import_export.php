@@ -47,8 +47,11 @@ class data_import_export {
 	function process_import_file($upload_id, $file_number, $filename, $stelle, $user, $pgdatabase, $epsg, $filetype = NULL, $formvars = NULL) {
 		$this->pgdatabase = $pgdatabase;
 		$this->epsg_codes = read_epsg_codes($pgdatabase);
-		$file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
-		$file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
+		// $file_name_parts[0] = substr($filename, 0, strrpos($filename, '.'));
+		// $file_name_parts[1] = substr($filename, strrpos($filename, '.')+1);
+		$pathinfo = pathinfo($filename);
+		$file_name_parts[0] = $pathinfo['dirname'] . '/' . $pathinfo['filename'];
+		$file_name_parts[1] = $pathinfo['extension'];
 		if ($filetype == NULL) {
 			$filetype = strtolower($file_name_parts[1]);
 		}
@@ -1612,7 +1615,7 @@ class data_import_export {
 					if ($this->formvars['export_format'] != 'CSV') {
 						$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 					}
-					if ($err == '') {
+					if ($err == 0) {
 						// Update timestamp formular_element_types having option export
 						$time_attributes = array();
 						foreach ($layerset[0]['attributes']['name'] AS $key => $value) {
@@ -1653,7 +1656,7 @@ class data_import_export {
 			}
 		}
 
-		if ($err != '') {
+		if ($err != 0) {
 			return array(
 				'success' => false,
 				'msg' => $err
@@ -1661,7 +1664,7 @@ class data_import_export {
 		}
 		return array(
 			'success' => true,
-			'contenttype' => $conntenttype,
+			'contenttype' => $contenttype,
 			'exportfile' => $exportfile,
 		);
 	}

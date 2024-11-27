@@ -1036,7 +1036,7 @@ class stelle {
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
-		if($GemeindenStelle != NULL){
+		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
@@ -2526,17 +2526,17 @@ class stelle {
 
 	function getGemeindeIDs() {
 		$liste = [];
+		$liste['ganze_gemeinde'] = Array();
+		$liste['eingeschr_gemeinde'] = Array();
+		$liste['ganze_gemarkung'] = Array();
+		$liste['eingeschr_gemarkung'] = Array();
+		$liste['ganze_flur'] = Array();
+		$liste['eingeschr_flur'] = Array();
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if ($this->database->result->num_rows > 0) {
-			$liste['ganze_gemeinde'] = Array();
-			$liste['eingeschr_gemeinde'] = Array();
-			$liste['ganze_gemarkung'] = Array();
-			$liste['eingeschr_gemarkung'] = Array();
-			$liste['ganze_flur'] = Array();
-			$liste['eingeschr_flur'] = Array();
 			while ($rs=$this->database->result->fetch_assoc()) {
 				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;

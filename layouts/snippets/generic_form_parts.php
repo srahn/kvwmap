@@ -74,7 +74,7 @@
 			else {
 				$title_link = 'href="javascript:void(0);"';
 			}
-			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities($attributes['tooltip'][$j], ENT_QUOTES)) . '\'}])"></a></td>';
+			$datapart .= '<td align="right"><a ' . $title_link . ' title="' . htmlentities($attributes['tooltip'][$j]) . '"><img src="' . GRAPHICSPATH . 'emblem-important.png" border="0" onclick="message([{\'type\': \'info\', \'msg\': \'' . str_replace(array("\r\n", "\r", "\n"), "<br>", htmlentities(addslashes($attributes['tooltip'][$j]))) . '\'}])"></a></td>';
 		}
 		if(in_array($attributes['type'][$j], array('date', 'time', 'timestamp', 'timestamptz'))){
 			$datapart .= '<td align="right" style="position: relative">'.calendar($attributes['type'][$j], $field_id, $attributes['privileg'][$j]).'</td>';
@@ -222,7 +222,7 @@
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
 			$onchange2 = "buildJSONString('" . $id . "', false);";
-			for ($t = 0; $t < count($type_attributes['name']); $t++) {
+			for ($t = 0; $t < count_or_0($type_attributes['name']); $t++) {
 				if ($type_attributes['visible'][$t] != 0) {
 					$field_id = $id . '_' . $t . '_' . $type_attributes['name'][$t];
 					$type_attributes['privileg'][$t] = $attributes['privileg'][$j];
@@ -425,7 +425,8 @@
 			case 'Radiobutton' : {
 				if($change_all){
 					$onchange = 'change_all('.$layer_id.', '.$k.', \''.$name.'\');';
-				}						
+				}
+				$e = 0;					
 				foreach ($attributes['enum'][$j] as $enum_key => $enum) {
 					$datapart .= '<input class="'.$field_class.'" tabindex="1" type="radio" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'"';
 					$datapart .= ' onchange="'.$onchange.'" ';
@@ -435,6 +436,7 @@
 					$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
 					$datapart .= 'value="' . $enum_key . '"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
 					if(!$attributes['horizontal'][$j] OR (is_numeric($attributes['horizontal'][$j]) AND($e+1) % $attributes['horizontal'][$j] == 0))$datapart .= '<br>';
+					$e++;
 				}
 			}break;				
 			
@@ -982,6 +984,10 @@
 								autocomplete="off"
 								title="' . $alias . '"
 								onkeydown="
+									if(event.keyCode == 13){
+										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+									}
 									if (this.backup_value == undefined) {
 										this.backup_value = this.value;
 										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
@@ -1086,6 +1092,10 @@
 								title="' . $alias . '"
 								autocomplete="off"
 								onkeydown="
+									if(event.keyCode == 13){
+										document.querySelector(\'#suggests_' . $element_id . ' select\').dataset.clicked = true;
+										document.querySelector(\'#suggests_' . $element_id . ' select\').onchange();
+									}
 									if (this.backup_value == undefined) {
 										this.backup_value = this.value;
 										document.getElementById(\'' . $element_id . '\').backup_value = document.getElementById(\'' . $element_id . '\').value;
@@ -1156,8 +1166,15 @@
 		}
 		if ($privileg == '0') {
 			$auswahlfeld_output = $enums[$value]['output'];
-			$datapart = '<div class="readonly_text">' . htmlspecialchars($auswahlfeld_output) . '</div>';
-			$datapart .= '<input type="hidden" name="' . $fieldname . '" id="' . $layer_id . '_' . $name . '_' . $k . '" class="' . $field_class . '" onchange="' . $onchange . '" value="' . htmlspecialchars($value) . '">'; // falls das Attribut ein visibility-changer ist
+			$datapart  = '<div class="readonly_text">' . htmlspecialchars($auswahlfeld_output) . '</div>';
+			$datapart .= '<input
+				type="hidden"
+				id="' . $layer_id . '_' . $name . '_' . $k . '"
+				name="' . $fieldname . '"
+				class="' . $field_class . '"
+				onchange="' . $onchange . '"
+				value="' . htmlspecialchars($value) . '"
+			>'; // falls das Attribut ein visibility-changer ist
 			$auswahlfeld_output = '';
 			$auswahlfeld_output_laenge = '';
 		}
