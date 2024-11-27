@@ -1507,7 +1507,7 @@ echo '			</table>
 									else {
 										$symbol = $this->map->getSymbolObjectById($style->symbol);
 									}
-									if($symbol->type == 1006){ 	# 1006 == hatch
+									if($symbol->type == 1005){ 	# 1005 == hatch
 										$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
 										$style->maxsize = 2*$style->width;
 									}
@@ -6965,7 +6965,7 @@ echo '			</table>
 				else {
 					$symbol = $map->getSymbolObjectById($style->symbol);
 				}
-				if($symbol->type == 1006){ 	# 1006 == hatch
+				if($symbol->type == 1005){ 	# 1005 == hatch
 					$style->size = 2*$style->width;					# size und maxsize beim Typ Hatch auf die doppelte Linienbreite setzen, damit man was in der Legende erkennt
 					$style->maxsize = 2*$style->width;
 				}

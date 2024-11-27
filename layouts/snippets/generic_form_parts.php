@@ -222,7 +222,7 @@
 			$tsize = 20;
 			$datapart .= '<table border="2" class="gle_datatype_table">';
 			$onchange2 = "buildJSONString('" . $id . "', false);";
-			for ($t = 0; $t < count($type_attributes['name']); $t++) {
+			for ($t = 0; $t < count_or_0($type_attributes['name']); $t++) {
 				if ($type_attributes['visible'][$t] != 0) {
 					$field_id = $id . '_' . $t . '_' . $type_attributes['name'][$t];
 					$type_attributes['privileg'][$t] = $attributes['privileg'][$j];
