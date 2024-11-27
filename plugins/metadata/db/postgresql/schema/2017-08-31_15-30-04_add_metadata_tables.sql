@@ -1,7 +1,6 @@
 --#####################
 --# Metadatentabellen #
 --#####################
---#2005-11-29_pk
 CREATE TABLE md_metadata
 (
   id serial NOT NULL,

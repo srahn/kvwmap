@@ -149,7 +149,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (47, 'MAXQUERYROWS', '', '100', 'maximale Anzahl der in einer Sachdatenabfrage zurückgelieferten Zeilen.\r\n', 'numeric', 'Administration', '', 1, 2),
 (48, 'ALWAYS_DRAW', '', 'true', 'definiert, ob der Polygoneditor nach einem Neuladen\r\nder Seite immer in den Modus \"Polygon zeichnen\" wechselt\r\n', 'boolean', 'Administration', '', 1, 2),
 (49, 'EARTH_RADIUS', '', '6384000', 'Parameter für die Strecken- und Flächenreduktion\r\n', 'numeric', 'Administration', '', 1, 2),
-(50, 'admin_stellen', '', '[\r\n    1,54\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
+(50, 'admin_stellen', '', '[\r\n    1\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
 (51, 'gast_stellen', '', '[\r\n  \r\n]', 'Gast-Stellen\r\n', 'array', 'Administration', '', 1, 2),
 (52, 'selectable_limits', '', '[\r\n    10,\r\n    25,\r\n    50,\r\n    100,\r\n    200\r\n]', 'auswählbare Treffermengen\r\n', 'array', 'Administration', '', 1, 2),
 (53, 'selectable_scales', '', '[\r\n    500,\r\n    1000,\r\n    2500,\r\n    5000,\r\n    7500,\r\n    10000,\r\n    25000,\r\n    50000,\r\n    100000,\r\n    250000,\r\n    500000,\r\n    1000000\r\n]', 'auswählbare Maßstäbe\r\n', 'array', 'Administration', '', 1, 2),
@@ -337,7 +337,7 @@ CREATE TABLE `cron_jobs` (
 
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
 (1, 'Lösche MapServer tmp Dateien', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
-(2, 'Lösche Gastnutzer', 'Jeden Tag 01:01', '1 1 * * *', NULL, '/var/www/apps/kvwmap_intern/tools/deleteGastUser.sh', NULL, 2, 54, 1, NULL, 'gisadmin');
+(2, 'Lösche Gastnutzer', 'Jeden Tag 01:01', '1 1 * * *', NULL, '/var/www/apps/kvwmap_intern/tools/deleteGastUser.sh', NULL, 2, 1, 1, NULL, 'gisadmin');
 
 -- --------------------------------------------------------
 
@@ -2104,7 +2104,6 @@ INSERT INTO `u_groups2rolle` (`user_id`, `stelle_id`, `id`, `status`) VALUES
 (1, 1, 20, 0),
 (1, 1, 31, 1),
 (1, 1, 32, 1),
-(1, 1, 54, 1),
 (1, 1, 57, 0),
 (1, 1, 59, 0),
 (1, 1, 60, 1),

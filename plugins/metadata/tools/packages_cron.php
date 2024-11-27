@@ -50,25 +50,24 @@
       }
       $GUI->formvars = $_REQUEST;
     }
-    $go = (isset($GUI->formvars['go']) ? $GUI->formvars['go'] : '');
-    //  echo 'go: ' . $go;
     $err_msgs = array();
+    $go = (isset($GUI->formvars['go']) ? $GUI->formvars['go'] : '');
     switch ($go) {
       case 'metadata_create_bundle_package' : {
         if (!array_key_exists('stelle_id', $GUI->formvars)) {
-          $err_msg[] = 'Parameter stelle_id wurde nicht übergeben.';
+          $err_msgs[] = 'Parameter stelle_id wurde nicht übergeben.';
           break;
         }
         if ($GUI->formvars['stelle_id'] == '') {
-          $err_msg[] = 'Parameter stelle_id ist leer.';
+          $err_msgs[] = 'Parameter stelle_id ist leer.';
           break;
         }
         if (!array_key_exists('login_name', $GUI->formvars)) {
-          $err_msg[] = 'Parameter login_name wurde nicht übergeben.';
+          $err_msgs[] = 'Parameter login_name wurde nicht übergeben.';
           break;
         }
         if ($GUI->formvars['login_name'] == '') {
-          $err_msg[] = 'Parameter login_name ist leer.';
+          $err_msgs[] = 'Parameter login_name ist leer.';
           break;
         }
 
@@ -98,23 +97,23 @@
 
         // find if any ressource has pack status in progress
         if ($package_in_progress = DataPackage::find_first_by_status($GUI, 3)) {
-          $err_msg[] = 'Auftrag abgelehnt. Es wird gerade ein anderes Packet Id: ' . $package_in_progress->get_id() . ' gepackt.';
+          $err_msgs[] = 'Auftrag abgelehnt. Es wird gerade ein anderes Packet Id: ' . $package_in_progress->get_id() . ' gepackt.';
           break;
         }
 
         // find registered packages to pack
         $packages = DataPackage::find_by_status($GUI, 2);
         if (count($packages) == 0) {
-          $err_msg[] = 'Keine Ressource gefunden die gepackt werden muss.';
+          $err_msgs[] = 'Keine Ressource gefunden die gepackt werden muss.';
           break;
         }
 
         if (!array_key_exists('login_name', $GUI->formvars)) {
-          $err_msg[] = 'Parameter login_name wurde nicht übergeben.';
+          $err_msgs[] = 'Parameter login_name wurde nicht übergeben.';
           break;
         }
         if ($GUI->formvars['login_name'] == '') {
-          $err_msg[] = 'Parameter login_name ist leer.';
+          $err_msgs[] = 'Parameter login_name ist leer.';
           break;
         }
 
@@ -130,13 +129,13 @@
             $err_msgs[] = $response['msg'];
           }
         }
-        if (count($err_msg) == 0) {
+        if (count($err_msgs) == 0) {
           $msg = 'Alle beauftragten Pakete erfolgreich gepackt.';
         }
       }
     }
 
-    if (count($err_msg) == 0) {
+    if (count($err_msgs) == 0) {
       echoLog($msg);
       return array(
         'success' => true,
@@ -145,7 +144,7 @@
     }
     else {
       // Ergebnis loggen
-      $msg = implode(' ', $err_msg);
+      $msg = implode(' ', $err_msgs);
       echoLog($msg);
       return array(
         'success' => false,

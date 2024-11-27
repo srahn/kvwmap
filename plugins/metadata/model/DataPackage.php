@@ -173,7 +173,7 @@ class DataPackage extends PgObject {
 	}
 
 	function get_export_path() {
-		$this->export_path = SHAPEPATH . 'datentool/datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
+		$this->export_path = METADATA_DATA_PATH . 'datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
 		return $this->export_path;
 	}
 
@@ -184,7 +184,7 @@ class DataPackage extends PgObject {
 	 */
 	public static	function get_bundle_package_file($stelle_id) {
 		$bundle_package_file = array(
-			SHAPEPATH . 'datentool/datenpakete/' . $stelle_id . '/',
+			METADATA_DATA_PATH . 'datenpakete/' . $stelle_id . '/',
 			METADATA_BUNDLE_PACKAGE_NAME . '.zip'
 		);
 		return $bundle_package_file;

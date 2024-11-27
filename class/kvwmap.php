@@ -34,6 +34,7 @@
 class GUI {
 
 	var $alert;
+	var $classes;
 	var $group_has_active_layers;
 	var $gui;
 	var $go;
@@ -12862,17 +12863,18 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->database->execSQL($sql,4, 1);
 	}
 
+	/**
+	 * $Stelle ist das "alte" Stellenobjekt und $new_stelle das "neue" Stellenobjekt,
+	 * denn falls die Stellen-ID geändert wurde, müssen alle Zuordnungen mit der alten ID gelöscht werden und mit der neuen ID zugewiesen werden
+	 */
 	function Stellenzuweisung($Stelle, $new_stelle, $menues, $functions, $frames,	$layouts,	$layer,	$selectedusers){
-		# $Stelle ist das "alte" Stellenobjekt und $new_stelle das "neue" Stellenobjekt,
-		# denn falls die Stellen-ID geändert wurde, müssen alle Zuordnungen mit der alten ID gelöscht werden und mit der neuen ID zugewiesen werden
-
 		# Menüs
 		$Stelle->deleteMenue(0); // erst alle Menüs rausnehmen
 		$new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
 
 		# Layer
-		if($layer[0] != NULL) {
-			$new_stelle->addLayer($layer, 0, '', false); # Hinzufügen der Layer zur Stelle
+		if ($layer[0] != NULL) {
+			$new_stelle->addLayer($layer, '', '', false); # Hinzufügen der Layer zur Stelle
 		}
 
 		# Funktionen
@@ -12983,7 +12985,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->Stelleneditor();
 	}
 
-  function StelleAendern() {
+  function stelle_aendern() {
   	$_files = $_FILES;
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$this->ddl = new ddl($this->database, $this);

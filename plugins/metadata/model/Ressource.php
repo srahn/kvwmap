@@ -17,7 +17,7 @@ class Ressource extends PgObject {
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
 		parent::__construct($gui, Ressource::$schema, Ressource::$tableName);
-		include_(CLASSPATH . 'data_import_export.php');
+		include_once(CLASSPATH . 'data_import_export.php');
     $this->gui->data_import_export = new data_import_export('gid');
     // $this->typen = array(
 		// 	'Punkte',
@@ -59,6 +59,18 @@ class Ressource extends PgObject {
    *     DATE(last_updated_at) + update_time + update_interval is in the past
    *   )
    * )
+   * Status of ressources during update:
+   * -1 - Abbruch wegen Fehler
+   *  0 - Uptodate
+   *  1 - Update gestartet
+   *  2 - Download gestartet
+   *  3 - Download fertig
+   *  4 - Auspacken gestartet
+   *  5 - Auspacken fertig
+   *  6 - Import gestartet
+   *  7 - Import fertig
+   *  8 - Transformation gestartet
+   *  9 - Transformation fertig
    */
   public static function update_outdated($gui, $ressource_id = null, $method_only = '') {
     $gui->debug->show('<br>Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
@@ -76,21 +88,22 @@ class Ressource extends PgObject {
             (status_id IS NULL OR status_id = 0) AND
             auto_update AND
             (
-              last_update IS NULL OR
+              last_updated_at IS NULL OR
               (
-                last_update IS NOT NULL AND
+                last_updated_at IS NOT NULL AND
                 update_interval IS NOT NULL AND
                 DATE(last_updated_at) + update_time + update_interval < now()
               )
             )
           ",
-          "last_update",
+          "last_updated_at",
           "*",
           1
         );
       }
     }
-    $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+    // $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+
     if (count($ressources) > 0) {
       $ressource = $ressources[0];
       $result = $ressource->run_update($method_only);
@@ -198,18 +211,18 @@ class Ressource extends PgObject {
           );
         }
       }
-      $this->debug->show('Download from URLs:<br>' . implode('<br>', $download_urls), true);
+      // $this->debug->show('Download from URLs:<br>' . implode('<br>', $download_urls), true);
       if ($this->get('download_path') == '') {
         return array(
           'success' => false,
           'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
         );
       }
-      $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
-      if (strpos($download_path, '/var/www/data/datentool/') !== 0) {
+      $download_path = METADATA_DATA_PATH . $this->get('download_path');
+      if (strpos($download_path, METADATA_DATA_PATH) !== 0) {
         return array(
           'success' => false,
-          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/datentool/ an.'
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit ' . METADATA_DATA_PATH . ' an.'
         );
       }
       if (!file_exists($download_path)) {
@@ -221,8 +234,12 @@ class Ressource extends PgObject {
       $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 
       foreach ($download_urls AS $download_url) {
-        $this->debug->show('Download ' . basename($download_url) . ' from url: ' . $download_url . ' to ' . $download_path, true);
+        $this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
         copy($download_url, $download_path . basename($download_url));
+        if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
+          unlink($download_path . basename($download_url));
+          $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+        }
       }
     }
     catch (Exception $e) {
@@ -275,11 +292,11 @@ class Ressource extends PgObject {
           'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
         );
       }
-      $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
-      if (strpos($download_path, '/var/www/data/datentool/') !== 0) {
+      $download_path = METADATA_DATA_PATH . $this->get('download_path');
+      if (strpos($download_path, METADATA_DATA_PATH) !== 0) {
         return array(
           'success' => false,
-          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit /var/www/data/datentool/ an.'
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit ' . METADATA_DATA_PATH . ' an.'
         );
       }
 
@@ -328,6 +345,122 @@ class Ressource extends PgObject {
     }
   }
 
+  /**
+   * Download dataset or its subsets to download_path
+   */
+  function download_atom() {
+    $this->debug->show('Starte Funktion download_atom', true);
+    try {
+      // $this->debug->show('Download from URLs:<br>' . implode('<br>', $download_urls), true);
+      if ($this->get('download_path') == '') {
+        return array(
+          'success' => false,
+          'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
+        );
+      }
+
+      $download_path = METADATA_DATA_PATH . $this->get('download_path');
+      if (strpos($download_path, METADATA_DATA_PATH) !== 0) {
+        return array(
+          'success' => false,
+          'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit ' . METADATA_DATA_PATH . ' an.'
+        );
+      }
+
+      if ($this->get('download_url') == '') {
+        return array(
+          'success' => false,
+          'msg' => 'Es ist keine Download-URL angegeben.'
+        );
+      }
+      $atom_url = $this->get('download_url');
+      // z.B. https://www.geodaten-mv.de/dienste/dom_atom?type=dataset&id=us214578-a1n5-4v12-v31c-5tg2az3a2164
+
+
+      $this->get_subressources();
+      if (!$this->has_subressources) {
+        return array(
+          'success' => false,
+          'msg' => 'Es sind keine Teildaten angegeben.'
+        );
+      }
+
+      if ($this->subressources[0]->get('download_url') == '') {
+        return array(
+          'success' => false,
+          'msg' => 'Die Teildaten haben keine download_url.'
+        );
+      }
+      $teile_url = $this->subressources[0]->get('download_url');
+      // z.B. https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif
+
+      if (!$this->subressources[0]->has_ranges) {
+        return array(
+          'success' => false,
+          'msg' => 'Die Teildaten haben keine Bereiche.'
+        );
+      }
+
+      $placeholders = array_map(
+        function($range) {
+          return $range->get('name');
+        },
+        $this->subressources[0]->ranges
+      );
+
+      if (!file_exists($download_path)) {
+        $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
+        mkdir($download_path, 0777, true);
+      }
+
+      array_map('unlink', glob($download_path . "/*"));
+      $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
+
+      $this->debug->show('Download ATOM-Feed from: ' . $atom_url . ' to ' . $download_path, true);
+      copy($atom_url, $download_path . 'atom-feed.xml');
+      $handle = fopen($download_path . 'atom-feed.xml', "r");
+      if (!$handle) {
+        return array(
+          'success' => false,
+          'msg' => 'Konnte Atom-Feed Datei ' . $download_path . ' atom-feed.xml nicht öffnen'
+        );
+      }
+
+      $teile_url = str_replace('?', '\?', str_replace('/', '\/', $teile_url));
+      foreach ($placeholders AS $placeholder) {
+        $teile_url = str_replace($placeholder, '(.*?)', $teile_url);
+      }
+      $regex = '/' . $teile_url . '/';
+      $this->debug->show('Check Lines against regex: ' . $regex, true);
+      while (($line = fgets($handle)) !== false) {
+        if (preg_match($regex, $line, $match) == 1) {
+          $download_url = str_replace('&amp;', '&', $match[0]);
+          $parts = explode('file=', $download_url);
+          $this->debug->show('Download File from: ' . $download_url . ' to ' . $download_path . $parts[1], true);
+          copy($download_url, $download_path . $parts[1]);
+          if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . $parts[1])) {
+            unlink($download_path . $parts[1]);
+            $this->debug->show('Datei ' . $parts[1] . ' gelöscht weil es keine Bilddatei ist.');
+          }
+        }
+      }
+      fclose($handle);
+      unlink($download_path . 'atom-feed.xml');
+      $this->debug->show('Download beendet und ATOM-Feed gelöscht', true);
+    }
+    catch (Exception $e) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Download der Atom-Daten: ', $e->getMessage()
+      );
+    }
+
+    return array(
+      'success' => true,
+      'msg' => 'Download von URLs erfolgreich beendet.'
+    );
+  }
+
   ##################
   # Unpack methods #
   ##################
@@ -365,7 +498,7 @@ class Ressource extends PgObject {
         'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
       );
     }
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     if (strpos($dest_path, '/var/www/data/') !== 0) {
       return array(
         'success' => false,
@@ -377,7 +510,7 @@ class Ressource extends PgObject {
       mkdir($dest_path, 0777, true);
     }
 
-    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    $download_path = METADATA_DATA_PATH . $this->get('download_path');
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
     $err_msg = array();
@@ -429,7 +562,7 @@ class Ressource extends PgObject {
         'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
       );
     }
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     if (strpos($dest_path, '/var/www/data/') !== 0) {
       return array(
         'success' => false,
@@ -440,7 +573,7 @@ class Ressource extends PgObject {
       $this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
       mkdir($dest_path, 0777, true);
     }
-    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    $download_path = METADATA_DATA_PATH . $this->get('download_path');
 
     $finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
     $err_msg = array();
@@ -498,7 +631,7 @@ class Ressource extends PgObject {
         'msg' => 'Es ist kein relatives Verzeichnis zur Ablage der gefilterten Daten angegeben.'
       );
     }
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     if (strpos($dest_path, '/var/www/data/') !== 0) {
       return array(
         'success' => false,
@@ -511,7 +644,7 @@ class Ressource extends PgObject {
     }
 
     $err_msg = array(); 
-    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    $download_path = METADATA_DATA_PATH . $this->get('download_path');
     forEach(scandir($download_path) AS $entry) {
       if (is_file($download_path . $entry)) {
         $fp_dest = fopen($dest_path, $entry, "w");
@@ -567,7 +700,7 @@ class Ressource extends PgObject {
         'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
       );
     }
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     if (strpos($dest_path, '/var/www/data/') !== 0) {
       return array(
         'success' => false,
@@ -580,7 +713,7 @@ class Ressource extends PgObject {
     }
 
     $err_msg = array(); 
-    $download_path = SHAPEPATH . 'datentool/' . $this->get('download_path');
+    $download_path = METADATA_DATA_PATH . $this->get('download_path');
     forEach(scandir($download_path) AS $entry) {
       if (is_file($download_path . $entry)) {
         if (!copy($download_path . $entry, $dest_path . $entry)) {
@@ -606,6 +739,55 @@ class Ressource extends PgObject {
   }
 
   /**
+   * Funktion verschiebt die im $download_path liegenden Dateien nach $dest_path
+   */
+  function unpack_move() {
+    $this->debug->show('Starte Funktion unpack_move', true);
+    if ($this->get('dest_path') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
+      );
+    }
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
+    if (strpos($dest_path, '/var/www/data/') !== 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Das Zielverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+      );
+    }
+    if (!file_exists($dest_path)) {
+      $this->debug->show('Lege Zielverzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+      mkdir($dest_path, 0777, true);
+    }
+
+    $err_msg = array(); 
+    $download_path = METADATA_DATA_PATH . $this->get('download_path');
+    forEach(scandir($download_path) AS $entry) {
+      if (is_file($download_path . $entry)) {
+        if (!rename($download_path . $entry, $dest_path . $entry)) {
+          $err_msg[] = 'Fehler beim Verschieben der Datei ' . $entry;
+        }
+        else {
+          $this->debug->show('Datei ' . $download_path . $entry . ' nach ' . $dest_path . $entry . ' verschoben.', true);
+        }
+      }
+    };
+
+    if (count($err_msg) > 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Verschieben der Dateien aus dem Downloadverzeichnis ' . $download_path . ' in das Zielverzeichnis ' . $dest_path . ' für die Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Meldung: ' . implode(', ', $err_msg)
+      );
+    }
+
+    return array(
+      'success' => true,
+      'msg' => 'Dateien der Ressource erfolgreich verschoben'
+    );
+  }
+
+  /**
    * Die Methode prüft nur ob es das Verzeichnis zum manuellen Kopieren von Dateien gibt.
    * Die Daten die da rein sollen müssen vom Admin selbst dort hinkopiert werden.
    * Diese Methode gibt es um festlegen zu können wo sich die manuell hochgeladenen Dateien
@@ -620,7 +802,43 @@ class Ressource extends PgObject {
         'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
       );
     }
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
+    if (strpos($dest_path, '/var/www/data/') !== 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Das Zielverzeichnis ' . $dest_path . ' fängt nicht mit /var/www/data/ an.'
+      );
+    }
+    if (!file_exists($dest_path)) {
+      $this->debug->show('Lege Zielverzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
+      mkdir($dest_path, 0777, true);
+    }
+
+    $msg = 'Zielverzeichnis zum manuellen Kopieren vorhanden.';
+    $this->debug->show($msg, true);
+
+    return array(
+      'success' => true,
+      'msg' => $msg
+    );
+  }
+
+  /**
+   * Die Methode prüft nur ob es das angegebene Import-Verzeichnis Dateien gibt.
+   * Die Daten die da rein sollen müssen vom Admin selbst dort hinkopiert oder geladen worden sein.
+   * Diese Methode gibt es um festlegen zu können wo sich die hochgeladenen Dateien
+   * befinden. Welche Dateien dort liegen und ob sie vorhanden sind
+   * wird in der Importmethode abgefragt und geprüft.
+   */
+  function unpack_no_copy() {
+    $this->debug->show('Starte Funktion manual_copy', true);
+    if ($this->get('dest_path') == '') {
+      return array(
+        'success' => false,
+        'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
+      );
+    }
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     if (strpos($dest_path, '/var/www/data/') !== 0) {
       return array(
         'success' => false,
@@ -682,7 +900,7 @@ class Ressource extends PgObject {
       );
     }
 
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
 
     if ($this->get('import_layer') != '') {
       // shape file is set explicit
@@ -746,7 +964,7 @@ class Ressource extends PgObject {
     }
 
     // get the files from dest_path
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     $gml_files = array();
     if ($this->get('import_file')) {
       $gml_files[] = $this->get('import_file');
@@ -824,7 +1042,7 @@ class Ressource extends PgObject {
     }
 
     // get the files from dest_path
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     $csv_file = $this->get('import_layer') . '.csv';
 
     if (!is_file($dest_path . $csv_file)) {
@@ -933,7 +1151,7 @@ class Ressource extends PgObject {
     }
 
     // get the files from dest_path
-    $dest_path = SHAPEPATH . 'datentool/' . $this->get('dest_path');
+    $dest_path = METADATA_DATA_PATH . $this->get('dest_path');
     $gml_files = array();
     $entries = scandir($dest_path);
     foreach ($entries AS $entry) {
