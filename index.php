@@ -280,6 +280,14 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'get_position_qrcode' : {
+				$GUI->sanitize([
+					'layer_id' => 'int',
+					'oid' => 'text'
+				]);				
+				$GUI->get_position_qrcode();
+			} break;
+
 			case 'write_mapserver_templates' : {
 				$GUI->checkCaseAllowed($go);
 				include_once(CLASSPATH . 'Layer.php');
@@ -341,6 +349,19 @@ function go_switch($go, $exit = false) {
 
 			case 'loadDrawingOrderForm' : {
 				$GUI->loadDrawingOrderForm();
+			} break;
+
+			case 'show_layer_in_map' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'zoom_to_layer_extent' => 'boolean'
+				]);
+				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->saveMap('');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->output();
 			} break;
 
 			case 'show_snippet' : {
@@ -455,6 +476,11 @@ function go_switch($go, $exit = false) {
 
 			case 'close_group_legend' : {
 				$GUI->close_group_legend();
+			} break;
+
+			# Legende für einen Layer erzeugen
+			case 'get_layer_legend' : {
+				$GUI->get_layer_legend();
 			} break;
 
 			# Legende erzeugen
@@ -1739,6 +1765,27 @@ function go_switch($go, $exit = false) {
 				}
 			} break;
 
+			case 'Layer_Zeichenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Zeichenreihenfolge();
+			} break;
+
+			case 'Layer_Zeichenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Zeichenreihenfolge');
+				$GUI->Layer_Zeichenreihenfolge_Speichern();
+			} break;
+
+			case 'Layer_Legendenreihenfolge' : {
+				$GUI->checkCaseAllowed($go);
+				$GUI->Layer_Legendenreihenfolge();
+			} break;
+
+			case 'Layer_Legendenreihenfolge_Speichern' : {
+				$GUI->checkCaseAllowed('Layer_Legendenreihenfolge');
+				$GUI->Layer_Legendenreihenfolge_Speichern();
+			} break;
+
+
 			case 'Layer2Stelle_Reihenfolge' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Layer2Stelle_Reihenfolge();
@@ -2010,7 +2057,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;			
+			} break;
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');
@@ -2210,7 +2257,7 @@ function go_switch($go, $exit = false) {
 
 			default : {
 				# Karteninformationen lesen
-				$GUI->loadMap('DataBase');
+				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();

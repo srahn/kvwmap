@@ -1189,6 +1189,10 @@ a.menuered:hover {
 	flex: 0 0 100%;
 }
 
+.qr_code{
+	background-image: url(<? echo GRAPHICSPATH; ?>qr_code.png);
+}
+
 .use_for_dataset{
 	background-image: url(<? echo GRAPHICSPATH; ?>use_for_dataset.png);
 }
@@ -1529,13 +1533,13 @@ a.menuered:hover {
 	position: relative;
 	z-index: 1000;
 	margin: 0;
-	height: 0px;
+	height: 1px;
 	width: 100%;
 }
 
 .dropZone.ready{
 	margin: -12 0 -12 15;
-	height: 24px;
+	height: 25px;
 	transition: height 0.1s ease, margin 0.1s ease;
 }
 
@@ -1555,6 +1559,7 @@ a.menuered:hover {
 	min-width: 177px;
 	border: 1px solid grey;
 	cursor: pointer;
+	text-align: start;
 }
 
 .dragObject:hover{
@@ -1567,11 +1572,7 @@ a.menuered:hover {
 
 .dragObject.picked{
 	visibility: hidden;
-	height: 0px;
-	margin: 0 0 0 0;
-	padding: 0 0 0 0;
-	border: none;
-	transition: height 0.15s ease, margin 0.15s ease, padding 0.15s ease;
+	max-height: 16px;
 }
 
 .dragObject.over{

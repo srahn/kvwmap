@@ -28,8 +28,8 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
- * @param String $exp Die MapServer-Expression
- * @param String $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @param string $exp Die MapServer-Expression
+ * @param string $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
@@ -1668,38 +1668,38 @@ function emailcheck($email) {
 }
 
 function buildExpressionString($str) {
-  $intervalle=explode(';',$str);
-  $anzInt=count($intervalle);
-  if ($intervalle[$anzInt-1]=='') { $anzInt--; }
+  $intervalle = explode(';', $str);
+  $anzInt = count($intervalle);
+  if ($intervalle[$anzInt-1] == '') { $anzInt--; }
   # Beginne mit der Erstellung des Ausdrucks
-  $expr.='(';
+  $expr.= '(';
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
-  $grenzen=explode('-',$intervalle[0]);
+  $grenzen = explode('-', $intervalle[0]);
   # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
-  if (count($grenzen)==1) {
+  if (count($grenzen) == 1) {
     # Wenn ja, wird die erste einschränkung geschrieben.
-    $expr.='[ID]='.$grenzen[0];
+    $expr.= '[ID] = ' . $grenzen[0];
   }
   else {
     # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
-    $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+    $expr.='([ID] > '.$grenzen[0].' AND [ID] < ' . $grenzen[1] . ')';
   }
   # weiter geht es mit den nächsten Intervallen
-  for ($i=1;$i<$anzInt;$i++) {
+  for ($i = 1; $i < $anzInt; $i++) {
     # wieder Zerlegen in Anfang und Ende
-    $grenzen=explode('-',$intervalle[$i]);
-    if (count($grenzen)==1) {
+    $grenzen = explode('-', $intervalle[$i]);
+    if (count($grenzen) == 1) {
       # Es gibt nur einen Wert
-      $expr.=' OR [ID]='.$grenzen[0];
+      $expr.=' OR [ID] = ' . $grenzen[0];
     }
     else {
       # Es gibt Anfang und Ende im Intervall
-      $expr.=' OR ([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+      $expr.=' OR ([ID] > ' . $grenzen[0] . ' AND [ID] < ' . $grenzen[1] . ')';
     }
   }
   # Beenden des Ausdrucks
-  $expr.=')';
+  $expr .= ')';
   return $expr;
 }
 
@@ -1924,7 +1924,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
@@ -2338,6 +2338,23 @@ function get_name_from_thump($thumb) {
 }
 
 /**
+ * Function return the most likely delimiter of $line
+ * @param string $line The line to test.
+ * @return string The detected delimiter.
+ */
+function detect_delimiter($line) {
+	$delimiters = [',', ';', "\t", '|', ':'];
+	$delimiter_counts = [];
+	foreach ($delimiters as $delimiter) {
+
+		$delimiter_counts[$delimiter] = substr_count($line, $delimiter);
+	}
+	// Find the delimiter with the highest count
+	$most_likely_delimiter = array_keys($delimiter_counts, max($delimiter_counts));
+	return $most_likely_delimiter[0];
+}
+
+/**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
 * Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
 * z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
@@ -2366,7 +2383,7 @@ function before_last($txt, $delimiter) {
  * Function extract from first select until last closing bracket.
  * If no open pracket is before select like in this example:
  * select id, the_geom from schema.tabelle where true, return $data as it is
- * @param String $data Mapserver data statement
+ * @param string $data Mapserver data statement
  * @return String inner sql
  */
 function get_sql_from_mapserver_data($data) {
@@ -2384,9 +2401,9 @@ function get_sql_from_mapserver_data($data) {
  * Returns an empty string if $schema_name.$table_name not exists in $sql.
  * Returns $table_name if $schema_name.$table_name exists but no alias for it.
  * Befor parsing the sql all select expressions will be replaced by *
- * @param String $sql The SQL-Statement to parse.
- * @param String $schema_name The schema name of the table.
- * @param String $table_name The table name.
+ * @param string $sql The SQL-Statement to parse.
+ * @param string $schema_name The schema name of the table.
+ * @param string $table_name The table name.
  * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
  */
 function get_table_alias($sql, $schema_name, $table_name) {
@@ -2658,7 +2675,7 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 
 /**
  * Function read all files recursively from a directory
- * @param String $dir - The directory
+ * @param string $dir - The directory
  * @return Array $files - The files in the directory and below
  */
 function getAllFiles($dir) {

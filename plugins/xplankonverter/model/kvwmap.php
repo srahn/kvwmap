@@ -533,8 +533,14 @@
 			# Extent mit Ausdehnung von adminstelle überschreiben
 			$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 
-			$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
-
+			$layer_id = $layer->getMetadata('kvwmap_layer_id');
+			$layerObj = Layer::find_by_id($GUI, $layer_id);
+			if (!$layerObj) {
+				return array(
+					'success' => false,
+					'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+				);
+			}
 			if ($layerObj->get('write_mapserver_templates') == 'generic') {
 				# Set generic Data sql for layer
 				$result = $layerObj->get_generic_data_sql();
@@ -614,7 +620,15 @@
 				$layer->set('template', 'templates/' . $layer->name . '_body.html');
 				# Extent mit Ausdehnung von adminstelle überschreiben
 				$layer->setMetaData("ows_extent", $bb->minx . ' ' . $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
-				$layerObj = Layer::find_by_id($GUI, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($GUI, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
+
 				if ($layerObj->get('write_mapserver_templates') == 'generic') {
 					# Set generic Data sql for layer
 					$result = $layerObj->get_generic_data_sql();
