@@ -6,7 +6,6 @@
 *		getsubmenues($id)
 *		getName()
 *		readDefaultValues()
-*		checkClientIpIsOn()
 *		Löschen()
 *		deleteMenue(text)
 *		deleteLayer($layer, $pgdatabase)
@@ -85,6 +84,7 @@ class stelle {
 	var $style;
 	var $reset_password_text;
 	var $invitation_text;
+	public $pgdbhost = 'pgsql';
 
 	function __construct($id, $database) {
 		global $debug;
@@ -241,7 +241,11 @@ class stelle {
 				`ows_contentvoicephone`,
 				`ows_contentfacsimile`,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`,
+				`style`,
+				`show_shared_layers`,
+				`reset_password_text`,
+				`invitation_text`
 			FROM
 				stelle s
 			WHERE
@@ -314,27 +318,6 @@ class stelle {
 		$this->reset_password_text = $rs['reset_password_text'];
 		$this->invitation_text = $rs['invitation_text'];
 	}
-
-  function checkClientIpIsOn() {
-    $sql = "
-			SELECT
-				check_client_ip
-			FROM
-				stelle
-			WHERE ID = " . $this->id . "
-		";
-    $this->debug->write("<p>file:stelle.php class:stelle->checkClientIpIsOn- Abfragen ob IP's der Nutzer in der Stelle getestet werden sollen<br>".$sql,4);
-    #echo '<br>'.$sql;
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0;
-		}
-		$rs = $this->database->result->fetch_array();
-    if ($rs['check_client_ip']=='1') {
-      return 1;
-    }
-    return 0;
-  }
 
 	function delete() {
 		$sql = "
@@ -1072,10 +1055,11 @@ class stelle {
 		return $ret;
 	}
 
-	/*
-	* Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
-	* Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
-	*/
+	/**
+	 * Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
+	 * Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
+	 * @param int[] $selected_parents Array of ids from parent stellen.
+	 */
 	function apply_parent_selection(
 		$selected_parents,
 		&$menues,
@@ -1348,7 +1332,6 @@ class stelle {
 			$columns = '
 				`Layer_ID`, 
 				`queryable`, 
-				`drawingorder`, 
 				`legendorder`,
 				`minscale`, 
 				`maxscale`, 
@@ -1457,7 +1440,7 @@ class stelle {
 		return 1;
 	}
 
-	function addLayer($layer_ids, $drawingorder, $filter = '', $assign_default_values = false, $privileg = 'default') {
+	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
@@ -1466,7 +1449,6 @@ class stelle {
 				`Layer_ID`,
 				`queryable`,
 				`use_geom`,
-				`drawingorder`,
 				`legendorder`,
 				`minscale`,
 				`maxscale`,
@@ -1480,17 +1462,18 @@ class stelle {
 				`privileg`,
 				`export_privileg`,
 				`postlabelcache`,
-				`requires`
+				`requires`,
+				`start_aktiv`
 			)";
 			if (!$assign_default_values) {
 				# Einstellungen von der Elternstelle übernehmen
-				$sql = "INSERT INTO used_layer " . $insert . "
+				$sql = "
+					INSERT INTO used_layer " . $insert . "
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1504,19 +1487,19 @@ class stelle {
 						`privileg`,
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						`start_aktiv`
 					FROM
 						used_layer as l,
 						stellen_hierarchie
 					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						COALESCE((select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . "), 1) AND
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
 					ON DUPLICATE KEY UPDATE 
 						queryable = l.queryable, 
 						use_geom = l.use_geom, 
-						drawingorder = l.drawingorder, 
 						legendorder = l.legendorder, 
 						minscale = l.minscale, 
 						maxscale = l.maxscale, 
@@ -1527,8 +1510,9 @@ class stelle {
 						postlabelcache = l.postlabelcache,
 						`privileg` = l.`privileg`,
 						`export_privileg` = l.`export_privileg`,
-						requires = l.requires";
-				#echo $sql.'<br><br>';
+						requires = l.requires
+				";
+				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1541,7 +1525,6 @@ class stelle {
 						'" . $layer_ids[$i] . "',
 						queryable,
 						use_geom,
-						drawingorder, 
 						legendorder, 
 						minscale, 
 						maxscale, 
@@ -1555,7 +1538,8 @@ class stelle {
 						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						0
 					FROM
 						layer as l
 					WHERE
@@ -1565,7 +1549,6 @@ class stelle {
 						ON DUPLICATE KEY UPDATE 
 							queryable = l.queryable, 
 							use_geom = l.use_geom, 
-							drawingorder = l.drawingorder, 
 							legendorder = l.legendorder, 
 							minscale = l.minscale, 
 							maxscale = l.maxscale, 
@@ -1823,13 +1806,16 @@ class stelle {
 
 	function updateLayerOrder($formvars){
 		# Aktualisieren der LayerzuStelle-Eigenschaften
-		if($formvars['legendorder'] == '')$formvars['legendorder'] = 'NULL';
-		$sql = 'UPDATE used_layer SET Layer_ID = '.$formvars['selected_layer_id'];
-		$sql .= ', drawingorder = '.$formvars['drawingorder'];
-		$sql .= ', legendorder = '.$formvars['legendorder'];
-		$sql .= ' WHERE Stelle_ID = '.$formvars['selected_stelle_id'].' AND Layer_ID = '.$formvars['selected_layer_id'];
+		$sql = '
+			UPDATE 
+				used_layer 
+			SET 
+				legendorder = ' . ($formvars['legendorder'] ?: 'NULL') . '
+			WHERE 
+				Stelle_ID = ' . $formvars['selected_stelle_id'] . ' AND 
+				Layer_ID = ' . $formvars['selected_layer_id'];
 		#echo $sql.'<br>';
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerdrawingorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
+		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerorder - Aktualisieren der LayerzuStelle-Eigenschaften:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 	}
@@ -1855,7 +1841,7 @@ class stelle {
     return $groups;
   }
 
-	function getLayers($group, $order = 'ul.legendorder, ul.drawingorder desc', $return = '') {
+	function getLayers($group, $order = 'ul.legendorder, l.drawingorder desc', $return = '') {
 		$layer = array(
 			'ID' => array(),
 			'Bezeichnung' => array(),
@@ -1867,7 +1853,7 @@ class stelle {
 			ul.stelle_id = " . $this->id .
 			($group != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group : "") . "
 		";
-		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY legendorder, drawingorder desc');
+		$order = ($order != NULL ? 'ORDER BY ' . $order : 'ORDER BY ul.legendorder, l.drawingorder desc');
 
 		# Lesen der Layer zur Stelle
 		$sql = "
@@ -1876,7 +1862,7 @@ class stelle {
 				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
 				l.Name,
 				l.alias,
-				ul.drawingorder,
+				l.drawingorder,
 				ul.legendorder
 			FROM
 				used_layer ul JOIN
@@ -2040,7 +2026,7 @@ class stelle {
 			WHERE
 				" . $condition . "
 		";
-		#echo $sql;
+		#echo 'SQL zur Abfrage der abfragbaren Layer in der Stelle: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getqueryablePostgisLayers - Lesen der abfragbaren PostgisLayer zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -2287,7 +2273,7 @@ class stelle {
 				ul.export_privileg,
 				ul.requires,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 
@@ -2318,7 +2304,7 @@ class stelle {
 			GROUP BY 
 				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
 				ul.`queryable`, 
-				ul.`drawingorder`, 
+				l.`drawingorder`, 
 				ul.`legendorder`, 
 				ul.`minscale`, 
 				ul.`maxscale`, 
@@ -2384,18 +2370,24 @@ class stelle {
 			'baseLayers' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					return $layer->get_baselayers_def($this->id);
+					if ($layer) {
+						// return only baselayer_def if layer has been found
+						return $layer->get_baselayers_def($this->id);
+					}
 				},
 				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
 			),
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					$layer->minScale = $layer2Stelle->get('minscale');
-					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
-					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
-					return $layer->get_overlays_def($this->id);
+					if ($layer) {
+						// return overlay_def only if layer has been found
+						$layer->minScale = $layer2Stelle->get('minscale');
+						$layer->maxScale = $layer2Stelle->get('maxscale');
+						$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
+						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+						return $layer->get_overlays_def($this->id);
+					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
 			)

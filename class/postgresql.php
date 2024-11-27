@@ -143,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -197,7 +197,7 @@ class pgdatabase {
 			SET CLIENT_ENCODING TO '".POSTGRES_CHARSET."';
 			SET datestyle TO 'German';
 			";
-		$ret=$this->execSQL($sql, 4, 0);
+		$ret = $this->execSQL($sql, 4, 0);
     if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     return $ret[1];
   }
@@ -679,7 +679,7 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
@@ -878,7 +878,7 @@ FROM
 					$fields[$i]['schema_name'] = $schemaname = $schema_names[$table_oid];
 					
 					$constraintstring = '';
-					
+					// Frage die attribute informationen der Tablle falls noch nicht geschehen
 					if(!is_array($attribute_infos[$schemaname][$tablename])){
 						$attribute_infos[$schemaname][$tablename] = $this->get_attribute_information($schemaname, $tablename);
 					}
@@ -895,8 +895,12 @@ FROM
 								$view_defintion_attributes[$tablename] = array();
 							}
 						}
-						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL)$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
-						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL)$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						if ($view_defintion_attributes[$tablename][$fieldname]['nullable'] != NULL) {
+							$attr_info['nullable'] = $view_defintion_attributes[$tablename][$fieldname]['nullable'];
+						}
+						if ($view_defintion_attributes[$tablename][$fieldname]['default'] != NULL) {
+							$attr_info['default'] = $view_defintion_attributes[$tablename][$fieldname]['default'];
+						}
 					}
 					# realer Name der Spalte in der Tabelle
 					$fields[$i]['real_name'] = $attr_info['name'];
@@ -1042,7 +1046,7 @@ FROM
 				" . $and_column . "
 			ORDER BY a.attnum, indisunique desc, indisprimary desc
 		";
-		#echo '<br><br>' . $sql;
+		#echo '<br>SQL zur Abfrage der Attributinformationen aus der Datenbank: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
 		if ($ret[0] == 0) {
 			while ($attr_info = pg_fetch_assoc($ret[1])) {

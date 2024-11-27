@@ -48,6 +48,7 @@ class account {
 	# Klasse für die Abrechnung und Statistik von Zugriffen
 
 	var $database;
+	var $debug;
 
 	function __construct($database) {
 		global $debug;
@@ -676,6 +677,8 @@ class user {
 	var $remote_addr;
 	var $has_logged_in;
 	var $language = 'german';
+	var $debug;
+	var $share_rollenlayer_allowed;
 
 	/**
 	 * Create a user object
@@ -750,7 +753,9 @@ class user {
     foreach ($ips AS $ip) {
       if (trim($ip)!='') {
         $ip=trim($ip);
-				if(!is_numeric(array_pop(explode('.', $ip))))$ip = gethostbyname($ip);			# für dyndns-Hosts
+				if (!is_numeric(explode('.', $ip)[0])) {
+					$ip = gethostbyname($ip);			# für dyndns-Hosts
+				}
         if (in_subnet($remote_addr, $ip)) {
           $this->debug->write('<br>IP:'.$remote_addr.' paßt zu '.$ip,4);
           #echo '<br>IP:'.$remote_addr.' paßt zu '.$ip;
@@ -827,7 +832,6 @@ class user {
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
-		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];

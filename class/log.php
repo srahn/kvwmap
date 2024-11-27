@@ -7,6 +7,8 @@
 
 class Debugger {
 	public $filename, $fp, $level;
+	var $mime_type;
+	var $user_funktion;
 
 	###################### Liste der Funktionen ####################################
 	#
@@ -17,7 +19,7 @@ class Debugger {
 	################################################################################
 
 	function __construct($filename, $mime_type = 'text/html') {
-		if ($_SESSION == null) {
+		if (!isset($_SESSION) OR $_SESSION == null) {
 			$_SESSION = array();
 		}
 		$this->filename = LOGPATH . (dirname($filename) != '.' ? dirname($filename) . '/' : '') . (array_key_exists('login_name', $_SESSION) ? $_SESSION['login_name'] : '') . basename($filename);
@@ -81,6 +83,8 @@ class LogFile {
 	var $filename; # Dateiname in der gelogt wird
 	var $fp; # filepointer
 	var $format; # Ausgabeformat
+	var $name; # Filename of logfile
+	var $with_timestamp; # Output with timestamp or not
 
 	###################### Liste der Funktionen ####################################
 	#

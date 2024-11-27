@@ -105,6 +105,7 @@
 		<td align="center" style="padding-top: 10px;">
 		<table border="0" cellspacing="0" cellpadding="3" style="background-color: #f8f8f9; width: 100%; border:1px solid <?php echo BG_DEFAULT ?>">
 			<tr>
+			<td style="border-bottom:1px solid #C3C7C3"></td>		
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strID; ?></td>
 				<td style="border-bottom:1px solid #C3C7C3">&nbsp;<?php echo $strClass; ?></td><?
 				foreach($supportedLanguages as $language){
@@ -137,7 +138,10 @@
 				echo '
 			<tr style="background-color:'.$tr_color.'">
 				<td style="border-bottom:1px solid #C3C7C3">
-					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
+					<img src="' . TEMPPATH_REL . $this->getlegendimage($this->layerdata, $this->classes[$i], NULL) . '">
+				</td>
+				<td style="border-bottom:1px solid #C3C7C3">
+					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">					
 				</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
 					<textarea rows="1" cols="12" style="min-width: 128px; width: 100%" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]"><?php echo $this->classes[$i]['Name']; ?></textarea>

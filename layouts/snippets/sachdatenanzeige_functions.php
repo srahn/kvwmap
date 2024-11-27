@@ -906,6 +906,16 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
 	}
 	
+	get_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'index.php?go=get_position_qrcode&layer_id=' + layer_id + '&oid=' + oid;
+	}
+
+	remove_position_qrcode = function(layer_id, oid) {
+		var img = document.getElementById('qr_' + layer_id + '_' + oid);
+		img.src = 'graphics/leer.gif';
+	}
+
 	zoom2object = function(layer_id, columnname, oid, selektieren){
 		params = 'go=zoomto_dataset&oid='+oid+'&layer_columnname='+columnname+'&layer_id='+layer_id+'&selektieren='+selektieren;
 		if(enclosingForm.id == 'GUI2'){					// aus overlay heraus --> Kartenzoom per Ajax machen
