@@ -4,12 +4,8 @@ CREATE OR REPLACE FUNCTION alkis.postprocessing()
   RETURNS void AS
 $BODY$
 
-
 SET client_encoding = 'UTF-8';
 SET enable_seqscan = off;
-
-
-BEGIN;
 
 TRUNCATE alkis.pp_flurstueckshistorie;
 
@@ -26,37 +22,50 @@ INSERT INTO alkis.pp_flurstueckshistorie
 	(	SELECT DISTINCT ON (f.flurstueckskennzeichen) 
 			f.flurstueckskennzeichen,
 			f.zeitpunktderentstehung,
-			COALESCE(vva.vorgaengerflurstueckskennzeichen, vna.vorgaengerflurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen,
-			n.nachfolgerflurstueckskennzeichen
+			COALESCE(vva.vorgaengerflurstueckskennzeichen, vna.vorgaengerflurstueckskennzeichen, vna2.vorgaengerflurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen,
+			COALESCE(n.nachfolgerflurstueckskennzeichen, n2.nachfolgerflurstueckskennzeichen) as nachfolgerflurstueckskennzeichen
 		FROM alkis.ax_flurstueck f
 			LEFT JOIN LATERAL ( SELECT 
-														array_agg(hf.flurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen
-													FROM 
-														alkis.ax_historischesflurstueckohneraumbezug hf
-													WHERE 
-														hf.endet IS NULL AND 
-														ARRAY[f.flurstueckskennzeichen] <@ hf.nachfolgerflurstueckskennzeichen) vva ON true
+							array_agg(hf.flurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen
+						FROM 
+							alkis.ax_historischesflurstueckohneraumbezug hf
+						WHERE 
+							hf.endet IS NULL AND 
+							ARRAY[f.flurstueckskennzeichen] <@ hf.nachfolgerflurstueckskennzeichen) vva ON true
 			LEFT JOIN LATERAL ( SELECT 
-														array_agg(u.flurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen
-													FROM 
-														alkis.ax_fortfuehrungsfall ff,
-														LATERAL unnest(ff.zeigtaufaltesflurstueck) u(flurstueckskennzeichen)
-													WHERE 
-														ff.endet IS NULL AND 
-														ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufneuesflurstueck AND NOT ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufaltesflurstueck) vna ON true
+							array_agg(u.flurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen
+						FROM 
+							alkis.ax_fortfuehrungsfall ff,
+							LATERAL unnest(ff.zeigtaufaltesflurstueck) u(flurstueckskennzeichen)
+						WHERE 
+							ff.endet IS NULL AND 
+							ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufneuesflurstueck AND NOT ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufaltesflurstueck) vna ON true
 			LEFT JOIN LATERAL ( SELECT 
-														array_agg(u.flurstueckskennzeichen) AS nachfolgerflurstueckskennzeichen
-													FROM 
-														alkis.ax_fortfuehrungsfall ff,
-														LATERAL unnest(ff.zeigtaufneuesflurstueck) u(flurstueckskennzeichen)
-													WHERE 
-														ff.endet IS NULL AND 
-														ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufaltesflurstueck AND NOT ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufneuesflurstueck) n ON true
+							array_agg(u.flurstueckskennzeichen) AS nachfolgerflurstueckskennzeichen
+						FROM 
+							alkis.ax_fortfuehrungsfall ff,
+							LATERAL unnest(ff.zeigtaufneuesflurstueck) u(flurstueckskennzeichen)
+						WHERE 
+							ff.endet IS NULL AND 
+							ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufaltesflurstueck AND NOT ARRAY[f.flurstueckskennzeichen] <@ ff.zeigtaufneuesflurstueck) n ON true
+
+			LEFT JOIN LATERAL ( SELECT 
+							array_agg(h.flurstueckskennzeichen) AS vorgaengerflurstueckskennzeichen
+						FROM 
+							alkis.ax_historischesflurstueck h
+						WHERE 
+							ARRAY[f.flurstueckskennzeichen] <@ h.nachfolgerflurstueckskennzeichen) vna2 ON true
+			LEFT JOIN LATERAL ( SELECT 
+							array_agg(u.flurstueckskennzeichen) AS nachfolgerflurstueckskennzeichen
+						FROM 
+							alkis.ax_historischesflurstueck h,
+							LATERAL unnest(h.nachfolgerflurstueckskennzeichen) u(flurstueckskennzeichen)
+						WHERE 
+							f.flurstueckskennzeichen = h.flurstueckskennzeichen) n2 ON true					
 		ORDER BY 
 			f.flurstueckskennzeichen, f.beginnt DESC);
 
 ANALYZE alkis.pp_flurstueckshistorie;
-
 
 -- =================================
 -- Flurstuecksnummern-Label-Position
@@ -119,7 +128,7 @@ INSERT INTO alkis.pp_strassenname (gml_id, schriftinhalt, hor, ver, art, winkel,
 UPDATE alkis.pp_strassenname  p
    SET schriftinhalt =     -- Hier ist der Label noch leer
    -- Subquery "Gib mir den Straßennamen":
-   ( SELECT k.bezeichnung                         -- Straßenname ..
+   ( SELECT distinct k.bezeichnung                         -- Straßenname ..
        FROM alkis.ax_lagebezeichnungkatalogeintrag k    --  .. aus Katalog
        JOIN alkis.ax_lagebezeichnungohnehausnummer l    -- verwendet als Lage o.H.
          ON (k.land=l.land AND k.regierungsbezirk=l.regierungsbezirk AND k.kreis=l.kreis AND k.gemeinde=l.gemeinde AND k.lage=l.lage )
@@ -129,8 +138,6 @@ UPDATE alkis.pp_strassenname  p
     )
 WHERE     p.schriftinhalt IS NULL
    AND NOT p.the_geom      IS NULL;   
-
-
 
 -- G E M A R K U N G
 
@@ -155,7 +162,6 @@ UPDATE alkis.pp_gemarkung a
        AND b.endet IS NULL
    );
 
-
 -- G E M E I N D E
 
 --DELETE FROM pp_gemeinde;
@@ -169,7 +175,6 @@ INSERT INTO alkis.pp_gemeinde
   ORDER BY        land, regierungsbezirk, kreis, gemeinde 
 ;
 
-
 -- Namen der Gemeinde dazu als Optimierung bei der Auskunft 
 UPDATE alkis.pp_gemeinde a
    SET gemeindename =
@@ -182,28 +187,6 @@ UPDATE alkis.pp_gemeinde a
        AND b.endet IS NULL
    );
 
-
-TRUNCATE alkis.pp_amt;
-	 
-INSERT INTO alkis.pp_amt
-  (land, regierungsbezirk, kreis, amt, amtsname, postleitzahlpostzustellung, ort_post, strasse, hausnummer, fax, telefon, weitereadressen)
-  SELECT DISTINCT g.land, g.regierungsbezirk, g.kreis, a.amt_schluessel,
-                  CASE WHEN position('(' in a.amt_name) > 0
-                    THEN substr(a.amt_name, 1, position('(' in a.amt_name)-2)
-                    ELSE a.amt_name
-                  END as amt_name,
-                  postleitzahlpostzustellung,
-                  ort_post,
-                  strasse,
-                  hausnummer,
-                  fax,
-                  telefon,
-                  weitereadressen
-  FROM            alkis.pp_gemeinde g, alkis.lk_aemtergemeinden a
-  LEFT JOIN    	  alkis.ax_dienststelle d ON d.schluesselgesamt = a.dienststelle_schluessel AND stellenart IN (1700, 1900)
-  LEFT JOIN       alkis.ax_anschrift an ON d.hat = an.gml_id
-  WHERE           g.land||g.regierungsbezirk||g.kreis||lpad(g.gemeinde::text, 3,'00') = a.gemeinde_schluessel and an.endet is null and d.endet is null 
-  ORDER BY        g.land, g.regierungsbezirk, g.kreis;
 	 
 -- ==============================================================================
 -- Geometrien der Flurstücke schrittweise zu groesseren Einheiten zusammen fassen
@@ -242,7 +225,6 @@ UPDATE alkis.pp_gemarkung a
        AND a.gemarkung = b.gemarkung
    ); -- Gemarkungsnummer ist je BundesLand eindeutig
 
-
 -- Gemarkungen zu Gemeinden zusammen fassen
 -- ----------------------------------------
 
@@ -269,31 +251,31 @@ UPDATE alkis.pp_gemeinde a
      AND a.gemeinde = b.gemeinde
    );
 
+TRUNCATE alkis.pp_amt;
 	 
--- Flächen vereinigen (aus der bereits vereinfachten Geometrie)
-UPDATE alkis.pp_amt a
-  SET the_geom = 
-   (SELECT st_multi(st_union(b.the_geom)) AS the_geom			-- angepasst am 10.03.2016
-    FROM alkis.pp_gemeinde b, alkis.lk_aemtergemeinden c
-    WHERE      
-    b.land||b.regierungsbezirk||b.kreis||lpad(b.gemeinde::text,3,'00') = c.gemeinde_schluessel
-       AND c.amt_schluessel = a.amt
-    GROUP BY c.amt_name
-   );
+INSERT INTO 
+	alkis.pp_amt (land, regierungsbezirk, kreis, amt, amtsname, anz_gemeinden, the_geom)
+  	
+	SELECT  
+		v.land, v.regierungsbezirk, v.kreis, v.verwaltungsgemeinschaft,
+		CASE WHEN position('(' in v.bezeichnung) > 0
+			THEN substr(v.bezeichnung, 1, position('(' in v.bezeichnung)-2)
+			ELSE v.bezeichnung
+		END as amt_name,
+		count(*),
+		st_multi(st_union(pp.the_geom))
+  	FROM
+		alkis.ax_gemeinde g
+		join alkis.pp_gemeinde pp on g.land = pp.land and g.regierungsbezirk = pp.regierungsbezirk and g.kreis = pp.kreis and g.gemeinde = pp.gemeinde
+  		join alkis.ax_verwaltungsgemeinschaft v on v.gml_id = any(g.istteilvon)
+	where 
+		g.istteilvon is not null and
+		v.endet is null 
+	GROUP BY
+		v.land, v.regierungsbezirk, v.kreis, v.verwaltungsgemeinschaft, v.bezeichnung
+  	ORDER BY        v.land, v.regierungsbezirk, v.kreis, v.verwaltungsgemeinschaft;
+
 	 
-
--- Gemeinden zählen
-UPDATE alkis.pp_amt a
-  SET anz_gemeinden = 
-   ( SELECT count(gemeinde) AS anz_gemeinden 
-     FROM    alkis.pp_gemeinde b, alkis.lk_aemtergemeinden c
-     WHERE      
-    
-    b.land||b.regierungsbezirk||b.kreis||lpad(b.gemeinde::text,3,'00') = c.gemeinde_schluessel
-       AND c.amt_schluessel = a.amt
-    GROUP BY c.amt_name
-   );
-
 -- Ämter zu Kreis zusammenfassen
 -- ----------------------------------------
 
@@ -305,7 +287,6 @@ FROM  alkis.pp_amt a, alkis.ax_kreisregion k
 WHERE a.kreis = k.kreis
 AND k.endet IS NULL
 GROUP BY a.land, a.regierungsbezirk, a.kreis, k.bezeichnung;
-
 
 -- Löcher schliessen	 
 UPDATE alkis.pp_flur SET the_geom = Filter_Rings(the_geom, 10);		-- hinzugefügt am 10.03.2016	 
@@ -328,8 +309,6 @@ UPDATE alkis.pp_amt SET simple_geom = st_simplify(the_geom, 5.0);
 
 UPDATE alkis.pp_kreis SET simple_geom = st_simplify(the_geom, 5.0); 
 
-
-
 TRUNCATE alkis.pp_zuordungspfeilspitze_flurstueck;
 INSERT INTO alkis.pp_zuordungspfeilspitze_flurstueck
 SELECT l.ogc_fid,st_azimuth(st_pointn(l.wkb_geometry, 1), st_pointn(l.wkb_geometry, 2)) * (- 180::double precision) / pi() + 90::double precision AS winkel, l.beginnt,l.endet, f.abweichenderrechtszustand, st_startpoint(l.wkb_geometry) AS wkb_geometry
@@ -346,188 +325,187 @@ SELECT l.ogc_fid, st_azimuth(st_pointn(l.wkb_geometry, 1), st_pointn(l.wkb_geome
 
 UPDATE alkis.ax_anschrift SET postleitzahlpostzustellung = lpad(postleitzahlpostzustellung, 5, '0') WHERE bestimmungsland is null;		-- Hinzugefügt am 18.01.2016
 
-
-
-DELETE FROM alkis.n_nutzung;
+TRUNCATE alkis.n_nutzung;
+ALTER SEQUENCE alkis.n_nutzung_gid_seq RESTART;
 
 -- 01 REO: ax_Wohnbauflaeche
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 11,                  0,      0,      artderbebauung, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe, werteart1, werteart2,           info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41001,                  11,         0,         0, artderbebauung, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_wohnbauflaeche
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 02 REO: ax_IndustrieUndGewerbeflaeche
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 12,                  coalesce(funktion, 0),  coalesce(lagergut, foerdergut, 0), null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1,                                         werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41002,                  12, coalesce(funktion, 0), coalesce(lagergut, foerdergut, primaerenergie, 0), null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_industrieundgewerbeflaeche
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 03 REO: ax_Halde
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 13,                  coalesce(lagergut, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41003,                  13, coalesce(lagergut, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_halde
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 04 ax_Bergbaubetrieb
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 14,                  coalesce(abbaugut, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,                       werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41004,                  14, coalesce(funktion, abbaugut, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_bergbaubetrieb
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 05 REO: ax_TagebauGrubeSteinbruch
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 15,                  coalesce(abbaugut, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,                       werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41005,                  15, coalesce(funktion, abbaugut, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_tagebaugrubesteinbruch
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 06 REO: ax_FlaecheGemischterNutzung
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 16,                  coalesce(funktion, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41006,                  16, coalesce(funktion, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_flaechegemischternutzung
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 07 REO: ax_FlaecheBesondererFunktionalerPraegung
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 17,                  coalesce(funktion, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41007,                  17, coalesce(funktion, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_flaechebesondererfunktionalerpraegung
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 08 REO: ax_SportFreizeitUndErholungsflaeche
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 18,                  coalesce(funktion, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41008,                  18, coalesce(funktion, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_sportfreizeitunderholungsflaeche
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 09 REO: ax_Friedhof
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 19,                  coalesce(funktion, 0),  0, null, zustand, name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     41009,                  19, coalesce(funktion, 0),         0, null, zustand, name,        null, wkb_geometry 
   FROM alkis.ax_friedhof
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 10 ax_Strassenverkehr
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info,   zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 21,                  coalesce(funktion, 0),  0, null,   zustand, zeigtaufexternes_name, zweitname,   wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42001,                  21, coalesce(funktion, 0),         0, null, zustand, zeigtaufexternes_name,   zweitname, wkb_geometry 
   FROM alkis.ax_strassenverkehr
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 11 ax_Weg
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info,  zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 22,                  coalesce(funktion, 0),  0, null,  null,    zeigtaufexternes_name, bezeichnung, wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42006,                  21, coalesce(funktion, 0),         0, null,    null, zeigtaufexternes_name, bezeichnung, wkb_geometry
   FROM alkis.ax_weg
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 12 ax_Platz
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 23,                  coalesce(funktion, 0),  0, null, null,    zeigtaufexternes_name, zweitname,   wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42009,                  21, coalesce(funktion, 0),         0, null,    null, zeigtaufexternes_name,   zweitname, wkb_geometry
   FROM alkis.ax_platz
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 13 ax_Bahnverkehr
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1,                         werteart2, info,          zustand, name,        bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 24,                  coalesce(funktion, bahnkategorie[1], 0), 0, null, zustand, NULL, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42010,                  22, coalesce(funktion, 0),         0, null, zustand, NULL,        NULL, wkb_geometry 
   FROM alkis.ax_bahnverkehr
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
--- 14 ax_Flugverkehr
+-- 14 ax_flugverkehr
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1,               werteart2, info,  zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 25,                  coalesce(funktion, art, 0), 0, null,  zustand, zeigtaufexternes_name, bezeichnung, wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42015,                  23, coalesce(funktion, 0),         0, null, zustand, zeigtaufexternes_name, bezeichnung, wkb_geometry 
   FROM alkis.ax_flugverkehr
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 15 ax_Schiffsverkehr
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 26,                  coalesce(funktion, 0),  0, null, zustand, zeigtaufexternes_name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     42016,                  24, coalesce(funktion, 0),         0, null, zustand, zeigtaufexternes_name,        null, wkb_geometry 
   FROM alkis.ax_schiffsverkehr
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 16 ax_Landwirtschaft
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1,          werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 31,                  coalesce(vegetationsmerkmal, 0), 0, null, null,    name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,                       werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43001,                  31, coalesce(vegetationsmerkmal, 0),         0, null,    null, name,        null, wkb_geometry 
   FROM alkis.ax_landwirtschaft
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 17 ax_Wald
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1,          werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 32,                  coalesce(vegetationsmerkmal, 0), 0, null, null,    name, bezeichnung, wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,            werteart1,            werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43002,                  32, coalesce(nutzung, 0), coalesce(zustand, 0), null,    null, name, bezeichnung, wkb_geometry 
   FROM alkis.ax_wald
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 18 ax_Gehoelz
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1,          werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 33,                  coalesce(vegetationsmerkmal, 0), 0, null, null,    null, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43003,                  33,         0,         0, null,    null, null,        null, wkb_geometry 
   FROM alkis.ax_gehoelz
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 19 ax_Heide
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 34,                  0,      0, null, null,    name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43004,                  34,         0,         0, null,    null, name,        null, wkb_geometry 
   FROM alkis.ax_heide
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 20 ax_Moor
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 35,                  0,      0, null, null,    name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43005,                  35,         0,         0, null,    null, name,        null, wkb_geometry 
   FROM alkis.ax_moor
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 21 ax_Sumpf
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 36,                  0,      0, null, null,    name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43006,                  36,         0,         0, null,    null, name,        null, wkb_geometry 
   FROM alkis.ax_sumpf
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 22 ax_UnlandVegetationsloseFlaeche
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info,                 zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 37,                  coalesce(funktion, 0),  coalesce(oberflaechenmaterial, 0), null, null,    name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1,                         werteart2, info, zustand, name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     43007,                  37, coalesce(funktion, 0), coalesce(oberflaechenmaterial, 0), null,    null, name,        null, wkb_geometry 
   FROM alkis.ax_unlandvegetationsloseflaeche
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 24 ax_Fliessgewaesser
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand,  name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 41,                  coalesce(funktion, 0),  0, null, zustand,  zeigtaufexternes_name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     44001,                  41, coalesce(funktion, 0),         0, null, zustand, zeigtaufexternes_name,        null, wkb_geometry 
   FROM alkis.ax_fliessgewaesser
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 25 ax_Hafenbecken
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info,    zustand,   name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 42,                  coalesce(funktion, 0),  0, null, null,      zeigtaufexternes_name, null,        wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     44005,                  42, coalesce(funktion, 0),         0, null,    null, zeigtaufexternes_name,        null, wkb_geometry 
   FROM alkis.ax_hafenbecken
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 26 ax_StehendesGewaesser
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung,         wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 43,                  coalesce(funktion, 0),  0, null, null,    zeigtaufexternes_name, gewaesserkennziffer, wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     44006,                  43, coalesce(funktion, 0),         0, null,    null, zeigtaufexternes_name, seekennzahl, wkb_geometry 
   FROM alkis.ax_stehendesgewaesser
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 
 -- 27 ax_Meer
 -- -------------------------------------
-INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, nutzungsartengruppe, werteart1, werteart2, info, zustand, name, bezeichnung, wkb_geometry)
-  SELECT              gml_id, beginnt, endet, 44,                  coalesce(funktion, 0),  0, null, null,    zeigtaufexternes_name, bezeichnung, wkb_geometry 
+INSERT INTO alkis.n_nutzung (gml_id, beginnt, endet, objektart, nutzungsartengruppe,             werteart1, werteart2, info, zustand,                  name, bezeichnung, wkb_geometry)
+  SELECT                     gml_id, beginnt, endet,     44007,                  44, coalesce(funktion, 0),         0, null,    null, zeigtaufexternes_name, bezeichnung, wkb_geometry 
   FROM alkis.ax_meer
   WHERE st_geometrytype(wkb_geometry) = 'ST_Polygon';
 

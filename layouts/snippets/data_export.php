@@ -332,7 +332,7 @@ $j=0;
 								<select name="export_setting">
 									<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 									<?
-										for($i = 0; $i < count($this->export_settings); $i++){
+										for($i = 0; $i < count_or_0($this->export_settings); $i++){
 											echo '<option value="'.$this->export_settings[$i]['name'].'" ';
 											if($this->selected_export_setting[0]['name'] == $this->export_settings[$i]['name']){echo 'selected ';}
 											echo '>'.$this->export_settings[$i]['name'].'</option>';

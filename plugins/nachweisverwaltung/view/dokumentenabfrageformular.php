@@ -262,7 +262,7 @@ else {
 									<select name="dokauswahlen">
 										<option value="">  -- Auswahl --  </option>
 										<?
-											for($i = 0; $i < count($this->dokauswahlset); $i++){
+											for($i = 0; $i < count_or_0($this->dokauswahlset); $i++){
 												echo '<option value="'.$this->dokauswahlset[$i]['id'].'" ';
 												if($this->selected_dokauswahlset[0]['id'] == $this->dokauswahlset[$i]['id']){echo 'selected ';}
 												echo '>'.$this->dokauswahlset[$i]['name'].'</option>';

@@ -23,13 +23,13 @@ BEGIN
 		WHERE
 			pg_class.relkind = 'r'
 			AND pg_namespace.nspname = 'alkis'
-			AND (substr(pg_class.relname,1,3) IN ('ax_','ap_','aa_' ) AND pg_attribute.attname = 'gml_id'
+			AND (substr(pg_class.relname,1,3) IN ('ax_','ap_','aa_','ln_','lb_') AND pg_attribute.attname = 'gml_id'
 			OR pg_class.relname IN ('import','delete') )
 		ORDER BY
 			pg_class.relname
 	LOOP
 		r := r || d || c.table_name || ' wurde geleert.';
-		EXECUTE 'DELETE FROM alkis.'||c.table_name;
+		EXECUTE 'TRUNCATE alkis.'||c.table_name;
 		d := E'\n';
 	END LOOP;
 
