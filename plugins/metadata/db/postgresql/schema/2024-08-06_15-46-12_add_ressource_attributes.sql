@@ -9,6 +9,7 @@ BEGIN;
   ALTER TABLE metadata.ressources ADD COLUMN layer_id integer;
   ALTER TABLE metadata.ressources ADD COLUMN update_time time without time zone;
   ALTER TABLE metadata.ressources ADD COLUMN import_filter text;
+  ALTER TABLE metadata.ressources ADD COLUMN import_file character varying;
 
   CREATE TABLE metadata.pack_status (
     id serial Primary Key,
@@ -38,15 +39,17 @@ BEGIN;
   ON UPDATE NO ACTION
   ON DELETE NO ACTION;
 
-  INSERT INFO metadata.unpack_methods (name, beschreibung, reihenfolge) VALUES
-  ('manual_copy', 'Manuell kopieren in Zielverzeichnis', 5);
+  INSERT INTO metadata.unpack_methods (name, beschreibung, reihenfolge) VALUES
+  ('manual_copy', 'Manuell kopieren in Zielverzeichnis', 5),
+  ('no_copy', 'Nicht kopieren', 6);
 
   CREATE TABLE IF NOT EXISTS metadata.pack_logs(
     id serial PRIMARY KEY,
     packed_at timestamp without time zone NOT NULL DEFAULT now(),
     msg text,
     package_id integer NOT NULL,
-    ressource_id integer NOT NULL
+    ressource_id integer NOT NULL,
+    fixed_at timestamp without time zone
   );
 
 COMMIT;

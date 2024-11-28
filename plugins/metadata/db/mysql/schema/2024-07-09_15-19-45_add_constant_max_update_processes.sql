@@ -24,4 +24,16 @@ BEGIN;
     2
   );
 
+  INSERT INTO config (`name`, `prefix`, `value`, `description`, `type`, `plugin`, `group`, `saved`, `editable`) VALUES (
+    'METADATA_DATA_PATH',
+    '',
+    '/var/www/data/datentool/',
+    'Absoluter Pfad für das Verzeichnis in das die Daten der Ressourcen heruntergeladen, entpackt und die Datenpackete für den Download abgelegt werden.',
+    'string',
+    'metadata',
+    'Plugins/metadata',
+    0,
+    2
+  );
+
 COMMIT;

@@ -14,7 +14,7 @@
 	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
 	// Metadaten_Recherche
-	// Metadaten_update_outdated
+	// metadata_update_outdated
 	// Metadateneingabe
 
 	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');

@@ -824,7 +824,7 @@ FROM
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
-			return false;
+			#return false;
 		};
 		set_error_handler($myErrorHandler);
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen

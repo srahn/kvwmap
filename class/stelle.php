@@ -1440,6 +1440,18 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function add layer with $layer_ids to stelle
+	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
+	 * - !$assign_default_values
+	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
+	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * @param array $layer_ids
+	 * @param string $filter
+	 * @param boolean $assign_default_values
+	 * @param string $privileg
+	 * @return integer 1 if success 0 if error
+	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
