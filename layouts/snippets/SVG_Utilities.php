@@ -2338,15 +2338,14 @@ function mouseup(evt){
 	top.document.getElementById("svghelp").SVGchange_box_width_height = change_box_width_height;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function draw_box_on() {
-	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
-	 	restart();
+	 	clear_geometry();
 		enclosingForm.last_doing.value = "draw_box";
 	}
 
 	// ----------------------------box aufziehen---------------------------------
 	function startpointFS(worldx, worldy) {
 	  draggingFS  = true;
-	  restart();
+	  clear_geometry();
 	  // neuen punkt hinzufuegen
 	  pathx.push(worldx);
 	  pathy.push(worldy);
@@ -2355,7 +2354,7 @@ function mouseup(evt){
 	}
 
 	function movepointFS(evt) {
-	if (!draggingFS) return;
+		if (!draggingFS) return;
 	  // neuen punkt abgreifen
 	  clientx = evt.clientX;
 	  clienty = resy - evt.clientY;
@@ -3279,10 +3278,7 @@ function mouseup(evt){
 		}
 	}
 
-	function restart(){
-		highlightbyid(\'pgon0\');
-		enclosingForm.last_doing.value = "draw_polygon";
-		enclosingForm.last_doing2.value = "draw_polygon";
+	function clear_geometry(){
 		textx = -1000000;
 		texty = -1000000;
 		redrawpoint();
@@ -3319,7 +3315,17 @@ function mouseup(evt){
 		redraw();
 	}
 
+	function restart(){
+		highlightbyid(\'pgon0\');
+		enclosingForm.last_doing.value = "draw_polygon";
+		enclosingForm.last_doing2.value = "draw_polygon";
+		clear_geometry();
+	}
+
 	function applypolygons(isvalid_check = true){
+		var Msg = top.$("#message_box");
+		Msg.hide();
+		Msg.html("");
 		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
