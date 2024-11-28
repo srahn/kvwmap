@@ -1551,7 +1551,7 @@ class stelle {
 						`export_privileg`,
 						postlabelcache,
 						requires,
-						0
+						'0'
 					FROM
 						layer as l
 					WHERE

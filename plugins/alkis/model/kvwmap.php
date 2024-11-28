@@ -55,7 +55,7 @@
 
 	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $Flurbezeichnung = '';
+    $Flurbezeichnung = [];
  	  $flur = new Flur('','','',$GUI->pgdatabase);
 		$bildmitte['rw']=($GUI->map->extent->maxx+$GUI->map->extent->minx)/2;
 		$bildmitte['hw']=($GUI->map->extent->maxy+$GUI->map->extent->miny)/2;

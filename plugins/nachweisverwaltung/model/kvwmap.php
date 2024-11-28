@@ -326,6 +326,7 @@
     $GUI->main= PLUGINS.'nachweisverwaltung/view/dokumenteneingabeformular.php';
     $GUI->titel='Dokument überarbeiten';    
 		if($GUI->formvars['reset_layers'])$GUI->reset_layers(NULL);
+		if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
     # Nachweisdaten aus Datenbank abfragen
     $nachweis=new Nachweis($GUI->pgdatabase, $GUI->user->rolle->epsg_code);
     $GUI->hauptdokumentarten = $nachweis->getHauptDokumentarten();
@@ -1596,6 +1597,7 @@
 		$GUI->sanitize(['dokauswahl_name' => 'text', 'dokauswahlen' => 'int', 'FlurstKennz' => 'text']);
 		include_once(PLUGINS.'alkis/model/kataster.php');
 		include_once(CLASSPATH.'FormObject.php');
+		if($GUI->formvars['bufferwidth'] == '')$GUI->formvars['bufferwidth'] = 2;
 		# Speichern einer neuen Dokumentauswahl
 		if($GUI->formvars['go_plus'] == 'Dokumentauswahl_speichern'){
 			$GUI->formvars['dokauswahlen'] = $GUI->save_Dokumentauswahl($GUI->user->rolle->stelle_id, $GUI->user->rolle->user_id, $GUI->formvars);

@@ -16631,8 +16631,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function spatial_processing() {
 		include_(CLASSPATH . 'spatial_processor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		if (in_array($this->formvars['operation'], array('area', 'length', 'transformPoint'))) {
-			$layerdb = $this->pgdatabase; # wegen st_area_utm und st_length_utm die eigene Datenbank nehmen
+		if (!in_array($this->formvars['operation'], array('add_geometry', 'subtract_geometry', 'add_buffer_within_polygon', 'add_buffered_vertices'))) {
+			$layerdb = $this->pgdatabase; 
 		}
 		else {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['geom_from_layer'], $this->Stelle->pgdbhost);
