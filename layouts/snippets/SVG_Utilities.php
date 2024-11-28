@@ -74,6 +74,10 @@
 		document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 	}	
 
+	function change_box_width_height(){
+		document.getElementById("svghelp").SVGchange_box_width_height();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	}	
+
 	var nbh = new Array();
 		
 </script>
@@ -2331,6 +2335,8 @@ function mouseup(evt){
 
 	boxfunctions = true;
 
+	top.document.getElementById("svghelp").SVGchange_box_width_height = change_box_width_height;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+
 	function draw_box_on() {
 	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
 	 	restart();
@@ -2369,7 +2375,35 @@ function mouseup(evt){
 
 	function endpointFS(evt) {
 	  draggingFS  = false;
-	}';
+		var width = Math.abs(Math.round((pathx[2] - pathx[1]) * 1000) / 1000);
+		var height = Math.abs(Math.round((pathy[0] - pathy[2]) * 1000) / 1000);
+		var Msg = top.$("#message_box");
+		Msg[0].style.left = "75%";
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		content+= \'<div style="width:320px;height: 30px">Rechteck</div>\';
+		content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="rect_width" name="rect_width" value="\'+width+\'">&nbsp;m</td></tr>\';
+		content+= \'<tr><td align="right">Höhe:&nbsp;</td><td><input style="width: 110px" type="text" id="rect_height" name="rect_height" value="\'+height+\'">&nbsp;m</td></tr></table>\';
+		content+= \'<br><input type="button" value="OK" onclick="change_box_width_height()">\';
+		Msg.html(content);
+	}
+	
+	function change_box_width_height() {
+		if (enclosingForm.rect_width.value && enclosingForm.rect_height.value) {
+			var width = parseFloat(enclosingForm.rect_width.value);
+			var height = parseFloat(enclosingForm.rect_height.value);
+			if (pathy[0] > pathy[2]) {
+				height = -1 * height;
+			}
+			pathy[1] = pathy[2] = (pathy[0] + height);
+			pathx[2] = pathx[3] = (pathx[0] + width);
+			path = buildsvgpath(pathx,pathy);
+			enclosingForm.newpath.value = path;
+			redrawfirstpolygon();
+		}
+	}
+	
+	';
 	
 	$bufferfunctions ='
 
@@ -4085,17 +4119,6 @@ $measurefunctions = '
 					<polyline class="navbutton_nofill" points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-dasharray:2,2;stroke-width:15"/>
 				</g>
       </g>';
-			$last_x += 36;
-			$bufferbuttons .= '
-      <g id="add_circle" transform="translate('.$last_x.' 0)">
-        <rect id="buffer3" onmouseover="show_tooltip(\''.$strCircle.'\',evt.clientX,evt.clientY)" onmousedown="add_circle();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
-				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
-					<circle cx="503" cy="281"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="242" cy="389"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="337" cy="577"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="462" cy="486"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-				</g>
-      </g>';
 			$last_x += 36;			
 		$bufferbuttons .= '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
@@ -4108,6 +4131,17 @@ $measurefunctions = '
 				</g>
       </g>';
 		$last_x += 36;
+		$bufferbuttons .= '
+      <g id="add_circle" transform="translate('.$last_x.' 0)">
+        <rect id="buffer3" onmouseover="show_tooltip(\''.$strCircle.'\',evt.clientX,evt.clientY)" onmousedown="add_circle();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<circle cx="503" cy="281"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="242" cy="389"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="337" cy="577"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="462" cy="486"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+				</g>
+      </g>';
+			$last_x += 36;
     return $bufferbuttons;
   }
 	
