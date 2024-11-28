@@ -863,29 +863,30 @@ class Ressource extends PgObject {
   # Import methods #
   ##################
   function import() {
-    if ($this->get('import_method') == '') {
-      return array(
-        'success' => false,
-        'msg' => 'Keine Importmethode definiert.'
-      );
-    }
+    if ($this->get('import_method') != '') {
+      $method_name = 'import_' . $this->get('import_method');
+      if (!method_exists($this, $method_name)) {
+        return array(
+          'success' => false,
+          'msg' => 'Die Funktion ' . $method_name . ' zum importieren der Ressource existiert nicht.'
+        );
+      }
+      $this->update_status(6);
+      $result = $this->${method_name}();
+      if (!$result['success']) {
+        $this->update_status(-1);
+        return $result;
+      }
 
-    $method_name = 'import_' . $this->get('import_method');
-    if (!method_exists($this, $method_name)) {
-      return array(
-        'success' => false,
-        'msg' => 'Die Funktion ' . $method_name . ' zum importieren der Ressource existiert nicht.'
-      );
-    }
-    $this->update_status(6);
-    $result = $this->${method_name}();
-    if (!$result['success']) {
-      $this->update_status(-1);
+      $this->update_status(7);
       return $result;
     }
-
-    $this->update_status(7);
-    return $result;
+    else {
+      return array(
+        'success' => true,
+        'msg' => 'Keine Importmethode angegeben.'
+      );
+    }
   }
 
   /**
@@ -1240,29 +1241,30 @@ class Ressource extends PgObject {
   # Transform methods #
   #####################
   function transform() {
-    if ($this->get('transform_method') == '') {
+    if ($this->get('transform_method') != '') {
+      $method_name = 'transform_' . $this->get('transform_method');
+      if (!method_exists($this, $method_name)) {
+        return array(
+          'success' => false,
+          'msg' => 'Die Funktion ' . $method_name . ' zum transformieren der Ressource existiert nicht.'
+        );
+      }
+
+      $this->update_status(8);
+      $result = $this->${method_name}();
+      if (!$result['success']) {
+        $this->update_status(-1);
+        return $result;
+      }
+      $this->update_status(9);
+      return $result;
+    }
+    else {
       return array(
         'success' => true,
         'msg' => 'Keine Transformationsmethode definiert.'
       );
     }
-
-    $method_name = 'transform_' . $this->get('transform_method');
-    if (!method_exists($this, $method_name)) {
-      return array(
-        'success' => false,
-        'msg' => 'Die Funktion ' . $method_name . ' zum transformieren der Ressource existiert nicht.'
-      );
-    }
-
-    $this->update_status(8);
-    $result = $this->${method_name}();
-    if (!$result['success']) {
-      $this->update_status(-1);
-      return $result;
-    }
-    $this->update_status(9);
-    return $result;
   }
 
   function transform_exec_sql() {
@@ -1278,6 +1280,23 @@ class Ressource extends PgObject {
     return array(
       'success' => true,
       'msg' => 'Transformationsbefehl erfolgreich ausgeführt.'
+    );
+  }
+
+  function transform_gdaltindex() {
+    $gdaltindex_params = $this->get('transform_command');
+    $gdaltindex_comand = 'gdaltindex ' . $gdaltindex_params;
+    $this->debug->show("Erzeuge gdaltindex mit Befehl: " . $gdaltindex_command, true);
+    exec($gdaltindex_command, $output, $return_var);
+    if (count($output) > 0) {
+      return array(
+        'success' => false,
+        'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . implode(', ', $output)
+      );
+    }
+    return array(
+      'success' => true,
+      'msg' => 'gdaltindex erfolgreich ausgeführt.'
     );
   }
 
