@@ -2067,7 +2067,7 @@ class GUI {
 	}
 
   function getFlurbezeichnung($epsgcode) {
-    $Flurbezeichnung = '';
+    $Flurbezeichnung = [];
  	  $flur = new Flur('','','',$this->pgdatabase);
 		$bildmitte['rw']=($this->map->extent->maxx+$this->map->extent->minx)/2;
 		$bildmitte['hw']=($this->map->extent->maxy+$this->map->extent->miny)/2;
