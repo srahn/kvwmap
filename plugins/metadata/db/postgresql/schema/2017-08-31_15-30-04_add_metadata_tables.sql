@@ -1,7 +1,6 @@
 --#####################
 --# Metadatentabellen #
 --#####################
---#2005-11-29_pk
 CREATE TABLE md_metadata
 (
   id serial NOT NULL,
@@ -51,8 +50,7 @@ CREATE TABLE md_metadata
   accessrights text,
   datalang varchar(25),
   CONSTRAINT md_metadata_pkey PRIMARY KEY (id)
-) 
-WITH OIDS;
+);
 COMMENT ON TABLE md_metadata IS 'Metadatendokumente';
 
 SELECT AddGeometryColumn('public', 'md_metadata','the_geom',25833,'POLYGON', 2);
@@ -69,8 +67,7 @@ CREATE TABLE md_identification
   descKeysTheme varchar(255)[],
   descKeysPlace varchar(255)[],  
   idtype varchar(25)
-) 
-WITH OIDS;
+);
 COMMENT ON TABLE md_identification IS 'Identifikations Informationen';
 
 CREATE TABLE md_dataidentification
@@ -78,8 +75,7 @@ CREATE TABLE md_dataidentification
   id serial NOT NULL,
   datalang varchar(25),
   tpcat text NOT NULL
-) 
-WITH OIDS;
+);
 COMMENT ON TABLE md_dataidentification IS 'Datenidentifizierungs Informationen';
 
 CREATE TABLE md_ci_citation
@@ -89,8 +85,7 @@ CREATE TABLE md_ci_citation
   resrefdate int4,
   reseddate int4,
   citrespparty int4
-) 
-WITH OIDS;
+);
 COMMENT ON TABLE md_ci_citation IS 'Quellenangaben und Verantwortliche Einrichtung oder Person';
 
 CREATE TABLE md_ci_responsibleparty
@@ -98,8 +93,7 @@ CREATE TABLE md_ci_responsibleparty
   id serial NOT NULL,
   rporgname varchar(255),
   rpcntinfo int4
-) 
-WITH OIDS;
+);
 COMMENT ON TABLE md_ci_responsibleparty IS 'Verantwortliche Einrichtung oder Person';
 
 --# Hinzufügen der Tabelle md_keywords
@@ -111,8 +105,7 @@ CREATE TABLE md_keywords
   keytyp varchar(25),
   thesaname int4,
   CONSTRAINT md_keywords_pkey PRIMARY KEY (id)
-) 
-WITHOUT OIDS;
+);
 COMMENT ON TABLE md_keywords IS 'Beschreibende Schlagwörter';
 
 --# Hinzufügen der Tabelle mn_keywords2metadata für die Verknüpfung zwischen Metadaten und Schlagwörtern
@@ -124,6 +117,5 @@ CREATE TABLE md_keywords2metadata
   CONSTRAINT md_keywords2metadata_pkey PRIMARY KEY (keyword_id, metadata_id),
   CONSTRAINT "fkKWD" FOREIGN KEY (keyword_id) REFERENCES md_keywords (id) ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT "fkMD" FOREIGN KEY (metadata_id) REFERENCES md_metadata (id) ON UPDATE NO ACTION ON DELETE CASCADE
-) 
-WITHOUT OIDS;
+);
 

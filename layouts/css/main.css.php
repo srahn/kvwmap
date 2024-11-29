@@ -152,6 +152,7 @@ body {
 }
 
 .collapsed *{
+	visibility: collapse !important;
 	margin: 0 !important;
 }
 
@@ -412,6 +413,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	--top: 24px;
 	font-weight: normal;
 }
 
@@ -426,7 +428,7 @@ span[data-tooltip]:hover::after {
 	right: 0px;
 	left: -300px;		/* IE Fallback */
 	left: var(--left);
-  top: 24px;
+  top: var(--top);
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
 	font-size: <? echo $font_size_factor * 11; ?>px;
@@ -1571,7 +1573,7 @@ a.menuered:hover {
 
 .dragObject.picked{
 	visibility: hidden;
-	max-height: 40px;
+	max-height: 16px;
 }
 
 .dragObject.over{
@@ -1882,6 +1884,42 @@ a:hover .preview_image{
 	width: 90%;
 }
 
+#overlayheader {
+	box-shadow: inset 0px -1px 0px 0px #ccc; 
+	position:fixed; 
+	top: 0px; 
+	margin: 0px 0 -11px 0; 
+	padding-top: 0; 
+}
+
+#overlayheader2 {
+	margin-top: -2px; 
+}
+
+#overlayheader, #overlayheader2 {
+	background: url(<? echo BG_IMAGE; ?>);
+	z-index: 1000;
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	justify-content: flex-start;
+	width: 100%;
+}
+
+#contentdiv {
+	background: url(<? echo BG_IMAGE; ?>);
+	width: 100%;
+	position:relative;
+}
+
+#overlayfooter {
+	background: url(<? echo BG_IMAGE; ?>);
+	border: 1px solid #cccccc;
+	width: 100%; 
+	position:fixed; 
+	bottom: 0px;
+}
+
 .dstable{
 	#max-width: 900px;
 	width: 100%;
@@ -1928,7 +1966,6 @@ thead.gle th {
 	display: flex;
 	margin: 2px 0 -11px 0;
 	border-left: 1px solid #bbb;
-	height: 27px
 }
 
 .gle_tabs > div{
@@ -1940,12 +1977,7 @@ thead.gle th {
 	color: #aaa;
 	white-space: nowrap;
 	border-radius: 0 5px 0 0;
-	margin-left: -4px;
-}
-
-.gle_tabs > div:first-child {
-	padding: 1px 5px 0 5px;
-	margin-left: 0;
+	height: 21px;
 }
 
 .gle_tabs > div.active_tab{

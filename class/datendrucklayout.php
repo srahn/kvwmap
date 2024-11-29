@@ -613,7 +613,7 @@ class ddl {
 									$values = json_decode($value);
 									$x2 = $x;
 									$y2 = $miny_array = $y;
-									for ($v = 0; $v < @count($values); $v++) {
+									for ($v = 0; $v < count_or_0($values); $v++) {
 										if ($attributes['form_element_type'][$j] == 'Dokument') {
 											# Dokument-Attribute werden im Raster ausgegeben
 											if ($v > 0) {
@@ -987,7 +987,7 @@ class ddl {
 				$output = $enum[$value]['output'] ?: $value;
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				if(@count($this->attributes['enum_output'][$j]) == 0){	
+				if(count_or_0($this->attributes['enum_output'][$j]) == 0){	
 					$output = $value;		# preview
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
@@ -1088,7 +1088,7 @@ class ddl {
 			# spaltenweiser Typ
 			$rowcount = ceil(count($result) / 3);
 		}
-		for ($i = 0; $i < @count($result); $i++) {
+		for ($i = 0; $i < count_or_0($result); $i++) {
 			if (true AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
 				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
 			}
@@ -1207,7 +1207,7 @@ class ddl {
 			}
 
 			$test = 0;
-			while ($test < 100 AND @count($this->remaining_attributes) > 0) {
+			while ($test < 100 AND count_or_0($this->remaining_attributes) > 0) {
 				# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);
 				$test++;
@@ -1592,7 +1592,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < @count($formvars['text']); $i++){
+      for($i = 0; $i < count_or_0($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
@@ -1768,7 +1768,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for ($i = 0; $i < @count($formvars['text']); $i++){
+      for ($i = 0; $i < count_or_0($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;

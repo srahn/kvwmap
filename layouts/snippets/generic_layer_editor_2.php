@@ -142,7 +142,10 @@ if ($doit == true) {
 								}
 								else {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
-									$visibility_geom = 'style="visibility: collapse"';
+									if ($this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] != count($layer['attributes']['tabs']) - 1) {
+										# wenn Geometrie-Tab nicht aktiv war
+										$visibility_geom = 'style="visibility: collapse"';
+									}
 								}
 							}
 							$opentab = $layer['attributes']['tabs'][$this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] ?: $this->formvars['opentab'] ?: 0];
@@ -173,7 +176,7 @@ if ($doit == true) {
 							}
 						}
 						
-						for($j = 0; $j < @count($layer['attributes']['name']); $j++) {
+						for($j = 0; $j < count_or_0($layer['attributes']['name']); $j++) {
 							$attribute_class = (($this->new_entry == true AND $layer['attributes']['dont_use_for_new'][$j] == -1) ? 'hidden' : 'visible');
 							// if(($layer['attributes']['privileg'][$j] == '0' AND $layer['attributes']['form_element_type'][$j] == 'Auswahlfeld') OR ($layer['attributes']['form_element_type'][$j] == 'Text' AND $layer['attributes']['saveable'][$j] == '0')){				# entweder ist es ein nicht speicherbares Attribut oder ein nur lesbares Auswahlfeld, dann ist es auch nicht speicherbar
 								// $layer['attributes']['form_element_type'][$j] .= '_not_saveable';

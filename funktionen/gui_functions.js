@@ -672,7 +672,7 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = document.getElementById("contentdiv").offsetWidth;
+		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").scrollWidth);
 		if (contentWidth < screen.width) {
 			window.resizeTo(contentWidth+35, 800);
 		}
@@ -1331,17 +1331,21 @@ function toggleDrawingOrderForm(){
 
 // --- html5 Drag and Drop --- //
  
-var dragSrcEl = null;
+var dragSrcEl, srcDropZone = null;
 
 function handleDragStart(e){
 	dragSrcEl = e.target;
-	var dropzones = document.querySelectorAll('.DropZone');
-	[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
-    dropzone.classList.add('ready');
-  });
-  if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
-	dragSrcEl.classList.add('dragging');
-	setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+	if (!dragSrcEl.classList.contains('dragging')) {
+		var dropzones = document.querySelectorAll('.DropZone');
+		[].forEach.call(dropzones, function (dropzone){		// DropZones groesser machen
+			dropzone.classList.add('ready');
+		});
+		if(browser == 'firefox')e.dataTransfer.setData('text/html', null);	
+		dragSrcEl.classList.add('dragging');
+		setTimeout(function(){dragSrcEl.classList.add('picked');}, 1);
+		srcDropZone = dragSrcEl.nextElementSibling;
+		dragSrcEl.parentNode.removeChild(srcDropZone);
+	}
 }
 
 function handleDragOver(e){
@@ -1361,12 +1365,11 @@ function handleDragLeave(e){
 function handleDrop(e){
   if (e.stopPropagation)e.stopPropagation();
 	dstDropZone = e.target;
-	srcDropZone = dragSrcEl.nextElementSibling;
 	dstDropZone.classList.remove('over');
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
 	if(srcDropZone != dstDropZone){
-		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// layer verschieben
+		dstDropZone.parentNode.insertBefore(dragSrcEl, dstDropZone);		// dragSrcEl verschieben
 		dragSrcEl.parentNode.insertBefore(srcDropZone, dragSrcEl);		// dropzone verschieben
 	}
   return false;
@@ -1375,7 +1378,7 @@ function handleDrop(e){
 function handleDragEnd(e){
 	dragSrcEl.classList.remove('dragging');
 	dragSrcEl.classList.remove('picked');
-	var dropzones = dragSrcEl.parentNode.querySelectorAll('.DropZone');
+	var dropzones = document.querySelectorAll('.DropZone');
 	[].forEach.call(dropzones, function (dropzone){		// DropZones kleiner machen
     dropzone.classList.remove('ready');
   });
@@ -1690,7 +1693,7 @@ function getRandomPassword() {
 	var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
 	var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var numbers = '0123456789';
-	var special_chars = '!@#$_+?%^&)';
+	var special_chars = '@#$_+?%^&)';
 	var length = Math.ceil(password_minlength / check_count);
 	var randomPassword;
 

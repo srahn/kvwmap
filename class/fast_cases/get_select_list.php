@@ -266,7 +266,9 @@ class GUI {
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					if (pg_num_rows($ret[1]) > 1) {
+						$html .= '<option value="">-- Bitte Auswählen --</option>';
+					}
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
@@ -1005,7 +1007,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-	function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -1117,26 +1119,21 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{
-					$attributes['default'][$i] = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
+					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
 			}
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
@@ -1147,8 +1144,7 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
@@ -1303,7 +1299,7 @@ class pgdatabase {
 			return false;
 		}
 		else {
-			$this->debug->write("Database connection: " . $this->dbConn . " successfully opend.", 4);
+			$this->debug->write("Database connection:  successfully opend.", 4);
 			$this->setClientEncodingAndDateStyle();
 			$this->connection_id = $connection_id;
 			return true;
@@ -1311,7 +1307,7 @@ class pgdatabase {
 	}
 	
   function close() {
-    $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
+    $this->debug->write("<br>PostgreSQL Verbindung  schließen.",4);
     return pg_close($this->dbConn);
   }	
 

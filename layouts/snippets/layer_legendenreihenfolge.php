@@ -41,22 +41,26 @@
 
 <script language="JavaScript">
 
-  var order = 0;
-  var form = new FormData(document.GUI);
+  let order = 0;
+  const form = new FormData(document.GUI);
 
-  async function save(){
-    var groups = document.getElementById('llr_main').querySelectorAll(':scope > .llr_group');
+  function save(){
+    const groups = document.getElementById('llr_main').querySelectorAll(':scope > .llr_group');
 	  [].forEach.call(groups, function (group){
       traverse_group(group, null);
     });
     form.append('go', 'Layer_Legendenreihenfolge_Speichern');
-	  response = await fetch('index.php', {
+
+    fetch('index.php', {
       method: "POST",
       body: form,
-    });
-    if (response.status == 200) {
+    })
+    .then((response)=>{
       document.GUI.submit();
-    }
+    })
+    .catch((error)=>{
+      console.error(error);
+    })
   }
 
   function traverse_group(group, uppergroup){
@@ -64,7 +68,7 @@
     form.append('group_ids[]', group.id);
     form.append('group_orders[]', order);
     form.append('group_uppergroups[]', uppergroup?.id ?? '');
-    var subgroups = group.querySelectorAll(':scope > .group_content > .llr_group');
+    const subgroups = group.querySelectorAll(':scope > .group_content > .llr_group');
 	  [].forEach.call(subgroups, function (subgroup){
       traverse_group(subgroup, group);
     });
@@ -133,6 +137,17 @@
     right: 10px;
     top: 3px;
   }
+
+  .dropZone.ready {
+    margin: -21 0 -22 15;
+    height: 44px;
+  }
+
+  .dropZone.over{
+    height: 71px;
+    margin: -22 0 -23 15;
+    transition: height 0.1s ease, margin 0.1s ease;
+  }  
 
 </style>
 

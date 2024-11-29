@@ -28,21 +28,27 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
- * @param String $exp Die MapServer-Expression
- * @param String $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @param string $exp Die MapServer-Expression
+ * @param string $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
-	$exp = str_replace(' eq ', '=', $exp);
-	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
 			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
 		}
 		else {
 			$operator = '=';
@@ -385,12 +391,16 @@ function InchesPerUnit($unit, $center_y){
 		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		if($center_y != 0.0){
-			$cos_lat = cos(pi() * $center_y/180.0);
-			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-		}
-		return 4374754 * $lat_adj;
+		return 39.3701 * degree2meter($center_y);
 	}
+}
+
+function degree2meter($center_y) {
+	if($center_y != 0.0){
+		$cos_lat = cos(pi() * $center_y/180.0);
+		$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+	}
+	return 111319 * $lat_adj;
 }
 
 function ie_check(){
@@ -548,7 +558,7 @@ function transformCoordsSVG($path){
     }
   }
   $svgresult = 'M';
-  for($i = 1; $i < @count($newsvgcoords); $i++){
+  for($i = 1; $i < count_or_0($newsvgcoords); $i++){
     $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;
@@ -701,8 +711,8 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$y = 54.075214183333;
   $point = new PointObj();
 	$point->setXY($x,$y);
-	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
-  $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
+	$projFROM = new projectionObj("init=epsg:".$from_epsg);
+  $projTO = new projectionObj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
 }
@@ -1086,45 +1096,18 @@ if (!function_exists('str_split')) {
 }
 
 function unzip($src_file, $dest_dir=false, $create_zip_name_dir=true, $overwrite=true){
-	# 1. Methode über unzip (nur Linux)
-	$output = array();
+	# 1. Methode über unzip (nur Linux) rausgenommen, da Umlaute kaputt gehen
 	$entries = NULL;
-	exec('export LD_LIBRARY_PATH=;unzip -l "'.$src_file.'" -d '.dirname($src_file), $output);
-	#echo '<br>unzip -l "'.$src_file.'" -d '.dirname($src_file);
-	for($i = 3; $i < count($output)-2; $i++){
-  		$entries[] = array_pop(explode('   ', $output[$i]));
+	if ($dest_dir === false) {
+		$dest_dir = dirname($src_file);
 	}
-	if($entries != NULL){
-		exec('export LD_LIBRARY_PATH=;unzip -o "'.$src_file.'" -d '.dirname($src_file));
-	}
-	# 2. Methode über php_zip Extension
-	else{
-	  if ($zip = zip_open($src_file)){
-	    if ($zip){
-	      $splitter = ($create_zip_name_dir === true) ? "." : "/";
-	      if ($dest_dir === false) $dest_dir = substr($src_file, 0, strrpos($src_file, $splitter))."/";
-	      @mkdir($dest_dir);
-	      while ($zip_entry = zip_read($zip)){
-	        $entries[] = zip_entry_name($zip_entry);
-	        $pos_last_slash = strrpos(zip_entry_name($zip_entry), "/");
-	        if ($pos_last_slash !== false){
-	          @mkdir($dest_dir.substr(zip_entry_name($zip_entry), 0, $pos_last_slash+1));
-	        }
-	        if (zip_entry_open($zip,$zip_entry,"r")){
-	          $file_name = $dest_dir.zip_entry_name($zip_entry);
-	          if ($overwrite === true || $overwrite === false && !is_file($file_name)){
-	            $fstream = zip_entry_read($zip_entry, zip_entry_filesize($zip_entry));
-							$fp = fopen($file_name, 'w');
-	            fwrite($fp, $fstream );
-	            fclose($fp);
-	            chmod($file_name, 0777);
-	          }
-	          zip_entry_close($zip_entry);
-	        }
-	      }
-	      zip_close($zip);
-	    }
-	  }
+	$zip = new ZipArchive;
+	if ($zip->open($src_file)) {
+		for ($i = 0; $i < $zip->numFiles; $i++) {
+			$entries[] = $zip->getNameIndex($i);
+		}
+		$zip->extractTo($dest_dir); 
+		$zip->close(); 
 	}
 	return $entries;
 }
@@ -1685,38 +1668,38 @@ function emailcheck($email) {
 }
 
 function buildExpressionString($str) {
-  $intervalle=explode(';',$str);
-  $anzInt=count($intervalle);
-  if ($intervalle[$anzInt-1]=='') { $anzInt--; }
+  $intervalle = explode(';', $str);
+  $anzInt = count($intervalle);
+  if ($intervalle[$anzInt-1] == '') { $anzInt--; }
   # Beginne mit der Erstellung des Ausdrucks
-  $expr.='(';
+  $expr.= '(';
   # man neheme das erste Intervall
   # Zerlege es in Anfang und Ende
-  $grenzen=explode('-',$intervalle[0]);
+  $grenzen = explode('-', $intervalle[0]);
   # Teste ob es überhaupt ein Ende gibt, oder nur einen einzelnen Wert
-  if (count($grenzen)==1) {
+  if (count($grenzen) == 1) {
     # Wenn ja, wird die erste einschränkung geschrieben.
-    $expr.='[ID]='.$grenzen[0];
+    $expr.= '[ID] = ' . $grenzen[0];
   }
   else {
     # Wenn es Anfang und Ende gibt, müssen zwei Bedingungen geschrieben werden
-    $expr.='([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+    $expr.='([ID] > '.$grenzen[0].' AND [ID] < ' . $grenzen[1] . ')';
   }
   # weiter geht es mit den nächsten Intervallen
-  for ($i=1;$i<$anzInt;$i++) {
+  for ($i = 1; $i < $anzInt; $i++) {
     # wieder Zerlegen in Anfang und Ende
-    $grenzen=explode('-',$intervalle[$i]);
-    if (count($grenzen)==1) {
+    $grenzen = explode('-', $intervalle[$i]);
+    if (count($grenzen) == 1) {
       # Es gibt nur einen Wert
-      $expr.=' OR [ID]='.$grenzen[0];
+      $expr.=' OR [ID] = ' . $grenzen[0];
     }
     else {
       # Es gibt Anfang und Ende im Intervall
-      $expr.=' OR ([ID]>'.$grenzen[0].' AND [ID]<'.$grenzen[1].')';
+      $expr.=' OR ([ID] > ' . $grenzen[0] . ' AND [ID] < ' . $grenzen[1] . ')';
     }
   }
   # Beenden des Ausdrucks
-  $expr.=')';
+  $expr .= ')';
   return $expr;
 }
 
@@ -1941,7 +1924,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
@@ -2355,6 +2338,23 @@ function get_name_from_thump($thumb) {
 }
 
 /**
+ * Function return the most likely delimiter of $line
+ * @param string $line The line to test.
+ * @return string The detected delimiter.
+ */
+function detect_delimiter($line) {
+	$delimiters = [',', ';', "\t", '|', ':'];
+	$delimiter_counts = [];
+	foreach ($delimiters as $delimiter) {
+
+		$delimiter_counts[$delimiter] = substr_count($line, $delimiter);
+	}
+	// Find the delimiter with the highest count
+	$most_likely_delimiter = array_keys($delimiter_counts, max($delimiter_counts));
+	return $most_likely_delimiter[0];
+}
+
+/**
 * Funktion liefert Teilstring von $txt vor dem letzten vorkommen von $delimiter
 * Kann z.B. verwendet werden zum extrahieren der Originaldatei vom Namen eines Thumpnails
 * z.B. before_last('MeineDatei_abc_1.Ordnung-345863_thump.jpg', '_') => MeineDatei_abc_1.Ordnung-345863
@@ -2383,7 +2383,7 @@ function before_last($txt, $delimiter) {
  * Function extract from first select until last closing bracket.
  * If no open pracket is before select like in this example:
  * select id, the_geom from schema.tabelle where true, return $data as it is
- * @param String $data Mapserver data statement
+ * @param string $data Mapserver data statement
  * @return String inner sql
  */
 function get_sql_from_mapserver_data($data) {
@@ -2401,9 +2401,9 @@ function get_sql_from_mapserver_data($data) {
  * Returns an empty string if $schema_name.$table_name not exists in $sql.
  * Returns $table_name if $schema_name.$table_name exists but no alias for it.
  * Befor parsing the sql all select expressions will be replaced by *
- * @param String $sql The SQL-Statement to parse.
- * @param String $schema_name The schema name of the table.
- * @param String $table_name The table name.
+ * @param string $sql The SQL-Statement to parse.
+ * @param string $schema_name The schema name of the table.
+ * @param string $table_name The table name.
  * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
  */
 function get_table_alias($sql, $schema_name, $table_name) {
@@ -2675,7 +2675,7 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 
 /**
  * Function read all files recursively from a directory
- * @param String $dir - The directory
+ * @param string $dir - The directory
  * @return Array $files - The files in the directory and below
  */
 function getAllFiles($dir) {
@@ -2752,5 +2752,13 @@ function required_shape_files_exists($files, $required = array('shp', 'shx', 'db
 			'msg' => 'In der ZIP-Datei ' . (count($missing) == 1 ? 'fehlt die Datei mit der Endung' : 'fehlen die Dateien mit den Endungen') . ' ' . implode(', ', $missing)
 		);
 	}
+}
+
+function set_href($text) {
+	if (strpos($text, ';http') !== false) {
+		$parts = explode(';http', $text);
+		$text = '<a href="http' . $parts[1] . '" target="Urheber" title="' . $parts[0] . '">' . $parts[0] .'</a>';
+	}
+	return $text;
 }
 ?>

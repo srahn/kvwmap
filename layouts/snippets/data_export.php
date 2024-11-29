@@ -3,6 +3,7 @@
   include(LAYOUTPATH.'languages/data_export_'.$this->user->rolle->language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 	$simple = ($this->formvars['simple'] == 1);
+	$document_ids = [];
 	$available_formats = array(
 		"Shape" => array(
 			"export_privileg" => 1,
@@ -190,8 +191,8 @@ function delete_settings(){
 </script>
 
 <?
-$floor = floor(count($this->attributes['name'])/4);
-$rest = count($this->attributes['name']) % 4;
+$floor = floor(count_or_0($this->attributes['name'])/4);
+$rest = count_or_0($this->attributes['name']) % 4;
 if ($rest % 4 != 0) {
  $r=1;
 } else {
@@ -331,7 +332,7 @@ $j=0;
 								<select name="export_setting">
 									<option value="">  -- <? echo $this->strPleaseSelect; ?> --  </option>
 									<?
-										for($i = 0; $i < count($this->export_settings); $i++){
+										for($i = 0; $i < count_or_0($this->export_settings); $i++){
 											echo '<option value="'.$this->export_settings[$i]['name'].'" ';
 											if($this->selected_export_setting[0]['name'] == $this->export_settings[$i]['name']){echo 'selected ';}
 											echo '>'.$this->export_settings[$i]['name'].'</option>';

@@ -1,5 +1,14 @@
 <?
 
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	if (MAPSERVERVERSION >= 800) {
 		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
@@ -13,15 +22,21 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 
 function mapserverExp2SQL($exp, $classitem) {
 	$exp = str_replace(array("'[", "]'", '[', ']'), '', $exp);
-	$exp = str_replace(' eq ', '=', $exp);
-	$exp = str_replace(' ne ', '!=', $exp);
+	$exp = str_replace(' eq ', ' = ', $exp);
+	$exp = str_replace(' ne ', ' != ', $exp);
+	$exp = str_replace(' ge ', ' >= ', $exp);
+	$exp = str_replace(' le ', ' <= ', $exp);
+	$exp = str_replace(' gt ', ' > ', $exp);
+	$exp = str_replace(' lt ', ' < ', $exp);
 	$exp = str_replace(" = ''", ' IS NULL', $exp);
 	$exp = str_replace('\b', '\y', $exp);
 
 	if ($exp != '' AND substr($exp, 0, 1) != '(' AND $classitem != '') { # Classitem davor setzen
 		if (strpos($exp, '/') === 0) { # regex
 			$operator = '~';
+			$exp = str_replace('\/', 'escaped_slash', $exp);
 			$exp = str_replace('/', '', $exp);
+			$exp = str_replace('escaped_slash', '/', $exp);
 		}
 		else {
 			$operator = '=';
@@ -163,12 +178,16 @@ function InchesPerUnit($unit, $center_y){
 		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		if($center_y != 0.0){
-			$cos_lat = cos(pi() * $center_y/180.0);
-			$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
-		}
-		return 4374754 * $lat_adj;
+		return 39.3701 * degree2meter($center_y);
 	}
+}
+
+function degree2meter($center_y) {
+	if($center_y != 0.0){
+		$cos_lat = cos(pi() * $center_y/180.0);
+		$lat_adj = sqrt(1 + $cos_lat * $cos_lat)/sqrt(2);
+	}
+	return 111319 * $lat_adj;
 }
 
 function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
@@ -390,14 +409,17 @@ class GUI {
 		}
 	}
 
-  function tooltip_query($rect){
+	function tooltip_query($rect){
 		$showdata = 'true';
     $this->mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     $this->queryrect = $rect;
-		if($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined'){
-			if($this->formvars['querylayer_id'] < 0)$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
-			else $layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
-			$this->formvars['qLayer'.$this->formvars['querylayer_id']] = '1';
+		if ($this->formvars['querylayer_id'] != '' AND $this->formvars['querylayer_id'] != 'undefined') {
+			if ($this->formvars['querylayer_id'] < 0) {
+				$layerset=$this->user->rolle->getRollenLayer(-$this->formvars['querylayer_id']);
+			}
+			else {
+				$layerset = $this->user->rolle->getLayer($this->formvars['querylayer_id']);
+			}
 		}
 		else{
 			$layerset = $this->user->rolle->getLayer('');
@@ -413,16 +435,18 @@ class GUI {
 			if ($layerset[$i]['connectiontype'] == 6 AND
 					$layerset[$i]['queryable'] AND
 					(
-						$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
-						$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
-					) AND
-					(
-						(
+						(	# Karte
+							(
+								$this->formvars[$queryfield . $layerset[$i]['Layer_ID']] == '1' OR 
+								$this->formvars[$queryfield . $layerset[$i]['requires']] == '1'
+							) AND
 							($layerset[$i]['maxscale'] == 0 OR $layerset[$i]['maxscale'] >= $this->map_scaledenom) AND 
 							($layerset[$i]['minscale'] == 0 OR $layerset[$i]['minscale'] <= $this->map_scaledenom)
-						) OR 
-						$this->last_query != '' OR
-						$this->formvars['querylayer_id'] != ''
+						)
+						OR
+						(	# Datensatz
+							$this->formvars['querylayer_id'] != ''
+						)
 					)
 				) {
 				# Dieser Layer soll abgefragt werden
@@ -433,7 +457,7 @@ class GUI {
 				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				}
-				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+				if ($layerset[$i]['oid'] == '' AND count_or_0($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
 				$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
@@ -441,7 +465,7 @@ class GUI {
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
-					for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
+					for($j = 0; $j < count_or_0($layerset[$i]['attributes']['name']); $j++){
 						$layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
 						if($layerset[$i]['attributes']['tooltip'][$j] == 1){
 							$show = true;
@@ -519,9 +543,17 @@ class GUI {
 				}
 
 				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
-				if($layerset[$i]['Filter'] != ''){
-					$layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
-					$sql_where .= " AND ".$layerset[$i]['Filter'];
+				if ($layerset[$i]['Filter'] != '') {
+					$layerset[$i]['Filter'] = replace_params(
+						$layerset[$i]['Filter'],
+						rolle::$layer_params,
+						$this->user->id,
+						$this->Stelle->id,
+						rolle::$hist_timestamp,
+						$this->rolle->language
+					);
+					// str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
 				if (QUERY_ONLY_ACTIVE_CLASSES AND array_key_exists($layerset[$i]['Layer_ID'], $disabled_class_expressions)) {
@@ -1370,7 +1402,7 @@ class rolle {
 		}
 	}
 
-	function getLayer($LayerName, $only_active_or_requires = false) {
+	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
 		$layer_name_filter = '';
 		$privilegfk = '';
@@ -1410,7 +1442,7 @@ class rolle {
 
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
-		}		
+		}
 
 		$sql = "
 			SELECT " .
@@ -1424,9 +1456,12 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function,
-				ul.`queryable`, l.`drawingorder`,
-				ul.`minscale`, ul.`maxscale`,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				ul.`queryable`,
+				l.`drawingorder`,
+				ul.`legendorder`,
+				ul.`minscale`,
+				ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
@@ -1471,7 +1506,7 @@ class rolle {
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . $htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
+			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		}
 		$i = 0;
@@ -1483,20 +1518,22 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-				$rs[$key] = replace_params(
-					$rs[$key],
-					rolle::$layer_params,
-					$this->user_id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$language,
-					$rs['duplicate_criterion']
-				);
+			if ($replace_params) {
+				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+					$rs[$key] = replace_params(
+						$rs[$key],
+						rolle::$layer_params,
+						$this->user_id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$language,
+						$rs['duplicate_criterion']
+					);
+				}
 			}
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
-			$layer[$i]=$rs;
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer[$i];
+			$layer[$i] = $rs;
+			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
 			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
 			$i++;
 		}
@@ -1801,7 +1838,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (@count($rs) == 0) {
+		if (count_or_0($rs) == 0) {
 			return null;
 		}
 		$rs['schema'] = replace_params(
@@ -1916,7 +1953,7 @@ class db_mapObj{
 			];
 	}
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true){
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -2028,26 +2065,21 @@ class db_mapObj{
 			$attributes['length'][$i]= $rs['length'];
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
+			$attributes['options'][$i] = $rs['options'];
 
 			if ($replace) {
-				if ($attributes['default'][$i] != '')	{
-					$attributes['default'][$i] = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+				foreach($replace_only AS $column) {
+					if ($attributes[$column][$i] != '') {
+						$attributes[$column][$i] = replace_params(
+							$attributes[$column][$i],
+							rolle::$layer_params,
+							$this->User_ID,
+							$this->Stelle_ID,
+							rolle::$hist_timestamp,
+							$this->rolle->language
+						);
+					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
 			}
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
@@ -2058,8 +2090,7 @@ class db_mapObj{
 			}
 			$attributes['form_element_type'][$i] = $rs['form_element_type'];
 			$attributes['form_element_type'][$rs['name']] = $rs['form_element_type'];
-			$attributes['options'][$i] = $rs['options'];
-			$attributes['options'][$rs['name']] = $rs['options'];
+			$attributes['options'][$rs['name']] = $attributes['options'][$i];
 			$attributes['alias'][$i] = $rs['alias'];
 			$attributes['alias_low-german'][$i] = $rs['alias_low-german'];
 			$attributes['alias_english'][$i] = $rs['alias_english'];
@@ -2104,7 +2135,7 @@ class db_mapObj{
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < count_or_0($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp

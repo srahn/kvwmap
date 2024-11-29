@@ -74,8 +74,9 @@ class rolle {
 		return 1;
 	}
 
-	function getLayer($LayerName, $only_active_or_requires = false) {
+	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
@@ -115,6 +116,9 @@ class rolle {
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
 		}
+		else {
+			$active_filter = '';
+		}
 
 		$sql = "
 			SELECT " .
@@ -129,8 +133,11 @@ class rolle {
 				wfs_geom,
 				write_mapserver_templates,
 				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
-				ul.`queryable`, l.`drawingorder`,
-				ul.`minscale`, ul.`maxscale`,
+				ul.`queryable`,
+				l.`drawingorder`,
+				ul.`legendorder`,
+				ul.`minscale`,
+				ul.`maxscale`,
 				ul.`offsite`,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
@@ -187,16 +194,18 @@ class rolle {
 					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
 				}
 			}
-			foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-				$rs[$key] = replace_params(
-					$rs[$key],
-					rolle::$layer_params,
-					$this->user_id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$language,
-					$rs['duplicate_criterion']
-				);
+			if ($replace_params) {
+				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+					$rs[$key] = replace_params(
+						$rs[$key],
+						rolle::$layer_params,
+						$this->user_id,
+						$this->stelle_id,
+						rolle::$hist_timestamp,
+						$language,
+						$rs['duplicate_criterion']
+					);
+				}
 			}
 			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
 			$layer[$i] = $rs;
@@ -1632,6 +1641,13 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Function set saved themes from Default user with $default_user_id to User with $user_id in Stelle $stelle_id
+	 * @param int $user_id
+	 * @param int $stelle_id
+	 * @param int $default_user_id
+	 * @return int 1 | 0 Wenn success 1 else 0
+	 */
 	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
 		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
@@ -1666,9 +1682,9 @@ class rolle {
 		return 1;
 	}
 
-	function setRolle($user_id, $stelle_id, $default_user_id) {
+	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1764,7 +1780,7 @@ class rolle {
 					`rolle`
 				WHERE
 					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $stelle_id . "
+					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
 			";
 		}
 		else {
@@ -1797,7 +1813,7 @@ class rolle {
 
 	function deleteRollen($user_id, $stellen) {
 		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
 				DELETE FROM `rolle`
 				WHERE
@@ -1900,7 +1916,7 @@ class rolle {
 	function deleteMenue($user_id, $stellen, $menues) {
 		# löscht die Menuepunkte der übergebenen Stellen für einen Benutzer.
 		if($menues == 0) {
-			for ($i = 0; $i < @count($stellen); $i++) {
+			for ($i = 0; $i < count_or_0($stellen); $i++) {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
@@ -1967,7 +1983,7 @@ class rolle {
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
-			for($j = 0; $j < @count($layerids); $j++){
+			for($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
@@ -2016,7 +2032,7 @@ class rolle {
 
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
@@ -2094,10 +2110,12 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
+	 */
 	function setLayer($user_id, $stelle_id, $default_user_id) {
-		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
-			# Layereinstellungen von Defaultrolle abfragen
+			// echo '<br>Layereinstellungen von Defaultrolle abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2116,7 +2134,7 @@ class rolle {
 			";
 		}
 		else {
-			# Layereinstellungen von Defaultlayerzuordnung abfragen
+			// echo '<br>Layereinstellungen von Defaultlayerzuordnung abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2147,7 +2165,8 @@ class rolle {
 			) " .
 			$rolle2used_layer_select_sql . "
 		";
-		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>".$sql,4);
+		// echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		return 1;
@@ -2155,7 +2174,7 @@ class rolle {
 
 	function deleteLayer($user_id, $stellen, $layer) {
 		# löscht die Layer der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			if (!is_array($layer)) {
 				$layer = array();
 			}

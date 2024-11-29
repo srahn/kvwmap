@@ -2,7 +2,7 @@
 include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
 include('funktionen/input_check_functions.php');
   
-$anzNamen = @count($this->namen);
+$anzNamen = count_or_0($this->namen);
 
 # Blätterfunktion
 if($this->formvars['offset'] == ''){
@@ -645,7 +645,7 @@ if($this->formvars['offset'] > 0){
 		<input name="withflurst" type="hidden" value="<?php echo $this->formvars['withflurst']; ?>">
 <? } ?>
 <input type="submit" onclick="save();" style="width: 0px; height: 0px; border: none">
-<input type="hidden" name="go" value="Namen_Auswaehlen">
+<input type="hidden" name="go" value="<? echo $this->formvars['go']; ?>">
 <input name="gml_id" type="hidden" value="<? echo $this->formvars['gml_id']; ?>">
 <input type="hidden" name="go_backup" value="">
 <input name="namensuche" type="hidden" value="true">

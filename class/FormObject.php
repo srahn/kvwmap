@@ -199,7 +199,7 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 		# insertafter ist die Nummer der Option, nach der die neue Option eingefügt werden soll
 		# die Zählung beginnt mit 1. Wenn z.B. eine Option an den Anfang gestellt werden soll
 		# muss insertafter = 0 sein.
-		$anzOption = @count($this->select['option']);
+		$anzOption = count_or_0($this->select['option']);
 		$oldvalue=$value;
 		$oldselected=$selected;
 		$oldlabel=$label;
@@ -251,7 +251,7 @@ static	function createCustomSelectField($name, $options, $value = '', $size = 1,
 					$this->html .= ' style="' . $this->style . '"';
 				}
 				$this->html.=">\n";
-				for ($i = 0; $i < @count($this->select['option']); $i++) {
+				for ($i = 0; $i < count_or_0($this->select['option']); $i++) {
 					$this->html .= "<option value='" . $this->select["option"][$i]["value"] . "'";
 					if (value_of($this->select["option"][$i], 'selected')) {
 						$this->html .= " selected";
@@ -347,7 +347,7 @@ class selectFormObject extends FormObject{
 				if($this->nochange != true){
 					$this->html.=" onchange=\"document.GUI.submit()\">\n";
 				}
-				for ($i=0;$i<@count($this->select['option']);$i++) {
+				for ($i = 0; $i < count_or_0($this->select['option']); $i++) {
 					$this->html.="<option value=\"".$this->select['option'][$i]['value']."\"";
 					if ($this->select['option'][$i]['selected']) {
 						$this->html.=' selected';

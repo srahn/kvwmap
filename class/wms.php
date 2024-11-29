@@ -58,7 +58,7 @@ class wms_request_obj {
 		$styleOpen = false;
 		#print_r($values);
 		while(!$layerEnd){
-			$i++;    
+			$i++;
 			if($values[$i]['level'] == $currentTag['level']+1 && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'open' ){
 				#echo "unterlayer gefunden<br/>";
 				$return = $this->searchLayers($values, $i, true);
@@ -85,8 +85,7 @@ class wms_request_obj {
 			if($values[$i]['level'] == $currentTag['level'] && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'close'){
 				$layers[] = $layer;
 				unset($layer);
-			
-			}  
+			}
 
 			if((!$parentLvl && $values[$i]['tag'] == 'LAYER' && $values[$i]['type'] == 'close') OR ($values[$i]['level'] == $currentTag['level']-1)){
 				$layerEnd =true;
