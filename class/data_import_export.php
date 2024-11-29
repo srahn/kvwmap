@@ -963,6 +963,7 @@ class data_import_export {
 	}
 
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
+		// echo '<br>Function ogr2ogr_import';
 		$command = '';
 		if ($options != NULL) {
 			$command .= $options;
@@ -977,8 +978,8 @@ class data_import_export {
 		if (OGR_BINPATH == '') {
 			$gdal_container_connect = 'gdalcmdserver:8080/t/?tool=ogr2ogr&param=';
 			$url = $gdal_container_connect . urlencode(trim($command));
-			#echo '<br>url:   ' . urldecode($url) . '<br><br>';
-			#echo '<br>url:   ' . $url . '<br><br>';
+			// echo '<br>url:   ' . urldecode($url) . '<br><br>';
+			// echo '<br>url:   ' . $url . '<br><br>';
 			$ch = curl_init();
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
