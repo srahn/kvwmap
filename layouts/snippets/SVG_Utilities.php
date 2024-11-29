@@ -208,6 +208,8 @@
 	let draggingFS  = false;
 	let moving  = false;
 	let movinggeom  = false;
+	let rotatinggeom = false;
+	let rotated = false;
 	let moved  = false;
 	let must_redraw = false;
 	let mobile = {$rolle_gps};
@@ -232,6 +234,9 @@
 	let doing;
 	let doing_save;
 	let suppresszoom = false;
+	let centroid = new Array();
+	let angle;
+	let startangle;
 SCRIPTDEFINITIONS;
 
 	$polygonANDpoint = '
@@ -1058,6 +1063,9 @@ SCRIPTDEFINITIONS;
 			case 'move_geometry':
 				startMoveGeom(client_x, client_y);
 			break;
+			case 'rotate_geometry':
+				startRotateGeom(client_x, client_y);
+			break;
 			
 			case 'ortho_point':
 				add_ortho_point(world_x, world_y, null, null, true);
@@ -1132,6 +1140,11 @@ function mousemove(evt){
 						if(movinggeom){
 							moveGeom(evt);
 						}
+						else {
+							if(rotatinggeom){
+								rotateGeom(evt);
+							}
+						}
 					}
 				}
 			}
@@ -1190,6 +1203,9 @@ function mouseup(evt){
   }
 	if(movinggeom){
 		endMoveGeom(evt);
+	}
+	if(rotatinggeom){
+		endRotateGeom(evt);
 	}
 }
 
@@ -1680,7 +1696,7 @@ function mouseup(evt){
 		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if(enclosingForm.last_doing.value == "add_geom" || enclosingForm.last_doing.value == "subtract_geom" || enclosingForm.last_doing.value == "move_geometry"){
+			if (["add_geom", "subtract_geom", "move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				if(enclosingForm.secondline.value == "true" && must_redraw){
 					applylines();
@@ -2572,7 +2588,7 @@ function mouseup(evt){
 		if(enclosingForm.secondline != undefined && enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if (["add_geom", "subtract_geom", "add_circle", "move_geometry"].includes(enclosingForm.last_doing.value)){
+			if (["add_geom", "subtract_geom", "add_circle", "move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				if(enclosingForm.secondpoly.value == "true" && must_redraw){
 					applypolygons();
@@ -3461,6 +3477,73 @@ $transformfunctions = '
 
 //---------------------- Verschieben der Geometrie -------------
 
+//---------------------- Drehen der Geometrie -------------
+
+	function rotate_geometry(){
+		document.getElementById("canvas").setAttribute("cursor", "se-resize");
+		enclosingForm.last_doing.value = "rotate_geometry";
+		if(polygonfunctions){
+			applypolygons();
+		}
+		else{
+			applylines();
+		}
+		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid", new Array(enclosingForm.result), new Array("setvalue"));
+	}
+	
+	function startRotateGeom(clientx, clienty){
+		rotatinggeom  = true;
+		if (enclosingForm.result.value != "") {
+			var centroid_world = enclosingForm.result.value.split(" ");
+			centroid[0] = (centroid_world[0] - minx) / scale;
+			centroid[1] = (centroid_world[1] - miny) / scale;
+		}
+	  move_x[0] = clientx;
+	  move_y[0] = clienty;
+		move_dx = move_x[0] - centroid[0];
+	  move_dy = move_y[0] - centroid[1];
+		startangle = getAngle(move_dx, move_dy);
+	}
+
+	function getAngle(a, b) {
+		var angle = Math.atan(b / a) * (180/Math.PI);
+		if (angle < 0 && a > 0 && b < 0) {
+			angle = 360 + angle;
+		}
+		else {
+			if ((angle < 0 && a < 0) || b < 0) {
+				angle = 180 + angle;
+			}
+		}
+		return angle;
+	}
+	
+	function rotateGeom(evt){
+		move_x[1] = evt.clientX;
+	  move_y[1] = resy - evt.clientY;
+	  move_dx = move_x[1] - centroid[0];
+	  move_dy = move_y[1] - centroid[1];
+		angle = getAngle(move_dx, move_dy);
+		angle = angle - startangle;
+		path = "translate(0 "+resy+") scale(1,-1) rotate(" + angle + ", " + centroid[0] + " " + centroid[1] + ")";
+	  document.getElementById("cartesian").setAttribute("transform", path);
+		rotated = true;
+	}
+
+	function endRotateGeom(evt) {
+	  if(rotated){
+			enclosingForm.secondpoly.value = true;
+			enclosingForm.secondline.value = true;
+			must_redraw = true;
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+		}
+	  rotatinggeom  = false;
+	  rotated  = false;
+	}
+	
+
+//---------------------- Drehen der Geometrie -------------
+
 ';
 
 $vertex_catch_functions = '
@@ -3974,11 +4057,11 @@ $measurefunctions = '
 		return $pointbuttons;
 	}
 
-	function boxbuttons(){
+	function boxbuttons($strCreateRectangle){
 		global $last_x;
 		$boxbuttons = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
-	        <rect id="box0" onmouseover="show_tooltip(\'Fenster aufziehen\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+	        <rect id="box0" onmouseover="show_tooltip(\'' . $strCreateRectangle . '\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_nofill navbutton_stroke" transform="translate(-3 2) scale(0.9)">
 						<g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
 							<rect x="170" y="30" width="40" height="14" style="stroke-width:4"/>
@@ -4169,7 +4252,7 @@ $measurefunctions = '
     return $special_bufferbuttons;
   }
 
-	function transform_buttons($strMoveGeometry){
+	function transform_buttons($strMoveGeometry, $strRotateGeometry){
 		global $last_x;
 		$transform_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
@@ -4185,6 +4268,20 @@ $measurefunctions = '
       </g>
     ';
 		$last_x += 36;
+		$transform_buttons .='
+			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
+        <rect id="rotate1" onmouseover="show_tooltip(\''.$strRotateGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'rotate1\');rotate_geometry();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_stroke" transform="translate(5 5) scale(1.1)">
+					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(4 4) scale(0.045)"
+						 style="stroke-dasharray:23,23;stroke-width:25"/>
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-2 0) scale(0.045)"
+						 style="stroke-width:25"/>
+				</g>
+      </g>
+    ';
+		$last_x += 36;		
     return $transform_buttons;
 	}
 	
