@@ -15513,7 +15513,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						} break;
 						default : {
 							if ($tablename AND $formtype != 'dynamicLink' AND $formtype != 'SubFormPK' AND $formtype != 'SubFormEmbeddedPK' AND $attributname != 'the_geom') {
-								if ($this->formvars[$form_fields[$i]] === '') {
+								if ($this->formvars[$form_fields[$i]] == '') {
 									$eintrag = 'NULL';
 								}
 								else {
