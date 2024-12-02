@@ -2446,7 +2446,7 @@ echo '			</table>
 				$layerset['Filter'] = replace_params(
 					$layerset['Filter'],
 					rolle::$layer_params,
-					$this->User_ID,
+					$this->user->id,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
 					$this->rolle->language
@@ -9826,7 +9826,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$layerset[0]['Filter'] = replace_params(
 						$layerset[0]['Filter'],
 						rolle::$layer_params,
-						$this->User_ID,
+						$this->user->id,
 						$this->Stelle_ID,
 						rolle::$hist_timestamp,
 						$this->rolle->language
@@ -16219,8 +16219,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								$layerset[$i]['Filter'] = replace_params(
 									$layerset[$i]['Filter'],
 									rolle::$layer_params,
-									$this->User_ID,
-									$this->Stelle_ID,
+									$this->user->id,
+									$this->Stelle->id,
 									rolle::$hist_timestamp,
 									$this->rolle->language
 								);
