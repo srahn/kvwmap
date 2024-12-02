@@ -66,7 +66,7 @@ for($gb = 0; $gb < count($this->gbblaetter); $gb++){
 	    for($s=0; $s < count_or_0($flst->Lage);$s++) {
       	$Adressbezeichnung .= $flst->Lage[$s];
     	}
-	    for($n=0;$n<count($flst->Nutzung);$n++) {
+	    for($n=0; $n < count_or_0($flst->Nutzung);$n++) {
 	    	if($flst->Nutzung[$n]['bezeichnung'] != ''){
 	    		$Nutzunglangtext.=tausenderTrenner($flst->Nutzung[$n]['flaeche']).' m<sup>2</sup> '.$flst->Nutzung[$n]['bezeichnung'].'<br>';
 	    	}
