@@ -4272,12 +4272,16 @@ $measurefunctions = '
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
         <rect id="rotate1" onmouseover="show_tooltip(\''.$strRotateGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'rotate1\');rotate_geometry();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 				<g class="navbutton navbutton_stroke" transform="translate(5 5) scale(1.1)">
-					<polygon class="navbutton_nofill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
-						transform="translate(4 4) scale(0.045)"
-						 style="stroke-dasharray:23,23;stroke-width:25"/>
 					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
-						transform="translate(-2 0) scale(0.045)"
+						transform="translate(-2 2) scale(0.045)"
 						 style="stroke-width:25"/>
+					<g transform="translate(23 -14) rotate(55 0 0)">
+						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+							style="stroke-width:4" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
+						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
+								transform="matrix(1 0 0 1 0 0) scale(0.05)"
+								style="fill:none;stroke-width:40"/>
+					</g>
 				</g>
       </g>
     ';
