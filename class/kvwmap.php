@@ -2169,8 +2169,8 @@ echo '			</table>
 					}
 				}
 				if ($this->error_message != '') {
-					$this->error_message .= '<br>';
-					throw new ErrorException($this->error_message);
+					#$this->error_message .= '<br>';
+					#throw new ErrorException($this->error_message);
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
