@@ -710,7 +710,7 @@ class GUI {
 				$layerset['Filter'] = replace_params(
 					$layerset['Filter'],
 					rolle::$layer_params,
-					$this->User_ID,
+					$this->user->id,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
 					$this->rolle->language
