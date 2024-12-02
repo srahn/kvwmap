@@ -801,6 +801,14 @@ hide_versions = function(flst){
 										<? 
 										for ($b=0; $b < count_or_0($flst->Buchungen);$b++) {
 											$BestandStr = $flst->Buchungen[$b]['bezeichnung'].' ';
+											if ($flst->Buchungen[$b]['anteil'] != '') {
+												if ($flst->Buchungen[$both]['anteil'] == '99999/99999') {
+													$BestandStr.= '<br>Anteil nicht ermittelbar an Miteigentumsanteil am Grundstück';
+												}
+												else {
+													$BestandStr.= 'zu '.$flst->Buchungen[$b]['anteil'] . ', ';
+												}
+											}
 											$BestandStr.='<a target="root" href="index.php?go=Grundbuchblatt_Auswaehlen_Suchen&selBlatt='.$flst->Buchungen[$b]['bezirk'].'-'.$flst->Buchungen[$b]['blatt'].'&csrf_token=' . $_SESSION['csrf_token'] . '">'.$flst->Buchungen[$b]['bezirk'].'-'.ltrim($flst->Buchungen[$b]['blatt'], '0').'</a>';
 											$BestandStr.=' '.str_pad($flst->Buchungen[$b]['pruefzeichen'],3,' ',STR_PAD_LEFT);
 											$BestandStr.=', Laufende Nummer '.str_pad(intval($flst->Buchungen[$b]['bvnr']),4,' ',STR_PAD_LEFT);
