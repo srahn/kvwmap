@@ -229,16 +229,20 @@ class Ressource extends PgObject {
         $this->debug->show('Lege Verzeichnis ' . $download_path . ' an, weil es noch nicht existiert!', true);
         mkdir($download_path, 0777, true);
       }
-
-      array_map('unlink', glob($download_path . "/*"));
-      $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
+      $only_missing = ((array_key_exists('only_missing', $this->formvars) AND $this->formvars['only_missing']) ? true : false);
+      if ($only_missing) {
+        array_map('unlink', glob($download_path . "/*"));
+        $this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
+      }
 
       foreach ($download_urls AS $download_url) {
         $this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
-        copy($download_url, $download_path . basename($download_url));
-        if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
-          unlink($download_path . basename($download_url));
-          $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+        if ($only_missing AND !file_exists($download_path . basename($download_url))) {
+          copy($download_url, $download_path . basename($download_url));
+          if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
+            unlink($download_path . basename($download_url));
+            $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+          }
         }
       }
     }
