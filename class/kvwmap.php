@@ -17567,10 +17567,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Set formvars from layer
 		$this->formvars = array_merge($layer, $this->formvars);
-
-		# Set geom_column from table
-		$geom_info = $pgdatabase->get_geom_column($schema_name, $table_name);
-		$this->formvars['geom_column'] = $geom_info['column'];
+		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
 		$shared_stellen = $this->Stelle->getStellen('', $this->user->id, '`show_shared_layers`');

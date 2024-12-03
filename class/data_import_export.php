@@ -280,7 +280,7 @@ class data_import_export {
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $shapefile, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
 		// ToDo: Die nachfolgenden beiden Test mit Groß und Kleinschreibung sind nicht vollständig für z.B. (Dbf, DBf).
 		// Man kann mit diesem Statement den Test vereinfachen auf eine Zeile
-		$filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
+		// $filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
 
 		if (file_exists($uploadpath . $shapefile . '.dbf')) {
 			$filename = $uploadpath . $shapefile . '.dbf';
