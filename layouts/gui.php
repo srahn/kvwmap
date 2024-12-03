@@ -30,7 +30,7 @@
 								<td id="menuebar" valign="top" align="center"><?php
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
-								<td align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+								<td id="container_paint_td" align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 									<div id="container_paint" style="height:100%; position: relative; <? echo ($this->main == 'map.php' ? 'overflow: hidden' : ''); ?>">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											window.name = 'root';

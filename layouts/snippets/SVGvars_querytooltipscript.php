@@ -45,7 +45,7 @@ $SVGvars_querytooltipscript .= '
 			var tooltipcontent = document.getElementById("tooltipcontent");
 			var obj = document.getElementById("highlight")
 			tooltipgroup.setAttribute(\'visibility\', \'hidden\');
-			top.document.GUI.result.value = "";				
+			//top.document.GUI.result.value = "";		
 			while(tooltipcontent.childNodes.length > 0){
 				tooltipcontent.removeChild(tooltipcontent.firstChild);
 			}
