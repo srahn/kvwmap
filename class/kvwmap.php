@@ -15521,8 +15521,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 												if (strlen($this->formvars[$form_fields[$i]]) > 19) {
 													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s.u', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s.u');
 												}
-												else {
+												elseif (strlen($this->formvars[$form_fields[$i]]) > 10){
 													$eintrag = DateTime::createFromFormat('d.m.Y H:i:s', $this->formvars[$form_fields[$i]])->format('Y-m-d H:i:s');
+												}
+												else {
+													$eintrag = DateTime::createFromFormat('d.m.Y', $this->formvars[$form_fields[$i]])->format('Y-m-d 00:00:00');
 												}
 											} break;
 											default : {
