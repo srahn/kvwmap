@@ -1873,7 +1873,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->StelleAendern();
+				$GUI->stelle_aendern();
 			} break;
 
 			case 'Stellen_Anzeigen' : {

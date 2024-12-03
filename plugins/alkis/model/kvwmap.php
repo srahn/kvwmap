@@ -55,7 +55,7 @@
 
 	$GUI->getFlurbezeichnung = function($epsgcode) use ($GUI){
 		include_once(PLUGINS.'alkis/model/kataster.php');
-    $Flurbezeichnung = '';
+    $Flurbezeichnung = [];
  	  $flur = new Flur('','','',$GUI->pgdatabase);
 		$bildmitte['rw']=($GUI->map->extent->maxx+$GUI->map->extent->minx)/2;
 		$bildmitte['hw']=($GUI->map->extent->maxy+$GUI->map->extent->miny)/2;
@@ -1197,7 +1197,7 @@
 		$GUI->main = PLUGINS.'alkis/view/grundbuchblattsuchform.php';
     $grundbuch = new grundbuch('', '', $GUI->pgdatabase);
     $GemeindenStelle=$GUI->Stelle->getGemeindeIDs();
-    if (!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
+    if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])){   // Stelle ist auf Gemeinden eingeschränkt
       $Gemarkung=new gemarkung('',$GUI->pgdatabase);
 			$ganze_gemarkungen = array_keys($GemeindenStelle['ganze_gemarkung']);
 			if (!empty($GemeindenStelle['ganze_gemeinde'])) {
@@ -1226,7 +1226,7 @@
 		##########################
     if($GUI->formvars['Bezirk'] != ''){
     	if($GUI->formvars['selBlatt'])$GUI->selblattliste = explode(', ',$GUI->formvars['selBlatt']);
-			if(!empty($GemeindenStelle)){   // Stelle ist auf Gemeinden eingeschränkt
+			if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])){   // Stelle ist auf Gemeinden eingeschränkt
 				$GUI->blattliste = $grundbuch->getGrundbuchblattlisteByGemkgIDs($GUI->formvars['Bezirk'], $ganze_gemarkungen, $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
 			}
 			else{
@@ -1337,7 +1337,7 @@
 		}
     $formvars = $GUI->formvars;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
-		$ret=$flurstueck->getNamen($formvars,@array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
+		$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {
       $GUI->Fehlermeldung='<br>Es konnten keine Namen abgefragt werden'.$ret[1];
       $GUI->namenWahl();

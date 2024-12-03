@@ -12,10 +12,10 @@
 // metadata_order_data_package
 // metadata_reorder_data_package
 // metadata_show_data_packages
+// metadata_update_outdated
 // Metadaten_Auswaehlen_Senden
 // Metadaten_Recherche
 // Metadateneingabe
-// Metadaten_update_outdated
 
 include_once(CLASSPATH . 'FormObject.php');
 include_once(PLUGINS . 'metadata/model/kvwmap.php');
@@ -133,6 +133,31 @@ function go_switch_metadata($go){
 			$GUI->metadata_show_data_packages();
 		} break;
 
+		case 'metadata_update_outdated' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
+			$GUI->checkCaseAllowed($go);
+			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
+			// header('Content-Type: application/json; charset=utf-8');
+			// echo json_encode($result);
+			echo $result['msg'];
+		} break;
+
+		case 'metadata_test' : {
+			$handle = fopen('/var/www/data/fdm/dom/dom_atom.xml', "r");
+			if ($handle) {
+				$atom_url = 'https://www.geodaten-mv.de/dienste/dom_download?index=4&amp;dataset=us214578-a1n5-4v12-v31c-5tg2az3a2164&amp;file=dom1_33_$x_$y_2_gtiff.tif';
+				$regex = '/' . str_replace('$x', '(.*?)', str_replace('$y', '(.*?)', str_replace('?', '\?', str_replace('/', '\/', $atom_url)))) . '/';
+				while (($line = fgets($handle)) !== false) {
+					if (preg_match($regex, $line, $match) == 1) {
+						echo '<br>' . $match[0];
+					}
+				}
+				fclose($handle);
+			}
+		} break;
+
 		case 'Metadaten_Auswaehlen_Senden' : {
 			$GUI->sanitize([
 				'was' => 'text',
@@ -152,17 +177,6 @@ function go_switch_metadata($go){
 			$GUI->metadaten_suche();
 		} break;
 
-		case 'Metadaten_update_outdated' : {
-			$GUI->sanitize([
-				'ressource_id' => 'integer'
-			]);
-			$GUI->checkCaseAllowed($go);
-			$result = Ressource::update_outdated($GUI, $GUI->formvars['ressource_id'], $GUI->formvars['method_only']);
-			// header('Content-Type: application/json; charset=utf-8');
-			// echo json_encode($result);
-			echo $result['msg'];
-		} break;
-
 		case 'Metadateneingabe' : {
 			$GUI->sanitize(['oid' => 'int', 'mdfileid' => 'int']);
 			$GUI->metadateneingabe();
@@ -170,7 +184,7 @@ function go_switch_metadata($go){
 
 
 		default : {
-			$GUI->goNotExecutedInPlugins = true;		// in diesem Plugin wurde go nicht ausgeführt
+			$GUI->goNotExecutedInPlugins = true; // in diesem Plugin wurde go nicht ausgeführt
 		}
 	}
 }

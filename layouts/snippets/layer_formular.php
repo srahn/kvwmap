@@ -1392,8 +1392,9 @@ from
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
 			</tr>
 			<?
-			$last_classification = $this->classes[0]['classification'];
-			for($i = 0; $i < count((is_null($this->classes) ? array() : $this->classes)); $i++){
+
+			$last_classification = (($this->classes AND is_array($this->classes) AND array_key_exists(0, $this->classes)) ? $this->classes[0]['classification'] : '');
+			for ($i = 0; $i < count((is_null($this->classes) ? array() : $this->classes)); $i++){
 				if($this->classes[$i]['classification'] != $last_classification){
 					$last_classification = $this->classes[$i]['classification'];
 					if($tr_color == 'gainsboro')$tr_color = '';

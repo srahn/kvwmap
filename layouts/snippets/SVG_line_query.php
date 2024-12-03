@@ -93,7 +93,7 @@ $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= linebuttons($strDrawLine, $strDelLine);
 $buttons_fs .= flurstquerybuttons();
 $buttons_fs .= linebuttons2($strSplitLine, $strReverse);
-$buttons_fs .= transform_buttons($strMoveGeometry);
+$buttons_fs .= transform_buttons($strMoveGeometry, $strRotateGeometry);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);
 $buttons_fs .= coord_input_buttons();
 if($this->user->rolle->gps){

@@ -5,7 +5,8 @@ BEGIN;
   CREATE TABLE metadata.ampel (
     id serial NOT NULL Primary Key,
     farbe character varying,
-    style character varying
+    style character varying,
+    reihenfolge character varying
   );
   INSERT INTO metadata.ampel (id, farbe, style) VALUES
   (1, 'rot', 'background-color: red'),
@@ -27,24 +28,29 @@ BEGIN;
     id serial NOT NULL Primary Key,
     gruppe character varying
   );
-  INSERT INTO metadata.gruppen (gruppe)
-  SELECT DISTINCT gruppe FROM import.kwp_datenbestandsaufnahme ORDER BY gruppe;
+  -- INSERT INTO metadata.gruppen (gruppe)
+  -- SELECT DISTINCT gruppe FROM import.kwp_datenbestandsaufnahme ORDER BY gruppe;
 
   DROP TABLE IF EXISTS metadata.dateninhaber CASCADE;
   CREATE TABLE metadata.dateninhaber (
     id serial NOT NULL Primary Key,
     dateninhaber character varying
   );
-  INSERT INTO metadata.dateninhaber (dateninhaber)
-  SELECT DISTINCT dateninhaber FROM import.kwp_datenbestandsaufnahme ORDER BY dateninhaber;
+  -- INSERT INTO metadata.dateninhaber (dateninhaber)
+  -- SELECT DISTINCT dateninhaber FROM import.kwp_datenbestandsaufnahme ORDER BY dateninhaber;
 
   DROP TABLE IF EXISTS metadata.formate CASCADE;
   CREATE TABLE metadata.formate (
     id serial NOT NULL Primary Key,
     format character varying
   );
-  INSERT INTO metadata.formate (format)
-  SELECT DISTINCT format FROM import.kwp_datenbestandsaufnahme ORDER BY format;
+  -- INSERT INTO metadata.formate (format)
+  -- SELECT DISTINCT format FROM import.kwp_datenbestandsaufnahme ORDER BY format;
+  INSERT INTO metadata.formate (format) VALUES
+    ('ESRI-Shape'),
+    ('CSV'),
+    ('WFS'),
+    ('GML');
 
   DROP TABLE IF EXISTS metadata.ressources CASCADE;
   CREATE TABLE IF NOT EXISTS metadata.ressources

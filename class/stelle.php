@@ -1036,7 +1036,7 @@ class stelle {
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
-		if($GemeindenStelle != NULL){
+		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
@@ -1440,6 +1440,18 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function add layer with $layer_ids to stelle
+	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
+	 * - !$assign_default_values
+	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
+	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * @param array $layer_ids
+	 * @param string $filter
+	 * @param boolean $assign_default_values
+	 * @param string $privileg
+	 * @return integer 1 if success 0 if error
+	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
@@ -1539,7 +1551,7 @@ class stelle {
 						`export_privileg`,
 						postlabelcache,
 						requires,
-						0
+						'0'
 					FROM
 						layer as l
 					WHERE
@@ -2514,17 +2526,17 @@ class stelle {
 
 	function getGemeindeIDs() {
 		$liste = [];
+		$liste['ganze_gemeinde'] = Array();
+		$liste['eingeschr_gemeinde'] = Array();
+		$liste['ganze_gemarkung'] = Array();
+		$liste['eingeschr_gemarkung'] = Array();
+		$liste['ganze_flur'] = Array();
+		$liste['eingeschr_flur'] = Array();
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if ($this->database->result->num_rows > 0) {
-			$liste['ganze_gemeinde'] = Array();
-			$liste['eingeschr_gemeinde'] = Array();
-			$liste['ganze_gemarkung'] = Array();
-			$liste['eingeschr_gemarkung'] = Array();
-			$liste['ganze_flur'] = Array();
-			$liste['eingeschr_flur'] = Array();
 			while ($rs=$this->database->result->fetch_assoc()) {
 				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;
