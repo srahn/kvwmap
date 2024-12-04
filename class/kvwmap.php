@@ -11815,23 +11815,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($result);
 			if ($this->formvars['archivieren']) {
-				# Dokumentpfad ermitteln
-				$document_path = ($layerset[0]['document_path'] != '' ? $layerset[0]['document_path'] . '/' : CUSTOM_IMAGE_PATH);
-
 				# Dateiname für Speicherung im Dokumentpfad ermitteln
 				$document_file = $this->outputfile;
-
-				# Wert für den Eintrag in Dokument-Attribut ermitteln
-				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
+				$pathinfo = pathinfo($document_file);				
 
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
 				for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
 					if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
 						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
 						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
+						$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
+						$document_path = $doc_paths['doc_path'];
 						break;
 					}
 				}
+
+				# Wert für den Eintrag in Dokument-Attribut ermitteln
+				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;				
 
 				# Datei von tmp in das Ziel verschieben
 				if (!is_dir($document_path)) {
