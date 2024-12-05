@@ -11469,7 +11469,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->ddl=$ddl;
     if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
 			$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS, 'Name');
-			$this->stellendaten=$this->user->getStellen('Bezeichnung');
+			$this->stellendaten=$this->user->getStellen(0);
 		}
 		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
 			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(NULL, NULL);
