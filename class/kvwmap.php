@@ -3659,6 +3659,7 @@ echo '			</table>
 			} break;
 			case 'image/jpeg' : case 'image/png' : {
 				header("Content-type: " . $this->mime_type);
+				header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
 				header("Cache-Control: max-age=31536000, immutable");
 				readfile(IMAGEPATH . $this->outputfile);
 			} break;			
@@ -7988,14 +7989,20 @@ echo '			</table>
 		fwrite($fp, $output);
 		fclose($fp);
 
-		if ($preview == true){
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+		if ($preview == true OR $this->formvars['output_filetype'] == 'image/jpeg') {
+			if ($preview == true) {
+				$resize = '-resize 595x1000';
+			}
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
-				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
+				$this->outputfile = $name.'-'.$currenttime.'-0.jpg';;
 			}
 			else{
-				return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
+				$this->outputfile = $name.'-'.$currenttime.'.jpg';
+			}
+			if ($preview == true) {
+				return TEMPPATH_REL.$this->outputfile;
 			}
 		}
   }
