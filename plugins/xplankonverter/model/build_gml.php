@@ -320,6 +320,7 @@ class Gml_builder {
 			# TODO This might not work for XP_Praesentationsobjekt, as it has no attributes on its own and therefore would not have a sequence 4
 			
 			# for XP_AbstraktesPraesentationsobjekt and children
+			$xp_plan_children = array('BP_Plan','FP_Plan','RP_Plan','SO_Plan','LP_Plan');
 			$abstraktes_praesentationsobjekt_children = array('XP_Praesentationsobjekt','XP_PPO','XP_FPO','XP_LPO','XP_TPO');
 			$prefixes_or_signs_to_remove = array('#','GML_','Gml_','gml_','{','}');
 			
@@ -375,7 +376,7 @@ class Gml_builder {
 			# sequence 16 = xp_externereferenz in xp_plan (in v 5.4)
 			# which is followed by texte (to xp_textabschnitt)
 			# and begruendungstexte (to xp_begruendungsabschnitt)
-			if ($sequence_attr == 17) {
+			if ($sequence_attr == 17 && in_array($uml_attribute['origin'], $xp_plan_children)) {
 				$sql = "SELECT gml_id::text FROM xplan_gml.xp_textabschnitt
 								WHERE inverszu_texte_xp_plan IS NOT NULL AND konvertierung_id = " .  $gml_object['konvertierung_id'] .  ";";
 				$xp_textabschnitte_to_xp_plan = pg_query($this->database->dbConn, $sql);

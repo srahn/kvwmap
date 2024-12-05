@@ -260,7 +260,7 @@ function rotate_print_extent(angle){
 					<select name="druckausschnitt" style="width:200px">
 						<option value=""><?php echo $this->strPleaseSelect; ?></option>
 						<?
-							for($i = 0; $i < count($this->Document->ausschnitte); $i++){
+							for($i = 0; $i < count_or_0($this->Document->ausschnitte); $i++){
 								echo '<option value="'.$this->Document->ausschnitte[$i]['id'].'" '.($this->formvars['druckausschnitt'] == $this->Document->ausschnitte[$i]['id'] ? 'selected="true"' : '').'>'.$this->Document->ausschnitte[$i]['name'].'</option>';
 							}
 						?>
@@ -270,7 +270,7 @@ function rotate_print_extent(angle){
 				</div>
 			</div>
 
-<?		if(count($this->Document->activeframe[0]['texts']) > 0){ 	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen  ?>
+<?		if(count_or_0($this->Document->activeframe[0]['texts']) > 0){ 	# Wenn der Druckrahmen Freitexte hat, die leer sind, werden dem Nutzer Textfelder angeboten um die Freitexte selber zu belegen  ?>
 			<div class="print_options_box" style="overflow: auto; max-height: 200px">
 <?			for($j = 0; $j < count($this->Document->activeframe[0]['texts']); $j++){
 					if($this->Document->activeframe[0]['texts'][$j]['text'] == ''){

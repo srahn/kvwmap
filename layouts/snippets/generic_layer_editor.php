@@ -295,7 +295,7 @@ if ($doit == true) { ?>
 					if($layer['attributes']['visible'][$j]){
 						if($layer['attributes']['type'][$j] != 'geometry') {
 							if($layer['attributes']['SubFormFK_hidden'][$j] != 1){
-								echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: right'.($collapsed ? ';display: none' : ''))) . '>';
+								echo '<td id="value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k.'" '.get_td_class_or_style(array('gle_attribute_value group_'.$groupname.' value_'.$layer['Layer_ID'].'_'.$layer['attributes']['name'][$j], $layer['shape'][$k][$layer['attributes']['style']], 'position: relative; text-align: left'.($collapsed ? ';display: none' : ''))) . '>';
 								if(in_array($layer['attributes']['type'][$j], array('date', 'time', 'timestamp'))){
 									echo calendar($layer['attributes']['type'][$j], $layer['Layer_ID'].'_'.$layer['attributes']['name'][$j].'_'.$k, $layer['attributes']['privileg'][$j]);
 								}
@@ -414,6 +414,7 @@ if ($doit == true) { ?>
 										<div id="result_filter_<? echo $layer['Layer_ID'] . '_' . $column_name; ?>" class="gle_result_filter">
 											<? 
 											if (!empty($this->result_values[$layer['Layer_ID']][$column_name])) {
+												natsort($this->result_values[$layer['Layer_ID']][$column_name]);
 												echo '<i class="fa fa-filter" aria-hidden="true" style="color: #bfbfbf"></i>
 															<select multiple="true" class="value_list" style="height: ' . (((count($this->result_values[$layer['Layer_ID']][$column_name]) + 1) * 22) + 6) . 'px;" onchange="filter_results(\'attr_' . $layer['Layer_ID'] . '_' . $column_name . '\', this)">
 																<option value="#all#">alle</option>';

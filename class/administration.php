@@ -212,8 +212,9 @@ class administration{
 					case 'sql' : {
 						$sql = file_get_contents($filepath . $file);
 						if ($sql != '') {
-							$sql = str_replace('$EPSGCODE_ALKIS', EPSGCODE_ALKIS, $sql);
-							$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
+							if (EPSGCODE_ALKIS != -1) {
+								$sql = str_replace(':alkis_epsg', EPSGCODE_ALKIS, $sql);
+							}
 							if ($database_type == 'mysql') {
 								#echo ' Exec SQL';
 								$result = $this->database->exec_commands($sql, NULL, NULL, false, true);	# mysql

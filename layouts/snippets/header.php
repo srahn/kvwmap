@@ -52,7 +52,7 @@
 						class="user-option"
 						style="margin-left: 0px" <?
 						if ($this->user->Stellen['ID'][$id] != $this->user->stelle_id) { ?>
-							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>'" <?
+							onclick="window.location.href='index.php?Stelle_ID=<? echo $this->user->Stellen['ID'][$id]; ?>&browserwidth=' + document.GUI.browserwidth.value + '&browserheight=' + document.GUI.browserheight.value" <?
 						} ?>
 					><? echo $this->user->Stellen['Bezeichnung'][$id];
 					if ($this->user->Stellen['ID'][$id] == $this->user->stelle_id) {

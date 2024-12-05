@@ -804,7 +804,7 @@ class GUI {
 		else {
 			# Vektorlayer
 			if ($layerset['Data'] != '') {
-				if(strpos($layerset['Data'], '$SCALE') !== false){
+				if (strpos($layerset['Data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
 				$layer->data = $layerset['Data'];
@@ -838,15 +838,24 @@ class GUI {
 			}
 			# Setzen des Filters
 			if ($layerset['Filter'] != '') {
-				$layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				if (substr($layerset['Filter'],0,1) == '(') {
+				# 2024-07-28 pk Replace all params in Filter
+				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
+				$layerset['Filter'] = replace_params(
+					$layerset['Filter'],
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language
+				);
+				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
 							$layer->setProcessingKey('NATIVE_FILTER', $layerset['Filter']);
 						}break;
 						case MAPSERVERVERSION >= 700 : {
-							$layer->setProcessing('NATIVE_FILTER='.$layerset['Filter']);
-						}break;
+							$layer->setProcessing('NATIVE_FILTER=' . $layerset['Filter']);
+						} break;
 						default : {
 							$layer->setFilter($layerset['Filter']);
 						}
@@ -1649,7 +1658,6 @@ class user {
 		$this->archived = $rs['archived'];
 		$this->share_rollenlayer_allowed = $rs['share_rollenlayer_allowed'];
 		$this->layer_data_import_allowed = $rs['layer_data_import_allowed'];
-		$this->font_size_factor = $rs['font_size_factor'];
 		$this->tokens = $rs['tokens'];
 		$this->num_login_failed = $rs['num_login_failed'];
 		$this->login_locked_until = $rs['login_locked_until'];
@@ -2319,7 +2327,7 @@ class db_mapObj {
 				rl.`logconsume`,
 				rl.`rollenfilter`,
 				ul.`queryable`,
-				COALESCE(rl.drawingorder, ul.drawingorder) as drawingorder,
+				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
 				ul.legendorder,
 				ul.`minscale`, ul.`maxscale`,
 				ul.`offsite`,
