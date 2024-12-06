@@ -5,7 +5,7 @@
 function toggle_vertices(){
 	save = document.GUI.layer_id.value;
 	document.GUI.layer_id.value = 0;
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 	document.GUI.layer_id.value = save;
 }
 

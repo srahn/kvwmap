@@ -13,13 +13,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	var enclosingForm = <? echo $this->currentform; ?>;
 		
 	update_geometry = function(){
-		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.update_geometry();
 	}
-	
-	show_foreign_vertices = function(){
-		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}
-	
+		
 	adjustHref = function(link){
 		if (link.href.indexOf('index.php?') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
