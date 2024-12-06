@@ -57,7 +57,7 @@ function send(){
 			alert('Geben Sie ein Polygon an.');exit();
 		}
 		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 	}
 	if(document.GUI.loc_x.value == '' && document.GUI.loc_y.value == ''){
@@ -111,28 +111,6 @@ function update_nutzungsart() {
 	if (document.GUI.entwicklungszustand.value == 'SF') {
 		add_options(document.GUI.nutzungsart, new Array('PG', 'KGA', 'FGA', 'CA', 'SPO', 'SG', 'FH', 'WF', 'FP', 'PP', 'LG', 'AB', 'GF', 'SN'), '-- Bitte wählen --');
 	}
-}
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
 }
 
 update_require_attribute = function(attributes, layer_id, value){

@@ -66,28 +66,6 @@
 <script type="text/javascript">
 <!--
 
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
-}
-
 function update_format(){
 	if(document.GUI.export_format.value == 'UKO' || document.GUI.export_format.value == 'OVL'){
 		document.getElementById('attributes_div').style.visibility = 'hidden';
@@ -130,7 +108,7 @@ function data_export() {
 			if(sure == false)return;
 		}
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Exportieren';
 		document.GUI.submit();
@@ -167,7 +145,7 @@ function select_document_attributes(ids){
 function save_settings(){
 	if(document.GUI.setting_name.value != ''){
 		if(document.GUI.newpathwkt.value == '' && document.GUI.newpath.value != ''){
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 		document.GUI.go_plus.value = 'Einstellungen_speichern';
 		document.GUI.submit();

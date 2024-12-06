@@ -833,7 +833,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 				else if(enclosingForm.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
 					if(enclosingForm.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
+						geom = SVG.buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';

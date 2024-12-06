@@ -15,7 +15,7 @@ function save_road(){
 			alert('Geben Sie ein Polygon an.');
 		}
 		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 			document.GUI.go_plus.value = 'strasse_speichern';
 			document.GUI.submit();
 		}
@@ -32,7 +32,7 @@ function save_buffer(){
 			alert('Geben Sie ein Polygon an.');
 		}
 		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 			document.GUI.go_plus.value = 'buffer_speichern';
 			document.GUI.submit();
 		}
@@ -51,33 +51,11 @@ function createbuffer(){
   }
   else{
   	if(top.document.GUI.newpath.value != ""){
-  		newpath = buildwktpolygonfromsvgpath(top.document.GUI.newpath.value);
+  		newpath = SVG.buildwktpolygonfromsvgpath(top.document.GUI.newpath.value);
 			top.document.GUI.buffer_geom.value = newpath;
   		top.ahah("index.php", "go=spatial_processing&path1="+newpath+"&width="+top.document.GUI.buffersize.value+"&operation=buffer_ring&resulttype=svgwkt", new Array(top.document.GUI.result, ""), new Array("setvalue", "execute_function"));
   	}
   }
-}
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
 }
 
 //-->
