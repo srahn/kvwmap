@@ -6,5 +6,6 @@ $strPrintFrame="Druckrohmen: ";
 $strRotationAngle="Dreihoort: ";
 $strPrintDetail="Druckutsnitt";
 $strLoad="Loden";
+$strOutputFileType = "Ausgabe als";
  
 ?>  

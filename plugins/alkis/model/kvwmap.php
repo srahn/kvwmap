@@ -1326,6 +1326,26 @@
     $GUI->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$GUI->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
     $GUI->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
     $GUI->FlurFormObj->outputHTML();
+    if (value_of($GUI->formvars, 'map_flag') != '') {
+      ################# Map ###############################################
+      if (value_of($GUI->formvars, 'geom_from_layer') == '') {
+        $GUI->formvars['geom_from_layer'] = $GUI->formvars['selected_layer_id'];
+      }
+      $saved_scale = $GUI->reduce_mapwidth(10);
+      $GUI->loadMap('DataBase');
+      if (value_of($GUI->formvars, 'CMD') == '' AND $saved_scale != NULL) {
+        $GUI->scaleMap($saved_scale);		# nur, wenn nicht navigiert wurde
+      }
+      $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
+      if (in_array(value_of($GUI->formvars, 'CMD'), ['Full_Extent', 'recentre', 'zoomin', 'zoomout', 'previous', 'next'])) {
+        $GUI->navMap($GUI->formvars['CMD']);
+      }
+      $GUI->drawMap();
+      $GUI->saveMap('');
+      $currenttime=date('Y-m-d H:i:s',time());
+      $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+      ########################################################################
+    }
     $GUI->output();
   };
 
@@ -1339,6 +1359,7 @@
 			$GemeindenStelle['ganze_gemarkung'] = array_flip($GemkgListe['GemkgID']);
 		}
     $formvars = $GUI->formvars;
+    $formvars['user_epsg'] = $GUI->user->rolle->epsg_code;
     $flurstueck=new flurstueck('',$GUI->pgdatabase);
 		$ret=$flurstueck->getNamen($formvars, array_keys($GemeindenStelle['ganze_gemarkung']), $GemeindenStelle['eingeschr_gemarkung'], $GemeindenStelle['ganze_flur'], $GemeindenStelle['eingeschr_flur']);
     if ($ret[0]) {

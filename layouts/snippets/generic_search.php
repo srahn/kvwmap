@@ -108,7 +108,7 @@ function suche(){
 				nogo = 'Geben Sie ein Polygon an oder schließen Sie die Karte';
 			}
 			else{
-				document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+				document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 			}
 		}
 	}
@@ -123,32 +123,6 @@ function suche(){
 		overlay_submit(document.GUI, true);
 		document.GUI.go_plus.value = '';
 	}
-}
-
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	var wkt = '';
-	if(svgpath != '' && svgpath != undefined){
-		wkt = "POLYGON((";
-		parts = svgpath.split("M");
-		for(j = 1; j < parts.length; j++){
-			if(j > 1){
-				wkt = wkt + "),("
-			}
-			koords = ""+parts[j];
-			coord = koords.split(" ");
-			wkt = wkt+coord[1]+" "+coord[2];
-			for(var i = 3; i < coord.length-1; i++){
-				if(coord[i] != ""){
-					wkt = wkt+","+coord[i]+" "+coord[i+1];
-				}
-				i++;
-			}
-		}
-		wkt = wkt+"))";
-	}
-	return wkt;
 }
 
 function update_require_attribute(attributes, layer_id, attributenamesarray, searchmask_number){

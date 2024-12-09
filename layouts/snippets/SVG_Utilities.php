@@ -34,48 +34,48 @@
 		}
 	}
 
-	function update_geometry(){
-		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}
-	
 	function show_vertices(){
-		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.show_vertices();
 	}
-	
+
+	function update_geometry(){
+		SVG.update_geometry();
+	}
+		
 	function coord_input_submit(){
-		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.coord_input_submit();
 	}
 	
 	function add_buffer_submit(){
-		document.getElementById("svghelp").SVGadd_buffer_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_buffer_submit();
 	}	
 	
 	function add_parallel_polygon_submit(){
-		document.getElementById("svghelp").SVGadd_parallel_polygon_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_parallel_polygon_submit();
 	}	
 	
 	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
-		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_ortho_point(world_x, world_y, local_x, local_y, deactivate);
 	}
 	
 	function remove_ortho_points(){
-		document.getElementById("svghelp").SVGremove_ortho_points();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.remove_ortho_points();
 	}
 	
 	function moveback(){	
-		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.moveback();
 	}
 	
 	function startup(){
-		document.getElementById("svghelp").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.startup();
 	}
 	
 	function showtooltip(result, showdata){
-		document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.showtooltip(result, showdata);
 	}	
 
 	function change_box_width_height(){
-		document.getElementById("svghelp").SVGchange_box_width_height();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.change_box_width_height();
 	}	
 
 	var nbh = new Array();
@@ -1343,8 +1343,6 @@ function mouseup(evt){
 
 	coord_input_functions = true;
 	
-	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function dec2dms(number, coordtype){
 		number = number+"";
 		part1 = number.split(".");
@@ -1463,10 +1461,6 @@ function mouseup(evt){
 
 	ortho_point_functions = true;
 	
-	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	
-	top.document.getElementById("svghelp").SVGremove_ortho_points = remove_ortho_points;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function ortho_point(){
 		enclosingForm.last_doing.value = "ortho_point";
 		if(enclosingForm.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
@@ -1647,8 +1641,6 @@ function mouseup(evt){
 
 	pointfunctions = true;
 	
-	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function rotate_point_direction(){
 		angle = 360 - enclosingForm.angle.value.replace(",", ".");
 		custom_angle = top.document.getElementById("custom_angle");
@@ -1689,8 +1681,6 @@ function mouseup(evt){
 	$linefunctions = '
 
 	linefunctions = true;
-
-	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
 		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
@@ -2351,8 +2341,6 @@ function mouseup(evt){
 
 	boxfunctions = true;
 
-	top.document.getElementById("svghelp").SVGchange_box_width_height = change_box_width_height;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function draw_box_on() {
 	 	clear_geometry();
 		enclosingForm.last_doing.value = "draw_box";
@@ -2424,9 +2412,6 @@ function mouseup(evt){
 
 		bufferfunctions = true;
 		
-		top.document.getElementById("svghelp").SVGadd_parallel_polygon_submit = add_parallel_polygon_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-		top.document.getElementById("svghelp").SVGadd_buffer_submit = add_buffer_submit;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 		function add_buffer(){		
 			var Msg = top.$("#message_box");
 			Msg.show();
@@ -2581,8 +2566,6 @@ function mouseup(evt){
 	$polygonfunctions = '
 
 	polygonfunctions = true;
-
-	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
 		if(enclosingForm.secondline != undefined && enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
@@ -3550,8 +3533,6 @@ $vertex_catch_functions = '
 
 	//-------------------- Punktfang -----------------------------
 
-	top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function toggle_vertices(){
 		remove_foreign_vertices();
 		if(enclosingForm.punktfang.checked){
@@ -3609,9 +3590,7 @@ $vertex_catch_functions = '
 		}  
 	}
 
-	top.document.getElementById("svghelp").SVGshow_foreign_vertices = show_foreign_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-	function show_foreign_vertices(){
+	function show_vertices(){
 		if(enclosingForm.vertices.value != ""){
 			var parent = document.getElementById("foreignvertices");
 			circle = new Array();

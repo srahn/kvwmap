@@ -1096,7 +1096,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnittswahl_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1105,7 +1105,7 @@ function go_switch($go, $exit = false) {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
