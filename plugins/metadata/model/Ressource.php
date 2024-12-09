@@ -237,12 +237,12 @@ class Ressource extends PgObject {
 
       foreach ($download_urls AS $download_url) {
         $this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
-        if ($only_missing AND !file_exists($download_path . basename($download_url))) {
+        if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
           copy($download_url, $download_path . basename($download_url));
-          if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
-            unlink($download_path . basename($download_url));
-            $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
-          }
+          // if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
+          //   unlink($download_path . basename($download_url));
+          //   $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+          // }
         }
       }
     }
