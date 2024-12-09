@@ -2113,6 +2113,10 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
+		if (value_of($formvars, 'newpathwkt') != ''){
+			# Suche im Suchpolygon
+			$sql .=' AND st_intersects(f.wkb_geometry, (st_transform(st_geomfromtext(\'' . $formvars['newpathwkt'] . '\', ' . $formvars['user_epsg'] . '), ' . EPSGCODE_ALKIS . ')))';
+		}
 		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){

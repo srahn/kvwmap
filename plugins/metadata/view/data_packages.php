@@ -27,6 +27,9 @@
       <div class="dpt-cell dpt-head-cell dpt-package">
         Datenpaket
       </div>
+      <div class="dpt-cell dpt-head-cell dpt-inhaber">
+        Inhaber
+      </div>
       <div class="dpt-cell dpt-head-cell dpt-status">
         Status
       </div>
@@ -53,15 +56,18 @@
           </a>
           <span class="metadata-tooltip" data-tooltip="Ressource ID: <?php echo $package->get('ressource_id'); ?> Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></span>
         </div>
+        <div class="dpt-cell dpt-inhaber">
+          <span id="inhaber_span_<? echo $package->get('ressource_id'); ?>"><a href="javascript:message([{ type: 'info', msg: '<? echo $package->get_inhaber_info(); ?>'}])"><?php echo $package->get('abk') ?: '' ; ?></a></span>
+        </div>
         <div class="dpt-cell dpt-status">
           <span id="status_span_<? echo $package->get('ressource_id'); ?>"><?php echo $package->get('status') ?: '' ; ?></span><span id="package_id_span_<? echo $package->get('ressource_id'); ?>"></span>
         </div>
         <div class="dpt-cell-right dpt-action">
-          <input id="button_-1_<? echo $package->get('ressource_id'); ?>" type="button" value="Abbrechen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button">
-          <input id="button_1_<? echo $package->get('ressource_id'); ?>" type="button" value="Neu erstellen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button order_data_package_button">
-          <input id="button_2_<? echo $package->get('ressource_id'); ?>" type="button" value="Zurücknehmen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button">
+          <input id="button_-1_<? echo $package->get('ressource_id'); ?>" type="button" value="Abbrechen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button" title="Das Packen dieses Paketes abbrechen.">
+          <input id="button_1_<? echo $package->get('ressource_id'); ?>" type="button" value="Neu erstellen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button order_data_package_button" title="Dieses Datenpakete zum Paken beauftragen.">
+          <input id="button_2_<? echo $package->get('ressource_id'); ?>" type="button" value="Zurücknehmen" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button cancle_data_package_button" title="Die Beauftragung zum Packen für dieses Paket zurücknehmen.">
           <span id="button_3_<? echo $package->get('ressource_id'); ?>" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button progress_data_package_span">in Arbeit</span>
-          <input id="button_4_<? echo $package->get('ressource_id'); ?>" type="button" value="Download" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button download_data_package_button">
+          <input id="button_4_<? echo $package->get('ressource_id'); ?>" type="button" value="Download" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="dpt-button download_data_package_button" title="Dieses Datenpaket runterladen.">
         </div>
       </div>
       <div style="clear: both;"></div><?php
@@ -74,15 +80,15 @@
     </div>
 
     <div class="dpt-footer-cell">
-      <input id="order_data_packages_button" type="button" name="Neu erstellen" value="Neu erstellen"/>
+      <input id="order_data_packages_button" type="button" name="Neu erstellen" value="Neu erstellen" title="Alle ausgewählten Datenpakete die noch nicht zum Download zur Verfügung stehen zum Packen beauftragen. Schon gepackte Pakete können erst neu erstellt werden wenn sie zuvor gelöscht worden sind."/>
     </div>
 
     <div class="dpt-footer-cell">
-      <input id="cancel_data_packages_button" type="button" name="Zurücknehmen" value="Zurücknehmen"/>
+      <input id="cancel_data_packages_button" type="button" name="Zurücknehmen" value="Zurücknehmen" title="Die Aufträge zum Packen für alle ausgewählten Datenpakete die noch nicht gepackt sind zurücknehmen."/>
     </div>
 
     <div class="dpt-footer-cell">
-      <input id="delete_data_packages_button" type="button" name="Löschen" value="Löschen"/>
+      <input id="delete_data_packages_button" type="button" name="Löschen" value="Löschen" title="Alle ausgewählten Datenpakete, die zum Download zur Verfügung stehen löschen. Sie können neu beauftragt werden."/>
     </div>
 
     <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
@@ -105,6 +111,7 @@
         type="button"
         name="download_bundle_package"
         value="Runterladen"
+        title="Das Gesamtpaket runterladen."
         style="display: <? echo (file_exists($bundle_package_path . $bundle_package_filename) ? 'inline' : 'none'); ?>"
         onclick="downloadBundlePackage()"
       />
@@ -148,12 +155,13 @@
     });
 
     document.getElementById('order_data_packages_button').addEventListener('click', function() {
-      // console.log('Click on order_data_packages_button');
+      console.log('Click on order_data_packages_button');
       document.querySelectorAll("input[type='checkbox'].data_package_checkbox").forEach((chk) => {
         if (chk.checked) {
-          // console.log('Checkbox %o is checked', chk);
+          console.log('Checkbox %o is checked', chk);
           const ressource_id = parseInt(chk.dataset.ressource_id);
           const package = dataPackages.get(ressource_id);
+          console.log(`Pack_status_id of ressouce_id ${ressource_id}: ${package.get('pack_status_id')}`);
           if (package.get('pack_status_id') == 1) {
             orderDataPackage(ressource_id);
           }
@@ -256,11 +264,9 @@
         throw new Error(`Response status: ${response.status}`);
       } 
       const json = await response.json();
+      let msg_type = 'notice';
       if (!json.success) {
-        message([{
-          'type': 'error',
-          'msg': json.msg
-        }]);
+        msg_type = 'error';
       }
       else {
         const dataPackage = dataPackages.get(ressource_id);
@@ -272,6 +278,10 @@
         dataPackage.data.created_from = null;
         dataPackage.updateGUI();
       }
+      message([{
+        'type': msg_type,
+        'msg': json.msg
+      }]);
     } catch (error) {
       console.error(error.message);
     }
@@ -365,6 +375,10 @@
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
+        message([{
+          'type': 'error',
+          'msg': response.status
+        }]);
       }
       const json = await response.json();
       if (!json.success) {

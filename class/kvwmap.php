@@ -3659,6 +3659,7 @@ echo '			</table>
 			} break;
 			case 'image/jpeg' : case 'image/png' : {
 				header("Content-type: " . $this->mime_type);
+				header("Content-Disposition: attachment; filename=\"" . $this->outputfile."\"");
 				header("Cache-Control: max-age=31536000, immutable");
 				readfile(IMAGEPATH . $this->outputfile);
 			} break;			
@@ -7988,14 +7989,20 @@ echo '			</table>
 		fwrite($fp, $output);
 		fclose($fp);
 
-		if ($preview == true){
-			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg');
-			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten -resize 595x1000 '.$dateipfad.$name.'-'.$currenttime.'.jpg';
+		if ($preview == true OR $this->formvars['output_filetype'] == 'image/jpeg') {
+			if ($preview == true) {
+				$resize = '-resize 595x1000';
+			}
+			exec(IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg');
+			#echo IMAGEMAGICKPATH.'convert -density 300x300 '.$dateipfad.$dateiname.'[0] -background white -flatten ' . $resize . ' '.$dateipfad.$name.'-'.$currenttime.'.jpg';
 			if (!file_exists(IMAGEPATH.$name.'-'.$currenttime.'.jpg')){
-				return TEMPPATH_REL.$name.'-'.$currenttime.'-0.jpg';
+				$this->outputfile = $name.'-'.$currenttime.'-0.jpg';;
 			}
 			else{
-				return TEMPPATH_REL.$name.'-'.$currenttime.'.jpg';
+				$this->outputfile = $name.'-'.$currenttime.'.jpg';
+			}
+			if ($preview == true) {
+				return TEMPPATH_REL.$this->outputfile;
 			}
 		}
   }
@@ -11470,7 +11477,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->ddl=$ddl;
     if(in_array($this->Stelle->id, $admin_stellen)){										# eine Admin-Stelle darf alle Layer und Stellen sehen
 			$this->layerdaten = $mapdb->get_layers_of_type(MS_POSTGIS, 'Name');
-			$this->stellendaten=$this->user->getStellen('Bezeichnung');
+			$this->stellendaten=$this->user->getStellen(0);
 		}
 		else{																																# eine normale Stelle nur die eigenen Layer und die eigene Stelle
 			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(NULL, NULL);
@@ -11794,7 +11801,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				";
 			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
 			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-			$ret = $layerdb->execSQL($sql,4, 1);
+			$ret = $layerdb->execSQL($sql, 4, 1);
 			if (!$ret[0]) {
 				while ($rs=pg_fetch_array($ret[1])) {
 					$result[] = $rs;
@@ -11815,23 +11822,23 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			# nur wenn kein PDF-Objekt aus einem übergeordneten Layer übergeben wurde, PDF anzeigen
 			$this->outputfile = basename($result);
 			if ($this->formvars['archivieren']) {
-				# Dokumentpfad ermitteln
-				$document_path = ($layerset[0]['document_path'] != '' ? $layerset[0]['document_path'] . '/' : CUSTOM_IMAGE_PATH);
-
 				# Dateiname für Speicherung im Dokumentpfad ermitteln
 				$document_file = $this->outputfile;
-
-				# Wert für den Eintrag in Dokument-Attribut ermitteln
-				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
+				$pathinfo = pathinfo($document_file);				
 
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
 				for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
 					if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
 						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
 						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
+						$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
+						$document_path = $doc_paths['doc_path'];
 						break;
 					}
 				}
+
+				# Wert für den Eintrag in Dokument-Attribut ermitteln
+				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;				
 
 				# Datei von tmp in das Ziel verschieben
 				if (!is_dir($document_path)) {
@@ -13248,7 +13255,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$users = put_value_first($users, $Stelle->default_user_id);
 				}
 				for ($i = 0; $i < count($users); $i++) {
-					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, ((i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
+					$this->user->rolle->setRolle($users[$i], $Stelle->id, $Stelle->default_user_id, (($i == 0 AND count($selectedparents) > 0) ? $selectedparents[0] : null));	# Hinzufügen einer neuen Rolle (selektierte User zur Stelle)
 					$this->user->rolle->setMenue($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der selektierten Obermenüs zur Rolle
 					$this->user->rolle->setLayer($users[$i], $Stelle->id, $Stelle->default_user_id);	# Hinzufügen der Layer zur Rolle
 					$this->user->rolle->setGroups($users[$i], $Stelle->id, $Stelle->default_user_id, $layer);
@@ -13257,6 +13264,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->selected_user->checkstelle();
 				}
 				$Stelle->updateLayerParams();
+				$this->update_layer_parameter_in_rollen($Stelle->id);
 				if ($ret[0]) {
 					$this->Meldung = $ret[1];
 				}
@@ -18806,7 +18814,8 @@ class db_mapObj{
 	/**
 	 * Function query and set required attribute values pending on form element type
 	 */
-	function add_attribute_values($attributes, $database, &$query_result, $withvalues, $stelle_id, $all_options = false) {
+	// function add_attribute_values($attributes, $database, &$query_result, $withvalues, $stelle_id, $all_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < count_or_0($attributes['name'] ?: []); $i++) {
@@ -18905,7 +18914,11 @@ class db_mapObj{
 											foreach ($query_result as $k => $record) { # bei Erfassung eines neuen DS hat $k den Wert -1
 												$options = $attributes['options'][$i];
 												foreach ($attributes['req'][$i] as $attributename) {
+													#	Ein <requires>-Tag in Hochkommas kann immer durch den Attributwert in Hochkommas ersetzt werden. 
+													# Das ist z.B. dafür notwendig , wenn sich auch bei leerem Attributwert Auswahlmöglichkeiten ergeben sollen.
+													$options = str_replace("'<requires>" . $attributename . "</requires>'", "'" . $query_result[$k][$attributename] . "'", $options);
 													if ($query_result[$k][$attributename] != '') {
+														# Wenn der <requires>-Tag nicht in Hochkommas steht, soll nur ersetzt werden, wenn der Attributwert nicht leer ist.
 														if (is_array($query_result[$k][$attributename])) {
 															$query_result[$k][$attributename] = implode("','", $query_result[$k][$attributename]);
 														}

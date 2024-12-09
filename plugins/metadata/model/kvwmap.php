@@ -3,10 +3,12 @@
 	// metadata_cancel_data_package
 	// metadata_create_bundle_package
 	// metadata_create_data_package
+	// metadata_create_metadata_document
 	// metadata_delete_bundle_package
 	// metadata_delete_data_package
 	// metadata_download_bundle_package
 	// metadata_download_data_package
+	// metadata_download_metadata_document
 	// metadata_order_bundle_package
 	// metadata_order_data_package
 	// metadata_reorder_data_packages
@@ -158,10 +160,10 @@
 			$package->update_attr(array('pack_status_id = 3'));
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
-			$exportpath = $package->get_export_path();
-			if (!file_exists($exportpath)) {
-				$GUI->debug->show('Lege Verzeichnis ' . $exportpath . ' an, weil es noch nicht existiert!', false);
-				mkdir($exportpath, 0777, true);
+			$export_path = $package->get_export_path();
+			if (!file_exists($export_path)) {
+				$GUI->debug->show('Lege Verzeichnis ' . $export_path . ' an, weil es noch nicht existiert!', false);
+				mkdir($export_path, 0777, true);
 			}
 			$result = $package->get_export_format();
 			if (!$result['success']) {
@@ -176,7 +178,7 @@
 				// mit ogr2ogr exportieren und zippen
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
-				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $exportpath, $exportfilename, true);
+				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
 				if (!$result['success']) {
 					// Fehler loggen
 					$result['msg'] = 'Fehler beim Exportieren des Layers ID: ' . $package->get('layer_id') . ' des Paket ID: ' . $package->get_id() . ' für Ressource ID: ' . $package->get('ressource_id') . "\n" . $result['msg'];
@@ -188,18 +190,27 @@
 			}
 			else {
 				// Text-Datei mit Links zum Dienst anlegen und Zip.
-				if (!is_dir($exportpath)) {
-					mkdir($exportpath);
+				if (!is_dir($export_path)) {
+					mkdir($export_path);
 				}
-				file_put_contents($exportpath . $exportfilename . '.txt', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
-				exec(ZIP_PATH . ' -j ' . rtrim($exportpath, '/') . ' ' . $exportpath . '*');
+				file_put_contents($export_path . $exportfilename . '.txt', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
+				exec(ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*');
 			}
 
 			// Metadatendatei erzeugen und in ZIP packen
-
+			// von Ressource des Datenpaketes
+			$export_file = $package->get_export_file();
+			exec(ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf');
 			// An Ressourcen hängende Dokumente in ZIP packen
+			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
+			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
 
-			// Wenn ZIP-Datei existiert und etwas drin ist, Verzeichnis löschen. (Aufräumen)
+			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
+
+			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
+			$package->delete_export_path();
+			chgrp($export_file, 'gisadmin');
+			chmod($export_file, 0664);
 
 			$package->update_attr(array('pack_status_id = 4'));
 
@@ -215,6 +226,29 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Function create a metadata document for layer $selected_layer_id
+	 */
+	$GUI->metadata_create_metadata_document = function($layer_id) use ($GUI) {
+		if ($layer_id == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter layer_id ist leer!'
+			);
+		}
+		// ToDo pk: set metadata from layer and stelle metadata
+		$ressource = Ressource::find_by_layer_id($GUI, $layer_id);
+		if ($ressource->get_id()) {
+			// ToDo pk: set additional metadata from ressource data
+			
+		}
+
+		return array(
+			'success' => false,
+			'msg' => 'Funktion noch nicht implementiert!'
+		);
 	};
 
 	/**
@@ -315,12 +349,11 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
 			$export_path = $package->get_export_path();
 			// Dateien im Verzeichnis löschen
-			array_map('unlink', glob($export_path . '*.*'));
-			// Verzeichnis löschen
-			rmdir($export_path);
+			$package->update_attr(array('pack_status_id = 3'));
+			$package->delete_export_path();
+			$package->delete_export_file();
 			$package_id = $package->get_id();
 			$package->delete();
 
@@ -409,6 +442,48 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Function responds metadata document of layer with $selected_layer_id
+	 */
+	$GUI->metadata_download_metadata_document = function($layer_id) use ($GUI) {
+		if ($layer_id == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter layer_id ist leer!'
+			);
+		}
+		$layer = Layer::find_by_id($GUI, $layer_id);
+		if ($layer->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es wurde kein Layer mit der id: ' . $layer_id . ' gefunden!'
+			);
+		}
+		$metadata_file = METADATA_DATA_PATH . 'metadaten/' . $layer_id . '.pdf';
+		if (!file_exists($metadata_file)) {
+			$response = $GUI->metadata_create_metadata_document($layer_id);
+			if (!$response['success']) {
+				return array(
+					'success' => false, 
+					'msg' => $response['msg']
+				);
+			}
+		}
+		if (!file_exists($metadata_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die Metadatendatei ' . $metadata_file . ' wurde nicht auf dem Server gefunden!'
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Metadatendatei gefunden.',
+			'downloadfile' => $metadata_file,
+			'filename' => $layer->get('Name')
+		);
 	};
 
 	/**
