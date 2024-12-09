@@ -11794,7 +11794,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				";
 			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
 			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-			$ret = $layerdb->execSQL($sql,4, 1);
+			$ret = $layerdb->execSQL($sql, 4, 1);
 			if (!$ret[0]) {
 				while ($rs=pg_fetch_array($ret[1])) {
 					$result[] = $rs;
@@ -18806,7 +18806,8 @@ class db_mapObj{
 	/**
 	 * Function query and set required attribute values pending on form element type
 	 */
-	function add_attribute_values($attributes, $database, &$query_result, $withvalues, $stelle_id, $all_options = false) {
+	// function add_attribute_values($attributes, $database, &$query_result, $withvalues, $stelle_id, $all_options = false) {
+	function add_attribute_values($attributes, $database, $query_result, $withvalues, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
 		for ($i = 0; $i < count_or_0($attributes['name'] ?: []); $i++) {

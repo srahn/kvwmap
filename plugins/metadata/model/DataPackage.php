@@ -21,6 +21,7 @@ class DataPackage extends PgObject {
 			r.id AS ressource_id,
 			r.bezeichnung,
 			r.layer_id,
+			r.ansprechperson,
 			p.id,
 			p.stelle_id,
 			p.pack_status_id,
@@ -28,7 +29,10 @@ class DataPackage extends PgObject {
 			l.connectiontype,
 			l.datentyp,
 			p.created_at,
-			p.created_from
+			p.created_from,
+			p.updated_at,
+			i.dateninhaber,
+			i.abk
 		";
 		$this->from = "
 			metadata.ressources r LEFT JOIN
@@ -39,7 +43,8 @@ class DataPackage extends PgObject {
 					metadata.data_packages
 			) p ON r.id = p.ressource_id LEFT JOIN
 			metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
-			kvwmap.layer l ON r.layer_id = l.layer_id
+			kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
+			metadata.dateninhaber i ON r.dateninhaber_id = i.id
 		";
 		$this->where = "
 			r.use_for_datapackage AND
@@ -84,7 +89,8 @@ class DataPackage extends PgObject {
 						stelle_id = " . $stelle_id . "
 				) p ON r.id = p.ressource_id LEFT JOIN
 				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
-				kvwmap.layer l ON r.layer_id = l.layer_id
+				kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
+				metadata.dateninhaber i ON r.dateninhaber_id = i.id
 			",
 			'where' => $package->where . " AND
 				(
@@ -175,6 +181,39 @@ class DataPackage extends PgObject {
 	function get_export_path() {
 		$this->export_path = METADATA_DATA_PATH . 'datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
 		return $this->export_path;
+	}
+
+	function get_export_file() {
+		$export_path = $this->get_export_path();
+		$this->export_file = (substr($export_path, -1, 1) == '/' ? substr($export_path, 0, -1) : $export_path) . '.zip';
+		return $this->export_file;
+	}
+
+	function get_inhaber_info() {
+		$infos = array();
+		if ($this->get('dateninhaber') != '') {
+			$infos[] = 'Dateninhaber: ' . $this->get('dateninhaber');
+		}
+		if ($this->get('abk') != '') {
+			$infos[] = 'Abkürzung: ' . $this->get('abk');
+		}
+		if ($this->get('ansprechperson') != '') {
+			$infos[] = 'Ansprechperson: ' . $this->get('ansprechperson');
+		}
+		return implode('<br>', $infos);
+	}
+
+	function delete_export_path() {
+		$export_path = $this->get_export_path();
+		array_map('unlink', glob($export_path . '*.*'));
+		rmdir($export_path);
+		return $export_path;
+	}
+
+	function delete_export_file() {
+		$export_file = $this->get_export_file();
+		unlink($export_file);
+		return $export_file;
 	}
 
 	/**

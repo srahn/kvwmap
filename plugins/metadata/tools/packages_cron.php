@@ -97,8 +97,18 @@
 
         // find if any ressource has pack status in progress
         if ($package_in_progress = DataPackage::find_first_by_status($GUI, 3)) {
-          $err_msgs[] = 'Auftrag abgelehnt. Es wird gerade ein anderes Packet Id: ' . $package_in_progress->get_id() . ' gepackt.';
-          break;
+          $updated_at = strtotime($package_in_progress->get('updated_at'));
+          $now = time();
+          if ($now - $updated_at > 1800) {
+            // cancle packing for package in progress
+            $msg = 'Fehler beim Exportieren des Layers ID: ' . $package_in_progress->get('layer_id') . "\nDas Packen wurde " . date('d.m.Y H:i:s', $updated_at) . ' beauftragt und ist ' . date('d.m.Y H:i:s', $now) . ' noch nicht fertig. Abbruch weil es über 30 min gedauert hat.';
+            $package_in_progress->log($msg);
+            $package_in_progress->update_attr(array('pack_status_id = -1'));
+          }
+          else {
+            $err_msgs[] = 'Auftrag abgelehnt. Es wird gerade ein anderes Packet Id: ' . $package_in_progress->get_id() . ' gepackt.';
+            break;
+          }
         }
 
         // find registered packages to pack

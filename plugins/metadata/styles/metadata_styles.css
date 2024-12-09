@@ -70,9 +70,14 @@
   width: 50%;
 }
 
+.dpt-inhaber {
+  width: 10%
+}
+
 .dpt-status {
   width: 15%;
 }
+
 
 .dpt-action {
   width: 10%;
