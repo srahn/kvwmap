@@ -305,7 +305,14 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 form {
 	margin: 0;
 	padding: 0;
-} 
+}
+
+hr {
+	margin: 7px; 
+	background-color: #777; 
+	height: 1px; 
+	border-width: 0;
+}
 
 .fett{
 	font-family: SourceSansPro2;
