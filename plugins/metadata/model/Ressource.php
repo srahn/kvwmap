@@ -114,6 +114,7 @@ class Ressource extends PgObject {
 
 		if (count($ressources) > 0) {
 			$ressource = $ressources[0];
+			// echo '<br>Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')';
 			$result = $ressource->run_update($method_only);
 			$ressource->log($result, true);
 		}
