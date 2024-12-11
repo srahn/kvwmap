@@ -149,11 +149,15 @@ body {
 .collapsed {
 	visibility: collapse;
   height: 0;
+	padding: 0 !important;
 }
 
 .collapsed *{
 	visibility: collapse !important;
 	margin: 0 !important;
+	width: 0;
+  display: block;
+  padding: 0;
 }
 
 #copyrights_div table td {
