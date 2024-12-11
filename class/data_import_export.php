@@ -962,6 +962,17 @@ class data_import_export {
 		return $ret;
 	}
 
+	/**
+	 * Function import the file $importfile into postgres $database in $schema.$tablename
+	 * with more options
+	 * @return int Should return the result_code $ret of exec but:
+	 *  1) when running ogr in web container
+	 *  1.1) int return status of command running with exec or
+	 *  1.2) string with msg in error case
+	 *  2) when running with http on gdal container
+	 *  2.1) exitCode of output of curl_exec or
+	 *  2.2) echo exitCode of output of curl_exec and exit
+	 */
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		// echo '<br>Function ogr2ogr_import';
 		$command = '';
@@ -1006,7 +1017,7 @@ class data_import_export {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
 			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 			$output = array();
-			#echo '<p>command: ' . $command;
+			// echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {

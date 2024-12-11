@@ -1,4 +1,5 @@
 <h2 style="margin-top: 20px;">crontab gisadmin</h2>
+/var/www/cron/gisadmin/<? echo substr(APPLVERSION, 0, -1); ?>
 <div style="
 	color: white;
 	background-color: #000;
@@ -16,6 +17,7 @@
 </div>
 <p>
 <h2 style="margin-top: 20px;">crontab root</h2>
+/var/www/cron/root/<? echo substr(APPLVERSION, 0, -1); ?>
 <div style="
 	color: white;
 	background-color: #000;

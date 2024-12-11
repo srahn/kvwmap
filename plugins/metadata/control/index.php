@@ -3,14 +3,15 @@
 // metadata_cancel_data_package
 // metadata_create_bundle_package
 // metadata_create_data_package
-// metadata_create_data_packages
+// metadata_create_metadata_document
 // metadata_delete_bundle_package
 // metadata_delete_data_package
 // metadata_download_bundle_package
 // metadata_download_data_package
+// metadata_download_metadata_document
 // metadata_order_bundle_package
 // metadata_order_data_package
-// metadata_reorder_data_package
+// metadata_reorder_data_packages
 // metadata_show_data_packages
 // metadata_update_outdated
 // Metadaten_Auswaehlen_Senden
@@ -51,6 +52,14 @@ function go_switch_metadata($go){
 			]);
 
 			$response = $GUI->metadata_create_data_package($GUI->formvars['package_id']);
+			echo json_encode($response);
+		} break;
+
+		case 'metadata_create_metadata_document' : {
+			$GUI->sanitize([
+				'layer_id' => 'integer'
+			]);
+			$response = $GUI->metadata_create_metadata_document($GUI->formvars['layer_id']);
 			echo json_encode($response);
 		} break;
 
@@ -106,6 +115,25 @@ function go_switch_metadata($go){
 			header('Pragma: public');
 			header('Content-Length: ' . filesize($downloadfile));
 			readfile($downloadfile);
+		} break;
+
+		case 'metadata_download_metadata_document' : {
+			$GUI->sanitize([
+				'layer_id' => 'integer'
+			]);
+			$response = $GUI->metadata_download_metadata_document($GUI->formvars['layer_id']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $response['msg'];
+				$GUI->main = '../../plugins/metadata/view/download_error.php';
+				$GUI->output();
+			}
+			header($_SERVER["SERVER_PROTOCOL"] . " 200 OK");
+			header("Cache-Control: public"); // needed for internet explorer
+			header("Content-Type: application/pdf");
+			header("Content-Transfer-Encoding: Binary");
+			header("Content-Length:" . filesize($response['downloadfile']));
+			header('Content-Disposition: attachment; filename=' . $response['filename'] . '.pdf');
+			readfile($response['downloadfile']);
 		} break;
 
 		case 'metadata_order_bundle_package': {
