@@ -12826,6 +12826,28 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
 		$this->database->execSQL($sql,4, 1);
+		$sql = "
+		DELETE FROM 
+			layer_attributes2stelle 
+		WHERE 
+			concat(stelle_id, ' ' , layer_id, ' ' , attributename) IN 
+				(
+					SELECT 
+						concat(t2.stelle_id, ' ', t2.layer_id, ' ', t2.attributename) 
+					FROM
+						layer_attributes2stelle AS t2 
+						LEFT JOIN	layer_attributes2stelle AS t1 ON 
+							t1.attributename = t2.attributename AND 
+							t1.stelle_id = t2.stelle_id AND 
+							t1.layer_id = " . $this->formvars['from_layer_id'] . "
+					WHERE
+						t2.layer_id = " . $this->formvars['to_layer_id'] . " AND 
+						t1.privileg IS NULL
+				)
+		";
+		#echo '<br>Sql zur Übernahme der Attributrechte: ' . $sql;
+		$this->debug->write("<p>file:stelle.php class:gui->Attributeditor_takeover_layer_attributes_privileges - Übernehmen der Stellen-Layerrechte von einem Layer zu einem anderen:<br>" . $sql, 4);
+		$this->database->execSQL($sql,4, 1);
 	}
 
 	/*
