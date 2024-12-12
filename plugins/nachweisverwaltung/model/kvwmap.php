@@ -330,8 +330,8 @@
 				$GUI->loadMap('DataBase');
 			}
 			if($saved_scale != NULL)$GUI->scaleMap($saved_scale);		# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
-      # zoomToMaxLayerExtent
-			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);
+      # zoom_to_max_layer_extent
+			if($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);
       $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
 	    if(!$GUI->formvars['geom_from_layer']){
 	      $layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
@@ -1384,7 +1384,7 @@
       $GUI->formvars['newpathwkt'] = $nachweis->document['wkt_umring'];
       $GUI->formvars['pathwkt'] = $GUI->formvars['newpathwkt'];
     }
-		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoomToMaxLayerExtent($GUI->formvars['zoom_layer_id']);	# zoomToMaxLayerExtent
+		elseif($GUI->formvars['zoom_layer_id'] != '')$GUI->zoom_to_max_layer_extent($GUI->formvars['zoom_layer_id']);	# zoom_to_max_layer_extent
 		
 		if($GUI->formvars['FlurstKennz'] != ''){		# über die Flurstückssuche gefundene Flurstücke -> Geometrie als Suchpolygon übernehmen
 			$GUI->formvars['suchpolygon'] = $GUI->pgdatabase->getGeomfromFlurstuecke($GUI->formvars['FlurstKennz'], $GUI->user->rolle->epsg_code);

@@ -2099,9 +2099,9 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "zoomToMaxLayerExtent" : {
+			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
-				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
