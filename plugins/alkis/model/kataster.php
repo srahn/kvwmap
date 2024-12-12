@@ -79,9 +79,7 @@ class Flur {
       $ret[1]='Fehler bei der Abfrage der Datenbank.'.$ret[1];
     }
     else {
-      if (pg_num_rows($ret[1])>0) {
-        $ret[1]=pg_fetch_assoc($ret[1]);
-      }
+      $ret[1]=pg_fetch_assoc($ret[1]);
     }
     return $ret;
   }
@@ -154,7 +152,7 @@ class adresse {
   
 	function getStrNamefromID($GemID,$StrID) {
     $ret=$this->database->getStrNameByID($GemID,$StrID);
-    if ($ret[0]==0 AND @count($ret[1])>0) {
+    if ($ret[0]==0 AND count_or_0($ret[1])>0) {
       # liefert die erste gefundene Strasse zurück
       return $ret[1];
     }
@@ -1023,11 +1021,14 @@ class flurstueck {
 					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
-					n.kulturart as objart, 
-					n.kulturart, 
+					n.nutzungsart as objart, 
+					n.nutzungsart, 
 					n.bodenart, 
-					n.entstehungsartoderklimastufewasserverhaeltnisse, 
-					n.zustandsstufeoderbodenstufe, 
+					n.entstehungsart, 
+					n.klimastufe, 
+					n.wasserverhaeltnisse, 
+					n.zustandsstufe, 
+					n.bodenstufe, 
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
@@ -1051,11 +1052,13 @@ class flurstueck {
 					a.flaeche > 0.01 
 					" .	$this->database->build_temporal_filter(array('n')) . "
 				) as n 
-				LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
-				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
-				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
-				LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
-				LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+				LEFT JOIN alkis.ax_nutzungsart_bodenschaetzung k ON k.wert = n.nutzungsart 
+				LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert = n.bodenart 
+				LEFT JOIN alkis.ax_entstehungsart e1 ON e1.wert = n.entstehungsart[1] 
+				LEFT JOIN alkis.ax_klimastufe e2 ON e2.wert = n.klimastufe
+				LEFT JOIN alkis.ax_wasserverhaeltnisse e3 ON e3.wert = n.wasserverhaeltnisse
+				LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
+				LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
 				LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
 				GROUP BY amtlicheflaeche, flstflaeche, n.wert, objart, label
 			";
@@ -1090,7 +1093,7 @@ class flurstueck {
 			SELECT 
 				amtlicheflaeche, 
 				round(sum(fl_geom / flstflaeche * amtlicheflaeche)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END) AS flaeche, 
-				sum(fl_geom), 
+				sum(fl_geom) as fl_geom, 
 				flstflaeche, 
 				n.wert, 
 				objart, 
@@ -1102,11 +1105,14 @@ class flurstueck {
 					flstflaeche, 
 					ltrim(n.bodenzahlodergruenlandgrundzahl, '0') as bodenzahlodergruenlandgrundzahl, 
 					ltrim(n.ackerzahlodergruenlandzahl, '0') as wert, 
-					n.kulturart as objart, 
-					n.kulturart, 
+					n.nutzungsart as objart, 
+					n.nutzungsart, 
 					n.bodenart, 
-					n.entstehungsartoderklimastufewasserverhaeltnisse, 
-					n.zustandsstufeoderbodenstufe, 
+					n.entstehungsart, 
+					n.klimastufe, 
+					n.wasserverhaeltnisse, 
+					n.zustandsstufe, 
+					n.bodenstufe, 
 					n.sonstigeangaben 
 				FROM 
 					(SELECT
@@ -1137,16 +1143,18 @@ class flurstueck {
 					alkis.ax_bodenschaetzung n,
 					ST_Area(ST_CollectionExtract(ST_Intersection(n.wkb_geometry, fnu.intersection), 3)) as a (flaeche)
 				WHERE 
-					--n.kulturart = ANY(fnu.ableitung_emz) and 
+					--n.nutzungsart = ANY(fnu.ableitung_emz) and 
 					st_intersects(n.wkb_geometry, fnu.intersection) AND 
 					a.flaeche > 0.01 
 					" . $this->database->build_temporal_filter(array('n')) . " 
 			) as n 
-			LEFT JOIN alkis.ax_kulturart_bodenschaetzung k ON k.wert=n.kulturart 
-			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert=n.bodenart 
-			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e1 ON e1.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[1] 
-			LEFT JOIN alkis.ax_entstehungsartoderklimastufewasserverhaeltnisse_bodensc e2 ON e2.wert=n.entstehungsartoderklimastufewasserverhaeltnisse[2] 
-			LEFT JOIN alkis.ax_zustandsstufeoderbodenstufe_bodenschaetzung z ON z.wert=n.zustandsstufeoderbodenstufe 
+			LEFT JOIN alkis.ax_nutzungsart_bodenschaetzung k ON k.wert = n.nutzungsart 
+			LEFT JOIN alkis.ax_bodenart_bodenschaetzung b ON b.wert = n.bodenart 
+			LEFT JOIN alkis.ax_entstehungsart e1 ON e1.wert = n.entstehungsart[1] 
+			LEFT JOIN alkis.ax_klimastufe e2 ON e2.wert = n.klimastufe
+			LEFT JOIN alkis.ax_wasserverhaeltnisse e3 ON e3.wert = n.wasserverhaeltnisse
+			LEFT JOIN alkis.ax_zustandsstufe z ON z.wert = n.zustandsstufe
+			LEFT JOIN alkis.ax_bodenstufe bs ON bs.wert = n.bodenstufe 
 			LEFT JOIN alkis.ax_sonstigeangaben_bodenschaetzung s ON s.wert=n.sonstigeangaben[1]
 			GROUP BY amtlicheflaeche, flstflaeche, n.wert, objart, label
 		";
@@ -1193,15 +1201,17 @@ class flurstueck {
     $sql.="SELECT distinct g.land || g.bezirk as bezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart ";
 		if ($this->hist_alb) {
 			$sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+			$istgebucht = 'isthistgebucht';
 		}
 		else {
 			$sql.="FROM alkis.ax_flurstueck f ";
+			$istgebucht = 'istgebucht';
 		}
 		if($fiktiv){
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON ARRAY[f." . $istgebucht . "] <@ s.an ";
 		}
 		else{
-			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f.istgebucht] <@ s.an ";
+			$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR ARRAY[f." . $istgebucht . "] <@ s.an ";
 		}
 		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
 		$sql.="WHERE f.flurstueckskennzeichen = '" . $this->FlurstKennz . "' ";
@@ -1294,7 +1304,7 @@ class flurstueck {
     $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Strassen zum Flurstück:",4);
 		$ret=$this->database->getStrassen($this->FlurstKennz);
     $Strassen=$ret[1];
-    for ($i=0; $i < @count($Strassen);$i++) {
+    for ($i=0; $i < count_or_0($Strassen);$i++) {
       $this->debug->write("<br>kataster.php flurstueck->getAdresse() Abfragen der Hausnummern zu den Strassen zum Flurstück:",4);
       $ret=$this->database->getHausNummern($this->FlurstKennz,$Strassen[$i]['strasse']);
       $HausNr=$ret[1];
@@ -1318,7 +1328,7 @@ class flurstueck {
 						st_area(f.wkb_geometry)
 					)::numeric, CASE WHEN amtlicheflaeche > 0.5 THEN 0 ELSE 2 END
 				) AS flaeche, 
-				nas.nutzungsartengruppe::text||nas.nutzungsart::text||nas.untergliederung1::text||nas.untergliederung2::text as nutzungskennz, 
+				nas.nutzungsartengruppe::text || lpad(nas.nutzungsart::text, 2, '0') || lpad(nas.untergliederung1::text, 2, '0') || lpad(nas.untergliederung2::text, 2, '0') as nutzungskennz, 
 				nag.gruppe || ' ' || coalesce(na.nutzungsart, '') || ' '||coalesce(nu1.untergliederung1, '') || ' ' || coalesce(nu2.untergliederung2, '') as bezeichnung, 
 				nag.bereich, 
 				nag.gruppe, 
@@ -1333,14 +1343,14 @@ class flurstueck {
 				alkis.ax_flurstueck f, 
 				alkis.n_nutzung n 
 				join st_area(st_intersection(n.wkb_geometry,f.wkb_geometry)) as a (flaeche) ON true
-				left join alkis.n_nutzungsartenschluessel nas on n.nutzungsartengruppe = nas.nutzungsartengruppe and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2
+				left join alkis.n_nutzungsartenschluessel nas on n.objektart = nas.objektart and n.werteart1 = nas.werteart1 and n.werteart2 = nas.werteart2
 				left join alkis.n_nutzungsartengruppe nag on nas.nutzungsartengruppe = nag.schluessel 
 				left join alkis.n_nutzungsart na on nas.nutzungsartengruppe = na.nutzungsartengruppe and nas.nutzungsart = na.schluessel 
 				left join alkis.n_untergliederung1 nu1 on nas.nutzungsartengruppe = nu1.nutzungsartengruppe and nas.nutzungsart = nu1.nutzungsart and nas.untergliederung1 = nu1.schluessel 
 				left join alkis.n_untergliederung2 nu2 on nas.nutzungsartengruppe = nu2.nutzungsartengruppe and nas.nutzungsart = nu2.nutzungsart and nas.untergliederung1 = nu2.untergliederung1 and nas.untergliederung2 = nu2.schluessel
 			WHERE 
 				st_intersects(n.wkb_geometry,f.wkb_geometry) = true AND 
-				a.flaeche > 0.001 AND 
+				a.flaeche >= 0.5 AND 
 				f.flurstueckskennzeichen = '" . $this->FlurstKennz . "'" .
 				$this->database->build_temporal_filter(array('f','n')) . "
 			ORDER BY nutzungskennz";
@@ -1365,6 +1375,20 @@ class flurstueck {
 		$diff = $Nutzungen[$i-1]['amtlicheflaeche'] - $summe;
 		$Nutzungen[$index]['flaeche'] += $diff;		
     return $Nutzungen;
+  }
+
+	static function getNutzungBegriffsbestimmungen($database) {	
+		$sql = "
+			SELECT 
+				*
+			FROM 
+				alkis.n_begriffsbestimmungen";
+		#echo $sql;
+    $query = $database->execSQL($sql, 4, 0);
+    while ($rs = pg_fetch_assoc($query[1])) {
+			$result[$rs['kennung']] = $rs;
+		}
+		return $result;
   }
 
   function vermessungsrunden($zahl, $stellen){
@@ -1425,62 +1449,116 @@ class flurstueck {
 	function getNachfolger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getNachfolger (vom Flurstück):<br>",4);
-		$sql = "SELECT 
-							DISTINCT ON (nachfolger) nachfolger, c.endet 
-						FROM (
-							SELECT 
-								unnest(coalesce(zeigtaufneuesflurstueck, ARRAY['BOV'])) as nachfolger 
-							FROM 
-								alkis.ax_fortfuehrungsfall 
-							WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck 
-							AND (NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck OR zeigtaufneuesflurstueck IS NULL)
-						)	as foo
-						LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
-						ORDER BY nachfolger, c.endet DESC";
-    $queryret=$this->database->execSQL($sql, 4, 0);
-    if (!$queryret[0]) {      
-			if(pg_num_rows($queryret[1]) == 0){		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT nachfolger, bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet FROM (";		# der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
-				$sql.= "SELECT unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger FROM alkis.ax_historischesflurstueckohneraumbezug as a WHERE a.flurstueckskennzeichen = '" . $this->FlurstKennz . "') as foo ";
-				$sql.= "LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger ";
-				$sql.= "LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger ";			# falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
-				$sql.= "GROUP BY nachfolger ORDER BY nachfolger";
+		$sql = "
+			SELECT 
+				DISTINCT ON (nachfolger) nachfolger, c.endet 
+			FROM (
+				SELECT 
+					unnest(coalesce(zeigtaufneuesflurstueck, ARRAY['BOV'])) as nachfolger 
+				FROM 
+					alkis.ax_fortfuehrungsfall 
+				WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck 
+				AND (NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck OR zeigtaufneuesflurstueck IS NULL)
+			)	as foo
+			LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
+			ORDER BY nachfolger, c.endet DESC";
+    $queryret=$this->database->execSQL($sql, 4, 0);  
+		if (pg_num_rows($queryret[1]) == 0) {
+			$sql = "
+				SELECT 
+					DISTINCT ON (nachfolger) nachfolger, c.endet 
+				FROM (
+					SELECT 
+						unnest(coalesce(nachfolgerflurstueckskennzeichen, ARRAY['BOV'])) as nachfolger 
+					FROM 
+						alkis.ax_historischesflurstueck 
+					WHERE flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+				)	as foo
+				LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 
+				ORDER BY nachfolger, c.endet DESC";
+			$queryret=$this->database->execSQL($sql, 4, 0); 
+			if (pg_num_rows($queryret[1]) == 0) {		# kein Fortführungsfall unter ALKIS -> Suche in ALB-Historie
+				$sql = "
+					SELECT 
+						nachfolger, 
+						bool_and(CASE WHEN b.flurstueckskennzeichen IS NULL THEN NULL ELSE TRUE END) as hist_alb, 
+						CASE WHEN min(coalesce(c.endet::text, '')) = '' THEN '' ELSE max(coalesce(c.endet::text, '')) END as endet -- der CASE ist dazu da, damit immer nur die jüngste Version eines Flurstücks gefunden wird
+					FROM (
+						SELECT 
+							unnest(a.nachfolgerflurstueckskennzeichen) as nachfolger 
+						FROM 
+							alkis.ax_historischesflurstueckohneraumbezug as a 
+						WHERE 
+							a.flurstueckskennzeichen = '" . $this->FlurstKennz . "'
+						) as foo 
+						LEFT JOIN alkis.ax_historischesflurstueckohneraumbezug b ON b.flurstueckskennzeichen = nachfolger 	
+						LEFT JOIN alkis.ax_flurstueck c ON c.flurstueckskennzeichen = nachfolger 			-- falls ein Nachfolger in ALKIS historisch ist (endet IS NOT NULL)
+					GROUP BY 
+						nachfolger 
+					ORDER BY 
+						nachfolger";
 				$queryret=$this->database->execSQL($sql, 4, 0);	
-				while($rs=pg_fetch_assoc($queryret[1])){
-					$Nachfolger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])){
-					$Nachfolger[]=$rs;
-				}
 			}
     }
+		while ($rs=pg_fetch_assoc($queryret[1])) {
+			$Nachfolger[]=$rs;
+		}
     return $Nachfolger;
   }
 
-  function getVorgaenger() {
+	function getVorgaenger() {
     if ($this->FlurstKennz=="") { return 0; }
     $this->debug->write("<p>kataster flurstueck->getVorgaenger (vom Flurstück):<br>",4);
-		$sql = "SELECT unnest(zeigtaufaltesflurstueck) as vorgaenger, array_to_string(array_agg(value), ';') as anlass FROM alkis.ax_fortfuehrungsfall, alkis.aa_anlassart WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND id = ANY(ueberschriftimfortfuehrungsnachweis) GROUP BY zeigtaufaltesflurstueck ORDER BY vorgaenger";
+		$sql = "
+			SELECT 
+				unnest(zeigtaufaltesflurstueck) as vorgaenger, 
+				array_to_string(array_agg(value), ';') as anlass 
+			FROM 
+				alkis.ax_fortfuehrungsfall, 
+				alkis.aa_anlassart 
+			WHERE 
+				ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufneuesflurstueck AND 
+				NOT ARRAY['" . $this->FlurstKennz . "'::varchar] <@ zeigtaufaltesflurstueck AND 
+				id = ANY(ueberschriftimfortfuehrungsnachweis) 
+			GROUP BY 
+				zeigtaufaltesflurstueck 
+			ORDER BY 
+				vorgaenger";
     $queryret=$this->database->execSQL($sql, 4, 0);
-    if(!$queryret[0]) {
+    if(pg_num_rows($queryret[1]) == 0){
+			$sql = "
+				SELECT 
+					flurstueckskennzeichen as vorgaenger, 
+					array_to_string(array_agg(value), ';') as anlass 
+				FROM 
+					alkis.ax_historischesflurstueck, 
+					alkis.aa_anlassart 
+				WHERE 
+					ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen and
+					id = ANY(anlass) 
+				GROUP BY
+					flurstueckskennzeichen
+				ORDER BY 
+					vorgaenger";
+    	$queryret=$this->database->execSQL($sql, 4, 0);
 			if(pg_num_rows($queryret[1]) == 0){			# kein Vorgänger unter ALKIS -> Suche in ALB-Historie
-				$sql = "SELECT flurstueckskennzeichen as vorgaenger, TRUE as hist_alb FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-				$sql.= "WHERE ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen ";
-				$sql.= $this->database->build_temporal_filter(array('f'));
-				$sql.= " ORDER BY vorgaenger";
+				$sql = "
+					SELECT 
+						flurstueckskennzeichen as vorgaenger, 
+						TRUE as hist_alb 
+					FROM 
+						alkis.ax_historischesflurstueckohneraumbezug f 
+					WHERE 
+						ARRAY['" . $this->FlurstKennz . "'::varchar] <@ nachfolgerflurstueckskennzeichen 
+						" . $this->database->build_temporal_filter(array('f')) . "
+					ORDER BY 
+						vorgaenger";
 				$queryret=$this->database->execSQL($sql, 4, 0);
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
-			}
-			else{
-				while($rs=pg_fetch_assoc($queryret[1])) {
-					$Vorgaenger[]=$rs;
-				}
 			}
     }
+		while($rs=pg_fetch_assoc($queryret[1])) {
+			$Vorgaenger[]=$rs;
+		}
     return $Vorgaenger;
   }
 

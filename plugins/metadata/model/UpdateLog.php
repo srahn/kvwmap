@@ -6,11 +6,11 @@
 class UpdateLog extends PgObject {
 	
 	static $schema = 'metadata';
-	static $tableName = 'update_log';
+	static $tableName = 'update_logs';
 	static $write_debug = false;
 
   function __construct($gui) {
-		$gui->debug->show('Create new Object update_log', UpdateLog::$write_debug);
+		$gui->debug->show('Create new Object updateLog', UpdateLog::$write_debug);
 		parent::__construct($gui, UpdateLog::$schema, UpdateLog::$tableName);
 	}
 

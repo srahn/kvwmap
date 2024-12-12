@@ -506,7 +506,7 @@ class ddl {
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
 								if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
-									if (($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height) {
+									if (($this->miny[$this->pdf->currentContents] - (float)$y) > $this->max_dataset_height) {
 										$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
 									}
 									# miny ist die unterste y-Position das aktuellen Datensatzes
@@ -613,7 +613,7 @@ class ddl {
 									$values = json_decode($value);
 									$x2 = $x;
 									$y2 = $miny_array = $y;
-									for ($v = 0; $v < @count($values); $v++) {
+									for ($v = 0; $v < count_or_0($values); $v++) {
 										if ($attributes['form_element_type'][$j] == 'Dokument') {
 											# Dokument-Attribute werden im Raster ausgegeben
 											if ($v > 0) {
@@ -684,8 +684,8 @@ class ddl {
 						# zurück zur Startseite des Datensatzes
 						$this->pdf->reopenObject($this->record_startpage);
 					}
-					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR);
-					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR);
+					$this->gui->map->width = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
+					$this->gui->map->height = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
 					# Rollenlayer zum Highlighten erzeugen und auf Objekt zoomen
 					if ($oid != ''){
@@ -732,14 +732,14 @@ class ddl {
 						$this->gui->map->selectOutputFormat('jpeg');
 					}
 					$this->gui->switchScaleUnitIfNecessary();
-					$this->gui->map->scalebar->set('status', MS_EMBED);
+					$this->gui->map->scalebar->status = MS_EMBED;
 					$this->gui->map->scalebar->position = MS_LR;
 					$this->gui->map->scalebar->label->size = 12;
 					$this->gui->map->scalebar->width = 180;
 					$this->gui->map->scalebar->height = 3;
 					# Parameter $scale in Data ersetzen
 					for($l = 0; $l < count($this->gui->layers_replace_scale); $l++){
-						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
+						$this->gui->layers_replace_scale[$l]->data = str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data);
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
@@ -786,6 +786,8 @@ class ddl {
 	}
 
 	function handlePageOverflow($offset_attribute, $offset_value, $ypos){
+		$offset_value = (float)$offset_value;
+		$ypos = (float)$ypos;
 		if($this->layout['page_id'][$offset_attribute] != $this->pdf->currentContents){
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}
@@ -987,7 +989,7 @@ class ddl {
 				$output = $enum[$value]['output'] ?: $value;
 			}break;
 			case 'Autovervollständigungsfeld' : {
-				if(@count($this->attributes['enum_output'][$j]) == 0){	
+				if(count_or_0($this->attributes['enum_output'][$j]) == 0){	
 					$output = $value;		# preview
 				}	
 				else $output = $this->attributes['enum_output'][$j][$i];
@@ -1088,7 +1090,7 @@ class ddl {
 			# spaltenweiser Typ
 			$rowcount = ceil(count($result) / 3);
 		}
-		for ($i = 0; $i < @count($result); $i++) {
+		for ($i = 0; $i < count_or_0($result); $i++) {
 			if (true AND is_numeric($result[$i][$this->layerset['ddl_attribute']])) {
 				$this->layout = $this->load_layouts(NULL, $result[$i][$this->layerset['ddl_attribute']], NULL, array(0,1))[0];
 			}
@@ -1207,7 +1209,7 @@ class ddl {
 			}
 
 			$test = 0;
-			while ($test < 100 AND @count($this->remaining_attributes) > 0) {
+			while ($test < 100 AND count_or_0($this->remaining_attributes) > 0) {
 				# übrig sind die, die noch nicht geschrieben wurden, weil sie abhängig sind
 				$this->add_attribute_elements($selected_layer_id, $layerdb, $this->attributes, $offsetx, $i, $preview);
 				$test++;
@@ -1592,7 +1594,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for($i = 0; $i < @count($formvars['text']); $i++){
+      for($i = 0; $i < count_or_0($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;
@@ -1768,7 +1770,7 @@ class ddl {
       $this->debug->write("<p>file:kvwmap class:ddl->save_ddl :",4);
       $this->database->execSQL($sql,4, 1);
 
-      for ($i = 0; $i < @count($formvars['text']); $i++){
+      for ($i = 0; $i < count_or_0($formvars['text']); $i++){
         $formvars['text'][$i] = str_replace(chr(10), ';', $formvars['text'][$i]);
         $formvars['text'][$i] = str_replace(chr(13), '', $formvars['text'][$i]);
         if($formvars['text'][$i] == 'NULL')$formvars['text'][$i] = NULL;

@@ -672,7 +672,7 @@ function drag(event) {
 function auto_resize_overlay(){
 	if (root.resized < 2) {		// wenn resized > 1 hat der Nutzer von Hand die Groesse veraendert, dann keine automatische Anpassung
 		root.resized = 0;
-		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").offsetWidth);
+		var contentWidth = Math.max(document.getElementById("overlayheader").offsetWidth, document.getElementById("contentdiv").scrollWidth);
 		if (contentWidth < screen.width) {
 			window.resizeTo(contentWidth+35, 800);
 		}
@@ -1560,12 +1560,24 @@ function showMapParameter(epsg_code, width, height, l) {
 }
 
 function showURL(params, headline) {
-	var msg = " \
-				<div style=\"text-align: left\"> \
-					<h2>" + headline + "</h2><br> \
-					<input id=\"url\" style=\"width: 350px\" type=\"text\" value=\"" + document.baseURI.match(/.*\//) + 'index.php?' + params + "\"><br> \
-				</div> \
-			";
+	let url = `${document.baseURI.match(/.*\//)}index.php?${params}`;
+	let msg = `
+		<div style="text-align: left;">
+			<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+			<div style="display:flex; margin-top: 10px">
+				<div style="float: left;"><textarea id="url" style="min-width: 385px;">${url}</textarea></div>
+				<div style="float: left; margin-left: 5px"><a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true"></i></a></div>
+			</div>
+			<div style="clear: both"></div>
+		</div>
+	`;
+	// msg = `
+	// 	<div style="text-align: left">
+	// 		<h2 style="margin-top: 2px; margin-buttom: 2px">${headline}</h2>
+	// 		<input type="text" id="url" style="width: 93%; float: left" value="${url}">
+	// 		<a href="${url}"><i class="fa fa-hand-o-right" aria-hidden="true" style="float: right""></i></a>
+	// 	</div>
+	// `;
 	message([{
 			'type': 'info',
 			'msg': msg
@@ -1693,7 +1705,7 @@ function getRandomPassword() {
 	var lower_chars = 'abcdefghijklmnopqrstuvwxyz';
 	var upper_chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 	var numbers = '0123456789';
-	var special_chars = '!@#$_+?%^&)';
+	var special_chars = '@#$_+?%^&)';
 	var length = Math.ceil(password_minlength / check_count);
 	var randomPassword;
 

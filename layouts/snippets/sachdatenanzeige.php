@@ -204,7 +204,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 
 <?
 	if (value_of($this->formvars, 'printversion') == '') {	
-		if (count($this->queried_layers) > 1) { ?>
+		if (count_or_0($this->queried_layers) > 1) { ?>
 			<script type="text/javascript">
 				document.getElementById('overlayheader2').style.display = '';
 				document.getElementById('overlayheader2').innerHTML = '<? echo $layer_tabs; ?>';
@@ -219,7 +219,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 							//document.getElementById('overlayfooter').style.display = 'block';
 							//document.getElementById('anzahl').value = '<? echo $this->formvars['anzahl']; ?>';
 						}
-						document.title = '<? echo implode(' - ', $this->queried_layers); ?>';
+						document.title = '<? echo implode(' - ', $this->queried_layers ?: []); ?>';
 						document.getElementById('overlayheader').style.display = document.getElementById('overlayheader2').style.display;
 						document.getElementById('overlayheader').innerHTML = document.getElementById('overlayheader2').innerHTML;
 					</script>
@@ -328,7 +328,7 @@ if($this->formvars['window_type'] == 'overlay'){ ?>
 <input type="hidden" name="backlink" value="<? echo strip_pg_escape_string($this->formvars['backlink']); ?>">
 
 <script type="text/javascript">
-	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0].value > 0) {
+	if (document.getElementsByName('gle_scrollposition_' + enclosingForm.active_layer_id.value)[0]?.value > 0) {
 		scrollto_saved_position();
 	}
 </script>

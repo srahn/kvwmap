@@ -9,11 +9,11 @@
 <!--
 
 function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 }
 
 function rotate_point_direction(){
-	document.getElementById("svghelp").SVGrotate_point_direction();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.rotate_point_direction();
 }
 
 function send(){

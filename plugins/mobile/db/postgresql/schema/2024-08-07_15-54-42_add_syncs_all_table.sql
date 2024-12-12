@@ -105,8 +105,8 @@ BEGIN;
         --RAISE notice 'sql nach entfernen von RETURNING uuid %', _sql;
       END IF;
 
-      INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (NEW.client_id, _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'insert');
-      RAISE NOTICE 'Neuen Datensatz mit Version % für Synchronisierung eingetragen.', new_version;
+      INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (current_setting('public.client_id'), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'insert');
+      RAISE NOTICE 'Neuen Datensatz mit Version % für Synchronisierung all und client_id % eingetragen.', new_version, current_setting('public.client_id');
 
       RETURN NEW;
     END;
@@ -177,9 +177,9 @@ BEGIN;
           --RAISE NOTICE 'sql nach insert version value %', _sql;
         END IF;
 
-        INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (NEW.client_id, _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'update');
+        INSERT INTO deltas_all (client_id, sql, schema_name, table_name, action) VALUES (current_setting('public.client_id'), _sql, TG_TABLE_SCHEMA, TG_TABLE_NAME, 'update');
 
-        RAISE NOTICE 'Änderung mit Version % für Synchronisierung eingetragen.', new_version;
+        RAISE NOTICE 'Änderung mit Version % für Synchronisierung all und client_id % eingetragen.', new_version, current_setting('public.client_id');
       END IF;
 
       RETURN NEW;

@@ -11,7 +11,7 @@
 	global $sizes;
 	$size = $sizes[$this->user->rolle->gui];
 	$size['map_functions_bar']['height'] = ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
-	$size['lagebzeichnung_bar']['height'] = (@count($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
+	$size['lagebzeichnung_bar']['height'] = (count_or_0($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$legend_hide_width = $size['legend']['hide_width'];
@@ -38,23 +38,23 @@ function zoomto(layer_id, oid, columnname){
 }
 
 function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 }
 
 function show_vertices(){	
-	document.getElementById("vertices").SVGshow_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.show_vertices();
 }
 
 function startup(){
-	document.getElementById("map").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.startup();
 }
 
 function showtooltip(result, showdata){
-	document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.showtooltip(result, showdata);
 }
 
 function clearMeasurement(){
-	document.getElementById("map").SVGclearMeasurement();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.clearMeasurement();
 }
 
 function showMapImage(){

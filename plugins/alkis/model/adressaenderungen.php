@@ -129,7 +129,7 @@ class adressaenderungen {
     while($rs = pg_fetch_array($ret[1])){
       $uebernommene_anschriften[] = $rs['gml_id'];
     }
-		if(@count($uebernommene_anschriften) > 0){
+		if(count_or_0($uebernommene_anschriften) > 0){
 			$sql = "DELETE FROM alkis.ax_anschrift_temp WHERE gml_id IN ('".implode("','", $uebernommene_anschriften)."')";			# �bernommene Anschriften l�schen
 			#echo $sql.'<br>';
 			$ret = $this->database->execSQL($sql, 4, 0);
@@ -152,7 +152,7 @@ class adressaenderungen {
 			$fp = fopen(IMAGEPATH.'/'.$filename, 'w');
 			$currenttime=date('Y-m-d_H_i_s',time());
 			fwrite($fp, $this->predata.chr(10));
-      for($i = 0; $i < @count($this->personen); $i++){
+      for($i = 0; $i < count_or_0($this->personen); $i++){
         $data = '			<wfsext:Replace vendorId="AdV" safeToIgnore="false">
 				<AX_Person gml:id="'.$this->personen[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->personen[$i]['gml_id'].'</gml:identifier>
@@ -183,7 +183,7 @@ class adressaenderungen {
 			</wfsext:Replace>'.chr(10);
         fwrite($fp, $data);
       }
-			for($i = 0; $i < @count($this->anschriften); $i++){
+			for($i = 0; $i < count_or_0($this->anschriften); $i++){
         $data = '<wfs:Insert>
 				<AX_Anschrift gml:id="'.$this->anschriften[$i]['gml_id'].'">
 					<gml:identifier codeSpace="http://www.adv-online.de/">urn:adv:oid:'.$this->anschriften[$i]['gml_id'].'</gml:identifier>

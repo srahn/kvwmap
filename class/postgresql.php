@@ -143,7 +143,7 @@ class pgdatabase {
 			"dbname='" .	 $credentials['dbname'] 	. "' " .
 			"user='" .		 $credentials['user'] 		. "' " .
 			"password='" . addslashes($credentials['password']) . "' " .
-			"application_name=kvwmap_user_" . $this->gui->user->id;
+			"application_name=kvwmap_user_" . ($this->gui->user ? $this->gui->user->id : '');
 		return $connection_string;
 	}
 
@@ -527,8 +527,8 @@ FROM
       $ret[1]=$curExtent;
     }
     
-    /*$projFROM = ms_newprojectionobj("init=epsg:".$curSRID);
-		$projTO = ms_newprojectionobj("init=epsg:".$newSRID);
+    /*$projFROM = new projectionObj("init=epsg:".$curSRID);
+		$projTO = new projectionObj("init=epsg:".$newSRID);
 		$curExtent->project($projFROM, $projTO);
 		$ret[0] = 0;
 		$ret[1] = $curExtent;*/
@@ -679,7 +679,7 @@ FROM
 			# alles ok mach nichts weiter
 		}
 		else {
-			# Fehler setze entsprechende Fags und Fehlermeldung
+			# Fehler setze entsprechende Flags und Fehlermeldung
 			$ret[0] = 1;
 			$ret[1] = $ret['msg'];
 			if ($suppress_err_msg) {
@@ -719,7 +719,7 @@ FROM
 		$timestamp = rolle::$hist_timestamp;
 		if($timestamp == ''){
 			foreach($tablenames as $tablename){
-				$filter .= ' AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'http://www.lverma-mv.de/_fdv#7040\' = any('.$tablename.'.zeigtaufexternes_art))';
+				$filter .= ' AND (' . $tablename . '.historisch IS NULL OR ' . $tablename . '.historisch != \'true\') AND ('.$tablename.'.zeigtaufexternes_art IS NULL OR NOT \'urn:mv:fdv:7040\' = any('.$tablename.'.zeigtaufexternes_art))';
 			}
 		}
 		return $filter;
@@ -824,7 +824,7 @@ FROM
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
-			return false;
+			#return false;
 		};
 		set_error_handler($myErrorHandler);
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
@@ -929,7 +929,7 @@ FROM
 					}
 					if($fieldtype != 'geometry'){
 						# testen ob es für ein Attribut ein constraint gibt, das wie enum wirkt
-						for($j = 0; $j < @count($constraints[$table_oid] ?: []); $j++){
+						for($j = 0; $j < count_or_0($constraints[$table_oid] ?: []); $j++){
 							if(strpos($constraints[$table_oid][$j], '(' . $fieldname . ')') AND strpos($constraints[$table_oid][$j], '=')){
 								$options = explode("'", $constraints[$table_oid][$j]);
 								for($k = 0; $k < count($options); $k++){
@@ -1344,13 +1344,19 @@ FROM
   function getBuchungenFromGrundbuch($FlurstKennz,$Bezirk,$Blatt,$hist_alb = false, $fiktiv = false, $buchungsstelle = NULL, $without_temporal_filter = false) {
     $sql ="SELECT DISTINCT gem.schluesselgesamt as gemkgschl, gem.bezeichnung as gemarkungsname, g.land || g.bezirk as bezirk, g.bezirk as gbezirk, g.buchungsblattnummermitbuchstabenerweiterung AS blatt, g.blattart, s.gml_id, s.laufendenummer AS bvnr, ltrim(s.laufendenummer, '~>a')::integer, s.buchungsart, s.buchungstext, art.beschreibung as bezeichnung, f.flurstueckskennzeichen as flurstkennz, s.zaehler::text||'/'||s.nenner::text as anteil, s.nummerimaufteilungsplan as auftplannr, s.beschreibungdessondereigentums as sondereigentum "; 
 		if($FlurstKennz!='') {
-			if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-			else $sql.="FROM alkis.ax_flurstueck f ";  
+			if ($hist_alb) {
+				$sql .= "FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+				$istgebucht = 'isthistgebucht';
+			}
+			else {
+				$sql.="FROM alkis.ax_flurstueck f ";
+				$istgebucht = 'istgebucht';
+			}
 			$sql.="LEFT JOIN alkis.ax_gemarkung gem ON f.land = gem.land AND f.gemarkungsnummer = gem.gemarkungsnummer ";
 			if($fiktiv){
-				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f.istgebucht] <@ s.an ";
+				$sql.="JOIN alkis.ax_buchungsstelle s ON ARRAY[f." . $istgebucht . "] <@ s.an ";
 			}
-			else $sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
+			else $sql.="JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f." . $istgebucht . "] <@ s.an) ";
 			
 			$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
 			$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id ";
@@ -1469,7 +1475,7 @@ FROM
   function getGemeindeListeByKreisGemeinden($Gemeinden){
     $sql ="SELECT DISTINCT g.schluesselgesamt AS id, g.bezeichnung AS name";
     $sql.=" FROM alkis.ax_gemeinde AS g WHERE 1=1";
-    if(is_array($Gemeinden)){
+    if(!empty($Gemeinden)){
 			$sql.=" AND g.schluesselgesamt IN ('".implode("','", $Gemeinden)."')";
     }
 		$sql.= $this->build_temporal_filter(array('g'));
@@ -1683,10 +1689,10 @@ FROM
 			FROM 
 				alkis.ax_kreisregion AS k, 
 				alkis.ax_gemeinde as g, 
-				alkis.ax_gemarkung AS gem, 
-				alkis.ax_flurstueck AS f 
+				alkis.ax_gemarkung AS gem
 				LEFT JOIN 
-					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(f.zustaendigestelle_stelle)
+					alkis.ax_dienststelle as d ON d.stellenart = 1200 AND d.stelle = ANY(gem.istamtsbezirkvon_stelle),
+				alkis.ax_flurstueck AS f 				
 				LEFT JOIN
 					alkis.aa_antrag a ON a.identifier = any(f.zeigtaufexternes_uri)
 			WHERE 
@@ -2107,7 +2113,11 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
-		if($ganze_gemkg_ids[0] != '' OR @count($eingeschr_gemkg_ids) > 0){
+		if (value_of($formvars, 'newpathwkt') != ''){
+			# Suche im Suchpolygon
+			$sql .=' AND st_intersects(f.wkb_geometry, (st_transform(st_geomfromtext(\'' . $formvars['newpathwkt'] . '\', ' . $formvars['user_epsg'] . '), ' . EPSGCODE_ALKIS . ')))';
+		}
+		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
 				$sql.="OR f.land||f.gemarkungsnummer IN ('".implode("','", $ganze_gemkg_ids)."')";
@@ -2307,6 +2317,7 @@ FROM
   function getGrundbuchbezirksliste(){
   	$sql ="SELECT schluesselgesamt as grundbuchbezschl, bezeichnung FROM alkis.ax_buchungsblattbezirk WHERE 1=1";
 		$sql.= $this->build_temporal_filter(array('ax_buchungsblattbezirk'));
+		$sql.= $this->build_temporal_filter_fachdatenverbindung(array('ax_buchungsblattbezirk'));
     $ret=$this->execSQL($sql, 4, 0);
     if ($ret[0]==0) {
     	while($rs=pg_fetch_assoc($ret[1])){
@@ -2349,16 +2360,27 @@ FROM
   }
     
   function getGrundbuchbezirke($FlurstKennz, $hist_alb = false) {
-		$sql ="SELECT distinct b.schluesselgesamt as Schluessel, b.bezeichnung AS Name ";
-		if($hist_alb) $sql.="FROM alkis.ax_historischesflurstueckohneraumbezug f ";
-		else $sql.="FROM alkis.ax_flurstueck f ";  
-		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f.istgebucht] <@ s2.an ";
-		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR array[f.istgebucht] <@ s.an OR array[f.istgebucht] <@ s2.an AND array[s2.gml_id] <@ s.an ";
-		$sql.="JOIN alkis.ax_buchungsstelle s ON f.istgebucht = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f.istgebucht] <@ s.an) ";
-		$sql.="LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert ";
-		$sql.="LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id "; 
-		$sql.="LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk ";
-		$sql.="WHERE f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
+		$sql ="
+			SELECT distinct 
+				b.schluesselgesamt as Schluessel, 
+				b.bezeichnung AS Name ";
+		if ($hist_alb) {
+			$sql .= "FROM alkis.ax_historischesflurstueckohneraumbezug f ";
+			$istgebucht = 'isthistgebucht';
+		}
+		else {
+			$sql.="FROM alkis.ax_flurstueck f ";
+			$istgebucht = 'istgebucht';
+		}
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s2 ON array[f." . $istgebucht . "] <@ s2.an ";
+		//$sql.="LEFT JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR array[f." . $istgebucht . "] <@ s.an OR array[f." . $istgebucht . "] <@ s2.an AND array[s2.gml_id] <@ s.an ";
+		$sql.="
+				JOIN alkis.ax_buchungsstelle s ON f." . $istgebucht . " = s.gml_id OR ARRAY[f.gml_id] <@ s.verweistauf OR (s.buchungsart != 2103 AND ARRAY[f." . $istgebucht . "] <@ s.an) 
+				LEFT JOIN alkis.ax_buchungsart_buchungsstelle art ON s.buchungsart = art.wert 
+				LEFT JOIN alkis.ax_buchungsblatt g ON s.istbestandteilvon = g.gml_id 
+				LEFT JOIN alkis.ax_buchungsblattbezirk b ON g.land = b.land AND g.bezirk = b.bezirk 
+			WHERE 
+				f.flurstueckskennzeichen = '" . $FlurstKennz . "'";
 		if(!$hist_alb) $sql.= $this->build_temporal_filter(array('f', 's', 'g', 'b'));
 		#echo $sql;
     $ret=$this->execSQL($sql, 4, 0);
@@ -2700,7 +2722,7 @@ FROM
     $sql.=",MIN(st_ymin(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS miny,MAX(st_ymax(st_envelope(st_transform(wkb_geometry, ".$epsgcode.")))) AS maxy";
     $sql.=" FROM alkis.ax_flurstueck AS f";
     $sql.=" WHERE 1=1";
-    $anzflst = @count($flurstkennz);
+    $anzflst = count_or_0($flurstkennz);
     if ($anzflst>0) {
       $sql.=" AND f.flurstueckskennzeichen IN ('".$flurstkennz[0]."'";
       for ($i=1;$i<$anzflst;$i++) {

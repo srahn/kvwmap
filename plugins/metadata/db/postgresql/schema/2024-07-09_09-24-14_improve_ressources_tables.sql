@@ -54,7 +54,10 @@ BEGIN;
     reihenfolge INTEGER
   );
   INSERT INTO metadata.unpack_methods (name, beschreibung, reihenfolge) VALUES
-  ('unzip', 'Unzip in Zielverzeichnis', 1);
+  ('unzip', 'Unzip in Zielverzeichnis', 1),
+  ('unzip_unzip', 'Unzip und Unzip im Zielverzeichnis', 2),
+  ('unzip_filter_stelle_extent', 'Unzip und Filter Stellenausdehnung', 3),
+  ('copy', 'Copy in Zielverzeichnis', 4);
 
   --
   -- import methods
@@ -66,7 +69,10 @@ BEGIN;
   );
   INSERT INTO metadata.import_methods (name, beschreibung, reihenfolge) VALUES
   ('ogr2ogr_shape', 'Import shape mit ogr2ogr in Postgres', 1),
-  ('raster2pgsql', 'Import mit raster2pgsql in Postgres', 2);
+  ('ogr2ogr_gml', 'Import GML mit ogr2ogr in Postgres', 2),
+  ('gml_dictionary', 'Import GML-Dictionary in Postgres', 3),
+  ('csv_by_import', 'CSV-Import mit Header in Postgres', 4),
+  ('raster2pgsql', 'Import mit raster2pgsql in Postgres', 5);
 
   --
   -- Transform methods
@@ -169,7 +175,7 @@ BEGIN;
   ALTER TABLE IF EXISTS metadata.attributes ADD COLUMN updated_from character varying;
 
 
-CREATE TABLE IF NOT EXISTS metadata.update_log (
+CREATE TABLE IF NOT EXISTS metadata.update_logs (
     id serial NOT NULL PRIMARY KEY,
     ressource_id integer NOT NULL,
     update_at timestamp without time zone NOT NULL DEFAULT now(),
@@ -177,12 +183,12 @@ CREATE TABLE IF NOT EXISTS metadata.update_log (
     abbruch_status_id integer
 );
 
-ALTER TABLE metadata.update_log ADD CONSTRAINT abbruch_status_id_fk FOREIGN KEY (abbruch_status_id)
+ALTER TABLE metadata.update_logs ADD CONSTRAINT abbruch_status_id_fk FOREIGN KEY (abbruch_status_id)
   REFERENCES metadata.update_status (id) MATCH SIMPLE
   ON UPDATE CASCADE
   ON DELETE NO ACTION;
 
-ALTER TABLE metadata.update_log ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
+ALTER TABLE metadata.update_logs ADD CONSTRAINT ressource_id_fk FOREIGN KEY (ressource_id)
   REFERENCES metadata.ressources (id) MATCH SIMPLE
   ON UPDATE CASCADE
   ON DELETE CASCADE;

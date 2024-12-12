@@ -14,7 +14,7 @@ if (isset($argv)) {
 register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
-	if (error_reporting() & $err['type']) { // This error code is included in error_reporting		
+	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -351,6 +351,19 @@ function go_switch($go, $exit = false) {
 				$GUI->loadDrawingOrderForm();
 			} break;
 
+			case 'show_layer_in_map' : {
+				$GUI->sanitize([
+					'selected_layer_id' => 'int',
+					'zoom_to_layer_extent' => 'boolean'
+				]);
+				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
+				$GUI->saveMap('');
+				$currenttime = date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->output();
+			} break;
+
 			case 'show_snippet' : {
 				$GUI->checkCaseAllowed($go);
 				$GUI->show_snippet();
@@ -474,8 +487,8 @@ function go_switch($go, $exit = false) {
 			case 'get_legend' : {
 				$GUI->loadMap('DataBase');
 				# Parameter $scale in Data ersetzen
-				for($i = 0; $i < @count($GUI->layers_replace_scale); $i++){
-					$GUI->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data));
+				for($i = 0; $i < count_or_0($GUI->layers_replace_scale); $i++){
+					$GUI->layers_replace_scale[$i]->data = str_replace('$SCALE', $GUI->map_scaledenom, $GUI->layers_replace_scale[$i]->data);
 				}
 				echo $GUI->create_dynamic_legend();
 			} break;
@@ -1083,7 +1096,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnittswahl_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1092,7 +1105,7 @@ function go_switch($go, $exit = false) {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1860,7 +1873,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->StelleAendern();
+				$GUI->stelle_aendern();
 			} break;
 
 			case 'Stellen_Anzeigen' : {
@@ -2044,7 +2057,7 @@ function go_switch($go, $exit = false) {
 			case 'crontab_schreiben' : {
 				$GUI->checkCaseAllowed('cronjobs_anzeigen');
 				$GUI->crontab_schreiben();
-			} break;			
+			} break;
 
 			case 'Funktionen_Anzeigen' : {
 				$GUI->checkCaseAllowed('Funktionen_Anzeigen');
@@ -2244,7 +2257,7 @@ function go_switch($go, $exit = false) {
 
 			default : {
 				# Karteninformationen lesen
-				$GUI->loadMap('DataBase');
+				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->saveMap('');
 				$GUI->drawMap();

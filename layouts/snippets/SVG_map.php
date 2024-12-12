@@ -52,7 +52,7 @@ include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php
 	}
 
 	function moveback() {
-		document.getElementById("svghelp").SVGmoveback(); // das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.moveback();
 	}
 
 	function checkQueryFields() {
@@ -602,12 +602,6 @@ function init(){
 		top.document.getElementById("map").onmousewheel = mousewheelchange;		// <=IE8
 	}
 }
-
-top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("map").SVGclearMeasurement = clearMeasurement;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("svghelp").SVGmoveback = moveback;
 
 function moveback(evt){
 	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
@@ -1290,10 +1284,6 @@ function clearMeasurement(){
 }
 
 // ----------------------------strecke messen---------------------------------
-
-top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 function toggle_vertices(){
 	remove_vertices();

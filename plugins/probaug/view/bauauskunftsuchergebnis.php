@@ -83,7 +83,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
   			';
   		}  
   	
-  		for($i = 0; $i < @count($this->bau->baudata); $i++){
+  		for($i = 0; $i < count_or_0($this->bau->baudata); $i++){
   			$feld1 = $this->bau->baudata[$i]['feld1'];
   			$feld2 = $this->bau->baudata[$i]['feld2'];
   			$feld3 = $this->bau->baudata[$i]['feld3'];
