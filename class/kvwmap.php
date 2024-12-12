@@ -19465,7 +19465,52 @@ class db_mapObj{
 				}
 			}
 
-			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `saveable`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`, `options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `arrangement`, `labeling`, `raster_visibility`, `dont_use_for_new`, `mandatory`, `quicksearch`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `order`, `privileg`, `query_tooltip` FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump(
+				'layer_attributes', 
+				'layer_attribut_id', 
+				'SELECT 
+					`name` AS layer_attribut_id, 
+					\''.$last_layer_id.'\' AS `layer_id`, 
+					`name`, 
+					`real_name`, 
+					`tablename`, 
+					`table_alias_name`, 
+					`type`, 
+					`geometrytype`, 
+					`constraints`, 
+					`saveable`, 
+					`nullable`, 
+					`length`, 
+					`decimal_length`, 
+					`default`, 
+					`form_element_type`, 
+					`options`, 
+					`alias`, 
+					`alias_low-german`, 
+					`alias_english`, 
+					`alias_polish`, 
+					`alias_vietnamese`, 
+					`tooltip`, 
+					`group`, 
+					`tab`, 
+					`arrangement`, 
+					`labeling`, 
+					`raster_visibility`, 
+					`dont_use_for_new`, 
+					`mandatory`, 
+					`quicksearch`, 
+					`visible`, 
+					`vcheck_attribute`, 
+					`vcheck_operator`, 
+					`vcheck_value`, 
+					`order`, 
+					`privileg`, 
+					`query_tooltip` 
+				FROM 
+					layer_attributes 
+				WHERE 
+					layer_id = ' . $layer_ids[$i]
+			);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
