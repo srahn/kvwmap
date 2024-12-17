@@ -1183,6 +1183,9 @@ function umlaute_sortieren($array, $second_array) {
 	  	$array[$i] = str_replace('Ä', 'A', $array[$i]);
 	  	$array[$i] = str_replace('Ü', 'U', $array[$i]);
 	  	$array[$i] = str_replace('Ö', 'O', $array[$i]);
+			$array[$i] = str_replace('ä', 'A', $array[$i]);
+	  	$array[$i] = str_replace('ü', 'U', $array[$i]);
+	  	$array[$i] = str_replace('ö', 'O', $array[$i]);
 	  	$array[$i] = str_replace('ß', 's', $array[$i]);
 		}
 		@asort($array);
@@ -1660,7 +1663,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix > 1 AND $postfix < 5)) {
+  if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
