@@ -1663,7 +1663,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix > 1 AND $postfix < 5)) {
+  if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
