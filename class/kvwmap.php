@@ -14983,7 +14983,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['id'],
 			($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
 		);
-		if ($ret[0]) {
+		if ($ret[1] == NULL) {
 			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
 		}
 		else {
