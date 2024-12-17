@@ -17,7 +17,8 @@
   $strInfo="Informationsabfrage";
   $strTouchInfo="Informationsabfrage auf angrenzende Objekte";
   $strInfoWithRadius="Informationsabfrage mit Suchradius";
-  $strInfoInPolygon="Informationsabfrage im Polygon / Flächenmessung";
+  $strInfoInPolygon="Informationsabfrage im Polygon";
+  $strMeasureArea="Flächenmessung";
   $strRuler="Wegstrecke messen";
 	$strPunktfang = "Punktfang umschalten";
   $strFreePolygon="Polygon zeichnen";
