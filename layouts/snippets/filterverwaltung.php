@@ -208,7 +208,7 @@ function showmap(){
 					$the_geom_index[] = $i;
 				}
     	}
-    	for($i = 0; $i < count($the_geom_index); $i++){
+    	for($i = 0; $i < count_or_0($the_geom_index); $i++){
 	    	echo '
 					<tr>
 	    			<td colspan=3>&nbsp;</td>
