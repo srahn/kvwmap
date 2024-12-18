@@ -1234,6 +1234,9 @@ echo '			</table>
 					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
 				}
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
+					if (!is_array($this->layer_ids_of_group[$group_id])) {
+						$this->layer_ids_of_group[$group_id] = [];
+					}
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layer_ids_of_group[$group_id]).'">';
