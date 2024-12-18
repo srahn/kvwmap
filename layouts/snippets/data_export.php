@@ -377,11 +377,20 @@ $j=0;
 								&nbsp;<? echo $strFilename; ?>:&nbsp;&nbsp;<input type="text" name="layer_name" value="<? echo sonderzeichen_umwandeln($this->layerdaten['Bezeichnung'][$selectindex]); ?>">
 							</td>
 						</tr>
+				<? 	if ($this->layerset[0]['metalink'] != '') { ?>
 						<tr>
 							<td>
 								<input type="checkbox" name="with_metadata_document" value="1" <? if ($this->formvars['with_metadata_document'] == 1)echo 'checked'; ?>> <? echo $strExportMetadatadocument; ?>
 							</td>
-						</tr><?
+						</tr>
+				<? 	}
+						if ($this->layerset[0]['terms_of_use_link'] != '') { ?>
+						<tr style="display: none">
+							<td>
+								<input type="checkbox" name="with_terms_of_use_document" value="1" checked> <? echo $strExportTermsOfUsedocument; ?>
+							</td>
+						</tr>
+				<? 	}
 						if ($groupnames){ ?>
 							<tr>
 								<td>
