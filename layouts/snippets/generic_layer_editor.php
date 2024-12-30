@@ -122,10 +122,19 @@ if ($doit == true) { ?>
 					<td align="right" valign="top" style="padding: 0 10 0 0">
 					<?	
 						if($this->search == true AND $this->formvars['printversion'] == '' AND $this->formvars['keinzurueck'] == '' AND $this->formvars['subform_link'] == ''){
-							if($this->formvars['backlink'] == ''){
+							if ($this->formvars['backlink'] == '') {
+								# kein backlink angegeben -> zurück zur Suche im Hauptfenster
 								$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+								$target = 'root';
 							}
-							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']).'" target="root" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+							else {
+								# es ist ein backlink angegeben -> zurück zum backlink im selben Fenster
+								$target = '_self';
+								if ($this->formvars['window_type'] == 'overlay') {
+									$this->formvars['backlink'] .= '&window_type=' . $this->formvars['window_type'];
+								}
+							}
+							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']).'" target="' . $target . '" title="'.$strbackToSearch.'"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 						} ?>
 					</td>
 					<td align="right" valign="top" style="padding: 0 10 0 0">
@@ -273,7 +282,7 @@ if ($doit == true) { ?>
 							<td style="line-height: 1px; ">
 								<a name="anchor_<? echo $layer['Layer_ID']; ?>_<? echo $layer['shape'][$k][$layer['maintable'].'_oid']; ?>">
 								<input type="hidden" value="" onchange="changed_<? echo $layer['Layer_ID']; ?>.value=this.value;root.document.GUI.gle_changed.value=this.value" name="changed_<? echo $layer['Layer_ID'].'_'.str_replace('-', '', $layer['shape'][$k][$layer['maintable'].'_oid']); ?>"> 
-								<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
+								<input id="<? echo $layer['Layer_ID'].'_'.$k; ?>" type="checkbox" onchange="count_selected(<? echo $layer['Layer_ID']; ?>);" class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't')echo 'no_edit'; ?>" name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>">&nbsp;
 							</td>
 						</tr>
 				  </table>
@@ -527,9 +536,8 @@ if ($doit == true) { ?>
 				<tr>
 					<td colspan="2"align="left">
 					<? if($this->new_entry != true){ ?>
-						<table width="100%" border="0" cellspacing="4" cellpadding="0"><?
+						<table border="0" cellspacing="4" cellpadding="0" class="button_background" style="box-shadow: none; border: 1px solid #bbb"><?
 							include(SNIPPETS . 'generic_layer_editor_common_part.php'); ?>
-							<tr>
 								<td>
 									<table cellspacing="0" cellpadding="0">
 										<tr>

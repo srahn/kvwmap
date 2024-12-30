@@ -1596,11 +1596,21 @@ class data_import_export {
 					if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 						$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
 						if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
-							# echo '<br>Metadatendatei heruntergeladen von: ' . $layerset[0]['metalink'];
-							# echo '<br>und gespeichert unter: ' . $metadata_file;
 						}
 						else { ?>
-							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihrem Administrator bei wiederholtem Auftreten dieses Fehlers.
+							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
+							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
+							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
+							exit;
+						}
+					}
+					# Bei Bedarf auch Nutzungsbedingungendatei mit dazupacken
+					if ($this->formvars['with_terms_of_use_document'] != '' AND $layerset[0]['terms_of_use_link'] != '') {
+						$terms_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['terms_of_use_link']);
+						if (file_put_contents($terms_file, file_get_contents($layerset[0]['terms_of_use_link'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
+						}
+						else { ?>
+							Download der Nutzungsbedingungen des Layers ist fehlgeschlagen!<br>Tragen Sie den Nutzungsbedingungen-Link des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
 							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
 							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
 							exit;

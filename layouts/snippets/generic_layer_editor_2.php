@@ -80,9 +80,18 @@ if ($doit == true) {
 							$this->formvars['subform_link'] == ''
 						) {
 							if ($this->formvars['backlink'] == '') {
+								# kein backlink angegeben -> zurück zur Suche im Hauptfenster
 								$this->formvars['backlink'] = 'javascript:currentform.go.value=\'get_last_search\';currentform.submit();';
+								$target = 'root';
 							}
-							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="root" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
+							else {
+								# es ist ein backlink angegeben -> zurück zum backlink im selben Fenster
+								$target = '_self';
+								if ($this->formvars['window_type'] == 'overlay') {
+									$this->formvars['backlink'] .= '&window_type=' . $this->formvars['window_type'];
+								}
+							}
+							echo '<a href="'.strip_pg_escape_string($this->formvars['backlink']) . '" target="' . $target . '" title="' . $strbackToSearch . '"><i class="fa fa-arrow-left hover-border" aria-hidden="true"></i></a>';
 						} ?>
 					</td>
 					<td width="99%" align="center"><h2 id="layername"><? echo $layer_name; ?></h2></td><?

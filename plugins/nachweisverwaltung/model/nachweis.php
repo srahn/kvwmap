@@ -1536,7 +1536,6 @@ class Nachweis {
       $ret=$queryret;
     }
     else {
-      $ret[0]=0;
       $rs=pg_fetch_assoc($queryret[1]);
       $ret[1]=$rs['link_datei'];
     }

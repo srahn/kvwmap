@@ -63,7 +63,8 @@
 	$strMapParameters = "Kartendarstellung";
 	$strMaxQueryRows = "Datensätze pro Seite";
 	$strmaxscale = "Maxscale";
-	$strMetaLink = "Metadatenlink";
+	$strMetaLink = "Metadaten-Link";
+	$strTermsOfUseLink = "Nutzungsbedingungen-Link";
 	$strMetaParameters = "Metadaten";
 	$strminscale = "Minscale";
 	$strName = "Name";

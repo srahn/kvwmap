@@ -472,6 +472,28 @@ $SVGvars_defs = '
   	return $dist;
 	}
 
+	function measure_area($strMeasureArea){
+		global $last_x;global $events;
+		$measure_area ='
+			<g id="measurearea" transform="translate('.$last_x.' 0)">
+				<rect id="measurearea0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strMeasureArea.'\',evt.clientX,evt.clientY)" onmousedown="measurearea();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<text transform="scale(1 1)" x="15" y="20" style="text-anchor:middle;font-size:14px;font-family:system-ui;stroke: #5c88a8;">m²</text>
+					<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
+					<path d="M14.95,5.5 C16.2,5.5 17.2,4.5 17.2,3.25 C17.2,2.0 16.2,1 14.95,1 C13.7,1 12.7,2.0 12.7,3.2 C12.7,4.5 13.7,5.5 14.95,5.5"/>
+					<path d="M8.3,29 C9.5,29 10.5,28 10.5,26.75 C10.5,25.5 9.5,24.5 8.3,24.5 C7.0,24.5 6,25.5 6,26.7 C6,28 7.0,29 8.25,29"/>
+					<path d="M3.3,23.2 C4.5,23.2 5.5,22.2 5.5,20.95 C5.5,19.7 4.5,18.7 3.2,18.7 C2.0,18.7 1.0,19.7 1.0,20.9 C1,22.2 2.0,23.2 3.3,23.2"/>
+					<path d="M5.3,11.2 C6.5,11.2 7.5,10.2 7.5,8.9 C7.5,7.7 6.5,6.7 5.3,6.7 C4.0,6.7 3,7.7 3,8.9 C3,10.2 4.0,11.2 5.3,11.2"/>
+					<path d="M26.7,9.6 C27.9,9.6 28.9,8.6 28.9,7.4 C28.9,6.1 27.9,5.1 26.7,5.1 C25.4,5.1 24.4,6.1 24.4,7.4 C24.4,8.6 25.4,9.6 26.7,9.6"/>
+					<path d="M24.6,23.9 C25.9,23.9 26.9,22.9 26.9,21.7 C26.9,20.4 25.9,19.4 24.6,19.4 C23.4,19.4 22.4,20.4 22.4,21.7 C22.4,22.9 23.4,23.9 24.6,23.9"/>
+					<path d="M10.3,27.8 L14.2,27.8 L18.5,26.5 L23.4,23.5 L25.9,19.8 L27.3,9.5 L25.1,5.8 L17.2,3 L12.7,3.4 L6.5,7.1 L3.9,10.8 L2.6,18.8 L3.8,23.1 L6.2,25.9 Z M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="fill-rule: evenodd;"/>
+					<path d="M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="opacity:0.15;"/>
+        </g>
+      </g>';
+    $last_x += 36;
+  	return $measure_area;
+	}
+
 	function punktfang($strPunktfang){
 		global $last_x;global $events;
 		$dist ='

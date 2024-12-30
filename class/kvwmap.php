@@ -15004,7 +15004,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['id'],
 			($this->formvars['user_id'] != '' ? $this->formvars['user_id'] : $this->user->id)
 		);
-		if ($ret[0]) {
+		if ($ret[1] == NULL) {
 			$this->Fehlermeldung = 'Es konnten keine gespeicherten Themen abgefragt werden.<br>' . $ret[1];
 		}
 		else {
@@ -18115,7 +18115,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,
@@ -19520,7 +19520,7 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `privileg`, `trigger_function`, `geom_column`
+				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `privileg`, `trigger_function`, `geom_column`
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
 				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
 				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
@@ -19582,7 +19582,52 @@ class db_mapObj{
 				}
 			}
 
-			$layer_attributes = $database->create_insert_dump('layer_attributes', 'layer_attribut_id', 'SELECT `name` AS layer_attribut_id, \''.$last_layer_id.'\' AS `layer_id`, `name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `saveable`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`, `options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `arrangement`, `labeling`, `raster_visibility`, `dont_use_for_new`, `mandatory`, `quicksearch`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `order`, `privileg`, `query_tooltip` FROM layer_attributes WHERE layer_id = ' . $layer_ids[$i]);
+			$layer_attributes = $database->create_insert_dump(
+				'layer_attributes', 
+				'layer_attribut_id', 
+				'SELECT 
+					`name` AS layer_attribut_id, 
+					\''.$last_layer_id.'\' AS `layer_id`, 
+					`name`, 
+					`real_name`, 
+					`tablename`, 
+					`table_alias_name`, 
+					`type`, 
+					`geometrytype`, 
+					`constraints`, 
+					`saveable`, 
+					`nullable`, 
+					`length`, 
+					`decimal_length`, 
+					`default`, 
+					`form_element_type`, 
+					`options`, 
+					`alias`, 
+					`alias_low-german`, 
+					`alias_english`, 
+					`alias_polish`, 
+					`alias_vietnamese`, 
+					`tooltip`, 
+					`group`, 
+					`tab`, 
+					`arrangement`, 
+					`labeling`, 
+					`raster_visibility`, 
+					`dont_use_for_new`, 
+					`mandatory`, 
+					`quicksearch`, 
+					`visible`, 
+					`vcheck_attribute`, 
+					`vcheck_operator`, 
+					`vcheck_value`, 
+					`order`, 
+					`privileg`, 
+					`query_tooltip` 
+				FROM 
+					layer_attributes 
+				WHERE 
+					layer_id = ' . $layer_ids[$i]
+			);
 			for($j = 0; $j < count($layer_attributes['insert']); $j++){
 				# Attribut des Layers
 				$dump_text .= "\n\n-- Attribut " . $layer_attributes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $layer_attributes['insert'][$j];
@@ -20025,7 +20070,7 @@ class db_mapObj{
 		# due to spaces in string concatenations with these attributes
 		$formvars['maintable'] = trim($formvars['maintable']);
 		$formvars['schema'] = trim($formvars['schema']);
-		foreach (array('pfad', 'Data', 'metalink', 'duplicate_criterion', 'comment') AS $var_name) {
+		foreach (array('pfad', 'Data', 'metalink', 'terms_of_use_link', 'duplicate_criterion', 'comment') AS $var_name) {
 			$formvars[$var_name] = $this->db->mysqli->real_escape_string($formvars[$var_name]);
 		}
 		if ($formvars['id'] == '') {
@@ -20063,6 +20108,7 @@ class db_mapObj{
 					'uptodateness',
 					'updatecycle',
 					'metalink',
+					'terms_of_use_link',
 					'comment'
 				) AS $key
 			) {
@@ -20333,6 +20379,7 @@ class db_mapObj{
 					`uptodateness`,
 					`updatecycle`,
 					`metalink`,
+					`terms_of_use_link`,
 					`status`,
 					`trigger_function`,
 					`listed`,
@@ -20411,6 +20458,7 @@ class db_mapObj{
 					" . quote($formvars['uptodateness']) . ",
 					" . quote($formvars['updatecycle']) . ",
 					" . quote($this->db->mysqli->real_escape_string($formvars['metalink'])) . ",
+					" . quote($this->db->mysqli->real_escape_string($formvars['terms_of_use_link'])) . ",
 					" . quote($formvars['status']) . ",
 					" . quote($formvars['trigger_function']) . ",
 			 		" . ($formvars['listed'] == '' ? '0' : $formvars['listed']) . ",
