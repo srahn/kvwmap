@@ -1,7 +1,7 @@
 <?php
- # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
- ?>
+	include_once(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
+	include_once(CLASSPATH . 'FormObject.php');
+?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">
 <!--
@@ -130,63 +130,60 @@ function showmap(){
 					</tr>
 			';
     }
-		if ((count($this->attributes))!=0) {
-			echo '
-					<tr>
-						<td align="center">
-							<span class="fett">Attribut</span>
-						</td>
-						<td align="center">
-							<span class="fett">Operator</span>
-						</td>
-						<td align="center">
-							<span class="fett">Wert</span>
-						</td>
-					</tr>
-			';
-    	for($i = 0; $i < count($this->attributes); $i++){
-				if($this->attributes[$i] == NULL)continue;
-				if($this->attributes[$i]['type'] != 'geometry'){
-					echo '
-					<tr>
-						<td align="center">
-							<input type="text" name="attribute_'.$this->attributes[$i]['name'].'" value="'.$this->attributes[$i]['name'].'" readonly>
-						</td>
-						<td align="center">
-							<select  style="width:90px" name="operator_'.$this->attributes[$i]['name'].'">
-								<option value="=" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '='){echo 'selected';}
-								echo ' >=</option>
-								<option value="!=" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '!='){echo 'selected';}
-								echo ' >!=</option>
-								<option value="<" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '<'){echo 'selected';}
-								echo ' ><</option>
-								<option value=">" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == '>'){echo 'selected';}
-								echo ' >></option>
-								<option value="like" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'like'){echo 'selected';}
-								echo ' >like</option>
-								<option value="IS" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IS'){echo 'selected';}
-								echo ' >IS</option>
-								<option value="IN" ';
-								if($this->formvars['operator_'.$this->attributes[$i]['name']] == 'IN'){echo 'selected';}
-								echo ' >IN</option>
-							</select>
-						</td>
-						<td align="center">
-							<input name="value_'.$this->attributes[$i]['name'].'" type="text" value="'.$this->formvars['value_'.$this->attributes[$i]['name']].'">
-						</td>
-					</tr>';
+		if ((count($this->attributes))!=0) { ?>
+			<tr>
+				<td align="center">
+					<span class="fett"><? echo $strAttribute; ?></span>
+				</td>
+				<td align="center">
+					<span class="fett"><? echo $strOperator; ?></span>
+				</td>
+				<td align="center">
+					<span class="fett"><? echo $strValue; ?></span>
+					<span data-tooltip="<? echo $strNullToolTip; ?>"></span>
+				</td>
+			</tr><?
+    	for ($i = 0; $i < count($this->attributes); $i++){
+				if ($this->attributes[$i] == NULL) {
+					continue;
 				}
-				else{
+				if ($this->attributes[$i]['type'] != 'geometry') {
+					$key = $this->attributes[$i]['name'];
+					$operator = $this->formvars['operator_' . $key];
+					$value = $this->formvars['value_' . $key]; ?>
+					<tr>
+						<td align="center">
+							<input type="text" name="attribute_<? echo $key; ?>" value="<? echo $key; ?>" readonly>
+						</td>
+						<td align="center"><?
+							echo FormObject::createSelectField(
+								'operator_' . $key,
+								array_map(
+									function($operator) {
+										return array('value' => $operator, 'output' => $operator);
+									},
+									array('=', '!=', '<', '>', 'LIKE', 'NOT LIKE', 'IS', 'IN', 'NOT IN')
+								),
+								$operator,
+								1,
+								'',
+								'',
+								'',
+								'',
+								'',
+								''
+							); ?>
+						</td>
+						<td align="center">
+							<input name="value_<? echo $key; ?>" type="text" value="<? echo $value; ?>" style="width: 200px">
+						</td>
+					</tr><?
+				}
+				else {
 					$the_geom_index[] = $i;
 				}
     	}
-    	for($i = 0; $i < count($the_geom_index); $i++){
+    	for ($i = 0; $i < count($the_geom_index); $i++){
 	    	echo '
 					<tr>
 	    			<td colspan=3>&nbsp;</td>
@@ -220,7 +217,7 @@ function showmap(){
 	        </tr>
 				';
 			}
-			if(count($this->attributes) > 0){
+			if (count($this->attributes) > 0){
 				if($this->attributes[$the_geom_index[0]]['name'] != '')$geom_check = 'document.GUI.check_'.$this->attributes[$the_geom_index[0]]['name'].'.checked';
 				else $geom_check = 0;
 				echo '<tr>
@@ -228,8 +225,7 @@ function showmap(){
 			 					</td>
 			 				</tr>';
 			}
-		} 
-			?>
+		} ?>
       </table></td>
   </tr>
   <tr> 

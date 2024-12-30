@@ -4591,7 +4591,7 @@ echo '			</table>
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
-  	$fpsvg = fopen(IMAGEPATH.$svgfile, 'w');
+  	$fpsvg = fopen(IMAGEPATH . $svgfile, 'w');
   	$svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -4601,12 +4601,12 @@ echo '			</table>
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
 		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, URL . 'tmp/', $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
-  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
+  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' ' . IMAGEPATH . $jpgfile);
+		// echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if (function_exists('imagecreatefromjpeg')) {
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
@@ -4619,7 +4619,8 @@ echo '			</table>
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
-    }
+    } 
+		//readfile(IMAGEPATH . $svgfile);
 		include(SNIPPETS . 'map_image.php');
   }
 
@@ -9845,7 +9846,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
-
+				// echo '<br>sql where: ' . $sql_where;
 				$sql = "
 					SELECT " . $query_parts['select'] . " FROM (
 						SELECT " . $pfad . "
@@ -9899,8 +9900,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				// if ($this->user->id == 41) {
-			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// if ($this->user->id == 17) {
+				// 	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
 				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
@@ -13494,7 +13495,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function Filterverwaltung() {
+	function filterverwaltung() {
 		$this->loadMap('DataBase');
 		$this->titel = 'Filterverwaltung';
 		$this->main = 'filterverwaltung.php';
@@ -13559,7 +13560,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars['value_' . $this->attributes[$i]['name']] = '';
 				}
 				for ($j = 0; $j < count($this->selected_layers); $j++){
-					$filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
+					$filter = $this->mapDB->read_attribute_filter($this->formvars['stelle'], $this->selected_layers[$j]);
 					for ($i = 0; $i < count_or_0($filter); $i++) {
 						if (
 							$this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
@@ -13577,11 +13578,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             }
           }
         }
-        foreach($setKeys as $key => $value){
-          if($value < count_or_0($this->selected_layers)){
+        foreach ($setKeys as $key => $value){
+          if ($value < count_or_0($this->selected_layers)){
             $this->formvars['value_'.$key] = '---- verschieden ----';
           }
-        }				
+        }
         if ($this->formvars['CMD']!='') {
           # Es soll navigiert werden
           # Navigieren
@@ -13605,7 +13606,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           }
         }
       }
-      else{
+      else {
         # Es soll navigiert werden
         # Navigieren
         $this->navMap($this->formvars['CMD']);
@@ -13613,7 +13614,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $this->user->rolle->readSettings();
       }
     }
-    else{
+    else {
       # Es soll navigiert werden
       # Navigieren
       $this->navMap($this->formvars['CMD']);
@@ -13622,7 +13623,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
   }
 
-  function Filter_speichern($formvars){
+	function Filter_speichern($formvars) {
+		include_once(CLASSPATH . 'Layer.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
@@ -13707,12 +13709,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         }
       }
     }
-    for($i = 0; $i < count($this->selected_layers); $i++){
-      $filter = $mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$i]);
-      $mapDB->writeFilter($this->pgdatabase, $filter, $this->selected_layers[$i], $formvars['stelle']);
-    }
-    $this->Filterverwaltung();
-  }
+		for ($i = 0; $i < count($this->selected_layers); $i++) {
+			$this->filterstring = $this->compose_filter(
+				$mapDB->read_attribute_filter($this->formvars['stelle'], $this->selected_layers[$i]),
+				Layer::find_by_id($this, $this->selected_layers[$i])->get('epsg_code')
+			);
+			$result = $mapDB->write_filter(
+				$this->filterstring,
+				$formvars['stelle'],
+				$this->selected_layers[$i]
+			);
+			if ($result AND $this->filterstring != '') {
+				$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
+			}
+		}
+		$this->filterverwaltung();
+	}
 
 	function MenuesAnzeigen() {
 		# Abfragen aller Menues
@@ -15810,10 +15822,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
+	/**
+	 * Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
+	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
+	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 */
 	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '') {
-		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
-		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
-		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
 		if (is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)) {			// bei Bedarf den JSON-String decodieren
 			$json = json_decode($json);
 		}
@@ -17867,6 +17881,52 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 	
+		/**
+	 * Function create the filter statement for layer with $layer_id in stelle with $stelle_id based on $filter settings
+	 * and write it to the $database.
+	 * @param array $filter The filter settings
+	 * @param integer $epsg_code The epsg_code of the geometry of the layer
+	 * @return boolean Return 0 in case of error
+	 */
+	function compose_filter($filter, $epsg_code) {
+		$filterstring = '';
+		if ($filter != '') {
+			$filterparts = array();
+			for ($i = 0; $i < count($filter); $i++) {
+				if ($filter[$i]['type'] == 'geometry') {
+					$poly_geom = $this->pgdatabase->getpolygon($filter[$i]['attributvalue'], $epsg_code);
+					#$filterparts[] = $filter[$i]['attributname'].' && \''.$poly_geom.'\'';		// ist ja bei within und intersects schon mit drin
+					$filterparts[] = $filter[$i]['operator'] . "(" . $filter[$i]['attributname'] . ",'" . $poly_geom . "'::geometry)";
+				}
+				else {
+					if ($filter[$i]['operator'] == 'IS') {
+						$filterparts[] = $filter[$i]['attributname'] . ' ' . $filter[$i]['operator'] . ' ' . $filter[$i]['attributvalue'];
+					}
+					elseif ($filter[$i]['operator'] == 'IN') {
+						if ($filter[$i]['type'] == 'varchar' OR $filter[$i]['type'] == 'text') {
+							$filter[$i]['attributvalue'] = implode(
+								',',
+								array_map(
+									function($value) {
+										return "'" . $value . "'";
+									},
+									explode(',', $filter[$i]['attributvalue'])
+								)
+								);
+						}
+						$filterparts[] = $filter[$i]['attributname'] . " " . $filter[$i]['operator'] . " (" . $filter[$i]['attributvalue'] . ")";
+					}
+					elseif (strpos($filter[$i]['attributvalue'], '$') !== false) {
+						$filterparts[] = "COALESCE(CAST(" . $filter[$i]['attributname'] . " AS text), '') = '" . $filter[$i]['attributvalue'] . "'";
+					}
+					else {
+						$filterparts[] = $filter[$i]['attributname'] . " " . $filter[$i]['operator'] . " " . quote($filter[$i]['attributvalue'], $filter[$i]['type']);
+					}
+				}
+			}
+		}
+		return '(' . implode(' AND ', $filterparts) . ')';
+	}
 } # end of class GUI
 
 class db_mapObj{
@@ -18540,41 +18600,34 @@ class db_mapObj{
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
   }
 
-  function writeFilter($database, $filter, $layer, $stelle){
-    if($filter != ''){
-      $layerdata = $this->get_Layer($layer);
-      $filterstring = '(1 = 1';
-      for($i = 0; $i < count($filter); $i++){
-        if($filter[$i]['type'] == 'geometry'){
-          $poly_geom = $database->getpolygon($filter[$i]['attributvalue'], $layerdata['epsg_code']);
-          #$filterstring .= ' AND '.$filter[$i]['attributname'].' && \''.$poly_geom.'\'';		// ist ja bei within und intersects schon mit drin
-          $filterstring .= ' AND '.$filter[$i]['operator'].'('.$filter[$i]['attributname'].',\''.$poly_geom.'\'::geometry)';
-        }
-        else{
-          if($filter[$i]['operator'] == 'IS'){
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' '.$filter[$i]['attributvalue'];
-          }
-          elseif($filter[$i]['operator'] == 'IN'){
-            if($filter[$i]['type'] == 'varchar' OR $filter[$i]['type'] == 'text'){
-              $values = explode(',', $filter[$i]['attributvalue']);
-              $filter[$i]['attributvalue'] = "'".implode("','", $values)."'";
-            }
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' ('.$filter[$i]['attributvalue'].')';
-          }
-          else{
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' \''.$filter[$i]['attributvalue'].'\'';
-          }
-        }
-      }
-      $filterstring .= ')';
-    }
-    $sql = 'UPDATE used_layer SET Filter = "'.$filterstring.'" WHERE Stelle_ID = '.$stelle.' AND Layer_ID = '.$layer;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->writeFilter - Speichern des Filterstrings:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-  }
+	/**
+	 * Function write the filter for Stelle with $stelle_id and Layer with $layer_id it to the Database.
+	 * @param string $filterstring
+	 * @param integer $stelle_id Id of the stelle to set the filter for
+	 * @param integer $layer_id Id of the layer to set the filter for
+	 * @return boolean Return false in case of error
+	 */
+	function write_filter($filterstring, $stelle_id, $layer_id) {
+		$filterstring = pg_escape_string($filterstring);
+		$sql = "
+			UPDATE
+				used_layer
+			SET
+				`Filter` = '" . $filterstring . "'
+			WHERE
+				`Stelle_ID` = " . $stelle_id . " AND
+				`Layer_ID` = " . $layer_id . "
+		";
+		// echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->write_filter - Speichern des Filterstrings:<br>" . $sql, 4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			echo $this->db->mysqli->error;
+			return false;
+		}
+		return true;
+	}
 
   function checkPolygon($poly_id){
     $sql = 'SELECT * FROM u_attributfilter2used_layer WHERE attributvalue = "'.$poly_id.'" AND type = "geometry"';
@@ -18601,7 +18654,7 @@ class db_mapObj{
     return $poly_id;
   }
 
-  function saveAttributeFilter($formvars){
+	function saveAttributeFilter($formvars) {
 		$sql = "
 			INSERT INTO 
 				u_attributfilter2used_layer 
@@ -18615,13 +18668,16 @@ class db_mapObj{
 			ON DUPLICATE KEY UPDATE  
 				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "', 
 				operator = '" . $formvars['operator'] . "'";
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-  }
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			return 0;
+		}
+	}
 
-	function readAttributeFilter($Stelle_ID, $Layer_ID) {
+	function read_attribute_filter($Stelle_ID, $Layer_ID) {
 		$filter = [];
 		$sql = "
 			SELECT
@@ -18633,7 +18689,7 @@ class db_mapObj{
 				Layer_ID = " . $Layer_ID . "
 		";
 		# echo '<br>Sql: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_attribute_filter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
 		while($rs = $this->db->result->fetch_assoc()) {
