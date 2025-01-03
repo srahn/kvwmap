@@ -145,11 +145,12 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 	return $allowedPasswordAgeRemainDays; // Passwort ist abgelaufen wenn Wert < 1  
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $export = 'false') {
+	// echo '<br>replace: ' . print_r($params, true) . ' in str: ' . $str;
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
@@ -160,6 +161,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
 		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
 		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		if (!is_null($export))							$str = str_replace('$EXPORT', $export, $str);
 	}
 	return $str;
 }
@@ -339,27 +341,31 @@ class GUI {
 		}
 	}
 	
-	function zoomToMaxLayerExtent($layer_id) {
-    # Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		if($layer_id > 0){
-			$layer = $this->user->rolle->getLayer($layer_id);
+	/**
+	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
+	 * @param int $layer_id Id of layer or rollenlayer to zoom to
+	 * @return void
+	 */
+	function zoom_to_max_layer_extent($layer_id) {
+		sanitize($layer_id, 'int');
+		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
+		if ($layer_id > 0) {
+			$layer = $this->user->rolle->getLayer($layer_id)[0];
 		}
-		else{
-			$layer = $this->user->rolle->getRollenLayer(-$layer_id);
+		else {
+			$layer = $this->user->rolle->getRollenLayer(-$layer_id)[0];
 		}
-		switch ($layer[0]['Datentyp']) {
+		switch ($layer['Datentyp']) {
 			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
 				# Abfragen der Datenbankverbindung des Layers
-				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-				$data = $layer[0]['Data'];
-				if ($data != ''){
-					# ersetzen von $scale
-					$data = str_replace('$SCALE', 1000, $data);
+				$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+				$data = $layer['Data'];
+				if ($data != '') {
 					# suchen nach dem ersten Vorkommen von using
-					$pos = strpos(strtolower($data),'using ');
-					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
+					$pos = strpos(strtolower($data), 'using ');
+					# Abschneiden der using Wörter im Datastatement wenn unique verwendet wurde
 					if ($pos !== false) {
-						$subquery=substr($data,0,$pos);
+						$subquery = substr($data, 0, $pos);
 					}
 					else {
 						# using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
@@ -369,66 +375,84 @@ class GUI {
 					$explosion = explode(' ', $data);
 					$this->attributes['the_geom'] = $explosion[0];
 				}
-				else{
-					$subquery = substr($layer[0]['pfad'], 7);
+				else {
+					$subquery = substr($layer['pfad'], 7);
 					$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
 				}
 
 				# Filter berücksichtigen
 				$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
-				if($filter != ''){
+				if ($filter != '') {
 					$filter = str_replace('$USER_ID', $this->user->id, $filter);
-					$subquery .= ' WHERE '.$filter;
+					$subquery .= ' WHERE ' . $filter;
 				}
 
+				$subquery = replace_params(
+					$subquery,
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language,
+					$layer['duplicate_criterion']
+				);
+
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql = '
-					SELECT 
-						st_xmin(extent) - (st_xmax(extent) - st_xmin(extent))/10 AS minx,
-						st_ymin(extent) - (st_ymax(extent) - st_ymin(extent))/10 AS miny,
-						st_xmax(extent) + (st_xmax(extent) - st_xmin(extent))/10 AS maxx,
-						st_ymax(extent) + (st_ymax(extent) - st_ymin(extent))/10 AS maxy
-					FROM (
-						SELECT 
-							st_transform(
-								st_setsrid(
-									st_extent(' . $this->attributes['the_geom'] . '), 
-									' . $layer[0]['epsg_code'] . '
-								), 
-								'.$this->user->rolle->epsg_code.'
-							) AS extent 
-						FROM (
-							SELECT 
-								' . $subquery . '
-						) AS fooForMaxLayerExtent
-					) as foo';
+				$sql = "
+					SELECT
+						st_xmin(extent) AS minx,
+						st_ymin(extent) AS miny,
+						st_xmax(extent) AS maxx,
+						st_ymax(extent) AS maxy
+					FROM
+						(
+							SELECT
+								st_transform(
+									st_setsrid(
+										st_extent(" . $this->attributes['the_geom'] . "),
+										" . $layer['epsg_code'] . "
+									),
+									" . $this->user->rolle->epsg_code . "
+								) AS extent
+							FROM
+								(
+									SELECT
+										" . $subquery . "
+								) AS fooForMaxLayerExtent
+						) as foo
+				";
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
-				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				$ret = $layerdb->execSQL($sql, 4, 0);
+				if ($ret[0]) {
+					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					return 0;
+				}
 				$rs = pg_fetch_array($ret[1]);
-			}break;
-			
+			} break;
+
 			case MS_LAYER_RASTER : {
-				if($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
-					$raster_file = SHAPEPATH.$layer[0]['Data'];
-					if(file_exists($raster_file)){
+				if ($layer['Data'] != '') {
+					# eine einzelne Rasterdatei
+					$raster_file = SHAPEPATH . $layer['Data'];
+					if (file_exists($raster_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'gdalinfo '.$raster_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'gdalinfo "' . $raster_file . '" > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
-						$ll = explode(', ', trim($this->get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
-						$ur = explode(', ', trim($this->get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
+						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
+						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
-				elseif($layer[0]['tileindex'] != ''){		# ein Tile-Index
-					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
-					if(file_exists($shape_file)){
+				elseif ($layer['tileindex'] != '') {
+					# ein Tile-Index
+					$shape_file = SHAPEPATH.$layer['tileindex'];
+					if (file_exists($shape_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'ogrinfo -al -so '.$shape_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'ogrinfo -al -so ' . $shape_file . ' > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
 						$extent = get_first_word_after($infotext, 'Extent:', ' ', chr(10));
 						$corners = explode('-', $extent);
 						$ll = explode(', ', trim($corners[0], '() '));
@@ -436,7 +460,7 @@ class GUI {
 					}
 				}
 				$extent = new rectObj();
-				$extent->setextent($ll[0],$ll[1],$ur[0],$ur[1]);
+				$extent->setextent($ll[0], $ll[1], $ur[0], $ur[1]);
 				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
@@ -444,34 +468,34 @@ class GUI {
 				$rs['maxx'] = $extent->maxx;
 				$rs['miny'] = $extent->miny;
 				$rs['maxy'] = $extent->maxy;
-			}break;
+			} break;
 		}
-		if($rs['minx'] != ''){
-			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
-			else $rand = 10;
-			$minx=$rs['minx']-$rand;
-			$maxx=$rs['maxx']+$rand;
-			$miny=$rs['miny']-$rand;
-			$maxy=$rs['maxy']+$rand;
-			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
-			$this->map->setextent($minx,$miny,$maxx,$maxy);
-			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
-			$oPixelPos = new PointObj();
-			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
-			if (MAPSERVERVERSION > 600) {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scaledenom;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scaledenom;
+		if ($rs['minx'] != '') {
+			if ($this->user->rolle->epsg_code == 4326) {
+				$rand = 10/10000;
 			}
 			else {
-				if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scale)$nScale = $layer[0]['maxscale']-1;
-				else $nScale = $this->map->scale;
-				$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
-				$this->map_scaledenom = $this->map->scale;
+				$rand = 10;
 			}
+			$minx = $rs['minx'] - $rand;
+			$maxx = $rs['maxx'] + $rand;
+			$miny = $rs['miny'] - $rand;
+			$maxy = $rs['maxy'] + $rand;
+			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
+			$this->map->setextent($minx, $miny, $maxx, $maxy);
+			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
+			$oPixelPos = new PointObj();
+			$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+			if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+				$nScale = $layer['maxscale'] - 1;
+			}
+			else {
+				$nScale = $this->map->scaledenom;
+			}
+			$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
+			$this->map_scaledenom = $this->map->scaledenom;
 		}
-  }
+	}
 
 	function login_agreement() {
 		$this->expect = array('agreement_accepted');
@@ -710,7 +734,7 @@ class GUI {
 				$layerset['Filter'] = replace_params(
 					$layerset['Filter'],
 					rolle::$layer_params,
-					$this->User_ID,
+					$this->user->id,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
 					$this->rolle->language
@@ -729,7 +753,7 @@ class GUI {
 					}
 			 }
 			 else {
-				 $expr=buildExpressionString($layerset['Filter']);
+				 $expr = buildExpressionString($layerset['Filter']);
 				 $layer->setFilter($expr);
 			 }
 			}
@@ -807,9 +831,9 @@ class GUI {
     $this->loadMap('DataBase');
     # zwischenspeichern des vorherigen Maßstabs
     $oldscale=round($this->map_scaledenom);
-		# zoomToMaxLayerExtent
+		# zoom_to_max_layer_extent
 		if($this->formvars['zoom_layer_id'] != '') {
-			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
 
 		if ($oldscale!=$this->formvars['nScale'] AND $this->formvars['nScale'] != '') {
@@ -1580,7 +1604,12 @@ class GUI {
 				}
 				$label->maxlength = $dbLabel['maxlength'];
 				$label->repeatdistance = $dbLabel['repeatdistance'];
-				$label->wrap = $dbLabel['wrap'];
+				if (MAPSERVERVERSION >= 800) {
+					$label->wrap = chr($dbLabel['wrap']);
+				}
+				else {
+					$label->wrap = $dbLabel['wrap'];
+				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
 				$label->size = $dbLabel['size'];
@@ -2798,7 +2827,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.`queryable`,
 				l.`drawingorder`,
 				ul.`legendorder`,
@@ -3822,7 +3851,7 @@ class db_mapObj{
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,

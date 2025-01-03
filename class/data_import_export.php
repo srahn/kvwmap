@@ -280,7 +280,7 @@ class data_import_export {
 	function load_shp_into_pgsql($pgdatabase, $uploadpath, $shapefile, $epsg, $schemaname, $tablename, $encoding = 'LATIN1', $adjustments = true) {
 		// ToDo: Die nachfolgenden beiden Test mit Groß und Kleinschreibung sind nicht vollständig für z.B. (Dbf, DBf).
 		// Man kann mit diesem Statement den Test vereinfachen auf eine Zeile
-		$filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
+		// $filename =current(preg_grep("/^" . preg_quote($shapefile . 'dbf') . "$/i", glob("$uploadpath/*")));
 
 		if (file_exists($uploadpath . $shapefile . '.dbf')) {
 			$filename = $uploadpath . $shapefile . '.dbf';
@@ -962,6 +962,17 @@ class data_import_export {
 		return $ret;
 	}
 
+	/**
+	 * Function import the file $importfile into postgres $database in $schema.$tablename
+	 * with more options
+	 * @return int Should return the result_code $ret of exec but:
+	 *  1) when running ogr in web container
+	 *  1.1) int return status of command running with exec or
+	 *  1.2) string with msg in error case
+	 *  2) when running with http on gdal container
+	 *  2.1) exitCode of output of curl_exec or
+	 *  2.2) echo exitCode of output of curl_exec and exit
+	 */
 	function ogr2ogr_import($schema, $tablename, $epsg, $importfile, $database, $layer, $sql = NULL, $options = NULL, $encoding = 'LATIN1', $multi = false) {
 		// echo '<br>Function ogr2ogr_import';
 		$command = '';
@@ -1006,7 +1017,7 @@ class data_import_export {
 			$command = 'export PGCLIENTENCODING=' . $encoding . ';' . OGR_BINPATH . 'ogr2ogr ' . $command;
 			$command .= ' 2> ' . IMAGEPATH . $tablename . '.err';
 			$output = array();
-			#echo '<p>command: ' . $command;
+			// echo '<p>command: ' . $command;
 			exec($command, $output, $ret);
 			$err_file = file_get_contents(IMAGEPATH . $tablename . '.err');
 			if ($ret != 0 OR strpos($err_file, 'statement failed') !== false) {
@@ -1326,7 +1337,8 @@ class data_import_export {
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->rolle->language
+					$this->rolle->language,
+					true 
 				);
 			}
 
@@ -1584,11 +1596,21 @@ class data_import_export {
 					if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 						$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
 						if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
-							# echo '<br>Metadatendatei heruntergeladen von: ' . $layerset[0]['metalink'];
-							# echo '<br>und gespeichert unter: ' . $metadata_file;
 						}
 						else { ?>
-							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihrem Administrator bei wiederholtem Auftreten dieses Fehlers.
+							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
+							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
+							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
+							exit;
+						}
+					}
+					# Bei Bedarf auch Nutzungsbedingungendatei mit dazupacken
+					if ($this->formvars['with_terms_of_use_document'] != '' AND $layerset[0]['terms_of_use_link'] != '') {
+						$terms_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['terms_of_use_link']);
+						if (file_put_contents($terms_file, file_get_contents($layerset[0]['terms_of_use_link'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
+						}
+						else { ?>
+							Download der Nutzungsbedingungen des Layers ist fehlgeschlagen!<br>Tragen Sie den Nutzungsbedingungen-Link des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
 							<p><a href="index.php?go=Daten_Export">Weiter mit Daten-Export</a>
 							<p><a href="index.php?go=neu Laden">Zur Karte</a><?php
 							exit;

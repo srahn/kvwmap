@@ -1303,7 +1303,12 @@ class GUI {
 				}
 				$label->maxlength = $dbLabel['maxlength'];
 				$label->repeatdistance = $dbLabel['repeatdistance'];
-				$label->wrap = $dbLabel['wrap'];
+				if (MAPSERVERVERSION >= 800) {
+					$label->wrap = chr($dbLabel['wrap']);
+				}
+				else {
+					$label->wrap = $dbLabel['wrap'];
+				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
 				$label->size = $dbLabel['size'];
@@ -2801,7 +2806,7 @@ class db_mapObj {
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,

@@ -506,7 +506,7 @@ class ddl {
 								# den letzten y-Wert dieses Elements in das Offset-Array schreiben
 								$this->layout['offset_attributes'][$attributes['name'][$j]] = $y;
 								if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
-									if (($this->miny[$this->pdf->currentContents] - $y) > $this->max_dataset_height) {
+									if (($this->miny[$this->pdf->currentContents] - (float)$y) > $this->max_dataset_height) {
 										$this->max_dataset_height = $this->miny[$this->pdf->currentContents] - $y;
 									}
 									# miny ist die unterste y-Position das aktuellen Datensatzes
@@ -684,8 +684,8 @@ class ddl {
 						# zurück zur Startseite des Datensatzes
 						$this->pdf->reopenObject($this->record_startpage);
 					}
-					$this->gui->map->set('width', $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR);
-					$this->gui->map->set('height', $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR);
+					$this->gui->map->width = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
+					$this->gui->map->height = $this->layout['elements'][$attributes['name'][$j]]['width'] * MAPFACTOR;
 					$oid = $this->result[$i][$this->layerset['maintable'].'_oid'];
 					# Rollenlayer zum Highlighten erzeugen und auf Objekt zoomen
 					if ($oid != ''){
@@ -732,14 +732,14 @@ class ddl {
 						$this->gui->map->selectOutputFormat('jpeg');
 					}
 					$this->gui->switchScaleUnitIfNecessary();
-					$this->gui->map->scalebar->set('status', MS_EMBED);
+					$this->gui->map->scalebar->status = MS_EMBED;
 					$this->gui->map->scalebar->position = MS_LR;
 					$this->gui->map->scalebar->label->size = 12;
 					$this->gui->map->scalebar->width = 180;
 					$this->gui->map->scalebar->height = 3;
 					# Parameter $scale in Data ersetzen
 					for($l = 0; $l < count($this->gui->layers_replace_scale); $l++){
-						$this->gui->layers_replace_scale[$l]->set('data', str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data));
+						$this->gui->layers_replace_scale[$l]->data = str_replace('$SCALE', $this->gui->map_scaledenom, $this->gui->layers_replace_scale[$l]->data);
 					}
 					$image_map = $this->gui->map->draw();
 					# Rollenlayer wieder entfernen
@@ -786,6 +786,8 @@ class ddl {
 	}
 
 	function handlePageOverflow($offset_attribute, $offset_value, $ypos){
+		$offset_value = (float)$offset_value;
+		$ypos = (float)$ypos;
 		if($this->layout['page_id'][$offset_attribute] != $this->pdf->currentContents){
 			$backto_oldpage = true;															# das Offset-Attribut wurde auf einer anderen Seite beendet -> zu dieser Seite zurückkehren
 		}

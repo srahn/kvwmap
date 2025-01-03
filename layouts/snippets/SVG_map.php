@@ -52,7 +52,7 @@ include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php
 	}
 
 	function moveback() {
-		document.getElementById("svghelp").SVGmoveback(); // das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.moveback();
 	}
 
 	function checkQueryFields() {
@@ -359,7 +359,7 @@ function startup() {
 	}
 	get_polygon_path();	
 	redrawPolygon();
-	if(doing == "polygonquery"){polygonarea()};
+	if(doing == "measurearea"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
   //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
@@ -403,7 +403,7 @@ function applyZoom() {
 }
 
 function mousewheelchange(evt) {
-	if (doing == "polygonquery") {
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if (doing == "measure") {
@@ -603,12 +603,6 @@ function init(){
 	}
 }
 
-top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("map").SVGclearMeasurement = clearMeasurement;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("svghelp").SVGmoveback = moveback;
-
 function moveback(evt){
 	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
@@ -658,7 +652,7 @@ function zoomall(){
 }
 
 function recentre(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
@@ -671,7 +665,7 @@ function recentre(){
 }
 
 function zoomin(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
@@ -683,7 +677,7 @@ function zoomin(){
 }
 
 function zoomout(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
@@ -734,6 +728,23 @@ function polygonquery() {
 	}
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
+	if (top.document.GUI.str_polypathx.value != "") {
+		polydrawing = true;
+		top.document.GUI.str_polypathx.value = "";
+		top.document.GUI.str_polypathy.value = "";
+	}
+	else {
+		deletepolygon();
+	}
+}
+
+function measurearea() {
+	if ((measuring || polydrawing) && (top.document.GUI.punktfang.checked)) {
+		remove_vertices();
+		request_vertices();
+	}
+	doing = "measurearea";
+	document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
 	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
@@ -850,8 +861,8 @@ function save_polygon_path(){
 
 function get_polygon_path(){
 	if(top.document.GUI.str_polypathx.value != ""){
-		highlightbyid("polygonquery0");
-		doing = "polygonquery";
+		highlightbyid("measurearea0");
+		doing = "measurearea";
 		var str_polypathx = top.document.GUI.str_polypathx.value;
 		var str_polypathy = top.document.GUI.str_polypathy.value;
 		polypathx = str_polypathx.split(";");
@@ -926,7 +937,7 @@ function mousedown(evt){
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
 			if(evt.preventDefault)evt.preventDefault();
 			else evt.returnValue = false; // IE fix
-			if(doing == "polygonquery"){
+			if(doing == "polygonquery" || doing == "measurearea"){
 				save_polygon_path();
 			}
 			if(doing == "measure"){
@@ -964,7 +975,7 @@ function mousedown(evt){
 	   case "ppquery":
 	    startPoint(evt);
 	   break;
-	   case "polygonquery":
+	   case "polygonquery": case "measurearea" :
 	 		if (polydrawing){
 	      addpolypoint(evt);
 	    }
@@ -1210,7 +1221,7 @@ function addpolypoint(evt){
   	polypathy.push(client_y);
   }
   redrawPolygon();
-  if(doing == "polygonquery"){polygonarea()};
+  if(doing == "measurearea"){polygonarea()};
 }
 	
 function deletepolygon(){
@@ -1239,7 +1250,7 @@ function redrawPolygon(){
 		polypath = polypath+" "+image_polypathx[0]+","+image_polypathy[0];
 	}
   // polygon um punktepfad erweitern
-	if(doing == "polygonquery"){
+	if(doing == "polygonquery" || doing == "measurearea"){
   	document.getElementById("polygon").setAttribute("points", polypath);
 	}
 	if(doing == "drawpolygon"){
@@ -1287,13 +1298,12 @@ function clearMeasurement(){
 	else if(doing == "polygonquery"){
 		polygonquery();
 	}
+	else if (doing == "measurearea") {
+		measurearea();
+	}
 }
 
 // ----------------------------strecke messen---------------------------------
-
-top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 function toggle_vertices(){
 	remove_vertices();
@@ -1480,7 +1490,7 @@ function add_vertex(evt){
 			vertex.setAttribute("opacity", "0.8");
 		}
 	}
-	if(doing == "polygonquery" || doing == "drawpolygon"){
+	if(doing == "polygonquery" || doing == "drawpolygon" || doing == "measurearea"){
 		if(!polydrawing){
 			restart();
 			polydrawing = true;

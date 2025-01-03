@@ -1096,7 +1096,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnittswahl_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1105,7 +1105,7 @@ function go_switch($go, $exit = false) {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -2112,9 +2112,9 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "zoomToMaxLayerExtent" : {
+			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
-				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
