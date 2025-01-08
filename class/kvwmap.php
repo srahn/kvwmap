@@ -4091,6 +4091,12 @@ echo '			</table>
 		}
 	}
 
+	function getRoute($formvars) {
+		include_(CLASSPATH.'Routing.php');
+		$routing = new routing($this->user->rolle, $this->database, $this->pgdatabase);
+		echo $routing->getRoute($formvars);
+	}
+
 	function reset_layers($layer_id){
 		$this->user->rolle->resetLayers($layer_id);
 		$this->user->rolle->resetQuerys($layer_id);

@@ -280,6 +280,10 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'get_route' : {
+				$GUI->getRoute($GUI->formvars);
+			} break;
+
 			case 'get_position_qrcode' : {
 				$GUI->sanitize([
 					'layer_id' => 'int',
