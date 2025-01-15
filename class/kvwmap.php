@@ -8565,7 +8565,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$new_params[] = '"' . $key . '":"' . $value . '"';
 			}
 			# speicher die neuen parameter
-			$rolle->update(array('layer_params' => implode(',', $new_params)));
+			$rolle->update(array('layer_params' => implode(',', $new_params)), false);
 		}
 	}
 
@@ -9105,7 +9105,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
-  * duplicate all layer that have it in duplicate_from_layer_id
+  * duplicate all layer that have the selected_layer_id in duplicate_from_layer_id
   * if $duplicate is false it updates also assignments to stelle for selected_layer
   * @param array $formvars Formular variables used to change the layer
   * @param boolean $duplicate True if the layer is a duplicate from another
@@ -9180,7 +9180,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					else {
 						$layer->remove_mapserver_templates();
 					}
-					$layer->update(array('geom_column' => $geom_column));
+					$layer->update(array('geom_column' => $geom_column), false);
 				}
 				if ($formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);
@@ -9561,7 +9561,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
 					'inviter_id' => $this->formvars['inviter_id']
-				)
+				),
+				false
 			);
 		}
 		if ($results[0]['success']) {
@@ -11232,17 +11233,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['CMD'] = '';
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
 		}
+
 		if ($this->formvars['selected_layer_id'] == '') {
 			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, true); # wenn kein Layer vorausgewählt, Subform-Layer ausschliessen
 		}
 		else {
-			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, false); # ansonsten nicht
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, false); # ansonsten nicht	
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 			if ($layerset[0]['privileg'] > 0) { # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true, true);
+				$attribute_values = [];
+				foreach($this->formvars['attributenames'] AS $key => $attributename) {
+					$attribute_values[$attributename] = $this->formvars['values'][$key];
+				}
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes(
+					$this->formvars['selected_layer_id'], // layer_id
+					$layerdb, // layerdb
+					$privileges['attributenames'], // attributenames
+					false, // all_languages
+					true, // recursive
+					true, // get_default
+					true, // replace
+					array('default', 'options'), // replace_only
+					$attribute_values // value_attributes
+				);
 				if (value_of($this->formvars, 'geom_from_layer') == '') {
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
@@ -11254,6 +11270,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 					}
 				}
+
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -11281,7 +11298,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 					}
 				}
-
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					# Hier auch nur Werte übergeben, die in neues Formular übernommen werden sollen
@@ -13213,7 +13229,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (count($refmaps) > 0) {
 					// reference map exists already, update it
 					$refmap = $refmaps[0];
-					$result = $refmap->update($params);
+					$result = $refmap->update($params, false);
 					$refmap_id = $refmap->get_id();
 				}
 				else {
@@ -14485,7 +14501,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					);
 				}
 				else {
-					$results = $this->myobject->update($this->myobject->data);
+					$results = $this->myobject->update($this->myobject->data, false);
 					if ($results[0]['success']) {
 						$result = array(
 							'success' => true,
@@ -14742,7 +14758,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
-    $this->user->rolle->setAktivLayer($this->formvars,$this->Stelle->id,$this->user->id);
+    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id);
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 
@@ -20886,7 +20902,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -21003,9 +21019,14 @@ class db_mapObj{
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
+						$replace_params = rolle::$layer_params;
+						// If key, value paires were passed replace it too
+						if (count($attribute_values) > 0) {
+							$replace_params = array_merge($replace_params, $attribute_values);
+						}
 						$attributes[$column][$i] = replace_params(
 							$attributes[$column][$i],
-							rolle::$layer_params,
+							$replace_params,
 							$this->User_ID,
 							$this->Stelle_ID,
 							rolle::$hist_timestamp,
@@ -21014,6 +21035,7 @@ class db_mapObj{
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);
