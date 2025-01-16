@@ -4,7 +4,7 @@ INSERT INTO `config` (`name`, `prefix`, `value`, `description`, `type`, `group`,
 (
   'ROUTING_URL', 
   '', 
-  'https://api.openrouteservice.org/v2/directions/driving-car?api_key=&start=$start&end=$end', 
+  '', 
   'URL eines Routing-Dienstes. Der Dienst muss GeoJSON zurückliefern. $start und $end sind die Platzhalter für den Start- bzw. Endpunkt der Route.', 
   'string', 
   'Administration', 
