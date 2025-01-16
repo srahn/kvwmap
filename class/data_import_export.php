@@ -1336,7 +1336,8 @@ class data_import_export {
 					$this->User_ID,
 					$this->Stelle_ID,
 					rolle::$hist_timestamp,
-					$this->rolle->language
+					$this->rolle->language,
+					true 
 				);
 			}
 

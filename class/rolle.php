@@ -13,20 +13,32 @@ class rolle {
 	var $minx;
 	var $language;
 	var $newtime;
+	var $gui; // file to include as gui
 	var $gui_object;
 	var $layerset;
+	var $data;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
 		#$this->layerset=$this->getLayer('');
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
+	}
+
+	public static	function find_by_ids($gui, $user_id, $stelle_id) {
+		$rolleObj = new MyObject($gui, 'rolle', array(array('key' => 'user_id', 'type' => 'integer'), array('key' => 'stelle_id', 'type' => 'integer')), $identifier_type = 'array');
+		$rolle = $rolleObj->find_by_ids(array(
+			'user_id' => $user_id,
+			'stelle_id' => $stelle_id
+		));
+		$rolle->data = $rolle->data;
+		return $rolle;
 	}
 
 	/*
@@ -447,7 +459,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>",4);
     $this->database->execSQL($sql);
     if (!$this->database->success) {
@@ -1808,7 +1820,69 @@ class rolle {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $ret[1], 4);
 			return 0;
 		}
+		// Update layer_params if default is not available for user
+		$rolle = rolle::find_by_ids($this->gui_object, $user_id, $stelle_id);
+		$this->rectify_layer_params($rolle);
 		return 1;
+	}
+
+	# ToDo pk: harmonize get_rolle_layer_params and get_layer_params, same with set_rolle_layer_params and set_layer_params
+	/**
+	 * Function get the layer parameter from rolle attribut layer_params as an assoziative array
+	 * @param MyObject The MyObject of the rolle.
+	 * @return Array The assoziative array with the layer params of rolle.
+	 */
+	function get_rolle_layer_params($rolle) {
+		return (array)json_decode('{' . $rolle->get('layer_params') . '}');
+	}
+
+	/**
+	 * Function set the layer parameter for rolle attribut layer_params as string
+	 * @param MyObject The MyObject of the rolle.
+	 * @param Array The assoziative array with layer params of rolle.
+	 * @return void
+	 */
+	function set_rolle_layer_params($rolle, $layer_params) {
+		$rolle->update(array('layer_params', implode(',', $new_layer_params)));
+	}
+
+	/**
+	 * Function get the layer_params of rolle and check if they are
+	 * arvailable for the user in that rolle. If not set the first possible value instead
+	 * of the before existing value of that layer parameter.
+	 * @param MyObject The MyObject of the rolle to be checked.
+	 * @return void
+	 */
+	function rectify_layer_params($rolle) {
+		include_once(CLASSPATH . 'LayerParam.php');
+		$layer_params = $this->get_rolle_layer_params($rolle);
+		$new_layer_params = array();
+		foreach (array_keys($layer_params) AS $key) {
+			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
+			$options = $layer_param->get_options($this->user_id, $this->stelle_id);
+			if (!$result['success']) {
+				return $result;
+			}
+			if (!in_array(
+				$layer_params[$key],
+				array_map(
+					function($option) {
+						return $option['value'];
+					},
+					$options
+				)
+			)) {
+				$layer_params[$key] = $options[$value];
+			};
+		}
+		foreach ($layer_params AS $param_key => $value) {
+			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
+		}
+		$this->set_layer_params($rolle, implode(',', $new_layer_params));
+		return array(
+			'success' => true,
+			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'
+		);
 	}
 
 	function deleteRollen($user_id, $stellen) {

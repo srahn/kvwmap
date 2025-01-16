@@ -370,11 +370,12 @@ class GUI {
 		$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 		$projTO = new projectionObj("init=epsg:4326");
 		$stellen_extent->project($projFROM, $projTO);
+		$url = GEO_NAME_SEARCH_URL
+			. urlencode($this->formvars['q'])
+			. (strpos(GEO_NAME_SEARCH_URL, 'viewbox=') === false ? '&viewbox=' . $stellen_extent->minx . ',' . $stellen_extent->miny . ',' . $stellen_extent->maxx . ',' . $stellen_extent->maxy : '');
 		$result = json_decode(
 			url_get_contents(
-				GEO_NAME_SEARCH_URL .
-				urlencode($this->formvars['q']) .
-				(strpos(GEO_NAME_SEARCH_URL, 'viewbox=') === false ? '&viewbox=' . $stellen_extent->minx . ',' . $stellen_extent->miny . ',' . $stellen_extent->maxx . ',' . $stellen_extent->maxy : ''),
+				$url,
 				NULL,
 				NULL,
 				'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:75.0) Gecko/20100101 Firefox/75.0'
@@ -4607,7 +4608,7 @@ echo '			</table>
   	$randomnumber = rand(0, 1000000);
   	$svgfile  = $randomnumber.'.svg';
   	$jpgfile = $randomnumber.'.jpg';
-  	$fpsvg = fopen(IMAGEPATH.$svgfile, 'w');
+  	$fpsvg = fopen(IMAGEPATH . $svgfile, 'w');
   	$svg = '<?xml version="1.0"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
@@ -4617,12 +4618,12 @@ echo '			</table>
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
 		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, URL . 'tmp/', $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
-  	exec(IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile);
-  	#echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
+  	exec(IMAGEMAGICKPATH . 'convert ' . IMAGEPATH . $svgfile . ' ' . IMAGEPATH . $jpgfile);
+		// echo IMAGEMAGICKPATH.'convert '.IMAGEPATH.$svgfile.' '.IMAGEPATH.$jpgfile;exit;
 
     if (function_exists('imagecreatefromjpeg')) {
     	$mainimage = imagecreatefromjpeg(IMAGEPATH.$jpgfile);
@@ -4635,7 +4636,8 @@ echo '			</table>
       ImageCopy($mainimage, $scaleimage, imagesx($mainimage)-imagesx($scaleimage), imagesy($mainimage)-imagesy($scaleimage), 0, 0, imagesx($scaleimage), imagesy($scaleimage));
       ob_end_clean();
       ImageJPEG($mainimage, IMAGEPATH.$jpgfile);
-    }
+    } 
+		//readfile(IMAGEPATH . $svgfile);
 		include(SNIPPETS . 'map_image.php');
   }
 
@@ -5584,9 +5586,9 @@ echo '			</table>
 				}
 			}
 		}
-		# zoomToMaxLayerExtent
+		# zoom_to_max_layer_extent
 		if ($this->formvars['zoom_layer_id'] != '') {
-			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
 		$this->saveMap('');
 		if ($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next') {
@@ -5703,8 +5705,8 @@ echo '			</table>
 			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
-		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		# zoom_to_max_layer_extent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
     # Spaltenname und from-where abfragen
     $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
     $data_explosion = explode(' ', $data);
@@ -5900,8 +5902,8 @@ echo '			</table>
 			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
-		# zoomToMaxLayerExtent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+		# zoom_to_max_layer_extent
+		if($this->formvars['zoom_layer_id'] != '')$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
 			$currenttime=date('Y-m-d H:i:s',time());
 			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
@@ -6650,10 +6652,10 @@ echo '			</table>
 			# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 			$this->scaleMap($saved_scale);
 		}
-		# zoomToMaxLayerExtent
+		# zoom_to_max_layer_extent
 		if ($this->formvars['zoom_layer_id'] != '') {
 			# Kartendrucklayouts laden
-			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
     $this->Document->frames = $this->Document->load_frames($this->Stelle->id, NULL);
 		if (count($this->Document->frames) == 0) {
@@ -8580,7 +8582,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$new_params[] = '"' . $key . '":"' . $value . '"';
 			}
 			# speicher die neuen parameter
-			$rolle->update(array('layer_params' => implode(',', $new_params)));
+			$rolle->update(array('layer_params' => implode(',', $new_params)), false);
 		}
 	}
 
@@ -9120,7 +9122,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
   /**
   * This function update layers settings of $formvars['selected_layer_id'] and
-  * duplicate all layer that have it in duplicate_from_layer_id
+  * duplicate all layer that have the selected_layer_id in duplicate_from_layer_id
   * if $duplicate is false it updates also assignments to stelle for selected_layer
   * @param array $formvars Formular variables used to change the layer
   * @param boolean $duplicate True if the layer is a duplicate from another
@@ -9195,7 +9197,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					else {
 						$layer->remove_mapserver_templates();
 					}
-					$layer->update(array('geom_column' => $geom_column));
+					$layer->update(array('geom_column' => $geom_column), false);
 				}
 				if ($formvars['pfad'] == '' OR $attributes != NULL){
 					$mapDB->delete_old_attributes($formvars['selected_layer_id'], $attributes);
@@ -9576,7 +9578,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					'loginname' => $this->formvars['loginname'],
 					'stelle_id' => $this->formvars['stelle_id'],
 					'inviter_id' => $this->formvars['inviter_id']
-				)
+				),
+				false
 			);
 		}
 		if ($results[0]['success']) {
@@ -9861,7 +9864,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
-
+				// echo '<br>sql where: ' . $sql_where;
 				$sql = "
 					SELECT " . $query_parts['select'] . " FROM (
 						SELECT " . $pfad . "
@@ -9915,8 +9918,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				// if ($this->user->id == 41) {
-			  // echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
+				// if ($this->user->id == 17) {
+				// 	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
 				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
 				$ret = $layerdb->execSQL($sql . $sql_order . $sql_limit, 4, 0, true);
@@ -11247,17 +11250,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['CMD'] = '';
 			$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
 		}
+
 		if ($this->formvars['selected_layer_id'] == '') {
 			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, true); # wenn kein Layer vorausgewählt, Subform-Layer ausschliessen
 		}
 		else {
-			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, false); # ansonsten nicht
+			$this->layerdaten = $this->Stelle->getqueryablePostgisLayers(1, NULL, false); # ansonsten nicht	
 			$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
 			if ($layerset[0]['privileg'] > 0) { # überprüfen, ob Recht zum Erstellen von neuen Datensätzen gesetzt ist
 				$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 				$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 				$privileges = $this->Stelle->get_attributes_privileges($this->formvars['selected_layer_id']);
-				$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, $privileges['attributenames'], false, true, true);
+				$attribute_values = [];
+				foreach($this->formvars['attributenames'] AS $key => $attributename) {
+					$attribute_values[$attributename] = $this->formvars['values'][$key];
+				}
+				$layerset[0]['attributes'] = $mapDB->read_layer_attributes(
+					$this->formvars['selected_layer_id'], // layer_id
+					$layerdb, // layerdb
+					$privileges['attributenames'], // attributenames
+					false, // all_languages
+					true, // recursive
+					true, // get_default
+					true, // replace
+					array('default', 'options'), // replace_only
+					$attribute_values // value_attributes
+				);
 				if (value_of($this->formvars, 'geom_from_layer') == '') {
 					$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
 				}
@@ -11269,6 +11287,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$formElementType = $layerset[0]['attributes']['form_element_type'][$layerset[0]['attributes']['indizes'][$element[1]]];
 					}
 				}
+
 				######### für neuen Datensatz verwenden -> von der Sachdatenanzeige übergebene Formvars #######
 				if ($this->formvars['chosen_layer_id'] OR $this->formvars['weiter_erfassen']) {
 					$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
@@ -11296,7 +11315,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 					}
 				}
-
 				######### von einer Sachdatenanzeige übergebene Formvars #######
 				for ($j = 0; $j < count($layerset[0]['attributes']['name']); $j++) {
 					# Hier auch nur Werte übergeben, die in neues Formular übernommen werden sollen
@@ -11356,9 +11374,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						# nur beim ersten Aufruf den Extent so anpassen, dass der alte Maßstab wieder da ist
 						$this->scaleMap($saved_scale);
 					}
-					# zoomToMaxLayerExtent
+					# zoom_to_max_layer_extent
 					if (value_of($this->formvars, 'zoom_layer_id') != '') {
-						$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+						$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 					}
 					# Zoom auf Geometrie-Fehler-Position
 					if ($this->error_position != '') {
@@ -12336,7 +12354,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$layer_id = $this->data_import_export->process_import_file(NULL, NULL, 1, $this->Stelle, $this->user, $this->pgdatabase, $this->formvars['epsg'], 'point', $this->formvars);
 		if ($layer_id != NULL) {
 			$this->loadMap('DataBase');
-			$this->zoomToMaxLayerExtent($layer_id);
+			$this->zoom_to_max_layer_extent($layer_id);
 			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->drawMap();
 			$this->saveMap('');
@@ -12441,7 +12459,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				
 				case 'use_geometry' : {
 					if (!in_array($filetype, array('tiff', 'tif', 'geotif'))) {
-						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoomToMaxLayerExtent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
+						echo '&nbsp;=>&nbsp;<a href="javascript:void(0);" onclick="enclosingForm.last_doing.value=\'add_geom\';enclosingForm.secondpoly.value=\'true\';ahah(\'index.php\', \'go=spatial_processing&path1=\'+enclosingForm.pathwkt.value+\'&operation=add_geometry&resulttype=svgwkt&geom_from_layer='.$layer_id.'&code2execute=zoom_to_max_layer_extent('.$layer_id.');\', new Array(enclosingForm.result, \'\', \'\'), new Array(\'setvalue\', \'execute_function\', \'execute_function\'));">Geometrie&nbsp;übernehmen</a>';
 					}
 				} break;
 
@@ -12450,7 +12468,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						echo '&nbsp;=>&nbsp;<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id='.$layer_id.'">Datensätze&nbsp;anzeigen</a><br>';
 					}
 					else {
-						echo '&nbsp;=>&nbsp;<a href="index.php?go=zoomToMaxLayerExtent&layer_id='.$layer_id.'">Zoom&nbsp;auf&nbsp;Layer</a><br>';
+						echo '&nbsp;=>&nbsp;<a href="index.php?go=zoom_to_max_layer_extent&layer_id='.$layer_id.'">Zoom&nbsp;auf&nbsp;Layer</a><br>';
 					}
 				}
 			}
@@ -13228,7 +13246,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				if (count($refmaps) > 0) {
 					// reference map exists already, update it
 					$refmap = $refmaps[0];
-					$result = $refmap->update($params);
+					$result = $refmap->update($params, false);
 					$refmap_id = $refmap->get_id();
 				}
 				else {
@@ -13510,7 +13528,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
-	function Filterverwaltung() {
+	function filterverwaltung() {
 		$this->loadMap('DataBase');
 		$this->titel = 'Filterverwaltung';
 		$this->main = 'filterverwaltung.php';
@@ -13575,7 +13593,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->formvars['value_' . $this->attributes[$i]['name']] = '';
 				}
 				for ($j = 0; $j < count($this->selected_layers); $j++){
-					$filter = $this->mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$j]);
+					$filter = $this->mapDB->read_attribute_filter($this->formvars['stelle'], $this->selected_layers[$j]);
 					for ($i = 0; $i < count_or_0($filter); $i++) {
 						if (
 							$this->formvars['value_'.$filter[$i]['attributname']] == NULL OR
@@ -13593,11 +13611,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
             }
           }
         }
-        foreach($setKeys as $key => $value){
-          if($value < count_or_0($this->selected_layers)){
+        foreach ($setKeys as $key => $value){
+          if ($value < count_or_0($this->selected_layers)){
             $this->formvars['value_'.$key] = '---- verschieden ----';
           }
-        }				
+        }
         if ($this->formvars['CMD']!='') {
           # Es soll navigiert werden
           # Navigieren
@@ -13621,7 +13639,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           }
         }
       }
-      else{
+      else {
         # Es soll navigiert werden
         # Navigieren
         $this->navMap($this->formvars['CMD']);
@@ -13629,7 +13647,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         $this->user->rolle->readSettings();
       }
     }
-    else{
+    else {
       # Es soll navigiert werden
       # Navigieren
       $this->navMap($this->formvars['CMD']);
@@ -13638,7 +13656,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
   }
 
-  function Filter_speichern($formvars){
+	function Filter_speichern($formvars) {
+		include_once(CLASSPATH . 'Layer.php');
     $mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
     if($formvars['selected_layers'] != ''){
       $this->selected_layers = explode(', ', $formvars['selected_layers']);
@@ -13723,12 +13742,22 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
         }
       }
     }
-    for($i = 0; $i < count($this->selected_layers); $i++){
-      $filter = $mapDB->readAttributeFilter($this->formvars['stelle'], $this->selected_layers[$i]);
-      $mapDB->writeFilter($this->pgdatabase, $filter, $this->selected_layers[$i], $formvars['stelle']);
-    }
-    $this->Filterverwaltung();
-  }
+		for ($i = 0; $i < count($this->selected_layers); $i++) {
+			$this->filterstring = $this->compose_filter(
+				$mapDB->read_attribute_filter($this->formvars['stelle'], $this->selected_layers[$i]),
+				Layer::find_by_id($this, $this->selected_layers[$i])->get('epsg_code')
+			);
+			$result = $mapDB->write_filter(
+				$this->filterstring,
+				$formvars['stelle'],
+				$this->selected_layers[$i]
+			);
+			if ($result AND $this->filterstring != '') {
+				$this->add_message('info', 'Folgenden Filter für Layer ' . $this->selected_layers[$i] . ' in Stelle ' . $formvars['stelle'] . ' geschrieben:<br>' . $this->filterstring);
+			}
+		}
+		$this->filterverwaltung();
+	}
 
 	function MenuesAnzeigen() {
 		# Abfragen aller Menues
@@ -14489,7 +14518,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					);
 				}
 				else {
-					$results = $this->myobject->update($this->myobject->data);
+					$results = $this->myobject->update($this->myobject->data, false);
 					if ($results[0]['success']) {
 						$result = array(
 							'success' => true,
@@ -14746,7 +14775,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     # Wenn ein Button im Kartenfenster gewählt wurde,
     # werden auch die Einstellungen aus der Legende übernommen
-    $this->user->rolle->setAktivLayer($this->formvars,$this->Stelle->id,$this->user->id);
+    $this->user->rolle->setAktivLayer($this->formvars, $this->Stelle->id, $this->user->id);
     $this->user->rolle->setQueryStatus($this->formvars);
 	}
 
@@ -14770,9 +14799,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->loadMap('DataBase', array(), ($this->formvars['strict_layer_name'] ? true : false));
 		# zwischenspeichern des vorherigen Maßstabs
 		$oldscale=round($this->map_scaledenom);
-		# zoomToMaxLayerExtent
+		# zoom_to_max_layer_extent
 		if (value_of($this->formvars, 'zoom_layer_id') != '') {
-			$this->zoomToMaxLayerExtent($this->formvars['zoom_layer_id']);
+			$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
 		}
 		if (value_of($this->formvars, 'nScale') != '' AND $this->formvars['nScale'] != $oldscale) {
 			# Zoom auf den in der Maßstabsauswahl ausgewählten Maßstab
@@ -15826,10 +15855,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 
+	/**
+	 * Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
+	 * Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
+	 * werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
+	 */
 	function processJSON($json, $doc_path = NULL, $doc_url = NULL, $options = NULL, $attribute_names = NULL, $attribute_values = NULL, $layer_db = NULL, $quote = '') {
-		# Diese Funktion wandelt den übergebenen JSON-String in ein PostgeSQL-Struct um.
-		# Wenn der JSON-String mit "file:" gekennzeichnete File-Input-Feld-Namen von Datei-Uploads enthält,
-		# werden diese Uploads gespeichert und der entstandene Dateipfad an die enstdprechende Stelle im String eingefügt
 		if (is_string($json) AND (strpos($json, '{') !== false OR strpos($json, '[') !== false)) {			// bei Bedarf den JSON-String decodieren
 			$json = json_decode($json);
 		}
@@ -17217,26 +17248,31 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     }
   }
 
-	function zoomToMaxLayerExtent($layer_id) {
+	/**
+	 * Function zoom to maximum extent of Layer with $layer_id in current map object $this->map
+	 * @param int $layer_id Id of layer or rollenlayer to zoom to
+	 * @return void
+	 */
+	function zoom_to_max_layer_extent($layer_id) {
 		sanitize($layer_id, 'int');
 		# Abfragen der maximalen Ausdehnung aller Daten eines Layers
-		if ($layer_id > 0){
+		if($layer_id > 0) {
 			$layer = $this->user->rolle->getLayer($layer_id);
 		}
-		else{
-			$layer = $this->user->rolle->getRollenLayer(-$layer_id);
+		else {
+			$layer = $this->user->rolle->getRollenLayer(-$layer_id)[0];
 		}
-		switch ($layer[0]['Datentyp']) {
+		switch ($layer['Datentyp']) {
 			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
 				# Abfragen der Datenbankverbindung des Layers
-				$layerdb=$this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-				$data = $layer[0]['Data'];
-				if ($data != ''){
+				$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
+				$data = $layer['Data'];
+				if ($data != '') {
 					# suchen nach dem ersten Vorkommen von using
-					$pos = strpos(strtolower($data),'using ');
-					# Abschneiden der uing Wörter im Datastatement wenn unique verwendet wurde
+					$pos = strpos(strtolower($data), 'using ');
+					# Abschneiden der using Wörter im Datastatement wenn unique verwendet wurde
 					if ($pos !== false) {
-						$subquery=substr($data,0,$pos);
+						$subquery = substr($data, 0, $pos);
 					}
 					else {
 						# using kommt nicht vor, es handelt sich um ein einfaches Data Statement in der Form
@@ -17246,56 +17282,91 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$explosion = explode(' ', $data);
 					$this->attributes['the_geom'] = $explosion[0];
 				}
-				else{
-					$subquery = substr($layer[0]['pfad'], 7);
+				else {
+					$subquery = substr($layer['pfad'], 7);
 					$this->attributes = $this->mapDB->read_layer_attributes($layer_id, $layerdb, NULL);
 				}
 
 				# Filter berücksichtigen
 				$filter = $this->mapDB->getFilter($layer_id, $this->Stelle->id);
-				if($filter != ''){
+				if ($filter != '') {
 					$filter = str_replace('$USER_ID', $this->user->id, $filter);
-					$subquery .= ' WHERE '.$filter;
+					$subquery .= ' WHERE ' . $filter;
 				}
 
+				$subquery = replace_params(
+					$subquery,
+					rolle::$layer_params,
+					$this->User_ID,
+					$this->Stelle_ID,
+					rolle::$hist_timestamp,
+					$this->rolle->language,
+					$layer['duplicate_criterion']
+				);
+
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
-				$sql ='SELECT st_xmin(extent) AS minx,st_ymin(extent) AS miny,st_xmax(extent) AS maxx,st_ymax(extent) AS maxy FROM (SELECT st_transform(st_setsrid(st_extent('.$this->attributes['the_geom'].'), '.$layer[0]['epsg_code'].'), '.$this->user->rolle->epsg_code.') AS extent FROM (SELECT ';
-				$sql.=$subquery;
-				$sql.=') AS fooForMaxLayerExtent) as foo';
+				$sql = "
+					SELECT
+						st_xmin(extent) AS minx,
+						st_ymin(extent) AS miny,
+						st_xmax(extent) AS maxx,
+						st_ymax(extent) AS maxy
+					FROM
+						(
+							SELECT
+								st_transform(
+									st_setsrid(
+										st_extent(" . $this->attributes['the_geom'] . "),
+										" . $layer['epsg_code'] . "
+									),
+									" . $this->user->rolle->epsg_code . "
+								) AS extent
+							FROM
+								(
+									SELECT
+										" . $subquery . "
+								) AS fooForMaxLayerExtent
+						) as foo
+				";
 				#echo $sql;
 
 				# Abfragen der Layerausdehnung
-				$ret=$layerdb->execSQL($sql,4,0);
-				if ($ret[0]) { echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql); return 0; }
+				$ret = $layerdb->execSQL($sql, 4, 0);
+				if ($ret[0]) {
+					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					return 0;
+				}
 				$rs = pg_fetch_array($ret[1]);
 			} break;
 
 			case MS_LAYER_RASTER : {
-				if ($layer[0]['Data'] != ''){				# eine einzelne Rasterdatei
-					$raster_file = SHAPEPATH.$layer[0]['Data'];
-					if(file_exists($raster_file)){
+				if ($layer[0]['Data'] != '') {
+					# eine einzelne Rasterdatei
+					$raster_file = SHAPEPATH . $layer['Data'];
+					if (file_exists($raster_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'gdalinfo "'.$raster_file.'" > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'gdalinfo "' . $raster_file . '" > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
 						$ll = explode(', ', trim(get_first_word_after($infotext, 'Lower Left', '', ')'), ' ('));
 						$ur = explode(', ', trim(get_first_word_after($infotext, 'Upper Right', '', ')'), ' ('));
 					}
 				}
-				elseif ($layer[0]['tileindex'] != ''){		# ein Tile-Index
+				elseif ($layer['tileindex'] != '') {
+					# ein Tile-Index
 					$shape_file = SHAPEPATH.$layer[0]['tileindex'];
-					if(file_exists($shape_file)){
+					if (file_exists($shape_file)) {
 						$output = rand(0, 100000);
-						$command = OGR_BINPATH.'ogrinfo -al -so '.$shape_file.' > '.IMAGEPATH.$output.'.info';
+						$command = OGR_BINPATH . 'ogrinfo -al -so ' . $shape_file . ' > ' . IMAGEPATH . $output . '.info';
 						exec($command);
-						$infotext = file_get_contents(IMAGEPATH.$output.'.info');
+						$infotext = file_get_contents(IMAGEPATH . $output . '.info');
 						$extent = get_first_word_after($infotext, 'Extent:', ' ', chr(10));
 						$corners = explode('-', $extent);
 						$ll = explode(', ', trim($corners[0], '() '));
 						$ur = explode(', ', trim($corners[1], '() '));
 					}
 				}
-				$extent = new rectObj($ll[0],$ll[1],$ur[0],$ur[1]);
+				$extent = new rectObj($ll[0], $ll[1], $ur[0], $ur[1]);
 				$rasterProjection = new projectionObj("init=epsg:".$layer[0]['epsg_code']);
 				$userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 				$extent->project($rasterProjection, $userProjection);
@@ -17305,24 +17376,32 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$rs['maxy'] = $extent->maxy;
 			} break;
 		}
-		if($rs['minx'] != ''){
-			if($this->user->rolle->epsg_code == 4326)$rand = 10/10000;
-			else $rand = 10;
-			$minx=$rs['minx']-$rand;
-			$maxx=$rs['maxx']+$rand;
-			$miny=$rs['miny']-$rand;
-			$maxy=$rs['maxy']+$rand;
+		if ($rs['minx'] != '') {
+			if ($this->user->rolle->epsg_code == 4326) {
+				$rand = 10/10000;
+			}
+			else {
+				$rand = 10;
+			}
+			$minx = $rs['minx'] - $rand;
+			$maxx = $rs['maxx'] + $rand;
+			$miny = $rs['miny'] - $rand;
+			$maxy = $rs['maxy'] + $rand;
 			#echo 'box:'.$minx.' '.$miny.','.$maxx.' '.$maxy;
-			$this->map->setextent($minx,$miny,$maxx,$maxy);
+			$this->map->setextent($minx, $miny, $maxx, $maxy);
 			# damit nicht außerhalb des Stellen-Extents oder des maximalen Layer-Maßstabs gezoomt wird
 			$oPixelPos = new PointObj();
-			$oPixelPos->setXY($this->map->width/2,$this->map->height/2);
-			if($layer[0]['maxscale'] > 0 AND $layer[0]['maxscale'] < $this->map->scaledenom)$nScale = $layer[0]['maxscale']-1;
-			else $nScale = $this->map->scaledenom;
-			$this->map->zoomscale($nScale,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+			$oPixelPos->setXY($this->map->width / 2, $this->map->height / 2);
+			if ($layer['maxscale'] > 0 AND $layer['maxscale'] < $this->map->scaledenom) {
+				$nScale = $layer['maxscale'] - 1;
+			}
+			else {
+				$nScale = $this->map->scaledenom;
+			}
+			$this->map->zoomscale($nScale, $oPixelPos, $this->map->width, $this->map->height, $this->map->extent, $this->Stelle->MaxGeorefExt);
 			$this->map_scaledenom = $this->map->scaledenom;
 		}
-  }
+	}
 
 	/**
 	* Function erzeugt eine MapServer Query Map vom $k-ten Feature im layerset
@@ -17835,6 +17914,52 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 	}
 	
+		/**
+	 * Function create the filter statement for layer with $layer_id in stelle with $stelle_id based on $filter settings
+	 * and write it to the $database.
+	 * @param array $filter The filter settings
+	 * @param integer $epsg_code The epsg_code of the geometry of the layer
+	 * @return boolean Return 0 in case of error
+	 */
+	function compose_filter($filter, $epsg_code) {
+		$filterstring = '';
+		if ($filter != '') {
+			$filterparts = array();
+			for ($i = 0; $i < count($filter); $i++) {
+				if ($filter[$i]['type'] == 'geometry') {
+					$poly_geom = $this->pgdatabase->getpolygon($filter[$i]['attributvalue'], $epsg_code);
+					#$filterparts[] = $filter[$i]['attributname'].' && \''.$poly_geom.'\'';		// ist ja bei within und intersects schon mit drin
+					$filterparts[] = $filter[$i]['operator'] . "(" . $filter[$i]['attributname'] . ",'" . $poly_geom . "'::geometry)";
+				}
+				else {
+					if ($filter[$i]['operator'] == 'IS') {
+						$filterparts[] = $filter[$i]['attributname'] . ' ' . $filter[$i]['operator'] . ' ' . $filter[$i]['attributvalue'];
+					}
+					elseif ($filter[$i]['operator'] == 'IN') {
+						if ($filter[$i]['type'] == 'varchar' OR $filter[$i]['type'] == 'text') {
+							$filter[$i]['attributvalue'] = implode(
+								',',
+								array_map(
+									function($value) {
+										return "'" . $value . "'";
+									},
+									explode(',', $filter[$i]['attributvalue'])
+								)
+								);
+						}
+						$filterparts[] = $filter[$i]['attributname'] . " " . $filter[$i]['operator'] . " (" . $filter[$i]['attributvalue'] . ")";
+					}
+					elseif (strpos($filter[$i]['attributvalue'], '$') !== false) {
+						$filterparts[] = "COALESCE(CAST(" . $filter[$i]['attributname'] . " AS text), '') = '" . $filter[$i]['attributvalue'] . "'";
+					}
+					else {
+						$filterparts[] = $filter[$i]['attributname'] . " " . $filter[$i]['operator'] . " " . quote($filter[$i]['attributvalue'], $filter[$i]['type']);
+					}
+				}
+			}
+		}
+		return '(' . implode(' AND ', $filterparts) . ')';
+	}
 } # end of class GUI
 
 class db_mapObj{
@@ -18508,41 +18633,34 @@ class db_mapObj{
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
   }
 
-  function writeFilter($database, $filter, $layer, $stelle){
-    if($filter != ''){
-      $layerdata = $this->get_Layer($layer);
-      $filterstring = '(1 = 1';
-      for($i = 0; $i < count($filter); $i++){
-        if($filter[$i]['type'] == 'geometry'){
-          $poly_geom = $database->getpolygon($filter[$i]['attributvalue'], $layerdata['epsg_code']);
-          #$filterstring .= ' AND '.$filter[$i]['attributname'].' && \''.$poly_geom.'\'';		// ist ja bei within und intersects schon mit drin
-          $filterstring .= ' AND '.$filter[$i]['operator'].'('.$filter[$i]['attributname'].',\''.$poly_geom.'\'::geometry)';
-        }
-        else{
-          if($filter[$i]['operator'] == 'IS'){
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' '.$filter[$i]['attributvalue'];
-          }
-          elseif($filter[$i]['operator'] == 'IN'){
-            if($filter[$i]['type'] == 'varchar' OR $filter[$i]['type'] == 'text'){
-              $values = explode(',', $filter[$i]['attributvalue']);
-              $filter[$i]['attributvalue'] = "'".implode("','", $values)."'";
-            }
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' ('.$filter[$i]['attributvalue'].')';
-          }
-          else{
-            $filterstring .= ' AND '.$filter[$i]['attributname'].' '.$filter[$i]['operator'].' \''.$filter[$i]['attributvalue'].'\'';
-          }
-        }
-      }
-      $filterstring .= ')';
-    }
-    $sql = 'UPDATE used_layer SET Filter = "'.$filterstring.'" WHERE Stelle_ID = '.$stelle.' AND Layer_ID = '.$layer;
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->writeFilter - Speichern des Filterstrings:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    if ($query==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-  }
+	/**
+	 * Function write the filter for Stelle with $stelle_id and Layer with $layer_id it to the Database.
+	 * @param string $filterstring
+	 * @param integer $stelle_id Id of the stelle to set the filter for
+	 * @param integer $layer_id Id of the layer to set the filter for
+	 * @return boolean Return false in case of error
+	 */
+	function write_filter($filterstring, $stelle_id, $layer_id) {
+		$filterstring = pg_escape_string($filterstring);
+		$sql = "
+			UPDATE
+				used_layer
+			SET
+				`Filter` = '" . $filterstring . "'
+			WHERE
+				`Stelle_ID` = " . $stelle_id . " AND
+				`Layer_ID` = " . $layer_id . "
+		";
+		// echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->write_filter - Speichern des Filterstrings:<br>" . $sql, 4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			echo $this->db->mysqli->error;
+			return false;
+		}
+		return true;
+	}
 
   function checkPolygon($poly_id){
     $sql = 'SELECT * FROM u_attributfilter2used_layer WHERE attributvalue = "'.$poly_id.'" AND type = "geometry"';
@@ -18569,7 +18687,7 @@ class db_mapObj{
     return $poly_id;
   }
 
-  function saveAttributeFilter($formvars){
+	function saveAttributeFilter($formvars) {
 		$sql = "
 			INSERT INTO 
 				u_attributfilter2used_layer 
@@ -18583,13 +18701,16 @@ class db_mapObj{
 			ON DUPLICATE KEY UPDATE  
 				attributvalue = '" . $this->db->mysqli->real_escape_string($formvars['attributvalue']) . "', 
 				operator = '" . $formvars['operator'] . "'";
-    #echo $sql;
-    $this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-  }
+		#echo $sql;
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->saveAttributeFilter - Speichern der Attribute-Filter-Parameter:<br>" . $sql,4);
+		$ret = $this->db->execSQL($sql);
+		if (!$this->db->success) {
+			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
+			return 0;
+		}
+	}
 
-	function readAttributeFilter($Stelle_ID, $Layer_ID) {
+	function read_attribute_filter($Stelle_ID, $Layer_ID) {
 		$filter = [];
 		$sql = "
 			SELECT
@@ -18601,7 +18722,7 @@ class db_mapObj{
 				Layer_ID = " . $Layer_ID . "
 		";
 		# echo '<br>Sql: ' . $sql;
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->readAttributeFilter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
+		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_attribute_filter - Lesen der Attribute-Filter-Parameter:<br>" . $sql, 4);
 		$this->db->execSQL($sql);
 		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__,4); return 0; }
 		while($rs = $this->db->result->fetch_assoc()) {
@@ -20798,7 +20919,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options'), $attribute_values = []) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20915,9 +21036,14 @@ class db_mapObj{
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
+						$replace_params = rolle::$layer_params;
+						// If key, value paires were passed replace it too
+						if (count($attribute_values) > 0) {
+							$replace_params = array_merge($replace_params, $attribute_values);
+						}
 						$attributes[$column][$i] = replace_params(
 							$attributes[$column][$i],
-							rolle::$layer_params,
+							$replace_params,
 							$this->User_ID,
 							$this->Stelle_ID,
 							rolle::$hist_timestamp,
@@ -20926,6 +21052,7 @@ class db_mapObj{
 					}
 				}
 			}
+
 			if ($get_default AND $attributes['default'][$i] != '') {
 				# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
 				$ret1 = $layerdb->execSQL('SELECT ' . $attributes['default'][$i], 4, 0);

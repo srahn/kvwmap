@@ -87,7 +87,14 @@ function get_url(){
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
-function quote($var, $type = NULL){
+/**
+ * Function enclose $var with single quotes when $type is text or varchar
+ * and elsewhere if $var has a numerical value
+ * @param any $var The value that has to be enclosed with quotas or not
+ * @param string $type optional type of var, default empty string
+ * @return any $var as string with enclosed quotes or as it is if not.
+ */
+function quote($var, $type = '') {
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
@@ -1923,7 +1930,8 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $export = 'false') {
+	// echo '<br>replace: ' . print_r($params, true) . ' in str: ' . $str;
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
@@ -1938,6 +1946,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
 		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
 		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		if (!is_null($export))							$str = str_replace('$EXPORT', $export, $str);
 	}
 	return $str;
 }

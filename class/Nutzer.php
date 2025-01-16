@@ -44,10 +44,13 @@ class Nutzer extends MyObject {
 			$num_login_failed = $nutzer->get('num_login_failed') + 1;
 			$gui->debug->show('Setze num_login_failed auf ' . $num_login_failed, Nutzer::$write_debug);
 
-			$nutzer->update(array(
-				'num_login_failed' => $num_login_failed,
-				'login_locked_until' => date('Y-m-d H:i:s', time() + ($num_login_failed <= 5 ? 0 : $num_login_failed * 5))
-			));
+			$nutzer->update(
+				array(
+					'num_login_failed' => $num_login_failed,
+					'login_locked_until' => date('Y-m-d H:i:s', time() + ($num_login_failed <= 5 ? 0 : $num_login_failed * 5))
+				),
+				false
+			);
 		}
 		return $nutzer;
 	}
@@ -55,11 +58,14 @@ class Nutzer extends MyObject {
 	public static function reset_num_login_failed($gui, $login_name) {
 		$nutzer = Nutzer::find_by_login_name($gui, $login_name);
 		if ($nutzer->has_key('num_login_failed')) {
-			$nutzer->update(array(
-				'ID' => $nutzer->get('ID'),
-				'num_login_failed' => 0,
-				'login_locked_until' => ''
-			));
+			$nutzer->update(
+				array(
+					'ID' => $nutzer->get('ID'),
+					'num_login_failed' => 0,
+					'login_locked_until' => ''
+				),
+				false
+			);
 		}
 		return $nutzer;
 	}

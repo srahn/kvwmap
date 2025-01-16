@@ -190,11 +190,12 @@ function degree2meter($center_y) {
 	return 111319 * $lat_adj;
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $export = 'false') {
+	// echo '<br>replace: ' . print_r($params, true) . ' in str: ' . $str;
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
@@ -205,6 +206,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
 		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
 		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		if (!is_null($export))							$str = str_replace('$EXPORT', $export, $str);
 	}
 	return $str;
 }
