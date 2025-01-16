@@ -25,7 +25,7 @@ class routing {
 		$endpoint->project($projFROM, $projTO);
 		# driving-car
     # cycling-road
-		$request = 'https://api.openrouteservice.org/v2/directions/driving-car?api_key=5b3ce3597851110001cf6248b1425dd37d714405bb899b3bf9107f73&start=' . $startpoint->x . ',' . $startpoint->y . '&end=' . $endpoint->x . ',' . $endpoint->y;
+		$request = str_replace(['$start', '$end'], [$startpoint->x . ',' . $startpoint->y, $endpoint->x . ',' . $endpoint->y], ROUTING_URL);
 		$res = url_get_contents($request);
 		$json = json_decode($res);
 		$geom = $spatial_processor->getGeomFromGeoJSON(json_encode($json->features[0]->geometry), $this->rolle->epsg_code);
