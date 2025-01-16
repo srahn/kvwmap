@@ -4618,7 +4618,7 @@ echo '			</table>
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
 		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, URL . 'tmp/', $this->formvars['svg_string']).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
