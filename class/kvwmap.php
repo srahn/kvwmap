@@ -1756,28 +1756,33 @@ echo '			</table>
 	function addFeatureLayer($name, $type, $features, $texts, $css_style_string, $map_factor){
 		if($map_factor == '')$map_factor = 1;
 		$layer = new LayerObj($this->map);
-		$layer->set('name', $name);
-		$layer->set("status", MS_ON);
-    $layer->set("type", $type);
+		$layer->name = $name;
+		$layer->status = MS_ON;
+    $layer->type = $type;
 		$i = 0;
 		foreach($features as $feature){
-			$shape = ms_shapeObjFromWkt($feature);
-			$shape->set('text', $texts[$i]);
+			if (MAPSERVERVERSION >= 800) {
+				$shape = shapeObj::fromWKT($feature);
+			}
+			else {
+				$shape = ms_shapeObjFromWkt($feature);
+			}
+			$shape->text = $texts[$i];
 			$layer->addFeature($shape);
 			$i++;
 		}
 		$class = new ClassObj($layer);
 		if($texts != NULL){
 			$label = new labelObj();
-			$label->set('size', 10 * $map_factor);
+			$label->size = 10 * $map_factor;
 			$label->color->setRGB(255, 0, 0);
 			#$label->set('type', 'TRUETYPE');
-			$label->set('font', 'arial');
-			$label->set('position', MS_LR);
-			$label->set('offsety', -9);
+			$label->font = 'arial';
+			$label->position = MS_LR;
+			$label->offsety = -9;
 			$class->addLabel($label);
 		}
-    $style = ms_newStyleObj($class);
+    $style = new StyleObj($class);
 		$css_styles = explode(';', str_replace(' ', '', $css_style_string));
 		foreach($css_styles as $css_style){
 			$parts = explode(':', $css_style);
