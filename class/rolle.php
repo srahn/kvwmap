@@ -31,16 +31,6 @@ class rolle {
 		$this->loglevel = 0;
 	}
 
-	public static	function find_by_ids($gui, $user_id, $stelle_id) {
-		$rolleObj = new MyObject($gui, 'rolle', array(array('key' => 'user_id', 'type' => 'integer'), array('key' => 'stelle_id', 'type' => 'integer')), $identifier_type = 'array');
-		$rolle = $rolleObj->find_by_ids(array(
-			'user_id' => $user_id,
-			'stelle_id' => $stelle_id
-		));
-		$rolle->data = $rolle->data;
-		return $rolle;
-	}
-
 	/*
 	* Speichert den Status der Layergruppen
 	* @param $formvars array mit key group_<group_id> welcher den Status der Gruppe enthält 
@@ -755,7 +745,7 @@ class rolle {
 		return $ret;
 	}
 
-# 2006-03-20 pk
+	# 2006-03-20 pk
   function setConsumeActivity($time,$activity,$prevtime) {
 		$errmsg = '';
     if (LOG_CONSUME_ACTIVITY==1) {
@@ -1821,7 +1811,7 @@ class rolle {
 			return 0;
 		}
 		// Update layer_params if default is not available for user
-		$rolle = rolle::find_by_ids($this->gui_object, $user_id, $stelle_id);
+		$rolle = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
 		$this->rectify_layer_params($rolle);
 		return 1;
 	}
@@ -2548,6 +2538,6 @@ class rolle {
 		}
 		return $ret;
 	}
-
 }
+include(CLASSPATH . 'Role.php');
 ?>

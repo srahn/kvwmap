@@ -33,6 +33,12 @@ class Nutzer extends MyObject {
 		return $user->find_by('login_name', $gui->database->mysqli->real_escape_string($login_name));
 	}
 
+	public static	function find_by_id($gui, $id) {
+		$gui->debug->show('Frage Nutzer mit id ab.', Nutzer::$write_debug);
+		$user = new Nutzer($gui);
+		return $user->find_by('ID', $gui->database->mysqli->real_escape_string($id));
+	}
+
 	function get_name() {
 		return ($this->get('Name') ? $this->get('Name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
 	}
