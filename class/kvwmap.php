@@ -11844,7 +11844,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
 						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
 						$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
-						$document_path = $doc_paths['doc_path'];
+						$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
 						break;
 					}
 				}
