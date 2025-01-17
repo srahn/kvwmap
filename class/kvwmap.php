@@ -14347,7 +14347,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
       $this->selected_user = new user('',$this->formvars['selected_user_id'],$this->user->database, '', true);
       # Löschen der in der Selectbox entfernten Stellen
-      $userstellen =  $this->selected_user->getStellen(0);
+      $userstellen =  $this->selected_user->getStellen(0, true);
 			$deletestellen = array();
       for ($i = 0; $i < count_or_0($userstellen['ID']); $i++) {
         $found = false;
