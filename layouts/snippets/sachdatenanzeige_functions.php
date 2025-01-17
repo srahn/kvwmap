@@ -179,19 +179,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
-				value_dependent.style.visibility = 'inherit';
+				if (name_dependent != null) {
+					name_dependent.classList.remove('collapsed');
+				}
+				value_dependent.classList.remove('collapsed');
 			}
-			else{
-				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
-				value_dependent.style.visibility = 'hidden';
+			else {
+				if (name_dependent != null) {
+					name_dependent.classList.add('collapsed');
+				}
+				value_dependent.classList.add('collapsed');
 			}
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsed')){
 					row_display = '';
 				}
 			})
@@ -897,6 +901,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
+		count_selected(layer_id);
 		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
@@ -1260,6 +1265,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 			}
 		});
+	}
+
+	count_selected = function(layer_id){
+		document.getElementById('selected_count_' + layer_id).innerHTML = document.querySelectorAll('.check_' + layer_id + ':checked').length;
 	}
 
 </script>

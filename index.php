@@ -280,6 +280,10 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
+			case 'get_route' : {
+				$GUI->getRoute($GUI->formvars);
+			} break;
+
 			case 'get_position_qrcode' : {
 				$GUI->sanitize([
 					'layer_id' => 'int',
@@ -1884,7 +1888,22 @@ function go_switch($go, $exit = false) {
 			case 'Stellenhierarchie' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Stellenhierarchie();
-			} break;			
+			} break;
+
+			case 'role_list' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->role_list();
+			} break;
+
+			case 'role_edit' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_edit();
+			} break;
+
+			case 'role_update' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_update();
+			} break;
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
@@ -2112,9 +2131,9 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "zoomToMaxLayerExtent" : {
+			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
-				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();

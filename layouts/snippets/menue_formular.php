@@ -13,7 +13,13 @@
 				<tr>
 					<td align="center">
 						<input type="hidden" name="go_plus" id="go_plus" value="">
-						<input value="<? echo $this->strButtonBack; ?>" title="<? echo $strShowMenueList; ?>" type="button" name="go" onclick="document.location.href='index.php?go=Menues_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#menue_<?php echo $this->menue->get('id'); ?>'">&nbsp;<?php
+						<input
+							value="<? echo $this->strButtonBack; ?>"
+							title="<? echo $strShowMenueList; ?>"
+							type="button"
+							name="go"
+							onclick="document.location.href='index.php?go=Menues_Anzeigen&csrf_token=<? echo $_SESSION['csrf_token']; ?>#menue_<?php echo $this->menue->get('id'); ?>'"
+						>&nbsp;<?php
 						if ($this->menue->get('id') != '') { ?>
 							<input value="<? echo $this->strChange; ?>" title="<? echo $this->strChangeTitle; ?>" type="button" name="dummy" onclick="submitWithValue('GUI','go_plus','Ändern')">&nbsp;
 							<input value="<? echo $this->strReset; ?>" title="<? echo $this->strResetTitle; ?>." type="reset" name="reset1">&nbsp;

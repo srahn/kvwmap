@@ -61,6 +61,7 @@
 	$strMaxQueryRows = "Records per Page";
 	$strmaxscale = "maxscale";
 	$strMetaLink = "Metadata-Link";
+	$strTermsOfUseLink = "Terms-of-use-Link";
 	$strMetaParameters = "Metadata";
 	$strminscale = "minscale";
 	$strName = "Name";

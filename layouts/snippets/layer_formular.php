@@ -1090,6 +1090,13 @@ from
 					</tr>
 
 					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTermsOfUseLink; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="terms_of_use_link" type="text" value="<?php echo $this->formvars['terms_of_use_link']; ?>" size="50" maxlength="255">
+						</td>
+					</tr>					
+
+					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strVersion; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<input name="version" type="text" value="<?php echo $this->formvars['version']; ?>" size="10" maxlength="10">

@@ -10,6 +10,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="last_button" VALUE="">
+	<INPUT TYPE="HIDDEN" NAME="previous_button" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">

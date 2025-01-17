@@ -1671,6 +1671,10 @@ class stelle {
 		return 1;
 	}
 	
+	/**
+	 * check if layer_params are used in any layer or menue of stelle
+	 * and set the ids in selectable_layer_params of stelle
+	 */
 	function updateLayerParams() {
 		$sql = "
 			UPDATE stelle
@@ -1725,8 +1729,7 @@ class stelle {
 				)
 			WHERE stelle.ID = " . $this->id . "
 		";
-
-		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
+		// echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 
 		$this->database->execSQL($sql);
@@ -2430,7 +2433,7 @@ class stelle {
 				WHERE 
 				`layer_id` = " . $layer_id;
 		}
-		#echo '<br>Sql: ' . $sql;
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }

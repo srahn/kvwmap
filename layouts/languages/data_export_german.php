@@ -9,7 +9,8 @@
 	$strRecordFromGLE = "Datensatz aus der Sachdatenanzeige";
 	$strRecordsFromGLE = "Datens&auml;tze aus der Sachdatenanzeige";
 	$strDownloadDocuments = "Dokumente herunterladen";
-	$strExportMetadatadocument = "Metadatendokument des Layers mit exportieren falls vorhanden";
+	$strExportMetadatadocument = "Metadatendokument des Layers auch exportieren";
+	$strExportTermsOfUsedocument = "Nutzungsbedingungen des Layers auch exportieren";
 	$strExportGroupnames = "Gruppennamen exportieren";
 	$strSelectAll = "alle auswählen";
 	$strLayer = "Thema";
