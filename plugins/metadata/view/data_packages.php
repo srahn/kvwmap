@@ -6,7 +6,7 @@
 <div id="metadata_data_packages_div">
   <!-- style="min-width: <?php echo $this->user->rolle->nImageWidth + $sizes['layouts/gui.php']['legend']['width'] + 22; ?>">//-->
   <h2 style="margin-top: 10px">Datenpakete zum Download</h2>
-  <a href="index.php?go=metadata_show_data_packages" title="Lade Seite neu"><i class="fa fa-refresh" aria-hidden="true" title="Seite neu laden" onMouseOver="this.style.color='black'"
+  <a href="index.php?go=metadata_show_data_packages" title="Inhalte auffrischen"><i class="fa fa-refresh" aria-hidden="true" title="Seite neu laden" onMouseOver="this.style.color='black'"
   onMouseOut="this.style.color='firebrick'" style="
     /* margin-left: 35px; */
     font-size: 1.8em;
@@ -48,13 +48,13 @@
           <input id="checkbox_<? echo $package->get('ressource_id'); ?>" data-ressource_id="<? echo $package->get('ressource_id'); ?>" class="data_package_checkbox" type="checkbox" style="margin-top: 1px"/>
         </div>
         <div class="dpt-cell dpt-datatype">
-        <i class="fa fa-<?php echo $package->datatype_icon; ?>" aria-hidden="true" title="Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></i>
+          <i class="fa fa-<?php echo $package->datatype_icon; ?>" aria-hidden="true" title="Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></i>
         </div>
         <div class="dpt-cell dpt-package">
           <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $package->get('layer_id'); ?>">
             <?php echo $package->get('bezeichnung'); ?>
           </a>
-          <span class="metadata-tooltip" data-tooltip="Ressource ID: <?php echo $package->get('ressource_id'); ?> Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?>"></span>
+          <span class="metadata-tooltip" data-tooltip="Ressource ID: <?php echo $package->get('ressource_id'); ?> Format: <?php echo $package->export_format; ?> <?php echo $package->datatype; ?> Anzahl Objekte: <? echo $package->num_feature; ?>"></span>
         </div>
         <div class="dpt-cell dpt-inhaber">
           <span id="inhaber_span_<? echo $package->get('ressource_id'); ?>"><a href="javascript:message([{ type: 'info', msg: '<? echo $package->get_inhaber_info(); ?>'}])"><?php echo $package->get('abk') ?: '' ; ?></a></span>
