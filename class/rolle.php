@@ -1868,7 +1868,7 @@ class rolle {
 		foreach ($layer_params AS $param_key => $value) {
 			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
 		}
-		$this->set_layer_params($rolle, implode(',', $new_layer_params));
+		$this->set_layer_params(implode(',', $new_layer_params));
 		return array(
 			'success' => true,
 			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'

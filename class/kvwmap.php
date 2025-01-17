@@ -1236,6 +1236,9 @@ echo '			</table>
 					$this->layerset['layers_of_group'][$group_id] = array_reverse($this->layerset['layers_of_group'][$group_id]);		# umgedrehte Zeichenreihenfolge verwenden
 				}
 				if (!value_of($this->formvars, 'nurFremdeLayer')) {
+					if (!is_array($this->layer_ids_of_group[$group_id])) {
+						$this->layer_ids_of_group[$group_id] = [];
+					}
 					$legend .=  '<tr>
 												<td align="center">
 													<input name="layers_of_group_'.$group_id.'" type="hidden" value="'.implode(',', $this->layer_ids_of_group[$group_id]).'">';
@@ -1753,28 +1756,33 @@ echo '			</table>
 	function addFeatureLayer($name, $type, $features, $texts, $css_style_string, $map_factor){
 		if($map_factor == '')$map_factor = 1;
 		$layer = new LayerObj($this->map);
-		$layer->set('name', $name);
-		$layer->set("status", MS_ON);
-    $layer->set("type", $type);
+		$layer->name = $name;
+		$layer->status = MS_ON;
+    $layer->type = $type;
 		$i = 0;
 		foreach($features as $feature){
-			$shape = ms_shapeObjFromWkt($feature);
-			$shape->set('text', $texts[$i]);
+			if (MAPSERVERVERSION >= 800) {
+				$shape = shapeObj::fromWKT($feature);
+			}
+			else {
+				$shape = ms_shapeObjFromWkt($feature);
+			}
+			$shape->text = $texts[$i];
 			$layer->addFeature($shape);
 			$i++;
 		}
 		$class = new ClassObj($layer);
 		if($texts != NULL){
 			$label = new labelObj();
-			$label->set('size', 10 * $map_factor);
+			$label->size = 10 * $map_factor;
 			$label->color->setRGB(255, 0, 0);
 			#$label->set('type', 'TRUETYPE');
-			$label->set('font', 'arial');
-			$label->set('position', MS_LR);
-			$label->set('offsety', -9);
+			$label->font = 'arial';
+			$label->position = MS_LR;
+			$label->offsety = -9;
 			$class->addLabel($label);
 		}
-    $style = ms_newStyleObj($class);
+    $style = new StyleObj($class);
 		$css_styles = explode(';', str_replace(' ', '', $css_style_string));
 		foreach($css_styles as $css_style){
 			$parts = explode(':', $css_style);
@@ -4092,6 +4100,12 @@ echo '			</table>
 		}
 	}
 
+	function getRoute($formvars) {
+		include_(CLASSPATH.'Routing.php');
+		$routing = new routing($this->user->rolle, $this->database, $this->pgdatabase);
+		echo $routing->getRoute($formvars);
+	}
+
 	function reset_layers($layer_id){
 		$this->user->rolle->resetLayers($layer_id);
 		$this->user->rolle->resetQuerys($layer_id);
@@ -4515,7 +4529,12 @@ echo '			</table>
 		}
 		$options = array_shift(explode(';', $attributes['options'][$this->formvars['attribute']]));
     $reqby_start = strpos(strtolower($options), "<required by>");
-    if($reqby_start > 0)$sql = substr($options, 0, $reqby_start);else $sql = $options; 
+    if ($reqby_start > 0) {
+			$sql = substr($options, 0, $reqby_start);
+		}
+		else {
+			$sql = $options;
+		}
 		$attributenames = explode('|', $this->formvars['attributenames']);
 		$attributevalues = explode('|', $this->formvars['attributevalues']);
 		$sql = str_replace('=<requires>', '= <requires>', $sql);
@@ -4529,7 +4548,9 @@ echo '			</table>
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					$html .= '<option value="">-- Bitte Auswählen --</option>';
+					if (pg_num_rows($ret[1]) > 1 OR $reqby_start > 0) {
+						$html .= '<option value="">-- Bitte Auswählen --</option>';
+					}
 					while($rs = pg_fetch_array($ret[1])){
 						$html .= '<option value="'.$rs['value'].'">'.$rs['output'].'</option>';
 					}
@@ -4602,7 +4623,7 @@ echo '			</table>
 <title> kvwmap </title><desc> kvwmap - WebGIS application - kvwmap.sourceforge.net </desc>';
 		$this->formvars['svg_string'] = preg_replace('/href="data:image[^ ]*"/', '', $this->formvars['svg_string']);
 		$this->formvars['svg_string'] = preg_replace('/xlink:href="[^ ]*"/', 'xlink:href="'.$this->img['hauptkarte'].'" ', $this->formvars['svg_string']);
-		$this->formvars['svg_string'] = str_replace(IMAGEURL, URL . 'tmp/', $this->formvars['svg_string']).'</svg>';
+		$this->formvars['svg_string'] = str_replace(IMAGEURL, IMAGEPATH, $this->formvars['svg_string']).'</svg>';
 		$svg.= str_replace('points=""', 'points="-1000,-1000 -2000,-2000 -3000,-3000 -1000,-1000"', $this->formvars['svg_string']);
 		fputs($fpsvg, $svg);
   	fclose($fpsvg);
@@ -11855,7 +11876,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						$dokument_attribute = $layerset[0]['attributes']['name'][$i];
 						$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
 						$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
-						$document_path = $doc_paths['doc_path'];
+						$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
 						break;
 					}
 				}
