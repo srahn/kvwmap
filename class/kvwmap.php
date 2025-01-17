@@ -160,14 +160,14 @@ class GUI {
 	}
 
 	/**
-		function sanitizes all values of $this->formvars array
-		with names by type given in $vars array
-		@param	$vars Array of formvars elements and types
-						eg: ['selected_layer_id' => 'int', name' => 'text']
-						allowed types: 'int', 'text'
-		@param bool $removeTT If true, floats and integers are converted by the function removeTausenderTrenner
-		@return	$this->formvars is passed by reference to sanitize function,
-						That's why it is changed at the end of this function
+	 * function sanitizes all values of $this->formvars array
+	 * with names by type given in $vars array
+	 * @param	$vars Array of formvars elements and types
+	 * 				eg: ['selected_layer_id' => 'int', name' => 'text']
+	 * 				allowed types: 'int', 'text'
+	 * @param bool $removeTT If true, floats and integers are converted by the function removeTausenderTrenner
+	 * @return	$this->formvars is passed by reference to sanitize function,
+	 * 				That's why it is changed at the end of this function
 	*/
 	function sanitize($vars, $removeTT = false) {
 		$vars_with_asterisk = array_filter(
@@ -13056,6 +13056,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$this->selected_user->checkstelle();
 			}
 		}
+		$this->update_layer_parameter_in_rollen($Stelle->id);
 	}
 
 	function dienstmetadaten_aendern() {
@@ -13764,6 +13765,62 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->filterverwaltung();
 	}
 
+	/**
+	 * Function shows all rollen in a list
+	 */
+	function role_list() {
+		# Abfragen aller Rollen
+		$this->roles = Role::find($this, 'true', ($this->formvars['view_sort'] ? $this->formvars['view_sort'] : 'stelle_id, user_id'), $this->formvars['sort_direction']);
+		if ($this->formvars['sort_direction'] == 'DESC') {
+			$this->formvars['sort_direction'] = 'ASC';
+		}
+		else {
+			$this->formvars['sort_direction'] = 'DESC';
+		}
+		$this->titel = 'Nutzerollen';
+		$this->main='rolesdaten.php';
+		$this->output();
+	}
+
+	/*
+	* This function get the rolle by formvar user_id and stelle_id,
+	* set the titel and page and start the output
+	*/
+	function role_edit() {
+		$this->sanitize([
+			'user_id' => 'integer',
+			'stelle_id' => 'integer'
+		]);
+		$this->role = Role::find_by_id($this, $this->formvars['user_id'], $this->formvars['stelle_id']);
+		$this->main = 'role_formular.php';
+		$this->output();
+	}
+
+	function role_update() {
+		// ToDo sanitize all formvars
+		$this->sanitize([
+			'user_id' => 'integer',
+			'stelle_id' => 'integer'
+		]);
+		$this->role = Role::find_by_id($this, $this->formvars['user_id'], $this->formvars['stelle_id']);
+		$this->role->setData($this->formvars);
+		$results = $this->role->validate();
+		if (empty($results)) {
+			$results = $this->role->update();
+		}
+		if ($results[0]['success']) {
+			$this->add_message('notice', 'Nutzerrolle erfolgreich aktualisiert.');
+		}
+		else {
+			$this->add_message('array', array_values($results));
+		}
+		$this->main = 'role_formular.php';
+		$this->output();
+	}
+//----------------
+	/**
+	 * Function shows all menues in a list
+	 */
 	function MenuesAnzeigen() {
 		# Abfragen aller Menues
 		if ($this->formvars['view_sort'] == '') {
@@ -20995,7 +21052,7 @@ class db_mapObj{
 			ORDER BY
 				`order`
 		";
-		#echo '<br>Sql read_layer_attributes: ' . $sql;
+		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
 		$ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }

@@ -1888,7 +1888,22 @@ function go_switch($go, $exit = false) {
 			case 'Stellenhierarchie' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Stellenhierarchie();
-			} break;			
+			} break;
+
+			case 'role_list' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->role_list();
+			} break;
+
+			case 'role_edit' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_edit();
+			} break;
+
+			case 'role_update' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_update();
+			} break;
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
