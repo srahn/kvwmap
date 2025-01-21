@@ -92,7 +92,14 @@
     </div>
 
     <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
-      <span>Gesamtpaket:</span>
+      Anzahl Pakete: <span id="num_packages_span"></span>
+      bestellt: <span id="num_ordered_packages_span"></span>
+      in Arbeit: <span id="num_packages_in_progress_span"></span>
+      gepackt: <span id="num_packed_packages_span"></span>
+    </div>
+
+    <div class="dpt-footer-cell" style="flex-grow: 100; text-align: right">
+      <span style="display: <? echo ($data_packages_exists ? 'inline' : 'none'); ?>">Gesamtpaket:</span>
       <input
         id="order_bundle_packages_button"
         type="button"
@@ -398,6 +405,28 @@
     } catch (error) {
       console.error(error.message);
     }
+  }
+
+  function numDataPackages() {
+    return Array.from(dataPackages).length;
+  }
+
+  function numOrderedDataPackages() {
+    return Array.from(dataPackages).filter(([key, package]) => {
+      return package.get('pack_status_id') == 2
+    }).length;
+  }
+
+  function numDataPackagesInProgress() {
+    return Array.from(dataPackages).filter(([key, package]) => {
+      return package.get('pack_status_id') == 3
+    }).length;
+  }
+
+  function numPackedDataPackages() {
+    return Array.from(dataPackages).filter(([key, package]) => {
+      return package.get('pack_status_id') == 4
+    }).length;
   }
 
   // create objects for data packages
