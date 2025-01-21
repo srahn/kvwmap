@@ -27,6 +27,11 @@ class Ressource extends PgObject {
 		// );
 	}
 
+	public static	function find($gui, $where, $order = '') {
+		$ressource = new Ressource($gui);
+		return $ressource->find_where($where, $order);
+	}
+
 	public static	function find_by_id($gui, $by, $id) {
 		$ressource = new Ressource($gui);
 		$ressource->find_by($by, $id);
