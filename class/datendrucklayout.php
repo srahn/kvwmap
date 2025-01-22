@@ -745,7 +745,8 @@ class ddl {
 					# Rollenlayer wieder entfernen
 					if ($oid != '') {
 						$this->gui->mapDB->deleteRollenLayer($rollenlayer_id);
-						$this->gui->map->removeLayer($this->gui->map->numlayers-1);
+						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);		# der letzte Layer ist die Scalebar
+						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);
 					}
 					$filename = $this->gui->map_saveWebImage($image_map,'jpeg');
 					$newname = $this->user->id.basename($filename);
