@@ -38,7 +38,7 @@ register_shutdown_function(function () {
     }
     else {
   		http_response_code(500);
-	  	include_once('layouts/snippets/general_error_page.php');
+	  	include_once(LAYER_ERROR_PAGE);
     }
 	}
 });
