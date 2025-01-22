@@ -773,7 +773,7 @@ class ddl {
 						$this->layout['elements'][$attributes['name'][$j]]['width']
 					);
 					if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
-						$this->miny[$this->pdf->currentContents] = $y;
+						#$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
 					}
 					if ($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages']) + 1) {
 						# falls in eine alte Seite geschrieben wurde, zurückkehren
