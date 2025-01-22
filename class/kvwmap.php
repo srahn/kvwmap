@@ -2257,8 +2257,8 @@ echo '			</table>
 		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
 		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
-		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
-		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username'] ?: '');
+		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password'] ?: '');
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
@@ -5318,15 +5318,30 @@ echo '			</table>
 			$this->map_factor = $this->formvars['mapfactor'];   # der durchgeschleifte MapFactor
 			$this->class_load_level = 2;    # die Klassen von allen Layern laden
 			$this->loadMap('DataBase', array(), true);
-			$requestobject = ms_newOwsRequestObj();
+			if (MAPSERVERVERSION < 800) {
+				$requestobject = ms_newOwsRequestObj();
+			}
+			else {
+				$requestobject = new OWSRequest();
+			}
 			$params = array_keys($this->formvars);
 			for ($i = 0; $i < count($this->formvars); $i++){
 				$requestobject->setParameter($params[$i], $this->formvars[$params[$i]]);
 			}
 			//$requestobject->loadparams();   # geht nur wenn php als cgi läuft
-			ms_ioinstallstdouttobuffer();
-			$this->map->owsdispatch($requestobject);
-			$contenttype = ms_iostripstdoutbuffercontenttype();
+			if (MAPSERVERVERSION < 800) {
+				ms_ioinstallstdouttobuffer();
+			}
+			else {
+				msIO_installStdoutToBuffer();
+			}			
+			$this->map->OWSDispatch($requestobject);
+			if (MAPSERVERVERSION < 800) {
+				$contenttype = ms_iostripstdoutbuffercontenttype();
+			}
+			else {
+				$contenttype = msIO_stripStdoutBufferContentType();
+			}
 			ob_end_clean();   //Ausgabepuffer leeren (sonst funktioniert header() nicht)
 			ob_start();
 			switch (strtolower($request['REQUEST'])) {
@@ -5358,13 +5373,23 @@ echo '			</table>
 				}
 			}
 			header('Content-type: ' . $contenttype);
-			ms_iogetStdoutBufferBytes();
+			if (MAPSERVERVERSION < 800) {
+				ms_iogetStdoutBufferBytes();
+			}
+			else {
+				msIO_getStdoutBufferBytes();
+			}
 			if ($this->writeTmpFile) {
 				$wms_response = new wms_response_obj($this->tmpfile);
 				$wms_response->save(ob_get_contents());
 			}
 			ob_end_flush();
-			ms_ioresethandlers();
+			if (MAPSERVERVERSION < 800) {
+				ms_ioresethandlers();
+			}
+			else {
+				msIO_resetHandlers();
+			}
 		}
 	}
 
@@ -8072,29 +8097,29 @@ echo '			</table>
 		}
 		$this->mapfile = $this->mapfile ?: WMS_MAPFILE_PATH . $this->Stelle->id . '/' . $this->formvars['mapfile_name'];
 		# setzen der WMS-Metadaten
-		$this->map->setMetaData("ows_title", $this->formvars['ows_title']);
-		$this->map->setMetaData("ows_abstract", $this->formvars['ows_abstract']);
-		$this->map->setMetaData("wms_extent", implode(' ', $bb));
-		$this->map->setMetaData("wms_accessconstraints", "none");
-		$this->map->setMetaData("ows_contactperson", $this->formvars['ows_contactperson']);
-		$this->map->setMetaData("ows_contactorganization", $this->formvars['ows_contactorganization']);
-		$this->map->setMetaData("ows_contactelectronicmailaddress", $this->formvars['ows_contactelectronicmailaddress']);
-		$this->map->setMetaData("ows_contactposition", $this->formvars['ows_contactposition']);
-		$this->map->setMetaData("ows_fees", $this->formvars['ows_fees']);
+		$this->map->web->metadata->set("ows_title", $this->formvars['ows_title']);
+		$this->map->web->metadata->set("ows_abstract", $this->formvars['ows_abstract']);
+		$this->map->web->metadata->set("wms_extent", implode(' ', $bb));
+		$this->map->web->metadata->set("wms_accessconstraints", "none");
+		$this->map->web->metadata->set("ows_contactperson", $this->formvars['ows_contactperson']);
+		$this->map->web->metadata->set("ows_contactorganization", $this->formvars['ows_contactorganization']);
+		$this->map->web->metadata->set("ows_contactelectronicmailaddress", $this->formvars['ows_contactelectronicmailaddress']);
+		$this->map->web->metadata->set("ows_contactposition", $this->formvars['ows_contactposition']);
+		$this->map->web->metadata->set("ows_fees", $this->formvars['ows_fees']);
 		$this->wms_onlineresource = MAPSERV_CGI_BIN . "?map=" . $this->mapfile . "&";
-		$this->map->setMetaData("wms_onlineresource", $this->wms_onlineresource);
-		$this->map->setMetaData("ows_srs", OWS_SRS . ' EPSG:3857');
-		$this->map->setMetaData("wms_enable_request", '*');
-		$this->map->setMetaData("gdi_filter_attribute_name", $this->formvars['filter_attribute_name']);
-		$this->map->setMetaData("gdi_filter_attribute_operator", $this->formvars['filter_attribute_operator']);
-		$this->map->setMetaData("gdi_filter_attribute_value", $this->formvars['filter_attribute_value']);
-		$this->map->setMetaData("gdi_nurVeroeffentlichte", $this->formvars['nurVeroeffentlichte']);
-		$this->map->setMetaData("gdi_nurAktiveLayer", $this->formvars['nurAktiveLayer']);
-		$this->map->setMetaData("gdi_totalExtent", $this->formvars['totalExtent']);
+		$this->map->web->metadata->set("wms_onlineresource", $this->wms_onlineresource);
+		$this->map->web->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
+		$this->map->web->metadata->set("wms_enable_request", '*');
+		$this->map->web->metadata->set("gdi_filter_attribute_name", $this->formvars['filter_attribute_name']);
+		$this->map->web->metadata->set("gdi_filter_attribute_operator", $this->formvars['filter_attribute_operator']);
+		$this->map->web->metadata->set("gdi_filter_attribute_value", $this->formvars['filter_attribute_value']);
+		$this->map->web->metadata->set("gdi_nurVeroeffentlichte", $this->formvars['nurVeroeffentlichte'] ?: '');
+		$this->map->web->metadata->set("gdi_nurAktiveLayer", $this->formvars['nurAktiveLayer']);
+		$this->map->web->metadata->set("gdi_totalExtent", $this->formvars['totalExtent']);
 
 		for ($i = 0; $i < $this->map->numlayers; $i++) {
 			$layer = $this->map->getLayer($i);
-			$layer->set('name', sonderzeichen_umwandeln($layer->name));
+			$layer->name = sonderzeichen_umwandeln($layer->name);
 			$layer->metadata->set("ows_title", $layer->name);
 			$layer->metadata->set("ows_extent", implode(', ', $bb));
 			$layer->metadata->set("ows_srs", OWS_SRS . ' EPSG:3857');
@@ -8120,7 +8145,7 @@ echo '			</table>
 				if ($layer->connectiontype == 6 AND $layer->data != '') {
 					$sql = $mapDB->getSelectFromData($layer->data);
 					$filters = array();
-					$layerdb = $mapDB->getlayerdatabase($layer->getMetadata('kvwmap_layer_id'), $this->Stelle->pgdbhost);
+					$layerdb = $mapDB->getlayerdatabase($layer->metadata->get('kvwmap_layer_id'), $this->Stelle->pgdbhost);
 					$attributes = $layerdb->getFieldsfromSelect($sql);
 					for ($j = 0; $j < count($attributes[1]) - 2; $j++) {
 						if ($attributes[1][$j]['name'] == 'veroeffentlicht') {
