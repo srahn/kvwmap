@@ -696,6 +696,11 @@ class user {
 		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$user = new MyObject($gui, 'user');
+		return $user->find_where($where, $order, $sort_direction);
+	}
+
 	/*
 	* Function return true if the case is for the user allowed to execute
 	* Currently only the following cases will be tested against the rights of the user

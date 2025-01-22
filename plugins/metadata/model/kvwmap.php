@@ -594,7 +594,40 @@
 
 	$GUI->metadata_show_data_packages = function() use ($GUI) {
 		$GUI->main = PLUGINS . 'metadata/view/data_packages.php';
-		$GUI->metadata_data_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
+		$all_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
+		$GUI->metadata_data_packages = array();
+		foreach($all_packages AS $package) {
+			$pfad = replace_params(
+				$package->layer->get('pfad'),
+				'',
+				$GUI->user->id,
+				$GUI->Stelle->id
+			);
+			$sql = "
+				SET search_path = " . $package->layer->get('schema') . ", public;
+				SELECT
+					count(*) AS anzahl
+				FROM
+					(
+						" . $pfad . "
+					) AS query
+				WHERE
+					ST_MakeEnvelope(
+						" . $GUI->Stelle->MaxGeorefExt->minx . ",
+						" . $GUI->Stelle->MaxGeorefExt->miny . ",
+						" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+						" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+						25832
+					) && query." . $package->layer->get('geom_column') . "
+			";
+			// echo print_r($this->Stelle, true);
+			$query = pg_query($sql);
+			$num_feature = pg_fetch_assoc($query)['anzahl'];
+			if ( $num_feature > 0) {
+				$package->num_feature = $num_feature;
+				$GUI->metadata_data_packages[] = $package;
+			}
+		}
 		$GUI->output();
 	};
 
