@@ -3328,7 +3328,7 @@ echo '			</table>
 			# sorgt dafür, dass die mapserver' . $this->user->id . '.log geschrieben und abgeschlossen wird
 			$this->map->setConfigOption('MS_ERRORFILE', LOGPATH . 'mapserver.log');
 			global $errors;
-			$errors[] = explode('Error', file_get_contents(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log'), 2)[1];
+			$errors[] = file_get_contents(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
 			throw new Exception('Fehler beim Erzeugen des Kartenbildes');
 		}
 		#if (!$img_urls) { wegen Bug im Firefox
