@@ -16,7 +16,7 @@ global $errors;
 	<body>
 		<div style="width:80%;margin:10px auto;position:relative;font-family: Arial, Verdana, Helvetica,sans-serif;">
 			<h3 style="background-color:#E6E6E6;padding:5px;">Hoppla!</h3>
-			<div style="width:40%;float:left;">
+			<div style="float:left;">
 			 <p>
 				 <h4>Es ist leider ein Fehler aufgetreten!</h4>
 					<div id="error_messages" style="width:100%;clear:both;">
@@ -28,12 +28,7 @@ global $errors;
 					</div>
 			 </p>
 			</div>
-			<div style="width:7%;float:left;">
-			 <p>
-		&nbsp;
-			 </p>
-			</div>
-			<div style="width:53%;float:left;">
+			<div style="float:left;">
 			 <p>
 				<h4>Was können Sie tun?</h4>
 				<ul>

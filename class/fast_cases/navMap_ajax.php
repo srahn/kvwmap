@@ -1032,10 +1032,10 @@ class GUI {
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
 
-				if (MS_DEBUG_LEVEL > 0) {
-					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+				if (MS_DEBUG_LEVEL !== NULL) {
+					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
 					$map->debug = MS_DEBUG_LEVEL;
-				};
+				}
 				$map->imagecolor->setRGB(255,255,255);
 				$map->maxsize = 4096;
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
@@ -1911,7 +1911,25 @@ class GUI {
 			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
 
-    $this->image_map = $this->map->draw() OR die($this->layer_error_handling());
+		try {
+			$f = @fopen(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log', 'r+');
+			if ($f !== false) {
+					ftruncate($f, 0);
+					fclose($f);
+			}
+    	$this->image_map = $this->map->draw();
+			# sorgt dafür, dass die mapserver' . $this->user->id . '.log geschrieben und abgeschlossen wird
+			# unter Mapserver 7 wird durch drawmap() kein Fehler geschmissen, deswegen steht diese Zeile hier auch nochmal
+			$this->map->setConfigOption('MS_ERRORFILE', LOGPATH . 'mapserver.log');
+		}
+		catch (Exception $ex) {
+			# sorgt dafür, dass die mapserver' . $this->user->id . '.log geschrieben und abgeschlossen wird
+			$this->map->setConfigOption('MS_ERRORFILE', LOGPATH . 'mapserver.log');
+			global $errors;
+			$errors[] = explode('Error', file_get_contents(dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log'), 2)[1];
+			throw new Exception('Fehler beim Erzeugen des Kartenbildes');
+		}
+
 		if (!$img_urls) {
 			if (MAPSERVERVERSION >= 800) {
 				$image = $this->image_map->getBytes();
