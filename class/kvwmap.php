@@ -11931,12 +11931,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				rename($result, $document_path . $document_file);
 
+				$array_add = ($this->formvars['prepend'] == 1? "array_prepend('" . $attribute_value . "', " . $dokument_attribute . ")" : "array_append(" . $dokument_attribute . ", '" . $attribute_value . "')");
+
 				# Wert in Attribut eintragen
 				$sql = "
 					UPDATE
 						" .  $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
 					SET
-						" . $dokument_attribute . " = " . ($dokument_is_array ? "array_append(" . $dokument_attribute . ", '" . $attribute_value . "')" : "'" . $attribute_value . "'") . "
+						" . $dokument_attribute . " = " . ($dokument_is_array ? $array_add : "'" . $attribute_value . "'") . "
 					WHERE
 						" . pg_quote($layerset[0]['oid']) . " = " . quote($oids[0]) . "
 				";
