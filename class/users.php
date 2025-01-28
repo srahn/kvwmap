@@ -1068,7 +1068,7 @@ class user {
 				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
 				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
 				)" : "") . "
