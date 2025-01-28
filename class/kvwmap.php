@@ -13016,8 +13016,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
 
 		# Layer
-		if ($layer[0] != NULL) {
-			$new_stelle->addLayer($layer, '', '', false); # Hinzufügen der Layer zur Stelle
+		if($layer[0] != NULL) {
+			$new_stelle->addLayer($layer, '', false); # Hinzufügen der Layer zur Stelle
 		}
 
 		# Funktionen
