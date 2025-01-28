@@ -12982,7 +12982,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Layer
 		if($layer[0] != NULL) {
-			$new_stelle->addLayer($layer, 0, '', false); # Hinzufügen der Layer zur Stelle
+			$new_stelle->addLayer($layer, '', false); # Hinzufügen der Layer zur Stelle
 		}
 
 		# Funktionen
