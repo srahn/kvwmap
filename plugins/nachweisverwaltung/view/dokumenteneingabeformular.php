@@ -186,6 +186,9 @@ $legendheight = $this->map->height + 20;
 	#dokein-image, #dokein-gemkg {
 		margin-right: 20px;
 	}
+	#dokein-image input {
+		width: 400px;
+	}
 	#dokein-main {
 		width:100%;
 		display: flex;
