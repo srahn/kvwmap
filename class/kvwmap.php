@@ -435,9 +435,10 @@ class GUI {
 		else {
 			$this->add_message('error', $error_msg);
 			$this->loadMap('DataBase');
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->saveMap('');
-			$this->drawMap();
+			// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			// $this->saveMap('');
+			// $this->drawMap();
+			$this->legende = $this->create_dynamic_legend();
 		}
 		$this->main = '../../' . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file;
 		$this->output();
@@ -902,18 +903,20 @@ echo '			</table>
 		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
 	function resetLegendOptions(){
 		$this->user->rolle->removeDrawingOrders();
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -972,9 +975,10 @@ echo '			</table>
 		$this->user->rolle->removeTransparency($this->formvars);
 		$this->user->rolle->removeLabelitem($this->formvars);
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -1000,9 +1004,10 @@ echo '			</table>
 		$this->user->rolle->setLanguage($this->formvars['language']);
 		$this->user->rolle->readSettings();
 		$this->loadMultiLingualText($this->user->rolle->language);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');
-		$this->drawMap();
+		#$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		#$this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -3357,7 +3362,7 @@ echo '			</table>
 			$this->outputfile = $filename;
 			return;
 		}
-		if ($this->formvars['go'] != 'navMap_ajax'){
+		if ($this->formvars['go'] != 'navMap_ajax' OR $this->formvars['with_legend'] == 1){
 			$this->legende = $this->create_dynamic_legend();
 			$this->debug->write("Legende erzeugt", 4);
 		}
@@ -4177,10 +4182,11 @@ echo '			</table>
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $this->attributes['geomtype'][$this->attributes['the_geom']]);
 		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array($layerset[0]['oid']), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
-		$currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
+		// $currenttime=date('Y-m-d H:i:s',time());
+    // $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    // $this->drawMap();
+    // $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -5562,8 +5568,8 @@ echo '			</table>
   }
 
 	function getMenueWithAjax() {
-		$this->loadMap('DataBase');
-		$this->drawMap();
+		// $this->loadMap('DataBase');
+		// $this->drawMap();
 		$this->user->rolle->hideMenue(0);
 		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
@@ -6056,10 +6062,11 @@ echo '			</table>
 		}
 		$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['Datentyp'], $this->database);
 		$this->loadMap('DataBase');
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
+    // $this->saveMap('');
+    // $currenttime=date('Y-m-d H:i:s',time());
+    // $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    // $this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
     $this->output();
 	}
 
@@ -8298,9 +8305,10 @@ echo '			</table>
 			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 		}
 		$this->loadMap('DataBase');
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -17438,7 +17446,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Abfragen der Layerausdehnung
 				$ret = $layerdb->execSQL($sql, 4, 0);
 				if ($ret[0]) {
-					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
 					return 0;
 				}
 				$rs = pg_fetch_array($ret[1]);
@@ -17732,10 +17740,11 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		$this->saveMap('');
-		$this->drawMap();
+		// $currenttime=date('Y-m-d H:i:s',time());
+		// $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		// $this->saveMap('');
+		// $this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 

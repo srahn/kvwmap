@@ -1030,7 +1030,12 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];

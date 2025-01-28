@@ -225,14 +225,14 @@ include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen vo
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
 $bg_pic   = $this->img['hauptkarte'];
-$res_x    = $this->map->width;
-$res_y    = $this->map->height;
-$res_xm   = $this->map->width / 2;
-$res_ym   = $this->map->height / 2;
-$dx       = $this->map->extent->maxx - $this->map->extent->minx;
-$dy       = $this->map->extent->maxy - $this->map->extent->miny;
-$scale    = ($dx / $res_x + $dy / $res_y) / 2;
-$radius = (float)$this->formvars['searchradius'] / $scale;
+$res_x    = $map_width;
+$res_y    = $map_height;
+$res_xm   = $map_width / 2;
+$res_ym   = $map_height / 2;
+#$dx       = $this->map->extent->maxx - $this->map->extent->minx;
+#$dy       = $this->map->extent->maxy - $this->map->extent->miny;
+#$scale    = ($dx / $res_x + $dy / $res_y) / 2;
+#$radius = (float)$this->formvars['searchradius'] / $scale;
 
 
 $fpsvg = fopen(IMAGEPATH . $svgfile, 'w') or die('fail: fopen(' . $svgfile . ')');
@@ -603,6 +603,9 @@ function getEventPoint(evt) {
 }
 
 function init(){
+	if ("{$bg_pic}" == "") {
+		top.neuLaden();
+	}
 	// Bug Workaround fuer Firefox
 	var nav_button_bg = document.querySelector('.navbutton_bg');
 	nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
