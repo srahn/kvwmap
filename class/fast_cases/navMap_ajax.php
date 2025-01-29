@@ -2026,8 +2026,8 @@ class GUI {
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = $this->map->projection;
-				$projTO = $this->reference_map->projection;
+				$projFROM = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
