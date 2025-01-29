@@ -1324,9 +1324,6 @@ class GUI {
   }
 
   function drawMap($img_urls = false) {
-		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
-			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
-		}
     if($this->main == 'map.php' AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
