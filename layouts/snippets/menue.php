@@ -82,7 +82,7 @@ function showMenue() {
 				onmousedown="document.GUI.go.value=\'neu Laden\';"
 				name="refmap"
 				src="' . $this->img['referenzkarte'] . '"
-				alt="Referenzkarte"
+				alt=""
 				hspace="0"
 			>';
 		if ($wappen['wappen'] != '') {
