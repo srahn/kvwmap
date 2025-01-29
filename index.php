@@ -151,7 +151,6 @@ define('CASE_COMPRESS', false);
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
 #											- InchesPerUnit() reinkopieren																											#
-#											- layer_error_handling() reinkopieren																								#
 #											- zoomToMaxLayerExtent() reinkopieren																								#
 #											- getlayerdatabase() reinkopieren																										#
 #											- read_layer_attributes() reinkopieren																							#
