@@ -54,6 +54,10 @@ class Ressource extends PgObject {
 		return $subressources;
 	}
 
+	function get_full_dest_path() {
+		return rtrim(METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path'), '/') .'/';
+	}
+
 	function destroy() {
 		#echo "\ndestroy Dataset: " . $this->get($this->identifier);
 		$this->debug->show('destroy dataset ' . $this->get('datenquelle'), Dataset::$write_debug);
@@ -516,7 +520,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -580,7 +584,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -649,7 +653,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Verzeichnis zur Ablage der gefilterten Daten angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -718,7 +722,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -767,7 +771,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -820,7 +824,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -856,7 +860,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -919,7 +923,7 @@ class Ressource extends PgObject {
 			);
 		}
 
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 
 		if ($this->get('import_layer') != '') {
 			// shape file is set explicit
@@ -983,7 +987,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		$gml_files = array();
 		if ($this->get('import_file')) {
 			$gml_files[] = $this->get('import_file');
@@ -1061,7 +1065,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		$csv_file = $this->get('import_layer') . '.csv';
 
 		if (!is_file($dest_path . $csv_file)) {
@@ -1170,7 +1174,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_dest_path();
 		$gml_files = array();
 		$entries = scandir($dest_path);
 		foreach ($entries AS $entry) {
