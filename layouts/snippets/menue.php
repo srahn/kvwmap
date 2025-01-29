@@ -82,7 +82,7 @@ function showMenue() {
 				onmousedown="document.GUI.go.value=\'neu Laden\';"
 				name="refmap"
 				src="' . $this->img['referenzkarte'] . '"
-				alt="Referenzkarte"
+				alt=""
 				hspace="0"
 			>';
 		if ($wappen['wappen'] != '') {
@@ -100,7 +100,7 @@ function showMenue() {
 			echo $wappen_html;
 		}
 
-		if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") {
+		if (MENU_REFMAP == "oben") {
 			echo $refmap_html;
 		} ?>
 
@@ -124,7 +124,7 @@ function showMenue() {
 		</div>
 
 		<div id="menuefooter"><?
-			if ($this->img['referenzkarte'] != '' AND MENU_REFMAP !="oben") {
+			if (MENU_REFMAP !="oben") {
 				echo $refmap_html;
 			}
 			if (MENU_WAPPEN == "unten") {
