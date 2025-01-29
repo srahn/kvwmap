@@ -3357,7 +3357,7 @@ echo '			</table>
 			$this->outputfile = $filename;
 			return;
 		}
-		if ($this->formvars['go'] != 'navMap_ajax' OR $this->formvars['with_legend'] == 1){
+		if ($this->formvars['go'] != 'navMap_ajax'){
 			$this->legende = $this->create_dynamic_legend();
 			$this->debug->write("Legende erzeugt", 4);
 		}
