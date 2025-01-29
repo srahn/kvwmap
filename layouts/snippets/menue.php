@@ -75,16 +75,30 @@ function showMenue() {
 			}
 		}
 		$refmap_html = '
-			<input
-				style="margin: 2px;border: 1px solid #cccccc;"
-				type="image"
+			<img
 				id="refmap"
-				onmousedown="document.GUI.go.value=\'neu Laden\';"
 				name="refmap"
 				src="' . $this->img['referenzkarte'] . '"
-				alt="Referenzkarte"
+				alt=""
 				hspace="0"
-			>';
+				style="cursor: pointer"
+			>
+			<input type="hidden" name="refmap_x">
+			<input type="hidden" name="refmap_y">
+			<script>
+				let img = document.getElementById("refmap");
+				img.x = img.getBoundingClientRect().left;
+				img.y = img.getBoundingClientRect().top;
+				function click(e) {
+					document.GUI.refmap_x.value = e.clientX - img.x;
+					document.GUI.refmap_y.value = e.clientY - img.y;
+					neuLaden();
+					document.GUI.refmap_x.value = "";
+					document.GUI.refmap_y.value = "";
+				}
+				img.addEventListener("click", click);
+			</script>
+			';
 		if ($wappen['wappen'] != '') {
 			$wappen_html = '
 				<div id="wappen_div" style="position: relative; visibility: visible; left: 0px; top: 0px">' .
@@ -100,7 +114,7 @@ function showMenue() {
 			echo $wappen_html;
 		}
 
-		if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") {
+		if (MENU_REFMAP == "oben") {
 			echo $refmap_html;
 		} ?>
 
@@ -124,7 +138,7 @@ function showMenue() {
 		</div>
 
 		<div id="menuefooter"><?
-			if ($this->img['referenzkarte'] != '' AND MENU_REFMAP !="oben") {
+			if (MENU_REFMAP !="oben") {
 				echo $refmap_html;
 			}
 			if (MENU_WAPPEN == "unten") {

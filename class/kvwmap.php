@@ -435,9 +435,10 @@ class GUI {
 		else {
 			$this->add_message('error', $error_msg);
 			$this->loadMap('DataBase');
-			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-			$this->saveMap('');
-			$this->drawMap();
+			// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+			// $this->saveMap('');
+			// $this->drawMap();
+			$this->legende = $this->create_dynamic_legend();
 		}
 		$this->main = '../../' . CUSTOM_PATH . 'layouts/snippets/' . $snippet_file;
 		$this->output();
@@ -902,18 +903,20 @@ echo '			</table>
 		$this->resizeMap2Window();
 		$this->user->rolle->readSettings();
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
 	function resetLegendOptions(){
 		$this->user->rolle->removeDrawingOrders();
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -972,9 +975,10 @@ echo '			</table>
 		$this->user->rolle->removeTransparency($this->formvars);
 		$this->user->rolle->removeLabelitem($this->formvars);
 		$this->neuLaden();
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -1000,9 +1004,10 @@ echo '			</table>
 		$this->user->rolle->setLanguage($this->formvars['language']);
 		$this->user->rolle->readSettings();
 		$this->loadMultiLingualText($this->user->rolle->language);
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		$this->loadMap('DataBase');
-		$this->drawMap();
+		#$this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		#$this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -2234,21 +2239,21 @@ echo '			</table>
 		}
 		$layer = new LayerObj($map);
 		$layer->name = $layerset[$layer_name_attribute];
-		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_name', $layerset['wms_name'] ?: ''); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
-		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_typename', $layerset['wms_name'] ?: ''); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
 		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('wms_format',$layerset['wms_format'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -2258,14 +2263,14 @@ echo '			</table>
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout'] ?: ''); #Mapserver8
 		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username'] ?: '');
 		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password'] ?: '');
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
+		$layer->metadata->set("gml_featureid", $layerset['oid'] ?: ''); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
@@ -3302,9 +3307,6 @@ echo '			</table>
 	# Zeichnet die Kartenelemente Hauptkarte, Legende, Maßstab und Referenzkarte
   # drawMap #
   function drawMap($img_urls = false) {
-		if (!in_array($this->formvars['go'], ['navMap_ajax', 'getMap'])) {
-			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
-		}
     if($this->main == 'map.php' AND $this->user->rolle->epsg_code != 4326 AND MINSCALE != '' AND $this->map_factor == '' AND $this->map_scaledenom < MINSCALE){
       $this->scaleMap(MINSCALE);
 			$this->saveMap('');
@@ -3438,8 +3440,8 @@ echo '			</table>
     if($this->reference_map->reference->image != NULL){
 			$this->reference_map->setextent($this->map->extent->minx,$this->map->extent->miny,$this->map->extent->maxx,$this->map->extent->maxy);
 			if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-				$projFROM = $this->map->projection;
-				$projTO = $this->reference_map->projection;
+				$projFROM = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
+				$projTO = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
 				$this->reference_map->extent->project($projFROM, $projTO);
 			}
       $img_refmap = $this->reference_map->drawReferenceMap();
@@ -4177,10 +4179,11 @@ echo '			</table>
 		$single_geoms = $spatial_processor->split_multi_geometries($this->formvars['newpathwkt'], $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $this->attributes['geomtype'][$this->attributes['the_geom']]);
 		$this->copy_dataset($mapdb, $this->formvars['selected_layer_id'], array($layerset[0]['oid']), array($this->formvars['oid']), count($single_geoms), array($this->formvars['layer_columnname']), $single_geoms, true);
 		$this->loadMap('DataBase');					# Karte anzeigen
-		$currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
-    $this->saveMap('');
+		// $currenttime=date('Y-m-d H:i:s',time());
+    // $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    // $this->drawMap();
+    // $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -5562,8 +5565,8 @@ echo '			</table>
   }
 
 	function getMenueWithAjax() {
-		$this->loadMap('DataBase');
-		$this->drawMap();
+		// $this->loadMap('DataBase');
+		// $this->drawMap();
 		$this->user->rolle->hideMenue(0);
 		include(LAYOUTPATH . "snippets/menue.php");
 		echo '█if(typeof resizemap2window != "undefined")resizemap2window();';
@@ -6056,10 +6059,11 @@ echo '			</table>
 		}
 		$dbmap->createAutoClasses(array_unique($classes), $auto_class_attribute, -$this->formvars['selected_layer_id'], $this->qlayerset[0]['Datentyp'], $this->database);
 		$this->loadMap('DataBase');
-    $this->saveMap('');
-    $currenttime=date('Y-m-d H:i:s',time());
-    $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    $this->drawMap();
+    // $this->saveMap('');
+    // $currenttime=date('Y-m-d H:i:s',time());
+    // $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+    // $this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
     $this->output();
 	}
 
@@ -7629,8 +7633,6 @@ echo '			</table>
 			$this->map->width = $this->Docu->activeframe[0]['mapwidth'] * $widthratio * $this->map_factor;
 			$this->map->height = $this->Docu->activeframe[0]['mapheight'] * $heightratio * $this->map_factor;
 
-			# errorhandler required for credits and grid
-			set_error_handler("MapserverErrorHandler"); # ist in allg_funktionen.php definiert
 			# copyright-layer aus dem Mapfile
 			@$creditslayer = $this->map->getLayerByName('credits');
 			if($creditslayer != false){
@@ -8298,9 +8300,10 @@ echo '			</table>
 			$this->user->rolle->set_one_Group($this->user->id, $this->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 		}
 		$this->loadMap('DataBase');
-		$this->user->rolle->newtime = $this->user->rolle->last_time_id;
-		$this->drawMap();
-		$this->saveMap('');
+		// $this->user->rolle->newtime = $this->user->rolle->last_time_id;
+		// $this->drawMap();
+		// $this->saveMap('');
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -8315,6 +8318,25 @@ echo '			</table>
   }
 
   function Layer2Stelle_EditorSpeichern(){
+		$this->sanitize([
+			'selected_layer_id' => 'int',
+			'use_geom' => 'int',
+			'postlabelcache' => 'int',
+			'offsite' => 'text',
+			'Filter' => 'text',
+			'template' => 'text',
+			'header' => 'text',
+			'footer' => 'text',
+			'logconsume' => 'int',
+			'queryable' => 'int',
+			'start_aktiv' => 'int',
+			'group_id' => 'int',
+			'transparency' => 'int',
+			'minscale' => 'int',
+			'maxscale' => 'int',
+			'symbolscale' => 'int',
+			'requires' => 'int'			
+		]);
     $Stelle = new stelle($this->formvars['selected_stelle_id'],$this->user->database);
     $Stelle->updateLayer($this->formvars);
     $this->Layer2Stelle_Editor();
@@ -13008,8 +13030,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$new_stelle->addMenue($menues); // und dann hinzufügen, damit die Reihenfolge stimmt
 
 		# Layer
-		if ($layer[0] != NULL) {
-			$new_stelle->addLayer($layer, '', '', false); # Hinzufügen der Layer zur Stelle
+		if($layer[0] != NULL) {
+			$new_stelle->addLayer($layer, '', false); # Hinzufügen der Layer zur Stelle
 		}
 
 		# Funktionen
@@ -16788,8 +16810,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($output_format == '' AND $refmap->selectOutputFormat('jpeg_print') == 1) {
 			$refmap->selectOutputFormat('jpeg');
 		}
-		set_error_handler("MapserverErrorHandler");		// ist in allg_funktionen.php definiert
-		$image_map = $refmap->draw() OR die($this->layer_error_handling());
+		$image_map = $refmap->draw();
 		$filename = $this->map_saveWebImage($image_map,'jpeg');
 
 		$image = imagecreatefromjpeg(IMAGEPATH . basename($filename));
@@ -17438,7 +17459,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# Abfragen der Layerausdehnung
 				$ret = $layerdb->execSQL($sql, 4, 0);
 				if ($ret[0]) {
-					echo err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
+					err_msg(htmlentities($_SERVER['PHP_SELF']), __LINE__, $sql);
 					return 0;
 				}
 				$rs = pg_fetch_array($ret[1]);
@@ -17686,8 +17707,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	  $point->setXY($refmapxposm, $refmapyposm);
 
 		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
-			$projFROM = $this->reference_map->projection;
-			$projTO = $this->map->projection;
+			$projFROM = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
+			$projTO = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
 			$point->project($projFROM, $projTO);
 		}
 
@@ -17705,37 +17726,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
     $this->saveMap('');
   }
 
-	function layer_error_handling(){
-		global $errors;
-		for($i = 0; $i < 2; $i++){		// es wird nach den ersten beiden Fehlern abgebrochen, da die Fehlermeldungen bei mehrmaligem Aufruf immer mehr werden...
-			$error_details .= $errors[$i].chr(10);
-			if(strpos($errors[$i], 'named') !== false){
-				$start = strpos($errors[$i], '\'')+1;
-				$end = strpos($errors[$i], '\'', $start);
-				$length = $end - $start;
-				$error_layername = substr($errors[$i], $start, $length);
-				$layer = $this->user->rolle->getLayer($error_layername);
-				if($layer == NULL)$layer = $this->user->rolle->getRollenLayer($error_layername);
-				$error_layer_id = $layer[0]['Layer_ID'];
-			}
-		}
-		restore_error_handler();
-		if($this->formvars['go'] != 'navMap_ajax'){
-			include(LAYER_ERROR_PAGE);
-		}
-		else{
-			header('error: true');	// damit ajax-Requests das auch mitkriegen
-		}
-	}
-
 	function deleteRollenlayer() {
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$mapDB->deleteRollenlayer($this->formvars['id'], $this->formvars['delete_rollenlayer_type']);
 		$this->loadMap('DataBase');
-		$currenttime=date('Y-m-d H:i:s',time());
-		$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		$this->saveMap('');
-		$this->drawMap();
+		// $currenttime=date('Y-m-d H:i:s',time());
+		// $this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
+		// $this->saveMap('');
+		// $this->drawMap();
+		$this->legende = $this->create_dynamic_legend();
 		$this->output();
 	}
 
@@ -19853,8 +19852,8 @@ class db_mapObj{
 		}
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$dump_text .= "\n\n-- Replace attribute options for Layer " . $layer_ids[$i];
-			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink');";
-			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK');";
+			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, 'layer_id=" . $layer_ids[$i]."', CONCAT('layer_id=', @last_layer_id" . $layer_ids[$i].")) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('Autovervollständigungsfeld', 'Auswahlfeld', 'Link','dynamicLink') AND options regexp 'layer_id=" . $layer_ids[$i] . "( |$)';";
+			$dump_text .= "\nUPDATE layer_attributes SET options = REPLACE(options, '" . $layer_ids[$i].",', CONCAT(@last_layer_id" . $layer_ids[$i].", ',')) WHERE layer_id IN (@last_layer_id" . implode(', @last_layer_id', $layer_ids) . ") AND form_element_type IN ('SubFormPK', 'SubFormFK', 'SubFormEmbeddedPK') AND options LIKE '" . $layer_ids[$i] . ",%';";
 		}
 
 		if ($with_datatypes) {

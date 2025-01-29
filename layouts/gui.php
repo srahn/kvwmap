@@ -18,6 +18,14 @@
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
 						<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?: '' ?>">
+						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
+						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
+						<input type="hidden" name="browserwidth">
+						<input type="hidden" name="browserheight">
+						<input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="gle_changed" value="">
+						<input type="hidden" name="mime_type" value="">
+						<input type="hidden" name="window_type" value="">
 						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
@@ -91,14 +99,6 @@
 								</td>
 							</tr>
 						</table>
-						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
-						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
-						<input type="hidden" name="browserwidth">
-						<input type="hidden" name="browserheight">
-						<input type="hidden" name="stopnavigation" value="0">
-						<input type="hidden" name="gle_changed" value="">
-						<input type="hidden" name="mime_type" value="">
-						<input type="hidden" name="window_type" value="">
 					</form>
 				</td>
 			</tr><?php
