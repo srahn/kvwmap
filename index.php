@@ -247,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if ($GUI->formvars['legendtouched']) {
+				if ($GUI->formvars['legendtouched'] OR $GUI->formvars['refmap_x']) {
 					$GUI->neuLaden();
 				}
 				else{
