@@ -856,6 +856,37 @@ class GUI {
       }
     }
   }
+
+	function zoomToRefExt() {
+    # Zoomen auf den in der Referenzkarte gesetzten Punkt
+    # Berechnen der Koordinaten des angeklickten Punktes in der Referencekarte
+    $refmapwidthm=($this->reference_map->reference->extent->maxx-$this->reference_map->reference->extent->minx);
+    $refmappixsize=$refmapwidthm/$this->reference_map->reference->width;
+    $refmapxposm=$this->reference_map->reference->extent->minx+$refmappixsize*$this->formvars['refmap_x'];
+    $refmapyposm=$this->reference_map->reference->extent->maxy-$refmappixsize*$this->formvars['refmap_y'];
+
+		$point = new PointObj();
+	  $point->setXY($refmapxposm, $refmapyposm);
+
+		if($this->ref['epsg_code'] != $this->user->rolle->epsg_code){
+			$projFROM = new projectionObj('init=epsg:' . $this->ref['epsg_code']);
+			$projTO = new projectionObj('init=epsg:' . $this->user->rolle->epsg_code);
+			$point->project($projFROM, $projTO);
+		}
+
+		$halfmapwidthm=($this->map->extent->maxx-$this->map->extent->minx)/2;
+    $halfmapheight=($this->map->extent->maxy-$this->map->extent->miny)/2;
+    $zoommaxx=$point->x + $halfmapwidthm;
+    $zoomminx=$point->x - $halfmapwidthm;
+    $zoommaxy=$point->y + $halfmapheight;
+    $zoomminy=$point->y - $halfmapheight;
+
+    $this->map->setextent($zoomminx,$zoomminy,$zoommaxx,$zoommaxy);
+    $oPixelPos = new PointObj();
+    $oPixelPos->setXY($this->map->width/2,$this->map->height/2);
+    $this->map->zoompoint(1,$oPixelPos,$this->map->width,$this->map->height,$this->map->extent,$this->Stelle->MaxGeorefExt);
+    $this->saveMap('');
+  }
 	
 	function reduce_mapwidth($width_reduction, $height_reduction = 0){
 		# Diese Funktion reduziert die aktuelle Kartenbildbreite um $width_reduction Pixel (und optional die Kartenbildhöhe um $height_reduction Pixel), damit das Kartenbild in Fachschalen nicht zu groß erscheint.

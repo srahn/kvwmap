@@ -820,6 +820,8 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	var input_coord = document.GUI.INPUT_COORD.value;
 	var cmd = document.GUI.CMD.value;
+	var refmap_x = document.GUI.refmap_x.value;
+	var refmap_y = document.GUI.refmap_y.value;
 	var width_reduction = '';
 	var height_reduction = '';
 	var browserwidth = '';
@@ -835,7 +837,7 @@ function get_map_ajax(postdata, code2execute_before, code2execute_after){
 	
 	if(document.GUI.punktfang != undefined && document.GUI.punktfang.checked)code2execute_after += 'toggle_vertices();';
 
-	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
+	postdata = postdata+"&mime_type=map_ajax&browserwidth="+browserwidth+"&browserheight="+browserheight+"&width_reduction="+width_reduction+"&height_reduction="+height_reduction+"&INPUT_COORD="+input_coord+"&CMD="+cmd+"&refmap_x="+refmap_x+"&refmap_y="+refmap_y+"&code2execute_before="+code2execute_before+"&code2execute_after="+code2execute_after;
 
 	if (document.GUI.legendtouched.value == 1) {
 		// Legende benutzt -> gesamtes Formular mitschicken
