@@ -773,7 +773,7 @@ function set_hist_timestamp() {
 	}
 	let ts = new_hist_timestamp.toLocaleString().replace(',', '');
 	get_map(mapimg3, 'no_postgis_layer=1&hist_timestamp=' + ts);
-	get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
+	//get_map(mapimg4, 'only_postgis_layer=1&hist_timestamp=' + ts);
 	document.GUI.hist_timestamp3.value = 0;
 	$('#hist_timestamp_form').show();
 	document.getElementById('hist_range_div').scrollLeft = scroll;
