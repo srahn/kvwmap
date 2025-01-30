@@ -125,16 +125,18 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	</div>
 </div>
 
-<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
+
 <div id="lagebezeichnung_bar">
 	<div id="lagebezeichnung">
+	<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
 		<span class="fett">Gemeinde:</span>&nbsp;<?php echo $this->Lagebezeichung['gemeindename']; ?>
 		<span class="fett">Gemarkung:</span>&nbsp;<?php echo $this->Lagebezeichung['gemkgname']; ?>&nbsp;(<?php echo $this->Lagebezeichung['gemkgschl']; ?>)
-		<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur']; ?>
+		<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur'];
+		}  ?>
 	</div>
 </div>
-<? } 
 
+<?
 if ($this->user->rolle->showmapfunctions) { ?>
 	<div id="map_functions_bar">
 		<div id="mapbuttons">
