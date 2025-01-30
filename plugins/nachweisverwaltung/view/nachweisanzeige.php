@@ -529,7 +529,7 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="save_selection(); clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
                 				
-				if (!is_array($this->formvars['id'])) {
+				if ($this->formvars['id'] != NULL AND !is_array($this->formvars['id'])) {
 					$this->formvars['id'] = [$this->formvars['id']];
 				}
 				if (
