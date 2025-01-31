@@ -1982,6 +1982,7 @@ function go_switch($go, $exit = false) {
 			case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->BenutzerdatenAnlegen();
+				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzerdaten_Ändern' : {

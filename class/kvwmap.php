@@ -221,9 +221,9 @@ class GUI {
 	}
 
 	/**
-		Check if the login is granted. If not set the login failed reason
-		@return true if granted, false if not.
-	*/
+	 * Check if the login is granted. If not set the login failed reason
+	 * @return true if granted, false if not.
+	 */
 	function is_login_granted($user, $login_name, $password) {
 		# check if login_name is locked
 		if ($user->login_is_locked()) {
@@ -14341,20 +14341,20 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
   function BenutzerdatenAnlegen() {
-    $ret=$this->user->checkUserDaten($this->formvars);
+    $ret = $this->user->checkUserDaten($this->formvars);
     if ($ret[0]) {
       # Fehler bei der Formulareingabe
       $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
     }
-    else{
-      $ret=$this->user->NeuAnlegen($this->formvars);
+    else {
+      $ret = $this->user->NeuAnlegen($this->formvars);
       if ($ret[0]) {
         # Fehler beim Eintragen der Benutzerdaten
         $this->add_message('error', 'Fehler beim Eintragen in die Datenbank!<br>' . $ret[1]);
       }
       else {
-        $this->formvars['selected_user_id']=$ret[1];
-        $stellen = array_filter(explode(', ',$this->formvars['selstellen']));
+        $this->formvars['selected_user_id'] = $ret[1];
+        $stellen = array_filter(explode(', ', $this->formvars['selstellen']));
 				for($i = 0; $i < count($stellen); $i++){
 					$stelle = new stelle($stellen[$i], $this->database);
 					$this->user->rolle->setRolle($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
@@ -14368,14 +14368,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$this->user->rolle->setSavedLayersFromDefaultUser($this->formvars['selected_user_id'], $stelle->id, $stelle->default_user_id);
 				}
         if ($ret[0]) {
-          $this->Meldung=$ret[1];
+          $this->Meldung = $ret[1];
         }
         else {
-          $this->Meldung='Daten des Benutzers erfolgreich eingetragen!';
+          $this->Meldung = 'Daten des Benutzers erfolgreich eingetragen!';
         }
       }
     }
-    $this->BenutzerdatenFormular();
   }
 
 	function BenutzerdatenAendern() {
