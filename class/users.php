@@ -776,7 +776,6 @@ class user {
 				id = ? AND
 				password = SHA1(?)
 		");
-		# echo '<br>SQL: ' . $sql;
 		$stmt->bind_param("is", $args1, $args2);
 		$args1 = $this->id;
 		$args2 = $password;
@@ -1295,6 +1294,33 @@ class user {
 		return $ret;
 	}
 
+	/**
+	 * Function return a unique login_name for $vorname and $nachname
+	 * that not allready exists in tabel user.
+	 * The loginname will be composed on the first letter of $vorname and $nachname
+	 * If it exists a increasing nummer will be added until the loginname not exists in
+	 * database. This that first not exists will be returned as unique and valid login_name.
+	 * @param String $vorname,
+	 * @param String $nachname,
+	 * @return String The loginname
+	 */
+	function get_login_name($vorname, $nachname) {
+		$loginname_exists = true;
+		$postfix = '';
+		do {
+			$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . $postfix;
+			$ret = $this->loginname_exists($login_name);
+			if ($ret[1] == 1) {
+				$postfix = ($postfix == '' ? 2 : $postfix + 1);
+			}
+			if ($postfix > 10) {
+				$ret[1] = 0; // Abbruch
+				$login_name = strtolower(substr($vorname, 0, 1)) . strtolower($nachname) . rand(11, 9999);
+			}
+		} while ($ret[1] == 1);
+		return $login_name;
+	}
+
 	function loginname_exists($login, $id = NULL) {
 		$Meldung='';
 		# testen ob es einen user mit diesem login_namen in der Datenbanktabelle gibt und diesen dann zurückliefern
@@ -1339,7 +1365,7 @@ class user {
 		if ($userdaten['vorname'] == '') { $Meldung .= '<br>Vorname fehlt.'; }
 		if ($userdaten['loginname'] == '') { $Meldung .= '<br>Login Name fehlt.'; }
 		else {
-			$ret=$this->loginname_exists($userdaten['loginname'], $userdaten['id']);
+			$ret = $this->loginname_exists($userdaten['loginname'], $userdaten['id']);
 			if ($ret[1] == 1) {
 				$Meldung .= '<br>Es existiert bereits ein Nutzer mit diesem Loginnamen.';
 			}
@@ -1373,7 +1399,7 @@ class user {
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
 		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
 		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
-		$sql.=',password_expired = false';
+		$sql.=',password_expired = ' . ($userdaten['password_expired'] ? '1' : '0');
 		if ($userdaten['phon']!='') {
 			$sql.=',phon="'.$userdaten['phon'].'"';
 		}
@@ -1398,9 +1424,9 @@ class user {
 		if($stellen[0] != ''){
 			$sql.=',stelle_id='.$stellen[0];
 		}
-		#echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
+		// echo '<p>SQL zum Eintragen eines neuen Nutzers: ' . $sql;
 		# Abfrage starten
-		$ret=$this->database->execSQL($sql,4, 0);
+		$ret = $this->database->execSQL($sql,4, 0);
 		if ($ret[0]) {
 			# Fehler bei Datenbankanfrage
 			$ret[1].='<br>Die Benutzerdaten konnten nicht eingetragen werden.<br>'.$ret[1];
