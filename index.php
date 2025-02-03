@@ -538,9 +538,9 @@ function go_switch($go, $exit = false) {
 				]);
 				$GUI->loadMap('DataBase');
 				$GUI->zoom2coord();
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->drawMap();
+				$GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
@@ -548,9 +548,9 @@ function go_switch($go, $exit = false) {
 			case 'zoom2wkt' : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoom2wkt();
-				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
+				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$GUI->drawMap();
+				$GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
