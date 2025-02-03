@@ -154,20 +154,44 @@ class Ressource extends PgObject {
 		if ($method_only == '' OR $method_only == 'transform') {
 			$result = $this->transform();
 			if (!$result['success']) { return $result; }
+
+			// Update metadata document
+			$this->gui->formvars['aktivesLayout'] = 4;
+			$this->gui->formvars['chosen_layer_id'] = 3;
+			$this->gui->formvars['oid'] = $this->get_id();
+			$this->gui->formvars['archivieren'] = 1;
+			$this->debug->show('Erzeuge Metadatendokument für Ressource ', true);
+			$this->gui->generischer_sachdaten_druck_drucken(NULL, NULL, NULL, true, false);
+
+			// Currently update status will be set to uptodate only if data has been transformed
+			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
 
-		$this->update_status(0);
 		return array(
 			'success' => true,
 			'msg' => $msg . '<br>Ressource erfolgreich aktualisiert.'
 		);
 	}
 
+	/**
+	 * Set the $status_id of ressource and if switch to uptodate status
+	 * set the last_updated_at timestamp too.
+	 * If parameter $msg is not empty the message will be echoed. 
+	 * @param Integer $status_id
+	 * @param String (optional) $msg
+	 */
 	function update_status($status_id, $msg = '') {
+		$attributes = array('status_id = ' . (string)$status_id);
+		$last_updated_at = date('Y-m-d H:i:s', time());
 		if ($msg != '') {
-			echo '<br>Update Status auf ' . $status_id . '<br>Msg: ' . $msg;
+			echo '<br>Update Status auf id: ' . $status_id . '<br>Msg: ' . $msg . ' ' . $last_updated_at;
 		}
-		$this->update_attr(array('status_id = ' . (string)$status_id));
+		if ($this->get('status_id') != 0 AND $status_id == 0) {
+			$attributes[] = "last_updated_at = '" . $last_updated_at . "'";
+		}
+		$this->show = true;
+		// echo '<br>Update status_id: ' . $this->get('status_id') . ' auf ' . $status_id;
+		$this->update_attr($attributes, false);
 	}
 
 	####################
@@ -1041,6 +1065,23 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'Anzahl erfolgreich gelesener GML-Dateien: ' . count($gml_files) . '.'
+		);
+	}
+
+	function import_ogr2ogr_gdb() {
+		$this->debug->show('Starte Funktion import_org2ogr_gdb', true);
+		if ($this->get('import_schema') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für das Importschema angegeben!'
+			);
+		}
+
+		// Hier weiter mit Implementierung gdb-Import.
+
+		return array(
+			'success' => true,
+			'msg' => 'Anzahl erfolgreich gelesener gdb-Tabellen: ' . count($gdb_files) . '.'
 		);
 	}
 

@@ -11790,10 +11790,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 * aktivesLayout=31
 	 * chosen_layer_id=743
 	 * archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
-	 * Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden folgenden Parameter abgeleitet
+	 * Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden darunter folgenden Parameter abgeleitet
 	 * oid => 23453
-	 * checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
-	 * check;rechnungen;rechnungen;222792641=on
+	 * z.B: checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
+	 * z.B: check;rechnungen;rechnungen;222792641=on
 	 * @param Object $pdfobject Ein PDF-Objekt welches fortgesetzt werden soll. Wenn keines angegeben ist wird eine neues angelegt.
 	 * @param int $offsetx
 	 * @param int $offsety
@@ -11842,12 +11842,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				WHERE
 					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids ?: []) . "')
 				" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
-				";
+			";
 			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
 			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			if (!$ret[0]) {
-				while ($rs=pg_fetch_array($ret[1])) {
+				while ($rs = pg_fetch_array($ret[1])) {
 					$result[] = $rs;
 				}
 			}
@@ -11868,7 +11868,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($this->formvars['archivieren']) {
 				# Dateiname für Speicherung im Dokumentpfad ermitteln
 				$document_file = $this->outputfile;
-				$pathinfo = pathinfo($document_file);				
+				$pathinfo = pathinfo($document_file);
 
 				# Attributname ermitteln in dem der Attributwert eingetragen werden soll
 				for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
@@ -11882,7 +11882,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				# Wert für den Eintrag in Dokument-Attribut ermitteln
-				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;				
+				$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
 
 				# Datei von tmp in das Ziel verschieben
 				if (!is_dir($document_path)) {
@@ -11908,8 +11908,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				else {
 					$this->add_message('notice', 'PDF-Dokument erfolgreich erzeugt und hinzugefügt.');
 				}
-				$this->formvars['no_output'] = false;
-				$this->GenerischeSuche_Suchen();
+				if ($this->formvars['no_output']) {
+					// no output
+				}
+				else {
+					$this->formvars['no_output'] = false;
+					$this->GenerischeSuche_Suchen();
+				}
 			}
 			else {
 				$this->mime_type='pdf';

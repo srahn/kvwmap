@@ -16,7 +16,6 @@
 	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
 	// Metadaten_Recherche
-	// metadata_update_outdated
 	// Metadateneingabe
 
 	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
@@ -200,7 +199,8 @@
 			// Metadatendatei erzeugen und in ZIP packen
 			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			exec(ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf');
+			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
+			exec($command);
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
 			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
