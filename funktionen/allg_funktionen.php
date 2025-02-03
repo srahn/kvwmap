@@ -177,17 +177,6 @@ function human_filesize($file) {
 	return format_human_filesize($bytes);
 }
 
-function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {
-		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	/* Don't execute PHP internal error handler */
-	return true;
-}
-
 function versionFormatter($version) {
   return substr(
     str_pad(

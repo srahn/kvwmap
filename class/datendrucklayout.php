@@ -745,7 +745,8 @@ class ddl {
 					# Rollenlayer wieder entfernen
 					if ($oid != '') {
 						$this->gui->mapDB->deleteRollenLayer($rollenlayer_id);
-						$this->gui->map->removeLayer($this->gui->map->numlayers-1);
+						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);		# der letzte Layer ist die Scalebar
+						$this->gui->map->removeLayer($this->gui->map->numlayers - 1);
 					}
 					$filename = $this->gui->map_saveWebImage($image_map,'jpeg');
 					$newname = $this->user->id.basename($filename);
@@ -772,7 +773,7 @@ class ddl {
 						$this->layout['elements'][$attributes['name'][$j]]['width']
 					);
 					if (!$this->miny[$this->pdf->currentContents] OR $this->miny[$this->pdf->currentContents] > $y) {
-						$this->miny[$this->pdf->currentContents] = $y;
+						#$this->miny[$this->pdf->currentContents] = $y;		# Fehler bei Druck der VSG mit Maßnahmen im Schutzgebietsportal
 					}
 					if ($this->pdf->currentContents != end($this->pdf->objects['3']['info']['pages']) + 1) {
 						# falls in eine alte Seite geschrieben wurde, zurückkehren

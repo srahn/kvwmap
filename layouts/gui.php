@@ -18,6 +18,14 @@
 				<td align="center" valign="top">
 					<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
 						<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?: '' ?>">
+						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
+						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
+						<input type="hidden" name="browserwidth">
+						<input type="hidden" name="browserheight">
+						<input type="hidden" name="stopnavigation" value="0">
+						<input type="hidden" name="gle_changed" value="">
+						<input type="hidden" name="mime_type" value="">
+						<input type="hidden" name="window_type" value="">
 						<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
@@ -31,7 +39,7 @@
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
 								<td id="container_paint_td" align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
-									<div id="container_paint" style="height:100%; position: relative; <? echo ($this->main == 'map.php' ? 'overflow: hidden' : ''); ?>">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
+									<div id="container_paint" style="height:100%; position: relative; <? echo (in_array($this->main, ['map.php', 'druckausschnittswahl.php']) ? 'overflow: hidden' : ''); ?>">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											window.name = 'root';
 											currentform = document.GUI;
@@ -91,14 +99,6 @@
 								</td>
 							</tr>
 						</table>
-						<input type="hidden" name="overlayx" value="<? echo $this->user->rolle->overlayx; ?>">
-						<input type="hidden" name="overlayy" value="<? echo $this->user->rolle->overlayy; ?>">
-						<input type="hidden" name="browserwidth">
-						<input type="hidden" name="browserheight">
-						<input type="hidden" name="stopnavigation" value="0">
-						<input type="hidden" name="gle_changed" value="">
-						<input type="hidden" name="mime_type" value="">
-						<input type="hidden" name="window_type" value="">
 					</form>
 				</td>
 			</tr><?php
