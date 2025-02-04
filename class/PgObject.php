@@ -67,6 +67,7 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
 	}
 
 	/**
@@ -388,7 +389,7 @@ class PgObject {
 		$oid = pg_last_oid($query);
 		if (empty($oid)) {
 			$ret_id = pg_fetch_assoc($query)[$this->identifier];
-			$this->debug->show('Query created identifier ' . $this->identifier . ' with value ' . $ret_id, $this->show);
+			$this->debug->show('Query created identifier ' . $this->identifier . ' with values ' . $ret_id, false);
 			$this->lastquery = $query;
 			$this->set($this->identifier, $ret_id);
 		}
@@ -451,7 +452,7 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 	}
 
-	function update_attr($attributes) {
+	function update_attr($attributes, $set = false) {
 		$quote = ($this->identifier_type == 'text' ? "'" : "");
 		$sql = "
 			UPDATE
@@ -465,6 +466,12 @@ class PgObject {
 		$this->debug->show('update sql: ' . $sql, $this->show);
 		try {
 			pg_query($this->database->dbConn, $sql);
+			if ($set) {
+				foreach($attributes AS $attribute) {
+					$parts = explode('=', $attribute);
+					$this->set(trim($parts[0]), trim($parts[1], "'"));
+				}
+			}
 			return array(
 				'success' => true,
 				'msg' => 'Attributes erfolgreich geupdated'

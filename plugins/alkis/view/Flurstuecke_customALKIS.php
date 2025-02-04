@@ -76,7 +76,7 @@ hide_versions = function(flst){
 		<td align="center">
 <?php
 	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp_de);
-	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
+	$sql = "SELECT aktualitaet::date FROM alkis.pp_aktualitaet;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_row($ret[1]);
 

@@ -696,6 +696,11 @@ class user {
 		$this->readUserDaten($this->id, $this->login_name, $password, $archived);
 	}
 
+	public static	function find($gui, $where, $order = '', $sort_direction = '') {
+		$user = new MyObject($gui, 'user');
+		return $user->find_where($where, $order, $sort_direction);
+	}
+
 	/*
 	* Function return true if the case is for the user allowed to execute
 	* Currently only the following cases will be tested against the rights of the user
@@ -1067,7 +1072,7 @@ class user {
 				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
 				(!$with_expired ? "
 				AND (
-					('" . date('Y-m-d h:i:s') . "' >= s.start AND '" . date('Y-m-d h:i:s') . "' <= s.stop)
+					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
 					OR
 					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
 				)" : "") . "

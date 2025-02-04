@@ -13,6 +13,7 @@ class DataPackage extends PgObject {
 	public $export_format;
 	public $datatype;
 	public $datatype_icon;
+	public $num_features;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object from Class DataPackage in table ' . DataPackage::$schema . '.' .  DataPackage::$tableName, $this->write_debug);
@@ -50,6 +51,11 @@ class DataPackage extends PgObject {
 			r.use_for_datapackage AND
 			r.layer_id IS NOT NULL
 		";
+	}
+
+	public static	function find($gui, $where, $order = '') {
+		$datapackage = new DataPackage($gui);
+		return $datapackage->find_where($where, $order);
 	}
 
 	public static	function find_by_id($gui, $id) {
