@@ -631,7 +631,7 @@
 
 			case 'Dokument': {
 				if ($value != '') {
-					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td>';
 						if ($hover_preview) {
@@ -660,7 +660,7 @@
 							$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ' (' . $preview['filesize'] . ')</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span></td></tr>';
 						$datapart .= '</table>';
 					}
 					else {

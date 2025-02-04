@@ -1397,7 +1397,12 @@ function go_switch($go, $exit = false) {
 			case 'belated_file_upload_speichern' : {
 				$GUI->checkCaseAllowed('belated_file_upload');
 				$GUI->belated_file_upload_speichern();
-			} break;	
+			} break;
+			
+			case 'get_document' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document();
+			} break;
 
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
