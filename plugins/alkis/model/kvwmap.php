@@ -1110,8 +1110,11 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$GUI->generischer_sachdaten_druck_drucken();
-	};
+		$result = $GUI->generischer_sachdaten_druck_drucken();
+    $GUI->outputfile = basename($result['pdf_file']);
+    $GUI->mime_type='pdf';
+    $GUI->output();
+  };
 
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';

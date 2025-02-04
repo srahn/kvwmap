@@ -2332,9 +2332,20 @@ function str_replace_last($search , $replace, $str) {
 }
 
 /**
-* Liefert den Originalnamen vom Namen der Thumb-Datei
-*/
-function get_name_from_thump($thumb) {
+ * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
+ * @param String $path Name of original file.
+ * @return String Name of thump file.
+ */
+function get_thumb_from_name($path) {
+	return before_last($path, '.') . '_thumb.jpg';
+}
+
+/**
+ * Liefert den Basename der Originaldatei vom Namen der Thumb-Datei
+ * @param String $thumb Name of the thumb file.
+ * @return String Basename of the original File.
+ */
+function get_name_from_thumb($thumb) {
 	return before_last($thumb, '_thumb.jpg');
 }
 
