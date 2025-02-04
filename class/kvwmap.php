@@ -18851,7 +18851,7 @@ class db_mapObj{
 						case (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) : {
 							$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;					# Array oder Datentyp
 						}break;
-						case ($only_filenames AND $type == 'bytea') : {
+						case ($only_filenames !== false AND $type == 'bytea') : {
 							$newattributesarray[] = "split_part(encode(" . $attributename . ", 'escape'), '&original_name=', 2) as " . $attributename;								# bytea
 						}break;
 						default : {
