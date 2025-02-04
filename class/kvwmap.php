@@ -7366,6 +7366,10 @@ echo '			</table>
 	 * @param string $value Wert der in dem Dokumentattribut in der Datenbank steht.
 	 * @param string $document_path Pfad für Dokumente in dem Layer.
 	 * @param string $document_url URL für den Zugriff auf die Dokumente von außen.
+	 * @param string $datatype Datentyp des Dokumentattributs
+	 * @param int 	 $layer_id Layer-ID
+	 * @param string $oid ID des Datensatzes
+	 * @param string $name Name des Dokumentattributs
 	 * @return array[ Array with values about doc type and preview with the following elements:
 	 *	'doc_src' => string, URL für den Zugriff auf die Datei von außen
 	 *	'doc_type' => string, Art des Dokumentes und damit auch der typ der Dokumentenvorschau
@@ -7388,59 +7392,69 @@ echo '			</table>
 	 * 		- Vorschau als Piktogram mit Extension
 	 * 		- Vorschau als Piktogram ohne Extension
 	 */
-	function get_dokument_vorschau($value, $document_path, $document_url) {
+	function get_dokument_vorschau($value, $document_path, $document_url, $datatype = NULL, $layer_id = NULL, $oid = NULL, $name = NULL) {
 		$doc_src = $doc_type = $thumb_src = $original_name = $target = $filesize = '';
 
-		$pfadteil = explode('&original_name=', $value);
-		$dateipfad = $pfadteil[0];
-		$pathinfo = pathinfo($dateipfad);
-		$type = strtolower($pathinfo['extension']);
-
-		if ($document_url != '') {
-			if (in_array($type, array('mp4'))) {
-				$doc_type = 'videostream';
-			}
-			else if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
-				# die URL verweist auf einen anderen Server
-				$doc_type = 'remote_url';
-			}
-			$dateipfad = url2filepath($dateipfad, $document_path, $document_url);
-		}
-		if (file_exists($dateipfad) OR $doc_type != '') {
+		if ($datatype != 'bytea') {
+			$pfadteil = explode('&original_name=', $value);
+			$dateipfad = $pfadteil[0];
 			$pathinfo = pathinfo($dateipfad);
-			if ($doc_type == '') {
-				$type = strtolower($pathinfo['extension']);
-				if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
-					$doc_type = 'local_img';
-				}
-				else {
-					$doc_type = 'local_doc';
-				}
-			}
-
-			$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+			$type = strtolower($pathinfo['extension']);
 
 			if ($document_url != '') {
-				$original_name = basename($dateipfad);
-				$doc_src = $value; # URL zu der Datei (komplette URL steht schon in $value)
-				$target = 'target="_blank"';
-				if (dirname($thumbname).'/' == IMAGEPATH){
-					$thumbname = IMAGEURL.basename($thumbname);
+				if (in_array($type, array('mp4'))) {
+					$doc_type = 'videostream';
+				}
+				else if (parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST) != parse_url($document_url, PHP_URL_HOST)) {
+					# die URL verweist auf einen anderen Server
+					$doc_type = 'remote_url';
+				}
+				$dateipfad = url2filepath($dateipfad, $document_path, $document_url);
+			}
+			if (file_exists($dateipfad) OR $doc_type != '') {
+				$pathinfo = pathinfo($dateipfad);
+				if ($doc_type == '') {
+					$type = strtolower($pathinfo['extension']);
+					if (in_array($type, array('jpg', 'png', 'gif', 'tif', 'pdf'))) {
+						$doc_type = 'local_img';
+					}
+					else {
+						$doc_type = 'local_doc';
+					}
+				}
+
+				$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+
+				if ($document_url != '') {
+					$original_name = basename($dateipfad);
+					$doc_src = $value; # URL zu der Datei (komplette URL steht schon in $value)
+					$target = 'target="_blank"';
+					if (dirname($thumbname).'/' == IMAGEPATH){
+						$thumbname = IMAGEURL.basename($thumbname);
+					}
+					else {
+						$thumbname = dirname($value).'/'.basename($thumbname);
+					}
+					$thumb_src = $thumbname;
 				}
 				else {
-					$thumbname = dirname($value).'/'.basename($thumbname);
+					$original_name = $pfadteil[1];
+					$this->allowed_documents[] = addslashes($dateipfad);
+					$this->allowed_documents[] = addslashes($thumbname);
+					$url = IMAGEURL . $this->document_loader_name . '?dokument=';
+					$doc_src = $url . $value;
+					$thumb_src = $url . $thumbname;
 				}
-				$thumb_src = $thumbname;
+				$filesize = human_filesize($dateipfad);
 			}
-			else {
-				$original_name = $pfadteil[1];
-				$this->allowed_documents[] = addslashes($dateipfad);
-				$this->allowed_documents[] = addslashes($thumbname);
-				$url = IMAGEURL . $this->document_loader_name . '?dokument=';
-				$doc_src = $url . $value;
-				$thumb_src = $url . $thumbname;
-			}
-			$filesize = human_filesize($dateipfad);
+		}
+		else {
+			$doc_type = 'local_doc';
+			$pathinfo = pathinfo($value);
+			$thumbname = $this->create_dokument_vorschau($doc_type, $pathinfo);
+			$thumb_src = IMAGEURL . basename($thumbname);
+			$original_name = pg_unescape_bytea($value);
+			$doc_src = 'index.php?go=get_document&layer_id=' . $layer_id . '&oid=' . $oid . '&name=' . $name . '&csrf_token=' . $_SESSION['csrf_token'];
 		}
 
 		return array(
@@ -9685,6 +9699,34 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->formvars['selected_layer_id'] = $layerid_save;
 	}
 
+	/**
+	 * Funktion liefert eine Datei, die in der Datenbank in einem bytea-Feld gespeichert ist
+	 */
+	function get_document() {
+		$layerset = $this->user->rolle->getLayer($this->formvars['layer_id']);
+		$this->formvars['selected_layer_id'] = $this->formvars['layer_id'];
+		$this->formvars['value_' . $layerset[0]['maintable'] . '_oid'] = $this->formvars['oid'];
+		$this->formvars['operator_' . $layerset[0]['maintable'] . '_oid'] = '=';
+		$this->formvars['only_filenames'] = false;
+		$this->formvars['no_output'] = true;
+		$this->formvars['no_last_query'] = true;
+		$this->formvars['no_last_search'] = true;
+		$this->GenerischeSuche_Suchen();
+		$value = pg_unescape_bytea($this->qlayerset[0]['shape'][0][$this->formvars['name']]);
+		$data = explode('&original_name=', $value);
+		$type = strtolower(array_pop(explode('.', $data[1])));
+		if (in_array($type, array('jpg', 'gif', 'png'))) {
+			header("Content-type: image/" . $type);
+		}
+		else {
+			header("Content-type: application/" . $type);
+		}
+		header("Content-disposition: attachment; filename=" . $data[1]);
+		header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+		header('Pragma: public');
+		echo $data[0];
+	}
+
 	function GenerischeSuche_Suchen() {
 		$this->formvars['search'] = true;
 		$this->formvars['selected_layer_id'] = $this->formvars['selected_layer_id'];
@@ -9729,7 +9771,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$layerset[0]['oid'] = $layerset[0]['attributes']['pk'][0];
 				}
 
-				$query_parts = $mapDB->getQueryParts($layerset[0], $privileges);
+				$query_parts = $mapDB->getQueryParts($layerset[0], $privileges, $this->formvars['only_filenames']);
 				$pfad = $query_parts['query'];
 
 				for($j = 0; $j < count($layerset[0]['attributes']['name']); $j++){
@@ -10893,7 +10935,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$insert = $this->processJSON($this->formvars[$form_fields[$i]], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);
 				}
 				else {
-					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb);	// normales Dokument-Attribut
+					$insert = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attributenames, $attributevalues, $layerdb, $document_attributes[$i]['datatype']);	// normales Dokument-Attribut
 					if ($this->user->rolle->upload_only_file_metadata == 1) {
 						$belated_files[$i] = $this->formvars[$form_fields[$i]];
 					}
@@ -15685,7 +15727,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					# normales Dokument-Attribut
-					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db);
+					$update = $this->save_uploaded_file($form_fields[$i], $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $document_attributes[$i]['datatype']);
 					if ($this->user->rolle->upload_only_file_metadata == 1) {
 						$belated_files[$attr_oid['oid']][$i] = $this->formvars[$form_fields[$i]];
 					}
@@ -15927,12 +15969,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	* @param $input_name Name of the files form field used to upload the file
 	* @param $doc_path Document path defined for the layer
 	* @param $doc_url Document url defined for the layer
-	* @param $options Options defined for the document attributes
-	* @param $attribute_names Names of the document attributes
-	* @param $attribute_values Values of the document attributes
-	* @param $layer_db The database object with connection to layers main table
+	* @param $options Options defined for the document attribute
+	* @param $attribute_names Names of all attributes
+	* @param $attribute_values Values of all attributes
+	* @param $layer_db The database object of the layer
+	* @param $datatype The datatype of the document attribute
 	*/
-	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db) {
+	function save_uploaded_file($input_name, $doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datatype = NULL) {
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		if ($this->user->rolle->upload_only_file_metadata == 1) {
 			$file = json_decode($this->formvars[$input_name]);
@@ -15951,49 +15994,53 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$_files = $_FILES;
 		}
 		if ($_files[$input_name]['name'] != '' OR $this->formvars[$input_name] == 'delete') {
-			// $name_array = explode('.', basename($_files[$input_name]['name']));
-			// $datei_name = $name_array[0];
-			// $datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : array_pop($name_array));
-			// $doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $datei_name);
-			// $nachDatei = $doc_paths['doc_path'] . '.' . $datei_erweiterung;
-
 			$pathinfo = pathinfo($_files[$input_name]['name']);
-			$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : $pathinfo['extension']);
-			$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $pathinfo['filename']);
-			$nachDatei = $doc_paths['doc_path'] . (substr(trim($doc_paths['doc_path']), -1) === '/' ? $pathinfo['filename'] : '') . '.' . $datei_erweiterung;
+			if ($datatype != 'bytea') {
+				$datei_erweiterung = ($this->user->rolle->upload_only_file_metadata == 1 ? 'jpg' : $pathinfo['extension']);
+				$doc_paths = $mapdb->getDocument_Path($doc_path, $doc_url, $options, $attribute_names, $attribute_values, $layer_db, $pathinfo['filename']);
+				$nachDatei = $doc_paths['doc_path'] . (substr(trim($doc_paths['doc_path']), -1) === '/' ? $pathinfo['filename'] : '') . '.' . $datei_erweiterung;
 
-			if ($doc_paths['doc_url'] != '') {
-				$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
-			}
-			else {
-				$db_input = $nachDatei . "&original_name=" . $_files[$input_name]['name']; # absoluter Dateipfad wird gespeichert
-			}
-			if ($this->formvars[$input_name] == 'delete') {
-				$db_input = 'NULL';
-			}
-			# Bild in das Datenverzeichnis kopieren
-			if ($_files[$input_name]['source_handling'] == 'copy') {
-				#echo '<p>copy dummy file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
-				$file_copy_success = copy($_files[$input_name]['tmp_name'], $nachDatei);
-			}
-			else {
-				#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
-				$file_copy_success = move_uploaded_file($_files[$input_name]['tmp_name'], $nachDatei);
-			}
-			if ($file_copy_success OR $this->formvars[$input_name] == 'delete') {
-				# bei dynamischem Dateipfad das Vorschaubild löschen
-				if (strtolower(substr($options, 0, 6)) == 'select') {
-					$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);
+				if ($doc_paths['doc_url'] != '') {
+					$db_input = $doc_paths['doc_url'] . '.' . $datei_erweiterung;			# die URL zu der Datei wird gespeichert (Permalink)
 				}
-				# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
-				$parts = explode('&original_name', $this->formvars[$input_name.'_alt']);
-				$old = array_shift($parts);
-				if ($old != '' AND $old != $nachDatei) {
-					$this->deleteDokument($old, $doc_path, $doc_url);
+				else {
+					$db_input = $nachDatei . "&original_name=" . $_files[$input_name]['name']; # absoluter Dateipfad wird gespeichert
+				}
+				if ($this->formvars[$input_name] == 'delete') {
+					$db_input = 'NULL';
+				}
+				# Bild in das Datenverzeichnis kopieren
+				if ($_files[$input_name]['source_handling'] == 'copy') {
+					#echo '<p>copy dummy file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
+					$file_copy_success = copy($_files[$input_name]['tmp_name'], $nachDatei);
+				}
+				else {
+					#echo '<p>move uploaded file: ' . $_files[$input_name]['tmp_name'] . ' to file: ' . $nachDatei;
+					$file_copy_success = move_uploaded_file($_files[$input_name]['tmp_name'], $nachDatei);
+				}
+				if ($file_copy_success OR $this->formvars[$input_name] == 'delete') {
+					# bei dynamischem Dateipfad das Vorschaubild löschen
+					if (strtolower(substr($options, 0, 6)) == 'select') {
+						$this->deleteDokument($nachDatei, $doc_path, $doc_url, true);
+					}
+					# Wenn eine alte Datei existiert, die nicht so heißt wie die neue --> löschen
+					$parts = explode('&original_name', $this->formvars[$input_name.'_alt']);
+					$old = array_shift($parts);
+					if ($old != '' AND $old != $nachDatei) {
+						$this->deleteDokument($old, $doc_path, $doc_url);
+					}
+				}
+				else {
+					echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
 				}
 			}
 			else {
-				echo '<br>Datei: '.$_files[$input_name]['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
+				if ($this->formvars[$input_name] == 'delete') {
+					$db_input = 'NULL';
+				}
+				else {
+  				$db_input = pg_escape_bytea(file_get_contents($_files[$input_name]['tmp_name']) . '&original_name=' . $_files[$input_name]['name']);
+				}
 			}
 			return $db_input;
 		}
@@ -18454,22 +18501,28 @@ class db_mapObj{
 	* select  - die entsprechend der Rechte gekürzte Attributliste für den SELECT-Teil der Abfrage, Array- und Datentyp-Attribute werden mit to_json() abgefragt, zusätzlich erweitert um die ID-Spalte
 	* query   - das SQL aus dem Query-Feld des Layers, zusätzlich erweitert um die ID-Spalte, kann dann in einer Unterabfrage im FROM-Teil eingebaut werden
 	* orderby - das ORDER BY aus dem Query-Feld des Layers, falls vorhanden 
-	* @param layerset array enthält die Layerinformationen inkl. den Attributinformationen
-	* @param privileges array enthält die Rechteeinstellungen der Attribute
+	* @param array $layerset enthält die Layerinformationen inkl. den Attributinformationen
+	* @param array $privileges enthält die Rechteeinstellungen der Attribute
+	* @param bool $only_filenames	wenn true, werden für Dateien, die in bytea-Feldern gespeichert sind, nur die Dateinamen abgefragt
 	* @return array with string select and string query and string orderby
 	*/
-	function getQueryParts($layerset, $privileges){
+	function getQueryParts($layerset, $privileges, $only_filenames = true){
 		$path = $layerset['pfad'];
 
 		if (array_key_exists('attributes', $layerset)) {
 			foreach ($layerset['attributes']['name'] as $i => $attributename) {
 				if (value_of($privileges, $attributename) != '') {
 					$type = $layerset['attributes']['type'][$i];
-					if (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) {
-						$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;								# Array oder Datentyp
-					}
-					else {
-						$newattributesarray[] = pg_quote($attributename);					# normal
+					switch (true) {
+						case (POSTGRESVERSION >= 930 AND substr($type, 0, 1) == '_' OR is_numeric($type)) : {
+							$newattributesarray[] = 'to_json(' . $attributename . ')::text as ' . $attributename;					# Array oder Datentyp
+						}break;
+						case ($only_filenames AND $type == 'bytea') : {
+							$newattributesarray[] = "split_part(encode(" . $attributename . ", 'escape'), '&original_name=', 2) as " . $attributename;								# bytea
+						}break;
+						default : {
+							$newattributesarray[] = pg_quote($attributename);					# normal
+						}
 					}
 				}
 			}
