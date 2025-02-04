@@ -496,7 +496,8 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$y = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
+										$result = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
+										$y = $result['y'];
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
 											$this->page_overflow = true;
@@ -1037,6 +1038,7 @@ class ddl {
 	* @param ...
 	* @param array $result Array von Sachdatenabfrageergebnissen
 	* @param ...
+	* @return array $return_values Full path to created pdf document if $output is true and else only the last y-value of cursor in page
 	*/
 	function createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $selected_layer_id, $layout, $result, $stelle, $user, $preview = NULL, $record_paging = NULL, $output = true, $append = false ) {
 		$result = (!$result ? array() : $result);
@@ -1055,6 +1057,10 @@ class ddl {
 		$this->xoffset_onpage = 0;
 		$new_column = false;
 		$this->page_overflow = false;
+		$return_values = array(
+			'pdf_file' => '',
+			'y' => 0
+		);
 		if ($pdfobject == NULL) {
 			include_once (CLASSPATH . 'class.ezpdf.php');
 			$this->pdf=new Cezpdf($this->layout['size'], $this->layout['orientation']);
@@ -1205,7 +1211,7 @@ class ddl {
 			for ($j = 0; $j < count($this->attributes['name']); $j++) {
 				if ($this->layout['elements'][$attributes['name'][$j]]['ypos'] > 0) {
 					# zum Anfang sind alle Attribute noch zu schreiben
-					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];		
+					$this->remaining_attributes[$this->attributes['name'][$j]] = $this->attributes['name'][$j];
 				}
 			}
 
@@ -1336,12 +1342,13 @@ class ddl {
 			$fp = fopen($dateipfad . $dateiname, 'wb');
 			fwrite($fp, $this->pdf->ezOutput());
 			fclose($fp);
-			return $dateipfad . $dateiname;
+			$return_values['pdf_file'] = $dateipfad . $dateiname;
 		}
 		else {
 			# der letzte y-Wert wird zurückgeliefert, um nachfolgende Elemente darunter zu setzen
-			return $this->miny[$this->pdf->currentContents];
+			$return_values['y'] = $this->miny[$this->pdf->currentContents];
 		}
+		return $return_values;
 	}
 
 	function add_everypage_elements($preview){

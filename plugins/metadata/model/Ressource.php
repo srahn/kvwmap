@@ -54,8 +54,8 @@ class Ressource extends PgObject {
 		return $subressources;
 	}
 
-	function get_full_dest_path() {
-		return rtrim(METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path'), '/') .'/';
+	function get_full_path($path) {
+		return rtrim(METADATA_DATA_PATH . 'ressourcen/' . $path, '/') .'/';
 	}
 
 	function destroy() {
@@ -161,12 +161,30 @@ class Ressource extends PgObject {
 
 			// Update metadata document
 			$this->gui->formvars['aktivesLayout'] = 4;
-			$this->gui->formvars['chosen_layer_id'] = 3;
+			$ressourcen_layer_id = 3;
+			$this->gui->formvars['chosen_layer_id'] = $ressourcen_layer_id;
 			$this->gui->formvars['oid'] = $this->get_id();
 			$this->gui->formvars['archivieren'] = 1;
-			$this->debug->show('Erzeuge Metadatendokument für Ressource ', true);
-			$this->gui->generischer_sachdaten_druck_drucken(NULL, NULL, NULL, true, false);
+			$this->gui->formvars['no_output'] = true;
 
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($this->gui, $ressourcen_layer_id);
+			# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen object_id
+			# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+			# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+			$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $this->get_id();
+			$this->gui->formvars['checkbox_names_' . $ressourcen_layer_id] = $checkbox_name;
+			$this->gui->formvars[$checkbox_name] = 'on';
+			$result = $this->gui->generischer_sachdaten_druck_drucken(
+				NULL, // pdfobject
+				NULL, // offsetx
+				NULL, // offsety
+				true, // output
+				false // append
+			);
+			$this->gui->outputfile = basename($result['pdf_file']);
+			$this->gui->pdf_archivieren($ressourcen_layer_id, $this->get_id(), $result['pdf_file']);
+			$this->debug->show('Metadatendokument für Ressource erzeugt: ' . $result['pdf_file'], true);
 			// Currently update status will be set to uptodate only if data has been transformed
 			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
@@ -260,7 +278,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -338,7 +356,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -405,7 +423,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -544,7 +562,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -556,7 +574,7 @@ class Ressource extends PgObject {
 			mkdir($dest_path, 0777, true);
 		}
 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 
 		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
@@ -608,7 +626,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -619,7 +637,7 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 
 		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
@@ -677,7 +695,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Verzeichnis zur Ablage der gefilterten Daten angegeben.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -690,7 +708,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				$fp_dest = fopen($dest_path, $entry, "w");
@@ -746,7 +764,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -759,7 +777,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!copy($download_path . $entry, $dest_path . $entry)) {
@@ -795,7 +813,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -808,7 +826,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!rename($download_path . $entry, $dest_path . $entry)) {
@@ -848,7 +866,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -884,7 +902,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -947,7 +965,7 @@ class Ressource extends PgObject {
 			);
 		}
 
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 
 		if ($this->get('import_layer') != '') {
 			// shape file is set explicit
@@ -1011,7 +1029,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$gml_files = array();
 		if ($this->get('import_file')) {
 			$gml_files[] = $this->get('import_file');
@@ -1106,7 +1124,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$csv_file = $this->get('import_layer') . '.csv';
 
 		if (!is_file($dest_path . $csv_file)) {
@@ -1215,7 +1233,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = $this->get_full_dest_path();
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$gml_files = array();
 		$entries = scandir($dest_path);
 		foreach ($entries AS $entry) {
