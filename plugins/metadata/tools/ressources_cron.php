@@ -44,8 +44,9 @@
         list($key, $val) = explode('=', $arg);
         $_REQUEST[$key] = $val;
       }
-      $GUI->formvars = $_REQUEST;
     }
+    $GUI->formvars = $_REQUEST;
+
     $err_msgs = array();
     $go = (isset($GUI->formvars['go']) ? $GUI->formvars['go'] : '');
 
@@ -86,7 +87,7 @@
           $err_msgs[] = $response['msg'];
           break;
         }
-        $msg = $response['msg'];
+        $msg .= $response['msg'];
       } break;
 
       default : {

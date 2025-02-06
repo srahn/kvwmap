@@ -114,7 +114,7 @@ class Ressource extends PgObject {
 
 		if (count($ressources) > 0) {
 			$ressource = $ressources[0];
-			// echo '<br>Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')';
+			// echo '<br>Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ') method_only: ' . $method_only;
 			$result = $ressource->run_update($method_only);
 			$ressource->log($result, true);
 		}
@@ -244,17 +244,17 @@ class Ressource extends PgObject {
 				$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 			}
 
-      foreach ($download_urls AS $download_url) {
-        $this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
-        if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
-          copy($download_url, $download_path . basename($download_url));
-          // if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
-          //   unlink($download_path . basename($download_url));
-          //   $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
-          // }
-        }
-      }
-    }
+			foreach ($download_urls AS $download_url) {
+				if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
+					$this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
+					copy($download_url, $download_path . basename($download_url));
+					// if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
+					//   unlink($download_path . basename($download_url));
+					//   $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+					// }
+				}
+			}
+		}
     catch (Exception $e) {
       return array(
         'success' => false,
@@ -1298,13 +1298,24 @@ class Ressource extends PgObject {
 
 	function transform_gdaltindex() {
 		$gdaltindex_params = $this->get('transform_command');
-		$gdaltindex_comand = 'gdaltindex ' . $gdaltindex_params;
+		$gdaltindex_command = 'gdaltindex ' . $gdaltindex_params;
 		$this->debug->show("Erzeuge gdaltindex mit Befehl: " . $gdaltindex_command, true);
-		exec($gdaltindex_command, $output, $return_var);
-		if (count($output) > 0) {
+		$descriptorspec = [
+			0 => ["pipe", "r"],  // stdin
+			1 => ["pipe", "w"],  // stdout
+			2 => ["pipe", "w"],  // stderr
+		];
+		$process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
+		$stdout = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+		$stderr = stream_get_contents($pipes[2]);
+		fclose($pipes[2]);
+
+		// exec($gdaltindex_command, $output, $return_var);
+		if ($stderr != '') {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . implode(', ', $output)
+				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . $stderr
 			);
 		}
 		return array(
