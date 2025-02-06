@@ -204,6 +204,10 @@ input[type="checkbox"], input[type="radio"] {
 	background: #fff;
 }
 
+.radio-label {
+	margin-right: 2px;
+}
+
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
 	margin: 3px;
 }
