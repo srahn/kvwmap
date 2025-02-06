@@ -195,9 +195,9 @@ function addMenues(){
 	<tr>
     <td style="text-align: center">
 		<span class="px17 fetter"><? echo $this->strTask;?>:</span>
-			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
+			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count_or_0($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
 				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
-				for ($i = 0; $i < count($this->allstellendaten['ID']); $i++){
+				for ($i = 0; $i < count_or_0($this->allstellendaten['ID']); $i++){
 					echo '<option';
 					if ($this->allstellendaten['ID'][$i] == $this->formvars['selected_stelle_id']){
 						echo ' selected';
@@ -549,7 +549,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
 											for($i=0; $i < count_or_0($this->formvars['sellayer']["Bezeichnung"]); $i++){
-													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace([' ', '<br>'], '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
 											</select>

@@ -90,10 +90,11 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 				$attributes = $mapDB->read_layer_attributes(
 					$layer_id,
 					$layerdb,
-					null, // $privileges['attributenames'],
-					false,
-					true
+					null, // Null statt $privileges['attributenames'], weil in kvmobile immer alle attribute vorhanden sein müssen, nicht nur die die sichtbar sind.
+					false, // $all_languages
+					true // recursive
 				);
+
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
 				for ($j = 0; $j < count($attributes['name']); $j++) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
@@ -239,6 +240,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	if ($result['success']) {
 		$GUI->debug->write('mobile_sycn_parameter_valid', 5);
 		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
 		# Layer DB abfragen $layerdb = new ...
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);

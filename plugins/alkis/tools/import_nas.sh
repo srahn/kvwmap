@@ -114,6 +114,7 @@ convert_nas_files() {
 				rm ${SQL_FILE}
 				rm -f ${GFS_FILE}
 				if [ ! "$(find ${IMPORT_PATH} -name "*.xml" -not -path ${IMPORT_PATH}/METADATA/*)" ] ; then		# nach der letzten NAS-Datei die Transaktionsdatei abschliessen
+					echo "SELECT ${POSTGRES_SCHEMA}.delete_duplicates();" >> ${IMPORT_PATH}/import_transaction.sql
 					echo "SELECT ${POSTGRES_SCHEMA}.execute_hist_operations();" >> ${IMPORT_PATH}/import_transaction.sql
 					echo "END;COMMIT;" >> ${IMPORT_PATH}/import_transaction.sql
 				fi

@@ -149,11 +149,15 @@ body {
 .collapsed {
 	visibility: collapse;
   height: 0;
+	padding: 0 !important;
 }
 
 .collapsed *{
 	visibility: collapse !important;
 	margin: 0 !important;
+	width: 0;
+  display: block;
+  padding: 0;
 }
 
 #copyrights_div table td {
@@ -305,7 +309,14 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 form {
 	margin: 0;
 	padding: 0;
-} 
+}
+
+hr {
+	margin: 7px; 
+	background-color: #777; 
+	height: 1px; 
+	border-width: 0;
+}
 
 .fett{
 	font-family: SourceSansPro2;
@@ -2740,7 +2751,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #neuer_datensatz_button {
-	display: none;
+	/* display: none; */
 	position: relative;
 	text-align: right;
 	margin-right: 8px;

@@ -40,6 +40,26 @@ class spatial_processor {
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }
+
+	function getGeomFromGeoJSON($geojson, $epsg) {
+		$sql = "
+			SELECT 
+				ST_AsSVG(geom) as svg,
+				round(ST_Length(geom)) as length
+			FROM
+				(SELECT
+					ST_Transform(
+							ST_GeomFromGeoJSON('" . $geojson . "'),
+							" . $epsg . "
+					) as geom
+				) as foo
+		";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+			return json_encode($rs);
+    }
+	}
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
   	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
