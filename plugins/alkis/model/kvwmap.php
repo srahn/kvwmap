@@ -98,8 +98,9 @@
     $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
+    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
     $layer->data = $datastring;
     $layer->status = MS_ON;
@@ -109,10 +110,11 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
@@ -148,12 +150,13 @@
 		$GUI->map_scaledenom = $GUI->map->scaledenom;
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$GUI->pgdatabase);
-    $layer=ms_newLayerObj($GUI->map);
+    $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
+    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
     $layer->data = $datastring;
@@ -164,15 +167,16 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0');
     $klasse = new ClassObj($layer);
-    $klasse->set('status', MS_ON);
+    $klasse->status = MS_ON;
     $style = new StyleObj($klasse);
     $style->color->setRGB(255,255,128);
     $style->outlinecolor->setRGB(0,0,0);

@@ -38,10 +38,10 @@
 #
 # Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 #
-	$pixel_y=($this->formvars['center_y']-$this->map->extent->miny)/$scale;
-	$pixel_x=($this->formvars['center_x']-$this->map->extent->minx)/$scale;
-	$refpoint_y=($this->formvars['refpoint_y']-$this->map->extent->miny)/$scale;
-	$refpoint_x=($this->formvars['refpoint_x']-$this->map->extent->minx)/$scale;
+	$pixel_y = ((float)$this->formvars['center_y'] - $this->map->extent->miny)/$scale;
+	$pixel_x = ((float)$this->formvars['center_x'] - $this->map->extent->minx)/$scale;
+	$refpoint_y = ((float)$this->formvars['refpoint_y'] - $this->map->extent->miny)/$scale;
+	$refpoint_x = ((float)$this->formvars['refpoint_x'] - $this->map->extent->minx)/$scale;
 	$angle = $this->formvars['angle'];
 	$pos_x = round($pixel_x-$printwidth/2);
 	$pos_y = round($pixel_y-$printheight/2);

@@ -239,6 +239,7 @@ $GUI->mobile_sync = function () use ($GUI) {
 	if ($result['success']) {
 		$GUI->debug->write('mobile_sycn_parameter_valid', 5);
 		include_once(CLASSPATH . 'Layer.php');
+		$layer = Layer::find_by_id($GUI, $GUI->formvars['selected_layer_id']);
 		# Layer DB abfragen $layerdb = new ...
 		$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 		$layerdb = $mapDB->getlayerdatabase($GUI->formvars['selected_layer_id'], $GUI->Stelle->pgdbhost);

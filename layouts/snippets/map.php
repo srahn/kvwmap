@@ -14,6 +14,7 @@
 	$size['lagebzeichnung_bar']['height'] = (count_or_0($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
+	$map_height = $this->user->rolle->nImageHeight;
 	$legend_hide_width = $size['legend']['hide_width'];
 	$legend_width = ($this->user->rolle->hideLegend == 1 ? $legend_hide_width : $size['legend']['width']);
 
@@ -22,13 +23,13 @@
 		+ ((defined('LAGEBEZEICHNUNGSART') AND LAGEBEZEICHNUNGSART != '') ? $size['lagebezeichnung_bar']['height'] : 0)
 		+ ($this->user->rolle->showmapfunctions == 1 ? $size['map_functions_bar']['height'] : 0);
 
-	$res_x    = $this->map->width;
-	$res_y    = $this->map->height;
-	$res_xm   = $this->map->width/2;
-	$res_ym   = $this->map->height/2;
-	$dx       = $this->map->extent->maxx-$this->map->extent->minx;
-	$dy       = $this->map->extent->maxy-$this->map->extent->miny;
-	$pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
+	// $res_x    = $this->map->width;
+	// $res_y    = $this->map->height;
+	// $res_xm   = $this->map->width/2;
+	// $res_ym   = $this->map->height/2;
+	// $dx       = $this->map->extent->maxx-$this->map->extent->minx;
+	// $dy       = $this->map->extent->maxy-$this->map->extent->miny;
+	// $pixelsize    = ($dx/$res_x+$dy/$res_y)/2;
 ?>
 
 <script type="text/javascript">

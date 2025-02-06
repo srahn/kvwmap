@@ -92,8 +92,8 @@
 		}
 
 		function coords_input(){
-			var mittex  = '.$this->map->width.'/2*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value);
-			var mittey  = parseFloat(form.maxy.value) - '.$this->map->height.'/2*parseFloat(form.pixelsize.value);
+			var mittex  = '.$map_width.'/2*parseFloat(form.pixelsize.value) + parseFloat(form.minx.value);
+			var mittey  = parseFloat(form.maxy.value) - '.$map_height.'/2*parseFloat(form.pixelsize.value);
 			mittex = format_number(mittex, true, true, false);
 			mittey = format_number(mittey, true, true, false);
 			var Msg = $("#message_box");

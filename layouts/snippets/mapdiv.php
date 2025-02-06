@@ -75,7 +75,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 					</select>
 				</div>
 			</div>
-			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 		</div>
 	</div>
 	<div id="map_copyrights_div" style="float: right; margin-right: 5px; height: 30px;">
@@ -125,16 +125,18 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	</div>
 </div>
 
-<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
+
 <div id="lagebezeichnung_bar">
 	<div id="lagebezeichnung">
+	<? if (is_array($this->Lagebezeichung) AND $this->Lagebezeichung['gemeindename'] != '') { ?>
 		<span class="fett">Gemeinde:</span>&nbsp;<?php echo $this->Lagebezeichung['gemeindename']; ?>
 		<span class="fett">Gemarkung:</span>&nbsp;<?php echo $this->Lagebezeichung['gemkgname']; ?>&nbsp;(<?php echo $this->Lagebezeichung['gemkgschl']; ?>)
-		<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur']; ?>
+		<span class="fett">Flur:</span>&nbsp;<?php echo $this->Lagebezeichung['flur'];
+		}  ?>
 	</div>
 </div>
-<? } 
 
+<?
 if ($this->user->rolle->showmapfunctions) { ?>
 	<div id="map_functions_bar">
 		<div id="mapbuttons">

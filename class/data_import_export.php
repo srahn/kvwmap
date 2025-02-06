@@ -996,7 +996,6 @@ class data_import_export {
 				$ret = $result->exitCode;
 				if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
 					$ret = 'Fehler beim Importieren der Datei ' . basename($importfile) . '!<br>' . $result->stderr;
-					echo $ret; exit;
 				}
 			}
 			curl_close($ch);

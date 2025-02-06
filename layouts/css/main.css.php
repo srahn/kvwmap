@@ -149,11 +149,15 @@ body {
 .collapsed {
 	visibility: collapse;
   height: 0;
+	padding: 0 !important;
 }
 
 .collapsed *{
 	visibility: collapse !important;
 	margin: 0 !important;
+	width: 0;
+  display: block;
+  padding: 0;
 }
 
 #copyrights_div table td {
@@ -198,6 +202,10 @@ input[type="checkbox"], input[type="radio"] {
 	outline: 0;
 	cursor: pointer;
 	background: #fff;
+}
+
+.radio-label {
+	margin-right: 2px;
 }
 
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
