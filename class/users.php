@@ -1040,6 +1040,11 @@ class user {
 		while ($rs = $this->database->result->fetch_array()) {
 			$userdaten[] = $rs;
 		}
+		if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
+			usort($userdaten, function($a, $b) {
+				return strcmp($a['last_timestamp'], $b['last_timestamp']);
+			});
+		}
 		return $userdaten;
 	}
 
