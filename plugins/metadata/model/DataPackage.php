@@ -96,13 +96,15 @@ class DataPackage extends PgObject {
 				) p ON r.id = p.ressource_id LEFT JOIN
 				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
 				kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
-				metadata.dateninhaber i ON r.dateninhaber_id = i.id
+				metadata.dateninhaber i ON r.dateninhaber_id = i.id JOIN
+				kvwmap.used_layer ul ON r.layer_id = ul.layer_id
 			",
 			'where' => $package->where . " AND
 				(
 					p.stelle_id IS NULL OR
 					p.stelle_id = " . $stelle_id . "
-				)
+				) AND
+				ul.stelle_id = " . $stelle_id . "
 			",
 			'order' => "r.bezeichnung"
 		);
