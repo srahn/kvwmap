@@ -86,16 +86,15 @@ function showMenue() {
 			<input type="hidden" name="refmap_x">
 			<input type="hidden" name="refmap_y">
 			<script>
-				let img = document.getElementById("refmap");
-				img.x = img.getBoundingClientRect().left;
-				img.y = img.getBoundingClientRect().top;
 				function click(e) {
-					document.GUI.refmap_x.value = e.clientX - img.x;
-					document.GUI.refmap_y.value = e.clientY - img.y;
+					let refmap = document.getElementById("refmap").getBoundingClientRect();
+					document.GUI.refmap_x.value = e.clientX - refmap.x;
+					document.GUI.refmap_y.value = e.clientY - refmap.y;
 					neuLaden();
 					document.GUI.refmap_x.value = "";
 					document.GUI.refmap_y.value = "";
 				}
+				let img = document.getElementById("refmap");
 				img.addEventListener("click", click);
 			</script>
 			';
