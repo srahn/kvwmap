@@ -2872,8 +2872,7 @@ echo '			</table>
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
-				// $label->minfeaturesize = $dbLabel['minfeaturesize'];
-				// $label->maxfeaturesize = $dbLabel['maxfeaturesize'];
+				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
 				}
