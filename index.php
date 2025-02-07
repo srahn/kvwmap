@@ -1397,7 +1397,12 @@ function go_switch($go, $exit = false) {
 			case 'belated_file_upload_speichern' : {
 				$GUI->checkCaseAllowed('belated_file_upload');
 				$GUI->belated_file_upload_speichern();
-			} break;	
+			} break;
+			
+			case 'get_document' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document();
+			} break;
 
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
@@ -2169,10 +2174,10 @@ function go_switch($go, $exit = false) {
 			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
 				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
-				// $currenttime=date('Y-m-d H:i:s',time());
-				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				// $GUI->drawMap();
-				// $GUI->saveMap('');
+				$currenttime=date('Y-m-d H:i:s',time());
+				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				$GUI->drawMap();
+				$GUI->saveMap('');
 				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
