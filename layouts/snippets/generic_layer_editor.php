@@ -85,6 +85,7 @@ $geomtype = '';
 $dimension = '';
 $privileg = '';
 # Variablensubstitution
+$dataset_operation_position = $this->user->rolle->dataset_operations_position;
 $layer = $this->qlayerset[$i];
 if (!$invisible_attributes) {
 	$invisible_attributes = array();
@@ -112,7 +113,32 @@ if ($this->new_entry == true) {
 	$doit = true;
 }
 
-if ($doit == true) { ?>
+if ($doit == true) { 
+	if ($layer['attributes']['the_geom'] != '') {
+		$index = $layer['attributes']['indizes'][$layer['attributes']['the_geom']];
+		$columnname = $layer['attributes']['real_name'][$layer['attributes']['the_geom']];
+		$geom_tablename = $layer['attributes']['table_name'][$layer['attributes']['the_geom']];
+		$column_geomtype = $layer['attributes']['geomtype'][$layer['attributes']['the_geom']];
+		$geomtype = getGeomType($column_geomtype, $layer['Datentyp']);
+		$privileg = $layer['attributes']['privileg'][$index];
+		$nullable = $layer['attributes']['nullable'][$index];
+		if ($this->new_entry == true AND $privileg == 1) {
+			$show_geom_editor = true; ?>
+			<style>
+				#nds_titel p {
+					margin: 0px 0px -32px 0px;
+				}
+				#nds_edit #layer {
+					margin: 0;
+				}
+			</style>
+<?	}
+		if ($nullable === '0'){ ?>
+			<script type="text/javascript">
+				geom_not_null = true;
+			</script><?
+		}
+	} ?>
 	<div id="layer" onclick="remove_calendar();">
 		<input type="hidden" value="" id="changed_<? echo $layer['Layer_ID']; ?>" name="changed_<? echo $layer['Layer_ID']; ?>"><?
 		if ($this->new_entry != true AND $layer['requires'] == '') { ?>
@@ -153,7 +179,7 @@ if ($doit == true) { ?>
 					<? } ?>
 				</tr>
 			</table><?
-		}
+		} 
 		$table_id = rand(0, 100000); ?>
 		<div style="display: flex; justify-content: end;"> 
 			<? echo $layer['paging']; ?>
@@ -167,7 +193,12 @@ if ($doit == true) { ?>
 				}	?>
 			</div>
 		</div>
-		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%">
+		<table id="<? echo $table_id; ?>" border="0" cellspacing="1" cellpadding="2" width="100%"> <?
+
+			if ($dataset_operation_position == 'oben' OR $dataset_operation_position == 'beide') {
+				include('dataset_operations.php');
+			} ?>
+
 			<tr>
 				<td width="100%">   
 					<table class="gle1_table" cellspacing="0" cellpadding="0" width="100%">
@@ -317,12 +348,6 @@ if ($doit == true) { ?>
 							}
 						}
 						else {
-							$columnname = $layer['attributes']['real_name'][$layer['attributes']['name'][$j]];
-							$geom_tablename = $layer['attributes']['table_name'][$layer['attributes']['name'][$j]];
-							$geomtype = $layer['attributes']['geomtype'][$layer['attributes']['name'][$j]];
-							$dimension = $layer['attributes']['dimension'][$j];
-							$privileg = $layer['attributes']['privileg'][$j];
-							$nullable = $layer['attributes']['nullable'][$j];
 							$this->form_field_names .= $layer['Layer_ID'].';' . ($layer['attributes']['saveable'][$j]? $layer['attributes']['real_name'][$layer['attributes']['name'][$j]] : '') . ';'.$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].';'.$layer['shape'][$k][$layer['attributes']['table_name'][$layer['attributes']['name'][$j]].'_oid'].';Geometrie;'.$layer['attributes']['nullable'][$j].'|';
 						}
 					}
@@ -530,121 +555,12 @@ if ($doit == true) { ?>
 					</table>
 				</td>
 			</tr>
-		</table><?
-		if ($this->formvars['printversion'] == '') { ?>
-			<table width="100%" border="0">
-				<tr>
-					<td colspan="2"align="left">
-					<? if($this->new_entry != true){ ?>
-						<table width="100%" border="0" cellspacing="4" cellpadding="0"><?
-							include(SNIPPETS . 'generic_layer_editor_common_part.php'); ?>
-							<tr>
-								<td>
-									<table cellspacing="0" cellpadding="0">
-										<tr>
-								<? if($layer['privileg'] == '2'){ ?>
-											<td id="delete_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a onclick="checkForUnsavedChanges(event);" title="<? echo $strdelete; ?>" href="javascript:delete_datasets(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="button datensatz_loeschen"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></td>
-								<?} if($layer['export_privileg'] != 0){ ?>
-											<td style="padding: 5 10 0 0;"><a title="<? echo $strExport; ?>" href="javascript:daten_export(<?php echo $layer['Layer_ID']; ?>, <? echo $layer['count']; ?>);"><div class="button_background"><div class="button datensatz_exportieren"><img  src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-								<? } if($layer['layouts']){ ?>
-											<td id="print_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strPrint; ?>" href="javascript:print_data(<?php echo $layer['Layer_ID']; ?>);"><div class="button_background"><div class="button drucken"><img width="30" src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></div></a></td>
-								<? } ?>
-								<? if($privileg != ''){ ?>
-											<td id="zoom_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 10 0 0;"><a title="<? echo $strzoomtodatasets; ?>" href="javascript:zoomto_datasets(<?php echo $layer['Layer_ID']; ?>, '<? echo $geom_tablename; ?>', '<? echo $columnname; ?>');"><div class="button zoom_highlight"><img src="<? echo GRAPHICSPATH.'leer.gif'; ?>"></div></a></td>
-											<td id="classify_link_<? echo $layer['Layer_ID']; ?>" style="padding: 5 0 0 0;">
-												<select style="width: 130px" name="klass_<?php echo $layer['Layer_ID']; ?>">
-													<option value=""><? echo $strClassify; ?>:</option>
-													<?
-													for($j = 0; $j < count($layer['attributes']['name']); $j++){
-														if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-															echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-														}
-													}
-													?>
-												</select>
-											</td>
-								<?}?>
-										</tr>
-									</table>
-								</td>
-							</tr>
-							<tr style="display:none">
-								<td height="23" colspan="3">
-									&nbsp;&nbsp;&bull;&nbsp;<a href="javascript:showcharts(<?php echo $layer['Layer_ID']; ?>);"><? echo $strCreateChart; ?></a>
-								</td>
-							</tr>
-							<tr id="charts_<?php echo $layer['Layer_ID']; ?>" style="display:none">
-								<td></td>
-								<td>
-									<table>
-										<tr>
-											<td colspan="2">
-												&nbsp;&nbsp;<select name="charttype_<?php echo $layer['Layer_ID']; ?>" onchange="change_charttype(<?php echo $layer['Layer_ID']; ?>);">
-													<option value="bar">Balkendiagramm</option>
-													<option value="mirrorbar">doppeltes Balkendiagramm</option>
-													<option value="circle">Kreisdiagramm</option>
-												</select>
-											</td>
-										</tr>
-										<tr>
-											<td>
-												&nbsp;&nbsp;Beschriftung:
-											</td>
-											<td>
-												<select style="width:133px" id="" name="chartlabel_<?php echo $layer['Layer_ID']; ?>" >
-													<?
-													for($j = 0; $j < count($layer['attributes']['name']); $j++){
-														if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-															echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-														}
-													}
-													?>
-												</select>
-											</td>
-										</tr>
-										<tr>
-											<td>
-												&nbsp;&nbsp;Wert:
-											</td>
-											<td>
-												<select style="width:133px" name="chartvalue_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-													<option value="">--- Bitte Wählen ---</option>
-													<?
-													for($j = 0; $j < count($layer['attributes']['name']); $j++){
-														if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-															echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-														}
-													}
-													?>
-												</select>
-											</td>
-										</tr>
-										<tr id="split_<?php echo $layer['Layer_ID']; ?>" style="display:none">
-											<td>
-												&nbsp;&nbsp;Trenn-Attribut:
-											</td>
-											<td>
-												<select style="width:133px" name="chartsplit_<?php echo $layer['Layer_ID']; ?>" onchange="create_chart(<?php echo $layer['Layer_ID']; ?>);">
-													<option value="">--- Bitte Wählen ---</option>
-													<?
-													for($j = 0; $j < count($layer['attributes']['name']); $j++){
-														if($layer['attributes']['name'][$j] != $layer['attributes']['the_geom']){
-															echo '<option value="'.$layer['attributes']['name'][$j].'">'.$layer['attributes']['alias'][$j].'</option>';
-														}
-													}
-													?>
-												</select>
-											</td>
-										</tr>
-									</table>
-								</td>
-							</tr>
-						</table>
-					<?} ?>
-					</td>
-				</tr>
-			</table><?
-		}
+		</table>
+		<table style="margin-right: auto"><?
+			if ($dataset_operation_position == 'unten' OR $dataset_operation_position == 'beide') {
+				include('dataset_operations.php');
+			} ?>
+		</table> <?
 		for ($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++) {
 			echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 		} ?>
