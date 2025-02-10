@@ -156,7 +156,6 @@ body {
 	visibility: collapse !important;
 	margin: 0 !important;
 	width: 0;
-  display: block;
   padding: 0;
 }
 
