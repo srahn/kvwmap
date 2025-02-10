@@ -150,7 +150,7 @@ body {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
-	#display: block;
+	display: block;
 }
 
 .collapsed *{
