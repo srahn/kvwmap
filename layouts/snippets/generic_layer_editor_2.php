@@ -153,7 +153,7 @@ if ($doit == true) {
 									array_push($layer['attributes']['tabs'], 'Geometrie');
 									if ($this->formvars['opentab_' . $layer['Layer_ID'] . '_' . $k] != count($layer['attributes']['tabs']) - 1) {
 										# wenn Geometrie-Tab nicht aktiv war
-										$visibility_geom = 'style="visibility: collapse"';
+										$visibility_geom = 'collapsed';
 									}
 								}
 							}
@@ -178,10 +178,10 @@ if ($doit == true) {
 						if ($sachdaten_tab) {
 							$tabname = 'Sachdaten';
 							if ($opentab != 'Sachdaten') {
-								$visibility = 'style="visibility: collapse"';
+								$visibility = 'collapsed';
 							}
 							if ($layer['attributes']['group'][0] == '') {
-								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. '" ' . $visibility . '><td><table class="tgle"><tbody class="gle gledata">';
+								echo '<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_' .$tabname. ' ' . $visibility . '"><td><table class="tgle"><tbody class="gle gledata">';
 							}
 						}
 						
@@ -207,10 +207,10 @@ if ($doit == true) {
 									$visibility = '';
 									$tabname = sonderzeichen_umwandeln($layer['attributes']['tab'][$j]);
 									if ($opentab != $layer['attributes']['tab'][$j]) {
-										$visibility = 'style="visibility: collapse"';
+										$visibility = 'collapsed';
 									}
 								}
-								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . '" ' . $visibility . '>
+								echo '<tr class="'.$layer['Layer_ID'].'_group_'.$groupname_short.' tab tab_' . $layer['Layer_ID'] . '_' . $k . '_' . $tabname . ' ' . $visibility . '">
 												<td colspan="2" width="100%">
 													<div>
 														<table ' . ($groupname_short == $tabname? 'style="display: none"' : '') . ' width="100%" class="tglegroup" border="0" cellspacing="0" cellpadding="0"><tbody class="gle glehead">
@@ -328,7 +328,7 @@ if ($doit == true) {
 						}
 						if ($show_geom_editor) {
 							echo '
-							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie" ' . $visibility_geom . '>
+							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie ' . $visibility_geom . '">
 								<td colspan="2" align="center">';
 									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
 							echo'
