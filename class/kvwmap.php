@@ -20875,7 +20875,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20988,6 +20988,11 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
@@ -21028,11 +21033,6 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
