@@ -7,6 +7,8 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	<INPUT TYPE="hidden" NAME="miny" VALUE="<?php echo $this->map->extent->miny; ?>">
 	<INPUT TYPE="hidden" NAME="maxx" VALUE="<?php echo $this->map->extent->maxx; ?>">
 	<INPUT TYPE="hidden" NAME="maxy" VALUE="<?php echo $this->map->extent->maxy; ?>">
+	<input type="hidden" name="refmap_x">
+	<input type="hidden" name="refmap_y">
 	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="last_button" VALUE="">
