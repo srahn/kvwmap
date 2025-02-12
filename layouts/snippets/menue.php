@@ -59,6 +59,8 @@ function showMenue() {
       ?></td>
     </tr>
 </table>
+<input type="hidden" name="refmap_x">
+<input type="hidden" name="refmap_y">
 
 <div id="menue_options">
 <?	
