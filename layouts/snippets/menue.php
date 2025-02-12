@@ -59,6 +59,8 @@ function showMenue() {
       ?></td>
     </tr>
 </table>
+<input type="hidden" name="refmap_x">
+<input type="hidden" name="refmap_y">
 
 <div id="menue_options">
 <?	
@@ -83,8 +85,6 @@ function showMenue() {
 				hspace="0"
 				style="cursor: pointer"
 			>
-			<input type="hidden" name="refmap_x">
-			<input type="hidden" name="refmap_y">
 			<script>
 				function click(e) {
 					let refmap = document.getElementById("refmap").getBoundingClientRect();
