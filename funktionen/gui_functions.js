@@ -77,11 +77,11 @@ function ahahDone(url, targets, req, actions) {
 		if (req.getResponseHeader('error') == 'true'){
 			message(req.responseText);
 		}
+		if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
+			window.location = url;
+			return;
+		}		
 		if (req.status == 200) { // only if "OK"
-			if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
-				window.location = url;
-				return;
-			}
 			if (req.getResponseHeader('warning') == 'true'){
 				message([{ type: 'warning', msg: req.responseText}]);
 			}
