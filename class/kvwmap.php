@@ -4568,7 +4568,7 @@ echo '			</table>
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					if (pg_num_rows($ret[1]) > 1 OR $reqby_start > 0) {
+					if (pg_num_rows($ret[1]) > 1 OR $reqby_start > 0 OR $this->formvars['auswahl'] == 1) {
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){

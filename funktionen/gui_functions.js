@@ -559,6 +559,10 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 	}
 }
 
+function clearMessageBox(){
+	document.getElementById('message_box').innerHTML = '';
+}
+
 function onload_functions() {
 	if(scrolldown){
 		window.scrollTo(0,document.body.scrollHeight);
@@ -1521,6 +1525,7 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 }
 
 function showCopyrights(header){
+	clearMessageBox();
 	message([{
 			'type': 'info',
 			'msg': '<h2 style="padding: 4px 4px 10px 4px">' + header + '</h2><div id="copyrights_div"></div>'
@@ -1529,6 +1534,7 @@ function showCopyrights(header){
 }
 
 function showMapParameter(epsg_code, width, height, l) {
+	clearMessageBox();
 	var gui = document.GUI,
 			msg = " \
 				<div style=\"text-align: left\"> \
