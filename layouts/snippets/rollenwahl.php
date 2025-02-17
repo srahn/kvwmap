@@ -2,18 +2,11 @@
   # 2007-12-30 pk
   include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
 	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php');
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
 	$show_layer_parameter = value_of($this->formvars, 'show_layer_parameter');
 ?>
-
-<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15">
-	<defs>
-		<? echo $SVGvars_defs; ?>
-	</defs>
-</svg>
 
 <script type="text/javascript">
 

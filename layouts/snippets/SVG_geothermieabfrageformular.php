@@ -22,7 +22,6 @@
 #
 	$svgfile  = 'SVG_geothermieabfrage.svg';
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 			# zuweisen von: $SVGvars_navbuttons
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 						# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 		# zuweisen von: $SVGvars_coordscript
 	$bg_pic   = $this->img['hauptkarte'];
 	$res_x    = $this->map->width;

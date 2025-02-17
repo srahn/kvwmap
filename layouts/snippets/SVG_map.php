@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -218,7 +218,6 @@ $last_x = 0;
 global $events;
 $events = true;
 
-include(LAYOUTPATH . 'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 include(LAYOUTPATH . 'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
 include(LAYOUTPATH . 'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
 include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript

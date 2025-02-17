@@ -223,7 +223,7 @@ if (!FAST_CASE) {
 	}
 }
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4, false);
 function go_switch($go, $exit = false) {
 	global $GUI;
 	global $newPassword;
@@ -610,6 +610,10 @@ function go_switch($go, $exit = false) {
 			# Kartenbild anzeigen
 			case 'showMapImage' : {
 				$GUI->showMapImage();
+			} break;
+
+			case 'show_missing_documents' : {
+				$GUI->show_missing_documents();
 			} break;
 
 			case 'showRefMapImage' : {

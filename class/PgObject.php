@@ -165,7 +165,7 @@ class PgObject {
 			" . $order . "
 			" . $limit . "
 		";
-		$this->debug->show('find_where sql: ' . $sql, false);
+		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
 		while($this->data = pg_fetch_assoc($query)) {
