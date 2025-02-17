@@ -1503,7 +1503,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurstueckskennzeichen";
@@ -1544,7 +1544,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
 					UNION
 					SELECT 
 						hf.flurstueckskennzeichen,
@@ -2533,7 +2533,7 @@ FROM
 						alkis.ax_flurstueck 
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . 
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						FlurID";
@@ -2577,8 +2577,8 @@ FROM
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+					flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
+					(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . "
 					UNION
 					SELECT 
 						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,

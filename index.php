@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -15,6 +16,7 @@ register_shutdown_function(function () {
 	global $errors;
 	$err = error_get_last();
 	if ($err AND (error_reporting() & $err['type'])) { // This error code is included in error_reporting		
+		header('error: true');
 		ob_end_clean();
 		if (class_exists('GUI') AND !empty(GUI::$messages)) {
 			foreach(GUI::$messages as $message) {
@@ -38,7 +40,7 @@ register_shutdown_function(function () {
     }
     else {
   		http_response_code(500);
-	  	include_once('layouts/snippets/general_error_page.php');
+	  	include_once(LAYER_ERROR_PAGE);
     }
 	}
 });
@@ -150,7 +152,6 @@ define('CASE_COMPRESS', false);
 #											- man muss in einer Fachschale zoomen (wegen reduce_mapwidth)												#
 #											- man muss einen Layer in der Legende ein oder ausschalten													#
 #											- InchesPerUnit() reinkopieren																											#
-#											- layer_error_handling() reinkopieren																								#
 #											- zoomToMaxLayerExtent() reinkopieren																								#
 #											- getlayerdatabase() reinkopieren																										#
 #											- read_layer_attributes() reinkopieren																							#
@@ -213,7 +214,6 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
-
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -247,7 +247,7 @@ function go_switch($go, $exit = false) {
 			case 'navMap_ajax' : {
 				$GUI->formvars['nurAufgeklappteLayer'] = true;
 				if($GUI->formvars['width_reduction'] != '')$GUI->reduce_mapwidth($GUI->formvars['width_reduction'], $GUI->formvars['height_reduction']);
-				if ($GUI->formvars['legendtouched']) {
+				if ($GUI->formvars['legendtouched'] OR $GUI->formvars['refmap_x']) {
 					$GUI->neuLaden();
 				}
 				else{
@@ -278,6 +278,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
+			} break;
+
+			case 'get_route' : {
+				$GUI->getRoute($GUI->formvars);
 			} break;
 
 			case 'get_position_qrcode' : {
@@ -357,10 +361,11 @@ function go_switch($go, $exit = false) {
 					'zoom_to_layer_extent' => 'boolean'
 				]);
 				$GUI->activate_layer_only($GUI->formvars['selected_layer_id'], $GUI->formvars['zoom_to_layer_extent']);
-				$GUI->saveMap('');
-				$currenttime = date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
+				// $GUI->saveMap('');
+				// $currenttime = date('Y-m-d H:i:s',time());
+				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -429,7 +434,8 @@ function go_switch($go, $exit = false) {
 			case 'setHistTimestamp' : {
 				$GUI->setHistTimestamp();
 				$GUI->loadMap('DataBase');
-				$GUI->drawMap();
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -448,13 +454,6 @@ function go_switch($go, $exit = false) {
 			case 'setLayerParams' : {
 				$GUI->setLayerParams();
 				echo "onLayerParamsUpdated('success')";
-			} break;
-
-			case 'changemenue' : {
-				$GUI->changemenue($GUI->formvars['id'], $GUI->formvars['status']);
-				$GUI->loadMap('DataBase');
-				$GUI->drawMap();
-				$GUI->output();
 			} break;
 
 			case 'changemenue_with_ajax' : {
@@ -509,18 +508,20 @@ function go_switch($go, $exit = false) {
 			case 'reset_layers' : {
 				$GUI->reset_layers(value_of($GUI->formvars, 'layer_id'));
 				$GUI->loadMap('DataBase');
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->drawMap();
-				$GUI->saveMap('');
+				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				// $GUI->drawMap();
+				// $GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
 			case 'show_all_layers' : {
 				$GUI->user->rolle->update_layer_status(NULL, '1');
 				$GUI->loadMap('DataBase');
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->drawMap();
-				$GUI->saveMap('');
+				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				// $GUI->drawMap();
+				// $GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -528,8 +529,9 @@ function go_switch($go, $exit = false) {
 				$GUI->reset_querys();
 				$GUI->loadMap('DataBase');
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->drawMap();
-				$GUI->saveMap('');
+				// $GUI->drawMap();
+				// $GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -543,6 +545,7 @@ function go_switch($go, $exit = false) {
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->drawMap();
 				$GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -552,6 +555,7 @@ function go_switch($go, $exit = false) {
 				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
 				$GUI->drawMap();
 				$GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -568,9 +572,10 @@ function go_switch($go, $exit = false) {
 				if($GUI->formvars['reloadmap']){
 					$GUI->loadMap('DataBase');
 					$GUI->scaleMap($GUI->formvars['nScale']);
-					$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-					$GUI->drawMap();
-					$GUI->saveMap('');
+					// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+					// $GUI->drawMap();
+					// $GUI->saveMap('');
+					$GUI->legende = $GUI->create_dynamic_legend();
 					$GUI->output();
 				}
 			} break;
@@ -1126,9 +1131,10 @@ function go_switch($go, $exit = false) {
 				$GUI->checkCaseAllowed('Notizenformular');
 				$GUI->notizLoeschen($GUI->formvars['oid']);
 				$GUI->loadMap('DataBase');
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
+				// $currenttime=date('Y-m-d H:i:s',time());
+				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -1395,7 +1401,12 @@ function go_switch($go, $exit = false) {
 			case 'belated_file_upload_speichern' : {
 				$GUI->checkCaseAllowed('belated_file_upload');
 				$GUI->belated_file_upload_speichern();
-			} break;	
+			} break;
+			
+			case 'get_document' : {
+				$GUI->check_csrf_token();
+				$GUI->get_document();
+			} break;
 
 			case 'Dokument_Loeschen' : {
 				$GUI->check_csrf_token();
@@ -1484,7 +1495,36 @@ function go_switch($go, $exit = false) {
 			} break;
 
 			case 'generischer_sachdaten_druck_Drucken' : {
-				$GUI->generischer_sachdaten_druck_drucken();
+				if ($GUI->formvars['archivieren']) {
+					# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
+					# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+					# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+					include_once(CLASSPATH . 'Layer.php');
+					$layer = Layer::find_by_id($GUI, $GUI->formvars['chosen_layer_id']);
+					$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
+					$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
+					$GUI->formvars[$checkbox_name] = 'on';
+				}
+				$result = $GUI->generischer_sachdaten_druck_drucken(
+					NULL, // pdfobject
+					NULL, // offsetx
+					NULL, // offsety
+					true, // output
+					false // append
+				);
+
+				$GUI->outputfile = basename($result['pdf_file']);
+				if ($GUI->formvars['archivieren']) {
+					// archivieren und letztes Suchergebnis anzeigen
+					$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
+					$GUI->formvars['no_output'] = false;
+					$GUI->GenerischeSuche_Suchen();
+				}
+				else {
+					// nur pdf ausgeben
+					$GUI->mime_type='pdf';
+					$GUI->output();
+				}
 			} break;
 
 			case 'sachdaten_druck_editor' : {
@@ -1762,9 +1802,10 @@ function go_switch($go, $exit = false) {
 					$GUI->LayerLoeschen(true); # Delete maintable too if possible
 					$GUI->add_message('notice', 'Geteilten Layer erfolgreich gelöscht!');
 					$GUI->loadMap('DataBase');
-					$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-					$GUI->saveMap('');
-					$GUI->drawMap();
+					// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+					// $GUI->saveMap('');
+					// $GUI->drawMap();
+					$GUI->legende = $GUI->create_dynamic_legend();
 					$GUI->output();
 				}
 			} break;
@@ -1888,7 +1929,22 @@ function go_switch($go, $exit = false) {
 			case 'Stellenhierarchie' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Stellenhierarchie();
-			} break;			
+			} break;
+
+			case 'role_list' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->role_list();
+			} break;
+
+			case 'role_edit' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_edit();
+			} break;
+
+			case 'role_update' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_update();
+			} break;
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
@@ -1967,6 +2023,7 @@ function go_switch($go, $exit = false) {
 			case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->BenutzerdatenAnlegen();
+				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzerdaten_Ändern' : {
@@ -2091,10 +2148,11 @@ function go_switch($go, $exit = false) {
 			case "Ändern" : {
 				$GUI->loadMap('DataBase');
 				$GUI->scaleMap($GUI->formvars['nScale']);
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
-				$GUI->saveMap('');
+				// $currenttime=date('Y-m-d H:i:s',time());
+				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				// $GUI->drawMap();
+				// $GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 			
@@ -2109,10 +2167,11 @@ function go_switch($go, $exit = false) {
 
 			case "neu Laden" : {
 				$GUI->neuLaden();
-				$GUI->saveMap('');
-				$currenttime=date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
-				$GUI->drawMap();
+				// $GUI->saveMap('');
+				// $currenttime=date('Y-m-d H:i:s',time());
+				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -2123,18 +2182,12 @@ function go_switch($go, $exit = false) {
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();
 				$GUI->saveMap('');
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
 			case "setMapExtent" : {
 				$GUI->setMapExtent();
-			} break;
-
-			case "history_move" : {
-				$GUI->neuLaden();
-				$GUI->saveMap('');
-				$GUI->drawMap();
-				$GUI->output();
 			} break;
 
 			case "Full_Extent" : {
@@ -2196,10 +2249,11 @@ function go_switch($go, $exit = false) {
 				$GUI->sanitize(['selected_rollenlayer_id' => 'int']);
 				$GUI->share_rollenlayer();
 				$GUI->loadMap('DataBase');
-				$currenttime = date('Y-m-d H:i:s',time());
-				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
-				$GUI->saveMap('');
-				$GUI->drawMap();
+				// $currenttime = date('Y-m-d H:i:s',time());
+				// $GUI->user->rolle->setConsumeActivity($currenttime,'getMap', $GUI->user->rolle->last_time_id);
+				// $GUI->saveMap('');
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 				$GUI->output();
 			} break;
 
@@ -2262,9 +2316,10 @@ function go_switch($go, $exit = false) {
 			default : {
 				# Karteninformationen lesen
 				$GUI->loadMap('DataBase', array(), ($GUI->formvars['strict_layer_name'] ? true : false));
-				$GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
-				$GUI->saveMap('');
-				$GUI->drawMap();
+				// $GUI->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				// $GUI->saveMap('');
+				// $GUI->drawMap();
+				$GUI->legende = $GUI->create_dynamic_legend();
 #				$GUI->add_message('info', 'Die Anwendung wird gerade überarbeitet. Es ist nicht sicher gestellt, dass sie richtig funktioniert und es können Fehlermeldungen auftreten!');
 				$GUI->output();
 			}

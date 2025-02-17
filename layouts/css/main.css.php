@@ -146,17 +146,23 @@ body {
 	margin: auto;
 }
 
-.collapsed {
+.collapsed, .collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
+	display: block;
 }
 
 .collapsed *{
 	visibility: collapse !important;
 	margin: 0 !important;
+  padding: 0;
+}
+
+.collapsedfull *{
+	visibility: collapse !important;
+	margin: 0 !important;
 	width: 0;
-  display: block;
   padding: 0;
 }
 
@@ -202,6 +208,10 @@ input[type="checkbox"], input[type="radio"] {
 	outline: 0;
 	cursor: pointer;
 	background: #fff;
+}
+
+.radio-label {
+	margin-right: 2px;
 }
 
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
@@ -2755,7 +2765,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #neuer_datensatz_button {
-	display: none;
+	/* display: none; */
 	position: relative;
 	text-align: right;
 	margin-right: 8px;

@@ -40,16 +40,16 @@
    		$maxy = $extent[1];												# am Anfang auf "0" setzen
     	$tilesx = ceil($width/$image_tile_size);		# Anzahl an Kacheln in x-Richtung
     	$tilesy = ceil($height/$image_tile_size);		# Anzahl an Kacheln in y-Richtung
-    	$restheight = $height;											# Resth�he des Teils des Gesamtbildes, f�r den noch keine Kacheln erzeugt wurden
-    	$tileheight = $image_tile_size;							# Kachelh�he
+    	$restheight = $height;											# Resthöhe des Teils des Gesamtbildes, für den noch keine Kacheln erzeugt wurden
+    	$tileheight = $image_tile_size;							# Kachelhöhe
     	
     	for($y = 0; $y < $tilesy; $y++){
     		if($restheight < $image_tile_size)$tileheight = $restheight;
     		$tileextentheight = $extentheight/$height*$tileheight;
     		$miny = $maxy;													# das miny ist das maxy der letzten Kachel
-    		$maxy = $maxy + $tileextentheight; 			# das maxy ist das maxy der letzten Kachel + die H�he der Kachel
+    		$maxy = $maxy + $tileextentheight; 			# das maxy ist das maxy der letzten Kachel + die Höhe der Kachel
     		$tilewidth = $image_tile_size;						# Kachelbreite
-    		$restwidth = $width;											# Restbreite des Teils der Zeile, f�r den noch keine Kacheln erzeugt wurden
+    		$restwidth = $width;											# Restbreite des Teils der Zeile, für den noch keine Kacheln erzeugt wurden
     		$minx = $extent[0];												# am Anfang jeder Zeile auf "0" setzen
     		$maxx = $extent[0];												# am Anfang jeder Zeile auf "0" setzen
     		for($x = 0; $x < $tilesx; $x++){

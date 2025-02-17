@@ -18,7 +18,8 @@
   $strTouchInfo="Info on surrounding objects";
   $strInfoWithRadius="Info with radius";
   $strInfoInPolygon="Info in polygon";
-  $strMeasureArea="measure area";
+  $strMeasureArea="Measure area";
+  $strRouting = "Routing";
   $strRuler="Ruler";
   $strFreePolygon="Draw polygon";
   $strFreeArrow="Draw arrow";

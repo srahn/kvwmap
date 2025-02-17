@@ -32,7 +32,7 @@ function hideMenue() {
 		ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
 		document.all.menue_options.innerHTML='';
 		document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
-		document.all.linkMinMax.href="javascript:showMenue()";
+		document.all.linkMinMax.onclick="showMenue()";
 		document.all.linkMinMax.title="Menü zeigen";
 	}
 }
@@ -42,7 +42,7 @@ function showMenue() {
   // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
   // fügt das Menü in die Spalte der GUI wieder ein.
   ahah('index.php', 'go=getMenueWithAjax', new Array(document.all.menuebar, ""), new Array("", "execute_function"));
-  document.all.linkMinMax.href="javascript:hideMenue()";
+  document.all.linkMinMax.onclick="hideMenue()";
   document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
   document.all.linkMinMax.title="Menü verstecken";
 }
@@ -51,14 +51,16 @@ function showMenue() {
     <tr>
       <td align="right"><?php
         if ($this->user->rolle->hideMenue) {
-          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
+          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:void(0);" onclick="showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
         }
         else {
-        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
+        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:void(0);" onclick="hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
         }
       ?></td>
     </tr>
 </table>
+<input type="hidden" name="refmap_x">
+<input type="hidden" name="refmap_y">
 
 <div id="menue_options">
 <?	
@@ -75,16 +77,27 @@ function showMenue() {
 			}
 		}
 		$refmap_html = '
-			<input
-				style="margin: 2px;border: 1px solid #cccccc;"
-				type="image"
+			<img
 				id="refmap"
-				onmousedown="document.GUI.go.value=\'neu Laden\';"
 				name="refmap"
 				src="' . $this->img['referenzkarte'] . '"
-				alt="Referenzkarte"
+				alt=""
 				hspace="0"
-			>';
+				style="cursor: pointer"
+			>
+			<script>
+				function click(e) {
+					let refmap = document.getElementById("refmap").getBoundingClientRect();
+					document.GUI.refmap_x.value = e.clientX - refmap.x;
+					document.GUI.refmap_y.value = e.clientY - refmap.y;
+					neuLaden();
+					document.GUI.refmap_x.value = "";
+					document.GUI.refmap_y.value = "";
+				}
+				let img = document.getElementById("refmap");
+				img.addEventListener("click", click);
+			</script>
+			';
 		if ($wappen['wappen'] != '') {
 			$wappen_html = '
 				<div id="wappen_div" style="position: relative; visibility: visible; left: 0px; top: 0px">' .
@@ -100,7 +113,7 @@ function showMenue() {
 			echo $wappen_html;
 		}
 
-		if ($this->img['referenzkarte'] != '' AND MENU_REFMAP == "oben") {
+		if (MENU_REFMAP == "oben") {
 			echo $refmap_html;
 		} ?>
 
@@ -124,7 +137,7 @@ function showMenue() {
 		</div>
 
 		<div id="menuefooter"><?
-			if ($this->img['referenzkarte'] != '' AND MENU_REFMAP !="oben") {
+			if (MENU_REFMAP !="oben") {
 				echo $refmap_html;
 			}
 			if (MENU_WAPPEN == "unten") {

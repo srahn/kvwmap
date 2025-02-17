@@ -128,7 +128,7 @@
 			$layer->type = 2;
 			$layer->maxscaledenom = 2000;
 			$layer->symbolscaledenom = 10000;
-			$layer->opacity = 5;
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 5 END END");
 			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
@@ -154,7 +154,7 @@
 			$layer->name = 'querymap'.$k;
 			$layer->type = 2;
 			$layer->symbolscaledenom = 10000;
-			$layer->opacity = 80;
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 80 END END");
 			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.EPSGCODE_ALKIS);
@@ -183,7 +183,7 @@
 			$layer->template = ' ';
 			$layer->name = 'querymap'.$k;
 			$layer->type = 2;
-			$layer->opacity = 50;
+			$layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
 			$layer->setConnectionType(6, '');
 			$layer->connection = $layerset[0]['connection'];
 			$layer->setProjection('+init=epsg:'.$layerset[0]['epsg_code']);
@@ -235,7 +235,7 @@
       $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
 			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
 			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
-			$antragsnr = $GUI->antrag->nr;
+			$antragsnr = sonderzeichen_umwandeln($GUI->antrag->nr);
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);

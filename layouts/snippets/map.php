@@ -14,6 +14,7 @@
 	$size['lagebzeichnung_bar']['height'] = (count_or_0($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
+	$map_height = $this->user->rolle->nImageHeight;
 	$legend_hide_width = $size['legend']['hide_width'];
 	$legend_width = ($this->user->rolle->hideLegend == 1 ? $legend_hide_width : $size['legend']['width']);
 
