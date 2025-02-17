@@ -38,7 +38,7 @@ class Konvertierung extends PgObject {
 	/**
 	 * Die Funktion setzt Einstellungen entsprechen der $planart.
 	 * Wenn $planart nicht übergeben wurde wird die Planart aus $this->data abgefragt.
-	 * @param String $planart (pptional) Planart der Konvertierung
+	 * @param string $planart (pptional) Planart der Konvertierung
 	 */
 	// MARK: Konfiguration
 	function set_config($planart = null) {
@@ -257,7 +257,14 @@ class Konvertierung extends PgObject {
 				# Hier eingeführt und nicht in GUI->loadlayer, weil führt dort beim WebAtlas-WMS zu einem Fehler
 				$layer->setMetaData('ows_extent', $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);
 				# Set Data sql for layer
-				$layerObj = Layer::find_by_id($gui, $layer->getMetadata('kvwmap_layer_id'));
+				$layer_id = $layer->getMetadata('kvwmap_layer_id');
+				$layerObj = Layer::find_by_id($gui, $layer_id);
+				if (!$layerObj) {
+					return array(
+						'success' => false,
+						'msg' => 'Fehler bei der Erzeugung des Web-Services. Layer mit der ID ' . $layer_id . ' wurde nicht gefunden!'
+					);
+				}
 				$result = $layerObj->get_generic_data_sql();
 				if ($result['success']) {
 					$layer->set('data', $result['data_sql']);
@@ -364,7 +371,7 @@ class Konvertierung extends PgObject {
 				$konvertierung->contenttype = 'application/pdf';
 				return $konvertierung;
 			case 'jpg' :
-				$filename = get_name_from_thump($path['basename']);
+				$filename = get_name_from_thumb($path['basename']);
 				$sql = "
 					SELECT
 						*

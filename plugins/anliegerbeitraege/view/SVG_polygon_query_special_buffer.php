@@ -56,7 +56,7 @@
 #
 # zusammenstellen der SVG
 #
-$fpsvg = fopen(IMAGEPATH.$svgfile,w) or die('fail: fopen('.$svgfile.')');
+$fpsvg = fopen(IMAGEPATH.$svgfile, 'w') or die('fail: fopen('.$svgfile.')');
 chmod(IMAGEPATH.$svgfile, 0666);
 
 $svg = $SVG_begin;
@@ -67,7 +67,7 @@ $svg .= $SVGvars_navscript;			# Funktionen zur Navigation
 $svg .= $polygonfunctions;			# Funktionen zum Zeichnen eines Polygons
 $svg .= $vertex_catch_functions;# Punktfangfunktionen
 $svg .= $special_buffer_functions;
-$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufügen und Entfernen von Polygonen
+$svg .= $flurstqueryfunctions;	# Funktionen zum Hinzufï¿½gen und Entfernen von Polygonen
 $svg .= $coord_input_functions;	# Funktionen zum Eingeben von Koordinaten
 $svg .= $measurefunctions;
 if($this->user->rolle->gps){

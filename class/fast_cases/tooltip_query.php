@@ -1,5 +1,14 @@
 <?
 
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
 function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 	if (MAPSERVERVERSION >= 800) {
 		return new RectObj($minx, $miny, $maxx, $maxy, $imageunits);
@@ -166,10 +175,10 @@ function checkPasswordAge($passwordSettingTime,$allowedPassordAgeMonth) {
 
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
-		return 39.3743;
+		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		return 39.37 * degree2meter($center_y);
+		return 39.3701 * degree2meter($center_y);
 	}
 }
 
@@ -181,11 +190,12 @@ function degree2meter($center_y) {
 	return 111319 * $lat_adj;
 }
 
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $export = 'false') {
+	// echo '<br>replace: ' . print_r($params, true) . ' in str: ' . $str;
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
-			foreach($params AS $key => $value){
+			foreach ($params AS $key => $value) {
 				$str = str_replace('$'.$key, $value, $str);
 			}
 		}
@@ -196,6 +206,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
 		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
 		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		if (!is_null($export))							$str = str_replace('$EXPORT', $export, $str);
 	}
 	return $str;
 }
@@ -448,7 +459,7 @@ class GUI {
 				if ($layerset[$i]['maintable'] == '') {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['maintable'] = $layerset[$i]['attributes']['table_name'][$layerset[$i]['attributes']['the_geom']];
 				}
-				if ($layerset[$i]['oid'] == '' AND @count($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
+				if ($layerset[$i]['oid'] == '' AND count_or_0($layerset[$i]['attributes']['pk']) == 1) {		# ist z.B. bei Rollenlayern der Fall
 					$layerset[$i]['oid'] = $layerset[$i]['attributes']['pk'][0];
 				}
 				$query_parts = $this->mapDB->getQueryParts($layerset[$i], $privileges);
@@ -456,7 +467,7 @@ class GUI {
 				
 				if($rect->minx != ''){	####### Kartenabfrage
 					$show = false;
-					for($j = 0; $j < @count($layerset[$i]['attributes']['name']); $j++){
+					for($j = 0; $j < count_or_0($layerset[$i]['attributes']['name']); $j++){
 						$layerset[$i]['attributes']['tooltip'][$j] = $privileges['tooltip_'.$layerset[$i]['attributes']['name'][$j]];
 						if($layerset[$i]['attributes']['tooltip'][$j] == 1){
 							$show = true;
@@ -1447,7 +1458,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.`queryable`,
 				l.`drawingorder`,
 				ul.`legendorder`,
@@ -1829,7 +1840,7 @@ class db_mapObj{
 		#echo '<br>GUI->getlayerdatabase layer_id: ' . $layer_id;
 		$layerdb = new pgdatabase();
 		$rs = $this->get_layer_connection($layer_id);
-		if (@count($rs) == 0) {
+		if (count_or_0($rs) == 0) {
 			return null;
 		}
 		$rs['schema'] = replace_params(
@@ -2126,7 +2137,7 @@ class db_mapObj{
 	function add_attribute_values($attributes, $database, $query_result, $withvalues = true, $stelle_id, $all_options = false) {
 		$attributes['req_by'] = $attributes['requires'] = $attributes['enum_requires_value'] = array();
 		# Diese Funktion fügt den Attributen je nach Attributtyp zusätzliche Werte hinzu. Z.B. bei Auswahlfeldern die Auswahlmöglichkeiten.
-		for ($i = 0; $i < @count($attributes['name']); $i++) {
+		for ($i = 0; $i < count_or_0($attributes['name']); $i++) {
 			$type = ltrim($attributes['type'][$i], '_');
 			$requires_options = '';
 			if (is_numeric($type) AND $query_result != NULL) {			# Attribut ist ein Datentyp

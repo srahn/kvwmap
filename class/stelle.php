@@ -84,6 +84,7 @@ class stelle {
 	var $style;
 	var $reset_password_text;
 	var $invitation_text;
+	public $pgdbhost = 'pgsql';
 
 	function __construct($id, $database) {
 		global $debug;
@@ -240,7 +241,11 @@ class stelle {
 				`ows_contentvoicephone`,
 				`ows_contentfacsimile`,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`, `style`, `reset_password_text`, `invitation_text`
+				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`,
+				`style`,
+				`show_shared_layers`,
+				`reset_password_text`,
+				`invitation_text`
 			FROM
 				stelle s
 			WHERE
@@ -1031,11 +1036,11 @@ class stelle {
 	function getFlurstueckeAllowed($FlurstKennz, $database) {
 		include_once(PLUGINS.'alkis/model/alkis.php');
 		$GemeindenStelle = $this->getGemeindeIDs();
-		if($GemeindenStelle != NULL){
+		if (!empty($GemeindenStelle['ganze_gemeinde']) OR !empty($GemeindenStelle['ganze_gemarkung']) OR !empty($GemeindenStelle['eingeschr_gemarkung'])) {   // Stelle ist auf Gemeinden eingeschränkt
 			$alkis = new alkis($database);
 			$ret=$alkis->getFlurstKennzByGemeindeIDs($GemeindenStelle, $FlurstKennz);
 			if ($ret[0]==0) {
-				$anzFlurstKennz = @count($ret[1]);
+				$anzFlurstKennz = count_or_0($ret[1]);
 				if ($anzFlurstKennz==0) {
 					$ret[0]=1;
 					$ret[1]="Sie haben keine Berechtigung zur Ansicht diese(s)r Flurstücke(s)";
@@ -1050,10 +1055,11 @@ class stelle {
 		return $ret;
 	}
 
-	/*
-	* Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
-	* Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
-	*/
+	/**
+	 * Add inheritted menues, functions, layouts, layers and users that not allready exists in formvars
+	 * Remove inheritted menues, functions, layouts, layers and users that currently exists in formvars
+	 * @param int[] $selected_parents Array of ids from parent stellen.
+	 */
 	function apply_parent_selection(
 		$selected_parents,
 		&$menues,
@@ -1434,6 +1440,18 @@ class stelle {
 		return 1;
 	}
 
+	/**
+	 * Function add layer with $layer_ids to stelle
+	 * ToDo sr: Beschreibung der 3 verschiedenen Fälle hinzufügen
+	 * - !$assign_default_values
+	 * - $assign_default_values OR $this->database->mysqli->affected_rows == 0
+	 * - !$assign_default_values AND $this->database->mysqli->affected_rows > 0
+	 * @param array $layer_ids
+	 * @param string $filter
+	 * @param boolean $assign_default_values
+	 * @param string $privileg
+	 * @return integer 1 if success 0 if error
+	 */
 	function addLayer($layer_ids, $filter = '', $assign_default_values = false, $privileg = 'default') {
 		#echo '<br>stelle.php addLayer ids: ' . implode(', ', $layer_ids);
 		# Hinzufügen von Layern zur Stelle
@@ -1456,11 +1474,13 @@ class stelle {
 				`privileg`,
 				`export_privileg`,
 				`postlabelcache`,
-				`requires`
+				`requires`,
+				`start_aktiv`
 			)";
 			if (!$assign_default_values) {
 				# Einstellungen von der Elternstelle übernehmen
-				$sql = "INSERT INTO used_layer " . $insert . "
+				$sql = "
+					INSERT INTO used_layer " . $insert . "
 					SELECT
 						'" . $this->id . "',
 						'" . $layer_ids[$i] . "',
@@ -1479,12 +1499,13 @@ class stelle {
 						`privileg`,
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						`start_aktiv`
 					FROM
 						used_layer as l,
 						stellen_hierarchie
 					WHERE
-						(select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . ") AND
+						COALESCE((select use_parent_privileges from used_layer where layer_id = " . $layer_ids[$i] . " AND stelle_id = " . $this->id . "), 1) AND
 						layer_id = " . $layer_ids[$i] . " AND
 						stelle_id = parent_id AND
 						child_id = " . $this->id . "
@@ -1501,8 +1522,9 @@ class stelle {
 						postlabelcache = l.postlabelcache,
 						`privileg` = l.`privileg`,
 						`export_privileg` = l.`export_privileg`,
-						requires = l.requires";
-				#echo $sql.'<br><br>';
+						requires = l.requires
+				";
+				// echo $sql.'<br><br>';
 				$this->debug->write("<p>file:stelle.php class:stelle->addLayer - Hinzufügen von Layern zur Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -1528,7 +1550,8 @@ class stelle {
 						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
 						`export_privileg`,
 						postlabelcache,
-						requires
+						requires,
+						'0'
 					FROM
 						layer as l
 					WHERE
@@ -1648,30 +1671,11 @@ class stelle {
 		return 1;
 	}
 	
+	/**
+	 * check if layer_params are used in any layer or menue of stelle
+	 * and set the ids in selectable_layer_params of stelle
+	 */
 	function updateLayerParams() {
-		/*
-		$sql = "
-			UPDATE
-				stelle
-			SET
-				selectable_layer_params = COALESCE(
-					(
-						SELECT GROUP_CONCAT(id)
-						FROM (
-							SELECT DISTINCT id
-							FROM `layer_parameter` as p, used_layer as ul, layer as l
-							WHERE
-								ul.Stelle_ID = " . $this->id . " AND
-								ul.Layer_ID = l.Layer_ID AND
-								locate(concat('$', p.key), concat(l.Name, l.alias, l.connection, l.Data, l.pfad, l.classitem, l.classification)) > 0
-						) as foo
-					),
-					''
-				)
-			WHERE
-				stelle.ID = " . $this->id . "
-		";
-		*/
 		$sql = "
 			UPDATE stelle
 			SET
@@ -1688,22 +1692,21 @@ class stelle {
 										FROM
 										`layer_parameter` as p,
 										used_layer as ul,
-										layer as l,
-										layer_attributes la
+										layer as l
+									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
 									WHERE
 										ul.Stelle_ID = " . $this->id . " AND
 										ul.Layer_ID = l.Layer_ID AND
-										la.layer_id = l.Layer_ID AND
 										(
 											locate(
 												concat('$', p.key),
 												concat(l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, ''))
 											) > 0
-										OR
-											locate(
-												concat('$', p.key),
-												concat(la.options, la.default)
-											) > 0
+										-- OR						-- aus Performancegründen rausgenommen
+										-- 	locate(
+										-- 		concat('$', p.key),
+										-- 		concat(la.options, la.default)
+										-- 	) > 0
 										)
 									UNION
 									SELECT
@@ -1726,38 +1729,7 @@ class stelle {
 				)
 			WHERE stelle.ID = " . $this->id . "
 		";
-
-		#echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
-		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
-
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-
-		$sql = "
-			UPDATE
-				rolle
-			SET
-				layer_params = concat(coalesce(layer_params, ''), 
-					coalesce(
-						concat(
-							CASE WHEN coalesce(layer_params, '') = '' THEN '' ELSE ',' END,
-							(SELECT
-								GROUP_CONCAT(concat('\"', `key`, '\":\"', default_value, '\"'))
-							FROM
-								layer_parameter p, stelle
-							WHERE
-								FIND_IN_SET(p.id, stelle.selectable_layer_params) AND
-								locate(concat('\"', p.key, '\"'), coalesce(layer_params, '')) = 0 AND
-								stelle.ID = rolle.stelle_id
-							)
-						),
-						''
-					)
-				)
-			WHERE
-				rolle.stelle_id = " . $this->id . "
-		";
-		#echo '<br>SQL zum Aktualisieren der Layerparameter in den Rollen: ' . $sql;
+		// echo '<br>SQL zur Aktualisierung der selectable_layer_params: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->updateLayerParams:<br>".$sql,4);
 
 		$this->database->execSQL($sql);
@@ -2385,8 +2357,8 @@ class stelle {
 		$stelle_id = $this->id;
 		$stellendaten = $this->getstellendaten();
 		$stellenextent = $this->MaxGeorefExt;
-		$projFROM = ms_newprojectionobj("init=epsg:" . $this->epsg_code);
-		$projTO = ms_newprojectionobj("init=epsg:4326");
+		$projFROM = new projectionObj("init=epsg:" . $this->epsg_code);
+		$projTO = new projectionObj("init=epsg:4326");
 		$stellenextent->project($projFROM, $projTO);
 
 		$layerdef = (Object) array(
@@ -2413,18 +2385,24 @@ class stelle {
 			'baseLayers' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					return $layer->get_baselayers_def($this->id);
+					if ($layer) {
+						// return only baselayer_def if layer has been found
+						return $layer->get_baselayers_def($this->id);
+					}
 				},
 				Layer2Stelle::find_base_layers($this->database->gui, $this->id)
 			),
 			'overlays' => array_map(
 				function($layer2Stelle) {
 					$layer = Layer::find_by_id($layer2Stelle->gui, $layer2Stelle->get('Layer_ID'));
-					$layer->minScale = $layer2Stelle->get('minscale');
-					$layer->maxScale = $layer2Stelle->get('maxscale');
-					$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
-					#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
-					return $layer->get_overlays_def($this->id);
+					if ($layer) {
+						// return overlay_def only if layer has been found
+						$layer->minScale = $layer2Stelle->get('minscale');
+						$layer->maxScale = $layer2Stelle->get('maxscale');
+						$layer->opacity  = $layer2Stelle->get('transparency') ?: 100;
+						#echo '<br>call get_overlay_layers for layer_id: ' . $layer->get('Layer_ID');
+						return $layer->get_overlays_def($this->id);
+					}
 				},
 				Layer2Stelle::find_overlay_layers($this->database->gui, $this->id)
 			)
@@ -2455,7 +2433,7 @@ class stelle {
 				WHERE 
 				`layer_id` = " . $layer_id;
 		}
-		#echo '<br>Sql: ' . $sql;
+		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
@@ -2551,17 +2529,17 @@ class stelle {
 
 	function getGemeindeIDs() {
 		$liste = [];
+		$liste['ganze_gemeinde'] = Array();
+		$liste['eingeschr_gemeinde'] = Array();
+		$liste['ganze_gemarkung'] = Array();
+		$liste['eingeschr_gemarkung'] = Array();
+		$liste['ganze_flur'] = Array();
+		$liste['eingeschr_flur'] = Array();
 		$sql = 'SELECT Gemeinde_ID, Gemarkung, Flur, Flurstueck FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getGemeindeIDs - Lesen der GemeindeIDs zur Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if ($this->database->result->num_rows > 0) {
-			$liste['ganze_gemeinde'] = Array();
-			$liste['eingeschr_gemeinde'] = Array();
-			$liste['ganze_gemarkung'] = Array();
-			$liste['eingeschr_gemarkung'] = Array();
-			$liste['ganze_flur'] = Array();
-			$liste['eingeschr_flur'] = Array();
 			while ($rs=$this->database->result->fetch_assoc()) {
 				if ($rs['Gemarkung'] != '') {
 					$liste['eingeschr_gemeinde'][$rs['Gemeinde_ID']] = NULL;

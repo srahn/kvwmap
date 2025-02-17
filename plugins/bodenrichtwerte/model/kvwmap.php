@@ -91,7 +91,7 @@
 
       # Bildung der Textposition zur SVG-Ausgabe
       $point_teil=strrpos($GUI->formvars['wkt_textposition'],'(')+1;
-      $point_paar=substr($GUI->formvars['wkt_textposition'],$point_teil, @count($point_teil)-2);
+      $point_paar=substr($GUI->formvars['wkt_textposition'],$point_teil, count_or_0($point_teil)-2);
       $point_xy=explode(' ',$point_paar);
       $GUI->formvars['loc_x']=$point_xy[0];
       $GUI->formvars['loc_y']=$point_xy[1];

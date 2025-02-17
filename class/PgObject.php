@@ -37,7 +37,12 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
-	function __construct($gui, $schema_name, $table_name) {
+
+	private $select;
+	private $from;
+	private $where;
+
+	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, false);
 		$this->debug = $gui->debug;
 		$this->gui = $gui;
@@ -60,6 +65,7 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
 	}
 
 	/**

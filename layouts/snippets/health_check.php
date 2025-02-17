@@ -10,14 +10,13 @@ $check['postgres_connection'] = $GUI->pgdatabase->open(POSTGRES_CONNECTION_ID);
 $output[] = 'Verbindung zur PostgreSQL-DB: ' . ($check['postgres_connection']? 'ok' : 'fehlgeschlagen');
 
 # Test ob Mapserver Karte rendern kann
-set_error_handler("MapserverErrorHandler");
 $map = new mapObj(DEFAULTMAPFILE);
 $map->setSymbolSet(SYMBOLSET);
 $map->setFontSet(FONTSET);
-$map->set('width', 300);
-$map->set('height', 200);
+$map->width = 300;
+$map->height = 200;
 $map->setextent(12.121, 54.09, 12.124, 54.091);
-$layer = ms_newLayerObj($map);
+$layer = new LayerObj($map);
 $layer->updateFromString('
 LAYER
   NAME "test"
@@ -48,7 +47,12 @@ END
 ');
 $image_map = $map->draw();
 $filename = rand(0, 1000000).'.'.$map->outputformat->extension;
-$image_map->saveImage(IMAGEPATH . $filename);
+if (MAPSERVERVERSION >= 800) {
+  $image_map->save(IMAGEPATH . $filename);
+}
+else {
+  $image_map->saveImage(IMAGEPATH . $filename);
+}
 $check['map_rendering'] = filesize(IMAGEPATH . $image) > 0;
 $output[] = 'Rendern einer Karte: ' . ($check['map_rendering']? 'ok' : 'fehlgeschlagen');
 

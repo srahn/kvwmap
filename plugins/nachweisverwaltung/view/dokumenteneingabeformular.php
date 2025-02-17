@@ -6,7 +6,7 @@
 <!--
 
 function toggle_vertices(){	
-	document.getElementById("vertices").SVGtoggle_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+	SVG.toggle_vertices();
 }
 
 function send(){	
@@ -26,7 +26,7 @@ function send(){
 			alert('Geben Sie ein Polygon an.');
 		}
 		else{
-			document.GUI.newpathwkt.value = buildwktpolygonfromsvgpath(document.GUI.newpath.value);
+			document.GUI.newpathwkt.value = SVG.buildwktpolygonfromsvgpath(document.GUI.newpath.value);
 		}
 	}
 	if(document.GUI.fortfuehrung.value != '' && document.GUI.fortfuehrung.value < 1850){
@@ -68,28 +68,6 @@ function check_poly(){
 			document.GUI.submit();
 		}
 	}
-}
-
-function buildwktpolygonfromsvgpath(svgpath){
-	var koords;
-	wkt = "POLYGON((";
-	parts = svgpath.split("M");
-	for(j = 1; j < parts.length; j++){
-		if(j > 1){
-			wkt = wkt + "),("
-		}
-		koords = ""+parts[j];
-		coord = koords.split(" ");
-		wkt = wkt+coord[1]+" "+coord[2];
-		for(var i = 3; i < coord.length-1; i++){
-			if(coord[i] != ""){
-				wkt = wkt+","+coord[i]+" "+coord[i+1];
-			}
-			i++;
-		}
-	}
-	wkt = wkt+"))";
-	return wkt;
 }
 
 function slide_legend_in(evt){
@@ -185,6 +163,9 @@ $legendheight = $this->map->height + 20;
 	}	
 	#dokein-image, #dokein-gemkg {
 		margin-right: 20px;
+	}
+	#dokein-image input {
+		width: 400px;
 	}
 	#dokein-main {
 		width:100%;

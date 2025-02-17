@@ -13,13 +13,9 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	var enclosingForm = <? echo $this->currentform; ?>;
 		
 	update_geometry = function(){
-		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.update_geometry();
 	}
-	
-	show_foreign_vertices = function(){
-		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}
-	
+		
 	adjustHref = function(link){
 		if (link.href.indexOf('index.php?') != -1 && link.target != 'root' && enclosingForm.name == 'GUI2') {
 			link.href = link.href.replace('?', '?window_type=overlay&');
@@ -145,11 +141,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.visibility = 'collapse';
+			group.classList.add('collapsed');
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.visibility = 'visible';
+			group.classList.remove('collapsed');
 		});
 	}
 
@@ -183,19 +179,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
-				value_dependent.style.visibility = 'inherit';
+				if (name_dependent != null) {
+					name_dependent.classList.remove('collapsedfull');
+				}
+				value_dependent.classList.remove('collapsedfull');
 			}
-			else{
-				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
-				value_dependent.style.visibility = 'hidden';
+			else {
+				if (name_dependent != null) {
+					name_dependent.classList.add('collapsedfull');
+				}
+				value_dependent.classList.add('collapsedfull');
 			}
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsedfull')){
 					row_display = '';
 				}
 			})
@@ -323,16 +323,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
-				type = elements[i].type;
-				if (type == 'checkbox' && elements[i].checked == false) {
-					value = 'f';
-				}
+				type = elements[i].type;			
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
 				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
 					value = parseFloat(value);
 				}
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}				
+				if (type == 'radio' && elements[i].checked == false) {
+					value = '';
+				}					
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
@@ -833,7 +836,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 				else if(enclosingForm.newpathwkt.value == ''){		// Polygon- oder Liniengeometrie
 					if(enclosingForm.newpath.value != ''){
-						geom = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
+						geom = SVG.buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 					}
 				}
 				attributenames += attributenamesarray[i] + '|';
@@ -901,6 +904,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
+		count_selected(layer_id);
 		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
@@ -1000,7 +1004,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementById('all_'+layer_id).value;
+		enclosingForm.all.value = document.getElementsByName('all_' + layer_id)[0].value;
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;
@@ -1264,6 +1268,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 			}
 		});
+	}
+
+	count_selected = function(layer_id){
+		document.getElementById('selected_count_' + layer_id).innerHTML = document.querySelectorAll('.check_' + layer_id + ':checked').length;
 	}
 
 </script>

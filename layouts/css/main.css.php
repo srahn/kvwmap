@@ -146,13 +146,24 @@ body {
 	margin: auto;
 }
 
-.collapsed {
+.collapsed, .collapsedfull {
 	visibility: collapse;
   height: 0;
+	padding: 0 !important;
+	display: block;
 }
 
 .collapsed *{
+	visibility: collapse !important;
 	margin: 0 !important;
+  padding: 0;
+}
+
+.collapsedfull *{
+	visibility: collapse !important;
+	margin: 0 !important;
+	width: 0;
+  padding: 0;
 }
 
 #copyrights_div table td {
@@ -197,6 +208,10 @@ input[type="checkbox"], input[type="radio"] {
 	outline: 0;
 	cursor: pointer;
 	background: #fff;
+}
+
+.radio-label {
+	margin-right: 2px;
 }
 
 #scrolldiv input[type="checkbox"], #scrolldiv input[type="radio"] {
@@ -304,7 +319,14 @@ input[type="button"][value='«'], input[type="button"][value='»'] {
 form {
 	margin: 0;
 	padding: 0;
-} 
+}
+
+hr {
+	margin: 7px; 
+	background-color: #777; 
+	height: 1px; 
+	border-width: 0;
+}
 
 .fett{
 	font-family: SourceSansPro2;
@@ -412,6 +434,7 @@ span[data-tooltip] {
   cursor: help;
 	--left: -250px;
 	--width: 500px;
+	--top: 24px;
 	font-weight: normal;
 }
 
@@ -426,7 +449,7 @@ span[data-tooltip]:hover::after {
 	right: 0px;
 	left: -300px;		/* IE Fallback */
 	left: var(--left);
-  top: 24px;
+  top: var(--top);
 	max-width: 500px;		/* IE Fallback */
   max-width: var(--width);
 	font-size: <? echo $font_size_factor * 11; ?>px;
@@ -849,6 +872,10 @@ select[name="geom_from_layer"] {
 
 #datendrucklayouteditor_formular_scroll>table>tbody>tr>td>table>tbody:first-of-type>tr:first-of-type{
 	background-color: #c5d4e7;
+}
+
+#search_div {
+	display: none;
 }
 
 #geo_name_search_result_div{
@@ -1345,7 +1372,7 @@ a.menuered:hover {
 	opacity: 1;
 }
 
-#header{
+#header {
 	height: <? echo ($size['header']['height'] - 2); ?>px;
 	border: 1px solid;
 	border-color: #ffffff #cccccc #bbbbbb;
@@ -2468,7 +2495,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 	background-color: #FFFFFF;
 	position:absolute;
 	box-shadow: 6px 5px 7px rgba(0, 0, 0, 0.3);
-	top: 30px;
+	top: 42px;
 	right: <? echo $font_size_factor * 15; ?>px;
 	z-index: 2000;
 }
@@ -2738,7 +2765,7 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 }
 
 #neuer_datensatz_button {
-	display: none;
+	/* display: none; */
 	position: relative;
 	text-align: right;
 	margin-right: 8px;

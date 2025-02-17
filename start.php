@@ -1,6 +1,8 @@
 <?php
 $language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
-include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
+$language_file = LAYOUTPATH . 'languages/start_' . $language . '.php';
+include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 $errors = array();
 
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
@@ -379,7 +381,6 @@ if (!$show_login_form) {
 
 				if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
 					logout();
-					$GUI->debug->write('Formvars nach logout in line ' . __LINE__ . ': ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 					if (is_new_password($GUI->formvars)) {
 						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
@@ -546,8 +547,8 @@ else {
 			if ($user_epsg['minx'] != '') {
 				// Koordinatensystem ist räumlich eingegrenzt
 				if ($GUI->Stelle->epsg_code != 4326) {
-					$projFROM = ms_newprojectionobj("init=epsg:".$GUI->Stelle->epsg_code);
-					$projTO = ms_newprojectionobj("init=epsg:4326");
+					$projFROM = new projectionObj("init=epsg:".$GUI->Stelle->epsg_code);
+					$projTO = new projectionObj("init=epsg:4326");
 					$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO); // max. Stellenextent wird in 4326 transformiert
 				}
 				// Vergleich der Extents und ggfs. Anpassung
@@ -555,14 +556,14 @@ else {
 				if($user_epsg['miny'] > $GUI->Stelle->MaxGeorefExt->miny)$GUI->Stelle->MaxGeorefExt->miny = $user_epsg['miny'];
 				if($user_epsg['maxx'] < $GUI->Stelle->MaxGeorefExt->maxx)$GUI->Stelle->MaxGeorefExt->maxx = $user_epsg['maxx'];
 				if($user_epsg['maxy'] < $GUI->Stelle->MaxGeorefExt->maxy)$GUI->Stelle->MaxGeorefExt->maxy = $user_epsg['maxy'];
-				$projFROM = ms_newprojectionobj("init=epsg:4326");
-				$projTO = ms_newprojectionobj("init=epsg:".$GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:4326");
+				$projTO = new projectionObj("init=epsg:".$GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);				// Transformation in das System des Nutzers
 			}
 			else {
 				# Umrechnen der maximalen Kartenausdehnung der Stelle
-				$projFROM = ms_newprojectionobj("init=epsg:" . $GUI->Stelle->epsg_code);
-				$projTO = ms_newprojectionobj("init=epsg:" . $GUI->user->rolle->epsg_code);
+				$projFROM = new projectionObj("init=epsg:" . $GUI->Stelle->epsg_code);
+				$projTO = new projectionObj("init=epsg:" . $GUI->user->rolle->epsg_code);
 				$GUI->Stelle->MaxGeorefExt->project($projFROM, $projTO);
 			}
 		}
@@ -576,7 +577,7 @@ else {
 		$mapdb->deleteRollenFilter();
 		# Löschen der Rollenlayer
 		$rollenlayerset = $mapdb->read_RollenLayer(NULL, 'search', 1);
-		for($i = 0; $i < @count($rollenlayerset); $i++){
+		for($i = 0; $i < count_or_0($rollenlayerset); $i++){
 			$mapdb->deleteRollenLayer($rollenlayerset[$i]['id']);
 			$mapdb->delete_layer_attributes(-$rollenlayerset[$i]['id']);
 		}
@@ -733,19 +734,25 @@ function get_permission_in_stelle($GUI) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
 			$reason = $expiration_info;
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
+			global $strPasswordReset;
+			global $strPasswordAgeExpired;
+			global $strPasswordExpired;
+			global $strPasswordElse;
+			global $strPasswordNew;
+			$errmsg = str_replace('$login_name', $GUI->user->login_name, $strPasswordReset) . ' ';
+			$GUI->debug->write('expiration_info: ' . $expiration_info, 4, $GUI->echo);
 			switch ($expiration_info) {
 				case 'password_age_expired' : {
-					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
+					$errmsg .= str_replace('$stelle_allowedPasswordAge', $GUI->Stelle->allowedPasswordAge, str_replace('$stelle_bezeichnung', $GUI->stelle->Bezeichnung, $strPasswordAgeExpired));
 				} break;
 				case 'password_expired' : {
-					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
+					$errmsg .= $strPasswordExpired;
 				} break;
 				default : {
-					$errmsg .= 'abgelaufen.';
+					$errmsg .= $strPasswordElse;
 				}
 			}
-			$errmsg .= ' Geben Sie jetzt ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
+			$errmsg .= $strPasswordNew;
 		}
 	}
 	else {

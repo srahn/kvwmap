@@ -72,7 +72,7 @@
 		}
 
   	$doit = false;
-	  $anzObj = @count($layer['shape']);
+	  $anzObj = count_or_0($layer['shape']);
 		if ($anzObj > 0) {
 			$this->found = 'true';
 			$k = 0;
@@ -132,8 +132,9 @@
 									<input
 										id="<? echo $layer['Layer_ID'] . '_' . $k; ?>"
 										type="checkbox"
-										class="<? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
+										class="check_<? echo $layer['Layer_ID']; ?> <? if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { echo 'no_edit'; } ?>"
 										name="check;<? echo $layer['attributes']['table_alias_name'][$layer['maintable']].';'.$layer['maintable'].';'.$layer['shape'][$k][$layer['maintable'].'_oid'].';'.$layer['Layer_ID']; ?>"
+										onchange="count_selected(<? echo $layer['Layer_ID']; ?>);"
 									>&nbsp;<span style="color:<? echo TXT_GLEHEADER; ?>;"><? echo $strSelectThisDataset; ?></span><?
 									if ($layer['shape'][$k][$layer['attributes']['Editiersperre']] == 't') { ?>
 										<span class="editier_sperre fa-stack" title="Dieser Datensatz ist zur Bearbeitung gesperrt">
@@ -516,7 +517,7 @@
 
 <?
 
-	for($l = 0; $l < @count($invisible_attributes[$layer['Layer_ID']]); $l++){
+	for($l = 0; $l < count_or_0($invisible_attributes[$layer['Layer_ID']]); $l++){
 		echo $invisible_attributes[$layer['Layer_ID']][$l]."\n";
 	}
 

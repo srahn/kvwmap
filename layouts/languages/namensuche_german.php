@@ -45,4 +45,6 @@
  $strNext="weiter";
  $strFlur="Flur";
  $strCheckAll="alle angezeigten auswählen";
+ $strSpatialFiltering="Suche räumlich eingrenzen";
+ $strSpatialFilteringClose="Karte schließen";
 ?>

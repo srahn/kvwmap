@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -52,7 +52,7 @@ include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php
 	}
 
 	function moveback() {
-		document.getElementById("svghelp").SVGmoveback(); // das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.moveback();
 	}
 
 	function checkQueryFields() {
@@ -218,21 +218,20 @@ $last_x = 0;
 global $events;
 $events = true;
 
-include(LAYOUTPATH . 'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 include(LAYOUTPATH . 'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
 include(LAYOUTPATH . 'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
 include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
 $bg_pic   = $this->img['hauptkarte'];
-$res_x    = $this->map->width;
-$res_y    = $this->map->height;
-$res_xm   = $this->map->width / 2;
-$res_ym   = $this->map->height / 2;
-$dx       = $this->map->extent->maxx - $this->map->extent->minx;
-$dy       = $this->map->extent->maxy - $this->map->extent->miny;
-$scale    = ($dx / $res_x + $dy / $res_y) / 2;
-$radius = (float)$this->formvars['searchradius'] / $scale;
+$res_x    = $map_width;
+$res_y    = $map_height;
+$res_xm   = $map_width / 2;
+$res_ym   = $map_height / 2;
+#$dx       = $this->map->extent->maxx - $this->map->extent->minx;
+#$dy       = $this->map->extent->maxy - $this->map->extent->miny;
+#$scale    = ($dx / $res_x + $dy / $res_y) / 2;
+#$radius = (float)$this->formvars['searchradius'] / $scale;
 
 
 $fpsvg = fopen(IMAGEPATH . $svgfile, 'w') or die('fail: fopen(' . $svgfile . ')');
@@ -268,6 +267,7 @@ $svg = '<?xml version="1.0"?>
   var dragging  = false; 
   var dragdone  = false; 
   var measuring  = false;
+	var routing_started = false;
   var polydrawing  = false; 
 	var texttyping = false;
 	var arrowdrawing = false;
@@ -354,12 +354,28 @@ $EPSGCODE_ALKIS = EPSGCODE_ALKIS;
 $svg .= <<<FUNCTIONDEF
 function startup() {
 	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
-	if (get_measure_path()) {
-		redrawPL();
+	switch (top.document.GUI.previous_button.value) {
+		case "measure" : 
+			get_measure_path();
+			redrawPL();
+		break;
+
+		case "measurearea" :
+			get_polygon_path();
+			redrawPolygon();
+			polygonarea();
+		break;
+
+		case "routing" :
+			get_path();
+			if (pathx[1]) {		// zwei Punkte -> Routen
+				generateRoute();
+			}
+			else {						// ein Punkt -> Anzeigen
+				document.getElementById("routing").setAttribute("d", "M " + pathx[0] + " " + pathy[0]);
+			}
+		break;
 	}
-	get_polygon_path();	
-	redrawPolygon();
-	if(doing == "polygonquery"){polygonarea()};
 	set_suchkreis();
 	eval(doing+"()");	
   //document.getElementById(doing+"0").classList.add("active");				// das kann der IE nicht
@@ -403,11 +419,14 @@ function applyZoom() {
 }
 
 function mousewheelchange(evt) {
-	if (doing == "polygonquery") {
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if (doing == "measure") {
 		save_measure_path();
+	}
+	if (doing == "routing") {
+		save_path();
 	}
 	remove_vertices();
 	if (!evt) {
@@ -583,6 +602,9 @@ function getEventPoint(evt) {
 }
 
 function init(){
+	if ("{$bg_pic}" == "") {
+		top.neuLaden();
+	}
 	// Bug Workaround fuer Firefox
 	var nav_button_bg = document.querySelector('.navbutton_bg');
 	nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
@@ -603,16 +625,12 @@ function init(){
 	}
 }
 
-top.document.getElementById("map").SVGstartup = startup;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("map").SVGclearMeasurement = clearMeasurement;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("svghelp").SVGmoveback = moveback;
-
 function moveback(evt){
 	// diese Funktion dient dazu die verschobene moveGroup wieder zurueck zu schieben
 	document.getElementById("mapimg2").setAttribute("style", "display:block");	
 	window.setTimeout('document.getElementById("moveGroup").setAttribute("transform", "translate(0 0)");document.getElementById("mapimg").setAttribute("href", document.getElementById("mapimg2").getAttribute("href"));startup();', 200);
+	// Routing entfernen
+	document.getElementById("routing").setAttribute("d", "");
 	// Redlining-Sachen loeschen
 	while(child = document.getElementById("redlining").firstChild){
   	document.getElementById("redlining").removeChild(child);
@@ -658,12 +676,15 @@ function zoomall(){
 }
 
 function recentre(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
 		save_measure_path();
 	}
+	if (doing == "routing") {
+		save_path();
+	}	
   doing = "recentre";
 	top.document.GUI.last_button.value = doing = "recentre";
 	document.getElementById("canvas").setAttribute("cursor", "move");
@@ -671,24 +692,30 @@ function recentre(){
 }
 
 function zoomin(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
 		save_measure_path();
 	}
+	if (doing == "routing") {
+		save_path();
+	}	
   doing = "zoomin";
 	top.document.GUI.last_button.value = doing = "zoomin";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
 function zoomout(){
-	if(doing == "polygonquery"){
+	if (doing == "polygonquery" || doing == "measurearea") {
 		save_polygon_path();
 	}
 	if(doing == "measure"){
 		save_measure_path();
 	}
+	if (doing == "routing") {
+		save_path();
+	}	
   doing = "zoomout";
 	top.document.GUI.last_button.value = doing = "zoomout";
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
@@ -734,6 +761,24 @@ function polygonquery() {
 	}
 	doing = "polygonquery";
 	document.getElementById("canvas").setAttribute("cursor", "help");
+	if (top.document.GUI.str_polypathx.value != "") {
+		polydrawing = true;
+		top.document.GUI.str_polypathx.value = "";
+		top.document.GUI.str_polypathy.value = "";
+	}
+	else {
+		deletepolygon();
+	}
+}
+
+function measurearea() {
+	if ((measuring || polydrawing) && (top.document.GUI.punktfang.checked)) {
+		remove_vertices();
+		request_vertices();
+	}
+	doing = "measurearea";
+	top.document.GUI.previous_button.value = doing;
+	document.getElementById("canvas").setAttribute("cursor", "crosshair");
 	// Wenn im UTM-System gemessen wird, NBH-Datei laden
 	if ({$this->user->rolle->epsg_code} == {$EPSGCODE_ALKIS}) {
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
@@ -746,6 +791,12 @@ function polygonquery() {
 	else {
 		deletepolygon();
 	}
+}
+
+function routing() {
+	document.getElementById("canvas").setAttribute("cursor", "crosshair");
+	doing = "routing";
+	top.document.GUI.previous_button.value = doing;
 }
 
 function drawarrow(){
@@ -769,6 +820,7 @@ function addfreetext(){
 }
 		    
 function noMeasuring(){
+	routing_started = false;
   measuring = false;
   restart();
 }
@@ -785,40 +837,29 @@ function measure(){
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	}
   doing = "measure";
+	top.document.GUI.previous_button.value = doing;
 	if(top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
 		top.document.GUI.str_pathx.value = "";
 		top.document.GUI.str_pathy.value = "";
 	}
-	else{
-		top.document.GUI.measured_distance.value = 0;
-		measured_distance = 0;
-		new_distance = 0;
-		freehand_measuring = false;
-  	measuring = false;
-  	restart();
-	}
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 
-function save_measure_path(){
+function save_path(){
 	var length = pathx.length;
 	if(length > 0){
 		var str_pathx = pathx_world.join(";");
 		var str_pathy = pathy_world.join(";");
 		top.document.GUI.str_pathx.value = str_pathx;
 		top.document.GUI.str_pathy.value = str_pathy;
-		top.document.GUI.measured_distance.value = measured_distance;
 	}
 }
 
-function get_measure_path(){
-	if(top.document.GUI.str_pathx.value != ""){
+function get_path(){
+	if (top.document.GUI.str_pathx.value != ""){
 		pathx = new Array();
 		pathy = new Array();
-		document.getElementById(doing+"0").style.setProperty("fill", "ghostwhite","");
-		doing = "measure";
-		measuring = true;
 		var str_pathx = top.document.GUI.str_pathx.value;
 		var str_pathy = top.document.GUI.str_pathy.value;
 		pathx_world = str_pathx.split(";");
@@ -826,9 +867,27 @@ function get_measure_path(){
 		pathx[0] = (pathx_world[0] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
 		pathy[0] = (pathy_world[0] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
 		var length = pathx_world.length; 
-	  for(var i = 1; i < length; i++){
+	  for (var i = 1; i < length; i++){
 	    pathx[i] = (pathx_world[i] - parseFloat(top.document.GUI.minx.value))/parseFloat(top.document.GUI.pixelsize.value);
 			pathy[i] = (pathy_world[i] - parseFloat(top.document.GUI.miny.value))/parseFloat(top.document.GUI.pixelsize.value);
+		}
+		return true;
+	}
+	return false;
+}
+
+function save_measure_path(){
+	save_path();
+	top.document.GUI.measured_distance.value = measured_distance;
+}
+
+function get_measure_path(){
+	if (get_path()) {
+		document.getElementById(doing+"0").style.setProperty("fill", "ghostwhite","");
+		doing = "measure";
+		measuring = true;
+		var length = pathx_world.length; 
+	  for(var i = 1; i < length; i++){
 			document.getElementById("moveGroup").removeChild(document.getElementById("section"+i));
 			showSectionMeasurement(i);
 		}
@@ -849,9 +908,9 @@ function save_polygon_path(){
 }
 
 function get_polygon_path(){
-	if(top.document.GUI.str_polypathx.value != ""){
-		highlightbyid("polygonquery0");
-		doing = "polygonquery";
+	if (top.document.GUI.str_polypathx.value != ""){
+		highlightbyid("measurearea0");
+		doing = "measurearea";
 		var str_polypathx = top.document.GUI.str_polypathx.value;
 		var str_polypathy = top.document.GUI.str_polypathy.value;
 		polypathx = str_polypathx.split(";");
@@ -926,7 +985,7 @@ function mousedown(evt){
 		if(evt.button == 1){			// mittlere Maustaste -> Pan
 			if(evt.preventDefault)evt.preventDefault();
 			else evt.returnValue = false; // IE fix
-			if(doing == "polygonquery"){
+			if(doing == "polygonquery" || doing == "measurearea"){
 				save_polygon_path();
 			}
 			if(doing == "measure"){
@@ -935,79 +994,88 @@ function mousedown(evt){
 			doing_save = doing;
 			doing = "recentre";
 		}
-	  switch(doing){
-	   case "previous":
-	   break;
-	   case "next":
-	   break;
-	   case "zoomin":
-			remove_vertices();
-	    startPoint(evt);
-	   break;
-	   case "zoomout":
-			remove_vertices();
-	    selectPoint(evt);
-	   break;
-	   case "recentre":			
-			remove_vertices();
-	    startMove(evt);
-	   break;
-		case "showcoords":
-	    top.show_coords(evt, null);
-	   break;
-	   case "pquery":
-	    startPoint(evt);
-	   break;
-		 case "touchquery":
-	    startPoint(evt);
-	   break;
-	   case "ppquery":
-	    startPoint(evt);
-	   break;
-	   case "polygonquery":
-	 		if (polydrawing){
-	      addpolypoint(evt);
-	    }
-	    else {
-	      startpolydraw(evt);
-	    }
-	   break;
-		 case "drawpolygon":
-	 		if (polydrawing){
-	      addpolypoint(evt);
-	    }
-	    else {
-	      startpolydraw(evt);
-	    }
-	   break;
-		 case "addtext":
-	     addnewtext(evt);
-	   break;
-		 case "drawarrow":
-		   startarrowdraw(evt);
-	   break;
-	   case "measure":
-			freehand_measuring = true;
-	    if (measuring){
-	    	client_x = evt.clientX;
-			  client_y = resy - evt.clientY;
-			  if(client_x == pathx[pathx.length-1] && client_y == pathy[pathy.length-1]){
-					evt.preventDefault();
-			  	recentre();		// Streckenmessung bei Doppelklick beenden
-			  }
-			  else{
-	      	addpoint(evt);
-					showSectionMeasurement(pathx.length-1);
-					measured_distance = new_distance;
-	      }
-	    }
-	    else {
-	      startMeasure(evt);
-	    }
-	   break;
-	   default:
-	    alert(`Fehlerhafte Eingabe!\nÜbergebene Daten: \${cmd}, \${doing}`);
-	   break;
+		switch(doing){
+	  	case "previous":
+	  	break;
+	  	case "next":
+	  	break;
+	  	case "zoomin":
+				remove_vertices();
+	    	startPoint(evt);
+	   	break;
+	  	case "zoomout":
+				remove_vertices();
+	  		selectPoint(evt);
+	   	break;
+	  	case "recentre":			
+				remove_vertices();
+				startMove(evt);
+	  	break;
+			case "showcoords":
+	  		top.show_coords(evt, null);
+	  	break;
+	  	case "pquery":
+	  		startPoint(evt);
+	  	break;
+			case "touchquery":
+	  		startPoint(evt);
+	  	break;
+	  	case "ppquery":
+	  		startPoint(evt);
+	  	break;
+	  	case "polygonquery": case "measurearea" :
+				if (polydrawing){
+					addpolypoint(evt);
+				}
+				else {
+					startpolydraw(evt);
+				}
+	  	break;
+			case "drawpolygon":
+				if (polydrawing){
+					addpolypoint(evt);
+				}
+				else {
+					startpolydraw(evt);
+				}
+	   	break;
+			case "addtext":
+	    	addnewtext(evt);
+	  	break;
+			case "drawarrow":
+				startarrowdraw(evt);
+	  	break;
+			case "routing":
+				if (routing_started) {
+					addRoutingPoint(evt);
+				}
+				else {
+					startRouting(evt);
+				}
+		 	break;
+	  	case "measure":
+				freehand_measuring = true;
+				if (measuring){
+					client_x = evt.clientX;
+					client_y = resy - evt.clientY;
+					if(client_x == pathx[pathx.length-1] && client_y == pathy[pathy.length-1]){
+						evt.preventDefault();
+						recentre();		// Streckenmessung bei Doppelklick beenden
+					}
+					else{
+						addpoint(evt);
+						redrawPL();
+						showSectionMeasurement(pathx.length-1);
+						measured_distance = new_distance;
+					}
+				}
+				else {
+					startMeasure(evt);
+				}
+	  	break;
+	  	default:
+	  		alert(`Fehlerhafte Eingabe!\nÜbergebene Daten: \${cmd}, \${doing}`);
+	  	break;
 	  }
 	}
 }
@@ -1210,7 +1278,7 @@ function addpolypoint(evt){
   	polypathy.push(client_y);
   }
   redrawPolygon();
-  if(doing == "polygonquery"){polygonarea()};
+  if(doing == "measurearea"){polygonarea()};
 }
 	
 function deletepolygon(){
@@ -1239,7 +1307,7 @@ function redrawPolygon(){
 		polypath = polypath+" "+image_polypathx[0]+","+image_polypathy[0];
 	}
   // polygon um punktepfad erweitern
-	if(doing == "polygonquery"){
+	if(doing == "polygonquery" || doing == "measurearea"){
   	document.getElementById("polygon").setAttribute("points", polypath);
 	}
 	if(doing == "drawpolygon"){
@@ -1287,13 +1355,12 @@ function clearMeasurement(){
 	else if(doing == "polygonquery"){
 		polygonquery();
 	}
+	else if (doing == "measurearea") {
+		measurearea();
+	}
 }
 
 // ----------------------------strecke messen---------------------------------
-
-top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-top.document.getElementById("vertices").SVGshow_vertices = show_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 function toggle_vertices(){
 	remove_vertices();
@@ -1480,7 +1547,7 @@ function add_vertex(evt){
 			vertex.setAttribute("opacity", "0.8");
 		}
 	}
-	if(doing == "polygonquery" || doing == "drawpolygon"){
+	if(doing == "polygonquery" || doing == "drawpolygon" || doing == "measurearea"){
 		if(!polydrawing){
 			restart();
 			polydrawing = true;
@@ -1502,18 +1569,37 @@ function add_vertex(evt){
 	}
 }
 
+function startRouting(evt) {
+  restart();
+  routing_started = true;
+  addpoint(evt);
+	document.getElementById("routing").setAttribute("d", "M " + pathx[0] + " " + pathy[0]);
+	save_path();
+}
+
+function addRoutingPoint(evt) {
+  addpoint(evt);
+	generateRoute();
+	save_path();
+}
+
+async function generateRoute() {
+	var res = await top.fetch("index.php?go=get_route&start=" + pathx_world[0] + "," + pathy_world[0] + "&end=" + pathx_world[1] + "," + pathy_world[1])
+	var json = await res.json();
+	document.getElementById("routing").setAttribute("d", world2pixelsvg(json.svg));
+	show_tooltip(json.length + " m", pathx[1] - 10, resy - pathy[1] - 10);
+}
+
 function startMeasure(evt) {
   restart();
   measuring = true;
-  // neuen punkt abgreifen
-	pathx[0] = evt.clientX;
-	pathy[0] = resy - evt.clientY;
-	pathx_world[0] = top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true, false);
-	pathy_world[0] = top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true, false);
+  addpoint(evt);
+	redrawPL();
 }
 
 function add_current_point(evt){
 	addpoint(evt);
+	redrawPL();
   showMeasurement(evt);
   deletelast(evt);
 }
@@ -1601,7 +1687,6 @@ function addpoint(evt){
 	pathy.push(client_y);
 	pathx_world.push(top.format_number(evt.clientX*parseFloat(top.document.GUI.pixelsize.value) + parseFloat(top.document.GUI.minx.value), false, true, false));
 	pathy_world.push(top.format_number(top.document.GUI.maxy.value - evt.clientY*parseFloat(top.document.GUI.pixelsize.value), false, true, false));
-  redrawPL();
 }
 
 function deletelast(evt) {
@@ -1622,15 +1707,14 @@ function restart(){
 	}
 	deletepolygon();
   redrawPL();
+	document.getElementById("routing").setAttribute("d", "");
 }
 
 function redrawPL(){
-  // punktepfad erstellen
   path = "";
   for(var i = 0; i < pathx.length; ++i){
   	path = path+" "+pathx[i]+","+pathy[i];
 	}
-  // polygon um punktepfad erweitern
   document.getElementById("polyline").setAttribute("points", path);
 }
 
@@ -1817,6 +1901,7 @@ function highlightbyid(id){
       <polygon points="" id="polygon" style="opacity:0.25;fill:yellow;stroke:black;stroke-width:2"/>
 			<text x="-1000" y="-1000" id="polygon_label" transform="scale(1, -1)" style="text-anchor:start;fill:rgb(0,0,0);stroke:none;font-size:12px;font-family:Arial;font-weight:bold"></text>
 			<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
+			<path d="" id="routing" marker-start="url(#location_pin)" marker-end="url(#location_pin)" style="fill:none;stroke:blue;stroke-width:3"/>
       <polyline points="" id="polyline" marker-start="url(#measure_start)" marker-end="url(#measure_end)" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
       <circle id="suchkreis" cx="-100" cy="-100" r="{$radius}" style="fill-opacity:0.25;fill:yellow;stroke:grey;stroke-width:2"/>
 			<g id="redlining">

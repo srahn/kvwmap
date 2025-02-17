@@ -217,9 +217,9 @@ function preventflickering(evt){
 <input type="hidden" name="aktiverRahmen" value="<?php echo $this->formvars['aktiverRahmen']; ?>">
 <input type="hidden" name="free_polygons" value="<? echo $this->formvars['free_polygons'] ?>">
 <input type="hidden" name="free_texts" value="<? echo $this->formvars['free_texts'] ?>">
-
 <input type="hidden" name="mapwidth" value="<?php echo $this->Document->activeframe[0]['mapwidth']; ?>">
 <input type="hidden" name="mapheight" value="<?php echo $this->Document->activeframe[0]['mapheight']; ?>">
+<input type="hidden" name="output_filetype" value="<?php echo $this->formvars['output_filetype']; ?>">
 
 <? # Durchschleifen der vom Nutzer eingegebenen Freitexte 
 	 for($j = 0; $j < count($this->Docu->activeframe[0]['texts']); $j++){		?>			
@@ -255,7 +255,7 @@ function preventflickering(evt){
 	
 	$layerset = $this->layerset['list'];
 	$scale = $this->map_scaledenom;
-	for ($i = 0; $i < @count($layerset); $i++){
+	for ($i = 0; $i < count_or_0($layerset); $i++){
 		if (
 			$layerset[$i]['aktivStatus'] != 0 
 			AND ($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) 

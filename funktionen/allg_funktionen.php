@@ -28,8 +28,8 @@ function rectObj($minx, $miny, $maxx, $maxy, $imageunits = 0){
 /**
  * Funktion wandelt die gegebene MapServer-Expression in einen SQL-Ausdruck um
  * der in WHERE-Klauseln für die Klassifizierung von Datensätzen verwendet werden kann
- * @param String $exp Die MapServer-Expression
- * @param String $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
+ * @param string $exp Die MapServer-Expression
+ * @param string $classitem Optional Das Classitem, welches in der MapServer-Expression verwendet wird.
  * @return String Die aus der MapServer-Expression erzeugte SQL-Expression
  */
 function mapserverExp2SQL($exp, $classitem) {
@@ -87,7 +87,14 @@ function get_url(){
 	return (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
 }
 
-function quote($var, $type = NULL){
+/**
+ * Function enclose $var with single quotes when $type is text or varchar
+ * and elsewhere if $var has a numerical value
+ * @param any $var The value that has to be enclosed with quotas or not
+ * @param string $type optional type of var, default empty string
+ * @return any $var as string with enclosed quotes or as it is if not.
+ */
+function quote($var, $type = '') {
 	switch ($type) {
 		case 'text' : case 'varchar' : {
 			return "'" . $var . "'";
@@ -168,17 +175,6 @@ function format_human_filesize($bytes, $precision = 2) {
 function human_filesize($file) {
 	$bytes = @filesize($file);
 	return format_human_filesize($bytes);
-}
-
-function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {
-		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	/* Don't execute PHP internal error handler */
-	return true;
 }
 
 function versionFormatter($version) {
@@ -388,10 +384,10 @@ function replace_semicolon($text) {
 
 function InchesPerUnit($unit, $center_y){
 	if($unit == MS_METERS){
-		return 39.3743;
+		return 39.3701;
 	}
 	elseif($unit == MS_DD){
-		return 39.37 * degree2meter($center_y);
+		return 39.3701 * degree2meter($center_y);
 	}
 }
 
@@ -558,7 +554,7 @@ function transformCoordsSVG($path){
     }
   }
   $svgresult = 'M';
-  for($i = 1; $i < @count($newsvgcoords); $i++){
+  for($i = 1; $i < count_or_0($newsvgcoords); $i++){
     $svgresult .= ' '.$newsvgcoords[$i];
   }
   return $svgresult;
@@ -711,8 +707,8 @@ function st_transform($x,$y,$from_epsg,$to_epsg) {
 	#$y = 54.075214183333;
   $point = new PointObj();
 	$point->setXY($x,$y);
-	$projFROM = ms_newprojectionobj("init=epsg:".$from_epsg);
-  $projTO = ms_newprojectionobj("init=epsg:".$to_epsg);
+	$projFROM = new projectionObj("init=epsg:".$from_epsg);
+  $projTO = new projectionObj("init=epsg:".$to_epsg);
   $point->project($projFROM, $projTO);
   return $point;
 }
@@ -1183,6 +1179,9 @@ function umlaute_sortieren($array, $second_array) {
 	  	$array[$i] = str_replace('Ä', 'A', $array[$i]);
 	  	$array[$i] = str_replace('Ü', 'U', $array[$i]);
 	  	$array[$i] = str_replace('Ö', 'O', $array[$i]);
+			$array[$i] = str_replace('ä', 'A', $array[$i]);
+	  	$array[$i] = str_replace('ü', 'U', $array[$i]);
+	  	$array[$i] = str_replace('ö', 'O', $array[$i]);
 	  	$array[$i] = str_replace('ß', 's', $array[$i]);
 		}
 		@asort($array);
@@ -1360,9 +1359,9 @@ function microtime_float(){
 
 
 function copy_file_to_tmp($frompath, $dateiname = ''){
-  $dateityp = explode('.',$frompath);
+	$dateityp = pathinfo($frompath)['extension'];
   $dateipfad=IMAGEPATH;
-  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp;
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }
@@ -1660,7 +1659,7 @@ function emailcheck($email) {
   }
 
   $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix > 1 AND $postfix < 5)) {
+  if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
@@ -1920,7 +1919,8 @@ function formvars_strip($formvars, $strip_list, $strip_type = 'remove') {
 * als key übergeben werden durch die values von $params und zusätzlich die Werte der
 * Variablen aus den Parametern 3 bis n wenn welche übergeben wurden
 */
-function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL) {
+function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist_timestamp = NULL, $language = NULL, $duplicate_criterion = NULL, $scale = NULL, $export = 'false') {
+	// echo '<br>replace: ' . print_r($params, true) . ' in str: ' . $str;
 	if (strpos($str, '$') !== false) {
 		if (!is_null($duplicate_criterion))	$str = str_replace('$duplicate_criterion', $duplicate_criterion, $str);
 		if (is_array($params)) {
@@ -1935,6 +1935,7 @@ function replace_params($str, $params, $user_id = NULL, $stelle_id = NULL, $hist
 		if (!is_null($hist_timestamp))			$str = str_replace('$HIST_TIMESTAMP', $hist_timestamp, $str);
 		if (!is_null($language))						$str = str_replace('$LANGUAGE', $language, $str);
 		if (!is_null($scale))								$str = str_replace('$SCALE', $scale, $str);
+		if (!is_null($export))							$str = str_replace('$EXPORT', $export, $str);
 	}
 	return $str;
 }
@@ -2331,10 +2332,38 @@ function str_replace_last($search , $replace, $str) {
 }
 
 /**
-* Liefert den Originalnamen vom Namen der Thumb-Datei
-*/
-function get_name_from_thump($thumb) {
+ * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
+ * @param String $path Name of original file.
+ * @return String Name of thump file.
+ */
+function get_thumb_from_name($path) {
+	return before_last($path, '.') . '_thumb.jpg';
+}
+
+/**
+ * Liefert den Basename der Originaldatei vom Namen der Thumb-Datei
+ * @param String $thumb Name of the thumb file.
+ * @return String Basename of the original File.
+ */
+function get_name_from_thumb($thumb) {
 	return before_last($thumb, '_thumb.jpg');
+}
+
+/**
+ * Function return the most likely delimiter of $line
+ * @param string $line The line to test.
+ * @return string The detected delimiter.
+ */
+function detect_delimiter($line) {
+	$delimiters = [',', ';', "\t", '|', ':'];
+	$delimiter_counts = [];
+	foreach ($delimiters as $delimiter) {
+
+		$delimiter_counts[$delimiter] = substr_count($line, $delimiter);
+	}
+	// Find the delimiter with the highest count
+	$most_likely_delimiter = array_keys($delimiter_counts, max($delimiter_counts));
+	return $most_likely_delimiter[0];
 }
 
 /**
@@ -2366,7 +2395,7 @@ function before_last($txt, $delimiter) {
  * Function extract from first select until last closing bracket.
  * If no open pracket is before select like in this example:
  * select id, the_geom from schema.tabelle where true, return $data as it is
- * @param String $data Mapserver data statement
+ * @param string $data Mapserver data statement
  * @return String inner sql
  */
 function get_sql_from_mapserver_data($data) {
@@ -2384,9 +2413,9 @@ function get_sql_from_mapserver_data($data) {
  * Returns an empty string if $schema_name.$table_name not exists in $sql.
  * Returns $table_name if $schema_name.$table_name exists but no alias for it.
  * Befor parsing the sql all select expressions will be replaced by *
- * @param String $sql The SQL-Statement to parse.
- * @param String $schema_name The schema name of the table.
- * @param String $table_name The table name.
+ * @param string $sql The SQL-Statement to parse.
+ * @param string $schema_name The schema name of the table.
+ * @param string $table_name The table name.
  * @return String Empty if $schema_name.$table_name not exists, alias if exists else $table_name
  */
 function get_table_alias($sql, $schema_name, $table_name) {
@@ -2658,7 +2687,7 @@ function layer_name_with_alias($name, $alias, $options = array()) {
 
 /**
  * Function read all files recursively from a directory
- * @param String $dir - The directory
+ * @param string $dir - The directory
  * @return Array $files - The files in the directory and below
  */
 function getAllFiles($dir) {

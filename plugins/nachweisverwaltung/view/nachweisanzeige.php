@@ -4,7 +4,7 @@
 var nachweise = new Array();
 
 <?
-	for($i = 0; $i < @count($this->nachweis->Dokumente); $i++){
+	for($i = 0; $i < count_or_0($this->nachweis->Dokumente); $i++){
 		$json = str_replace('\\"', '\\\"', str_replace('\\\"', '"', str_replace("'", "\'", str_replace('\\r', '\\\r', str_replace('\\n', '\\\n', str_replace('\\t', '\\\t', json_encode($this->nachweis->Dokumente[$i])))))));
 		echo "nachweise.push(JSON.parse('".$json."'));\n";
 	}
@@ -529,6 +529,9 @@ include(LAYOUTPATH."snippets/Fehlermeldung.php");
 					<input type="checkbox" name="id[]" id="id_<? echo $this->nachweis->Dokumente[$i]['id']; ?>" onchange="save_selection(); clear_selections('markhauptart[]', '');" value="<? echo $this->nachweis->Dokumente[$i]['id']; ?>"<? 
         # Püfen ob das Dokument markiert werden soll
                 				
+				if ($this->formvars['id'] != NULL AND !is_array($this->formvars['id'])) {
+					$this->formvars['id'] = [$this->formvars['id']];
+				}
 				if (
 					$this->formvars['markhauptart'][0] != '000' AND 
 					($this->formvars['id'] == NULL OR @in_array($this->nachweis->Dokumente[$i]['id'], $this->formvars['id']))

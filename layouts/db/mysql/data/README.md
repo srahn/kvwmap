@@ -1,0 +1,1 @@
+Die Datei mariadb_install.sql wird durch ein Dump der Datenbank kvwmapdb auf dem Server dev.gdi-service.de erstellt. Das Repository in apps/kvwmap ist dafür auf branch kvwmap zu halten, weil die Datei mariadb_install.sql durch das Script install.php aufgerufen wird, welches bei der Installation im Branch kvwmap verwendet wird.

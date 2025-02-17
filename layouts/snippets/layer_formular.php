@@ -391,18 +391,35 @@ from
 		<td style="width: 100%;">
 			<table cellpadding="0" cellspacing="0" class="navigation">
 				<tr>
-					<th><a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a></th>
-					<? if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])){ ?>
-					<th><a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a></th>
-					<th><a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a></th>
-					<? } ?>
-					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a></th>
-					<? } ?>
-					<th><a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a></th>
-					<? if(in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])){ ?>
-					<th><a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a></th>
-					<? } ?>
+					<th>
+						<a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a>
+					</th><?
+					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a>
+						</th>
+						<th>
+							<a href="index.php?go=Style_Label_Editor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strStylesLabels; ?></div></a>
+						</th><?
+					}
+					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strAttributes; ?></div></a>
+						</th><?
+					} ?>
+					<th>
+						<a href="javascript:toggleForm('stellenzuweisung');"><div id="stellenzuweisung_link"><? echo $strStellenAsignment; ?></div></a>
+					</th><?
+					if (in_array($this->formvars['connectiontype'], [MS_POSTGIS, MS_WFS])) { ?>
+						<th>
+							<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a>
+						</th><?
+					}
+					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+						<th>
+							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
+						</th><?
+					} ?>
 				</tr>
 			</table>
 		</td>
@@ -789,7 +806,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100">
+								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100"><a href="index.php?go=show_missing_documents&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-chain-broken" aria-hidden="true" style="margin-top: 5px; margin-left: 5px" title="Zeige Datensätze für die Dateien auf dem Server fehlen."></i></a>
 						</td>
 					</tr>
 					<tr>
@@ -856,12 +873,14 @@ from
 						<td width="370" colspan="2" style="border-bottom:1px solid #C3C7C3">
 							<div style="float: left; width: 95%"><?
 								include_once(CLASSPATH . 'Layer.php');
-								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']); ?>
-								<ul><?
-								foreach($this->layer->charts AS $chart) { ?>
-									<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+								$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+								if ($this->layer) { ?>
+									<ul><?
+										foreach($this->layer->charts AS $chart) { ?>
+											<li><a href="index.php?go=layer_chart_Editor&id=<? echo $chart->get_id(); ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><? echo $chart->get('title'); ?></a></li><?
+										} ?>
+									</ul><?php
 								} ?>
-								</ul>
 							</div>
 							<a href="index.php?go=layer_charts_Anzeigen&layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 								<i class="fa fa-pencil" aria-hidden="true" style="margin-top: 5px; margin-left: 5px"></i>
@@ -1069,6 +1088,13 @@ from
 								<input name="metalink" type="text" value="<?php echo $this->formvars['metalink']; ?>" size="50" maxlength="255">
 						</td>
 					</tr>
+
+					<tr>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strTermsOfUseLink; ?></th>
+						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+								<input name="terms_of_use_link" type="text" value="<?php echo $this->formvars['terms_of_use_link']; ?>" size="50" maxlength="255">
+						</td>
+					</tr>					
 
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strVersion; ?></th>
@@ -1286,7 +1312,7 @@ from
 				<tr valign="top"> 
 					<td align="right">Zugeordnete<br>
 						<select name="selectedstellen" size="10" multiple style="position: relative; width: 340px"><? 
-						for ($i = 0; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
+						for ($i = 0; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++) {
 								echo '<option class="select_option_link" onclick="gotoStelle(event, this)" value="'.$this->formvars['selstellen']["ID"][$i].'" title="'.$this->formvars['selstellen']["Bezeichnung"][$i].'" onclick="handleClick(event, this)">'.$this->formvars['selstellen']["Bezeichnung"][$i].'</option>';
 							 }
 						?>
@@ -1373,8 +1399,9 @@ from
 	<!--			<td style="border-left:1px solid #C3C7C3; border-bottom:1px solid #C3C7C3">ändern</td>	-->
 			</tr>
 			<?
-			$last_classification = $this->classes[0]['classification'];
-			for($i = 0; $i < count((is_null($this->classes) ? array() : $this->classes)); $i++){
+
+			$last_classification = (($this->classes AND is_array($this->classes) AND array_key_exists(0, $this->classes)) ? $this->classes[0]['classification'] : '');
+			for ($i = 0; $i < count((is_null($this->classes) ? array() : $this->classes)); $i++){
 				if($this->classes[$i]['classification'] != $last_classification){
 					$last_classification = $this->classes[$i]['classification'];
 					if($tr_color == 'gainsboro')$tr_color = '';
@@ -1512,7 +1539,7 @@ from
 <input type="hidden" name="assign_default_values" value="0">
 <input type="hidden" name="selstellen" value="<? 
 	echo $this->formvars['selstellen']["ID"][0];
-	for($i=1; $i < @count($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
+	for($i=1; $i < count_or_0($this->formvars['selstellen']["Bezeichnung"] ?: []); $i++){
 		echo ', '.$this->formvars['selstellen']["ID"][$i];
 	}
 ?>">

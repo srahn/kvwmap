@@ -53,7 +53,7 @@ function save(){
 
 	$this->qlayerset[$i]['Layer_ID'] = LAYER_ID_JAGDBEZIRKE;		// damit man alle Jagd-Layer abfragen und editieren kann, wird die Layer-ID vom Lagbezirks_Layer genommen
 
-  $anzObj = @count($this->qlayerset[$i]['shape']);
+  $anzObj = count_or_0($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {
     ?>
 
@@ -190,7 +190,7 @@ function save(){
         <tr width="100%">
           <td valign="top" bgcolor="<?php echo BG_DEFAULT ?>">
             <?php
-            if(@count($paechterliste) == 0) {
+            if(count_or_0($paechterliste) == 0) {
             echo '<span class="fett">P&auml;chter</span>';
             } else {
             ?>
@@ -201,10 +201,10 @@ function save(){
           </td>
           <td valign="top">
         <?php
-        if(@count($paechterliste) == 0){
+        if(count_or_0($paechterliste) == 0){
         	echo 'keine P&auml;chterdaten';
         }
-        for($p = 0; $p < @count($paechterliste); $p++){
+        for($p = 0; $p < count_or_0($paechterliste); $p++){
         	echo $paechterliste[$p]['nachname'].',&nbsp;'.$paechterliste[$p]['vorname'].'<br>';
         }
         ?>

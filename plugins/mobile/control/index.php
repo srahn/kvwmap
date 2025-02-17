@@ -1,6 +1,20 @@
 <?php
+// mobile_delete_images
+// mobile_download_image
+// mobile_get_data
+// mobile_get_data_version
+// mobile_get_layers
+// mobile_get_pmtiles
+// mobile_get_pmtiles_style
+// mobile_get_stellen
+// mobile_sync
+// mobile_sync_all
+// mobile_upload_image'
 
-include(PLUGINS . 'mobile/model/kvwmap.php');
+if (strpos($go, '_') !== false AND substr($go, 0, strpos($go, '_')) === 'mobile') {
+	include(PLUGINS . 'mobile/model/kvwmap.php');
+}
+
 function go_switch_mobile($go) {
 	global $GUI;
 	switch ($GUI->go) {
@@ -31,13 +45,6 @@ function go_switch_mobile($go) {
 			$GUI->formvars['epsg'] = 4326;
 			$GUI->formvars['sql_' . $GUI->formvars['selected_layer_id']] = 'WHERE (version IS NULL OR version <= ' . $GUI->formvars['last_delta_version'] . ')';
 			$GUI->daten_export_exportieren();
-		}
-		break;
-
-		case 'mobile_get_data_version': {
-			$GUI->sanitize(['selected_layer_id' => 'int']);
-			$result = $GUI->mobile_get_data_version();
-			echo json_encode($result);
 		}
 		break;
 

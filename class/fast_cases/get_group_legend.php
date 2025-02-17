@@ -1,4 +1,24 @@
 <?
+
+function count_or_0($val) {
+	if (is_null($val) OR !is_array($val)) {
+		return 0;
+	}
+	else {
+		return count($val);
+	}
+}
+
+if (MAPSERVERVERSION < 800) {
+	function msGetErrorObj(){
+		return ms_GetErrorObj();
+	}
+
+	function msResetErrorList(){
+		return ms_ResetErrorList();
+	}
+}
+
 function replace_semicolon($text) {
 	return str_replace(';', '', $text);
 }
@@ -268,8 +288,8 @@ class GUI {
     # Änderungen in den Gruppen werden gesetzt
     $this->formvars = $this->user->rolle->setGroupStatus($this->formvars);
     $this->loadMap('DataBase');
-		for($i = 0; $i < @count($this->layers_replace_scale ?: []); $i++){
-			$this->layers_replace_scale[$i]->set('data', str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data));
+		for($i = 0; $i < count_or_0($this->layers_replace_scale ?: []); $i++){
+			$this->layers_replace_scale[$i]->data = str_replace('$SCALE', $this->map_scaledenom, $this->layers_replace_scale[$i]->data);
 		}
     echo $this->create_group_legend($this->formvars['group'], $this->formvars['status']);
   }
@@ -434,10 +454,10 @@ class GUI {
 				$map->status = MS_ON;
 				$map->name = MAPFILENAME;
 
-				if (MS_DEBUG_LEVEL > 0) {
-					$map->setConfigOption('MS_ERRORFILE', '/var/www/logs/mapserver.log');
+				if (MS_DEBUG_LEVEL !== NULL) {
+					$map->setConfigOption('MS_ERRORFILE', dirname($this->debug->filename) . '/mapserver' . $this->user->id . '.log');
 					$map->debug = MS_DEBUG_LEVEL;
-				};
+				}
 				$map->imagecolor->setRGB(255,255,255);
 				$map->maxsize = 4096;
 				$map->setProjection('+init=epsg:' . $this->user->rolle->epsg_code);
@@ -593,6 +613,7 @@ class GUI {
 				}
         unset($this->layer_ids_of_group);		# falls loadmap zweimal aufgerufen wird
 				$layerset['layer_group_has_legendorder'] = array();
+				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
 					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
@@ -611,8 +632,20 @@ class GUI {
 					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
+
 						$this->loadlayer($map, $layerset['list'][$i], $strict_layer_name);
+						$error = msGetErrorObj();
+						while ($error && $error->code != MS_NOERR) {
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
+							$error = $error->next();
+						}
+						msResetErrorList();
 					}
+				}
+				if ($this->error_message != '') {
+					$this->error_message .= '<br>';
+					//  throw new ErrorException($this->error_message);
 				}
 				$this->layerset = $layerset;
 				if ($num_default_layers > 0 AND $map->numlayers > $num_default_layers) {
@@ -656,21 +689,21 @@ class GUI {
 		}
 		$layer = new LayerObj($map);
 		$layer->name = $layerset[$layer_name_attribute];
-		$layer->metadata->set('wms_name', $layerset['wms_name']); #Mapserver8
+		$layer->metadata->set('wms_name', $layerset['wms_name'] ?: ''); #Mapserver8
 		$layer->metadata->set('kvwmap_layer_id', $layerset['Layer_ID']);
 		$layer->metadata->set('wfs_request_method', 'GET');
 		if ($layerset['wms_keywordlist']) {
 			$layer->metadata->set('ows_keywordlist', $layerset['wms_keywordlist']);
 		}
-		$layer->metadata->set('wfs_typename', $layerset['wms_name']); #Mapserver8
-		$layer->metadata->set('wms_title', $layerset['Name_or_alias']); #Mapserver8
-		$layer->metadata->set('wfs_title', $layerset['Name_or_alias']); #Mapserver8
+		$layer->metadata->set('wfs_typename', $layerset['wms_name'] ?: ''); #Mapserver8
+		$layer->metadata->set('wms_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
+		$layer->metadata->set('wfs_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
 		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
-		$layer->metadata->set('wms_format',$layerset['wms_format']); #Mapserver8
-		$layer->metadata->set('ows_server_version',$layerset['wms_server_version']); #Mapserver8
-		$layer->metadata->set('ows_version',$layerset['wms_server_version']); #Mapserver8
+		$layer->metadata->set('wms_format',$layerset['wms_format'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_server_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
 		if ($layerset['metalink']) {
 			$layer->metadata->set('ows_metadataurl_href',$layerset['metalink']);
 			$layer->metadata->set('ows_metadataurl_type', 'ISO 19115');
@@ -680,14 +713,14 @@ class GUI {
 			$layerset['ows_srs'] = 'EPSG:' . $layerset['epsg_code'];
 		}		
 		$layer->metadata->set('ows_srs', $layerset['ows_srs']);
-		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout']); #Mapserver8
-		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username']);
-		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password']);
+		$layer->metadata->set('wms_connectiontimeout',$layerset['wms_connectiontimeout'] ?: ''); #Mapserver8
+		$layer->metadata->set('ows_auth_username', $layerset['wms_auth_username'] ?: '');
+		$layer->metadata->set('ows_auth_password', $layerset['wms_auth_password'] ?: '');
 		$layer->metadata->set('ows_auth_type', 'basic');
 		$layer->metadata->set('wms_exceptions_format', ($layerset['wms_server_version'] == '1.3.0' ? 'XML' : 'application/vnd.ogc.se_xml'));
 		# ToDo: das Setzen von ows_extent muss in dem System erfolgen, in dem der Layer definiert ist (erstmal rausgenommen)
 		#$layer->metadata->set("ows_extent", $bb->minx . ' '. $bb->miny . ' ' . $bb->maxx . ' ' . $bb->maxy);		# führt beim WebAtlas-WMS zu einem Fehler
-		$layer->metadata->set("gml_featureid", $layerset['oid']); #Mapserver8
+		$layer->metadata->set("gml_featureid", $layerset['oid'] ?: ''); #Mapserver8
 		$layer->metadata->set("gml_include_items", "all");
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
@@ -697,6 +730,7 @@ class GUI {
 		if(value_of($layerset, 'status') != ''){
 			$layerset['aktivStatus'] = 0;
 		}
+
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
@@ -819,7 +853,7 @@ class GUI {
 					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 				}
 				else{
-					$layer->set('opacity',$layerset['transparency']);
+					$layer->opacity = $layerset['transparency'];
 				}
 			}
 			if ($layerset['tileindex']!='') {
@@ -934,7 +968,7 @@ class GUI {
 						$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
 					}
 					else{
-						$layer->set('opacity',$layerset['transparency']);
+						$layer->opacity = $layerset['transparency'];
 					}
 				}
 			}
@@ -951,8 +985,8 @@ class GUI {
 		$this->loadclasses($layer, $layerset, $classset, $map);
 	}
 
-	function loadclasses($layer, $layerset, $classset, $map){
-    $anzClass = @count($classset);
+  function loadclasses($layer, $layerset, $classset, $map){
+		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
       if ($classset[$j]['Name']!='') {
@@ -974,8 +1008,8 @@ class GUI {
       if ($classset[$j]['legendgraphic'] != '') {
 				$imagename = WWWROOT . APPLVERSION . CUSTOM_PATH . 'graphics/' . $classset[$j]['legendgraphic'];
 				$klasse->keyimage = $imagename;
-			}
-      for ($k = 0; $k < @count($classset[$j]['Style']); $k++) {
+			}			
+      for ($k = 0; $k < count_or_0($classset[$j]['Style']); $k++) {
         $dbStyle = $classset[$j]['Style'][$k];
 				$style = new styleObj($klasse);
 				if ($dbStyle['geomtransform'] != '') {
@@ -996,7 +1030,12 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['symbolname']!='') {
-						$style->symbolname = $dbStyle['symbolname'];
+						if (MAPSERVERVERSION < 800) {
+							$style->symbolname = $dbStyle['symbolname'];
+						}
+						else {
+							$style->setSymbolByName($map, $dbStyle['symbolname']);
+						}
 					}
 					if ($dbStyle['symbol']>0) {
 						$style->symbol = $dbStyle['symbol'];
@@ -1030,10 +1069,10 @@ class GUI {
 						foreach($pattern as &$pat){
 							$pat = $pat * $this->map_factor;
 						}
-						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END");
+						$style->updateFromString("STYLE PATTERN " . implode(' ', $pattern) . " END END");
 					}
 					else {
-						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END");
+						$style->updateFromString("STYLE PATTERN " . $dbStyle['pattern']." END END");		
 					}
 					$style->linecap = 'butt';
 				}
@@ -1044,7 +1083,7 @@ class GUI {
 					else{
 						$style->gap = $dbStyle['gap'];
 					}
-				}
+				}		
 				if($dbStyle['initialgap'] != '') {
 					$style->initialgap = $dbStyle['initialgap'];
 				}
@@ -1132,7 +1171,7 @@ class GUI {
 						}
 					}
         }
-
+		
         if ($dbStyle['minwidth']!='') {
           if ($this->map_factor != '') {
             $style->minwidth = $dbStyle['minwidth']*$this->map_factor/1.414;
@@ -1189,14 +1228,14 @@ class GUI {
 				}
 				else {
 					if ($dbStyle['offsetx']!='') {
-						$style->set('offsetx', $dbStyle['offsetx']);
+						$style->offsetx = $dbStyle['offsetx'];
 					}
 					if ($dbStyle['offsety']!='') {
-						$style->set('offsety', $dbStyle['offsety']);
+						$style->offsety = $dbStyle['offsety'];
 					}
 				}
       } # Ende Schleife für mehrere Styles
-
+	  
       # setzen eines oder mehrerer Labels
       # Änderung am 12.07.2005 Korduan
       for ($k=0;$k<count($classset[$j]['Label']);$k++) {
@@ -1269,12 +1308,18 @@ class GUI {
 				}
 				$label->maxlength = $dbLabel['maxlength'];
 				$label->repeatdistance = $dbLabel['repeatdistance'];
-				$label->wrap = $dbLabel['wrap'];
+				if (MAPSERVERVERSION >= 800) {
+					$label->wrap = chr($dbLabel['wrap']);
+				}
+				else {
+					$label->wrap = $dbLabel['wrap'];
+				}
 				$label->force = $dbLabel['the_force'];
 				$label->partials = $dbLabel['partials'];
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
 				}
@@ -1335,10 +1380,10 @@ class GUI {
 				}
 				else {
 					if ($dbLabel['offsetx']!='') {
-						$label->set('offsetx', $dbLabel['offsetx']);
+						$label->offsetx = $dbLabel['offsetx'];
 					}
 					if ($dbLabel['offsety']!='') {
-						$label->set('offsety', $dbLabel['offsety']);
+						$label->offsety = $dbLabel['offsety'];
 					}
 				}
 				$klasse->addLabel($label);
@@ -1378,7 +1423,7 @@ class GUI {
 				<tr>
 					<td>
 						<div id="layergroupdiv_'.$group_id.'" style="width:100%; padding-left: 4px;'.(($groupstatus != 1 AND value_of($this->group_has_active_layers, $group_id) != '') ? 'display: none' : '').'"><table cellspacing="0" cellpadding="0">';
-		$layercount = @count($this->layerset['layers_of_group'][$group_id] ?: []);
+		$layercount = count_or_0($this->layerset['layers_of_group'][$group_id] ?: []);
 		if($groupstatus == 1 OR value_of($this->group_has_active_layers, $group_id) != ''){		# Gruppe aufgeklappt oder hat aktive Layer
 			if(value_of($this->groupset[$group_id], 'untergruppen') != ''){
 				for($u = 0; $u < count($this->groupset[$group_id]['untergruppen']); $u++){			# die Untergruppen rekursiv durchlaufen
@@ -1424,116 +1469,119 @@ class GUI {
     return $legend;
   }
 
-	function create_layer_legend($layer, $requires = false){
-		if(!$requires AND value_of($layer, 'requires') != '' OR $requires AND value_of($layer, 'requires') == '')return;
+	function create_layer_legend($layer){
+		if (value_of($layer, 'requires') != '' )return;
 		$visible = $this->check_layer_visibility($layer);
 		# sichtbare Layer
 		if ($visible) {
-			if (value_of($layer, 'requires') == '') {
-				$legend = '<tr><td valign="top">';
+			$legend = '<tr><td valign="top">';
 
-				$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
+			$legend.='<div style="position:static; float:right" id="options_'.$layer['Layer_ID'].'"> </div>';
 
-				if (!empty($layer['shared_from'])) {
-					$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
-					$legend .= ' <a
-						href="javascript:void(0)"
-						onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
-						style="
-							font-size: 10px;
-							margin-left: -10px;
-							vertical-align: top;
-						"
-					><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
-				}
-
-				if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
-					$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
-					$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
-					$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
-					$input_attr['value'] = 1;
-					$input_attr['class'] = 'info-select-field';
-					$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
-					$input_attr['style'] = ((
-						$this->user->rolle->query or
-						$this->user->rolle->touchquery or
-						$this->user->rolle->queryradius or
-						$this->user->rolle->polyquery
-					) ? '' : 'display: none');
-					$input_attr['onClick'] = ($input_attr['type'] == 'radio' ?
-						"this.checked = this.checked2;" :
-						"updateThema(
-							event,
-							document.getElementById('thema" . $layer['Layer_ID'] . "'),
-							document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
-							'',
-							''," .
-							$this->user->rolle->instant_reload . "
-						)"
-					);
-					$input_attr['onMouseUp'] = ($input_attr['type'] == 'radio' ?
-						"this.checked = this.checked2;" :
-						""
-					);
-
-					$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
-						"updateThema(
-							event,
-							document.getElementById('thema" . $layer['Layer_ID'] . "'),
-							document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
-							($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
-							($this->user->rolle->singlequery == 1 ? "document.GUI.layers" : "''") . "," .
-							$this->user->rolle->instant_reload . "
-						)" :
-						""
-					);
-
-					# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
-					# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-					$legend .= '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
-					$legend .= '<input';
-					foreach ($input_attr AS $key => $value) {
-						$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
-					}
-					$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
-					$legend .= '>';
-				}
-				else{
-					#$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
-				}
-				$legend .=  '</td><td valign="top">';
-				// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
-				$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
-
-				$legend .=  '<input id="thema'.$layer['Layer_ID'].'" ';
-				if(value_of($layer, 'selectiontype') == 'radio'){
-					$legend .=  'type="radio" ';
-					$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
-					$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
-				}
-				else{
-					$legend .=  'type="checkbox" ';
-					$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
-				}
-				$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
-				if($layer['aktivStatus'] == 1){
-					$legend .=  'checked title="'.$this->deactivatelayer.'"';
-				}
-				else{
-					$legend .=  ' title="'.$this->activatelayer.'"';
-				}
-				$legend .= ' ></td><td valign="middle" id="legend_layer_' . $layer['Layer_ID'] . '">';
-
-				$legend .= $this->create_layername_legend($layer);
+			if (!empty($layer['shared_from'])) {
+				$user_daten = $this->user->getUserDaten($layer['shared_from'], '', '');
+				$legend .= ' <a
+					href="javascript:void(0)"
+					onclick="message([{ \'type\': \'info\', \'msg\' : \'' . $this->strLayerSharedFrom . ' ' . $user_daten[0]['Vorname'] . ' ' . $user_daten[0]['Name'] . (!empty($user_daten[0]['organisation']) ? ' (' . $user_daten[0]['organisation'] . ')' : '') . '\'}])"
+					style="
+						font-size: 10px;
+						margin-left: -10px;
+						vertical-align: top;
+					"
+				><i class="fa fa-share-alt" aria-hidden="true"></i></a>';
 			}
+
+			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
+				$input_attr['id'] = 'qLayer' . $layer['Layer_ID'];
+				$input_attr['name'] = 'qLayer' . $layer['Layer_ID'];
+				$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+				$input_attr['value'] = 1;
+				$input_attr['class'] = 'info-select-field';
+				$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
+				$input_attr['style'] = ((
+					$this->user->rolle->query or
+					$this->user->rolle->touchquery or
+					$this->user->rolle->queryradius or
+					$this->user->rolle->polyquery
+				) ? '' : 'display: none');
+				$input_attr['onClick'] = ($input_attr['type'] == 'radio' ?
+					"this.checked = this.checked2;" :
+					"updateThema(
+						event,
+						document.getElementById('thema" . $layer['Layer_ID'] . "'),
+						document.getElementById('qLayer" . $layer['Layer_ID'] . "'),
+						'',
+						''," .
+						$this->user->rolle->instant_reload . "
+					)"
+				);
+				$input_attr['onMouseUp'] = ($input_attr['type'] == 'radio' ?
+					"this.checked = this.checked2;" :
+					""
+				);
+
+				$input_attr['onMouseDown'] = ($input_attr['type'] == 'radio' ?
+					"updateThema(
+						event,
+						document.getElementById('thema" . $layer['Layer_ID'] . "'),
+						document.getElementById('qLayer" . $layer['Layer_ID'] . "')," .
+						($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
+						($this->user->rolle->singlequery == 1 ? "document.GUI.layers" : "''") . "," .
+						$this->user->rolle->instant_reload . "
+					)" :
+					""
+				);
+
+				# die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat,
+				# damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+				$legend .= '<input type="hidden" name="qLayer'.$layer['Layer_ID'].'" value="0">';
+				$legend .= '<input';
+				foreach ($input_attr AS $key => $value) {
+					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
+				}
+				$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+				$legend .= '>';
+			}
+			else{
+				#$legend .= '<img src="'.GRAPHICSPATH.'leer.gif" width="17" height="1" border="0">';
+			}
+			$legend .=  '</td><td valign="top">';
+			// die sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen, welches immer den value 0 hat, damit sie beim Neuladen ausgeschaltet werden können, denn eine nicht angehakte Checkbox/Radiobutton wird ja nicht übergeben
+			$legend .=  '<input type="hidden" name="thema'.$layer['Layer_ID'].'" value="0">';
+
+			$legend .=  '<input id="thema'.$layer['Layer_ID'].'" ';
+			if(value_of($layer, 'selectiontype') == 'radio'){
+				$legend .=  'type="radio" ';
+				$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
+				$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['Layer_ID'].'|';
+			}
+			else{
+				$legend .=  'type="checkbox" ';
+				$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['Layer_ID'].'\'), document.getElementById(\'qLayer'.$layer['Layer_ID'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
+			}
+			$legend .=  ' name="thema'.$layer['Layer_ID'].'" value="1" ';
+			if($layer['aktivStatus'] == 1){
+				$legend .=  'checked title="'.$this->deactivatelayer.'"';
+			}
+			else{
+				$legend .=  ' title="'.$this->activatelayer.'"';
+			}
+			$legend .= ' ></td><td valign="middle" id="legend_layer_' . $layer['Layer_ID'] . '">';
+
+			$legend .= $this->create_layername_legend($layer);
 			$legend .= $this->create_class_legend($layer);
-			if (value_of($layer, 'requires') == '') {
-				$legend .= '</td></tr>';
+
+			# requires-Layer
+			if(value_of($layer, 'required') != ''){
+				foreach($layer['required'] as $require_layer_id){
+					$legend .= $this->create_class_legend($this->layerset['layer_ids'][$require_layer_id]);
+				}
 			}
+			$legend .= '</td></tr>';
 		}
 
 		# unsichtbare Layer
-		if(value_of($layer, 'requires') == '' AND !$visible){
+		if (!$visible) {
 			$legend .=  '
 						<tr>
 							<td valign="top">';
@@ -1594,13 +1642,6 @@ class GUI {
 			}
 			$legend .=  '</td>
 					</tr>';
-		}
-
-		# requires-Layer
-		if(value_of($layer, 'required') != ''){
-			foreach($layer['required'] as $require_layer_id){
-				$legend .= $this->create_layer_legend($this->layerset['layer_ids'][$require_layer_id], true);
-			}
 		}
 		return $legend;
 	}
@@ -2771,7 +2812,7 @@ class db_mapObj {
 				l.connectiontype,
 				l.classitem, l.styleitem, l.classification,
 				l.cluster_maxdistance, l.tolerance, l.toleranceunits, l.sizeunits, l.processing, l.epsg_code, l.ows_srs, l.wms_name, l.wms_keywordlist, l.wms_server_version,
-				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume,l.metalink, l.status, l.trigger_function,
+				l.wms_format, l.wms_auth_username, l.wms_auth_password, l.wms_connectiontimeout, l.selectiontype, l.logconsume, l.metalink, l.terms_of_use_link, l.status, l.trigger_function,
 				l.duplicate_from_layer_id,
 				l.duplicate_criterion,
 				l.shared_from,

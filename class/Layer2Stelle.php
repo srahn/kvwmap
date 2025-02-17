@@ -17,7 +17,7 @@ class Layer2Stelle extends MyObject {
 	/**
 	 * Function find layers that belongs to $stelle_id and are sync and editable
 	 * @param GUI $gui - The current GUI-Objekt.
-	 * @param Integer $stelle_id - The id of the stelle.
+	 * @param int $stelle_id - The id of the stelle.
 	 * @return Layer2Stelle[] $layer2stelle - The sync layers of the stelle.
 	 */
 	public static function find_sync_layers($gui, $stelle_id) {

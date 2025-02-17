@@ -11,6 +11,7 @@
 	$strPunktfang = "Punktfang";
 	$strGPSFollow = "GPS-Verfolgungsmodus";
 	$strMoveGeometry = "Geometrie verschieben";
+  $strRotateGeometry="Geometrie drehen";
 	$strParallelPolygon = "einseitig gepufferte Linie erzeugen";
 	$strReverse = "Linienrichtung drehen";
 	$strRuler = "Streckenmessung";
@@ -21,4 +22,5 @@
 	$strSplitPolygon = "Polygone teilen";
 	$strUndo = "R\u00fcckg\u00e4ngig";
 	$strCircle = "Kreis hinzuf\u00fcgen";
+	$strCreateRectangle = "Rechteck aufziehen";
 ?>

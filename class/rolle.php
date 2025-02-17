@@ -13,17 +13,19 @@ class rolle {
 	var $minx;
 	var $language;
 	var $newtime;
+	var $gui; // file to include as gui
 	var $gui_object;
 	var $layerset;
+	var $data;
 
 	function __construct($user_id, $stelle_id, $database) {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
-		$this->database=$database;
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
+		$this->database = $database;
 		#$this->layerset=$this->getLayer('');
 		#$this->groupset=$this->getGroups('');
 		$this->loglevel = 0;
@@ -76,6 +78,7 @@ class rolle {
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
@@ -115,6 +118,9 @@ class rolle {
 		if ($only_active_or_requires) {
 			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
 		}
+		else {
+			$active_filter = '';
+		}
 
 		$sql = "
 			SELECT " .
@@ -128,7 +134,7 @@ class rolle {
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, status, trigger_function, version,
+				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
 				ul.`queryable`,
 				l.`drawingorder`,
 				ul.`legendorder`,
@@ -443,7 +449,7 @@ class rolle {
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
-		#echo 'Read rolle settings mit sql: ' . $sql;
+		#echo '<br>Read rolle settings mit sql: ' . $sql;
     $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>",4);
     $this->database->execSQL($sql);
     if (!$this->database->success) {
@@ -739,7 +745,7 @@ class rolle {
 		return $ret;
 	}
 
-# 2006-03-20 pk
+	# 2006-03-20 pk
   function setConsumeActivity($time,$activity,$prevtime) {
 		$errmsg = '';
     if (LOG_CONSUME_ACTIVITY==1) {
@@ -1637,6 +1643,13 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Function set saved themes from Default user with $default_user_id to User with $user_id in Stelle $stelle_id
+	 * @param int $user_id
+	 * @param int $stelle_id
+	 * @param int $default_user_id
+	 * @return int 1 | 0 Wenn success 1 else 0
+	 */
 	function setSavedLayersFromDefaultUser($user_id, $stelle_id, $default_user_id){
 		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
@@ -1671,9 +1684,9 @@ class rolle {
 		return 1;
 	}
 
-	function setRolle($user_id, $stelle_id, $default_user_id) {
+	function setRolle($user_id, $stelle_id, $default_user_id, $parent_stelle_id = NULL) {
 		# trägt die Rolle für einen Benutzer ein.
-		if ($default_user_id > 0 AND $default_user_id != $user_id) {
+		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
 				INSERT IGNORE INTO `rolle` (
@@ -1769,7 +1782,7 @@ class rolle {
 					`rolle`
 				WHERE
 					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $stelle_id . "
+					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
 			";
 		}
 		else {
@@ -1797,12 +1810,74 @@ class rolle {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__ . $ret[1], 4);
 			return 0;
 		}
+		// Update layer_params if default is not available for user
+		$rolle = Role::find_by_id($this->gui_object, $user_id, $stelle_id);
+		$this->rectify_layer_params($rolle);
 		return 1;
+	}
+
+	# ToDo pk: harmonize get_rolle_layer_params and get_layer_params, same with set_rolle_layer_params and set_layer_params
+	/**
+	 * Function get the layer parameter from rolle attribut layer_params as an assoziative array
+	 * @param MyObject The MyObject of the rolle.
+	 * @return Array The assoziative array with the layer params of rolle.
+	 */
+	function get_rolle_layer_params($rolle) {
+		return (array)json_decode('{' . $rolle->get('layer_params') . '}');
+	}
+
+	/**
+	 * Function set the layer parameter for rolle attribut layer_params as string
+	 * @param MyObject The MyObject of the rolle.
+	 * @param Array The assoziative array with layer params of rolle.
+	 * @return void
+	 */
+	function set_rolle_layer_params($rolle, $layer_params) {
+		$rolle->update(array('layer_params', implode(',', $new_layer_params)));
+	}
+
+	/**
+	 * Function get the layer_params of rolle and check if they are
+	 * arvailable for the user in that rolle. If not set the first possible value instead
+	 * of the before existing value of that layer parameter.
+	 * @param MyObject The MyObject of the rolle to be checked.
+	 * @return void
+	 */
+	function rectify_layer_params($rolle) {
+		include_once(CLASSPATH . 'LayerParam.php');
+		$layer_params = $this->get_rolle_layer_params($rolle);
+		$new_layer_params = array();
+		foreach (array_keys($layer_params) AS $key) {
+			$layer_param = LayerParam::find_by_key($this->gui_object, $key);
+			$options = $layer_param->get_options($this->user_id, $this->stelle_id);
+			if (!$result['success']) {
+				return $result;
+			}
+			if (!in_array(
+				$layer_params[$key],
+				array_map(
+					function($option) {
+						return $option['value'];
+					},
+					$options
+				)
+			)) {
+				$layer_params[$key] = $options[$value];
+			};
+		}
+		foreach ($layer_params AS $param_key => $value) {
+			$new_layer_params[] = '"' . $param_key . '":"' . $value . '"';
+		}
+		$this->set_layer_params(implode(',', $new_layer_params));
+		return array(
+			'success' => true,
+			'msg' => 'Layerparameter erfolgreich für Rolle angepasst.'
+		);
 	}
 
 	function deleteRollen($user_id, $stellen) {
 		# löscht die übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
 				DELETE FROM `rolle`
 				WHERE
@@ -1905,7 +1980,7 @@ class rolle {
 	function deleteMenue($user_id, $stellen, $menues) {
 		# löscht die Menuepunkte der übergebenen Stellen für einen Benutzer.
 		if($menues == 0) {
-			for ($i = 0; $i < @count($stellen); $i++) {
+			for ($i = 0; $i < count_or_0($stellen); $i++) {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
@@ -1972,7 +2047,7 @@ class rolle {
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		}
 		else {
-			for($j = 0; $j < @count($layerids); $j++){
+			for($j = 0; $j < count_or_0($layerids); $j++){
 				$sql = "
 					INSERT IGNORE INTO u_groups2rolle 
 					SELECT DISTINCT 
@@ -2021,7 +2096,7 @@ class rolle {
 
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
@@ -2099,10 +2174,12 @@ class rolle {
 		return 1;
 	}
 
+	/**
+	 * Trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
+	 */
 	function setLayer($user_id, $stelle_id, $default_user_id) {
-		# trägt die Layer der entsprehenden Rolle für einen Benutzer ein.
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
-			# Layereinstellungen von Defaultrolle abfragen
+			// echo '<br>Layereinstellungen von Defaultrolle abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2121,7 +2198,7 @@ class rolle {
 			";
 		}
 		else {
-			# Layereinstellungen von Defaultlayerzuordnung abfragen
+			// echo '<br>Layereinstellungen von Defaultlayerzuordnung abfragen';
 			$rolle2used_layer_select_sql = "
 				SELECT " .
 					$user_id . ", " .
@@ -2152,7 +2229,8 @@ class rolle {
 			) " .
 			$rolle2used_layer_select_sql . "
 		";
-		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>".$sql,4);
+		// echo '<br>Sql: ' . $sql;
+		$this->debug->write("<p>file:rolle.php class:rolle function:setLayer - Setzen der Layer der Rolle:<br>" . $sql, 4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		return 1;
@@ -2160,7 +2238,7 @@ class rolle {
 
 	function deleteLayer($user_id, $stellen, $layer) {
 		# löscht die Layer der übergebenen Stellen für einen Benutzer.
-		for ($i = 0; $i < @count($stellen); $i++) {
+		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			if (!is_array($layer)) {
 				$layer = array();
 			}
@@ -2460,6 +2538,6 @@ class rolle {
 		}
 		return $ret;
 	}
-
 }
+include(CLASSPATH . 'Role.php');
 ?>

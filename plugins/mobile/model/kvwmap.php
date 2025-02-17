@@ -1,24 +1,21 @@
 <?php
-/*
-	* Cases:
-	* mobile_create_layer_sync
-	* mobile_create_layer_sync_all
-	* mobile_delete_images
-	* mobile_drop_layer_sync
-	* mobile_drop_layer_sync_all
-	* mobile_get_data_version
-	* mobile_get_layers 
-	* mobile_get_stellen
-	* mobile_prepare_layer_sync
-	* mobile_prepare_layer_sync_all
-	* mobile_reformat_attributes
-	* mobile_reformat_layer
-	* mobile_sync
-	* mobile_sync_all
-	* mobile_sync_all_parameter_valide
-	* mobile_sync_parameter_valide
-	* mobile_upload_image
-	*/
+// mobile_create_layer_sync
+// mobile_create_layer_sync_all
+// mobile_delete_images
+// mobile_drop_layer_sync
+// mobile_drop_layer_sync_all
+// mobile_get_data_version
+// mobile_get_layers 
+// mobile_get_stellen
+// mobile_prepare_layer_sync
+// mobile_prepare_layer_sync_all
+// mobile_reformat_attributes
+// mobile_reformat_layer
+// mobile_sync
+// mobile_sync_all
+// mobile_sync_all_parameter_valide
+// mobile_sync_parameter_valide
+// mobile_upload_image
 
 /**
  * This function return all stellen the authenticated user is assigned to
@@ -46,7 +43,7 @@ $GUI->mobile_get_stellen = function () use ($GUI) {
 		ORDER BY
 			s.Bezeichnung
 	";
-	#echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
+	// echo '<br>SQL zur Abfrage der mobilen Stellen des Nutzers: ' . $sql;
 	$ret = $GUI->database->execSQL($sql, 4, 0);
 
 	if ($ret[0]) {
@@ -93,18 +90,11 @@ $GUI->mobile_get_layers = function () use ($GUI) {
 				$attributes = $mapDB->read_layer_attributes(
 					$layer_id,
 					$layerdb,
-					null, // $privileges['attributenames'],
-					false,
-					true
+					null, // Null statt $privileges['attributenames'], weil in kvmobile immer alle attribute vorhanden sein müssen, nicht nur die die sichtbar sind.
+					false, // $all_languages
+					true // recursive
 				);
-					$privileges['attributenames'],
-					false, // all_languages
-					true, // recursive
-					false, // get_default
-					true, // replace
-					array('options') // replace_only
-				);
-				// echo '<p>attributes: ' . print_r($attributes, true);
+
 				# Zuordnen der Privilegien und Tooltips zu den Attributen
 				for ($j = 0; $j < count($attributes['name']); $j++) {
 					$attributes['privileg'][$j] = $attributes['privileg'][$attributes['name'][$j]] = ($privileges == NULL ? 0 : $privileges[$attributes['name'][$j]]);
@@ -418,7 +408,7 @@ $GUI->mobile_sync_parameter_valide = function ($params) use ($GUI) {
 
 /**
  * Check if the $params are valid for sync_all process
- * @param String[] $params - The parameter to check.
+ * @param string[] $params - The parameter to check.
  * They normaly has been sent from client and comes from formvars var of GUI object.
  * @return Any[] $result - An array with success, msg and err_msg. Success false indicates not valid parameter.
  */
@@ -518,8 +508,8 @@ $GUI->mobile_reformat_stelle = function ($stelle_settings, $layer_params) use ($
 	$stelle['ID'] = $stelle_settings['ID'];
 	$stelle['Bezeichnung'] = $stelle_settings['Bezeichnung'];
 	$stelle['dbname'] = ((POSTGRES_DBNAME and POSTGRES_DBNAME != '') ? POSTGRES_DBNAME : 'kvmobile');
-	$projFROM = ms_newprojectionobj("init=epsg:" . $stelle_settings['epsg_code']);
-	$projTO = ms_newprojectionobj("init=epsg:4326");
+	$projFROM = new projectionObj("init=epsg:" . $stelle_settings['epsg_code']);
+	$projTO = new projectionObj("init=epsg:4326");
 	$extent = rectObj($stelle_settings['minxmax'], $stelle_settings['minymax'], $stelle_settings['maxxmax'], $stelle_settings['maxymax']);
 	$extent->project($projFROM, $projTO);
 	$stelle['west'] = round($extent->minx, 5);
@@ -1167,6 +1157,10 @@ $GUI->mobile_validate_layer_sync = function ($layerdb, $layer_id, $sync) use ($G
 		include_once(CLASSPATH . 'synchronisation.php');
 		include_once(CLASSPATH . 'Layer.php');
 		$layer = Layer::find_by_id($GUI, $layer_id);
+		if (!$layer) {
+			$GUI->add_message('error', 'Der Layer mit der ID: ' . $layer_id . ' existiert nicht!');
+			return false;
+		}
 
 		$results = $layer->has_sync_functions(synchro::NECESSARY_FUNCTIONS);
 		foreach ($results as $result) {
@@ -1235,23 +1229,20 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 
 	# Bestimme den Uploadpfad des Layers
 	if (intval($layer_id) == 0) {
-		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Sie müssen eine korrekte Layer_id angeben!';
 		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
-			"msg" => $msg
 			"msg" => $msg
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
 	if (count($layer) == 0) {
-		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
+
 		$msg = 'Der Layer mit der ID ' . $layer_id . ' wurde in der Stelle mit ID: ' . $GUI->Stelle->id . ' nicht gefunden!';
 		return array(
 			"success" => false,
-			"msg" => $msg
 			"msg" => $msg
 		);
 	}
@@ -1265,25 +1256,21 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 	}
 
 	if ($files['image'] == '') {
-		$msg = 'Es wurde keine Datei hochgeladen!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Es wurde keine Datei hochgeladen!';
 		$GUI->deblog->write($msg);
 		return array(
 			"success" => false,
 			"msg" => $msg
-			"msg" => $msg
 		);
 	}
 
 	if (file_exists($doc_path . $files['image']['name'])) {
-		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
-		$GUI->deblog->write($msg);
+
 		$msg = 'Datei ' . $doc_path . $files['image']['name'] . 'existiert schon auf dem Server!';
 		$GUI->deblog->write($msg);
 		return array(
 			"success" => true,
-			"msg" => $msg
 			"msg" => $msg
 		);
 	}
@@ -1294,13 +1281,10 @@ $GUI->mobile_upload_image = function ($layer_id, $files) use ($GUI) {
 		$msg = 'Konnte hochgeladene Datei: ' . $files['image']['tmp_name'] . ' nicht nach ' . $doc_path . $files['image']['name'] . ' kopieren!';
 	}
 	else {
-	}
-	else {
 		$vorschaubild = $GUI->get_dokument_vorschau($doc_path . $files['image']['name'], $doc_path, '');
 		$success = true;
 		$msg = 'Datei erfolgreich auf dem Server gespeichert unter: ' . $doc_path . $files['image']['name'];
 	}
-	$GUI->deblog->write($msg);
 	$GUI->deblog->write($msg);
 	return array(
 		"success" => $success,
@@ -1313,7 +1297,7 @@ $GUI->mobile_delete_images = function ($layer_id, $images) use ($GUI) {
 	if (intval($layer_id) == 0) {
 		return array(
 			"success" => false,
-			"msg" => "Sie müssen eine korrekte Layer_id angeben!"
+			"msg" => "Sie müssen eine korrekte selected_layer_id angeben!"
 		);
 	}
 	$layer = $GUI->Stelle->getLayer($layer_id);
