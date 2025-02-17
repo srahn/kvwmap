@@ -327,16 +327,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
-				type = elements[i].type;
-				if (type == 'checkbox' && elements[i].checked == false) {
-					value = 'f';
-				}
+				type = elements[i].type;			
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
 				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
 					value = parseFloat(value);
 				}
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}				
+				if (type == 'radio' && elements[i].checked == false) {
+					value = '';
+				}					
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
