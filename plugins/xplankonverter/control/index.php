@@ -1023,6 +1023,14 @@ function go_switch_xplankonverter($go) {
 					);
 					$GUI->output(); break;
 				}
+				if ($GUI->konvertierung->plan === false) {
+					$GUI->Fehlermeldung = "Zur Konvertierung mit der ID={$GUI->formvars['konvertierung_id']} wurde keinen Plan der Planart {$GUI->konvertierung->get('planart')} gefunden!";
+					$GUI->data = array(
+						'success' => false,
+						'msg' => $GUI->Fehlermeldung
+					);
+					$GUI->output(); break;
+				}
 				if (!isInStelleAllowed($GUI->Stelle, $GUI->konvertierung->get('stelle_id'))) {
 					$GUI->Fehlermeldung = "Der Zugriff auf den Anwendungsfall ist nicht erlaubt.<br>
 						Die Konvertierung mit der ID={$GUI->konvertierung->get('id')} gehört zur Stelle ID= {$GUI->konvertierung->get('stelle_id')}<br>
@@ -1994,7 +2002,7 @@ function go_switch_xplankonverter($go) {
 		*							Die Namen der gml und referenz-Dateien werden per json an das upload_xplan_gml Formular zurückgeliefert und dort angezeigt.
 		*							Dort klickt der Anwender auf den Button zum Übernehmen der Daten in das Plan-Formular
 		*	Schritt 3:	Der View upload_xplan_gml ruft den case xplankonverter_extract_gml_to_form auf mit dem gml_file und der random_number als parameter.
-		*							Darin wird die Methode extract_gml_class der Klasse gml_extractor ausgeführt, die folgendes macht:
+		*							Darin wird die Methode extract_gml_classes der Klasse gml_extractor ausgeführt, die folgendes macht:
 		*							- GML-Datei in das gmlastmp Schema schreiben mit ogr2ogr_gmlas
 		*							- Hier wurde der Sonderfall eingeführt wenn in dem XPlanGML mehrere Pläne sind.
 		*								- In dem Fall wird dem Nutzer nicht das eine Formular mit den Daten des ersten Plans angezeigt, sondern eine Auswahl gestellt:
@@ -2413,7 +2421,7 @@ function go_switch_xplankonverter($go) {
 			#echo 'uploaded gml file: ' . $gml_file
 			#$gml_location = IMAGEPATH . $_POST['gml_file'] . '_' . $GUI->user->id . '.gml';
 			$gml_extractor = new Gml_extractor($GUI->pgdatabase, $gml_file, 'xplan_gmlas_tmp_' . $GUI->user->id);
-			$gml_extractor->extract_gml_class($GUI->plan_class);
+			$gml_extractor->extract_gml_classes($GUI->plan_class);
 
 			$GUI->user->rolle->oGeorefExt->minx = $GUI->formvars['minx'];
 			$GUI->user->rolle->oGeorefExt->miny = $GUI->formvars['miny'];

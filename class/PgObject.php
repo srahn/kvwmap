@@ -37,14 +37,14 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
-	function __construct($gui, $schema, $tableName) {
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, false);
+	function __construct($gui, $schema_name, $table_name) {
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, false);
 		$this->debug = $gui->debug;
 		$this->gui = $gui;
 		$this->database = $gui->pgdatabase;
-		$this->schema = $schema;
-		$this->tableName = $tableName;
-		$this->qualifiedTableName = $schema . '.' . $tableName;
+		$this->schema = $schema_name;
+		$this->tableName = $table_name;
+		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
 		$this->identifier = 'id';
