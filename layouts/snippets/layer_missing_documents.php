@@ -105,8 +105,12 @@
 				</tr><?
 				foreach($attribute_with_missing_docs['missing_documents'] AS $key => $missing_document) { ?>
 					<tr>
-						<td><? echo $attribute_with_missing_docs['features'][$key]->get('oid'); ?></td>
-						<td style="padding-left: 20px"><? echo str_replace($this->layer->get('document_path'), '', $missing_document); ?></td>
+						<td>
+							<a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $this->layer->get_id(); ?>&value_<? echo $this->layer->get('maintable'); ?>_oid=<? echo $attribute_with_missing_docs['features'][$key]->get('oid'); ?>&operator_<? echo $this->layer->get('maintable'); ?>_oid==" title="Zeigt den Datensatz an" target="_Datensätze_mit_fehlenden_Dokumenten"><? echo $attribute_with_missing_docs['features'][$key]->get('oid'); ?></a>
+						</td>
+						<td style="padding-left: 20px">
+							<? echo str_replace($this->layer->get('document_path'), '', $missing_document); ?>
+						</td>
 					</tr><?
 				} ?>
 			</table><?php
