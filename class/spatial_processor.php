@@ -1060,6 +1060,22 @@ class spatial_processor {
     }
     return $WKT;
   }
+
+	function composeMultipointWKTStringFromSVGPath($svgpath) {
+		if ($svgpath != '') {
+			$wkt = "MULTIPOINT((";
+			$coord = explode(' ', $svgpath);
+			$wkt = $wkt . $coord[1] . " " . $coord[2];
+			for ($i = 3; $i < count($coord) - 1; $i++){
+				if ($coord[$i] != ""){
+					$wkt = $wkt . "),(" . $coord[$i] . " " . $coord[$i+1];
+				}
+				$i++;
+			}
+			$wkt = $wkt . "))";
+		}
+		return $wkt;
+	}
   
   function transformCoordsSVG($path){
 	if($path != ''){

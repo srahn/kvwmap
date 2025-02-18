@@ -796,24 +796,34 @@ function go_switch($go, $exit = false) {
 				$GUI->PointEditor_Senden();
 			}break;
 
+			# MultipointEditor
+			case 'MultipointEditor' : {
+				$GUI->MultiGeomEditor();
+			}break;
+
+			# MultipointEditor
+			case 'MultipointEditor_Senden' : {
+				$GUI->MultiGeomEditor_Senden();
+			}break;
+
 			# PolygonEditor
 			case 'PolygonEditor' : {
-				$GUI->PolygonEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# PolygonEditor
 			case 'PolygonEditor_Senden' : {
-				$GUI->PolygonEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# LineEditor
 			case 'LineEditor' : {
-				$GUI->LineEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# LineEditor
 			case 'LineEditor_Senden' : {
-				$GUI->LineEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# Sachdaten speichern

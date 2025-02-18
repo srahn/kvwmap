@@ -331,7 +331,7 @@ if ($doit == true) {
 							<tr class="tab tab_' . $layer['Layer_ID'] . '_-1_Geometrie ' . $visibility_geom . '">
 								<td colspan="2" align="center">';
 									include(LAYOUTPATH.'snippets/'.$geomtype.'Editor.php');
-							echo'
+							echo '
 								</td>
 							</tr>';
 							if ($this->user->rolle->geom_edit_first) {

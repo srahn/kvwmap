@@ -1049,91 +1049,91 @@ echo '			</table>
 	* function returns the svg and wkb geometry of an uploaded shape file
 	* in json format and an error message and success false when fail
 	*/
-	function get_geom_from_shape_file() {
-		$success = false;
-		$upload_file = $_FILES['file'];
-		$geom = '';
-		$msg = 'filename: ' . $upload_file['name'] . ' tmp_name: ' . $upload_file['tmp_name'];
-		if (strtolower(pathinfo($upload_file['name'], PATHINFO_EXTENSION)) == 'zip') {
-			$zip_file = IMAGEPATH . pathinfo($upload_file['tmp_name'], PATHINFO_FILENAME) . '_' . $upload_file['name'];
-			$msg .= 'zipfile: ' . $zip_file;
+	// function get_geom_from_shape_file() {
+	// 	$success = false;
+	// 	$upload_file = $_FILES['file'];
+	// 	$geom = '';
+	// 	$msg = 'filename: ' . $upload_file['name'] . ' tmp_name: ' . $upload_file['tmp_name'];
+	// 	if (strtolower(pathinfo($upload_file['name'], PATHINFO_EXTENSION)) == 'zip') {
+	// 		$zip_file = IMAGEPATH . pathinfo($upload_file['tmp_name'], PATHINFO_FILENAME) . '_' . $upload_file['name'];
+	// 		$msg .= 'zipfile: ' . $zip_file;
 
-			$importer = new data_import_export();
+	// 		$importer = new data_import_export();
 
-			if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
-				# ToDo: Shape in einem untergeordneten Ordner auspacken um Problemm mit gleichen Namen von hochgeladenen Dateien unterschiedlicher Anwender zu vermeiden.
-				$shape_files = unzip($zip_file, false, false, true);
+	// 		if (move_uploaded_file($upload_file['tmp_name'], $zip_file)) {
+	// 			# ToDo: Shape in einem untergeordneten Ordner auspacken um Problemm mit gleichen Namen von hochgeladenen Dateien unterschiedlicher Anwender zu vermeiden.
+	// 			$shape_files = unzip($zip_file, false, false, true);
 
-				$msg .= 'file unziped';
-				# get shape file name
-				$first_file = explode('.', $shape_files[0]);
-				$shape_file_name = $first_file[0];
+	// 			$msg .= 'file unziped';
+	// 			# get shape file name
+	// 			$first_file = explode('.', $shape_files[0]);
+	// 			$shape_file_name = $first_file[0];
 
-				# get EPSG-Code aus prj-Datei
-				$file_epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
-				if ($file_epsg == '') {
-					$file_epsg = '25833';
-					# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
-				}
-				$msg .= 'EPSG: ' . $file_epsg;
+	// 			# get EPSG-Code aus prj-Datei
+	// 			$file_epsg = $importer->get_shp_epsg(IMAGEPATH . $shape_file_name, $this->pgdatabase);
+	// 			if ($file_epsg == '') {
+	// 				$file_epsg = '25833';
+	// 				# ToDo EPSG-Code konnte nicht aus prj-Datei ermittelt werden, Dateiname merken und EPSG-Code nachfragen
+	// 			}
+	// 			$msg .= 'EPSG: ' . $file_epsg;
 
-				# get encoding of dbf file
-				$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
+	// 			# get encoding of dbf file
+	// 			$encoding = $importer->getEncoding(IMAGEPATH . $shape_file_name . '.dbf');
 
-				# load shapes to custom schema
-				$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(sonderzeichen_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
+	// 			# load shapes to custom schema
+	// 			$import_result = $importer->load_shp_into_pgsql($this->pgdatabase, IMAGEPATH, $shape_file_name, $file_epsg, CUSTOM_SHAPE_SCHEMA, 'b' . strtolower(sonderzeichen_umwandeln(substr($shape_file_name, 0, 15))) . rand(1, 1000000), $encoding);
 
-				# return name of import table
-				$table_name = $import_result[0]['tablename'];
+	// 			# return name of import table
+	// 			$table_name = $import_result[0]['tablename'];
 
-				include_once (CLASSPATH.'polygoneditor.php');
+	// 			include_once (CLASSPATH.'multigeomeditor.php');
 
-				$polygoneditor = new polygoneditor($this->pgdatabase, $file_epsg, $this->user->rolle->epsg_code);
-				$geom = $polygoneditor->getpolygon(NULL, $table_name, 'the_geom', NULL, CUSTOM_SHAPE_SCHEMA);
-				if ($geom['wktgeom'] != '') {
-					# use geom on client side to set
-					# $this->formvars['newpathwkt'] = $geom['wktgeom'];
-					# $this->formvars['pathwkt'] = $geom['wktgeom'];
-					# $this->formvars['newpath'] = $geom['svggeom'];
-					# $this->formvars['firstpoly'] = 'true';
-					# $this->formvars['zoom'] == 'true')
+	// 			$polygoneditor = new polygoneditor($this->pgdatabase, $file_epsg, $this->user->rolle->epsg_code);
+	// 			$geom = $polygoneditor->getpolygon(NULL, $table_name, 'the_geom', NULL, CUSTOM_SHAPE_SCHEMA);
+	// 			if ($geom['wktgeom'] != '') {
+	// 				# use geom on client side to set
+	// 				# $this->formvars['newpathwkt'] = $geom['wktgeom'];
+	// 				# $this->formvars['pathwkt'] = $geom['wktgeom'];
+	// 				# $this->formvars['newpath'] = $geom['svggeom'];
+	// 				# $this->formvars['firstpoly'] = 'true';
+	// 				# $this->formvars['zoom'] == 'true')
 
-					# drop custom shape table
-					$sql = "
-						 DROP TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $table_name . "
-					";
-					$this->pgdatabase->execSQL($sql, 4, 0, true);
+	// 				# drop custom shape table
+	// 				$sql = "
+	// 					 DROP TABLE " . CUSTOM_SHAPE_SCHEMA . "." . $table_name . "
+	// 				";
+	// 				$this->pgdatabase->execSQL($sql, 4, 0, true);
 
-					# delete uploaded shape files
-					foreach($shape_files AS $shape_file) {
-						 unlink(IMAGEPATH . $shape_file);
-					}
-					unlink(IMAGEPATH . pathinfo($shape_file, PATHINFO_FILENAME) . '.sql');
-					unlink($zip_file);
+	// 				# delete uploaded shape files
+	// 				foreach($shape_files AS $shape_file) {
+	// 					 unlink(IMAGEPATH . $shape_file);
+	// 				}
+	// 				unlink(IMAGEPATH . pathinfo($shape_file, PATHINFO_FILENAME) . '.sql');
+	// 				unlink($zip_file);
 
-					$msg = 'Geometrie erfolgreich geladen.';
-					$success = true;
-				}
-				else {
-					$msg = 'Fehler beim Lesen der Geometrie!';
-				}
-			}
-			else {
-				$msg = 'Fehler beim kopieren der Datei auf den Server!';
-			}
-		}
-		else {
-			$msg .= 'Datei ist keine Zip-Datei!';
-		}
+	// 				$msg = 'Geometrie erfolgreich geladen.';
+	// 				$success = true;
+	// 			}
+	// 			else {
+	// 				$msg = 'Fehler beim Lesen der Geometrie!';
+	// 			}
+	// 		}
+	// 		else {
+	// 			$msg = 'Fehler beim kopieren der Datei auf den Server!';
+	// 		}
+	// 	}
+	// 	else {
+	// 		$msg .= 'Datei ist keine Zip-Datei!';
+	// 	}
 
-		$response = array(
-			"success" => $success,
-			"result" => $msg,
-			"svggeom" => $geom['svggeom'],
-			"wktgeom" => $geom['wktgeom']
-		);
-		return utf8_decode(json_encode($response));
-	}
+	// 	$response = array(
+	// 		"success" => $success,
+	// 		"result" => $msg,
+	// 		"svggeom" => $geom['svggeom'],
+	// 		"wktgeom" => $geom['wktgeom']
+	// 	);
+	// 	return utf8_decode(json_encode($response));
+	// }
 
 	function get_layer_legend() {
 		if ($this->formvars['layer_params'] != '') {
@@ -5712,44 +5712,48 @@ echo '			</table>
 		}
 	}
 
-  function LineEditor(){
-		include_once (CLASSPATH.'lineeditor.php');
+	function MultiGeomEditor() {
+		include_once (CLASSPATH . 'multigeomeditor.php');
 		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
 		$this->reduce_mapwidth(30);
-    $this->main='LineEditor.php';
-    $this->titel='Geometrie bearbeiten';
-    $layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-    $layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		if($this->formvars['geom_from_layer'] == '')$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+		$this->main = $this->formvars['go'] . '.php';
+		$this->titel='Geometrie bearbeiten';
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		if ($this->formvars['geom_from_layer'] == '') {
+			$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
+		}
 		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
 		$this->formvars['layer_columnname'] = $attributes['the_geom'];
 		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
 		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-    $this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
-    $lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-		if(!$this->formvars['edit_other_object'] AND ($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')){
+		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
+		$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+		if (
+			!$this->formvars['edit_other_object'] AND
+			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
+		) {
 			$this->neuLaden();
 		}
-		else{
+		else {
 			$this->loadMap('DataBase');
 			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
-				# Linien abfragen
+				# geom abfragen
 				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-				$this->lines = $lineeditor->getlines($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
-				if($this->lines['wktgeom'] != ''){
-					$this->formvars['newpathwkt'] = $this->lines['wktgeom'];
+				$this->geom = $multigeomeditor->getGeom($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
+				if($this->geom['wktgeom'] != ''){
+					$this->formvars['newpathwkt'] = $this->geom['wktgeom'];
 					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-					$this->formvars['newpath'] = str_replace('-', '', $this->lines['svggeom']);
-					$this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);		# neuere Postgis-Versionen haben ein L mit drin
-					$this->formvars['firstline'] = 'true';
+					$this->formvars['newpath'] = $this->geom['svggeom'];
+					$this->formvars['firstpoly'] = 'true';
 					if($this->formvars['zoom'] != 'false'){
-						$rect = $lineeditor->zoomToLine($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
+						$rect = $multigeomeditor->zoomToGeom($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
 						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
 						$this->map_scaledenom = $this->map->scaledenom;
 					}
 				}
 			}
-    }
+		}
 		# Zoom auf Geometrie-Fehler-Position
 		if ($this->error_position != '') {
 			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
@@ -5757,32 +5761,93 @@ echo '			</table>
 		}
 		# zoom_to_max_layer_extent
 		if($this->formvars['zoom_layer_id'] != '')$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
-    # Spaltenname und from-where abfragen
-    $data = $this->mapDB->getData($this->formvars['geom_from_layer']);
-    $data_explosion = explode(' ', $data);
-    $this->formvars['columnname'] = $data_explosion[0];
-    $select = $fromwhere = $this->mapDB->getSelectFromData($data);
-		# order by rausnehmen
-		$this->formvars['orderby'] = '';
-		$orderbyposition = strrpos(strtolower($select), 'order by');
-		$lastfromposition = strrpos(strtolower($select), 'from');
-		if($orderbyposition !== false AND $orderbyposition > $lastfromposition){
-			$fromwhere = substr($select, 0, $orderbyposition);
-			$this->formvars['orderby'] = ' '.substr($select, $orderbyposition);
+		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
+			$currenttime=date('Y-m-d H:i:s',time());
+			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
 		}
-    $this->formvars['fromwhere'] = 'from ('.$fromwhere.') as foo where 1=1';
-    if(strpos(strtolower($this->formvars['fromwhere']), ' where ') === false){
-      $this->formvars['fromwhere'] .= ' where (1=1)';
-    }
+		$this->drawMap();
+		$this->saveMap('');
+		$this->output();
+	}
 
-    $this->saveMap('');
-    if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
-    	$currenttime=date('Y-m-d H:i:s',time());
-    	$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-    }
-    $this->drawMap();
-    $this->output();
-  }
+	function MultiGeomEditor_Senden(){
+		$this->sanitize([
+			'area' => 'float',
+			'linelength' => 'float'
+		], true);
+		include_(CLASSPATH . 'multigeomeditor.php');
+		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
+		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
+		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
+		$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+		# eingeabewerte pruefen:
+		$ret = $multigeomeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
+		if ($ret[0]) { # fehlerhafte eingabedaten
+			if (strpos($ret[1], '[') !== false) {
+				$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
+				$this->formvars['no_load'] = 'true';
+			}
+			$this->Meldung = $ret[1];
+			$this->MultiGeomEditor();
+			return;
+		}
+		else {
+			# Before Update trigger
+			if (!empty($layerset[0]['trigger_function'])) {
+				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
+				if ($layerset[0]['oid'] == 'oid'){
+					$oid_sql = 'oid,';
+				}
+				$sql_old = "
+					SELECT ".
+						$oid_sql." *
+					FROM
+						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
+					WHERE
+						" . $where_condition;
+				#echo '<br>sql before update: ' . $sql_old; #pk
+				$ret = $layerdb->execSQL($sql_old, 4, 1);
+				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
+				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+			}
+
+			$ret = $multigeomeditor->updateGeom(
+				$this->formvars['newpathwkt'], 
+				$this->formvars['oid'],
+				$this->formvars['layer_tablename'],
+				$this->formvars['layer_columnname'],
+				$this->attributes['geomtype'][$this->attributes['the_geom']],
+				$this->get_auto_attribute_kvps()
+			);
+			if (!$ret['success']) { # fehler beim eintrag
+				$this->Meldung = $ret[1];
+				$this->formvars['no_load'] = 'true';
+			}
+			else { # eintrag erfolgreich
+				# After Update trigger
+				if (!empty($layerset[0]['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
+				}
+				$this->formvars['newpath']="";
+				$this->formvars['newpathwkt']="";
+				$this->formvars['pathwkt']="";
+				$this->formvars['firstpoly']="";
+				$this->formvars['secondpoly']="";
+				$this->formvars['firstline'] = "";
+				$this->formvars['secondline'] = "";				
+				$this->add_message('notice', 'Eintrag erfolgreich!');
+				if ($ret[3]) {
+					$this->add_message('info', $ret[3]);
+				}
+				elseif ($ret['msg'] != '') {
+					$this->add_message('info', $ret['msg']);
+				}
+			}
+			$this->formvars['CMD'] = '';
+			$this->MultiGeomEditor();
+		}
+	}
 
 	/**
 	 * function collect key value pairs of auto attributes for an update statement
@@ -5836,208 +5901,6 @@ echo '			</table>
 		return $kvps;
 	}
 
-	function LineEditor_Senden() {
-		$this->sanitize([
-			'linelength' => 'float'
-		], true);
-		include_(CLASSPATH . 'lineeditor.php');
-		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-		# eingeabewerte pruefen:
-		$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-		if ($ret[0]) { # fehlerhafte eingabedaten
-			$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
-			$this->formvars['no_load'] = 'true';
-			$this->Meldung=$ret[1];
-			$this->LineEditor();
-			return;
-		}
-		else {
-			# Before Update trigger
-			if (!empty($layerset[0]['trigger_function'])) {
-				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
-				if ($layerset[0]['oid'] == 'oid'){
-					$oid_sql = 'oid,';
-				}
-				$sql_old = "
-					SELECT ".
-						$oid_sql." *
-					FROM
-						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
-					WHERE
-						" . $where_condition;
-				#echo '<br>sql before update: ' . $sql_old; #pk
-				$ret = $layerdb->execSQL($sql_old, 4, 1);
-				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
-				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
-			}
-
-			$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-			$ret = $lineeditor->eintragenLinie(
-				$this->formvars['newpathwkt'],
-				$this->formvars['oid'],
-				$this->formvars['layer_tablename'],
-				$this->formvars['layer_columnname'],
-				$this->attributes['geomtype'][$this->attributes['the_geom']],
-				$this->get_auto_attribute_kvps()
-			);
-			if ($ret[0]) { # fehler beim eintrag
-				$this->add_message('error', $ret[1]);
-				$this->formvars['no_load'] = 'true';
-			}
-			else { # eintrag erfolgreich
-				# After Update trigger
-				if (!empty($layerset[0]['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
-				}
-				$this->formvars['newpath'] = "";
-				$this->formvars['newpathwkt'] = "";
-				$this->formvars['pathwkt'] = "";
-				$this->formvars['firstline'] = "";
-				$this->formvars['secondline'] = "";
-				$this->formvars['secondpoly'] = "";
-				$this->add_message('notice', 'Eintrag erfolgreich!');
-			}
-			$this->formvars['CMD'] = '';
-			$this->LineEditor();
-		}
-	}
-
-	function PolygonEditor() {
-		include_once (CLASSPATH . 'polygoneditor.php');
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$this->reduce_mapwidth(30);
-		$this->main='PolygonEditor.php';
-		$this->titel='Geometrie bearbeiten';
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		if ($this->formvars['geom_from_layer'] == '') {
-			$this->formvars['geom_from_layer'] = $layerset[0]['geom_from_layer'];
-		}
-		$attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$this->formvars['layer_columnname'] = $attributes['the_geom'];
-		$this->formvars['layer_tablename'] = $attributes['table_name'][$attributes['the_geom']];
-		$this->formvars['geom_nullable'] = $attributes['nullable'][$attributes['indizes'][$attributes['the_geom']]];
-		$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
-		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-		if (
-			!$this->formvars['edit_other_object'] AND
-			($this->formvars['oldscale'] != $this->formvars['nScale'] OR $this->formvars['neuladen'] OR $this->formvars['CMD'] != '')
-		) {
-			$this->neuLaden();
-		}
-		else {
-			$this->loadMap('DataBase');
-			if($this->formvars['oid'] != '' AND $this->formvars['no_load'] != 'true'){
-				# Polygon abfragen
-				$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-				$this->polygon = $polygoneditor->getpolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent);
-				if($this->polygon['wktgeom'] != ''){
-					$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-					$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-					$this->formvars['newpath'] = $this->polygon['svggeom'];
-					$this->formvars['firstpoly'] = 'true';
-					if($this->formvars['zoom'] != 'false'){
-						$rect = $polygoneditor->zoomTopolygon($this->formvars['oid'], $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL);
-						$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-						$this->map_scaledenom = $this->map->scaledenom;
-					}
-				}
-			}
-		}
-		# Zoom auf Geometrie-Fehler-Position
-		if ($this->error_position != '') {
-			$rect = rectObj($this->error_position[0]-50,$this->error_position[1]-50,$this->error_position[0]+50,$this->error_position[1]+50);
-			$this->map_scaledenom = $this->map->scaledenom;
-		}
-		# zoom_to_max_layer_extent
-		if($this->formvars['zoom_layer_id'] != '')$this->zoom_to_max_layer_extent($this->formvars['zoom_layer_id']);
-		if($this->formvars['CMD'] != 'previous' AND $this->formvars['CMD'] != 'next'){
-			$currenttime=date('Y-m-d H:i:s',time());
-			$this->user->rolle->setConsumeActivity($currenttime,'getMap',$this->user->rolle->last_time_id);
-		}
-		$this->drawMap();
-		$this->saveMap('');
-		$this->output();
-	}
-
-	function PolygonEditor_Senden(){
-		$this->sanitize([
-			'area' => 'float'
-		], true);
-		include_(CLASSPATH . 'polygoneditor.php');
-		$mapDB = new db_mapObj($this->Stelle->id,$this->user->id);
-		$layerdb = $mapDB->getlayerdatabase($this->formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-		$layerset = $this->user->rolle->getLayer($this->formvars['selected_layer_id']);
-		$this->attributes = $mapDB->read_layer_attributes($this->formvars['selected_layer_id'], $layerdb, NULL);
-		$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-		# eingeabewerte pruefen:
-		$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-		if ($ret[0]) { # fehlerhafte eingabedaten
-			if (strpos($ret[1], '[') !== false) {
-				$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
-				$this->formvars['no_load'] = 'true';
-			}
-			$this->Meldung = $ret[1];
-			$this->PolygonEditor();
-			return;
-		}
-		else {
-			# Before Update trigger
-			if (!empty($layerset[0]['trigger_function'])) {
-				$where_condition = $layerset[0]['oid'] . " = '" . $this->formvars['oid'] . "'";
-				if ($layerset[0]['oid'] == 'oid'){
-					$oid_sql = 'oid,';
-				}
-				$sql_old = "
-					SELECT ".
-						$oid_sql." *
-					FROM
-						" . $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
-					WHERE
-						" . $where_condition;
-				#echo '<br>sql before update: ' . $sql_old; #pk
-				$ret = $layerdb->execSQL($sql_old, 4, 1);
-				$old_dataset = ($ret[0] == 0 ? pg_fetch_assoc($ret[1]) : array());
-				$this->exec_trigger_function('BEFORE', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
-			}
-
-			$umring = $this->formvars['newpathwkt'];
-			$ret = $polygoneditor->eintragenFlaeche(
-				$umring, $this->formvars['oid'],
-				$this->formvars['layer_tablename'],
-				$this->formvars['layer_columnname'],
-				$this->attributes['geomtype'][$this->attributes['the_geom']],
-				$this->get_auto_attribute_kvps()
-			);
-			if (!$ret['success']) { # fehler beim eintrag
-				$this->Meldung = $ret[1];
-				$this->formvars['no_load'] = 'true';
-			}
-			else { # eintrag erfolgreich
-				# After Update trigger
-				if (!empty($layerset[0]['trigger_function'])) {
-					$this->exec_trigger_function('AFTER', 'UPDATE', $layerset[0], $this->formvars['oid'], $old_dataset);
-				}
-				$this->formvars['newpath']="";
-				$this->formvars['newpathwkt']="";
-				$this->formvars['pathwkt']="";
-				$this->formvars['firstpoly']="";
-				$this->formvars['secondpoly']="";
-				$this->add_message('notice', 'Eintrag erfolgreich!');
-				if ($ret[3]) {
-					$this->add_message('info', $ret[3]);
-				}
-				elseif ($ret['msg'] != '') {
-					$this->add_message('info', $ret['msg']);
-				}
-			}
-			$this->formvars['CMD'] = '';
-			$this->PolygonEditor();
-		}
-	}
 	
 	function create_auto_classes_for_rollenlayer(){
 		$dbmap = new db_mapObj($this->Stelle->id, $this->user->id);
@@ -10969,43 +10832,30 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['geomtype'] = $geomtypes[$layerset[0]['Datentyp']];
 		}
 
-		if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
-			if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
-				include_(CLASSPATH.'spatial_processor.php');
-				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+		if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != ''){   # wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
+			include_(CLASSPATH.'spatial_processor.php');
+			$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+			if ($this->formvars['geomtype'] == 'POLYGON' OR $this->formvars['geomtype'] == 'MULTIPOLYGON') {
 				$this->formvars['newpathwkt'] = $spatial_pro->composePolygonWKTStringFromSVGPath($this->formvars['newpath']);
 			}
-			if ($this->formvars['newpathwkt'] != '') {
-				include_(CLASSPATH.'polygoneditor.php');
-				$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-				$ret = $polygoneditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-				if ($ret[0]) { # fehlerhafte eingabedaten
-					$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
-					$this->Meldung1=$ret[1];
-					$this->neuer_Layer_Datensatz();
-					return;
-				}
-			}
-		}
-		elseif ($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING') {
-			if ($this->formvars['newpathwkt'] == '' AND $this->formvars['newpath'] != '') {
-				# wenn keine WKT-Geoemtrie da ist, muss die WKT-Geometrie aus dem SVG erzeugt werden
-				include_(CLASSPATH.'spatial_processor.php');
-				$spatial_pro = new spatial_processor($this->user->rolle, $this->database, $this->pgdatabase);
+			elseif ($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING') {
 				$this->formvars['newpathwkt'] = $spatial_pro->composeLineWKTStringFromSVGPath($this->formvars['newpath']);
 			}
-			if ($this->formvars['newpathwkt'] != '') {
-				include_(CLASSPATH.'lineeditor.php');
-				$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-				# eingeabewerte pruefen:
-				$ret = $lineeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
-				if ($ret[0]) { # fehlerhafte eingabedaten
-					$this->Meldung1=$ret[1];
-					$this->neuer_Layer_Datensatz();
-					return;
-				}
+			elseif ($this->formvars['geomtype'] == 'MULTIPOINT') {
+				$this->formvars['newpathwkt'] = $spatial_pro->composeMultipointWKTStringFromSVGPath($this->formvars['newpath']);
 			}
 		}
+		if ($this->formvars['newpathwkt'] != '') {
+			include_(CLASSPATH.'multigeomeditor.php');
+			$multigeomeditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+			$ret = $multigeomeditor->pruefeEingabedaten($this->formvars['newpathwkt']);
+			if ($ret[0]) { # fehlerhafte eingabedaten
+				$this->error_position = explode(' ', trim(substr($ret[1], strpos($ret[1], '[')), '[]'));
+				$this->Meldung1=$ret[1];
+				$this->neuer_Layer_Datensatz();
+				return;
+			}
+		}	
 		$this->success = true;
 		foreach ($tablename as $table) {
 			$insert = array();
@@ -11146,18 +10996,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								elseif ($this->formvars['newpathwkt'] != '') {
 									# ToDo: Replace this also with a get_wkb_geometry function from polygoneditor and replace wkb_geometry generation in
 									# PointEditor_Senden also by a function and also for Line and Polygon editing cases
-									if ($this->formvars['geomtype'] == 'LINESTRING' OR $this->formvars['geomtype'] == 'MULTILINESTRING') {
-										$result = $lineeditor->get_wkb_geometry(array(
-											'geomtype' => $this->formvars['geomtype'],
-											'line' => $this->formvars['newpathwkt']
-										));
-									}
-									else {
-										$result = $polygoneditor->get_wkb_geometry(array(
-											'geomtype' => $this->formvars['geomtype'],
-											'polygon' => $this->formvars['newpathwkt']
-										));
-									}
+									$result = $multigeomeditor->get_wkb_geometry(array(
+										'geomtype' => $this->formvars['geomtype'],
+										'geom' => $this->formvars['newpathwkt']
+									));									
 									if ($result['success']) {
 										$insert[$table['attributname'][$i]] = "'" . $result['wkb_geometry'] . "'";
 									}
@@ -11513,59 +11355,29 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							}
 						}
 					}
-					if (
-						$this->geomtype == 'POLYGON' OR
-						$this->geomtype == 'MULTIPOLYGON' OR
-						$this->geomtype == 'GEOMETRY' OR
-						$this->geomtype == 'LINESTRING' OR
-						$this->geomtype == 'MULTILINESTRING'
-					) {
-						#-----Polygoneditor und Linieneditor---#
+					if (in_array($this->geomtype, ['POLYGON', 'MULTIPOLYGON', 'GEOMETRY', 'LINESTRING', 'MULTILINESTRING', 'MULTIPOINT'])) {
+						#-----Polygoneditor, Linieneditor oder Multipointeditor ---#
 						$this->queryable_vector_layers = $this->Stelle->getqueryableVectorLayers(NULL, $this->user->id, NULL, NULL, NULL, true, true);
 
 						if ($this->formvars['chosen_layer_id'] AND $privileges[$this->qlayerset[0]['attributes']['the_geom']] == 1) {			# für neuen Datensatz verwenden -> Geometrie abfragen
-							if ($this->geomtype == 'POLYGON' OR $this->geomtype == 'MULTIPOLYGON' OR $this->geomtype == 'GEOMETRY') {		# Polygonlayer
-								include_once (CLASSPATH.'polygoneditor.php');
-								$polygoneditor = new polygoneditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-								$this->polygon = $polygoneditor->getpolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->map->extent, $this->formvars['layer_schemaname']);
-								if ($this->polygon['wktgeom'] != '') {
-									$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
-									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-									$this->formvars['newpath'] = $this->polygon['svggeom'];
-									$this->formvars['firstpoly'] = 'true';
-									if ($this->formvars['zoom'] != 'false') {
-										$rect = $polygoneditor->zoomTopolygon($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL, $this->formvars['layer_schemaname']);
-										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-										if (MAPSERVERVERSION > 600) {
-											$this->map_scaledenom = $this->map->scaledenom;
-										}
-										else {
-											$this->map_scaledenom = $this->map->scale;
-										}
-									}
-								}
-							}
-							else {			# Linienlayer
-								include_once (CLASSPATH.'lineeditor.php');
-								$lineeditor = new lineeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
-								$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
-								$this->lines = $lineeditor->getlines($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname']);
-								if ($this->lines['wktgeom'] != '') {
-									$this->formvars['newpathwkt'] = $this->lines['wktgeom'];
-									$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
-									$this->formvars['newpath'] = str_replace('-', '', $this->lines['svggeom']);
-									$this->formvars['newpath'] = str_replace('L ', '', $this->formvars['newpath']);		# neuere Postgis-Versionen haben ein L mit drin
-									$this->formvars['firstline'] = 'true';
-									if ($this->formvars['zoom'] != 'false') {
-										$rect = $lineeditor->zoomToLine($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], 10);
-										$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
-										$this->map_scaledenom = $this->map->scaledenom;
-									}
+							include_once (CLASSPATH.'multigeomeditor.php');
+							$polygoneditor = new multigeomeditor($layerdb, $layerset[0]['epsg_code'], $this->user->rolle->epsg_code, $layerset[0]['oid']);
+							$this->geomload = true;			# Geometrie wird das erste Mal geladen, deshalb nicht in den Weiterzeichnenmodus gehen
+							$this->polygon = $polygoneditor->getGeom($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], $this->formvars['layer_schemaname']);
+							if ($this->polygon['wktgeom'] != '') {
+								$this->formvars['newpathwkt'] = $this->polygon['wktgeom'];
+								$this->formvars['pathwkt'] = $this->formvars['newpathwkt'];
+								$this->formvars['newpath'] = $this->polygon['svggeom'];
+								$this->formvars['firstpoly'] = 'true';
+								$this->formvars['firstline'] = 'true';
+								if ($this->formvars['zoom'] != 'false') {
+									$rect = $polygoneditor->zoomToGeom($oid, $this->formvars['layer_tablename'], $this->formvars['layer_columnname'], NULL, $this->formvars['layer_schemaname']);
+									$this->map->setextent($rect->minx,$rect->miny,$rect->maxx,$rect->maxy);
+									$this->map_scaledenom = $this->map->scaledenom;
 								}
 							}
 						}
-						#-----Polygoneditor und Linieneditor---#
+						#-----Polygoneditor, Linieneditor oder Multipointeditor ---#
 					}
 					elseif ($this->geomtype == 'POINT') {
 						#-----Pointeditor-----#

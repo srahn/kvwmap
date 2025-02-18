@@ -534,7 +534,11 @@ function buildsvgpolygonfromwkt($wkt){
 }
 
 function transformCoordsSVG($path){
+	$path = str_replace([',', 'cx=', 'cy=', '"', ','], [' ', ''], $path);		# bei MULTIPOINTs mit drin
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
+	if (strpos($path, 'M') === false) {
+		$path = 'M ' . $path;
+	}
   $svgcoords = explode(' ',$path);
 	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
