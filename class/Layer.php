@@ -16,6 +16,7 @@ class Layer extends MyObject {
 	public $opacity;
 	public $minScale;
 	public $maxScale;
+	public $document_attributes;
 
 	function __construct($gui) {
 		$this->gui = $gui;

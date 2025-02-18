@@ -110,6 +110,7 @@ class GUI {
 	var $trigger_functions;
 	var $custom_trigger_functions;
 	var $goNotExecutedInPlugins;
+	var $layer;
 
 	# Konstruktor
 	function __construct($main, $style, $mime_type) {
@@ -3519,13 +3520,12 @@ echo '			</table>
 		if ($this->gui != '') {
 			return $this->gui;
 		}
-		if (strpos($this->user->rolle->gui, 'layouts') === false) {
-			# Berücksichtigung des alten gui-Pfads
-			return WWWROOT . APPLVERSION . 'layouts/' . $this->user->rolle->gui;
+		# Berücksichtigung des alten gui-Pfads
+		$guifile = WWWROOT . APPLVERSION . (strpos($this->user->rolle->gui, 'layouts') === false ? 'layouts/' : '') . $this->user->rolle->gui;
+		if (!file_exists($guifile)) {
+			$guifile = WWWROOT . APPLVERSION . 'layouts/gui.php';
 		}
-		else {
-			return WWWROOT . APPLVERSION . $this->user->rolle->gui;
-		}
+		return $guifile;
 	}
 
 	function notifications_anzeigen() {
@@ -4147,10 +4147,10 @@ echo '			</table>
 		}
 
 		$width = $this->formvars['browserwidth'] -
-			$size['margin']['width'] -
-			($this->user->rolle->hideMenue  == 1 ? $size['menue']['hide_width'] : $size['menue']['width']) -
-			($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
-			- 18;	# Breite für möglichen Scrollbalken
+			$size['margin']['width']
+			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
+			- ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
+			- (strpos($this->user->rolle->gui, 'gui_smart.php') !== false ? 0 : 18);	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
@@ -4165,6 +4165,7 @@ echo '			</table>
 		if($height % 2 != 0)$height = $height - 1;		# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
 		if($width  % 2 != 0)$width = $width - 1;				# muss gerade sein, sonst verspringt die Karte beim Panen immer um 1 Pixel
 
+		// $this->debug->write('<br>resizeMap2Window for gui: ' . $this->user->rolle->gui . ' to: ' . $width . 'x' . $height, 4, false);
 		$this->user->rolle->setSize($width.'x'.$height);
 		$this->user->rolle->readSettings();
 	}
@@ -4666,10 +4667,24 @@ echo '			</table>
 		include(SNIPPETS . 'map_image.php');
   }
 
-	/*
-	* This function return the image of the referenzkarte with given ID
-	* if refmap not found return alternative not found image
-	*/
+	/**
+	 * Find and show documents that are registered in datasets of layer with $selected_layer_id
+	 * but can not be found in document_path of this layer.
+	 */
+	function show_missing_documents() {
+		$this->sanitize([
+			'selected_layer_id' => 'int'
+		]);
+		include_once(CLASSPATH . 'Layer.php');
+		$this->layer = Layer::find_by_id($this, $this->formvars['selected_layer_id']);
+		$this->main = 'layer_missing_documents.php';
+		$this->output();
+	}
+
+	/**
+	 * This function return the image of the referenzkarte with given ID
+	 * if refmap not found return alternative not found image
+	 */
 	function getRefMapImage($id) {
 		include_once(CLASSPATH . 'Referenzkarte.php');
 		$referenzkarte = Referenzkarte::find_by_id($this, $id);

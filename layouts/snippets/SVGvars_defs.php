@@ -4,14 +4,14 @@ $SVGvars_defs = '
 	<style type="text/css"><![CDATA[
 		#buttons{
 		}
-		#buttons:hover .navbutton_bg{
+		g:hover .navbutton_bg{
 			transition: all 0.15s ease;
 			opacity: 1;
 		}
-		#buttons:hover .navbutton_frame{
+		g:hover .navbutton_frame{
 			opacity: 1;
 		}
-		#buttons .navbutton_frame{
+		g .navbutton_frame{
 			opacity: 0.0;
 		}		
 		.navbutton_frame{
