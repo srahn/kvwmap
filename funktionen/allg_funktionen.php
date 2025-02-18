@@ -1653,8 +1653,8 @@ function emailcheck($email) {
     $Meldung.='<br>E-Mail enthält kein @.';
   }
 
-  $postfix=strlen(strrchr($email,"."))-1;
-  if (!($postfix > 1 AND $postfix < 5)) {
+  $postfix = strlen(strrchr($email, ".")) - 1;
+  if (!($postfix > 1 AND $postfix < 8)) {
     #echo " postfix ist zu kurz oder zu lang";
     $Meldung.='<br>E-Mail ist zu kurz oder zu lang.';
   }
