@@ -159,14 +159,17 @@ class PgObject {
 			SELECT
 				" . $select . "
 			FROM
-				" . $this->schema . '.' . $this->tableName . "
+				" . $this->schema . '."' . $this->tableName . '"
 			WHERE
-				" . $where . "
+				' . $where . "
 			" . $order . "
 			" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
+		if ($query == false){
+			echo '<p>'.$sql;exit;
+		}
 		$results = array();
 		while($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
