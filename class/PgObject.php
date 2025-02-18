@@ -167,9 +167,6 @@ class PgObject {
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
-		if ($query == false){
-			echo '<p>'.$sql;exit;
-		}
 		$results = array();
 		while($this->data = pg_fetch_assoc($query)) {
 			$results[] = clone $this;
