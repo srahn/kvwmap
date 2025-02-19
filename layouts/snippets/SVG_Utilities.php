@@ -3466,7 +3466,20 @@ $vertex_catch_functions = '
 		evt.target.setAttribute("opacity", "0.3");
 	}
 
-	function add_foreign_vertex(evt){
+	function add_foreign_vertex_mousedown(evt){
+		// punktobjekt bilden, welches die Koordinaten aufnimmt
+    function point(x,y) {
+      this.clientX = x;
+      this.clientY = y;
+    }
+		// Aufrufen der Funktion mousedown() fuer die jeweilige Aktion
+    position = new point(evt.target.getAttribute("x"), evt.target.getAttribute("y"));
+		mouse_coords_type = "world";
+		mousedown(position);
+		mouse_coords_type = "image";
+	}
+
+	function add_foreign_vertex_mouseup(evt){
 		// punktobjekt bilden, welches die Koordinaten aufnimmt
     function point(x,y) {
       this.clientX = x;
@@ -3482,11 +3495,9 @@ $vertex_catch_functions = '
 				end_vertex_move(position);
 			}
 		}
-		else{
-			mouse_coords_type = "world";
-	  	mousedown(position);
-			mouse_coords_type = "image";
-		}  
+		else {
+			mouseup(position);
+		}
 	}
 
 	top.document.getElementById("svghelp").SVGshow_foreign_vertices = show_foreign_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
@@ -3773,7 +3784,7 @@ $measurefunctions = '
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.3" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
-			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />
+			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmousedown="add_foreign_vertex_mousedown(evt)" onmouseup="add_foreign_vertex_mouseup(evt)" />
 	  </g>
 	  
 
