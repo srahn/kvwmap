@@ -83,6 +83,7 @@
 	<g>
 		<rect x="0" y="0" rx="3" ry="3" width="<? echo ((strpos($this->user->rolle->gui, 'gui_light.php') !== false)? '216' : '180'); ?>" height="36" class="navbutton_bg"/>
 		<g transform="translate(0 0)">
+			<title><? echo $this->strPlaceSearch; ?></title>
 			<a href="javascript:void(0);" onclick="$('#search_div').toggle(); $('#geo_name_search_result_div').show()">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(6 6) scale(0.045 0.045)">
@@ -91,6 +92,7 @@
 			</a>
 		</g>
 		<g transform="translate(36 0)">
+			<title><? echo $this->strPlaceSearch; ?></title>
 			<a href="index.php?go=neu%20Laden&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(6.5 5) scale(0.04 0.05)">
@@ -99,6 +101,7 @@
 			</a>
 		</g>
 		<g transform="translate(72 0)">
+			<title><? echo $this->strPlaceSearch; ?></title>
 			<a href="index.php?go=Druckausschnittswahl&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(5 5) scale(0.05 0.05)">
@@ -107,6 +110,7 @@
 			</a>
 		</g>
 		<g transform="translate(108 0)">
+			<title><? echo $this->strPlaceSearch; ?></title>
 			<a href="javascript:void(0);" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {
 			<? if (count_or_0($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
@@ -123,6 +127,7 @@
 			</a>
 		</g>
 		<g transform="translate(144 0)">
+			<title><? echo $this->strPlaceSearch; ?></title>
 			<a href="javascript:void(0);" onclick="$('#user_options').toggle(); $('#sperr_div').toggle();">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(8 6) scale(0.045 0.045)">
@@ -132,13 +137,14 @@
 		</g>
 		<? if (strpos($this->user->rolle->gui, 'gui_light.php') !== false) { ?>
 			<g transform="translate(180 0)">
-			<a href="javascript:void(0);" onclick="$('#legenddiv').toggle();">
-				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
-				<g class="navbutton" width="36" height="36" transform="translate(7 5) scale(0.05 0.05)">
-					<path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
-				</g>
-			</a>
-		</g>
+				<title><? echo $this->strPlaceSearch; ?></title>
+				<a href="javascript:void(0);" onclick="$('#legenddiv').toggle();">
+					<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+					<g class="navbutton" width="36" height="36" transform="translate(7 5) scale(0.05 0.05)">
+						<path d="M0 96C0 78.3 14.3 64 32 64l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 128C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32l384 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 288c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32L32 448c-17.7 0-32-14.3-32-32s14.3-32 32-32l384 0c17.7 0 32 14.3 32 32z"/>
+					</g>
+				</a>
+			</g>
 		<? } ?>
 	</g>
 </svg>
