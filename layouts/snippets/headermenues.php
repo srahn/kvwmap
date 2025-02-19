@@ -75,11 +75,11 @@
 	</div>
 </div>
 
-<div style="padding: 6px;"><?
+<div style="padding: 6px; height: 22px"><?
 	include(SNIPPETS . 'geo_name_search.php'); ?>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" width="<? echo ((strpos($this->user->rolle->gui, 'gui_smart.php') !== false)? '216' : '180'); ?>">
+<svg xmlns="http://www.w3.org/2000/svg" <? echo ((strpos($this->user->rolle->gui, 'gui_smart.php') !== false)? 'width="223" height="45"' : 'width="180"'); ?>">
 	<g>
 		<rect x="0" y="0" rx="3" ry="3" width="<? echo ((strpos($this->user->rolle->gui, 'gui_smart.php') !== false)? '216' : '180'); ?>" height="36" class="navbutton_bg"/>
 		<g transform="translate(0 0)">
