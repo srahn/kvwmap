@@ -85,7 +85,7 @@
 		<g transform="translate(0 0)">
 			<a href="javascript:void(0);" onclick="$('#search_div').toggle(); $('#geo_name_search_result_div').show()">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
-				<g class="navbutton" width="36" height="36" transform="translate(5 5) scale(0.05 0.05)">
+				<g class="navbutton" width="36" height="36" transform="translate(6 6) scale(0.045 0.045)">
 					<path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/>
 				</g>
 			</a>
@@ -125,7 +125,7 @@
 		<g transform="translate(144 0)">
 			<a href="javascript:void(0);" onclick="$('#user_options').toggle(); $('#sperr_div').toggle();">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
-				<g class="navbutton" width="36" height="36" transform="translate(7 5) scale(0.05 0.05)">
+				<g class="navbutton" width="36" height="36" transform="translate(8 6) scale(0.045 0.045)">
 					<path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
 				</g>
 			</a>
