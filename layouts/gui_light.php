@@ -58,6 +58,8 @@
 				<input type="hidden" name="gle_changed" value="">
 				<input type="hidden" name="mime_type" value="">
 				<input type="hidden" name="window_type" value="">
+				<input type="hidden" name="refmap_x">
+				<input type="hidden" name="refmap_y">
 			</form>
 		</div>
 	</body>

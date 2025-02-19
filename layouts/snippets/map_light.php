@@ -143,5 +143,3 @@ if($this->formvars['gps_follow'] == ''){
 >
 	<?php include(SNIPPETS . 'legenddiv.php'); ?>
 </div>
-<input type="hidden" name="refmap_x">
-<input type="hidden" name="refmap_y">
