@@ -2,7 +2,7 @@
 	<head>
 		<title><? echo TITLE; ?></title>
 		<? include(SNIPPETS . 'gui_head.php'); ?>
-		<link rel="stylesheet" href="layouts/css/smart.css" type="text/css">
+		<link rel="stylesheet" href="layouts/css/light.css" type="text/css">
 	</head>
 	<body onload="onload_functions();">
 		<? include(LAYOUTPATH.'snippets/SVGvars_defs.php');	?>
@@ -31,17 +31,17 @@
 						currentform = document.GUI;
 						<? $this->currentform = 'document.GUI'; ?>
 					</script><?php
-					$this->debug->write("<br>GUI->main: <b>" . $this->main . "</b> in gui_smart.php", 4, false);
+					$this->debug->write("<br>GUI->main: <b>" . $this->main . "</b> in gui_light.php", 4, false);
 					if ($this->main == 'map.php') {
-						$this->main = 'map_smart.php';
-						$this->debug->write("<br>Change GUI->main to: <b>" . $this->main . "</b> in gui_smart.php", 4, false);
+						$this->main = 'map_light.php';
+						$this->debug->write("<br>Change GUI->main to: <b>" . $this->main . "</b> in gui_light.php", 4, false);
 					}
 					if (file_exists($this->main)) {
-						$this->debug->write("<br>Include <b>" . $this->main . "</b> in gui_smart.php", 4, false);
+						$this->debug->write("<br>Include <b>" . $this->main . "</b> in gui_light.php", 4, false);
 						include($this->main); # Pluginviews
 					}
 					else {
-						$this->debug->write("<br>Include <b>" . LAYOUTPATH . "snippets/" . $this->main . "</b> in gui_smart.php", 4, false);
+						$this->debug->write("<br>Include <b>" . LAYOUTPATH . "snippets/" . $this->main . "</b> in gui_light.php", 4, false);
 						include(LAYOUTPATH . "snippets/" . $this->main);		# normale snippets
 					} ?>
 				</div>

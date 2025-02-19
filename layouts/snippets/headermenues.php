@@ -79,9 +79,9 @@
 	include(SNIPPETS . 'geo_name_search.php'); ?>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" <? echo ((strpos($this->user->rolle->gui, 'gui_smart.php') !== false)? 'width="223" height="45"' : 'width="180"'); ?>">
+<svg xmlns="http://www.w3.org/2000/svg" <? echo ((strpos($this->user->rolle->gui, 'gui_light.php') !== false)? 'width="223" height="45"' : 'width="180"'); ?>">
 	<g>
-		<rect x="0" y="0" rx="3" ry="3" width="<? echo ((strpos($this->user->rolle->gui, 'gui_smart.php') !== false)? '216' : '180'); ?>" height="36" class="navbutton_bg"/>
+		<rect x="0" y="0" rx="3" ry="3" width="<? echo ((strpos($this->user->rolle->gui, 'gui_light.php') !== false)? '216' : '180'); ?>" height="36" class="navbutton_bg"/>
 		<g transform="translate(0 0)">
 			<a href="javascript:void(0);" onclick="$('#search_div').toggle(); $('#geo_name_search_result_div').show()">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
@@ -130,7 +130,7 @@
 				</g>
 			</a>
 		</g>
-		<? if (strpos($this->user->rolle->gui, 'gui_smart.php') !== false) { ?>
+		<? if (strpos($this->user->rolle->gui, 'gui_light.php') !== false) { ?>
 			<g transform="translate(180 0)">
 			<a href="javascript:void(0);" onclick="$('#legenddiv').toggle();">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>

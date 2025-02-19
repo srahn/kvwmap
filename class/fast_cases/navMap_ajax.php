@@ -308,7 +308,7 @@ class GUI {
 			$size['margin']['width']
 			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
 			- ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
-			- (strpos($this->user->rolle->gui, 'gui_smart.php') !== false ? 0 : 18);	# Breite für möglichen Scrollbalken
+			- (strpos($this->user->rolle->gui, 'gui_light.php') !== false ? 0 : 18);	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
