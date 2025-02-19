@@ -92,7 +92,7 @@
 			</a>
 		</g>
 		<g transform="translate(36 0)">
-			<title><? echo $this->strPlaceSearch; ?></title>
+			<title><? echo $this->strShowMap; ?></title>
 			<a href="index.php?go=neu%20Laden&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(6.5 5) scale(0.04 0.05)">
@@ -101,7 +101,7 @@
 			</a>
 		</g>
 		<g transform="translate(72 0)">
-			<title><? echo $this->strPlaceSearch; ?></title>
+			<title><? echo $this->strPrintMapArea; ?></title>
 			<a href="index.php?go=Druckausschnittswahl&csrf_token=<? echo $_SESSION['csrf_token']; ?>">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(5 5) scale(0.05 0.05)">
@@ -110,7 +110,7 @@
 			</a>
 		</g>
 		<g transform="translate(108 0)">
-			<title><? echo $this->strPlaceSearch; ?></title>
+			<title><? echo $this->strNotifications; ?></title>
 			<a href="javascript:void(0);" onclick="if ($('#user_notifications').is(':visible') && $('.notification-box').filter(':visible').length > 0) { $('#user_notifications').hide('swing'); } else {
 			<? if (count_or_0($result['notifications']) == 0) { echo 'message([{ type: \'notice\', msg: \'Keine neuen Benachrichtigungen vorhanden.\'}]);'; } ?> $('.notification-box').show(); $('#user_notifications').show('swing'); }">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
@@ -127,7 +127,7 @@
 			</a>
 		</g>
 		<g transform="translate(144 0)">
-			<title><? echo $this->strPlaceSearch; ?></title>
+			<title><? echo $this->strSettings; ?></title>
 			<a href="javascript:void(0);" onclick="$('#user_options').toggle(); $('#sperr_div').toggle();">
 				<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" width="36" height="36" transform="translate(8 6) scale(0.045 0.045)">
@@ -137,7 +137,7 @@
 		</g>
 		<? if (strpos($this->user->rolle->gui, 'gui_light.php') !== false) { ?>
 			<g transform="translate(180 0)">
-				<title><? echo $this->strPlaceSearch; ?></title>
+				<title><? echo $this->strLegend; ?></title>
 				<a href="javascript:void(0);" onclick="$('#legenddiv').toggle();">
 					<rect x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
 					<g class="navbutton" width="36" height="36" transform="translate(7 5) scale(0.05 0.05)">
