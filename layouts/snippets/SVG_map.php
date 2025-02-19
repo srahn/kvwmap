@@ -822,6 +822,8 @@ function addfreetext(){
 function noMeasuring(){
 	routing_started = false;
   measuring = false;
+	top.document.GUI.str_pathx.value = "";
+	top.document.GUI.str_pathy.value = "";
   restart();
 }
 
