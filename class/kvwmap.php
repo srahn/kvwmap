@@ -21161,8 +21161,8 @@ class db_mapObj{
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
 						$replace_params = rolle::$layer_params;
-						// If key, value paires were passed replace it too
-						if (count($attribute_values) > 0) {
+						// If key, value pairs were passed replace it too in default
+						if (count($attribute_values) > 0 AND $replace_only == 'default') {
 							$replace_params = array_merge($replace_params, $attribute_values);
 						}
 						$attributes[$column][$i] = replace_params(
