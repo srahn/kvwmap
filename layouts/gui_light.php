@@ -20,7 +20,7 @@
 			<img id="preview_img" style="max-height: 940px" src="<? echo GRAPHICSPATH.'leer.gif'; ?>">
 		</div>
 		<a name="oben"></a>
-		<div onclick="remove_calendar();">
+		<div id="gui-table" onclick="remove_calendar();">
 			<form name="GUI" enctype="multipart/form-data" method="post" action="index.php" id="GUI">
 				<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?: '' ?>">
 				<div id="message_box"></div>		<!-- muss innerhalb des form stehen -->
