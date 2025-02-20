@@ -1623,6 +1623,7 @@ a.menuered:hover {
 
 #legend{
 	margin: 4px 0 4px 7px;
+	width: 93%;
 }
 
 .normallegend {

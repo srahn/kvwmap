@@ -17,6 +17,7 @@
 }
 
 #legend_layer {
+  display: block;
   position: absolute;
   top: 42px;
   right: 0px;
@@ -25,10 +26,17 @@
   border-bottom-left-radius: 10px;
   box-shadow: -4px 4px 5px #939191;
   opacity: 75%;
+  padding-top: 7px;
+  padding-bottom: 7px;
 }
 
 #scrolldiv {
-  overflow: visible;
+  max-height: 890px;
+  padding-bottom: 1px;
+}
+
+#legend {
+  margin: 0 0 0 7px;
 }
 
 .button_background {

@@ -4136,8 +4136,8 @@ echo '			</table>
 
 	function resizeMap2Window() {
 		global $sizes;
-
 		$size = $sizes[$this->user->rolle->gui];
+		$gui_light = ($this->user->rolle->gui == 'layouts/gui_light.php');
 
 		if (array_key_exists('legenddisplay', $this->formvars) AND $this->formvars['legenddisplay'] !== NULL) {
 			$hideLegend = $this->formvars['legenddisplay'];		// falls die Legende gerade ein/ausgeblendet wurde
@@ -4149,8 +4149,8 @@ echo '			</table>
 		$width = $this->formvars['browserwidth'] -
 			$size['margin']['width']
 			- ($this->user->rolle->hideMenue == 1 ? $size['menue']['hide_width'] : $size['menue']['width'])
-			- ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width'])
-			- (strpos($this->user->rolle->gui, 'gui_light.php') !== false ? 0 : 18);	# Breite für möglichen Scrollbalken
+			- ($gui_light? 0 : ($hideLegend == 1 ? $size['legend']['hide_width'] : $size['legend']['width']))
+			- ($gui_light ? 0 : 18);	# Breite für möglichen Scrollbalken
 
 		$height = $this->formvars['browserheight'] -
 			$size['margin']['height'] -
