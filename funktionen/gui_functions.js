@@ -77,11 +77,11 @@ function ahahDone(url, targets, req, actions) {
 		if (req.getResponseHeader('error') == 'true'){
 			message(req.responseText);
 		}
+		if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
+			window.location = url;
+			return;
+		}		
 		if (req.status == 200) { // only if "OK"
-			if (req.getResponseHeader('logout') == 'true') { // falls man zwischenzeitlich ausgeloggt wurde
-				window.location = url;
-				return;
-			}
 			if (req.getResponseHeader('warning') == 'true'){
 				message([{ type: 'warning', msg: req.responseText}]);
 			}
@@ -557,6 +557,10 @@ function message(messages, t_visible = 1000, t_fade = 2000, css_top, confirm_val
 		clearTimeout(messageTimeoutID);
 		$('#message_box').stop().fadeIn().show();
 	}
+}
+
+function clearMessageBox(){
+	document.getElementById('message_box').innerHTML = '';
 }
 
 function onload_functions() {
@@ -1521,6 +1525,7 @@ function mouseOutClassStatus(classid, imgsrc, width, height, type){
 }
 
 function showCopyrights(header){
+	clearMessageBox();
 	message([{
 			'type': 'info',
 			'msg': '<h2 style="padding: 4px 4px 10px 4px">' + header + '</h2><div id="copyrights_div"></div>'
@@ -1529,6 +1534,7 @@ function showCopyrights(header){
 }
 
 function showMapParameter(epsg_code, width, height, l) {
+	clearMessageBox();
 	var gui = document.GUI,
 			msg = " \
 				<div style=\"text-align: left\"> \

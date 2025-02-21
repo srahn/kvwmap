@@ -1352,9 +1352,9 @@ function microtime_float(){
 
 
 function copy_file_to_tmp($frompath, $dateiname = ''){
-  $dateityp = explode('.',$frompath);
+	$dateityp = pathinfo($frompath)['extension'];
   $dateipfad=IMAGEPATH;
-  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp;
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }

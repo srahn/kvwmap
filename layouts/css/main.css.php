@@ -146,17 +146,23 @@ body {
 	margin: auto;
 }
 
-.collapsed {
+.collapsed, .collapsedfull {
 	visibility: collapse;
   height: 0;
 	padding: 0 !important;
+	display: block;
 }
 
 .collapsed *{
 	visibility: collapse !important;
 	margin: 0 !important;
+  padding: 0;
+}
+
+.collapsedfull *{
+	visibility: collapse !important;
+	margin: 0 !important;
 	width: 0;
-  display: block;
   padding: 0;
 }
 

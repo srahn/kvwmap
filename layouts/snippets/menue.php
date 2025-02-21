@@ -32,7 +32,7 @@ function hideMenue() {
 		ahah('index.php', 'go=hideMenueWithAjax', new Array("", ""), new Array("", "execute_function"));
 		document.all.menue_options.innerHTML='';
 		document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>maximize_menue.png';
-		document.all.linkMinMax.href="javascript:showMenue()";
+		document.all.linkMinMax.onclick="showMenue()";
 		document.all.linkMinMax.title="Menü zeigen";
 	}
 }
@@ -42,7 +42,7 @@ function showMenue() {
   // löscht die aktuelle Tabelle mit dem Link auf das Nachladen des Menüs und
   // fügt das Menü in die Spalte der GUI wieder ein.
   ahah('index.php', 'go=getMenueWithAjax', new Array(document.all.menuebar, ""), new Array("", "execute_function"));
-  document.all.linkMinMax.href="javascript:hideMenue()";
+  document.all.linkMinMax.onclick="hideMenue()";
   document.all.imgMinMax.src='<?php echo GRAPHICSPATH; ?>minimize_menue.png';
   document.all.linkMinMax.title="Menü verstecken";
 }
@@ -51,14 +51,16 @@ function showMenue() {
     <tr>
       <td align="right"><?php
         if ($this->user->rolle->hideMenue) {
-          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
+          ?><a id="linkMinMax" title="Menü zeigen" href="javascript:void(0);" onclick="showMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>maximize_menue.png" border="0"></a><?php
         }
         else {
-        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
+        	?><a id="linkMinMax" title="Menü verstecken" href="javascript:void(0);" onclick="hideMenue()"><img id="imgMinMax" src="<?php  echo GRAPHICSPATH; ?>minimize_menue.png" border="0"></a><?php
         }
       ?></td>
     </tr>
 </table>
+<input type="hidden" name="refmap_x">
+<input type="hidden" name="refmap_y">
 
 <div id="menue_options">
 <?	
@@ -83,19 +85,16 @@ function showMenue() {
 				hspace="0"
 				style="cursor: pointer"
 			>
-			<input type="hidden" name="refmap_x">
-			<input type="hidden" name="refmap_y">
 			<script>
-				let img = document.getElementById("refmap");
-				img.x = img.getBoundingClientRect().left;
-				img.y = img.getBoundingClientRect().top;
 				function click(e) {
-					document.GUI.refmap_x.value = e.clientX - img.x;
-					document.GUI.refmap_y.value = e.clientY - img.y;
+					let refmap = document.getElementById("refmap").getBoundingClientRect();
+					document.GUI.refmap_x.value = e.clientX - refmap.x;
+					document.GUI.refmap_y.value = e.clientY - refmap.y;
 					neuLaden();
 					document.GUI.refmap_x.value = "";
 					document.GUI.refmap_y.value = "";
 				}
+				let img = document.getElementById("refmap");
 				img.addEventListener("click", click);
 			</script>
 			';

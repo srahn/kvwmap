@@ -13,4 +13,5 @@ $strFirstDatasets="Anfang";
 $strbackToSearch="zurück";
 $strLimit="Anzahl Treffer:";
 $strToTop="nach oben";
+$strNoQueryableLayers="Leider wurde kein abfragbares Thema ausgewählt.";
 ?>

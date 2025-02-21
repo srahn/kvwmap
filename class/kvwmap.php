@@ -2872,6 +2872,7 @@ echo '			</table>
 				$label->size = $dbLabel['size'];
 				$label->minsize = $dbLabel['minsize'];
 				$label->maxsize = $dbLabel['maxsize'];
+				$label->minfeaturesize = $dbLabel['minfeaturesize'];
 				if ($dbLabel['maxscale'] != '') {
 					$label->maxscaledenom = $dbLabel['maxscale'];
 				}
@@ -4558,7 +4559,7 @@ echo '			</table>
 			switch($this->formvars['type']) {
 				case 'select-one' : {					# ein Auswahlfeld soll mit den Optionen aufgefüllt werden 
 					$html = '>';			# Workaround für dummen IE Bug
-					if (pg_num_rows($ret[1]) > 1 OR $reqby_start > 0) {
+					if (pg_num_rows($ret[1]) > 1 OR $reqby_start > 0 OR $this->formvars['auswahl'] == 1) {
 						$html .= '<option value="">-- Bitte Auswählen --</option>';
 					}
 					while($rs = pg_fetch_array($ret[1])){
@@ -10659,48 +10660,13 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$mapdb = new db_mapObj($this->Stelle->id, $this->user->id);
 		$layerdb = $mapdb->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
 		$attributes = $mapdb->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL);
-		for ($i = 0; $i < count($attributes['name']); $i++) {
-			if ($attributes['options'][$i] == 'delete') { # statt zu Löschen soll hier nur ein Auto-Feld gesetzt werden
-				$attribute = $attributes['real_name'][$attributes['name'][$i]];
-				switch($attributes['form_element_type'][$i]) {
-					case 'Time' : {
-						$instead_updates[] = $attribute." = '".date('Y-m-d G:i:s')."'";
-					} break;
-					case 'User' : {
-						$instead_updates[] = $attribute." = '".$this->user->Vorname." ".$this->user->Name."'";
-					} break;
-					case 'UserID' : {
-						$instead_updates[] = $attribute.' = '.$this->user->id;
-					} break;
-					case 'Stelle' : {
-						$instead_updates[] = $attribute." = '".$this->Stelle->Bezeichnung."'";
-					} break;
-					case 'StelleID' : {
-						$instead_updates[] = $attribute.' = '.$this->Stelle->id;
-					} break;
-				}
-			}
-		}
 		$results = array();
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_'.$this->formvars['chosen_layer_id']]);
 		for ($i = 0; $i < count($checkbox_names); $i++) {
 			if ($this->formvars[$checkbox_names[$i]] == 'on') {
 				$element = explode(';', $checkbox_names[$i]);     #  check;table_alias;table;oid
 				$oids[] = $element[3];
-				if (!empty($instead_updates)) {			# statt zu Löschen sollen hier nur die Auto-Felder gesetzt werden
-					$sql = "
-							UPDATE
-								" . pg_quote($element[2]) . "
-							SET
-								" . implode(', ', $instead_updates) . "
-							WHERE
-								" . $layer['oid'] . " = " . quote($element[3]);
-						$ret = $layerdb->execSQL($sql, 4, 1, true);
-						$this->success = $ret['success'];
-				}
-				else {
-					$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $attributes, $element[3]);
-				}
+				$results = $results + $this->Datensatz_Loeschen($layerdb, $layer, $attributes, $element[3]);
 			}
 		}
 		if ($output) {
@@ -10743,131 +10709,168 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function Datensatz_Loeschen($layerdb, $layer, $attributes, $oid) {
 		$results = array();
-		if (!empty($layer['trigger_function'])) {
-			if ($layer['oid'] == 'oid') {
-				$oid_sql = 'oid,';
-			}
-			$sql_old = "
-				SELECT ".
-					$oid_sql . " *
-				FROM
-					" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
-				WHERE
-					" . $layer['oid'] . " = '" . $oid . "'";
-			#echo '<br>Sql before delete: ' . $sql_old; #pk
-			$ret = $layerdb->execSQL($sql_old, 4, 1, true);
-			if ($ret['success']) {
-				$old_dataset = pg_fetch_assoc($ret['query']);
-
-				# Rufe Before Delete trigger
-				$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $oid, $old_dataset);
-
-				# Rufe Instead Delete trigger auf
-				$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $oid, $old_dataset);
-			}
-			else {
-				$old_dataset = array();
-				$results[] = array('type' => 'error', 'msg' => $ret['msg']);
-				$this->success = false;
-			}
-		}
-
-		if ($trigger_result['executed']) {
-			#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
-			# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
-			if ($trigger_result['success']) {
-				$trigger_result_type = 'notice';
-			}
-			else {
-				$this->success = false;
-				$trigger_result_type = 'error';
-			}
-			if ($trigger_result['message'] != '') {
-				$results[] = array('type' => $trigger_result_type, 'msg' => $trigger_result['message']);
-			}
-		}
-		else {
-			#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
-			# Instead Triggerfuktion wurde nicht ausgeführt
-			# Delete the object regularly in database
-
-			# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
-			$document_attributes = array();
-			for ($i = 0; $i < count($attributes['name']); $i++) {
-				if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
-					$document_attributes[] = $attributes['name'][$i];
+		for ($i = 0; $i < count($attributes['name']); $i++) {
+			if ($attributes['options'][$i] == 'delete') { # statt zu Löschen soll hier nur ein Auto-Feld gesetzt werden
+				$attribute = $attributes['real_name'][$attributes['name'][$i]];
+				switch($attributes['form_element_type'][$i]) {
+					case 'Time' : {
+						$instead_updates[] = $attribute." = '".date('Y-m-d G:i:s')."'";
+					} break;
+					case 'User' : {
+						$instead_updates[] = $attribute." = '".$this->user->Vorname." ".$this->user->Name."'";
+					} break;
+					case 'UserID' : {
+						$instead_updates[] = $attribute.' = '.$this->user->id;
+					} break;
+					case 'Stelle' : {
+						$instead_updates[] = $attribute." = '".$this->Stelle->Bezeichnung."'";
+					} break;
+					case 'StelleID' : {
+						$instead_updates[] = $attribute.' = '.$this->Stelle->id;
+					} break;
 				}
 			}
-			if(!empty($document_attributes)){
-				$this->formvars['selected_layer_id'] = $layer['Layer_ID'];
-				$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
-				$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
-				$this->formvars['no_output'] = true;
-				$search_save = $this->formvars['search'];
-				$this->GenerischeSuche_Suchen();
-				$this->formvars['no_output'] = false;
-				$this->formvars['search'] = $search_save;
-				$this->search = $search_save;
-			}
-
+		}
+		if (!empty($instead_updates)) {			# statt zu Löschen sollen hier nur die Auto-Felder gesetzt werden
 			$sql = "
-				DELETE FROM
+				UPDATE
 					" . pg_quote($layer['maintable']) . "
+				SET
+					" . implode(', ', $instead_updates) . "
 				WHERE
-					" . pg_quote($layer['oid']) . " = '" . $oid . "'
-			";
-			$oids[] = $element[3];
+					" . $layer['oid'] . " = " . quote($oid);
 			$ret = $layerdb->execSQL($sql, 4, 1, true);
 			if ($ret['success']) {
-				if ($ret['msg']) {	# Notice aus Trigger
-					$results[] = array('type' => $ret['type'], 'msg' => $ret['msg']);
+				$results[] = array('type' => 'notice', 'msg' => 'Löschen erfolgreich<br>');
+			}
+		}
+		else {															# richtig löschen
+			if (!empty($layer['trigger_function'])) {
+				if ($layer['oid'] == 'oid') {
+					$oid_sql = 'oid,';
 				}
-				$sql_result = pg_fetch_row($ret['query']);	# Select aus Regel
-				if ($sql_result[0] != '') {
-					$results[] = array('type' => 'info', 'msg' => $sql_result[0]);
-				}
-				# Prüfe ob Löschung kein Datensatz betroffen hat
-				if (pg_affected_rows($ret['query']) == 0) {
-					$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht.<br>');
-					$this->success = false;
+				$sql_old = "
+					SELECT ".
+						$oid_sql . " *
+					FROM
+						" . $layer['schema'] . '.' . pg_quote($layer['maintable']) . "
+					WHERE
+						" . $layer['oid'] . " = '" . $oid . "'";
+				#echo '<br>Sql before delete: ' . $sql_old; #pk
+				$ret = $layerdb->execSQL($sql_old, 4, 1, true);
+				if ($ret['success']) {
+					$old_dataset = pg_fetch_assoc($ret['query']);
+
+					# Rufe Before Delete trigger
+					$this->exec_trigger_function('BEFORE', 'DELETE', $layer, $oid, $old_dataset);
+
+					# Rufe Instead Delete trigger auf
+					$trigger_result = $this->exec_trigger_function('INSTEAD', 'DELETE', $layer, $oid, $old_dataset);
 				}
 				else {
-					if ($this->user->rolle->upload_only_file_metadata == 1 AND is_array($this->qlayerset) AND is_array($this->qlayerset[0]) AND is_array($this->qlayerset[0]['shape'])) {
-						include_once(CLASSPATH . 'BelatedFile.php');
-						foreach ($this->qlayerset[0]['shape'] AS $dataset) {
-							foreach ($document_attributes AS $document_attribute) {
-								$where = "
-									`user_id` = " . $this->user->id . " AND
-									`layer_id` = " . $layer['Layer_ID'] . " AND
-									`attribute_name` = '" . $document_attribute . "' AND
-									`file` = '" . $dataset['datei'] . "'
-								";
-								foreach (BelatedFile::find($this, $where) AS $belated_file) {
-									$belated_file->delete();
+					$old_dataset = array();
+					$results[] = array('type' => 'error', 'msg' => $ret['msg']);
+					$this->success = false;
+				}
+			}
+
+			if ($trigger_result['executed']) {
+				#echo '<br>Delete Trigger Funktion wurde ausgeführt.';
+				# Instead Triggerfunktion wurde ausgeführt, übergebe Erfolgsmeldung
+				if ($trigger_result['success']) {
+					$trigger_result_type = 'notice';
+				}
+				else {
+					$this->success = false;
+					$trigger_result_type = 'error';
+				}
+				if ($trigger_result['message'] != '') {
+					$results[] = array('type' => $trigger_result_type, 'msg' => $trigger_result['message']);
+				}
+			}
+			else {
+				#echo '<br>Delete Trigger Funktion wurde nicht ausgeführt.';
+				# Instead Triggerfuktion wurde nicht ausgeführt
+				# Delete the object regularly in database
+
+				# überprüfen ob Dokument-Attribute vorhanden sind, wenn ja deren Datei-Pfade ermitteln und nach erfolgreichem Löschen auch die Dokumente löschen
+				$document_attributes = array();
+				for ($i = 0; $i < count($attributes['name']); $i++) {
+					if($attributes['form_element_type'][$i] == 'Dokument' AND $attributes['table_name'][$i] == $layer['maintable']){
+						$document_attributes[] = $attributes['name'][$i];
+					}
+				}
+				if(!empty($document_attributes)){
+					$this->formvars['selected_layer_id'] = $layer['Layer_ID'];
+					$this->formvars['value_'.$layer['maintable'].'_oid'] = $oid;
+					$this->formvars['operator_'.$layer['maintable'].'_oid'] = '=';
+					$this->formvars['no_output'] = true;
+					$search_save = $this->formvars['search'];
+					$this->GenerischeSuche_Suchen();
+					$this->formvars['no_output'] = false;
+					$this->formvars['search'] = $search_save;
+					$this->search = $search_save;
+				}
+
+				$sql = "
+					DELETE FROM
+						" . pg_quote($layer['maintable']) . "
+					WHERE
+						" . pg_quote($layer['oid']) . " = '" . $oid . "'
+				";
+				$oids[] = $element[3];
+				$ret = $layerdb->execSQL($sql, 4, 1, true);
+				if ($ret['success']) {
+					if ($ret['msg']) {	# Notice aus Trigger
+						$results[] = array('type' => $ret['type'], 'msg' => $ret['msg']);
+					}
+					$sql_result = pg_fetch_row($ret['query']);	# Select aus Regel
+					if ($sql_result[0] != '') {
+						$results[] = array('type' => 'info', 'msg' => $sql_result[0]);
+					}
+					# Prüfe ob Löschung kein Datensatz betroffen hat
+					if (pg_affected_rows($ret['query']) == 0) {
+						$results[] = array('type' => 'error', 'msg' => '<br>Datensatz wurde nicht gelöscht.<br>');
+						$this->success = false;
+					}
+					else {
+						if ($this->user->rolle->upload_only_file_metadata == 1 AND is_array($this->qlayerset) AND is_array($this->qlayerset[0]) AND is_array($this->qlayerset[0]['shape'])) {
+							include_once(CLASSPATH . 'BelatedFile.php');
+							foreach ($this->qlayerset[0]['shape'] AS $dataset) {
+								foreach ($document_attributes AS $document_attribute) {
+									$where = "
+										`user_id` = " . $this->user->id . " AND
+										`layer_id` = " . $layer['Layer_ID'] . " AND
+										`attribute_name` = '" . $document_attribute . "' AND
+										`file` = '" . $dataset['datei'] . "'
+									";
+									foreach (BelatedFile::find($this, $where) AS $belated_file) {
+										$belated_file->delete();
+									}
 								}
 							}
 						}
+						$results[] = array('type' => 'notice', 'msg' => 'Löschen erfolgreich<br>');
 					}
-					$results[] = array('type' => 'notice', 'msg' => 'Löschen erfolgreich<br>');
+				}
+				else {
+					$results[] = array('type' => 'error', 'msg' => $ret['msg']);
+					$this->success = false;
 				}
 			}
-			else {
-				$results[] = array('type' => 'error', 'msg' => $ret['msg']);
-				$this->success = false;
-			}
-		}
 
-		if ($this->success) {
-			# Dokumente löschen
-			if ($document_attributes AND is_array($document_attributes)) {
-				foreach($document_attributes as $document_attribute){
-					$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+			if ($this->success) {
+				# Dokumente löschen
+				if ($document_attributes AND is_array($document_attributes)) {
+					foreach($document_attributes as $document_attribute){
+						$this->deleteDokument($this->qlayerset[0]['shape'][0][$document_attribute], $layer['document_path'], $layer['document_url']);
+					}
 				}
-			}
-			$this->qlayerset[0]['shape'] = array();
-			# After delete trigger
-			if (!empty($layer['trigger_function'])) {
-				$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
+				$this->qlayerset[0]['shape'] = array();
+				# After delete trigger
+				if (!empty($layer['trigger_function'])) {
+					$this->exec_trigger_function('AFTER', 'DELETE', $layer, '', $old_dataset);
+				}
 			}
 		}
 		return $results;
@@ -20874,7 +20877,7 @@ class db_mapObj{
 		return $attributes;
   }
 
-  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options')) {
+  function read_layer_attributes($layer_id, $layerdb, $attributenames, $all_languages = false, $recursive = false, $get_default = false, $replace = true, $replace_only = array('default', 'options', 'vcheck_value')) {
 		global $language;
 		$attributes = array(
 			'name' => array(),
@@ -20987,6 +20990,11 @@ class db_mapObj{
 			$attributes['decimal_length'][$i]= $rs['decimal_length'];
 			$attributes['default'][$i] = $rs['default'];
 			$attributes['options'][$i] = $rs['options'];
+			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
+			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
+			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
+			$attributes['dependents'][$i] = &$dependents[$rs['name']];
+			$dependents[$rs['vcheck_attribute']][] = $rs['name'];			
 
 			if ($replace) {
 				foreach($replace_only AS $column) {
@@ -21027,11 +21035,6 @@ class db_mapObj{
 			$attributes['mandatory'][$i] = $rs['mandatory'];
 			$attributes['quicksearch'][$i] = $rs['quicksearch'];
 			$attributes['visible'][$i] = $rs['visible'];
-			$attributes['vcheck_attribute'][$i] = $rs['vcheck_attribute'];
-			$attributes['vcheck_operator'][$i] = $rs['vcheck_operator'];
-			$attributes['vcheck_value'][$i] = $rs['vcheck_value'];
-			$attributes['dependents'][$i] = &$dependents[$rs['name']];
-			$dependents[$rs['vcheck_attribute']][] = $rs['name'];
 			$attributes['privileg'][$i] = $rs['privileg'];
 			$attributes['query_tooltip'][$i] = $rs['query_tooltip'];
 			if ($rs['form_element_type'] == 'Style') {
@@ -22097,11 +22100,11 @@ class db_mapObj{
     if($formvars["label_angle"] != ''){$sql.="angle = '" . $formvars["label_angle"]."',";}else{$sql.="angle = NULL,";}
     if($formvars["label_anglemode"]){$sql.="anglemode = '" . $formvars["label_anglemode"]."',";}else $sql.="anglemode = NULL,";
     if($formvars["label_buffer"]){$sql.="buffer = '" . $formvars["label_buffer"]."',";}else $sql.="buffer = NULL,";
-    if($formvars["label_minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["label_minfeaturesize"]."',";}
-    if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}
+    if($formvars["label_minfeaturesize"]){$sql.="minfeaturesize = '" . $formvars["label_minfeaturesize"]."',";}else{$sql.="minfeaturesize = NULL,";}
+    if($formvars["label_maxfeaturesize"]){$sql.="maxfeaturesize = '" . $formvars["label_maxfeaturesize"]."',";}else{$sql.="maxfeaturesize = NULL,";}
     if($formvars["label_partials"] != ''){$sql.="partials = '" . $formvars["label_partials"]."',";}else{$sql.="partials = NULL,";}
-		if($formvars["label_maxlength"] != ''){$sql.="maxlength = '" . $formvars["label_maxlength"]."',";}
-		if($formvars["label_repeatdistance"] != ''){$sql.="repeatdistance = '" . $formvars["label_repeatdistance"]."',";}
+		if($formvars["label_maxlength"] != ''){$sql.="maxlength = '" . $formvars["label_maxlength"]."',";}else{$sql.="maxlength = NULL,";}
+		if($formvars["label_repeatdistance"] != ''){$sql.="repeatdistance = '" . $formvars["label_repeatdistance"]."',";}else{$sql.="repeatdistance = NULL,";}
     if($formvars["label_wrap"] != ''){$sql.="wrap = '" . $formvars["label_wrap"]."',";}else{$sql .= "wrap = NULL,";}
 		if($formvars["label_text"] != ''){$sql.="text = '" . $formvars["label_text"]."',";}else{$sql .= "text = NULL,";}
     if($formvars["label_the_force"] != ''){$sql.="the_force = '" . $formvars["label_the_force"]."',";}else{$sql.="the_force = NULL,";}
