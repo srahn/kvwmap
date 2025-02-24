@@ -163,9 +163,9 @@ class PgObject {
 			FROM
 				" . $from . "
 			WHERE
-				' . $where . "
-			" . $order . "
-			" . $limit . "
+				" . $where . "
+				" . $order . "
+				" . $limit . "
 		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
