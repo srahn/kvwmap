@@ -1692,6 +1692,15 @@ function mouseup(evt){
 
 	multipointfunctions = true;
 
+	function update_geometry(){
+		document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
+		updatepaths();
+		if (["move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
+			enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+		}
+		redrawmultipoint();
+	}
+
 	function getxcoordsfromsvgpath(path){
 		xcoords = new Array();
 		parts = path.split(" ");
@@ -3692,7 +3701,7 @@ $transformfunctions = '
 		if(polygonfunctions){
 			applypolygons();
 		}
-		else{
+		else if(linefunctions){
 			applylines();
 		}
 	}
@@ -3738,7 +3747,7 @@ $transformfunctions = '
 		if(polygonfunctions){
 			applypolygons();
 		}
-		else{
+		else if(linefunctions){
 			applylines();
 		}
 		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid", new Array(enclosingForm.result), new Array("setvalue"));
