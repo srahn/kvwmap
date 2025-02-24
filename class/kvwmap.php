@@ -16228,17 +16228,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 						else {
 							$layer = new layerObj($map);
-							$layer->set('data', $layerset[$i]['Data']);
+							$layer->data = $layerset[$i]['Data'];
 							if ($layerset[$i]['tileindex'] != '') {
-								$layer->set('tileindex', SHAPEPATH.$layerset[$i]['tileindex']);
+								$layer->tileindex = SHAPEPATH.$layerset[$i]['tileindex'];
 							}
-							$layer->set('status',MS_ON);
-							$layer->set('type',$layerset[$i]['Datentyp']);
+							$layer->status = MS_ON;
+							$layer->type = $layerset[$i]['Datentyp'];
 							if ($layerset[$i]['template']!='') {
-								$layer->set('template',$layerset[$i]['template']);
+								$layer->template = $layerset[$i]['template'];
 							}
 							else {
-								$layer->set('template', ' ');		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
+								$layer->template = ' ';		# ohne Template kann der Layer über den Mapserver nicht abgefragt werden
 							}
 							$projFROM = new projectionObj("init=epsg:" . $this->user->rolle->epsg_code);
 							$projTO = new projectionObj("init=epsg:" . $layerset[$i]['epsg_code']);
@@ -16248,33 +16248,54 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 								# bei Rasterlayern nur punktuell abfragen
 								$point = new PointObj();
 								$point->setXY($rect2->minx+($rect2->maxx-$rect2->minx)/2, $rect2->miny+($rect2->maxy-$rect2->miny)/2);
-								@$layer->queryByPoint($point, MS_MULTIPLE, 0);
+								if (MAPSERVERVERSION >= 800) {
+									@$layer->queryByPoint($map, $point, MS_MULTIPLE, 0);
+								}
+								else {
+									@$layer->queryByPoint($point, MS_MULTIPLE, 0);
+								}
 							}
 							else {
-								@$layer->queryByRect($rect2);
+								if (MAPSERVERVERSION >= 800) {
+									@$layer->queryByRect($map, $rect2);
+								}
+								else {
+									@$layer->queryByRect($rect2);
+								}
 							}
 							$anzResult=$layer->getNumResults();
 							for ($j = 0; $j < $anzResult; $j++) {
 								$result = $layer->getResult($j);
-								if (MAPSERVERVERSION < '600') {
-									$s = $layer->getFeature($result->shapeindex);
+								$s = $layer->getShape($result);
+								$count = 0;
+								if (MAPSERVERVERSION >= 800) {
+									$lastvalue = '';
+									for ($v = 0; $v < $s->numvalues; $v++) {
+										$value = $s->getValue($v);
+										if ($value != $lastvalue) {
+											$layerset[$i]['shape'][$j][$v] = utf8_encode($value);
+											$layerset[$i]['attributes']['name'][$count] = $v;
+											$layerset[$i]['attributes']['privileg'][$count] = 0;
+											$layerset[$i]['attributes']['visible'][$count] = true;
+											$lastvalue = $value;
+										}
+										$count++;
+									}
 								}
 								else {
-									$s = $layer->getShape($result);
-								}
-								$count = 0;
-								foreach ($s->values as $key => $value) {
-									if (
-										$layerset[$i]['Datentyp'] != 3 OR
-										in_array($key, array('x','y','value_0'))
-									) {
-										# für Rasterlayer nur diese Daten ausgeben
-										$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
-										$layerset[$i]['attributes']['name'][$count] = $key;
-										$layerset[$i]['attributes']['privileg'][$count] = 0;
-										$layerset[$i]['attributes']['visible'][$count] = true;
+									foreach ($s->values as $key => $value) {
+										if (
+											$layerset[$i]['Datentyp'] != 3 OR
+											in_array($key, array('x','y','value_0'))
+										) {
+											# für Rasterlayer nur diese Daten ausgeben
+											$layerset[$i]['shape'][$j][$key] = utf8_encode($value);
+											$layerset[$i]['attributes']['name'][$count] = $key;
+											$layerset[$i]['attributes']['privileg'][$count] = 0;
+											$layerset[$i]['attributes']['visible'][$count] = true;
+										}
+										$count++;
 									}
-									$count++;
 								}
 							}
 							$this->qlayerset[] = $layerset[$i];
@@ -16283,19 +16304,19 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 					case MS_OGR : { # OGR Layer (4)
 						$layer=new layerObj($map);
-						if (MAPSERVERVERSION < '540') {
-							$layer->set('connectiontype',$layerset[$i]['connectiontype']);
-						}
-						else {
-							$layer->setConnectionType($layerset[$i]['connectiontype']);
-						}
-						$layer->set('connection', $layerset[$i]['connection']);
-						$layer->set('type',$layerset[$i]['Datentyp']);
-						$layer->set('status',MS_ON);
+						$layer->setConnectionType($layerset[$i]['connectiontype'], '');
+						$layer->connection = $layerset[$i]['connection'];
+						$layer->type = $layerset[$i]['Datentyp'];
+						$layer->status = MS_ON;
 						if ($layerset[$i]['template']!='') {
 							$layer->set('template',$layerset[$i]['template']);
 						}
-						@$layer->queryByRect($rect);
+						if (MAPSERVERVERSION >= 800) {
+							@$layer->queryByRect($map, $rect);
+						}
+						else {
+							@$layer->queryByRect($rect);
+						}
 						$layer->open();
 						$anzResult=$layer->getNumResults();
 						for ($j=0;$j<$anzResult;$j++) {
