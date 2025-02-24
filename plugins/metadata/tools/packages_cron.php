@@ -33,7 +33,7 @@
     $userDb->passwd = MYSQL_PASSWORD;
     $userDb->dbName = MYSQL_DBNAME;
     $GUI->database = $userDb;
-    $GUI->database->open(true);
+    $GUI->database->open();
     $GUI->pgdatabase = new pgdatabase();
     $GUI->pgdatabase->open(1);
 

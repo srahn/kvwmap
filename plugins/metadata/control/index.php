@@ -12,7 +12,9 @@
 // metadata_order_bundle_package
 // metadata_order_data_package
 // metadata_reorder_data_packages
+// metadata_set_ressource_status
 // metadata_show_data_packages
+// metadata_show_ressources_status
 // metadata_update_outdated
 // Metadaten_Auswaehlen_Senden
 // Metadaten_Recherche
@@ -157,8 +159,24 @@ function go_switch_metadata($go){
 			echo json_encode($response);
 		} break;
 
+		case 'metadata_set_ressource_status' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer',
+				'status_id' => 'integer'
+			]);
+			$response = $GUI->metadata_set_ressource_status($GUI->formvars['ressource_id'], $GUI->formvars['status_id']);
+			echo json_encode($response);
+		} break;
+
 		case 'metadata_show_data_packages': {
 			$GUI->metadata_show_data_packages();
+		} break;
+
+		case 'metadata_show_ressources_status' : {
+			$GUI->sanitize([
+				'ressource_id' => 'integer'
+			]);
+			$GUI->metadata_show_ressources_status($GUI->formvars['ressource_id']);
 		} break;
 
 		case 'metadata_update_outdated' : {
