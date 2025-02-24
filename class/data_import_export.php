@@ -1282,6 +1282,7 @@ class data_import_export {
   }
 
 	function export_exportieren($formvars, $stelle, $user, $exportpath = '', $exportfilename = '', $suppress_err_msg = false) {
+		ini_set('memory_limit', '8192M');
 		global $GUI;
 		global $kvwmap_plugins;
 		$currenttime = date('Y-m-d H:i:s',time());

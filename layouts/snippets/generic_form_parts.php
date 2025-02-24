@@ -434,7 +434,7 @@
 						$datapart .= 'checked ';
 					}
 					$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
-					$datapart .= 'value="' . $enum_key . '"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
+					$datapart .= 'value="' . $enum_key . '"><label class="radio-label" for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
 					if(!$attributes['horizontal'][$j] OR (is_numeric($attributes['horizontal'][$j]) AND($e+1) % $attributes['horizontal'][$j] == 0))$datapart .= '<br>';
 					$e++;
 				}
@@ -1360,6 +1360,9 @@
 		}
 		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 			$geomtype = 'Line';
+		}
+		elseif ($geomtype == 'MULTIPOINT') {
+			$geomtype = 'Multipoint';
 		}
 		return $geomtype;
 	}

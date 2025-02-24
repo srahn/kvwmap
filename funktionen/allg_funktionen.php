@@ -534,7 +534,11 @@ function buildsvgpolygonfromwkt($wkt){
 }
 
 function transformCoordsSVG($path){
+	$path = str_replace([',', 'cx=', 'cy=', '"', ','], [' ', ''], $path);		# bei MULTIPOINTs mit drin
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
+	if (strpos($path, 'M') === false) {
+		$path = 'M ' . $path;
+	}
   $svgcoords = explode(' ',$path);
 	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
@@ -1359,9 +1363,9 @@ function microtime_float(){
 
 
 function copy_file_to_tmp($frompath, $dateiname = ''){
-  $dateityp = explode('.',$frompath);
+	$dateityp = pathinfo($frompath)['extension'];
   $dateipfad=IMAGEPATH;
-  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp;
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }

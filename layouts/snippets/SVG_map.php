@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -218,7 +218,6 @@ $last_x = 0;
 global $events;
 $events = true;
 
-include(LAYOUTPATH . 'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 include(LAYOUTPATH . 'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
 include(LAYOUTPATH . 'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
 include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
@@ -823,6 +822,8 @@ function addfreetext(){
 function noMeasuring(){
 	routing_started = false;
   measuring = false;
+	top.document.GUI.str_pathx.value = "";
+	top.document.GUI.str_pathy.value = "";
   restart();
 }
 
@@ -838,12 +839,20 @@ function measure(){
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	}
   doing = "measure";
-	top.document.GUI.previous_button.value = doing;
-	if(top.document.GUI.str_pathx.value != ""){
+	if(top.document.GUI.previous_button.value == "measure" && top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
 		top.document.GUI.str_pathx.value = "";
 		top.document.GUI.str_pathy.value = "";
 	}
+	else{
+		top.document.GUI.measured_distance.value = 0;
+		measured_distance = 0;
+		new_distance = 0;
+		freehand_measuring = false;
+  	measuring = false;
+  	restart();
+	}
+	top.document.GUI.previous_button.value = doing;
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 

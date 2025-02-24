@@ -468,7 +468,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom) {
+	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom, $aggregate_function = 'st_union') {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
 		# Abfragebereich berechnen
 		if ($input_coord) {
@@ -485,7 +485,7 @@ class spatial_processor {
 			$maxy = $miny + $height;
 			$rect = rectObj($minx, $miny, $maxx, $maxy);
 		}
-		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
+		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function);
 		return $geom;
 	}
  
@@ -555,7 +555,7 @@ class spatial_processor {
   }
 
 	function add_buffered_vertices($geom_1, $formvars) {
-		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false);
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false, 'st_collect');
 		if($querygeometryWKT == '') {
 			header('warning: true');
 			echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
@@ -653,7 +653,7 @@ class spatial_processor {
     }
   }
 
-	function getgeometrybyquery($rect, $layer_id, $singlegeom) {
+	function getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function) {
 		$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
 		if ($layer_id != '') {
 			if ($layer_id < 0) { # Rollenlayer
@@ -767,7 +767,7 @@ class spatial_processor {
 					}
 					if (!$punktuell) {
 						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
-						$columnname = "st_union(".$columnname.")";
+						$columnname = $aggregate_function . "(".$columnname.")";
 					}
 					$columnname = 'ST_Force2D(' . $columnname . ')';
 					$sql = "
@@ -1060,6 +1060,22 @@ class spatial_processor {
     }
     return $WKT;
   }
+
+	function composeMultipointWKTStringFromSVGPath($svgpath) {
+		if ($svgpath != '') {
+			$wkt = "MULTIPOINT((";
+			$coord = explode(' ', $svgpath);
+			$wkt = $wkt . $coord[1] . " " . $coord[2];
+			for ($i = 3; $i < count($coord) - 1; $i++){
+				if ($coord[$i] != ""){
+					$wkt = $wkt . "),(" . $coord[$i] . " " . $coord[$i+1];
+				}
+				$i++;
+			}
+			$wkt = $wkt . "))";
+		}
+		return $wkt;
+	}
   
   function transformCoordsSVG($path){
 	if($path != ''){

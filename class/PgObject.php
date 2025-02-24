@@ -42,14 +42,14 @@ class PgObject {
 	private $from;
 	private $where;
 
-	function __construct($gui, $schema, $tableName, $identifier = 'id', $identifier_type = 'integer') {
-		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, false);
+	function __construct($gui, $schema_name, $table_name, $identifier = 'id', $identifier_type = 'integer') {
+		$gui->debug->show('Create new Object PgObject with schema ' . $schema_name . ' table ' . $table_name, $this->show);
 		$this->debug = $gui->debug;
 		$this->gui = $gui;
 		$this->database = $gui->pgdatabase;
-		$this->schema = $schema;
-		$this->tableName = $tableName;
-		$this->qualifiedTableName = $schema . '.' . $tableName;
+		$this->schema = $schema_name;
+		$this->tableName = $table_name;
+		$this->qualifiedTableName = $schema_name . '.' . $table_name;
 		$this->data = array();
 		$this->select = '*';
 		$this->from = $schema . '.' . $tableName;
@@ -163,7 +163,7 @@ class PgObject {
 			FROM
 				" . $from . "
 			WHERE
-				" . $where . "
+				' . $where . "
 			" . $order . "
 			" . $limit . "
 		";
@@ -179,7 +179,7 @@ class PgObject {
 	/**
 	 * Function query, set and return extent of all features in epsg of $this->geom_column in $this->extent variable
 	 * additional it query and set the extents in epsg given in $ows_srs string
-	 * @param string $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
+	 * @param String $ows_srs: Empty space separated list of srs codes with or without EPSG: or epsg:
 	 * e.g. "EPSG:25833 EPSG:25832 EPSG:4326 5650"
 	 * with an empty string in $ows_srs only extent in geom_column srs will be queried, set and returned.
 	 * @return Array Array with extent in geom_column srs, other extents will be set in extents array with epsg codes as keys
@@ -649,10 +649,10 @@ class PgObject {
 
 	/**
 	* Query all child elementes of a table related over given fk_id
-	* @param string $child_schema - Name of the schema of child table
-	* @param string $child_table - Name of the table of child table
-	* @param string $fkey_column - Name of the column where the fkeys resists in child table
-	* @param string $fk_id - ID of the parent to filter the childs that belongs to the parent
+	* @param String $child_schema - Name of the schema of child table
+	* @param String $child_table - Name of the table of child table
+	* @param String $fkey_column - Name of the column where the fkeys resists in child table
+	* @param String $fk_id - ID of the parent to filter the childs that belongs to the parent
 	* @return Array(PgObject) - The childs that belongs to the parent over this fkey constraint
 	*/
 	function find_childs($child_schema, $child_table, $fkey_column, $fk_id) {

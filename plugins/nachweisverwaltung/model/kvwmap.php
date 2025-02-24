@@ -235,7 +235,7 @@
       $GUI->antrag=new antrag($antr_selected,$stelle_id,$GUI->pgdatabase);
 			$GUI->antrag->getAntraege(array($antr_selected),'','','',$stelle_id);
 			$GUI->antrag->searches = $GUI->Suchparameter_abfragen($antr_selected, $stelle_id);
-			$antragsnr = $GUI->antrag->nr;
+			$antragsnr = sonderzeichen_umwandeln($GUI->antrag->nr);
 			if($stelle_id != '')$antragsnr.='~'.$stelle_id;
       if(is_dir(RECHERCHEERGEBNIS_PATH.$antragsnr)){
         chdir(RECHERCHEERGEBNIS_PATH);
