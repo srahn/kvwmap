@@ -1,4 +1,4 @@
-<? include(LAYOUTPATH . 'languages/zwischenablage_' . $this->user->rolle->language . '.php'); ?>
+<? include(LAYOUTPATH . 'languages/zwischenablage_' . rolle::$language . '.php'); ?>
 
 <style>
 

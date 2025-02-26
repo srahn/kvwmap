@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/SVG_map_' . rolle::$language . '.php');
 #
 ###################################################################
 #                                                                 #

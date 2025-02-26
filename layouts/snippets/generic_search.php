@@ -1,5 +1,5 @@
 <? 
-include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 

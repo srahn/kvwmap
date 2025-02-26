@@ -1,6 +1,6 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/data_export_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/data_export_'.rolle::$language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 	$simple = ($this->formvars['simple'] == 1);
 	$document_ids = [];

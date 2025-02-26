@@ -1,7 +1,7 @@
 <?
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/rollenwahl_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/rollenwahl_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	global $supportedLanguages;
 	global $last_x;
@@ -207,11 +207,11 @@ if ($this->Fehlermeldung!='') {
 										</td>
 										<td class="rollenwahl-option-data">
 											<select name="language">
-												<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<? if($this->user->rolle->language == 'german') { echo ' selected'; }	?>><? echo $strGerman; ?></option><? } ?>
-												<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<? if($this->user->rolle->language == 'low-german') { echo ' selected'; }	?>><? echo $strPlatt; ?></option><? } ?>
-												<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<? if($this->user->rolle->language == 'english') { echo ' selected'; }	?>><? echo $strEnglish; ?></option><? } ?>
-												<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<? if($this->user->rolle->language == 'polish') { echo ' selected'; }	?>><? echo $strPolish; ?></option><? } ?>
-												<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<? if($this->user->rolle->language == 'vietnamese') { echo ' selected'; }	?>><? echo $strVietnamese; ?></option><? } ?>
+												<? if(in_array('german', $supportedLanguages)){ ?><option value="german"<? if(rolle::$language == 'german') { echo ' selected'; }	?>><? echo $strGerman; ?></option><? } ?>
+												<? if(in_array('low-german', $supportedLanguages)){ ?><option value="low-german"<? if(rolle::$language == 'low-german') { echo ' selected'; }	?>><? echo $strPlatt; ?></option><? } ?>
+												<? if(in_array('english', $supportedLanguages)){ ?><option value="english"<? if(rolle::$language == 'english') { echo ' selected'; }	?>><? echo $strEnglish; ?></option><? } ?>
+												<? if(in_array('polish', $supportedLanguages)){ ?><option value="polish"<? if(rolle::$language == 'polish') { echo ' selected'; }	?>><? echo $strPolish; ?></option><? } ?>
+												<? if(in_array('vietnamese', $supportedLanguages)){ ?><option value="vietnamese"<? if(rolle::$language == 'vietnamese') { echo ' selected'; }	?>><? echo $strVietnamese; ?></option><? } ?>
 											</select>&nbsp;
 											<span data-tooltip="<? echo $strHintLanguage; ?>"></span>
 										</td>
