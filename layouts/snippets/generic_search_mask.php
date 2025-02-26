@@ -1,5 +1,5 @@
 <?
-include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include_once(SNIPPETS.'/generic_form_parts.php');
 $num_colspan = ($this->user->rolle->visually_impaired) ? 2 : 3;
 $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss', 'time' => 'hh:mm:ss');

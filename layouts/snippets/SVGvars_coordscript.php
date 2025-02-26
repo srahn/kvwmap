@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVGvars_coordscript_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/SVGvars_coordscript_' . rolle::$language . '.php');
 
 	foreach ($this->epsg_codes as $epsg_code) {
 		$epsg_codes .= '<option';

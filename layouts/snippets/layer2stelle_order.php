@@ -42,7 +42,7 @@
 	};
 
   # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/layer2stelle_order_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/layer2stelle_order_'.rolle::$language.'.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
   <tr align="center"> 

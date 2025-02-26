@@ -1,5 +1,5 @@
 <?
-	$lang = $this->user->rolle->language;
+	$lang = rolle::$language;
 ?>
 <style>
 

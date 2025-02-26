@@ -1,5 +1,5 @@
 <?php
-	$language_file_name = 'map_' . $this->user->rolle->language . '.php';
+	$language_file_name = 'map_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
 	include(LAYOUTPATH . 'languages/_include_language_files.php');

@@ -1319,14 +1319,7 @@ class data_import_export {
 			#echo '<br>name: ' . $layerset[0]['Name']; exit;
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
-				$filter = replace_params(
-					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$filter = replace_params_rolle($mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id));
 			}
 
 			# Where-Klausel aus Sachdatenabfrage-SQL
@@ -1445,7 +1438,7 @@ class data_import_export {
 					}
 
 					#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
-					$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
+					$this->formvars['layer_name'] = replace_params_rolle($this->formvars['layer_name']);
 					$this->formvars['layer_name'] = sonderzeichen_umwandeln($this->formvars['layer_name']);
 					$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
 					$this->formvars['geomtype'] = $layerset[0]['attributes']['geomtype'][$layerset[0]['attributes']['the_geom']];

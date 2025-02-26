@@ -627,15 +627,7 @@ class spatial_processor {
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg = $layerset[0]['epsg_code'];
 
-				$data = replace_params(
-					$layerset[0]['Data'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
-				$data = str_replace('$SCALE', 1000, $data);
+				$data = $layerset[0]['Data'];
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);

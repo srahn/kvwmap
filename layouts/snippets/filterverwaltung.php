@@ -1,6 +1,6 @@
 <?php
  # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/filterverwaltung_'.rolle::$language.'.php');
  ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
 <script type="text/javascript">

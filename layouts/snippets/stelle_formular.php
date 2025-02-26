@@ -1,6 +1,6 @@
 <?php
 	# 2007-12-30 pk
-	include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/stelle_formular_' . rolle::$language . '.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
 <script language="JavaScript">
@@ -242,11 +242,11 @@ else {
 				</tr>
 
 				<tr class="group-stammdaten"><?
-				if ($this->user->rolle->language != 'german') { ?>
+				if (rolle::$language != 'german') { ?>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst($this->user->rolle->language); ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst(rolle::$language); ?></th>
 						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-							<input name="Bezeichnung_<? echo $this->user->rolle->language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . $this->user->rolle->language]; ?>" size="25" maxlength="100">
+							<input name="Bezeichnung_<? echo rolle::$language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . rolle::$language]; ?>" size="25" maxlength="100">
 						</td>
 					</tr><?
 				} ?>

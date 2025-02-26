@@ -98,9 +98,8 @@
     $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
     $layer->data = $datastring;
     $layer->status = MS_ON;
@@ -154,9 +153,8 @@
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$HIST_TIMESTAMP' = '' THEN endet IS NULL ELSE beginnt::text <= '\$HIST_TIMESTAMP' and ('\$HIST_TIMESTAMP' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
-    $datastring = replace_params($datastring, NULL, NULL, NULL, rolle::$hist_timestamp);
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
     $layer->data = $datastring;

@@ -1,4 +1,4 @@
-<? include(LAYOUTPATH.'languages/layer_formular_'.$this->user->rolle->language.'.php');
+<? include(LAYOUTPATH.'languages/layer_formular_'.rolle::$language.'.php');
 
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);

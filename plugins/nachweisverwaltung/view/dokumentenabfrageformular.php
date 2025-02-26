@@ -1,5 +1,5 @@
 <?
-  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
 ?>
 
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>

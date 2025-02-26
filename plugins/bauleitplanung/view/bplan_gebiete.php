@@ -2,7 +2,7 @@ Dieses Snippet wird nicht mehr verwendet
 
 <?php
  # 2008-09-30 sr
-  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 
  # Variablensubstitution
  $layer = $this->qlayerset[$i];

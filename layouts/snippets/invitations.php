@@ -1,5 +1,5 @@
 <?
-	include(LAYOUTPATH . 'languages/invitations_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/invitations_' . rolle::$language . '.php');
 ?>
 <script>
 	function invitation_delete(id) {

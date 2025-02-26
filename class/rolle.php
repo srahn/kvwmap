@@ -8,10 +8,13 @@ class rolle {
 	var $database;
 	var $loglevel;
 	var $hist_timestamp_de;
+	static $language;
 	static $hist_timestamp;
 	static $layer_params;
+	static $user_ID;
+	static $stelle_ID;
+	static $stelle_bezeichnung;
 	var $minx;
-	var $language;
 	var $newtime;
 	var $gui_object;
 	var $layerset;
@@ -20,12 +23,13 @@ class rolle {
 		global $debug;
 		global $GUI;
 		$this->gui_object = $GUI;
-		$this->debug=$debug;
-		$this->user_id=$user_id;
-		$this->stelle_id=$stelle_id;
+		$this->debug = $debug;
+		$this->user_id = $user_id;
+		$this->stelle_id = $stelle_id;
 		$this->database=$database;
-		#$this->layerset=$this->getLayer('');
-		#$this->groupset=$this->getGroups('');
+		rolle::$user_ID = $user_id;
+		rolle::$stelle_ID = $stelle_id;
+		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
 		$this->loglevel = 0;
 	}
 
@@ -75,16 +79,15 @@ class rolle {
 	}
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
-		global $language;
 		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
 		# Abfragen der Layer in der Rolle
-		if ($language != 'german') {
+		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
+				WHEN l.`Name_" . rolle::$language . "` != \"\" THEN l.`Name_" . rolle::$language . "`
 				ELSE l.`Name`
 			END AS Name";
 		} else {
@@ -196,14 +199,9 @@ class rolle {
 			}
 			if ($replace_params) {
 				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
-					$rs[$key] = replace_params(
+					$rs[$key] = replace_params_rolle(
 						$rs[$key],
-						rolle::$layer_params,
-						$this->user_id,
-						$this->stelle_id,
-						rolle::$hist_timestamp,
-						$language,
-						$rs['duplicate_criterion']
+						['duplicate_criterion' => $rs['duplicate_criterion']]
 					);
 				}
 			}
@@ -292,11 +290,10 @@ class rolle {
   }	
 
   function getGroups($GroupName) {
-		global $language;
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
+		if(rolle::$language != 'german') {
+			$sql.='CASE WHEN `Gruppenname_'.rolle::$language.'` != "" THEN `Gruppenname_'.rolle::$language.'` ELSE `Gruppenname` END AS ';
 		}
 		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
@@ -436,7 +433,6 @@ class rolle {
 	}
 	
   function readSettings() {
-		global $language;
     # Abfragen und Zuweisen der Einstellungen der Rolle
     $sql = "
 			SELECT
@@ -470,8 +466,7 @@ class rolle {
 			$this->coordtype=$rs['coordtype'];
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
-			$this->language=$rs['language'];
-			$language = $this->language;
+			rolle::$language = $rs['language'];
 			$this->hideMenue=$rs['hidemenue'];
 			$this->hideLegend=$rs['hidelegend'];
 			$this->tooltipquery=$rs['tooltipquery'];
