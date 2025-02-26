@@ -1,6 +1,6 @@
  <?php
 	global $supportedLanguages;
-	include(LAYOUTPATH . 'languages/header_' . $this->user->rolle->language . '.php'); 
+	include(LAYOUTPATH . 'languages/header_' . rolle::$language . '.php'); 
 ?>
 
 <style>

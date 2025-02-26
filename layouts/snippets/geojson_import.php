@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/geojson_import_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/geojson_import_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--

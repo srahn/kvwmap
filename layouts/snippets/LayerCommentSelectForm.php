@@ -1,6 +1,6 @@
 <?php
  # 2008-02-05 pkvvm
-  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.rolle::$language.'.php');
  ?>
 <br>
 <h2><?php echo $strTitleLayers; ?></h2>

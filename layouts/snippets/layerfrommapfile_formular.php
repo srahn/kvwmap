@@ -1,6 +1,6 @@
 <?php
  # 2008-01-12 pkvvm
-  include(LAYOUTPATH.'languages/layerfrommapfile_formular_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/layerfrommapfile_formular_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--

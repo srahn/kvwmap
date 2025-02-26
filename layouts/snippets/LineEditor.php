@@ -1,7 +1,7 @@
 <?php
  # 2008-10-01 sr
-  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
  ?>

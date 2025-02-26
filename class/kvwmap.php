@@ -1001,7 +1001,7 @@ echo '			</table>
 	function setLanguage(){
 		$this->user->rolle->setLanguage($this->formvars['language']);
 		$this->user->rolle->readSettings();
-		$this->loadMultiLingualText($this->user->rolle->language);
+		$this->loadMultiLingualText(rolle::$language);
 		$this->loadMap('DataBase');
 		#$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 		#$this->drawMap();
@@ -1933,7 +1933,6 @@ echo '			</table>
 					#$layer->set('connection',"http://www.kartenserver.niedersachsen.de/wmsconnector/com.esri.wms.Esrimap/Biotope?LAYERS=7&REQUEST=GetMap&TRANSPARENT=true&FORMAT=image/png&SERVICE=WMS&VERSION=1.1.1&STYLES=&EXCEPTIONS=application/vnd.ogc.se_xml&SRS=EPSG:31467");
 					#echo '<br>Name: '.$layerset[$i][name];
 					$layer->set('connection',	$layerset[$i][connection]);
-					#echo '<br>Connection: ' . replace_params($layerset[$i][connection], rolle::$layer_params);
 					if (MAPSERVERVERSION < 540) {
 						$layer->set('connectiontype', 7);
 					}
@@ -2365,16 +2364,7 @@ echo '			</table>
 		}
 
 		if ($layerset['processing'] != "") {
-			$processings = explode(";",
-				replace_params(
-					$layerset['processing'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle->id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				)
-			);
+			$processings = explode(";",	replace_params_rolle($layerset['processing']));
 			foreach ($processings as $processing) {
 				if (MAPSERVERVERSION >= 800) {
 					$p = explode('=', $processing);
@@ -2455,14 +2445,7 @@ echo '			</table>
 			if ($layerset['Filter'] != '') {
 				# 2024-07-28 pk Replace all params in Filter
 				// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
-				$layerset['Filter'] = replace_params(
-					$layerset['Filter'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$layerset['Filter'] = replace_params_rolle($layerset['Filter']);
 				if (substr($layerset['Filter'], 0, 1) == '(') {
 					switch (true) {
 						case MAPSERVERVERSION >= 800 : {
@@ -3458,9 +3441,9 @@ echo '			</table>
 	}
 
 	function loadMultiLingualText($language) {
-    #echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+    #echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
     $this->Stelle->language=$language;
-    include(LAYOUTPATH.'languages/'.$this->user->rolle->language.'.php');
+    include(LAYOUTPATH.'languages/'.$language.'.php');
   }
 
 	function getLagebezeichnung($epsgcode) {
@@ -4618,7 +4601,7 @@ echo '			</table>
 		echo $url . '&field_id='.$this->formvars['field_id'];
 	}
 	function showMapImage() {
-		include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php');
+		include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php');
   	$this->loadMap('DataBase');
   	$this->drawMap(true);
   	$randomnumber = rand(0, 1000000);
@@ -8798,17 +8781,10 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$data_sql = replace_params($data_sql, $params);
 			$this->formvars['classification_name'] = replace_params($this->layerdata['classification'], $params);
 		}
-
-		$duplicate_criterion = $this->formvars['duplicate_criterion'];
-		$data_sql = replace_params(
+		$data_sql = replace_params_rolle(
 			$data_sql,
-			rolle::$layer_params,
-			$this->user->id,
-			$this->Stelle->id,
-			rolle::$hist_timestamp,
-			$this->user->rolle->language,
-			$duplicate_criterion
-		);  # die restlichen Layer-Parameter ersetzen
+			['duplicate_criterion' => $this->formvars['duplicate_criterion']])
+		;  # die restlichen Layer-Parameter ersetzen
 
     $auto_classes = $this->AutoklassenErzeugen($layerdb, $data_sql, $this->formvars['classification_column'], $this->formvars['classification_method'], $this->formvars['num_classes'], $this->formvars['classification_name'], $this->formvars['classification_color']);
 
@@ -9086,13 +9062,13 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 				$all_layer_params = $mapDB->get_all_layer_params_default_values();
 			  $attributes = $mapDB->load_attributes(
 					$layerdb,
-					replace_params(
+					replace_params_rolle(
 						$path,
 						$all_layer_params,
 						$this->user->id,
 						$this->Stelle->id,
 						rolle::$hist_timestamp,
-						$this->user->rolle->language,
+						rolle::$language,
 						$duplicate_criterion
 					),
 					$this->formvars['sync']
@@ -9213,14 +9189,9 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$all_layer_params = $mapDB->get_all_layer_params_default_values();
 					$attributes = $mapDB->load_attributes(
 						$layerdb,
-						replace_params(
+						replace_params_rolle(
 							$formvars['pfad'],
-							$all_layer_params,
-							$this->user->id,
-							$this->Stelle->id,
-							rolle::$hist_timestamp,
-							$this->user->rolle->language,
-							$formvars['duplicate_criterion']
+							array_merge($all_layer_params, ['duplicate_criterion' => $formvars['duplicate_criterion']])
 						),
 						$this->formvars['sync']
 					);
@@ -9947,15 +9918,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				# 2008-10-22 sr Filter zur Where-Klausel hinzugefügt
 				# 2024-07-28 pk Replace all params from filter
 				if ($layerset[0]['Filter'] != '') {
-					// $layerset[0]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[0]['Filter']);
-					$layerset[0]['Filter'] = replace_params(
-						$layerset[0]['Filter'],
-						rolle::$layer_params,
-						$this->user->id,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+					$layerset[0]['Filter'] = replace_params_rolle($layerset[0]['Filter']);
 					$sql_where .= " AND " . $layerset[0]['Filter'];
 				}
 
@@ -12024,7 +11987,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	}
 
 	function layer_chart_Speichern($chart) {
-		include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
+		include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
 		$chart->data = formvars_strip($this->formvars, array('id', 'layer_id', 'title', 'type', 'aggregate_function', 'value_attribute_label', 'value_attribute_name', 'label_attribute_name', 'beschreibung', 'breite'), 'keep');
 		$results = $chart->validate();
 		if (empty($results)) {
@@ -14806,14 +14769,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$output = '<table>';
 		while ($rs = $this->database->result->fetch_assoc()){
-			$rs['layer'] = replace_params(
-				$rs['layer'],
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$this->rolle->language
-			);
+			$rs['layer'] = replace_params_rolle($rs['layer']);
       $output .= '<tr>
 							<td>' . $rs['layer'] . '</td>
 							<td>' . set_href($rs['beschreibung']) . '</td>
@@ -16390,15 +16346,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							# 2024-07-28 pk Replace all params from filter
 							$filter = '';
 							if ($layerset[$i]['Filter'] != '') {
-								// $layerset[$i]['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
-								$layerset[$i]['Filter'] = replace_params(
-									$layerset[$i]['Filter'],
-									rolle::$layer_params,
-									$this->user->id,
-									$this->Stelle->id,
-									rolle::$hist_timestamp,
-									$this->rolle->language
-								);
+								$layerset[$i]['Filter'] = replace_params_rolle($layerset[$i]['Filter']);
 								$filter = " AND " . $layerset[$i]['Filter'];
 							}
 							# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -17141,17 +17089,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$query_parts['select'] .= ", st_assvg(st_buffer(st_transform(" . $the_geom . ", ".$client_epsg."), ".$buffer."), 0, 15) AS highlight_geom";
 				}
 
-				# 2006-06-12 sr   Filter zur Where-Klausel hinzugefügt
 				if ($layerset[$i]['Filter'] != '') {
-					$layerset[$i]['Filter'] = replace_params(
-						$layerset[$i]['Filter'],
-						rolle::$layer_params,
-						$this->user->id,
-						$this->Stelle->id,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
-					// str_replace('$USER_ID', $this->user->id, $layerset[$i]['Filter']);
+					$layerset[$i]['Filter'] = replace_params_rolle($layerset[$i]['Filter']);
 					$sql_where .= " AND " . $layerset[$i]['Filter'];
 				}
 				# Filter auf Grund von ausgeschalteten Klassen hinzufügen
@@ -17492,18 +17431,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset['Data'] = str_replace('$SCALE', $this->map_scaledenom ?: 1000, $layerset['Data']);
 				$layer->data = $layerset['Data'];
 				if ($layerset['Filter'] != '') {
-					# 2024-07-28 pk Replace all params from filter
-					// aber auch replace USER_ID muss hier nicht mehr
-					// weil das schon für layerset['Filter'] vor dem Aufruf von createQueryMap gemacht wurde
-					// $layerset['Filter'] = replace_params(
-					// 	$layerset['Filter'],
-					// 	rolle::$layer_params,
-					// 	$this->User_ID,
-					// 	$this->Stelle_ID,
-					// 	rolle::$hist_timestamp,
-					// 	$this->rolle->language
-					// );
-					// $layerset['Filter'] = str_replace('$USER_ID', $this->user->id, $layerset['Filter']);
 					if (substr($layerset['Filter'], 0, 1) == '(') {
 						switch (true) {
 							case MAPSERVERVERSION >= 800 : {
@@ -18044,14 +17971,9 @@ class db_mapObj{
 		while ($rs = $ret['result']->fetch_array()) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
 			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			$rs['alias_link'] = $rs['alias'];
@@ -18196,14 +18118,9 @@ class db_mapObj{
 				$rs['Layer_ID']
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
-				$rs[$key] = replace_params(
+				$rs[$key] = replace_params_rolle(
 					$rs[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$rs['duplicate_criterion']
+					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
@@ -18743,14 +18660,9 @@ class db_mapObj{
 			return 0;
 		}
 		$rs = $this->db->result->fetch_assoc();
-		$data = replace_params(
+		$data = replace_params_rolle(
 			$rs['Data'],
-			rolle::$layer_params,
-			$this->User_ID,
-			$this->Stelle_ID,
-			rolle::$hist_timestamp,
-			$language,
-			$rs['duplicate_criterion']
+			['duplicate_criterion' => $rs['duplicate_criterion']]
 		);
 		return $data;
 	}
@@ -18769,14 +18681,9 @@ class db_mapObj{
     $this->db->execSQL($sql);
     if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
     $layer = $this->db->result->fetch_assoc();
-		$path = replace_params(
+		$path = replace_params_rolle(
 			$layer['pfad'],
-			rolle::$layer_params,
-			$this->User_ID,
-			$this->Stelle_ID,
-			rolle::$hist_timestamp,
-			$this->rolle->language,
-			$layer['duplicate_criterion']
+			['duplicate_criterion' => $rs['duplicate_criterion']]
 		);
 		return $path;
   }
@@ -18830,14 +18737,7 @@ class db_mapObj{
 		if (count_or_0($rs) == 0) {
 			return null;
 		}
-		$rs['schema'] = replace_params(
-			$rs['schema'],
-			rolle::$layer_params,
-			$this->User_ID,
-			$this->Stelle_ID,
-			rolle::$hist_timestamp,
-			$this->rolle->language
-		);
+		$rs['schema'] = replace_params_rolle($rs['schema']);
 		$layerdb->schema = ($rs['schema'] == '' ? 'public' : $rs['schema']);
 		if (!$layerdb->open($rs['connection_id'])) {
 			echo 'Die Verbindung zur PostGIS-Datenbank konnte mit connection_id: ' . $rs['connection_id'] . ' nicht hergestellt werden:';
@@ -18878,7 +18778,6 @@ class db_mapObj{
 	}
 
   function getSelectFromData($data){
-		global $language;
     if(strpos($data, '(') === false){
       $from = stristr($data, ' from ');
       $usingposition = strpos($from, 'using');
@@ -18892,15 +18791,9 @@ class db_mapObj{
       $select = trim($select, '(');
       $select = substr($select, 0, strrpos($select, ')'));
     }
-		return replace_params(
+		return replace_params_rolle(
 						$select,
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$language,
-						NULL,
-						1000
+						['$SCALE' => '1000']
 					);
 	}
 
@@ -18913,8 +18806,6 @@ class db_mapObj{
 			'if_empty_use_query' => false
 		);
 		$options = array_merge($default_options, $options);
-		global $language;
-		$data = str_replace('$SCALE', '1000', $this->getData($layer_id));
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
@@ -18927,15 +18818,7 @@ class db_mapObj{
 			return $ret[1];
 		}
 		elseif ($options['if_empty_use_query']) {
-			$path = replace_params(
-				$this->getPath($layer_id),
-				rolle::$layer_params,
-				$this->User_ID,
-				$this->Stelle_ID,
-				rolle::$hist_timestamp,
-				$language
-			);
-			return $this->getPathAttributes($database, $path);
+			return $this->getPathAttributes($database, $this->getPath($layer_id));
 		}
 		else {
 			$this->GUI->add_message('warning', 'Das Data-Feld des Layers mit der Layer-ID ' . $layer_id . ' ist leer.');
@@ -20844,27 +20727,13 @@ class db_mapObj{
 
 			if ($replace) {
 				if ($attributes['default'][$i] != '')	{					# da Defaultvalues auch dynamisch sein können (z.B. 'now'::date) wird der Defaultwert erst hier ermittelt
-					$replaced_default = replace_params(
-						$attributes['default'][$i],
-						rolle::$layer_params,
-						$this->User_ID,
-						$this->Stelle_ID,
-						rolle::$hist_timestamp,
-						$this->rolle->language
-					);
+					$replaced_default = replace_params_rolle($attributes['default'][$i]);
 					$ret1 = $layerdb->execSQL('SELECT ' . $replaced_default, 4, 0);
 					if ($ret1[0] == 0) {
 						$attributes['default'][$i] = @array_pop(pg_fetch_row($ret1[1]));
 					}
 				}
-				$rs['options'] = replace_params(
-					$rs['options'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$rs['options'] = replace_params_rolle($rs['options']);
 			}
 
 			$attributes['form_element_type'][$i]= $rs['form_element_type'];
@@ -21020,14 +20889,7 @@ class db_mapObj{
 			if ($replace) {
 				foreach($replace_only AS $column) {
 					if ($attributes[$column][$i] != '') {
-						$attributes[$column][$i] = replace_params(
-							$attributes[$column][$i],
-							rolle::$layer_params,
-							$this->User_ID,
-							$this->Stelle_ID,
-							rolle::$hist_timestamp,
-							$this->rolle->language
-						);
+						$attributes[$column][$i] = replace_params_rolle($attributes[$column][$i]);
 					}
 				}
 			}
@@ -21329,14 +21191,7 @@ class db_mapObj{
 		else {
 			while ($rs = $this->db->result->fetch_assoc()) {
 				$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
-				$rs['Name_or_alias'] = replace_params(
-					$rs['Name_or_alias'],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language
-				);
+				$rs['Name_or_alias'] = replace_params_rolle($rs['Name_or_alias']);
 				$params[$rs['id']]['key'] = $rs['key'];
 				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name_or_alias']];
 			}
@@ -21477,14 +21332,9 @@ class db_mapObj{
 		$layer = $this->db->result->fetch_array();
 		if ($replace_params) {
 			foreach (array('classitem', 'classification', 'Data', 'pfad') AS $key) {
-				$layer[$key] = replace_params(
+				$layer[$key] = replace_params_rolle(
 					$layer[$key],
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$layer['duplicate_criterion']
+					['duplicate_criterion' => $layer['duplicate_criterion']]
 				);
 			}
 		}

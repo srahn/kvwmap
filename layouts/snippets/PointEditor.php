@@ -1,5 +1,5 @@
 <?
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 	global $selectable_scales;
 	$selectable_scales = array_reverse($selectable_scales);
 ?>

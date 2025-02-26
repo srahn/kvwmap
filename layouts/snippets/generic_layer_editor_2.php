@@ -1,5 +1,5 @@
 <?
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 $invisible_attributes = array();
 $checkbox_names = '';
 $columnname = '';

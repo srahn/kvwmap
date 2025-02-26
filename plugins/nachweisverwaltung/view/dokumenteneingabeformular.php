@@ -1,5 +1,5 @@
 <?
-  include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -128,7 +128,7 @@ function showUnterArten(id){
 
 <?php
 
-include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 
 if ($this->Meldung=='Daten zum neuen Dokument erfolgreich eingetragen!' OR $this->Meldung=='') {
   $bgcolor=BG_FORM;

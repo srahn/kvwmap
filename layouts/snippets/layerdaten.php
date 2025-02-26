@@ -9,8 +9,8 @@
 </script>
 
 <?php
-  include(LAYOUTPATH . 'languages/layerdaten_' . $this->user->rolle->language . '.php');
-	include(LAYOUTPATH . 'languages/layer_formular_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/layerdaten_' . rolle::$language . '.php');
+	include(LAYOUTPATH . 'languages/layer_formular_' . rolle::$language . '.php');
 
 	$datatypes = [0 => 'Punkt',
 								1 => 'Linie',

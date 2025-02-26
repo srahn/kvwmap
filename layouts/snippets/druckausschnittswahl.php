@@ -1,7 +1,7 @@
 <?php
  # 2008-01-22 pkvvm
-  include(LAYOUTPATH.'languages/druckausschnittswahl_'.$this->user->rolle->language.'.php');
-	include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/druckausschnittswahl_'.rolle::$language.'.php');
+	include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--
