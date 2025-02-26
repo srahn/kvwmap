@@ -8,6 +8,11 @@ class DataType extends MyObject {
 		parent::__construct($gui, 'datatypes');
 	}
 
+	public static	function find_by_id($gui, $id) {
+		$datatype = new DataType($gui);
+		return $datatype->find_by('id', $id);
+	}
+
 	// function get_generic_select($layer, $attr) {
 	// 	// echo '<p>' . print_r($layer, true);
 	// 	 //echo '<br>' . print_r($attr, true);

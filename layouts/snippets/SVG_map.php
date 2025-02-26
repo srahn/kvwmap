@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -218,21 +218,20 @@ $last_x = 0;
 global $events;
 $events = true;
 
-include(LAYOUTPATH . 'snippets/SVGvars_defs.php');            # zuweisen von: $SVGvars_defs 
 include(LAYOUTPATH . 'snippets/SVGvars_mainnavbuttons.php');  # zuweisen von: $SVGvars_mainnavbuttons
 include(LAYOUTPATH . 'snippets/SVGvars_coordscript.php');     # zuweisen von: $SVGvars_coordscript
 include(LAYOUTPATH . 'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript 
 include(LAYOUTPATH . 'snippets/SVGvars_tooltipblank.php');    # zuweisen von: $SVGvars_tooltipblank
 $bg_pic   = $this->img['hauptkarte'];
-$res_x    = $this->map->width;
-$res_y    = $this->map->height;
-$res_xm   = $this->map->width / 2;
-$res_ym   = $this->map->height / 2;
-$dx       = $this->map->extent->maxx - $this->map->extent->minx;
-$dy       = $this->map->extent->maxy - $this->map->extent->miny;
-$scale    = ($dx / $res_x + $dy / $res_y) / 2;
-$radius = (float)$this->formvars['searchradius'] / $scale;
+$res_x    = $map_width;
+$res_y    = $map_height;
+$res_xm   = $map_width / 2;
+$res_ym   = $map_height / 2;
+#$dx       = $this->map->extent->maxx - $this->map->extent->minx;
+#$dy       = $this->map->extent->maxy - $this->map->extent->miny;
+#$scale    = ($dx / $res_x + $dy / $res_y) / 2;
+#$radius = (float)$this->formvars['searchradius'] / $scale;
 
 
 $fpsvg = fopen(IMAGEPATH . $svgfile, 'w') or die('fail: fopen(' . $svgfile . ')');
@@ -357,8 +356,9 @@ function startup() {
 	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
 	switch (top.document.GUI.previous_button.value) {
 		case "measure" : 
-			get_measure_path();
-			redrawPL();
+			if (get_measure_path()) {
+				redrawPL();
+			}
 		break;
 
 		case "measurearea" :
@@ -603,6 +603,9 @@ function getEventPoint(evt) {
 }
 
 function init(){
+	if ("{$bg_pic}" == "") {
+		top.neuLaden();
+	}
 	// Bug Workaround fuer Firefox
 	var nav_button_bg = document.querySelector('.navbutton_bg');
 	nav_button_bg.setAttribute('width', parseInt(nav_button_bg.getAttribute('width')) + 0.01);
@@ -820,6 +823,8 @@ function addfreetext(){
 function noMeasuring(){
 	routing_started = false;
   measuring = false;
+	top.document.GUI.str_pathx.value = "";
+	top.document.GUI.str_pathy.value = "";
   restart();
 }
 
@@ -835,12 +840,20 @@ function measure(){
 		top.ahah("index.php", "go=getNBH", new Array(""), new Array("execute_function"));
 	}
   doing = "measure";
-	top.document.GUI.previous_button.value = doing;
-	if(top.document.GUI.str_pathx.value != ""){
+	if(top.document.GUI.previous_button.value == "measure" && top.document.GUI.str_pathx.value != ""){
 		measuring = true;	
 		top.document.GUI.str_pathx.value = "";
 		top.document.GUI.str_pathy.value = "";
 	}
+	else{
+		top.document.GUI.measured_distance.value = 0;
+		measured_distance = 0;
+		new_distance = 0;
+		freehand_measuring = false;
+  	measuring = false;
+  	restart();
+	}
+	top.document.GUI.previous_button.value = doing;
   document.getElementById("canvas").setAttribute("cursor", "crosshair");
 }
 

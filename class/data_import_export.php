@@ -953,7 +953,7 @@ class data_import_export {
 		$errorfile = rand(0, 1000000);
 		$command .= ' 2> ' . IMAGEPATH . $errorfile . '.err';
 		$output = array();
-		// echo '<br>' . $command;
+		// echo '<br>Command in org2ogr_export: ' . $command;
 		exec($command, $output, $ret);
 		if ($ret != 0) {
 			exec("sed -i -e 's/".$database->passwd."/xxxx/g' " . IMAGEPATH . $errorfile . '.err');		# falls das DB-Passwort in der Fehlermeldung vorkommt => ersetzen
@@ -1282,6 +1282,7 @@ class data_import_export {
   }
 
 	function export_exportieren($formvars, $stelle, $user, $exportpath = '', $exportfilename = '', $suppress_err_msg = false) {
+		ini_set('memory_limit', '8192M');
 		global $GUI;
 		global $kvwmap_plugins;
 		$currenttime = date('Y-m-d H:i:s',time());
@@ -1410,7 +1411,7 @@ class data_import_export {
 				. $where
 				. $query_parts['orderby'] . "
 			";
-			#echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql; exit;
+			// echo '<br>SQL für die Abfrage der zu exportierenden Daten: '. $sql;
 			$data_sql = $sql;
 
 			$temp_table = 'shp_export_'.rand(1, 1000000);
@@ -1420,7 +1421,7 @@ class data_import_export {
 				CREATE TABLE public." . $temp_table . " AS "
 				. $sql . "
 			";
-			#echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
+			// echo '<p>SQL zum Anlegen der temporären Tabelle: ' . $sql . '-';
 			$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
 			if ($ret['success']) {
 				for ($s = 0; $s < count($selected_attributes); $s++) {
@@ -1448,7 +1449,7 @@ class data_import_export {
 					FROM
 						public." . $temp_table . "
 				";
-				#echo '<p>SQL zur Abfrage der zu exportierenden Attribute; ' . $sql;
+				// echo '<p>SQL zur Abfrage der zu exportierenden Attribute; ' . $sql;
 				$ret = $layerdb->execSQL($sql, 4, 0, $suppress_err_msg);
 				if (!$ret[0]) {
 					$count = pg_num_rows($ret[1]);
@@ -1456,7 +1457,7 @@ class data_import_export {
 						$this->formvars['layer_name'] = $layerset[0]['Name'];
 					}
 
-					#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
+					showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
 					$this->formvars['layer_name'] = replace_params($this->formvars['layer_name'], rolle::$layer_params);
 					$this->formvars['layer_name'] = sonderzeichen_umwandeln($this->formvars['layer_name']);
 					$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
@@ -1473,13 +1474,15 @@ class data_import_export {
 					$exportfile = $exportpath . ($exportfilename ?: $this->formvars['layer_name']);
 					switch ($this->formvars['export_format']) {
 						case 'Shape' : {
+							// echo '<br>SQL für ogr2ogr_export: ' . $sql;
 							$err = $this->ogr2ogr_export(addslashes($sql), '"ESRI Shapefile"', $exportfile . '.shp', $layerdb);
-							if (!file_exists($exportfile.'.cpg')) {
+							if (!file_exists($exportfile . '.cpg')) {
 								// ältere ogr-Versionen erzeugen die cpg-Datei nicht
 								$fp = fopen($exportfile.'.cpg', 'w');
 								fwrite($fp, 'UTF-8');
 								fclose($fp);
 							}
+							// echo '<br>Datei ' . $exportfile . ' expoprtiert.';
 							$zip = true;
 						} break;
 

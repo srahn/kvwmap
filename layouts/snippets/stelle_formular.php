@@ -549,7 +549,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
 											for($i=0; $i < count_or_0($this->formvars['sellayer']["Bezeichnung"]); $i++){
-													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace([' ', '<br>'], '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
 											</select>

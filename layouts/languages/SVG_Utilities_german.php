@@ -1,7 +1,7 @@
 <?php
 	$strBuffer = "Puffer hinzuf\u00fcgen";
 	$strBufferedLine = "gepufferte Linie hinzuf\u00fcgen";
-	$strCornerPoint = "Eckpunkte bearbeiten. Punkte Löschen mit Doppelklick.";
+	$strCornerPoint = "Stützpunkte bearbeiten. Punkte Löschen mit Doppelklick.";
 	$strCutByPolygon = "Freihandpolygon ausschneiden";
 	$strDelete = "alles l\u00f6schen";
 	$strDelLine = "Linien l\u00f6schen";

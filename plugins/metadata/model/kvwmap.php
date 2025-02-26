@@ -12,11 +12,12 @@
 	// metadata_order_bundle_package
 	// metadata_order_data_package
 	// metadata_reorder_data_packages
+	// metadata_set_ressource_status
 	// metadata_show_data_packages
+	// metadata_show_ressources_status
 	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
 	// Metadaten_Recherche
-	// metadata_update_outdated
 	// Metadateneingabe
 
 	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
@@ -200,7 +201,8 @@
 			// Metadatendatei erzeugen und in ZIP packen
 			// von Ressource des Datenpaketes
 			$export_file = $package->get_export_file();
-			exec(ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf');
+			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
+			exec($command);
 			// An Ressourcen hängende Dokumente in ZIP packen
 			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
 			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
@@ -592,6 +594,18 @@
 		);
 	};
 
+	$GUI->metadata_set_ressource_status = function() use ($GUI) {
+		$ressource = Ressource::find_by_id($GUI, 'ressource_id', $GUI->formvars['ressource_id']);
+		$result = $ressource->update_attr(array('status_id' => $GUI->formvars['status_id']));
+		if (!$result['success']) {
+			return $result;
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Status erfolgreich aktualisiert'
+		);
+	};
+
 	$GUI->metadata_show_data_packages = function() use ($GUI) {
 		$GUI->main = PLUGINS . 'metadata/view/data_packages.php';
 		$all_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
@@ -628,6 +642,13 @@
 				$GUI->metadata_data_packages[] = $package;
 			}
 		}
+		$GUI->output();
+	};
+
+	$GUI->metadata_show_ressources_status = function($ressource_id) use ($GUI) {
+		$GUI->metadata_ressources = Ressource::find($GUI, "true", "auto_update, status_id");
+		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
+		$GUI->main = PLUGINS . 'metadata/view/ressources_status.php';
 		$GUI->output();
 	};
 

@@ -13,4 +13,5 @@ $strFirstDatasets="start";
 $strbackToSearch="back";
 $strLimit="Limit Resultcount:";
 $strToTop="to top";
+$strNoQueryableLayers="No queryable layer selected.";
 ?>

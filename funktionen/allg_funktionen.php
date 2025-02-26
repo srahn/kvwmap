@@ -177,17 +177,6 @@ function human_filesize($file) {
 	return format_human_filesize($bytes);
 }
 
-function MapserverErrorHandler($errno, $errstr, $errfile, $errline){
-	global $errors;
-	if (!(error_reporting() & $errno)) {
-		// This error code is not included in error_reporting
-		return;
-	}
-	$errors[] = '<b>' . $errstr . '</b><br> in Datei ' . $errfile . '<br>in Zeile '. $errline;
-	/* Don't execute PHP internal error handler */
-	return true;
-}
-
 function versionFormatter($version) {
   return substr(
     str_pad(
@@ -545,7 +534,11 @@ function buildsvgpolygonfromwkt($wkt){
 }
 
 function transformCoordsSVG($path){
+	$path = str_replace([',', 'cx=', 'cy=', '"', ','], [' ', ''], $path);		# bei MULTIPOINTs mit drin
 	$path = str_replace('L ', '', $path);		# neuere Postgis-Versionen haben ein L mit drin
+	if (strpos($path, 'M') === false) {
+		$path = 'M ' . $path;
+	}
   $svgcoords = explode(' ',$path);
 	$newsvgcoords = [];
   for($i = 0; $i < count($svgcoords); $i++){
@@ -1370,9 +1363,9 @@ function microtime_float(){
 
 
 function copy_file_to_tmp($frompath, $dateiname = ''){
-  $dateityp = explode('.',$frompath);
+	$dateityp = pathinfo($frompath)['extension'];
   $dateipfad=IMAGEPATH;
-  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp[1];
+  if($dateiname == '')$dateiname=rand(100000,999999).'.'.$dateityp;
   if(copy($frompath, $dateipfad.$dateiname) == true){
     return TEMPPATH_REL.$dateiname;
   }
@@ -2343,9 +2336,20 @@ function str_replace_last($search , $replace, $str) {
 }
 
 /**
-* Liefert den Originalnamen vom Namen der Thumb-Datei
-*/
-function get_name_from_thump($thumb) {
+ * Liefert den Namen der Thumb-Datei vom Originalnamen in $path
+ * @param String $path Name of original file.
+ * @return String Name of thump file.
+ */
+function get_thumb_from_name($path) {
+	return before_last($path, '.') . '_thumb.jpg';
+}
+
+/**
+ * Liefert den Basename der Originaldatei vom Namen der Thumb-Datei
+ * @param String $thumb Name of the thumb file.
+ * @return String Basename of the original File.
+ */
+function get_name_from_thumb($thumb) {
 	return before_last($thumb, '_thumb.jpg');
 }
 

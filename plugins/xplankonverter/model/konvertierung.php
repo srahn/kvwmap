@@ -371,7 +371,7 @@ class Konvertierung extends PgObject {
 				$konvertierung->contenttype = 'application/pdf';
 				return $konvertierung;
 			case 'jpg' :
-				$filename = get_name_from_thump($path['basename']);
+				$filename = get_name_from_thumb($path['basename']);
 				$sql = "
 					SELECT
 						*
