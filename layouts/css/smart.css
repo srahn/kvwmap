@@ -1,0 +1,41 @@
+#header_menue {
+  position: absolute;
+  width: 420px;
+  top: 5px;
+  right: 5px;
+  font-size: 15px;
+  line-height: 16px;
+  font-family: SourceSansPro1;
+}
+
+.header-button {
+  color: #40637d;
+}
+
+#legenddiv {
+  display: none;
+}
+
+#legend_layer {
+  position: absolute;
+  top: 38px;
+  right: 0px;
+  background-color: #eff9ff;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  box-shadow: -4px 4px 5px #939191;
+  opacity: 75%;
+}
+
+#scrolldiv {
+  overflow: visible;
+}
+
+.button_background {
+  display: none;
+}
+
+#layer_switch_icon {
+  width: 18px;
+  height: 18px
+}
