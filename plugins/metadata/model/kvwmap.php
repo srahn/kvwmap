@@ -596,13 +596,26 @@
 		$GUI->main = PLUGINS . 'metadata/view/data_packages.php';
 		$all_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
 		$GUI->metadata_data_packages = array();
-		foreach($all_packages AS $package) {
+		foreach ($all_packages AS $package) {
 			$pfad = replace_params(
 				$package->layer->get('pfad'),
 				'',
 				$GUI->user->id,
 				$GUI->Stelle->id
 			);
+			$where = "";
+			if ($package->layer->get('Datentyp') != 5) {
+				$where = "
+					WHERE
+						ST_MakeEnvelope(
+							" . $GUI->Stelle->MaxGeorefExt->minx . ",
+							" . $GUI->Stelle->MaxGeorefExt->miny . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+							25832
+						) && query." . $package->layer->get('geom_column') . "
+				";
+			}
 			$sql = "
 				SET search_path = " . $package->layer->get('schema') . ", public;
 				SELECT
@@ -610,15 +623,8 @@
 				FROM
 					(
 						" . $pfad . "
-					) AS query
-				WHERE
-					ST_MakeEnvelope(
-						" . $GUI->Stelle->MaxGeorefExt->minx . ",
-						" . $GUI->Stelle->MaxGeorefExt->miny . ",
-						" . $GUI->Stelle->MaxGeorefExt->maxx . ",
-						" . $GUI->Stelle->MaxGeorefExt->maxy . ",
-						25832
-					) && query." . $package->layer->get('geom_column') . "
+					) AS query" .
+				$where . "
 			";
 			// echo print_r($this->Stelle, true);
 			$query = pg_query($sql);
@@ -627,6 +633,7 @@
 				$package->num_feature = $num_feature;
 				$GUI->metadata_data_packages[] = $package;
 			}
+
 		}
 		$GUI->output();
 	};

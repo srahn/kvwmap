@@ -82,6 +82,7 @@ class DataPackage extends PgObject {
 
 	public static	function find_by_stelle_id($gui, $stelle_id) {
 		$package = new DataPackage($gui);
+		// $package->show = true;
 		$params = array(
 			'select' => $package->select,
 			'from' => "
