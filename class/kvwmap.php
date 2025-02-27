@@ -16260,17 +16260,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 					case MS_OGR : case 5 : { # OGR Layertype 4 und 5 (MS_TILED_OGR))
 						$layer=new layerObj($map);
-						if (MAPSERVERVERSION < '540') {
-							$layer->set('connectiontype',$layerset[$i]['connectiontype']);
-						}
-						else {
-							$layer->setConnectionType($layerset[$i]['connectiontype']);
-						}
-						$layer->set('connection', $layerset[$i]['connection']);
-						$layer->set('type', $layerset[$i]['Datentyp']);
-						$layer->set('status', MS_ON);
-						if ($layerset[$i]['template'] != '') {
-							$layer->set('template', $layerset[$i]['template']);
+						$layer->setConnectionType($layerset[$i]['connectiontype'], '');
+						$layer->connection = $layerset[$i]['connection'];
+						$layer->type = $layerset[$i]['Datentyp'];
+						$layer->status = MS_ON;
+						if ($layerset[$i]['template']!='') {
+							$layer->set('template',$layerset[$i]['template']);
 						}
 						if (MAPSERVERVERSION >= 800) {
 							@$layer->queryByRect($map, $rect);
