@@ -1,6 +1,6 @@
 <?php
 	global $supportedLanguages;
-	$language_file_name = 'layer_formular_' . $this->user->rolle->language . '.php';
+	$language_file_name = 'layer_formular_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
 	include(LAYOUTPATH . 'languages/_include_language_files.php');
@@ -806,7 +806,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strDocument_path; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100">
+								<input name="document_path" type="text" value="<?php echo $this->formvars['document_path']; ?>" size="50" maxlength="100"><a href="index.php?go=show_missing_documents&selected_layer_id=<? echo $this->formvars['selected_layer_id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-chain-broken" aria-hidden="true" style="margin-top: 5px; margin-left: 5px" title="Zeige Datensätze für die Dateien auf dem Server fehlen."></i></a>
 						</td>
 					</tr>
 					<tr>

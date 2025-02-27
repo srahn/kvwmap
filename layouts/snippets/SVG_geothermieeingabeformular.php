@@ -17,7 +17,6 @@
 #
 	$svgfile	= 'SVG_geothermieeingabe.svg';
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 			# zuweisen von: $SVGvars_navbuttons
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 						# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 		# zuweisen von: $SVGvars_coordscript
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipscript.php');		# zuweisen von: $SVGvars_tooltipscript 
 	include(LAYOUTPATH.'snippets/SVGvars_tooltipblank.php');		# zuweisen von: $SVGvars_tooltipblank 

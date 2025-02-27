@@ -16,6 +16,7 @@ class Layer extends MyObject {
 	public $opacity;
 	public $minScale;
 	public $maxScale;
+	public $document_attributes;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -778,7 +779,7 @@ l.Name AS sub_layer_name
 	}
 
 	function get_name($name_col = 'Name') {
-		return $this->get($name_col . (($name_col == 'Name' AND $this->gui->user->rolle->language != 'german') ? '_' . $this->gui->user->rolle->language : ''));
+		return $this->get($name_col . (($name_col == 'Name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -820,7 +821,7 @@ l.Name AS sub_layer_name
 		$query_attribute_aliases = array();
 
 		for ($i = 0; $i < count($query_attributes['name']); $i++) {
-			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
+			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . (rolle::$language != 'german' ? '_' . rolle::$language : '')][$i];
 		}
 
 		$data_attribute_names = array_map(

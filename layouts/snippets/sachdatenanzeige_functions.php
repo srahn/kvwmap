@@ -4,7 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -141,11 +141,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.visibility = 'collapse';
+			group.classList.add('collapsed');
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.visibility = 'visible';
+			group.classList.remove('collapsed');
 		});
 	}
 
@@ -180,22 +180,22 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
 				if (name_dependent != null) {
-					name_dependent.classList.remove('collapsed');
+					name_dependent.classList.remove('collapsedfull');
 				}
-				value_dependent.classList.remove('collapsed');
+				value_dependent.classList.remove('collapsedfull');
 			}
 			else {
 				if (name_dependent != null) {
-					name_dependent.classList.add('collapsed');
+					name_dependent.classList.add('collapsedfull');
 				}
-				value_dependent.classList.add('collapsed');
+				value_dependent.classList.add('collapsedfull');
 			}
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsed')){
+				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsedfull')){
 					row_display = '';
 				}
 			})
@@ -323,16 +323,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
-				type = elements[i].type;
-				if (type == 'checkbox' && elements[i].checked == false) {
-					value = 'f';
-				}
+				type = elements[i].type;			
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
 				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
 					value = parseFloat(value);
 				}
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}				
+				if (type == 'radio' && elements[i].checked == false) {
+					value = '';
+				}					
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {

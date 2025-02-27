@@ -712,9 +712,9 @@ class ddl {
 							);
 						}
 						else {
-							include_(CLASSPATH.'polygoneditor.php');
-							$polygoneditor = new polygoneditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
-							$rect = $polygoneditor->zoomTopolygon(
+							include_(CLASSPATH.'multigeomeditor.php');
+							$polygoneditor = new multigeomeditor($layerdb, $this->layerset['epsg_code'], $this->gui->user->rolle->epsg_code, $this->layerset['oid']);
+							$rect = $polygoneditor->zoomToGeom(
 								$oid,
 								$attributes['table_name'][$attributes['the_geom']],
 								$attributes['real_name'][$attributes['the_geom']],

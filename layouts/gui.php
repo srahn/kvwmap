@@ -4,6 +4,12 @@
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
+		<? include(LAYOUTPATH.'snippets/SVGvars_defs.php');	?>
+		<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+		<defs>
+			<? echo $SVGvars_defs; ?>
+		</defs>
+		</svg>
 		<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
 			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
@@ -30,7 +36,7 @@
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
-									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php",4);
+									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php", 4, false);
 									include(HEADER); ?>
 								</td>
 							</tr>

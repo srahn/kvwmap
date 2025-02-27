@@ -1,6 +1,6 @@
 <?php
 # 2008-01-12 pkvvm
-include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/cronjobs_'.rolle::$language.'.php');
 ?>
 <table border="0" cellpadding="5" cellspacing="0" bgcolor="<?php echo $bgcolor; ?>">
 	<tr> 

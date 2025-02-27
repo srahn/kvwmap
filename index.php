@@ -223,7 +223,7 @@ if (!FAST_CASE) {
 	}
 }
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4, false);
 function go_switch($go, $exit = false) {
 	global $GUI;
 	global $newPassword;
@@ -617,6 +617,10 @@ function go_switch($go, $exit = false) {
 				$GUI->showMapImage();
 			} break;
 
+			case 'show_missing_documents' : {
+				$GUI->show_missing_documents();
+			} break;
+
 			case 'showRefMapImage' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->getRefMapImage($GUI->formvars['ID']);
@@ -796,24 +800,34 @@ function go_switch($go, $exit = false) {
 				$GUI->PointEditor_Senden();
 			}break;
 
+			# MultipointEditor
+			case 'MultipointEditor' : {
+				$GUI->MultiGeomEditor();
+			}break;
+
+			# MultipointEditor
+			case 'MultipointEditor_Senden' : {
+				$GUI->MultiGeomEditor_Senden();
+			}break;
+
 			# PolygonEditor
 			case 'PolygonEditor' : {
-				$GUI->PolygonEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# PolygonEditor
 			case 'PolygonEditor_Senden' : {
-				$GUI->PolygonEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# LineEditor
 			case 'LineEditor' : {
-				$GUI->LineEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# LineEditor
 			case 'LineEditor_Senden' : {
-				$GUI->LineEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# Sachdaten speichern

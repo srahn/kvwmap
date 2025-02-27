@@ -1,6 +1,6 @@
 <?php
-	include(LAYOUTPATH.'languages/userdaten_formular_' . $this->user->rolle->language . '.php');
-	include(LAYOUTPATH.'languages/userdaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH.'languages/userdaten_formular_' . rolle::$language . '.php');
+	include(LAYOUTPATH.'languages/userdaten_' . rolle::$language . '.php');
 	
 	$loeschen = (NUTZER_ARCHIVIEREN ? 'archivieren' : 'löschen');
 	

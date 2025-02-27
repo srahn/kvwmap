@@ -517,9 +517,9 @@ else {
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 		$GUI->user->rolle->readSettings();
 	}
-	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+	#echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
 	# Rollenbezogene Stellendaten zuweisen
-	$GUI->loadMultiLingualText($GUI->user->rolle->language);
+	$GUI->loadMultiLingualText(rolle::$language);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
 	$GUI->debug->write('User: ' . $GUI->user->login_name, 4);

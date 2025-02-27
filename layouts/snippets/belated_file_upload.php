@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/belated_file_upload_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/belated_file_upload_' . rolle::$language . '.php');
 ?>
 <script type="text/javascript">
 	

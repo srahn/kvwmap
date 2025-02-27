@@ -1,6 +1,6 @@
 <?
 global $supportedLanguages;
-include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'); ?>
+include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 <div id="mapimage">
 	<input type="hidden" name="go" value="neu Laden">
 	<INPUT TYPE="hidden" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>">

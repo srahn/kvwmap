@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/MapCommentForm_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/MapCommentForm_'.rolle::$language.'.php');
 	$timestamp = DateTime::createFromFormat('Y-m-d H:i:s', $this->user->rolle->newtime);
 ?>
 

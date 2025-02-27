@@ -1,6 +1,6 @@
 <?php
 ###################################################################
-# kvwmap - Kartenserver für Kreisverwaltungen                     #
+# kvwmap - Kartenserver fï¿½r Kreisverwaltungen                     #
 ###################################################################
 # Lizenz                                                          #
 #                                                                 # 
@@ -45,8 +45,8 @@ class tif {
 		$current_resolution = $breite/$this->map->width;
 		str_replace(',','.',$this->resolution);
 		$ratio = $current_resolution/$this->resolution;
-		$this->map->set('width', $this->map->width*$ratio);
-		$this->map->set('height', $this->map->height*$ratio);
+		$this->map->width = $this->map->width*$ratio;
+		$this->map->height = $this->map->height*$ratio;
 		$this->final_resolution = $breite/$this->map->width;
 		return $this->map;
   }

@@ -1,5 +1,5 @@
 <?php
-	include_once(LAYOUTPATH.'languages/filterverwaltung_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/filterverwaltung_'.rolle::$language.'.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <script src="funktionen/selectformfunctions.js" language="JavaScript"  type="text/javascript"></script>
