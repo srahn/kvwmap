@@ -16281,7 +16281,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 					} break; # ende Layer ist ein Shapefile
 
-					case MS_OGR : { # OGR Layer (4)
+					case MS_OGR : case 5 : { # OGR Layertype 4 und 5 (MS_TILED_OGR))
 						$layer=new layerObj($map);
 						if (MAPSERVERVERSION < '540') {
 							$layer->set('connectiontype',$layerset[$i]['connectiontype']);
@@ -16290,10 +16290,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							$layer->setConnectionType($layerset[$i]['connectiontype']);
 						}
 						$layer->set('connection', $layerset[$i]['connection']);
-						$layer->set('type',$layerset[$i]['Datentyp']);
-						$layer->set('status',MS_ON);
-						if ($layerset[$i]['template']!='') {
-							$layer->set('template',$layerset[$i]['template']);
+						$layer->set('type', $layerset[$i]['Datentyp']);
+						$layer->set('status', MS_ON);
+						if ($layerset[$i]['template'] != '') {
+							$layer->set('template', $layerset[$i]['template']);
 						}
 						@$layer->queryByRect($rect);
 						$layer->open();
@@ -16765,8 +16765,14 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           } break;
 
           default : { # alle anderen Layertypen
-            echo 'Die Sachdatenabfrage für den connectiontype: '.$layerset[$i]['connectiontype'].' wird nicht unterstützt.';
-          }
+            $this->add_message('waring', 'Die Sachdatenabfrage für den connectiontype: ' . $layerset[$i]['connectiontype'] . ' wird nicht unterstützt.');
+						$this->loadMap('DataBase');
+						$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+						$this->saveMap('');
+						$this->drawMap();
+						$this->main = 'map.php';
+						return;
+					}
         } # ende Switch
       } # ende der Behandlung der zur Abfrage ausgewählten Layer
     } # ende der Schleife zur Abfrage der Layer der Stelle
