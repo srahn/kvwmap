@@ -18806,6 +18806,7 @@ class db_mapObj{
 			'if_empty_use_query' => false
 		);
 		$options = array_merge($default_options, $options);
+		$data = $this->getData($layer_id);
 		if ($data != '') {
 			$select = $this->getSelectFromData($data);
 			if ($database->schema != '') {
