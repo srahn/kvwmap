@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/flurstueck_suche_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/flurstueck_suche_'.rolle::$language.'.php');
  ?>
 
 <script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript"></script>

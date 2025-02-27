@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/data_import_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/data_import_'.rolle::$language.'.php');
  ?>
 <script type="text/javascript">
 <!--

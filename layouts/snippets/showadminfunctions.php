@@ -1,5 +1,5 @@
 <?
-	include(LAYOUTPATH.'languages/showadminfunctions_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/showadminfunctions_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">

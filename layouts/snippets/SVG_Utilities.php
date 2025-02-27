@@ -1,6 +1,6 @@
 <?php
  # 2008-01-24 pkvvm
-  include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/SVG_Utilities_'.rolle::$language.'.php');
 
 	$map_width = $this->user->rolle->nImageWidth;
 	$map_height = $this->user->rolle->nImageHeight;

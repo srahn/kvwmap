@@ -3,7 +3,7 @@
 /**
  * Formular zur Bearbeitung von Diagrammdefinitionen
  */
-include(LAYOUTPATH . 'languages/layer_chart_' . $this->user->rolle->language . '.php');
+include(LAYOUTPATH . 'languages/layer_chart_' . rolle::$language . '.php');
 include_once(CLASSPATH . 'FormObject.php') ?>
 
 <h2 style="margin-top: 20px"><? echo $strLayerChartTitle; ?></h2><?

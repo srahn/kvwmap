@@ -65,7 +65,7 @@ function showMenue() {
 <div id="menue_options">
 <?	
   if (!$this->user->rolle->hideMenue) {
-		include(LAYOUTPATH.'languages/menue_body_'.$this->user->rolle->language.'.php');
+		include(LAYOUTPATH.'languages/menue_body_'.rolle::$language.'.php');
 
 		if (MENU_WAPPEN != 'kein') {
 			$wappen = $this->Stelle->getWappen();

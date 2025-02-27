@@ -1,6 +1,6 @@
 <?
 include_once(CLASSPATH.'FormObject.php');
-include(LAYOUTPATH.'languages/PolygonEditor_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/PolygonEditor_'.rolle::$language.'.php');
 ?>
 <script language="JavaScript">
 <!--

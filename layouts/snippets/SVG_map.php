@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/SVG_map_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/SVG_map_' . rolle::$language . '.php');
 #
 ###################################################################
 #                                                                 #
@@ -356,8 +356,9 @@ function startup() {
 	{$conditional_output($this->user->rolle->gps, 'update_gps_position();')}
 	switch (top.document.GUI.previous_button.value) {
 		case "measure" : 
-			get_measure_path();
-			redrawPL();
+			if (get_measure_path()) {
+				redrawPL();
+			}
 		break;
 
 		case "measurearea" :

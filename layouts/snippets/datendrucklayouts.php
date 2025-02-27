@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH . 'languages/datendrucklayouts_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/datendrucklayouts_' . rolle::$language . '.php');
 	include(SNIPPETS . 'sachdatenanzeige_functions.php');
 	include_once(CLASSPATH . 'FormObject.php');	
 ?>

@@ -1,6 +1,6 @@
 <?php
 	global $supportedLanguages;
-	$language_file_name = 'layer_formular_' . $this->user->rolle->language . '.php';
+	$language_file_name = 'layer_formular_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
 	include(LAYOUTPATH . 'languages/_include_language_files.php');

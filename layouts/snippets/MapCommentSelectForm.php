@@ -1,6 +1,6 @@
 <?php
  # 2008-02-05 pkvvm
-  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/MapCommentSelectForm_'.rolle::$language.'.php');
  ?>
 <h2><?php echo $strTitleExtent; ?></h2>
 <br>
