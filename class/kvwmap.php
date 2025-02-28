@@ -12022,7 +12022,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$response = array(
 				'success' => false,
-				'msg' => $strLayerChartMissingLayerId
+				'msg' => $strLayerChartMissingLayerId,
+				'err_msg' => ''
 			);
 		}
 		return $response;
@@ -14653,13 +14654,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			}
 			else {
 				$result = $this->myobject->delete();
-				if (!$result) {
-					$result = array(
-						'success' => false,
-						'err_msg' => $this->database->mysqli->error
-					);
-				}
-				else {
+				if ($result['success']) {
 					$num_affected_rows = $this->database->mysqli->affected_rows;
 					switch ($num_affected_rows) {
 						case (-1) : {
