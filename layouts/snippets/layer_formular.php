@@ -245,6 +245,11 @@ from
 		elm["Data"].value = '';
 	}
 
+	function add_labelitem(){
+		var table = document.getElementById('labelitems_table');
+		table.firstElementChild.appendChild(table.firstElementChild.firstElementChild.nextElementSibling.cloneNode(true));
+	}
+
 	function unselectItem(evt) {
 		console.log('click on ', evt.target);
 		const datasource_id = $(evt).attr('datasource_id');
@@ -257,7 +262,7 @@ from
 				const datasource_id = $(evt.target).attr('datasource_id');
 				//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
 				// add clicked item to chosen-choices and select in select field
-				$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+				$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
 				$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
 				$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
 				$('#chosen-drop').hide();
@@ -323,6 +328,10 @@ from
 	
 	.layerform_header{
 		background: rgb(199, 217, 230);
+	}
+
+	#labelitems_table tr:nth-of-type(2){
+		display: none;
 	}
 </style>
 
@@ -721,7 +730,31 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-								<input name="labelitem" type="text" value="<?php echo $this->formvars['labelitem']; ?>" size="50" maxlength="100">
+							<table id="labelitems_table" style="width: 95%" cellpadding="1" cellspacing="0">
+								<tr>
+									<th class="fetter">&nbsp;Attribut:</th>
+									<th class="fetter">&nbsp;Alias:</th>
+								</tr>
+								<? for ($l = -1; $l < count($this->formvars['labelitems']); $l++) { 
+										if ($l != -1) {
+											$name = $this->formvars['labelitems'][$l]->get('name');
+											$alias = $this->formvars['labelitems'][$l]->get('alias');
+										}
+								?>
+								<tr>
+									<td>
+										<input name="labelitems_name[]" type="text" value="<? echo $name; ?>" size="25" maxlength="100">
+									</td>
+									<td>
+										<input name="labelitems_alias[]" type="text" value="<? echo $alias; ?>" size="25" maxlength="100">
+									</td>
+									<td>
+										<i class="fa fa-times" style="color: gray; cursor: pointer" onclick="this.closest('tr').remove();"></i>
+									</td>
+								</tr>
+								<? } ?>
+							</table>
+							<i class="fa fa-plus" style="color: gray; cursor: pointer; float: right;  margin: -18px 15px 0 0" onclick="add_labelitem();"></i>
 						</td>
 					</tr>
 					<tr>
@@ -1019,7 +1052,7 @@ from
 									<ul id="chosen-choices"><?
 										foreach ($this->layerdata['datasources'] AS $datasource) { ?>
 											<li class="chosen-item"><span><? echo $datasource->get('name') ?? $datasource->get('beschreibung'); ?></span>
-											<a datasource_id="<? echo $datasource->get('id'); ?>" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li><?
+											<a datasource_id="<? echo $datasource->get('id'); ?>" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -16px; margin-top: -1px;"></i></a></li><?
 										} ?>
 									</ul>
 								</div>
@@ -1557,7 +1590,7 @@ from
 		const datasource_id = $(evt.target).attr('datasource_id');
 		//console.log('click on selectable item %o with datasource_id %s', evt.target, datasource_id);
 		// add clicked item to chosen-choices and select in select field
-		$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -14px; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
+		$('#chosen-choices').append(`<li class="chosen-item"><span>${evt.target.innerHTML}</span><a datasource_id="${datasource_id}" class="chosen-item-close" data-option-array-index="5" onclick="unselectItem(this)"><i class="fa fa-times" style="color: gray; float: right; margin-right: -16px; margin-top: -1px;"></i></a></li>`);
 		$(`#datasource_ids option[value=${datasource_id}]`).prop('selected', true);
 		$(`.selectable-item[datasource_id="${datasource_id}"]`).toggleClass('selectable-item selected-item').off();
 		$('#chosen-drop').hide();

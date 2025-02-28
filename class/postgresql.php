@@ -90,7 +90,7 @@ class pgdatabase {
 			$connection_string = $this->get_connection_string();
 		}
 		try {
-			$this->dbConn = pg_connect($connection_string, $flag);
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
 		catch (Exception $e) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
@@ -542,7 +542,7 @@ FROM
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
-			echo '<p>pgconn: ' . $this->dbConn; exit;
+			echo '<p>pgconn: ' . $this->dbConn;
 		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';

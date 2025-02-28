@@ -616,13 +616,13 @@ class MyObject {
 		return $results;
 	}
 
-	function delete() {
+	function delete($where = NULL) {
 		$sql = "
 			DELETE
 			FROM
 				`" . $this->tableName . "`
 			WHERE
-				" . $this->get_identifier_expression() . "
+				" . ($where ?: $this->get_identifier_expression()) . "
 		";
 		#$this->debug->show('MyObject delete sql: ' . $sql, true);
 		$result = $this->database->execSQL($sql);
