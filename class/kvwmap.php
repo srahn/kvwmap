@@ -9042,19 +9042,25 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		include_once(CLASSPATH . 'Layer.php');
 		global $supportedLanguages;
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-
+		$formvars['labelitem'] = $formvars['labelitems_name'][1];
 		$mapDB->updateLayer($formvars, $duplicate);
 		$layer = Layer::find_by_id($this, $formvars['selected_layer_id']);
 		if ($layer) {
 			$layer->update_datasources($this, ($formvars['datasource_ids'] ?: []));
-			$layer->update_labelitems($this, ($formvars['labelitems_name'] ?: []), ($formvars['labelitems_alias'] ?: []));
 		}
 
 		if ($formvars['connectiontype'] == 6) {
 			if ($formvars['connection_id'] != '') {
+				$layerdb = $mapDB->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
+				$data_attributes = $mapDB->getDataAttributes($layerdb, $formvars['selected_layer_id'], ['assoc' => true]);
+				foreach ($formvars['labelitems_name'] ?: [] as $labelitem) {
+					if ($labelitem != '' AND !array_key_exists($labelitem, $data_attributes)) {
+						$this->add_message('error', 'Das Attribut ' . $labelitem . ' wird nicht im Data-Feld abgefragt!');
+					}
+				}
+				$layer->update_labelitems($this, ($formvars['labelitems_name'] ?: []), ($formvars['labelitems_alias'] ?: []));
 				if ($formvars['pfad'] != '') {
 					#---------- Speichern der Layerattribute -------------------
-					$layerdb = $mapDB->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
 					$all_layer_params = $mapDB->get_all_layer_params_default_values();
 					$attributes = $mapDB->load_attributes(
 						$layerdb,
@@ -18935,7 +18941,8 @@ class db_mapObj{
 	 */
 	function getDataAttributes($database, $layer_id, $options = array()) {
 		$default_options = array(
-			'if_empty_use_query' => false
+			'if_empty_use_query' => false,
+			'assoc' => false
 		);
 		$options = array_merge($default_options, $options);
 		$data = $this->getData($layer_id);
@@ -18944,7 +18951,7 @@ class db_mapObj{
 			if ($database->schema != '') {
 				$select = str_replace($database->schema . '.', '', $select);
 			}
-			$ret = $database->getFieldsfromSelect($select);
+			$ret = $database->getFieldsfromSelect($select, $options['assoc']);
 			if ($ret[0]) {
 				$this->GUI->add_message('error', $ret[1]);
 			}
