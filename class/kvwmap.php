@@ -9064,12 +9064,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 					$layerdb,
 					replace_params_rolle(
 						$path,
-						$all_layer_params,
-						$this->user->id,
-						$this->Stelle->id,
-						rolle::$hist_timestamp,
-						rolle::$language,
-						$duplicate_criterion
+						['duplicate_criterion' => $this->formvars['duplicate_criterion']]
 					),
 					$this->formvars['sync']
 				);
