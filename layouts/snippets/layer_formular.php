@@ -333,6 +333,10 @@ from
 	#labelitems_table tr:nth-of-type(2){
 		display: none;
 	}
+
+	#labelitems_table tr:first-child:nth-last-child(2){
+		display: none;
+	}	
 </style>
 
 <table>
@@ -730,6 +734,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
+							<i class="fa fa-plus" style="color: gray; cursor: pointer; float: right;  margin: 4px 15px 0 0" onclick="add_labelitem();"></i>
 							<table id="labelitems_table" style="width: 95%" cellpadding="1" cellspacing="0">
 								<tr>
 									<th class="fetter">&nbsp;Attribut:</th>
@@ -754,7 +759,6 @@ from
 								</tr>
 								<? } ?>
 							</table>
-							<i class="fa fa-plus" style="color: gray; cursor: pointer; float: right;  margin: -18px 15px 0 0" onclick="add_labelitem();"></i>
 						</td>
 					</tr>
 					<tr>

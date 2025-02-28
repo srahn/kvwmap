@@ -144,12 +144,14 @@ class Layer extends MyObject {
 		$layer_labelitems->delete('layer_id = ' . $this->get_id());
 		for ($i = 1; $i < count($names); $i++) {
 			# der erste ist ein Dummy und wird ausgelassen
-			$layer_labelitems->create(array(
-				'layer_id' => $this->get_id(),
-				'name' => $names[$i],
-				'alias' => $aliases[$i],
-				'order' => $i + 1
-			));
+			if ($names[$i] != '') {
+				$layer_labelitems->create(array(
+					'layer_id' => $this->get_id(),
+					'name' => $names[$i],
+					'alias' => $aliases[$i],
+					'order' => $i + 1
+				));
+			}
 		}
 	}
 
