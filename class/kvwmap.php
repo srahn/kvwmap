@@ -18788,7 +18788,7 @@ class db_mapObj{
     }
 		return replace_params_rolle(
 						$select,
-						['$SCALE' => '1000']
+						['SCALE' => '1000']
 					);
 	}
 
