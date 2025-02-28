@@ -472,7 +472,7 @@ class GUI {
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
 			$layer_labelitems = new MyObject($this, 'layer_labelitems');
 			$labelitems = $layer_labelitems->find_where('layer_id = ' . ($layer[0]['original_layer_id'] ?: $layer[0]['Layer_ID']), 'order');
-			$query_attributes = $mapDB->read_layer_attributes($this->formvars['layer_id'], $layerdb, NULL, false, false, false);
+			$query_attributes = $mapDB->read_layer_attributes(($layer[0]['original_layer_id'] ?: $layer[0]['Layer_ID']), $layerdb, NULL, false, false, false);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
