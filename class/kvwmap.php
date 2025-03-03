@@ -17371,16 +17371,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					$subquery .= ' WHERE ' . $filter;
 				}
 
-				$subquery = replace_params(
-					$subquery,
-					rolle::$layer_params,
-					$this->User_ID,
-					$this->Stelle_ID,
-					rolle::$hist_timestamp,
-					$this->rolle->language,
-					$layer['duplicate_criterion']
-				);
-
 				# Erzeugen des Abfragestatements für den maximalen Extent aus dem Data String
 				$sql = "
 					SELECT
