@@ -1374,9 +1374,9 @@ class user {
 		}
 		$sql.=' Name="'.$userdaten['nachname'].'"';
 		$sql.=',Vorname="'.$userdaten['vorname'].'"';
-		$sql.=',login_name="'.$userdaten['loginname'].'"';
+		$sql.=',login_name="' . trim($userdaten['loginname']) . '"';
 		$sql.=',Namenszusatz="'.$userdaten['Namenszusatz'].'"';
-		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string($userdaten['password2']) . '")';
+		$sql.=',password = SHA1("' . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . '")';
 		$sql.=',password_setting_time = CURRENT_TIMESTAMP()';
 		$sql.=',password_expired = false';
 		if ($userdaten['phon']!='') {
@@ -1449,7 +1449,7 @@ class user {
 		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
-				`password` = SHA1('" . $this->database->mysqli->real_escape_string($userdaten['password2']) . "'),
+				`password` = SHA1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
 				`password_setting_time` = CURRENT_TIMESTAMP(),
 				`password_expired` = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
@@ -1461,7 +1461,7 @@ class user {
 			SET
 				`Name` = '" . $userdaten['nachname'] . "',
 				`Vorname` = '" . $userdaten['vorname'] . "',
-				`login_name` = '" . $userdaten['loginname'] . "',
+				`login_name` = '" . trim($userdaten['loginname']) . "',
 				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
 				`start` = '" . ($userdaten['start'] ?: '0000-00-00') . "',
 				`stop`= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
