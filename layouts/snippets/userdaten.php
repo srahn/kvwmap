@@ -33,7 +33,7 @@
 	<tr>
 		<td style="float: right; margin-right: 50px"><input type="checkbox" onclick="toggle_archived_users();" id="archived" name="archived"> archivierte Nutzer anzeigen</td>
   </tr>
-  <? if($this->formvars['order']=="Name") { ?>
+  <? if (in_array($this->formvars['order'], ['Name', 'Name,Vorname'])) { ?>
   <tr height="50px" valign="bottom">
     <td colspan="2">
     <? $umlaute=array("Ä","Ö","Ü");
@@ -53,7 +53,7 @@
 					<tr>
 						<th>&nbsp;</th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=ID&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strID;?></a></th>
-						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName;?></a></th>
+						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=Name,Vorname&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $this->strName;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=stop&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strIntervall;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=last_timestamp&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strLastActivity;?></a></th>
 						<th align="left"><a href="index.php?go=Benutzerdaten_Anzeigen&order=organisation&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><?php echo $strOrganisation;?></a></th>
@@ -66,7 +66,7 @@
 						<th>&nbsp;</th>
 					</tr><?php
 					for ($i = 0; $i < count($this->userdaten); $i++) {
-						if ($this->formvars['order']=="Name") {
+						if (in_array($this->formvars['order'], ['Name', 'Name,Vorname'])) {
 							$first = strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1));
 							if (in_array($first,$umlaute)) {
 								switch ($first) {
