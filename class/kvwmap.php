@@ -14296,7 +14296,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 	function BenutzerdatenAnzeigen() {
 		if($this->formvars['order'] == ''){
-			$this->formvars['order'] = 'Name';
+			$this->formvars['order'] = 'Name,Vorname';
 		}
 		$this->titel='Benutzerdaten';
 		$this->main='userdaten.php';
