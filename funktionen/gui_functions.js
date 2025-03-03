@@ -734,6 +734,14 @@ function formdata2urlstring(formdata){
 	return url;
 }
 
+function setScale(select){
+	if(select.value != ''){
+		document.GUI.nScale.value=select.value;
+		document.getElementById('scales').style.display='none';
+		document.GUI.submit();
+	}
+}
+
 function add_split_mapimgs() {
 	svgdoc = document.SVG.getSVGDocument();
 	svgdoc.getElementById("mapimg3")?.remove();
