@@ -734,32 +734,34 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strLabelItem; ?></th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<span data-tooltip="<? echo $strLabelItemHelp; ?>" style="float: right; margin: 4px 13px 5px;"></span>
-							<i class="fa fa-plus" style="color: gray; cursor: pointer; float: right;  margin: 4px 0 0 0" onclick="add_labelitem();"></i>
-							<table id="labelitems_table" style="width: 93%" cellpadding="1" cellspacing="0">
-								<tr>
-									<th class="fetter">&nbsp;Attribut:</th>
-									<th class="fetter">&nbsp;Alias:</th>
-								</tr>
-								<? for ($l = -1; $l < count($this->formvars['labelitems']); $l++) { 
-										if ($l != -1) {
-											$name = $this->formvars['labelitems'][$l]->get('name');
-											$alias = $this->formvars['labelitems'][$l]->get('alias');
-										}
-								?>
-								<tr>
-									<td>
-										<input name="labelitems_name[]" type="text" value="<? echo $name; ?>" size="25" maxlength="100">
-									</td>
-									<td>
-										<input name="labelitems_alias[]" type="text" value="<? echo $alias; ?>" size="25" maxlength="100">
-									</td>
-									<td>
-										<i class="fa fa-times" style="color: gray; cursor: pointer" onclick="this.closest('tr').remove();"></i>
-									</td>
-								</tr>
-								<? } ?>
-							</table>
+							<div style="display:flex">
+								<table id="labelitems_table" style="width: 93%" cellpadding="1" cellspacing="0">
+									<tr>
+										<th class="fetter">&nbsp;Attribut:</th>
+										<th class="fetter">&nbsp;Alias:</th>
+									</tr>
+									<? for ($l = -1; $l < count($this->formvars['labelitems']); $l++) { 
+											if ($l != -1) {
+												$name = $this->formvars['labelitems'][$l]->get('name');
+												$alias = $this->formvars['labelitems'][$l]->get('alias');
+											}
+									?>
+									<tr>
+										<td>
+											<input name="labelitems_name[]" type="text" value="<? echo $name; ?>" size="25" maxlength="100">
+										</td>
+										<td>
+											<input name="labelitems_alias[]" type="text" value="<? echo $alias; ?>" size="25" maxlength="100">
+										</td>
+										<td>
+											<i class="fa fa-times" style="color: gray; cursor: pointer" onclick="this.closest('tr').remove();"></i>
+										</td>
+									</tr>
+									<? } ?>
+								</table>
+								<i class="fa fa-plus" style="color: gray; cursor: pointer; height: 12px;  margin: 4px 0 0 0" onclick="add_labelitem();"></i>
+								<span data-tooltip="<? echo $strLabelItemHelp; ?>" style="height: 12px; margin: 4px 13px 5px;"></span>
+							</div>
 						</td>
 					</tr>
 					<tr>
