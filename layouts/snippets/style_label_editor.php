@@ -179,16 +179,6 @@ function navigate(params) {
 	location.href = 'index.php?' + params + '&selected_layer_id=' + document.GUI.selected_layer_id.value + '&csrf_token=<? echo $_SESSION['csrf_token']; ?>';
 }
 
-function setScale(select){
-	if(select.value != ''){
-		document.GUI.nScale.value=select.value;
-		document.getElementById('scales').style.display='none';
-		document.GUI.legendtouched.value = 1;
-		neuLaden();
-	}
-}
-
-
 //-->
 </script>
 
@@ -518,7 +508,7 @@ function setScale(select){
 										</select>
 									</div>
 								</div>
-								&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+								&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 							</div>
 						</div>
 					</td>
