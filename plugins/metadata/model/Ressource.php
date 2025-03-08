@@ -78,7 +78,8 @@ class Ressource extends PgObject {
 		// $ressource->show = true;
 		$ressources = $ressource->find_where(
 			"
-				status_id > -1 AND
+				(von_eneka OR use_for_datapackage) AND
+				(status_id IS NULL OR status_id > -1) AND
 				auto_update AND
 				(
 					last_updated_at IS NULL OR
@@ -186,23 +187,29 @@ class Ressource extends PgObject {
 			$results = $ressource->getSQLResults("
 				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
-			echo 'res: ' . print_r($results, true);
 			if ($results[0]['num_running'] < 10) {
-				$ressources = Ressource::find_outdated($gui, NULL, 1); // liefert nur die erste gefundene zurück
+				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running']); // liefert nur die erste gefundene zurück
 			}
 		}
-		// $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 
 		if (count($ressources) > 0) {
-			$ressource = $ressources[0];
-			$gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ') method_only: ' . $method_only);
-			$result = $ressource->run_update($method_only);
-			$ressource->log($result, true);
+			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+			foreach ($ressources AS $ressource) {
+				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+				if ($gui->formvars['dry_run'] == 1) {
+					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+				}
+				else {
+					$result = $ressource->run_update($method_only);
+					$ressource->log($result, false);
+					return $result;
+				}
+			}
 		}
 		else {
 			return array(
 				'success' => true,
-				'msg' => 'Es sind zur Zeit keine Ressourcen zu aktualisieren.'
+				'msg' => 'Nichts zu tun'
 			);
 		}
 	}
@@ -235,7 +242,7 @@ class Ressource extends PgObject {
 	}
 
 	function run_update($method_only = '') {
-		// $this->debug->show('Run Update für Ressource id: ' . $this->get_id(), true);
+		$this->debug->show('Update Ressource ' . $this->get_id(), true);
 		$this->update_status(1, $msg);
 
 		if ($this->must_be_executed('download', $method_only)) {
@@ -256,18 +263,18 @@ class Ressource extends PgObject {
 
 			// Update metadata document
 			$this->gui->formvars['aktivesLayout'] = 4;
-			$this->gui->formvars['chosen_layer_id'] = $this->layer_id;
+			$this->gui->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
 			$this->gui->formvars['oid'] = $this->get_id();
 			$this->gui->formvars['archivieren'] = 1;
 			$this->gui->formvars['no_output'] = true;
 
 			include_once(CLASSPATH . 'Layer.php');
-			$layer = Layer::find_by_id($this->gui, $this->layer_id);
+			$layer = Layer::find_by_id($this->gui, METADATA_RESSOURCES_LAYER_ID);
 			# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen object_id
 			# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
 			# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
 			$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $this->get_id();
-			$this->gui->formvars['checkbox_names_' . $this->layer_id] = $checkbox_name;
+			$this->gui->formvars['checkbox_names_' . METADATA_RESSOURCES_LAYER_ID] = $checkbox_name;
 			$this->gui->formvars[$checkbox_name] = 'on';
 			$result = $this->gui->generischer_sachdaten_druck_drucken(
 				NULL, // pdfobject
@@ -277,15 +284,17 @@ class Ressource extends PgObject {
 				false // append
 			);
 			$this->gui->outputfile = basename($result['pdf_file']);
-			$this->gui->pdf_archivieren($this->layer_id, $this->get_id(), $result['pdf_file']);
-			$this->debug->show('Metadatendokument für Ressource erzeugt: ' . $result['pdf_file'], true);
-			// Currently update status will be set to uptodate only if data has been transformed
+			$this->gui->pdf_archivieren(METADATA_RESSOURCES_LAYER_ID, $this->get_id(), $result['pdf_file']);
+			$this->debug->show('Metadatendokument für Ressource ' . $this->get_id() . ' aktualisiert.', true);
+		}
+
+		if ($method_only == '') {
 			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
 
 		return array(
 			'success' => true,
-			'msg' => $msg . 'Ressource erfolgreich aktualisiert.'
+			'msg' => $msg . 'Ressource ' . $this->get_id() . ' erfolgreich aktualisiert.'
 		);
 	}
 
@@ -297,24 +306,25 @@ class Ressource extends PgObject {
 	 * @param String (optional) $msg
 	 */
 	function update_status($status_id, $msg = '') {
+		// $this->debug->show('Set status_id: ' . $status_id, true);
 		$attributes = array('status_id = ' . (string)$status_id);
 		$last_updated_at = date('Y-m-d H:i:s', time());
 		if ($msg != '') {
-			echo '<br>Update Status auf id: ' . $status_id . '<br>Msg: ' . $msg . ' ' . $last_updated_at;
+			$this->debug->show('Ressource ' . $this->get_id() . ' uptodate: ' . $last_updated_at, true);
 		}
 		if ($this->get('status_id') != 0 AND $status_id == 0) {
 			$attributes[] = "last_updated_at = '" . $last_updated_at . "'";
 		}
 		// $this->show = true;
 		// echo '<br>Update status_id: ' . $this->get('status_id') . ' auf ' . $status_id;
-		$this->update_attr($attributes, false);
+		$this->update_attr($attributes, true);
 	}
 
 	####################
 	# Download methods #
 	####################
 	function download() {
-		$this->debug->show('Starte Funktion download', true);
+		// $this->debug->show('Starte Funktion download', true);
 		if ($this->get('download_method') != '') {
 			$method_name = 'download_' . $this->get('download_method');
 			if (!method_exists($this, $method_name)) {
@@ -694,7 +704,7 @@ class Ressource extends PgObject {
 	# Unpack methods #
 	##################
 	function unpack() {
-		$this->debug->show('Starte Funktion unpack', true);
+		// $this->debug->show('Starte Funktion unpack', true);
 		if ($this->get('unpack_method') != '') {
 			$method_name = 'unpack_' . $this->get('unpack_method');
 			if (!method_exists($this, $method_name)) {
@@ -720,7 +730,7 @@ class Ressource extends PgObject {
 	 * and remove the zip-files afterward
 	 */
 	function unpack_unzip() {
-		$this->debug->show('Starte Funktion unpack_unzip', true);
+		// $this->debug->show('Starte Funktion unpack_unzip', true);
 		if ($this->get('dest_path') == '') {
 			return array(
 				'success' => false,
@@ -745,9 +755,8 @@ class Ressource extends PgObject {
 		$err_msg = array();
 		foreach (glob($download_path . '*') as $filename) {
 			if (finfo_file($finfo, $filename) == 'application/zip') {
-				echo '<br>filename: ' . $filename;
 				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+				$this->debug->show('Packe ' . $filename . ' aus', true);
 				$descriptorspec = [
 					0 => ["pipe", "r"],  // stdin
 					1 => ["pipe", "w"],  // stdout
@@ -1118,6 +1127,34 @@ class Ressource extends PgObject {
 		}
 	}
 
+	function import_mastr() {
+		$import_command = 'mastrImport';
+		$this->debug->show("Importiere Markstammdaten mit Befehl: " . $import_command, true);
+		$url = 'gdalcmdserver:8080/t/?tool=' . $import_command;
+		// echo '<br>url:   ' . urldecode($url) . '<br><br>';
+		// echo '<br>url:   ' . $url . '<br><br>';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$output = curl_exec($ch);
+		#echo '<br>output: ' . $output;
+		$result = json_decode($output);
+		$ret = $result->exitCode;
+		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einlesen des Mastr!'
+			);
+		}
+		else {
+			return array(
+				'success' => true,
+				'msg' => 'Import Mastr erfolgreich ausgeführt.'
+			);
+		}
+	}
+
 	/**
 	 * Import shape with ogr2ogr to Postgres
 	 */
@@ -1185,7 +1222,7 @@ class Ressource extends PgObject {
 	}
 
 	function import_ogr2ogr_gml() {
-		$this->debug->show('Starte Funktion import_org2ogr_gml', true);
+		// $this->debug->show('Starte Funktion import_org2ogr_gml', true);
 		if ($this->get('import_table') == '') {
 			return array(
 				'success' => false,
@@ -1223,8 +1260,9 @@ class Ressource extends PgObject {
 
 		$err_msg = array();
 		$first = true;
+		$this->database->create_schema($this->get('import_schema'));
 		foreach ($gml_files as $gml_file) {
-			echo '<br>Importiere Datei: ' . $dest_path . $gml_file;
+			$this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
 			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
 			$result = $this->gui->data_import_export->ogr2ogr_import(
 				$this->get('import_schema'),
@@ -1515,7 +1553,7 @@ class Ressource extends PgObject {
 
 	function transform_exec_sql() {
 		$sql = $this->get('transform_command');
-		$this->debug->show("Transformiere Ressource mit SQL: " . $sql, true);
+		$this->debug->show("Transform Ressource " . $this->get_id() . " mit sql", true);
 		$query = $this->execSQL($sql);
 		if (!$query) {
 			return array(

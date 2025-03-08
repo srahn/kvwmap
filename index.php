@@ -1504,37 +1504,113 @@ function go_switch($go, $exit = false) {
 				$GUI->generischer_sachdaten_druck();
 			} break;
 
+			/**
+			 * To create and assign print pdf document for all data sets of a layer
+			 * go=generischer_sachdaten_druck_Drucken&archivieren=1&aktivesLayout=$aktivesLayout&chosen_layer_id=$layer_id
+			 */
 			case 'generischer_sachdaten_druck_Drucken' : {
 				if ($GUI->formvars['archivieren']) {
-					# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
-					# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
-					# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
 					include_once(CLASSPATH . 'Layer.php');
-					$layer = Layer::find_by_id($GUI, $GUI->formvars['chosen_layer_id']);
-					$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
-					$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
-					$GUI->formvars[$checkbox_name] = 'on';
-				}
-				$result = $GUI->generischer_sachdaten_druck_drucken(
-					NULL, // pdfobject
-					NULL, // offsetx
-					NULL, // offsety
-					true, // output
-					false // append
-				);
-
-				$GUI->outputfile = basename($result['pdf_file']);
-				if ($GUI->formvars['archivieren']) {
-					// archivieren und letztes Suchergebnis anzeigen
-					$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
+					$layer_id = $GUI->formvars['chosen_layer_id'];
+					$aktivesLayout = $GUI->formvars['aktivesLayout'];
+					$layer = Layer::find_by_id($GUI, $layer_id);
+					$oids = array();
+					if ($GUI->formvars['oid'] == '') {
+						$oid_uebergeben = false;
+						// echo '<br>Frage alle Datensatz-IDs des Layers ab.';
+						$GUI->formvars['selected_layer_id'] = $GUI->formvars['chosen_layer_id'];
+						$GUI->formvars['no_output'] = true;
+						$GUI->GenerischeSuche_Suchen();
+						$oids = array_map(
+							function($dataset) use ($layer) {
+								return $dataset[$layer->get('oid')];
+							},
+							$GUI->qlayerset[0]['shape']
+						);
+						sort($oids);
+					}
+					else {
+						$oid_uebergeben = true;
+						$oids[] = $GUI->formvars['oid'];
+					}
+					foreach ($oids AS $oid) {
+						if (!$oid_uebergeben) {
+							unset($GUI->qlayerset);
+						}
+						$GUI->formvars = array(
+							'aktivesLayout' => $aktivesLayout,
+							'chosen_layer_id' => $layer_id,
+							'archivieren' => 1,
+							'oid' => $oid
+						);
+						# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
+						# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+						# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+						$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
+						$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
+						$GUI->formvars[$checkbox_name] = 'on';
+						$result = $GUI->generischer_sachdaten_druck_drucken(
+							NULL, // pdfobject
+							NULL, // offsetx
+							NULL, // offsety
+							true, // output
+							false // append
+						);
+						unset($GUI->formvars[$checkbox_name]);
+						$GUI->outputfile = basename($result['pdf_file']);
+						// archivieren und letztes Suchergebnis anzeigen
+						$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
+						$GUI->outputfile = '';
+					}
+					$GUI->formvars['oid'] = '';
 					$GUI->formvars['no_output'] = false;
+					$GUI->formvars['anzahl'] = 10;
 					$GUI->GenerischeSuche_Suchen();
 				}
 				else {
+					$result = $GUI->generischer_sachdaten_druck_drucken(
+						NULL, // pdfobject
+						NULL, // offsetx
+						NULL, // offsety
+						true, // output
+						false // append
+					);
+					$GUI->outputfile = basename($result['pdf_file']);
 					// nur pdf ausgeben
 					$GUI->mime_type='pdf';
 					$GUI->output();
 				}
+
+				// if ($GUI->formvars['archivieren'] AND $GUI->formvars['oid'] != '') {
+				// 	# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
+				// 	# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+				// 	# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+				// 	include_once(CLASSPATH . 'Layer.php');
+				// 	$layer = Layer::find_by_id($GUI, $GUI->formvars['chosen_layer_id']);
+				// 	$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
+				// 	$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
+				// 	$GUI->formvars[$checkbox_name] = 'on';
+				// }
+				// $result = $GUI->generischer_sachdaten_druck_drucken(
+				// 	NULL, // pdfobject
+				// 	NULL, // offsetx
+				// 	NULL, // offsety
+				// 	true, // output
+				// 	false // append
+				// );
+
+				// $GUI->outputfile = basename($result['pdf_file']);
+				// if ($GUI->formvars['archivieren']) {
+				// 	// archivieren und letztes Suchergebnis anzeigen
+				// 	$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
+				// 	$GUI->formvars['no_output'] = false;
+				// 	$GUI->GenerischeSuche_Suchen();
+				// }
+				// else {
+				// 	// nur pdf ausgeben
+				// 	$GUI->mime_type='pdf';
+				// 	$GUI->output();
+				// }
 			} break;
 
 			case 'sachdaten_druck_editor' : {

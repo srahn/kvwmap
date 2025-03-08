@@ -48,7 +48,7 @@
           <input id="checkbox_<? echo $ressource->get_id(); ?>" data-ressource_id="<? echo $ressource->get_id(); ?>" class="ressource_checkbox" type="checkbox" style="margin-top: 1px"/>
         </div>
         <div class="odr-cell odr-ressource">
-          <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo $ressource->layer_id; ?>&value_id=<?php echo $ressource->get('id'); ?>&operator_id==">
+          <a href="index.php?go=Layer-Suche_Suchen&selected_layer_id=<? echo METADATA_RESSOURCES_LAYER_ID; ?>&value_id=<?php echo $ressource->get('id'); ?>&operator_id==">
             <?php echo $ressource->get('bezeichnung'); ?>
             <span id="ressource_id_span_<? echo $ressource->get_id(); ?>"></span>
           </a>
@@ -66,7 +66,7 @@
           <span id="next_update_at_span_<? echo $ressource->get_id(); ?>"><?php echo ($ressource->get_next_update_at() ?: '') ; ?></span>
         </div>
         <div class="odr-cell-right odr-action">
-          <? echo ($ressource->get('outdated') == 't' ? 'ja' : 'nein'); ?>
+          <? echo ($ressource->get('outdated') == 't' ? 'ja' : '-'); ?>
           <!--input id="button_-1_<? echo $ressource->get_id(); ?>" type="button" value="Abbrechen" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button cancle_ressource_button" title="Das Aktualisieren dieser Ressource abbrechen."//-->
           <input id="button_0_<? echo $ressource->get_id(); ?>" type="button" value="Uptodate" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button set_uptodate_ressource_button" title="Diese Ressource auf uptodate setzen.">
           <!--input id="button_1_<? echo $ressource->get_id(); ?>" type="button" value="Neu erstellen" data-ressource_id="<? echo $ressource->get_id(); ?>" class="odr-button order_ressource_button" title="Diese Ressource zum Aktualisieren beauftragen.">
@@ -99,6 +99,12 @@
       in Arbeit: <span id="num_ressources_in_progress_span"></span> //-->
     </div>
   </div>
+</div>
+<div><?php
+  if (count($this->metadata_processes) > 0) { ?>
+    <h2 style="margin-top: 20px; margin-bottom: 20px">Laufende Prozesse</h2><?
+    echo implode('<br>', $this->metadata_processes);
+  } ?>
 </div>
 
 <script>

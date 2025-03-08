@@ -9809,7 +9809,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 						}
 					}
 				}
-
 				# 2008-10-22 sr Filter zur Where-Klausel hinzugefügt
 				# 2024-07-28 pk Replace all params from filter
 				if ($layerset[0]['Filter'] != '') {
@@ -9870,7 +9869,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 
 				$layerset[0]['sql'] = $sql;
-				// if ($this->user->id == 17) {
+				// if ($this->user->id == 1) {
 				// 	echo "<p>Abfragestatement: " . $sql . $sql_order . $sql_limit;
 				// }
 				$this->debug->write("<p>Suchanfrage ausführen: ", 4);
@@ -11850,7 +11849,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 
 		# Entnehme die Checkboxwerte aus formvars
 		$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
-
 		# Daten abfragen
 		if ($this->qlayerset[0]['shape'] != null) {
 			$result = $this->qlayerset[0]['shape'];
@@ -11871,8 +11869,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids ?: []) . "')
 				" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
 			";
-			#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
-			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
+			// echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
+			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :", 4);
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			if (!$ret[0]) {
 				while ($rs = pg_fetch_array($ret[1])) {
@@ -11889,7 +11887,6 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			# PDF erzeugen
 			$return_values = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging'], $output, $append);
 		}
-
 		return $return_values;
 	}
 
