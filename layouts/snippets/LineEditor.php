@@ -78,7 +78,7 @@ function buildwktlinefromsvgpath(svgpath){
 						<div style="width:150px;" onmouseover="document.getElementById('scales').style.display='inline-block';" onmouseout="document.getElementById('scales').style.display='none';">
 							<div valign="top" style="height:0px; position:relative;">
 								<div id="scales" style="display:none; position:absolute; left:66px; bottom:-1px; width: 78px; vertical-align:top; overflow:hidden; border:solid grey 1px;">
-									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="document.GUI.nScale.value=this.value; document.getElementById('scales').style.display='none'; document.GUI.submit();">
+									<select size="<? echo count($selectable_scales); ?>" style="padding:4px; margin:-2px -17px -4px -4px;" onclick="setScale(this);">
 										<? 
 											foreach($selectable_scales as $scale){
 												echo '<option onmouseover="this.selected = true;" value="'.$scale.'">1:&nbsp;&nbsp;'.$scale.'</option>';
@@ -87,7 +87,7 @@ function buildwktlinefromsvgpath(svgpath){
 									</select>
 								</div>
 							</div>
-							&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+							&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 						</div>
 					</td>
 					<? if($this->user->rolle->runningcoords != '0'){ ?>

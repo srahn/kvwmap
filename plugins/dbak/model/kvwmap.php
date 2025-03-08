@@ -55,7 +55,7 @@
 						$this->add_message('info', $result['msg']);
 					}
 					else {
-						$this->add_message('notice', `Fehler beim Löschen der Altlastenfläche im DbAk-Landesportal: {$result['msg']}`);
+						$this->add_message('notice', `Fehler beim Löschen der Altlastenfläche im DbAk-Landesportal: {$result['err_msg']}`);
 					}
 				}
 				catch (Exception $e) {

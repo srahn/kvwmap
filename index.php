@@ -1612,6 +1612,39 @@ function go_switch($go, $exit = false) {
 				// 	$GUI->output();
 				// }
 			} break;
+			
+			// case 'generischer_sachdaten_druck_Drucken' : {
+			// 	if ($GUI->formvars['archivieren']) {
+			// 		# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
+			// 		# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+			// 		# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+			// 		include_once(CLASSPATH . 'Layer.php');
+			// 		$layer = Layer::find_by_id($GUI, $GUI->formvars['chosen_layer_id']);
+			// 		$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
+			// 		$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
+			// 		$GUI->formvars[$checkbox_name] = 'on';
+			// 	}
+			// 	$result = $GUI->generischer_sachdaten_druck_drucken(
+			// 		NULL, // pdfobject
+			// 		NULL, // offsetx
+			// 		NULL, // offsety
+			// 		true, // output
+			// 		false // append
+			// 	);
+
+			// 	$GUI->outputfile = basename($result['pdf_file']);
+			// 	if ($GUI->formvars['archivieren']) {
+			// 		// archivieren und letztes Suchergebnis anzeigen
+			// 		$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
+			// 		$GUI->formvars['no_output'] = false;
+			// 		$GUI->GenerischeSuche_Suchen();
+			// 	}
+			// 	else {
+			// 		// nur pdf ausgeben
+			// 		$GUI->mime_type='pdf';
+			// 		$GUI->output();
+			// 	}
+			// } break;
 
 			case 'sachdaten_druck_editor' : {
 				$GUI->checkCaseAllowed('sachdaten_druck_editor');

@@ -142,8 +142,9 @@ function replace_params_rolle($str, $additional_params = NULL) {
 			$params = array_merge($params, $additional_params);
 		}
 		$str = replace_params($str, $params);
-		$str = str_replace('$CURRENT_DATE', date('Y-m-d'), $str);
-		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s'), $str);
+		$current_time = time();
+		$str = str_replace('$CURRENT_DATE', date('Y-m-d', $current_time), $str);
+		$str = str_replace('$CURRENT_TIMESTAMP', date('Y-m-d G:i:s', $current_time), $str);
 		$str = str_replace('$USER_ID', rolle::$user_ID, $str);
 		$str = str_replace('$STELLE_ID', rolle::$stelle_ID, $str);
 		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);

@@ -232,6 +232,7 @@
     else{
       $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
+    $GUI->formvars['original_layer_id'] = $layerset[0]['Layer_ID'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
