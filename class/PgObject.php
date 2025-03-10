@@ -157,7 +157,7 @@ class PgObject {
 		$where = (empty($where) ? "true" : $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
-		echo $sql = "
+		$sql = "
 			SELECT
 				" . $select . "
 			FROM
@@ -166,7 +166,7 @@ class PgObject {
 				" . $where . "
 				" . $order . "
 				" . $limit . "
-		";exit;
+		";
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
