@@ -523,7 +523,8 @@ function art_hide(){
 
   <tr align="center">
     <td colspan="3">
-    <input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;<input type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input type="submit" name="go_plus" value="als neues Layout speichern">
+    	<input type="button" name="go_plus" value="Layout löschen" onclick="Bestaetigung('index.php?go=Druckrahmen_Löschen&selected_frame_id=<? echo $this->Document->selectedframe[0]['id']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie dieses Layout wirklich löschen?');">&nbsp;
+			<input type="submit" name="go_plus" value="Änderungen Speichern">&nbsp;<input type="submit" name="go_plus" value="als neues Layout speichern">
     </td>
   </tr>
 
