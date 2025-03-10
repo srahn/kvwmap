@@ -75,6 +75,8 @@ function showMapImage(){
 function addRedlining(){
 	svgdoc = document.SVG.getSVGDocument();
 	var redlining = svgdoc.getElementById("redlining");
+	document.GUI.free_polygons.value = '';
+	document.GUI.free_texts.value = '';
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
 		switch(child.id){
