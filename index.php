@@ -1512,7 +1512,6 @@ function go_switch($go, $exit = false) {
 				if ($GUI->formvars['archivieren']) {
 					include_once(CLASSPATH . 'Layer.php');
 					$layer_id = $GUI->formvars['chosen_layer_id'];
-					$aktivesLayout = $GUI->formvars['aktivesLayout'];
 					$layer = Layer::find_by_id($GUI, $layer_id);
 					$oids = array();
 					if ($GUI->formvars['oid'] == '') {
@@ -1537,12 +1536,7 @@ function go_switch($go, $exit = false) {
 						if (!$oid_uebergeben) {
 							unset($GUI->qlayerset);
 						}
-						$GUI->formvars = array(
-							'aktivesLayout' => $aktivesLayout,
-							'chosen_layer_id' => $layer_id,
-							'archivieren' => 1,
-							'oid' => $oid
-						);
+						$GUI->formvars['oid'] = $oid;
 						# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
 						# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
 						# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
