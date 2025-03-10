@@ -402,28 +402,6 @@ class Gml_extractor {
 		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
 		return $ret;
 	}
-
-	/*
-	* Returns TRUE OR FALSE, depending on whether the schema exists
-	*/
-	function check_if_schema_exists($schema) {
-		$sql = "
-			SELECT
-				EXISTS(
-					SELECT
-						1
-					FROM
-						information_schema.schemata
-					WHERE 
-						schema_name = '" . $schema . "'
-					AND
-						catalog_name = '" . POSTGRES_DBNAME . "'
-				)
-			;";
-		$ret = $this->pgdatabase->execSQL($sql, 4, 0);
-		$result = pg_fetch_row($ret[1]);
-		return ($result[0] === 't');
-	}
 	
 	/*
 	* Returns TRUE OR FALSE, depending on whether the schema exists
@@ -1365,30 +1343,14 @@ class Gml_extractor {
 	}
 
 	/*
-	* Create a specific schema
-	*/
-	function create_schema($schema) {
-		$sql = "CREATE SCHEMA " . $schema . ";";
-		$ret = $this->pgdatabase->execSQL($sql, 4,0);
-	}
-
-	/*
-	* Drops a specific schema
-	*/
-	function drop_schema($schema) {
-		$sql = "DROP SCHEMA IF EXISTS " .$schema . " CASCADE;";
-		$ret = $this->pgdatabase->execSQL($sql, 4,0);
-	}
-
-	/*
 	 * This function builds the basic xplan_gmlas tables for the basisobjekte of all schemas (xp, bp, fp, lp, rp, so)
 	 */
 	function build_basic_tables() {
 		# Prepare schema 
-		if ($this->check_if_schema_exists($this->gmlas_schema)) {
-			$this->drop_schema($this->gmlas_schema);
+		if ($this->pgdatabase->schema_exists($this->gmlas_schema)) {
+			$this->pgdatabase->drop_schema($this->gmlas_schema);
 		}
-		$this->create_schema($this->gmlas_schema);
+		$this->pgdatabase->create_schema($this->gmlas_schema);
 
 		# Currently creates 39 tables related to BP/FP/RP/SO-Plan and Bereich
 		# does not include praesentationsobjekte, textabschnitt or begruendungabschnitt

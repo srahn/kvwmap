@@ -1504,6 +1504,10 @@ function go_switch($go, $exit = false) {
 				$GUI->generischer_sachdaten_druck();
 			} break;
 
+			/**
+			 * To create and assign print pdf document for all data sets of a layer
+			 * go=generischer_sachdaten_druck_Drucken&archivieren=1&aktivesLayout=$aktivesLayout&chosen_layer_id=$layer_id
+			 */
 			case 'generischer_sachdaten_druck_Drucken' : {
 				if ($GUI->formvars['archivieren']) {
 					include_once(CLASSPATH . 'Layer.php');
@@ -1512,7 +1516,8 @@ function go_switch($go, $exit = false) {
 					$layer = Layer::find_by_id($GUI, $layer_id);
 					$oids = array();
 					if ($GUI->formvars['oid'] == '') {
-						// Frage alle Datensatz-ID's des Layers ab.
+						$oid_uebergeben = false;
+						// echo '<br>Frage alle Datensatz-IDs des Layers ab.';
 						$GUI->formvars['selected_layer_id'] = $GUI->formvars['chosen_layer_id'];
 						$GUI->formvars['no_output'] = true;
 						$GUI->GenerischeSuche_Suchen();
@@ -1522,13 +1527,16 @@ function go_switch($go, $exit = false) {
 							},
 							$GUI->qlayerset[0]['shape']
 						);
-						unset($GUI->qlayerset);
+						sort($oids);
 					}
 					else {
-						$mit_oids = 'ja';
+						$oid_uebergeben = true;
 						$oids[] = $GUI->formvars['oid'];
 					}
 					foreach ($oids AS $oid) {
+						if (!$oid_uebergeben) {
+							unset($GUI->qlayerset);
+						}
 						$GUI->formvars = array(
 							'aktivesLayout' => $aktivesLayout,
 							'chosen_layer_id' => $layer_id,

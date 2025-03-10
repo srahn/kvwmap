@@ -1234,7 +1234,7 @@ class data_import_export {
       $csv .= implode(';', $values[$i]).chr(13).chr(10);
     }
 
-    $currenttime=date('Y-m-d H:i:s',time());
+    $currenttime = date('Y-m-d H:i:s',time());
 		return utf8_decode($csv);
 	}
 
@@ -1458,12 +1458,12 @@ class data_import_export {
 					$this->formvars['layer_name'] = str_replace(['.', '(', ')', '/', '[', ']', '<', '>'], '_', $this->formvars['layer_name']);
 					$this->formvars['geomtype'] = $layerset[0]['attributes']['geomtype'][$layerset[0]['attributes']['the_geom']];
 					$folder = 'Export_'.$this->formvars['layer_name'].rand(0,10000);
-					$old = umask(0);
 					$exportpath = $exportpath ?: IMAGEPATH . $folder . '/';
 					if (!is_dir($exportpath)) {
-						mkdir($exportpath, 0777); # Ordner erzeugen
+						$old = umask(0);
+						mkdir($exportpath, 0774); # Ordner erzeugen
+						umask($old);
 					}
-					umask($old);
 					$zip = false;
 
 					$exportfile = $exportpath . ($exportfilename ?: $this->formvars['layer_name']);
@@ -1538,7 +1538,7 @@ class data_import_export {
 
 						case 'CSV' : {
 							$result = array();
-							while ($rs = pg_fetch_assoc($ret[1])){
+							while ($rs = pg_fetch_assoc($ret[1])) {
 								$result[] = $rs;
 							}
 							# Bugfix 3.5.64: Fehlerbehebung liefert bei leeren Tabellen nur leere csv
@@ -1616,22 +1616,12 @@ class data_import_export {
 
 					# bei Bedarf zippen
 					if ($zip) {
-						$zipfilepath = rtrim($exportpath, '/');
-						# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
-						array_walk(searchdir($zipfilepath, true), function($item, $key){
-							$pathinfo = pathinfo($item);
-							rename($item, $pathinfo['dirname'] . '/' . umlaute_umwandeln($pathinfo['filename']) . '.' . $pathinfo['extension']);
-						});
-
-						exec(ZIP_PATH.' -j ' . $zipfilepath . ' ' . $zipfilepath . '/*'); # Ordner zippen
-						#echo '<p>' . ZIP_PATH.' -j ' . $zipfilepath . ' ' . $zipfilepath .'/*';
-
-						$exportfile = $zipfilepath . '.zip';
+						$exportfile = $this->zip_export_path($exportpath);
 						$contenttype = 'application/octet-stream';
 					}
 					# temp. Tabelle wieder löschen
 					$sql = 'DROP TABLE ' . $temp_table;
-					$ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
+					// $ret = $layerdb->execSQL($sql,4, 0, $suppress_err_msg);
 					if ($this->formvars['export_format'] != 'CSV') {
 						$user->rolle->setConsumeShape($currenttime, $this->formvars['selected_layer_id'], $count);
 					}
@@ -1687,6 +1677,18 @@ class data_import_export {
 			'contenttype' => $contenttype,
 			'exportfile' => $exportfile,
 		);
+	}
+
+	function zip_export_path($export_path) {
+		$zipfilepath = rtrim($export_path, '/');
+		# Beim Zippen gehen die Umlaute in den Dateinamen kaputt, deswegen vorher umwandeln
+		array_walk(searchdir($export_path, true), function($item, $key){
+			$pathinfo = pathinfo($item);
+			rename($item, $pathinfo['dirname'] . '/' . umlaute_umwandeln($pathinfo['filename']) . '.' . $pathinfo['extension']);
+		});
+		exec(ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*'); # Ordner zippen
+		// echo ZIP_PATH . ' -j ' . rtrim($export_path, '/') . ' ' . $export_path . '*';
+		return rtrim($export_path, '/') . '.zip';
 	}
 
 	function copy_documents_to_export_folder($result, $attributes, $maintable, $folder, $doc_path, $doc_url, $recursion_depth = 0){
