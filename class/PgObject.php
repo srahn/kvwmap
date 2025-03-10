@@ -153,11 +153,11 @@ class PgObject {
 	function find_where($where, $order = NULL, $select = '*', $limit = NULL, $from = NULL) {
 		// echo '<br>PgObject->find_where';
 		$select = (empty($select) ? $this->select : $select);
-		$from = (empty($from) ? $this->schema . '.' . $this->tableName : $from);
+		$from = (empty($from) ? $this->schema . '."' . $this->tableName . '"' : $from);
 		$where = (empty($where) ? "true" : $where);
 		$order = (empty($order) ? "" : " ORDER BY " . replace_semicolon($order));
 		$limit = (empty($limit) ? "" : " LIMIT " . replace_semicolon($limit));
-		$sql = "
+		echo $sql = "
 			SELECT
 				" . $select . "
 			FROM
@@ -166,7 +166,7 @@ class PgObject {
 				" . $where . "
 				" . $order . "
 				" . $limit . "
-		";
+		";exit;
 		$this->debug->show('find_where sql: ' . $sql, $this->show);
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
