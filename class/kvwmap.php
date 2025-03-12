@@ -11827,20 +11827,27 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			'pdf_file' => '',
 			'y' => 0
 		);
-
-		# Entnehme die Checkboxwerte aus formvars
-		$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
-		# Daten abfragen
+		
 		if ($this->qlayerset[0]['shape'] != null) {
+			# entweder gibt es schon ein Result
 			$result = $this->qlayerset[0]['shape'];
 		}
-		elseif ($checkbox_names[0] != '') {
-			for ($i = 0; $i < count($checkbox_names); $i++) {
-				if ($this->formvars[$checkbox_names[$i]] == 'on') {
-					$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-					$oids[] = $element[3];
+		else {
+			if ($this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']] != '') {
+				$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
+				# oder es wurden Checkboxen angehakt
+				for ($i = 0; $i < count($checkbox_names); $i++) {
+					if ($this->formvars[$checkbox_names[$i]] == 'on') {
+						$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
+						$oids[] = $element[3];
+					}
 				}
 			}
+			else {
+				# oder eine einzelne oid übergeben
+				$oids[] = $this->formvars['oid'];
+			}
+			# Daten abfragen
 			$sql = "
 				SELECT 
 					" . $query_parts['select'] . "

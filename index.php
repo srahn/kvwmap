@@ -1537,12 +1537,6 @@ function go_switch($go, $exit = false) {
 							unset($GUI->qlayerset);
 						}
 						$GUI->formvars['oid'] = $oid;
-						# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen oid
-						# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
-						# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
-						$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $GUI->formvars['oid'];
-						$GUI->formvars['checkbox_names_' . $GUI->formvars['chosen_layer_id']] = $checkbox_name;
-						$GUI->formvars[$checkbox_name] = 'on';
 						$result = $GUI->generischer_sachdaten_druck_drucken(
 							NULL, // pdfobject
 							NULL, // offsetx
