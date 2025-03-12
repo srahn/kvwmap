@@ -1726,8 +1726,8 @@ class ddl {
 			$sql .= ", `margin_left` = ".(int)$formvars['margin_left'];
 			$sql .= ", `margin_right` = ".(int)$formvars['margin_right'];
 			$sql .= ", `dont_print_empty` = " . (int)$formvars['dont_print_empty'];
-			$sql .= ", `no_record_splitting` = ".(int)$formvars['use_previews'];
-			$sql .= ", `use_previews` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `no_record_splitting` = ".(int)$formvars['no_record_splitting'];
+			$sql .= ", `use_previews` = ".(int)$formvars['use_previews'];
 			$sql .= ", `columns` = ".(int)$formvars['columns'];
 			if($formvars['filename'])$sql .= ", `filename` = '".$formvars['filename']."'";
       else $sql .= ", `filename` = NULL";			
