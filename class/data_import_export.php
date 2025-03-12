@@ -1592,6 +1592,7 @@ class data_import_export {
 					if ($this->formvars['with_metadata_document'] != '' AND $layerset[0]['metalink'] != '') {
 						$metadata_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['metalink']);
 						if (file_put_contents($metadata_file, file_get_contents($layerset[0]['metalink'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
+							$zip = true;
 						}
 						else { ?>
 							Download der Metadatendatei des Layers ist fehlgeschlagen!<br>Tragen Sie den Metadatenlink des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
@@ -1604,6 +1605,7 @@ class data_import_export {
 					if ($this->formvars['with_terms_of_use_document'] != '' AND $layerset[0]['terms_of_use_link'] != '') {
 						$terms_file = IMAGEPATH . $folder. '/' . basename($layerset[0]['terms_of_use_link']);
 						if (file_put_contents($terms_file, file_get_contents($layerset[0]['terms_of_use_link'], false, stream_context_create(array('ssl' => array('verify_peer' => false)))))) {
+							$zip = true;
 						}
 						else { ?>
 							Download der Nutzungsbedingungen des Layers ist fehlgeschlagen!<br>Tragen Sie den Nutzungsbedingungen-Link des Layers korrekt ein oder sorgen Sie für eine korrekte Internetverbindung zwischen dem Server und der Quelle des Dokumentes.<br>Informieren Sie Ihren Administrator bei wiederholtem Auftreten dieses Fehlers.
