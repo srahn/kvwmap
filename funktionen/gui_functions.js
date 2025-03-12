@@ -370,12 +370,13 @@ function printMap(){
 	document.GUI.submit();
 }
 
-function printMapFast(){
+function printMapFast(filetype = 'pdf'){
 	if(typeof addRedlining != 'undefined'){
 		addRedlining();
 	}
 	document.GUI.go.value = 'Schnelle_Druckausgabe';
 	document.GUI.target = '_blank';
+	document.GUI.output_filetype.value = filetype;
 	document.GUI.submit();
 	document.GUI.go.value = 'neu Laden';
 	document.GUI.target = '';

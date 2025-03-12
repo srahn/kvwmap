@@ -35,6 +35,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 	<input type="hidden" name="group_options_open" value="">
 	<input type="hidden" name="free_polygons" value="">
 	<input type="hidden" name="free_texts" value="">
+	<input type="hidden" name="output_filetype" value="">
 	<?php
 		include(LAYOUTPATH.'snippets/SVG_map.php');
 	?>
