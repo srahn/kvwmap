@@ -1510,9 +1510,6 @@ function go_switch($go, $exit = false) {
 			 */
 			case 'generischer_sachdaten_druck_Drucken' : {
 				if ($GUI->formvars['archivieren']) {
-					include_once(CLASSPATH . 'Layer.php');
-					$layer_id = $GUI->formvars['chosen_layer_id'];
-					$layer = Layer::find_by_id($GUI, $layer_id);
 					$oids = array();
 					if ($GUI->formvars['oid'] == '') {
 						$oid_uebergeben = false;
@@ -1520,12 +1517,9 @@ function go_switch($go, $exit = false) {
 						$GUI->formvars['selected_layer_id'] = $GUI->formvars['chosen_layer_id'];
 						$GUI->formvars['no_output'] = true;
 						$GUI->GenerischeSuche_Suchen();
-						$oids = array_map(
-							function($dataset) use ($layer) {
-								return $dataset[$layer->get('oid')];
-							},
-							$GUI->qlayerset[0]['shape']
-						);
+						foreach ($GUI->qlayerset[0]['shape'] as $row) {
+							$oids[] = $row[$GUI->qlayerset[0]['maintable'] . '_oid'];
+						}
 						sort($oids);
 					}
 					else {
@@ -1544,10 +1538,8 @@ function go_switch($go, $exit = false) {
 							true, // output
 							false // append
 						);
-						$GUI->outputfile = basename($result['pdf_file']);
 						// archivieren und letztes Suchergebnis anzeigen
 						$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
-						$GUI->outputfile = '';
 					}
 					$GUI->formvars['oid'] = '';
 					$GUI->formvars['no_output'] = false;
