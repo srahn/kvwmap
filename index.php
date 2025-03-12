@@ -1544,7 +1544,6 @@ function go_switch($go, $exit = false) {
 							true, // output
 							false // append
 						);
-						unset($GUI->formvars[$checkbox_name]);
 						$GUI->outputfile = basename($result['pdf_file']);
 						// archivieren und letztes Suchergebnis anzeigen
 						$GUI->pdf_archivieren($GUI->formvars['chosen_layer_id'], $GUI->formvars['oid'], $result['pdf_file']);
