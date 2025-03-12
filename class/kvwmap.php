@@ -16499,8 +16499,12 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 									$this->formvars['newpath'] = '';
 									$this->formvars['loc_x'] = '';
 									$this->formvars['loc_y'] = '';
-									$editor = $geomtype.'Editor';
-									$this->{$editor}();
+									if ($geomtype == 'Point') {
+										$this->PointEditor();
+									}
+									else {
+										$this->MultiGeomEditor();
+									}
 									exit();
 								}
 
