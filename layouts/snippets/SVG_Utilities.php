@@ -113,7 +113,7 @@
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 	#
-	if($this->formvars['loc_y']==0) {
+	if($this->formvars['loc_y'] == '') {
 		$text_x=-1000000;
 		$text_y=-1000000;
 	}
