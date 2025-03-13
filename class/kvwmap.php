@@ -15897,13 +15897,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			if ($this->formvars['embedded'] != '') {
 				# es wurde ein Datensatz aus einem embedded-Formular gespeichert
-				if ($this->formvars['reload']) {
+				if ($this->formvars['reload'] == '1') {
 					# in diesem Fall wird die komplette Seite neu geladen
-					echo '█currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
+					echo 'currentform.go.value=\'get_last_query\';	overlay_submit(currentform, false);';
 				}
 				else {
-					# ansonsten wird das embedded-Formular entfernt und das Listen-DIV neu geladen (getrennt durch █)
-					echo '█reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+					if ($this->formvars['reload'] !== '0') {		# 0 heißt: no_subform_reload - Subform-Liste wird nicht neu geladen
+						# ansonsten wird das Listen-DIV neu geladen
+						echo 'reload_subform_list(\''.$this->formvars['targetobject'].'\', 0, 0);';
+					}
 					if (!empty(GUI::$messages)){
 						echo 'message('.json_encode(GUI::$messages).');';
 					}
@@ -19361,6 +19363,9 @@ class db_mapObj{
 										case 'reload': {														# die komplette Sachdatenanzeige soll neu geladen werden
 											$attributes['reload'][$i] = true;
 										} break;
+										case 'no_subform_reload': {														# die SubForm-Liste soll nicht neu geladen werden
+											$attributes['no_subform_reload'][$i] = true;
+										} break;										
 										case 'show_count': {														# die Anzahl der Subform-Datensätze anzeigen
 											$attributes['show_count'][$i] = true;
 										} break;										

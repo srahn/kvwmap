@@ -607,8 +607,13 @@
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
-				$reloadParams .= '&targetattribute='.$name;
-				$reloadParams .= '&reload='.$attributes['reload'][$j];
+				$reloadParams .= '&targetattribute='.$name;				
+				if ($attributes['no_subform_reload'][$j] == true) {
+					$reloadParams .= '&reload=0';
+				}
+				else {
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+				}
 				$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 				$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 				$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
