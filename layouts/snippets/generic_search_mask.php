@@ -180,10 +180,10 @@ $date_types = array('date' => 'TT.MM.JJJJ', 'timestamp' => 'TT.MM.JJJJ hh:mm:ss'
 							if (is_array($this->attributes['enum'][$i])){
 								foreach ($this->attributes['enum'][$i] as $enum_key => $enum) {	?>
 									<option  <? 
-									if (!is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
-										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);																																																																																															 
+									if ($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] != '' AND !is_array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]])) {
+										$this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] = array($this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]);
 									}
-									if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]]) AND $enum_key != '') {
+									if (in_array($enum_key, $this->formvars[$prefix.'value_'.$this->attributes['name'][$i]] ?: []) AND $enum_key != '') {
 										echo 'selected';
 									} ?> value="<? echo $enum_key; ?>" title="<? echo $enum['output']; ?>"><? echo $enum['output']; ?></option><? echo "\n";
 								}
