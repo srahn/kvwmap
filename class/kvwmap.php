@@ -9053,13 +9053,15 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if ($formvars['connectiontype'] == 6) {
 			if ($formvars['connection_id'] != '') {
 				$layerdb = $mapDB->getlayerdatabase($formvars['selected_layer_id'], $this->Stelle->pgdbhost);
-				$data_attributes = $mapDB->getDataAttributes($layerdb, $formvars['selected_layer_id'], ['assoc' => true]);
-				foreach ($formvars['labelitems_name'] ?: [] as $labelitem) {
-					if ($labelitem != '' AND !array_key_exists($labelitem, $data_attributes)) {
-						$this->add_message('error', 'Das Attribut ' . $labelitem . ' wird nicht im Data-Feld abgefragt!');
+				if ($formvars['Data'] != '') {
+					$data_attributes = $mapDB->getDataAttributes($layerdb, $formvars['selected_layer_id'], ['assoc' => true]);
+					foreach ($formvars['labelitems_name'] ?: [] as $labelitem) {
+						if ($labelitem != '' AND !array_key_exists($labelitem, $data_attributes)) {
+							$this->add_message('error', 'Das Attribut ' . $labelitem . ' wird nicht im Data-Feld abgefragt!');
+						}
 					}
+					$layer->update_labelitems($this, ($formvars['labelitems_name'] ?: []), ($formvars['labelitems_alias'] ?: []));
 				}
-				$layer->update_labelitems($this, ($formvars['labelitems_name'] ?: []), ($formvars['labelitems_alias'] ?: []));
 				if ($formvars['pfad'] != '') {
 					#---------- Speichern der Layerattribute -------------------
 					$all_layer_params = $mapDB->get_all_layer_params_default_values();
