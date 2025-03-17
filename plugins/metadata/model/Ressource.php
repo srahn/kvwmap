@@ -276,7 +276,7 @@ class Ressource extends PgObject {
 			$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $this->get_id();
 			$this->gui->formvars['checkbox_names_' . METADATA_RESSOURCES_LAYER_ID] = $checkbox_name;
 			$this->gui->formvars[$checkbox_name] = 'on';
-			$result = $this->gui->generischer_sachdaten_druck_drucken(
+			$result = $this->gui->generischer_sachdaten_druck_createPDF(
 				NULL, // pdfobject
 				NULL, // offsetx
 				NULL, // offsety

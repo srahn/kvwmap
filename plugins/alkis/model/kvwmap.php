@@ -1098,7 +1098,7 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$result = $GUI->generischer_sachdaten_druck_drucken();
+		$result = $GUI->generischer_sachdaten_druck_createPDF();
     $GUI->outputfile = basename($result['pdf_file']);
     $GUI->mime_type='pdf';
     $GUI->output();

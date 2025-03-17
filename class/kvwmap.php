@@ -10467,7 +10467,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			if ($this->formvars['aktivesLayout'] = $ddl->selectedlayout[0]) {
 				$this->formvars['chosen_layer_id'] = $layer_id;
 				$this->qlayerset[0]['shape'] = null;
-				$this->generischer_sachdaten_druck_drucken($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
+				$this->generischer_sachdaten_druck_createPDF($this->pdf, null, null, ($layer_id === array_key_last($oids)? true : false), ($this->pdf? true : false));
 			}
 			$this->outputfile = 'zwischenablage.pdf';
 			$fp = fopen(IMAGEPATH . $this->outputfile, 'wb');
@@ -11660,144 +11660,47 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->output();
 	}
 
+	function generischer_sachdaten_druck_drucken() {
+		if ($this->formvars['archivieren']) {
+			$oids = array();
+			if ($this->formvars['oid'] == '') {
+				$oid_uebergeben = false;
+				// echo '<br>Frage alle Datensatz-IDs des Layers ab.';
+				$this->formvars['selected_layer_id'] = $this->formvars['chosen_layer_id'];
+				$this->formvars['no_output'] = true;
+				$this->GenerischeSuche_Suchen();
+				foreach ($this->qlayerset[0]['shape'] as $row) {
+					$oids[] = $row[$this->qlayerset[0]['maintable'] . '_oid'];
+				}
+				sort($oids);
+			}
+			else {
+				$oid_uebergeben = true;
+				$oids[] = $this->formvars['oid'];
+			}
+			foreach ($oids AS $oid) {
+				if (!$oid_uebergeben) {
+					unset($this->qlayerset);
+				}
+				$this->formvars['oid'] = $oid;
+				$result = $this->generischer_sachdaten_druck_createPDF();
+				// archivieren und letztes Suchergebnis anzeigen
+				$this->pdf_archivieren($this->formvars['chosen_layer_id'], $this->formvars['oid'], $result['pdf_file']);
+			}
+			$this->formvars['oid'] = '';
+			$this->formvars['no_output'] = false;
+			$this->formvars['anzahl'] = 10;
+			$this->GenerischeSuche_Suchen();
+		}
+		else {
+			$result = $this->generischer_sachdaten_druck_createPDF();
+			$this->outputfile = basename($result['pdf_file']);
+			// nur pdf ausgeben
+			$this->mime_type='pdf';
+			$this->output();
+		}
+	}
 
-
-	/**
-	 * Erzeugt ein PDF-Dokument oder schreibt es fort.
-	 * Abgelegt wird das Dokument wenn $output true ist im document_path des Layers $document_path mit dem Namen den die Funktion createDataPDF zurückliefert
-	 * Übergebene formvars Daten:
-	 * go=generischer_sachdaten_druck_Drucken
-	 * aktivesLayout=31
-	 * chosen_layer_id=743
-	 * archiveren => 1 Wenn PDF in Dokumentpfad gespeichert und in Dokument Attribut hinterlegt werden soll statt download
-	 * Wenn archivieren = 1 wird auch oid übergeben und daraus werden die beiden darunter folgenden Parameter abgeleitet
-	 * oid => 23453
-	 * z.B: checkbox_names_743=check;rechnungen;rechnungen;222792641| Nur ein Feld wenn archivieren
-	 * z.B: check;rechnungen;rechnungen;222792641=on
-	 * @param Object $pdfobject Ein PDF-Objekt welches fortgesetzt werden soll. Wenn keines angegeben ist wird eine neues angelegt.
-	 * @param int $offsetx
-	 * @param int $offsety
-	 * @param boolean $output Legt fest ob die PDF-Datei an den Client ausgegeben wird.
-	 * @param boolean $append Legt fest ob der Druck angehängt werden soll oder von vorn begonnen wird.
-	 */
-	// function generischer_sachdaten_druck_drucken_alt($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
-	// 	include_(CLASSPATH . 'datendrucklayout.php');
-	// 	$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
-	// 	$ddl = new ddl($this->database, $this);
-	// 	$layerset = $this->user->rolle->getLayer($this->formvars['chosen_layer_id']);
-	// 	$layerdb = $mapDB->getlayerdatabase($this->formvars['chosen_layer_id'], $this->Stelle->pgdbhost);
-	// 	$layerset[0]['attributes'] = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, NULL, false, true);
-	// 	$privileges = $this->Stelle->get_attributes_privileges($this->formvars['chosen_layer_id']);
-	// 	# Attribute laden
-	// 	$attributes = $mapDB->read_layer_attributes($this->formvars['chosen_layer_id'], $layerdb, $privileges['attributenames']);
-
-	// 	$query_parts = $mapDB->getQueryParts($layerset[0], $privileges);
-
-	// 	# Entnehme die Checkboxwerte aus formvars
-	// 	$checkbox_names = explode('|', $this->formvars['checkbox_names_' . $this->formvars['chosen_layer_id']]);
-
-	// 	# Daten abfragen
-	// 	if ($this->qlayerset[0]['shape'] != null) {
-	// 		$result = $this->qlayerset[0]['shape'];
-	// 	}
-	// 	elseif ($checkbox_names[0] != '') {
-	// 		for ($i = 0; $i < count($checkbox_names); $i++) {
-	// 			if ($this->formvars[$checkbox_names[$i]] == 'on') {
-	// 				$element = explode(';', $checkbox_names[$i]);   #  check;table_alias;table;oid
-	// 				$oids[] = $element[3];
-	// 			}
-	// 		}
-	// 		$sql = "
-	// 			SELECT 
-	// 				" . $query_parts['select'] . "
-	// 			FROM 
-	// 				(SELECT " . $query_parts['query'] . ") as foo
-	// 			WHERE
-	// 				" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids ?: []) . "')
-	// 			" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
-	// 		";
-	// 		#echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
-	// 		$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :",4);
-	// 		$ret = $layerdb->execSQL($sql, 4, 1);
-	// 		if (!$ret[0]) {
-	// 			while ($rs = pg_fetch_array($ret[1])) {
-	// 				$result[] = $rs;
-	// 			}
-	// 		}
-	// 	}
-	// 	# weitere Informationen hinzufügen (Auswahlmöglichkeiten, usw.)
-	// 	$attributes = $mapDB->add_attribute_values($attributes, $layerdb, $result, true, $this->Stelle->id);
-	// 	$this->attributes = $attributes;
-	// 	# aktives Layout abfragen
-	// 	if ($this->formvars['aktivesLayout'] != '') {
-	// 		$ddl->selectedlayout = $ddl->load_layouts(NULL, $this->formvars['aktivesLayout'], NULL, NULL);
-	// 		# PDF erzeugen
-	// 		$result = $ddl->createDataPDF($pdfobject, $offsetx, $offsety, $layerdb, $layerset, $attributes, $this->formvars['chosen_layer_id'], $ddl->selectedlayout[0], $result, $this->Stelle, $this->user, NULL, $this->formvars['record_paging'], $output, $append);
-	// 	}
-
-	// 	if ($output) {
-	// 		$this->outputfile = basename($result['pdf_file']);
-	// 		if ($this->formvars['archivieren']) {
-	// 			# Dateiname für Speicherung im Dokumentpfad ermitteln
-	// 			$document_file = $this->outputfile;
-	// 			$pathinfo = pathinfo($document_file);
-
-	// 			# Attributname ermitteln in dem der Attributwert eingetragen werden soll
-	// 			for ($i = 0; $i < count($layerset[0]['attributes']['name']); $i++) {
-	// 				if ($layerset[0]['attributes']['form_element_type'][$i] == 'Dokument') {
-	// 					$dokument_attribute = $layerset[0]['attributes']['name'][$i];
-	// 					$dokument_is_array = substr($layerset[0]['attributes']['type'][$i], 0, 1) == '_';
-	// 					$doc_paths = $mapDB->getDocument_Path($layerset[0]['document_path'], $layerset[0]['document_url'], $layerset[0]['attributes']['options'][$i], [], [], $layerdb, $pathinfo['filename']);
-	// 					$document_path = dirname($doc_paths['doc_path'] . 'x') . '/';
-	// 					break;
-	// 				}
-	// 			}
-
-	// 			# Wert für den Eintrag in Dokument-Attribut ermitteln
-	// 			$attribute_value = $document_path . $document_file . '&original_name=' . $document_file;
-
-	// 			# Datei von tmp in das Ziel verschieben
-	// 			if (!is_dir($document_path)) {
-	// 				mkdir($document_path, 0755);
-	// 			}
-	// 			$thumb = get_thumb_from_name($document_path . $document_file);
-	// 			if (file_exists($thumb)) {
-	// 				unlink($thumb);
-	// 			}
-	// 			rename($result, $document_path . $document_file);
-
-	// 			$array_add = ($this->formvars['prepend'] == 1? "array_prepend('" . $attribute_value . "', " . $dokument_attribute . ")" : "array_append(" . $dokument_attribute . ", '" . $attribute_value . "')");
-
-	// 			# Wert in Attribut eintragen
-	// 			$sql = "
-	// 				UPDATE
-	// 					" .  $layerset[0]['schema'] . '.' . pg_quote($layerset[0]['maintable']) . "
-	// 				SET
-	// 					" . $dokument_attribute . " = " . ($dokument_is_array ? $array_add : "'" . $attribute_value . "'") . "
-	// 				WHERE
-	// 					" . pg_quote($layerset[0]['oid']) . " = " . quote($oids[0]) . "
-	// 			";
-	// 			#echo '<p>Sql zum Update des Dokumentattributes:<br>' . $sql;
-	// 			$ret = $layerdb->execSQL($sql, 4, 1);
-	// 			$this->last_query = $this->user->rolle->get_last_query();
-	// 			if (!$ret['success']) {
-	// 				$this->add_message('error', $ret[2]);
-	// 			}
-	// 			else {
-	// 				$this->add_message('notice', 'PDF-Dokument erfolgreich erzeugt und hinzugefügt.');
-	// 			}
-	// 			$this->formvars['no_output'] = false;
-	// 			$this->GenerischeSuche_Suchen();
-	// 		}
-	// 		else {
-	// 			$this->mime_type='pdf';
-	// 			$this->output();
-	// 		}
-	// 	}
-	// 	else {
-	// 		return $result; # das ist der letzte y-Wert, um nachfolgende Elemente darunter zu setzen
-	// 	}
-	// }
 
 	/**
 	 * Erzeugt ein PDF-Dokument oder schreibt es fort.
@@ -11813,7 +11716,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	 * @param boolean $append Legt fest ob der Druck angehängt werden soll oder von vorn begonnen wird.
 	 * @return array String[] $return_values Array mit Werten für den pdf Datei Pfad inklusive namen ($output = true) und eimem Wert für y ($output = false).
 	 */
-	function generischer_sachdaten_druck_drucken($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
+	function generischer_sachdaten_druck_createPDF($pdfobject = NULL, $offsetx = NULL, $offsety = NULL, $output = true, $append = false) {
 		include_(CLASSPATH . 'datendrucklayout.php');
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		$ddl = new ddl($this->database, $this);
@@ -11858,7 +11761,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 					" . pg_quote($layerset[0]['maintable'] . "_oid") . " IN ('" . implode("','", $oids ?: []) . "')
 				" . ($this->formvars['orderby' . $this->formvars['chosen_layer_id']] != ''? 'ORDER BY ' . $this->formvars['orderby' . $this->formvars['chosen_layer_id']] : '') . "
 			";
-			// echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruch: " . $sql;
+			// echo "<br>SQL zur Abfrage von Datensätzen für den Sachdatendruck: " . $sql;
 			$this->debug->write("<p>file:kvwmap class:generischer_sachdaten_druck :", 4);
 			$ret = $layerdb->execSQL($sql, 4, 1);
 			if (!$ret[0]) {
@@ -12690,7 +12593,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (!(array_key_exists('selected_layer_id', $this->formvars) AND $this->formvars['selected_layer_id'] != '')) {
 			$this->add_message('error', 'Es muss der Parameter selected_layer_id angegeben werden!');
 			$this->loadMap('DataBase');
-			$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+			$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 			$this->saveMap('');
 			$this->drawMap();
 			$this->output();
@@ -16096,7 +15999,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			) {
 				$this->add_message('warning', 'Keine Datensätze mehr in der Sachdatenanzeige.');
 				$this->loadMap('DataBase');
-				$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+				$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 				$this->saveMap('');
 				$this->drawMap();
 				$this->main = 'map.php';
@@ -16462,7 +16365,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							if ($ret[0]) {
 								$this->add_message('error', $ret[1]);
 								$this->loadMap('DataBase');
-								$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+								$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 								$this->saveMap('');
 								$this->drawMap();
 								$this->output();
@@ -16723,7 +16626,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
           default : { # alle anderen Layertypen
             $this->add_message('waring', 'Die Sachdatenabfrage für den connectiontype: ' . $layerset[$i]['connectiontype'] . ' wird nicht unterstützt.');
 						$this->loadMap('DataBase');
-						$this->user->rolle->newtime = $GUI->user->rolle->last_time_id;
+						$this->user->rolle->newtime = $this->user->rolle->last_time_id;
 						$this->saveMap('');
 						$this->drawMap();
 						$this->main = 'map.php';

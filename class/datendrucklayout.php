@@ -496,7 +496,7 @@ class ddl {
 										$this->gui->getSubFormResultSet($this->attributes, $j, $this->layerset['maintable'], $this->result[$i]);
 										$this->gui->formvars['aktivesLayout'] = $sublayout;
 										$page_id_before_sublayout = $this->pdf->currentContents;
-										$result = $this->gui->generischer_sachdaten_druck_drucken($this->pdf, $offx, $offy, false);
+										$result = $this->gui->generischer_sachdaten_druck_createPDF($this->pdf, $offx, $offy, false);
 										$y = $result['y'];
 										$page_id_after_sublayout = $this->pdf->currentContents;
 										if ($page_id_before_sublayout != $page_id_after_sublayout) {
