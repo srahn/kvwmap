@@ -1,6 +1,6 @@
 <?php
 # 2007-12-30 pk
-  include(LAYOUTPATH.'languages/map_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/map_'.rolle::$language.'.php');
 	
 $userProjection = new projectionObj("init=epsg:".$this->user->rolle->epsg_code);
 $wgsProjection = new projectionObj("init=epsg:4326");

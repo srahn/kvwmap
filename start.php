@@ -1,6 +1,8 @@
 <?php
 $language = ((array_key_exists('language', $_REQUEST) AND in_array($_REQUEST['language'], array('german', 'english', 'low-german', 'polish', 'vietnamese'))) ? $_REQUEST['language'] : 'german');
-include_once(LAYOUTPATH . 'languages/start_' . $language . '.php');
+$language_file = LAYOUTPATH . 'languages/start_' . $language . '.php';
+include(LAYOUTPATH . 'languages/_include_language_files.php');
+
 $errors = array();
 
 # Objekt für graphische Benutzeroberfläche erzeugen mit default-Werten
@@ -379,7 +381,6 @@ if (!$show_login_form) {
 
 				if (in_array($permission['reason'], ['password_expired', 'password_age_expired'])) {
 					logout();
-					$GUI->debug->write('Formvars nach logout in line ' . __LINE__ . ': ' . print_r($GUI->formvars, true), 4, $GUI->echo);
 					if (is_new_password($GUI->formvars)) {
 						$GUI->debug->write('Passwort ist abgelaufen. Es wurde ein neues Passwort angegeben.', 4, $GUI->echo);
 						$new_password_err = isPasswordValide($GUI->formvars['passwort'], $GUI->formvars['new_password'], $GUI->formvars['new_password_2']);
@@ -516,9 +517,9 @@ else {
 		$GUI->user->setOptions($GUI->user->stelle_id, $GUI->formvars);
 		$GUI->user->rolle->readSettings();
 	}
-	#echo 'In der Rolle eingestellte Sprache: '.$GUI->user->rolle->language;
+	#echo 'In der Rolle eingestellte Sprache: '.rolle::$language;
 	# Rollenbezogene Stellendaten zuweisen
-	$GUI->loadMultiLingualText($GUI->user->rolle->language);
+	$GUI->loadMultiLingualText(rolle::$language);
 
 	# Ausgabe der Zugriffsinformationen in debug-Datei
 	$GUI->debug->write('User: ' . $GUI->user->login_name, 4);
@@ -733,19 +734,25 @@ function get_permission_in_stelle($GUI) {
 			$GUI->debug->write('Passwort ist abgelaufen.', 4, $GUI->echo);
 			$allowed = false;
 			$reason = $expiration_info;
-			$errmsg = 'Das Passwort des Nutzers ' . $GUI->user->login_name . ' ist ';
+			global $strPasswordReset;
+			global $strPasswordAgeExpired;
+			global $strPasswordExpired;
+			global $strPasswordElse;
+			global $strPasswordNew;
+			$errmsg = str_replace('$login_name', $GUI->user->login_name, $strPasswordReset) . ' ';
+			$GUI->debug->write('expiration_info: ' . $expiration_info, 4, $GUI->echo);
 			switch ($expiration_info) {
 				case 'password_age_expired' : {
-					$errmsg .= 'in der Stelle ' . $GUI->stelle->Bezeichnung . ' abgelaufen. Passwörter haben in dieser Stelle nur eine Gültigkeit von ' . $GUI->Stelle->allowedPasswordAge . ' Monaten.';
+					$errmsg .= str_replace('$stelle_allowedPasswordAge', $GUI->Stelle->allowedPasswordAge, str_replace('$stelle_bezeichnung', $GUI->stelle->Bezeichnung, $strPasswordAgeExpired));
 				} break;
 				case 'password_expired' : {
-					$errmsg .= 'abgelaufen und muss neu gesetzt werden.';
+					$errmsg .= $strPasswordExpired;
 				} break;
 				default : {
-					$errmsg .= 'abgelaufen.';
+					$errmsg .= $strPasswordElse;
 				}
 			}
-			$errmsg .= ' Geben Sie jetzt ein neues Passwort ein und notieren Sie es sich bevor Sie sich hier wieder anmelden.';
+			$errmsg .= $strPasswordNew;
 		}
 	}
 	else {

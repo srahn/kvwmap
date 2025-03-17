@@ -12,8 +12,8 @@ class Ressource extends PgObject {
 	public $write_debug = false;
 	public $has_subressources = false;
 	public $has_ressource_ranges = false;
-
 	public $sub_ressources = array();
+	public $layer_id = 8;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object ressource in table ' . Ressource::$schema . '.' . Ressource::$tableName, $this->$write_debug);
@@ -25,6 +25,30 @@ class Ressource extends PgObject {
 		// 	'Linien',
 		// 	'Flächen'
 		// );
+	}
+
+	public static	function find($gui, $where, $order = '') {
+		$ressource = new Ressource($gui);
+		$select = "ampel_id, r.gruppe_id, r.bezeichnung, r.hinweise_auf, r.beschreibung, r.dateninhaber_id, r.ansprechperson, r.format_id, r.aktualitaet, r.url, r.datenguete_id, r.quelle, r.github, r.download_url, r.dest_path, r.download_method, r.id, r.download_path, r.last_updated_at, r.auto_update, r.update_interval, r.import_epsg, r.error_msg, r.relevanz, r.digital, r.flaechendeckend, r.bemerkung_prioritaet, r.inquiries_required, r.inquiries, r.inquiries_responses, r.inquiries_responsible, r.inquiries_to, r.check_required, r.created_at, r.created_from, r.updated_at, r.updated_from, r.use_for_datapackage, r.transform_command, r.unpack_method, r.import_method, r.transform_method, r.status_id, r.von_eneka, r.documents, r.import_layer, r.import_schema, r.import_table, r.layer_id, r.update_time, r.import_filter, r.import_file, r.metadata_document, r.gebietseinheit_id, r.next_update_at,
+		DATE(r.last_updated_at) + r.update_time + r.update_interval AS next_interval_date,
+		s.status,
+		status_id > -1 AND
+		auto_update AND
+		(
+			last_updated_at IS NULL OR
+			(
+				(
+					next_update_at IS NOT NULL AND
+					next_update_at > last_updated_at AND
+					next_update_at < now()
+				) OR
+				(
+					update_interval IS NOT NULL AND
+					DATE(last_updated_at) + update_time + update_interval < now()
+				)
+			)
+		) AS outdated";
+		return $ressource->find_where($where, $order, $select, NULL, 'metadata.ressources r JOIN metadata.update_status AS s ON r.status_id = s.id');
 	}
 
 	public static	function find_by_id($gui, $by, $id) {
@@ -41,12 +65,83 @@ class Ressource extends PgObject {
 		return $ressource;
 	}
 
+	/**
+	 * Function query outdated ressources if $ressource_id is set it
+	 * query only if this ressource is outdated
+	 * @param integer $ressource_id
+	 * @param integer $limit If limit is given only the amount of ressources will be replied
+	 * @return Ressource[] An Array of Ressources that are outdated
+	 */
+	public static function find_outdated($gui, $ressource_id = NULL, $limit = NULL) {
+		$ressources = array();
+		$ressource = new Ressource($gui);
+		// $ressource->show = true;
+		$ressources = $ressource->find_where(
+			"
+				(von_eneka OR use_for_datapackage) AND
+				(status_id IS NULL OR status_id > -1) AND
+				auto_update AND
+				(
+					last_updated_at IS NULL OR
+					(
+						(
+							next_update_at IS NOT NULL AND
+							next_update_at > last_updated_at AND
+							next_update_at < now()
+						) OR
+						(
+							update_interval IS NOT NULL AND
+							DATE(last_updated_at) + update_time + update_interval < now()
+						)
+					)
+				)
+			" .
+			($ressource_id ? " AND id = " . $ressource_id : ""),
+			"last_updated_at",
+			"*",
+			$limit
+		);
+		return $ressources;
+	}
+
+	function get_next_update_at() {
+		$now = new DateTime('now');
+		if ($this->get('status_id') == -1 OR !$this->get('auto_update')) {
+			return null;
+		}
+		if ($this->get('last_updated_at') == '') {
+			return date("d.m.Y H:i:s", $now);
+		}
+		$next_update_at = new DateTime($this->get('next_update_at'));
+		$last_updated_at = new DateTime($this->get('last_updated_at'));
+		if (
+			$this->get('next_update_at') != '' AND
+			$next_update_at > $last_updated_at
+		) {
+			return $this->get('next_update_at');
+		}
+
+		$last_update_at = new DateTime($last_updated_at->format('d.m.Y'));
+		if ($this->get('update_time') != '') {
+			list($hours,$minutes,$seconds) = explode(':', $this->get('update_time'));
+			$last_update_at = $last_update_at->add(new DateInterval('PT' . $hours . 'H' . $minutes . 'M'));
+		}
+		if ($this->get('update_interval') != '') {
+			$next_update_at = $this->get('next_interval_date');
+			return $next_update_at;
+		}
+	}
+		
 	function get_subressources() {
 		$subresource = new SubRessource($this->gui);
 		$subressources = $subresource->find_by_ressource_id($this->get_id());
 		$this->has_subressources = count($subressources) > 0;
 		$this->subressources = $subressources;
 		return $subressources;
+	}
+
+	function get_full_path($path) {
+		return rtrim(METADATA_DATA_PATH . 'ressourcen/' . $path, '/') .'/';
 	}
 
 	function destroy() {
@@ -67,6 +162,7 @@ class Ressource extends PgObject {
 	 *     DATE(last_updated_at) + update_time + update_interval is in the past
 	 *   )
 	 * )
+	 * if $ressource_id is given force to update it also if it is not outdated!
 	 * Status of ressources during update:
 	 * -1 - Abbruch wegen Fehler
 	 *  0 - Uptodate
@@ -81,47 +177,39 @@ class Ressource extends PgObject {
 	 *  9 - Transformation fertig
 	 */
 	public static function update_outdated($gui, $ressource_id = null, $method_only = '') {
-		$gui->debug->show('<br>Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
+		// $gui->debug->show('Starte Funktion update_outdated' . ($ressource_id != null ? ' mit Ressource id: ' . $ressource_id : ''), true);
+
 		$ressource = new Ressource($gui);
 		if ($ressource_id != null) {
 			$ressources = $ressource->find_where('id = ' . $ressource_id);
 		}
 		else {
 			$results = $ressource->getSQLResults("
-				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0;
+				SELECT count(id) AS num_running FROM metadata.ressources WHERE status_id > 0 AND status_id < 11;
 			");
 			if ($results[0]['num_running'] < 10) {
-				$ressources = $ressource->find_where(
-					"
-						(status_id IS NULL OR status_id = 0) AND
-						auto_update AND
-						(
-							last_updated_at IS NULL OR
-							(
-								last_updated_at IS NOT NULL AND
-								update_interval IS NOT NULL AND
-								DATE(last_updated_at) + update_time + update_interval < now()
-							)
-						)
-					",
-					"last_updated_at",
-					"*",
-					1
-				);
+				$ressources = Ressource::find_outdated($gui, NULL, 10 - $results[0]['num_running']); // liefert nur die erste gefundene zurück
 			}
 		}
-		// $gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
 
 		if (count($ressources) > 0) {
-			$ressource = $ressources[0];
-			// echo '<br>Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')';
-			$result = $ressource->run_update($method_only);
-			$ressource->log($result, true);
+			$gui->debug->show('Anzahl gefundener Ressourcen: ' . count($ressources), true);
+			foreach ($ressources AS $ressource) {
+				// $gui->debug->show('Update outdated ressource: ' . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : ''), true);
+				if ($gui->formvars['dry_run'] == 1) {
+					echo "\nUpdate outdated ressource: " . $ressource->get('bezeichnung') . ' (' . $ressource->get_id() . ')' . ($method_only != '' ? ' method_only: ' . $method_only : '');
+				}
+				else {
+					$result = $ressource->run_update($method_only);
+					$ressource->log($result, false);
+					return $result;
+				}
+			}
 		}
 		else {
 			return array(
 				'success' => true,
-				'msg' => 'Es sind zur Zeit keine Ressourcen zu aktualisieren.'
+				'msg' => 'Nichts zu tun'
 			);
 		}
 	}
@@ -130,26 +218,80 @@ class Ressource extends PgObject {
 		UpdateLog::write($this->gui, $this, $result, $show);
 	}
 
+	/**
+	 * function calculate if a method should be executed
+	 * If the $method is $method_only or $method_only is empty and current
+	 * status_id is below the $status_threshold of the $method it returns true.
+	 * @param String $method The method tested to be executed.
+	 * @param String $method_only The name of the method that should be executed only
+	 * @return Boolean If the method must be executed or not.
+	 */
+	function must_be_executed($method, $method_only) {
+		$status_thresholds = array(
+			'download' => 2,
+			'unpack' => 4,
+			'import' => 6,
+			'transform' => 8
+		);
+		return
+			(
+				$method_only == '' AND
+				$this->get('status_id') < $status_thresholds[$method]
+			) OR
+			$method_only == $method;
+	}
+
 	function run_update($method_only = '') {
-		$this->debug->show('Run Update für Ressource id: ' . $this->get_id(), true);
+		$this->debug->show('Update Ressource ' . $this->get_id(), true);
 		$this->update_status(1, $msg);
 
-		if ($method_only == '' OR $method_only == 'download') {
+		if ($this->must_be_executed('download', $method_only)) {
 			$result = $this->download();
 			if (!$result['success']) { return $result; }
 		}
-		if ($method_only == '' OR $method_only == 'unpack') {
+		if ($this->must_be_executed('unpack', $method_only)) {
 			$result = $this->unpack();
 			if (!$result['success']) { return $result; }
 		}
-		if ($method_only == '' OR $method_only == 'import') {
+		if ($this->must_be_executed('import', $method_only)) {
 			$result = $this->import();
 			if (!$result['success']) { return $result; }
 		}
-		if ($method_only == '' OR $method_only == 'transform') {
+		if ($this->must_be_executed('transform', $method_only)) {
 			$result = $this->transform();
 			if (!$result['success']) { return $result; }
+
+			// Update metadata document
+			$this->gui->formvars['aktivesLayout'] = 4;
+			$this->gui->formvars['chosen_layer_id'] = METADATA_RESSOURCES_LAYER_ID;
+			$this->gui->formvars['oid'] = $this->get_id();
+			$this->gui->formvars['archivieren'] = 1;
+			$this->gui->formvars['no_output'] = true;
+
+			include_once(CLASSPATH . 'Layer.php');
+			$layer = Layer::find_by_id($this->gui, METADATA_RESSOURCES_LAYER_ID);
+			# Erzeuge die Checkboxvariablen an Hand der maintable des Layers und der mitgegebenen object_id
+			# Für den Case archivieren = 1 werden nicht die checkbox_names mit ihrer Semikolon getrennten Struktur
+			# verwendet damit man die URL in dynamicLink verwenden kann mit Semikolon für Linkname und no_new_window.
+			$checkbox_name = 'check;' . $layer->get('maintable') . ';' . $layer->get('maintable') . ';' . $this->get_id();
+			$this->gui->formvars['checkbox_names_' . METADATA_RESSOURCES_LAYER_ID] = $checkbox_name;
+			$this->gui->formvars[$checkbox_name] = 'on';
+			$result = $this->gui->generischer_sachdaten_druck_createPDF(
+				NULL, // pdfobject
+				NULL, // offsetx
+				NULL, // offsety
+				true, // output
+				false // append
+			);
+			$this->gui->outputfile = basename($result['pdf_file']);
+			$this->gui->pdf_archivieren(METADATA_RESSOURCES_LAYER_ID, $this->get_id(), $result['pdf_file']);
+			$this->debug->show('Metadatendokument für Ressource ' . $this->get_id() . ' aktualisiert.', true);
 		}
+
+		if ($method_only == '') {
+			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
+		}
+<<<<<<< HEAD
 		$last_updated_at = date("Y-m-d");
 		$this->update_status(0, '', $last_updated_at);
 		return array(
@@ -159,22 +301,51 @@ class Ressource extends PgObject {
 	}
 
 	function update_status($status_id, $msg = '', $date = '') {
+=======
+
+		return array(
+			'success' => true,
+			'msg' => $msg . 'Ressource ' . $this->get_id() . ' erfolgreich aktualisiert.'
+		);
+	}
+
+	/**
+	 * Set the $status_id of ressource and if switch to uptodate status
+	 * set the last_updated_at timestamp too.
+	 * If parameter $msg is not empty the message will be echoed. 
+	 * @param Integer $status_id
+	 * @param String (optional) $msg
+	 */
+	function update_status($status_id, $msg = '') {
+		// $this->debug->show('Set status_id: ' . $status_id, true);
+		$attributes = array('status_id = ' . (string)$status_id);
+		$last_updated_at = date('Y-m-d H:i:s', time());
+>>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 		if ($msg != '') {
-			echo '<br>Update Status auf ' . $status_id . '<br>Msg: ' . $msg;
+			$this->debug->show('Ressource ' . $this->get_id() . ' uptodate: ' . $last_updated_at, true);
 		}
+		if ($this->get('status_id') != 0 AND $status_id == 0) {
+			$attributes[] = "last_updated_at = '" . $last_updated_at . "'";
+		}
+<<<<<<< HEAD
 		$attributes = array();
 		$attributes[] = "status_id = " . (string)$status_id;
 		if ($date != '') {
 			$attributes[] = "last_updated_at = '" . $date . "'";
 		}
 		$this->update_attr($attributes);
+=======
+		// $this->show = true;
+		// echo '<br>Update status_id: ' . $this->get('status_id') . ' auf ' . $status_id;
+		$this->update_attr($attributes, true);
+>>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 	}
 
 	####################
 	# Download methods #
 	####################
 	function download() {
-		$this->debug->show('Starte Funktion download', true);
+		// $this->debug->show('Starte Funktion download', true);
 		if ($this->get('download_method') != '') {
 			$method_name = 'download_' . $this->get('download_method');
 			if (!method_exists($this, $method_name)) {
@@ -232,7 +403,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -249,17 +420,17 @@ class Ressource extends PgObject {
 				$this->debug->show('Alle Dateien im Verzeichnis ' . $download_path . ' gelöscht.', true);
 			}
 
-      foreach ($download_urls AS $download_url) {
-        $this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
-        if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
-          copy($download_url, $download_path . basename($download_url));
-          // if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
-          //   unlink($download_path . basename($download_url));
-          //   $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
-          // }
-        }
-      }
-    }
+			foreach ($download_urls AS $download_url) {
+				if (!($only_missing AND file_exists($download_path . basename($download_url)))) {
+					$this->debug->show('Download from: ' . $download_url . ' to ' . $download_path, true);
+					copy($download_url, $download_path . basename($download_url));
+					// if ($this->get('format_id') == 5 AND !exif_imagetype($download_path . basename($download_url))) {
+					//   unlink($download_path . basename($download_url));
+					//   $this->debug->show('Datei ' . basename($download_url) . ' gelöscht weil es keine Bilddatei ist.');
+					// }
+				}
+			}
+		}
     catch (Exception $e) {
       return array(
         'success' => false,
@@ -310,7 +481,7 @@ class Ressource extends PgObject {
 					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
 				);
 			}
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -363,6 +534,77 @@ class Ressource extends PgObject {
 		}
 	}
 
+	function download_parallel_from_file() {
+		$this->debug->show('Starte Funktion download_parallel_from_file', true);
+		try {
+			if ($this->get('download_path') == '') {
+				return array(
+					'success' => false,
+					'msg' => 'Es ist kein relatives Download-Verzeichnis angegeben.'
+				);
+			}
+
+			$download_path = $this->get_full_path($this->get('download_path'));;
+			if (strpos($download_path, '/var/www/data/') !== 0) {
+				return array(
+					'success' => false,
+					'msg' => 'Das Download-Verzeichnis ' . $download_path . ' fängt nicht mit ' . '/var/www/data/' . ' an.'
+				);
+			}
+
+			// urls.txt wird im Pfad oberhalb von download_path erwarte
+			$path_parts = explode('/', rtrim($download_path, '/'));
+			array_pop($path_parts);
+			$urls_file_path = implode('/', $path_parts) . '/';
+			$urls_file = $urls_file_path . 'urls.txt';
+			if (!file_exists($urls_file)) {
+				return array(
+					'success' => false,
+					'msg' => 'Die Datei ' . $urls_file . ' ist nicht vorhanden.'
+				);
+			}
+
+			$parallel_download_script = WWWROOT . APPLVERSION . 'plugins/metadata/tools/download_parallel.sh';
+			if (!file_exists($parallel_download_script)) {
+				return array(
+					'success' => false,
+					'msg' => 'Das Script ' . $parallel_download_script . ' zum parallelen runterladen von den URLs aus der Datei ' . $urls_file . ' ist nicht vorhanden.'
+				);
+			}
+
+			// Script aufrufen zum Download der Dateien in urls.txt
+			$cmd = $parallel_download_script . ' ' . $urls_file . ' ' . $download_path . ' 10';
+			$this->debug->show('Download Dateien aus urls.txt mit Befehl: ' . $cmd, true);
+			// Befehl z.B. /var/www/apps/kvwmap/plugins/metadata/tools/download_parallel.sh /var/www/data/fdm/ressourcen/dgm/dgm1/NS/urls.txt /var/www/data/fdm/ressourcen/dgm/dgm1/NS/downloads/ 10
+			$descriptorspec = [
+				0 => ["pipe", "r"],  // stdin
+				1 => ["pipe", "w"],  // stdout
+				2 => ["pipe", "w"],  // stderr
+			];
+			$process = proc_open($cmd, $descriptorspec, $pipes, dirname(__FILE__), null);
+			$line = __LINE__;
+			$stdout = stream_get_contents($pipes[1]);
+			fclose($pipes[1]);
+			$stderr = stream_get_contents($pipes[2]);
+			fclose($pipes[2]);
+			if ($stderr != '') {
+				$err_msg[] = 'Fehler bei parallelen Download der Dateien aus urls.txt für Ressource ' . $this->get_id() . ' in Datei: ' . basename(__FILE__) . ' Zeile: ' . $line . ' Rückgabewert: ' . $stderr;
+			}
+		}
+		catch (Exception $e) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim parallelen Download der Dateien aus urls.txt: ', $e->getMessage()
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Download parralel von Datei urls.txt erfolgreich beendet.'
+		);
+	}
+
+
 	/**
 	 * Download dataset or its subsets to download_path
 	 */
@@ -377,7 +619,7 @@ class Ressource extends PgObject {
 				);
 			}
 
-			$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+			$download_path = $this->get_full_path($this->get('download_path'));;
 			if (strpos($download_path, '/var/www/data/') !== 0) {
 				return array(
 					'success' => false,
@@ -483,7 +725,7 @@ class Ressource extends PgObject {
 	# Unpack methods #
 	##################
 	function unpack() {
-		$this->debug->show('Starte Funktion unpack', true);
+		// $this->debug->show('Starte Funktion unpack', true);
 		if ($this->get('unpack_method') != '') {
 			$method_name = 'unpack_' . $this->get('unpack_method');
 			if (!method_exists($this, $method_name)) {
@@ -509,14 +751,14 @@ class Ressource extends PgObject {
 	 * and remove the zip-files afterward
 	 */
 	function unpack_unzip() {
-		$this->debug->show('Starte Funktion unpack_unzip', true);
+		// $this->debug->show('Starte Funktion unpack_unzip', true);
 		if ($this->get('dest_path') == '') {
 			return array(
 				'success' => false,
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -528,15 +770,14 @@ class Ressource extends PgObject {
 			mkdir($dest_path, 0777, true);
 		}
 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 
 		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
 		foreach (glob($download_path . '*') as $filename) {
 			if (finfo_file($finfo, $filename) == 'application/zip') {
-				echo '<br>filename: ' . $filename;
 				$cmd = 'unzip -j -o "' . $filename . '" -d ' . $dest_path;
-				$this->debug->show('Packe Datei aus mit Befehl: ' . $cmd, true);
+				$this->debug->show('Packe ' . $filename . ' aus', true);
 				$descriptorspec = [
 					0 => ["pipe", "r"],  // stdin
 					1 => ["pipe", "w"],  // stdout
@@ -580,7 +821,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -591,7 +832,7 @@ class Ressource extends PgObject {
 			$this->debug->show('Lege Verzeichnis ' . $dest_path . ' an, weil es noch nicht existiert!', true);
 			mkdir($dest_path, 0777, true);
 		}
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 
 		$finfo = finfo_open(FILEINFO_MIME_TYPE); // return mime type aka mimetype extension
 		$err_msg = array();
@@ -649,7 +890,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Verzeichnis zur Ablage der gefilterten Daten angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -662,7 +903,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				$fp_dest = fopen($dest_path, $entry, "w");
@@ -718,7 +959,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Auspackverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -731,7 +972,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!copy($download_path . $entry, $dest_path . $entry)) {
@@ -767,7 +1008,7 @@ class Ressource extends PgObject {
 				'msg' => 'Es ist kein relatives Zielverzeichnis angegeben.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -780,7 +1021,7 @@ class Ressource extends PgObject {
 		}
 
 		$err_msg = array(); 
-		$download_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('download_path');
+		$download_path = $this->get_full_path($this->get('download_path'));;
 		forEach(scandir($download_path) AS $entry) {
 			if (is_file($download_path . $entry)) {
 				if (!rename($download_path . $entry, $dest_path . $entry)) {
@@ -820,7 +1061,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -856,7 +1097,7 @@ class Ressource extends PgObject {
 				'msg' => 'Das Zielverzeichnis zum manuellen Kopieren fehlt.'
 			);
 		}
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		if (strpos($dest_path, '/var/www/data/') !== 0) {
 			return array(
 				'success' => false,
@@ -907,14 +1148,53 @@ class Ressource extends PgObject {
 		}
 	}
 
+	function import_mastr() {
+		$import_command = 'mastrImport';
+		$this->debug->show("Importiere Markstammdaten mit Befehl: " . $import_command, true);
+		$url = 'gdalcmdserver:8080/t/?tool=' . $import_command;
+		// echo '<br>url:   ' . urldecode($url) . '<br><br>';
+		// echo '<br>url:   ' . $url . '<br><br>';
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 300);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+		$output = curl_exec($ch);
+		#echo '<br>output: ' . $output;
+		$result = json_decode($output);
+		$ret = $result->exitCode;
+		if ($ret != 0 OR strpos($result->stderr, 'statement failed') !== false) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einlesen des Mastr!'
+			);
+		}
+		else {
+			return array(
+				'success' => true,
+				'msg' => 'Import Mastr erfolgreich ausgeführt.'
+			);
+		}
+	}
+
 	/**
 	 * Import shape with ogr2ogr to Postgres
 	 * Import only one if $this->get('import_layer') is defined else all shapes in $shape_path
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
+<<<<<<< HEAD
 		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
 		$imported_shape_files = array();
+=======
+		if ($this->get('import_table') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
+			);
+		}
+
+		$dest_path = $this->get_full_path($this->get('dest_path'));
+>>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 
 		if ($this->get('import_layer') != '') {
 			// shape file is set explicit. Import only this
@@ -1054,7 +1334,7 @@ class Ressource extends PgObject {
 	}
 
 	function import_ogr2ogr_gml() {
-		$this->debug->show('Starte Funktion import_org2ogr_gml', true);
+		// $this->debug->show('Starte Funktion import_org2ogr_gml', true);
 		if ($this->get('import_table') == '') {
 			return array(
 				'success' => false,
@@ -1063,7 +1343,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$gml_files = array();
 		if ($this->get('import_file')) {
 			$gml_files[] = $this->get('import_file');
@@ -1092,8 +1372,9 @@ class Ressource extends PgObject {
 
 		$err_msg = array();
 		$first = true;
+		$this->database->create_schema($this->get('import_schema'));
 		foreach ($gml_files as $gml_file) {
-			echo '<br>Importiere Datei: ' . $dest_path . $gml_file;
+			$this->debug->show('Importiere Datei: ' . $dest_path . $gml_file, true);
 			// $result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $gml_file, $this->database, $this->get('import_layer'), NULL, ($first ? '-overwrite' : '-append'), 'UTF-8', true);
 			$result = $this->gui->data_import_export->ogr2ogr_import(
 				$this->get('import_schema'),
@@ -1124,6 +1405,23 @@ class Ressource extends PgObject {
 		);
 	}
 
+	function import_ogr2ogr_gdb() {
+		$this->debug->show('Starte Funktion import_org2ogr_gdb', true);
+		if ($this->get('import_schema') == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Name für das Importschema angegeben!'
+			);
+		}
+
+		// Hier weiter mit Implementierung gdb-Import.
+
+		return array(
+			'success' => true,
+			'msg' => 'Anzahl erfolgreich gelesener gdb-Tabellen: ' . count($gdb_files) . '.'
+		);
+	}
+
 	/**
 	 * Import raster files to Postgres
 	 */
@@ -1141,7 +1439,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$csv_file = $this->get('import_layer') . '.csv';
 
 		if (!is_file($dest_path . $csv_file)) {
@@ -1250,7 +1548,7 @@ class Ressource extends PgObject {
 		}
 
 		// get the files from dest_path
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$dest_path = $this->get_full_path($this->get('dest_path'));
 		$gml_files = array();
 		$entries = scandir($dest_path);
 		foreach ($entries AS $entry) {
@@ -1367,7 +1665,7 @@ class Ressource extends PgObject {
 
 	function transform_exec_sql() {
 		$sql = $this->get('transform_command');
-		$this->debug->show("Transformiere Ressource mit SQL: " . $sql, true);
+		$this->debug->show("Transform Ressource " . $this->get_id() . " mit sql", true);
 		$query = $this->execSQL($sql);
 		if (!$query) {
 			return array(
@@ -1383,13 +1681,24 @@ class Ressource extends PgObject {
 
 	function transform_gdaltindex() {
 		$gdaltindex_params = $this->get('transform_command');
-		$gdaltindex_comand = 'gdaltindex ' . $gdaltindex_params;
+		$gdaltindex_command = 'gdaltindex ' . $gdaltindex_params;
 		$this->debug->show("Erzeuge gdaltindex mit Befehl: " . $gdaltindex_command, true);
-		exec($gdaltindex_command, $output, $return_var);
-		if (count($output) > 0) {
+		$descriptorspec = [
+			0 => ["pipe", "r"],  // stdin
+			1 => ["pipe", "w"],  // stdout
+			2 => ["pipe", "w"],  // stderr
+		];
+		$process = proc_open($gdaltindex_command, $descriptorspec, $pipes, dirname(__FILE__), null);
+		$stdout = stream_get_contents($pipes[1]);
+		fclose($pipes[1]);
+		$stderr = stream_get_contents($pipes[2]);
+		fclose($pipes[2]);
+
+		// exec($gdaltindex_command, $output, $return_var);
+		if ($stderr != '') {
 			return array(
 				'success' => false,
-				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . implode(', ', $output)
+				'msg' => 'Fehler beim Ausführen des Programms gdaltindex: ' . $stderr
 			);
 		}
 		return array(

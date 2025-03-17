@@ -1,5 +1,5 @@
 <?php
-	$language_file_name = 'map_' . $this->user->rolle->language . '.php';
+	$language_file_name = 'map_' . rolle::$language . '.php';
 
 	$language_file = LAYOUTPATH . 'languages/' . $language_file_name;
 	include(LAYOUTPATH . 'languages/_include_language_files.php');
@@ -14,6 +14,7 @@
 	$size['lagebzeichnung_bar']['height'] = (count_or_0($this->Lagebezeichnung ?: []) == 0 ? $size['lagebezeichnung_bar']['height'] : 0);
 
 	$map_width = $this->user->rolle->nImageWidth;
+	$map_height = $this->user->rolle->nImageHeight;
 	$legend_hide_width = $size['legend']['hide_width'];
 	$legend_width = ($this->user->rolle->hideLegend == 1 ? $legend_hide_width : $size['legend']['width']);
 
@@ -74,6 +75,8 @@ function showMapImage(){
 function addRedlining(){
 	svgdoc = document.SVG.getSVGDocument();
 	var redlining = svgdoc.getElementById("redlining");
+	document.GUI.free_polygons.value = '';
+	document.GUI.free_texts.value = '';
 	for(var i = 0; i < redlining.childNodes.length; i++){
 		child = redlining.childNodes[i];
 		switch(child.id){
@@ -102,15 +105,6 @@ function addRedlining(){
 				document.GUI.free_texts.value += '||';
 			break;
 		}
-	}
-}
-
-function setScale(select){
-	if(select.value != ''){
-		document.GUI.nScale.value=select.value;
-		document.getElementById('scales').style.display='none';
-		document.GUI.go.value='neu Laden';
-		document.GUI.submit();
 	}
 }
 

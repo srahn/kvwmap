@@ -1,6 +1,6 @@
 <?php
   # 2007-01-24 pkvvm
-  include(LAYOUTPATH.'languages/notizerfassung_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/notizerfassung_'.rolle::$language.'.php');
 ?>
 <script language="JavaScript">
 <!--

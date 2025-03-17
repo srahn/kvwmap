@@ -1,6 +1,9 @@
 <?php
  # 2008-01-24 pkvvm
-  include(LAYOUTPATH.'languages/SVG_Utilities_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/SVG_Utilities_'.rolle::$language.'.php');
+
+	$map_width = $this->user->rolle->nImageWidth;
+	$map_height = $this->user->rolle->nImageHeight;
  ?>
 
 <script type="text/javascript" src="funktionen/helmert_trafo.js"></script>
@@ -87,7 +90,6 @@
 	global $last_x;$last_x = 0;
 	global $events;$events = true;
 
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons	
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
 	include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
@@ -111,7 +113,7 @@
 	#
 	# Positionsanzeigetext ausserhalb der Anzeigeflaeche bei Start
 	#
-	if($this->formvars['loc_y']==0) {
+	if($this->formvars['loc_y'] == '') {
 		$text_x=-1000000;
 		$text_y=-1000000;
 	}
@@ -155,6 +157,7 @@
 	let flurstuecksqueryfunctions = false;
 	let boxfunctions = false;
 	let pointfunctions = false;
+	let multipointfunctions = false;
 	let linefunctions = false;
 	let measurefunctions = false;
 	let path  = "";
@@ -490,10 +493,7 @@ SCRIPTDEFINITIONS;
 				path.push(laststarty);
 			}
 		}
-		pixelpath = '';
-		for(i = 0; i < path.length; i++){
-			pixelpath = pixelpath + path[i] + ' ';
-		}
+		pixelpath = path.join(' ');
 		return pixelpath;
 	}
 
@@ -899,6 +899,9 @@ SCRIPTDEFINITIONS;
 			redrawfirstline();
 			if(enclosingForm.firstline.value == 'true')linelength();
 		}
+		if(multipointfunctions == true){
+			redrawmultipoint();
+		}		
 		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == 'vertex_edit') || enclosingForm.last_button.value == 'vertex_edit1'){
 			edit_vertices();
 		}
@@ -975,6 +978,10 @@ SCRIPTDEFINITIONS;
 	 			choose(world_x, world_y);
 	 			redrawpoint();
 			break;
+			case 'draw_multipoint':
+				addmultipoint(world_x, world_y);
+				redrawmultipoint();
+			break;			
 			case 'draw_box':
 	 			startpointFS(world_x, world_y);
 			break;
@@ -1227,6 +1234,9 @@ function mouseup(evt){
 				remove_vertices();
 				remove_in_between_vertices();
 			}
+			if(multipointfunctions == true){
+				remove_vertices();
+			}			
 			enclosingForm.last_button.value = id;
 			if(id == 'recentre0'){
 				document.getElementById('canvas').setAttribute('cursor', 'move');
@@ -1675,6 +1685,275 @@ function mouseup(evt){
 		texty = null;
 	  sendBWlocation(null, null);
 		redrawpoint();
+	}
+	';
+
+	$multipointfunctions = '
+
+	multipointfunctions = true;
+
+	function update_geometry(){
+		document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
+		updatepaths();
+		if (["move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
+			enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+		}
+		redrawmultipoint();
+	}
+
+	function getxcoordsfromsvgpath(path){
+		xcoords = new Array();
+		parts = path.split(" ");
+		for(i = 1; i < parts.length; i=i+2){
+			if(parts[i] != ""){
+				xcoords.push(parts[i]);
+			}
+		}
+		return xcoords;
+	}
+
+	function getycoordsfromsvgpath(path){
+		ycoords = new Array();
+		parts = path.split(" ");
+		for(i = 2; i < parts.length; i=i+2){
+			if(parts[i] != ""){
+				ycoords.push(parts[i]);
+			}
+		}
+		return ycoords;
+	}
+	
+	function draw_multipoint(){
+		applymultipoint();
+		enclosingForm.last_doing.value = "draw_multipoint";
+	}
+
+	// ------------------------Punkt setzen-----------------------------
+	function addmultipoint(worldx, worldy){
+		// neuen punkt setzen
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y; 
+	  pathx.push(world_x);
+	  pathy.push(world_y);
+	  path = buildsvglinepath(pathx,pathy);
+	  enclosingForm.newpath.value = path;
+		applymultipoint();
+	}
+
+	function redrawmultipoint(){
+	  var obj = document.getElementById("multipoint");
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+	  obj.setAttribute("d", pixel_path);
+	}
+
+	function buildwktmultipointfromsvgpath(svgpath){
+		if(svgpath != ""){		
+			var wkt = "";
+			svgpath = svgpath.substring(2);		// "M " abschneiden
+			coord = svgpath.split(" ");
+			wkt = wkt+coord[0]+" "+coord[1];
+			for(var i = 2; i < coord.length; i=i+2){
+				if(coord[i] != ""){
+					wkt = wkt+"),("+coord[i]+" "+coord[i+1];
+				}
+			}
+			wkt = "MULTIPOINT(("+wkt+"))";
+			return wkt;
+		}
+		else{
+			return "";
+		}
+	}	
+
+	function applymultipoint(){
+		enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value = buildwktmultipointfromsvgpath(enclosingForm.newpath.value);
+	}	
+
+	function activate_vertex(evt){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
+			vertex_id_string = evt.target.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			if(vertex_id[1] == "new"){
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill: #00DD00");
+			}
+			else{
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
+			}
+		}
+	}
+	
+	function deactivate_vertex(evt){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
+			vertex_id_string = evt.target.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			if(vertex_id[1] == "new"){
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.01");
+			}
+			else{
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.3");
+			}
+		}
+	}
+
+	function select_vertex(evt){
+		selected_vertex = evt.target;
+		last_selected_vertex = selected_vertex;
+		vertex_id_string = evt.target.getAttribute("id");
+		vertex_id = vertex_id_string.split("_");
+		if(vertex_id[1] != "new"){
+			jetzt = new Date();
+	  	time = jetzt.getTime();
+			if(time - time_mouse_down < 1000){
+				delete_vertex(evt);
+			}
+			time_mouse_down = time;
+		}
+	}
+
+	function move_vertex(evt, vertex, coordtype){
+		if(vertex == undefined){
+			vertex = evt.target;
+		}
+		vertex_id_string = vertex.getAttribute("id");
+		vertex_id = vertex_id_string.split("_");
+		if(vertex_id[1] != "new"){
+			if(selected_vertex == vertex){
+				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
+					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+					deactivated_foreign_vertex = 0;
+				}
+				if(coordtype == "world"){
+					vertex_new_world_x = evt.clientX; 
+					vertex_new_world_y = evt.clientY;
+				}
+				else{
+					x = evt.clientX;
+					y = evt.clientY;
+					vertex_new_world_x = (x * scale) + minx;
+					vertex_new_world_y = ((resy-y) * scale) + miny;
+				}
+				vertex.setAttribute("cx", x);
+				vertex.setAttribute("cy", resy-y);
+				svg_path = enclosingForm.newpath.value+"";
+				components = svg_path.split(" ");
+				components[parseInt(vertex_id[1])] = vertex_new_world_x;
+		  	components[parseInt(vertex_id[1])+1] = vertex_new_world_y;
+				pathx[Math.floor(parseInt(vertex_id[1])/2)] = vertex_new_world_x;
+		  	pathy[Math.floor(parseInt(vertex_id[1])/2)] = vertex_new_world_y;
+				new_svg_path = components[0];
+				for(i = 1; i < components.length; i++){
+					new_svg_path = new_svg_path + " " + components[i];
+				}
+				enclosingForm.newpath.value = new_svg_path;
+				redrawmultipoint();
+				vertex_moved = true;
+			}
+		}
+	}
+
+	function delete_vertex(evt){
+		vertex = evt.target;
+		if(selected_vertex == vertex){
+			vertex_id_string = vertex.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			svg_path = enclosingForm.newpath.value+"";
+			components = svg_path.split(" ");
+			if(components.length > 2){			// nur loeschen, wenn mindestens 1 Eckpunkt uebrig
+				components.splice(parseInt(vertex_id[1]), 2);
+				pathx.splice(Math.floor(parseInt(vertex_id[1])/2), 1);
+				pathy.splice(Math.floor(parseInt(vertex_id[1])/2), 1);
+				new_svg_path = components.join(" ");
+				enclosingForm.newpath.value = new_svg_path;
+	
+				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, diesen neu aus dem SVG erstellen
+					applymultipoint();
+				}
+				remove_vertices();													// alle entfernen
+				pixel_path = world2pixelsvg(new_svg_path);
+				add_vertices(pixel_path);										// und wieder hinzufuegen, damit die Nummerierung wieder stimmt
+				redrawmultipoint();
+				selected_vertex = "";
+				last_selected_vertex = "";
+			}
+		}
+	}
+
+	function end_vertex_move(evt){
+		if(selected_vertex == evt.target){
+			if(vertex_moved == true){
+				if(enclosingForm.newpathwkt.value != ""){
+					applymultipoint();
+				}
+				remove_vertices();													// alle entfernen
+				pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+				add_vertices(pixel_path);										// und wieder hinzufuegen
+			}
+			selected_vertex = "";
+			vertex_moved = false;
+		}
+	}
+	
+	function remove_vertices(){
+		var parent = document.getElementById("vertices");
+		var count = parent.childNodes.length;
+		for(i = 0; i < count; i++){
+			parent.removeChild(parent.lastChild);
+		}
+	}
+	
+	function add_vertices(pixel_path){
+		pixel_path = pixel_path+"";
+		components = pixel_path.split(" ");
+		var parent = document.getElementById("vertices");
+		circle = new Array();
+		kreis1 = document.getElementById("kreis");
+		for(i = 1; i < components.length; i=i+2){
+			// Eckpunkte
+			circle[i] = kreis1.cloneNode(true);
+			circle[i].setAttribute("cx", components[i]);
+			circle[i].setAttribute("cy", components[i+1]);
+			circle[i].setAttribute("style","fill: #FF0000");
+			circle[i].setAttribute("id", "vertex_"+i);
+			parent.appendChild(circle[i]);
+		}
+	}
+
+	function edit_vertices(){
+		highlightbyid("vertex_edit1");
+		save_geometry_for_undo();
+		enclosingForm.last_doing.value = "vertex_edit";
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+		add_vertices(pixel_path);
+	}
+
+	function save_geometry_for_undo(){
+		newpath_undo = enclosingForm.newpath.value;
+		newpathwkt_undo = enclosingForm.newpathwkt.value;
+	}
+
+	function undo_geometry_editing(){
+		enclosingForm.newpath.value = newpath_undo;
+		enclosingForm.newpathwkt.value = newpathwkt_undo;
+		remove_vertices();													// alle entfernen
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+		add_vertices(pixel_path);										// und wieder hinzufuegen
+		redrawmultipoint();
+	}
+	
+	function restart(){
+		highlightbyid(\'text0\');
+		enclosingForm.last_doing.value = "draw_multipoint";
+		enclosingForm.newpath.value = "";
+		enclosingForm.pathwkt.value = "";
+		enclosingForm.newpathwkt.value = "";
+		enclosingForm.result.value = "";
+		path = "";
+		var alle = pathx.length;
+		for(var i = 0; i < alle; ++i){
+		  pathx.pop();
+		  pathy.pop();
+		}
+		redrawmultipoint();
 	}
 	';
 
@@ -3422,7 +3701,7 @@ $transformfunctions = '
 		if(polygonfunctions){
 			applypolygons();
 		}
-		else{
+		else if(linefunctions){
 			applylines();
 		}
 	}
@@ -3468,7 +3747,7 @@ $transformfunctions = '
 		if(polygonfunctions){
 			applypolygons();
 		}
-		else{
+		else if(linefunctions){
 			applylines();
 		}
 		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid", new Array(enclosingForm.result), new Array("setvalue"));
@@ -3567,7 +3846,20 @@ $vertex_catch_functions = '
 		evt.target.setAttribute("opacity", "0.3");
 	}
 
-	function add_foreign_vertex(evt){
+	function add_foreign_vertex_mousedown(evt){
+		// punktobjekt bilden, welches die Koordinaten aufnimmt
+    function point(x,y) {
+      this.clientX = x;
+      this.clientY = y;
+    }
+		// Aufrufen der Funktion mousedown() fuer die jeweilige Aktion
+    position = new point(evt.target.getAttribute("x"), evt.target.getAttribute("y"));
+		mouse_coords_type = "world";
+		mousedown(position);
+		mouse_coords_type = "image";
+	}
+
+	function add_foreign_vertex_mouseup(evt){
 		// punktobjekt bilden, welches die Koordinaten aufnimmt
     function point(x,y) {
       this.clientX = x;
@@ -3583,11 +3875,9 @@ $vertex_catch_functions = '
 				end_vertex_move(position);
 			}
 		}
-		else{
-			mouse_coords_type = "world";
-	  	mousedown(position);
-			mouse_coords_type = "image";
-		}  
+		else {
+			mouseup(position);
+		}
 	}
 
 	function show_vertices(){
@@ -3857,6 +4147,7 @@ $measurefunctions = '
 				<polyline points="" id="polyline" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
 				<use id="gps_position" style="stroke:red;" xlink:href="#crosshair_red" x="-1000" y="-1000"/>
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
+				<path d="" id="multipoint" marker-start="url(#point)" marker-mid="url(#point)" marker-end="url(#point)" style="fill:none;stroke:blue;stroke-width:0"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 				<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
 			</g>
@@ -3872,7 +4163,7 @@ $measurefunctions = '
 	  <g id="templates">
 	  	<circle style="-moz-user-select: none;" id="kreis" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_vertex(evt)" onmouseout="deactivate_vertex(evt)" onmousedown="select_vertex(evt)" onmousemove="move_vertex(evt)" onmouseup="end_vertex_move(evt)" />
 			<line stroke="#111" stroke-width="14" id="linie" x1="-5000" y1="-5000" x2="-5001" y2="-5001" opacity="0.3" onmouseover="activate_line(evt)" onmousemove="activate_line(evt)" />
-			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmouseup="add_foreign_vertex(evt)" />
+			<circle id="kreis3" cx="-5000" cy="-5000" r="7" opacity="0.3" onmouseover="activate_foreign_vertex(evt)" onmouseout="deactivate_foreign_vertex(evt)" onmousedown="add_foreign_vertex_mousedown(evt)" onmouseup="add_foreign_vertex_mouseup(evt)" />
 	  </g>
 	  
 
@@ -4035,6 +4326,24 @@ $measurefunctions = '
 		$last_x += 36;
 		return $pointbuttons;
 	}
+
+	function multipointbuttons($strSetPosition){
+		global $last_x;
+		$pointbuttons = '
+				<g id="text" onmousedown="draw_multipoint();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
+	        <rect id="text0" onmouseover="show_tooltip(\''.$strSetPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(4 4) scale(1)">
+						<circle cx="14" cy="12" r="3"/>
+						<g transform="scale(1.12)">
+							<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+								 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+						</g>
+					</g>
+		    </g>
+		';
+		$last_x += 36;
+		return $pointbuttons;
+	}	
 
 	function boxbuttons($strCreateRectangle){
 		global $last_x;

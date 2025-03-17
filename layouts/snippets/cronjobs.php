@@ -1,5 +1,5 @@
 <?php
-	include(LAYOUTPATH.'languages/cronjobs_'.$this->user->rolle->language.'.php');
+	include(LAYOUTPATH.'languages/cronjobs_'.rolle::$language.'.php');
 ?>
 <script language="javascript" type="text/javascript">
 	function update_aktiv(id) {

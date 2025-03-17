@@ -4,7 +4,7 @@ if (value_of($this->formvars, 'anzahl') == '') {
 }
 
 include('funktionen/input_check_functions.php');
-include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->language.'.php');
+include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.rolle::$language.'.php');
 ?>
 
 <script type="text/javascript">
@@ -141,11 +141,11 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		tab.classList.add("active_tab");
 		var groups_to_close = dataset.querySelectorAll('.tab');
 		[].forEach.call(groups_to_close, function (group){
-			group.style.visibility = 'collapse';
+			group.classList.add('collapsed');
 		});
 		var groups_to_open = dataset.querySelectorAll('.tab_' + layer_id + '_' + k + '_' + tabname);
 		[].forEach.call(groups_to_open, function (group){
-			group.style.visibility = 'visible';
+			group.classList.remove('collapsed');
 		});
 	}
 
@@ -179,19 +179,23 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			var name_dependent = scope.querySelector('#name_'+layer_id+'_'+dependent+'_'+k);
 			var value_dependent = scope.querySelector('#value_'+layer_id+'_'+dependent+'_'+k);
 			if(field_has_value(object, operator, value)){
-				if(name_dependent != null)name_dependent.style.visibility = 'inherit';
-				value_dependent.style.visibility = 'inherit';
+				if (name_dependent != null) {
+					name_dependent.classList.remove('collapsedfull');
+				}
+				value_dependent.classList.remove('collapsedfull');
 			}
-			else{
-				if(name_dependent != null)name_dependent.style.visibility = 'hidden';
-				value_dependent.style.visibility = 'hidden';
+			else {
+				if (name_dependent != null) {
+					name_dependent.classList.add('collapsedfull');
+				}
+				value_dependent.classList.add('collapsedfull');
 			}
 			// visibility of row
 			var row = value_dependent.parentNode;
 			all_attributes_in_row = [].slice.call(row.childNodes);
 			row_display = 'none';
 			all_attributes_in_row.forEach(function(td){
-				if(td.nodeType == 1 && td.id != '' && td.style.visibility != 'hidden'){
+				if(td.nodeType == 1 && td.id != '' && !td.classList.contains('collapsedfull')){
 					row_display = '';
 				}
 			})
@@ -319,16 +323,19 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			if (elements[i].classList[0] == id)	{
 				value = elements[i].value;
 				name = elements[i].name;
-				type = elements[i].type;
-				if (type == 'checkbox' && elements[i].checked == false) {
-					value = 'f';
-				}
+				type = elements[i].type;			
 				if (['int', 'int4', 'int8'].includes(datatype)) {
 					value = parseInt(value);
 				}
 				if (['numeric', 'float4', 'float8', 'float'].includes(datatype)) {
 					value = parseFloat(value);
 				}
+				if (type == 'checkbox' && elements[i].checked == false) {
+					value = 'f';
+				}				
+				if (type == 'radio' && elements[i].checked == false) {
+					value = '';
+				}					
 				if(name.slice(-4) != '_alt'){
 					if (type == 'file') { // Spezialfall bei Datei-Upload-Feldern:
 						if (value != '') {
@@ -717,7 +724,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 		formData.append('targetobject', targetobject);
 		formData.append('form_field_names', form_fieldstring);
 		formData.append('embedded', 'true');
-		ahah('index.php', formData, new Array(document.getElementById(fromobject), ''), new Array('sethtml', 'execute_function'));
+		ahah('index.php', formData, new Array(''), new Array('execute_function'));
 	}
 
 	subsave_new_layer_data = function(layer_id, fromobject, targetobject, targetlayer_id, targetattribute, reload, list_edit){
@@ -897,6 +904,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 			k++;
 			obj = document.getElementById(layer_id + '_' + k);
 		}
+		count_selected(layer_id);
 		document.getElementById('selectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		document.getElementById('deselectDatasetsLinkText_' + layer_id).classList.toggle('hidden');
 		message([{ 'type': 'notice', 'msg': (status ? '<? echo $strAllDeselected; ?>' : '<? echo $strAllSelected; ?>')}]);
@@ -996,7 +1004,7 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 	}
 
 	daten_export = function(layer_id, anzahl, format){
-		enclosingForm.all.value = document.getElementById('all_'+layer_id).value;
+		enclosingForm.all.value = document.getElementsByName('all_' + layer_id)[0].value;
 		if(enclosingForm.all.value || check_for_selection(layer_id)){				// entweder alle gefundenen oder die ausgewaehlten
 			var option = document.createElement("option");
 			option.text = anzahl;
@@ -1260,6 +1268,10 @@ include_once(LAYOUTPATH.'languages/generic_layer_editor_2_'.$this->user->rolle->
 				}
 			}
 		});
+	}
+
+	count_selected = function(layer_id){
+		document.getElementById('selected_count_' + layer_id).innerHTML = document.querySelectorAll('.check_' + layer_id + ':checked').length;
 	}
 
 </script>

@@ -76,7 +76,7 @@ hide_versions = function(flst){
 		<td align="center">
 <?php
 	$timestamp = DateTime::createFromFormat('d.m.Y H:i:s', $this->user->rolle->hist_timestamp_de);
-	$sql = "SELECT max(beginnt)::date FROM alkis.ax_fortfuehrungsfall;";
+	$sql = "SELECT aktualitaet::date FROM alkis.pp_aktualitaet;";
   $ret=$this->pgdatabase->execSQL($sql,4,0);
   $aktalkis = pg_fetch_row($ret[1]);
 
@@ -93,8 +93,8 @@ hide_versions = function(flst){
 		$this->found = 'true';
 	?>
 		<br>
-		<? if($this->user->rolle->hist_timestamp_de == ''){ ?>
-		<span style="font-size:80%;">Stand ALKIS vom: <? echo $aktalkis[0]; ?><br></span>
+		<? if($this->user->rolle->hist_timestamp_de == '') { ?>
+		<span style="font-size:80%;">Stand ALKIS vom: <? echo ($aktalkis[0] ? $aktalkis[0] : $this->qlayerset[$i]['uptodateness']); ?><br></span>
 		<? }else{ ?>
 		<span class="fett" style="color: #a82e2e;">historischer Stand vom: <? echo $this->user->rolle->hist_timestamp_de; ?><br></span>
 		<? } ?>

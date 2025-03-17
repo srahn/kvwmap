@@ -2,7 +2,7 @@
 	global $selectable_limits;
 	include_once(CLASSPATH.'FormObject.php');
 	include(SNIPPETS.'generic_form_parts.php');
-  include(LAYOUTPATH.'languages/sachdatenanzeige_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/sachdatenanzeige_'.rolle::$language.'.php');
 	include(SNIPPETS.'sachdatenanzeige_functions.php');
 ?>
 <script>
@@ -23,10 +23,8 @@ if ($this->formvars['window_type'] == 'overlay') { ?>
 }
 $this->found = 'false';
 $anzLayer=count($this->qlayerset);
-if ($anzLayer==0) {
-	?>
-<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoLayer; ?></span><br/>
-	<?php	
+if ($anzLayer==0 AND $this->user->rolle->singlequery == 2) { ?>
+	<span style="font:normal 12px verdana, arial, helvetica, sans-serif; color:#FF0000;"><? echo $strNoQueryableLayers; ?></span><br/><?
 } 
 
 if($this->formvars['printversion'] == '' AND $this->formvars['window_type'] != 'overlay') { ?>

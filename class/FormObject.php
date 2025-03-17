@@ -121,7 +121,7 @@ static	function createSelectField($name, $options, $value = '', $size = 1, $styl
 
 	$html  = '
 <select id="' . $id . '" name="' . $name . ($multiple != '' ? '[]' : '') . '" size="' . $size . '" ' . $style . ' ' . $onchange . ' ' . $onmouseenter . ' ' . $multiple . ' ' . $class . '>
-	' . implode('<br>', $options_html) . '
+	' . implode("\n", $options_html) . '
 </select>';
   return $html;
 }

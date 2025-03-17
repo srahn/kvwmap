@@ -16,6 +16,7 @@ class Layer extends MyObject {
 	public $opacity;
 	public $minScale;
 	public $maxScale;
+	public $document_attributes;
 
 	function __construct($gui) {
 		$this->gui = $gui;
@@ -128,16 +129,29 @@ class Layer extends MyObject {
 	}
 
 	function update_datasources($gui, $datasource_ids) {
-		#echo '<br>update_datasources: ' . implode(', ', $datasource_ids) . ' of layer: ' . $this->get_id(); 
-		foreach(LayerDataSource::find($gui, '`layer_id` = ' . $this->get_id()) AS $layer_datasource) {
-			$layer_datasource->delete();
-		}
 		$layer_datasource = new LayerDataSource($gui);
+		$layer_datasource->delete('`layer_id` = ' . $this->get_id());
 		foreach($datasource_ids AS $datasource_id) {
 			$layer_datasource->create(array(
 				'layer_id' => $this->get_id(),
 				'datasource_id' => $datasource_id
 			));
+		}
+	}
+
+	function update_labelitems($gui, $names, $aliases) {
+		$layer_labelitems = new MyObject($gui, 'layer_labelitems');
+		$layer_labelitems->delete('layer_id = ' . $this->get_id());
+		for ($i = 1; $i < count($names); $i++) {
+			# der erste ist ein Dummy und wird ausgelassen
+			if ($names[$i] != '') {
+				$layer_labelitems->create(array(
+					'layer_id' => $this->get_id(),
+					'name' => $names[$i],
+					'alias' => $aliases[$i],
+					'order' => $i + 1
+				));
+			}
 		}
 	}
 
@@ -480,14 +494,14 @@ l.Name AS sub_layer_name
 		return (count($layers) > 0);
 	}
 
-	function delete() {
-		#echo '<br>Class Layer Method delete';
-		$ret = parent::delete();
-		if (MYSQLVERSION > 412) {
-			parent::reset_auto_increment();
-		}
-		return $ret;
-	}
+	// function delete() {
+	// 	#echo '<br>Class Layer Method delete';
+	// 	$ret = parent::delete();
+	// 	if (MYSQLVERSION > 412) {
+	// 		parent::reset_auto_increment();
+	// 	}
+	// 	return $ret;
+	// }
 
 	function get_subform_layers() {
 		include_once(CLASSPATH . 'LayerAttribute.php');
@@ -778,7 +792,7 @@ l.Name AS sub_layer_name
 	}
 
 	function get_name($name_col = 'Name') {
-		return $this->get($name_col . (($name_col == 'Name' AND $this->gui->user->rolle->language != 'german') ? '_' . $this->gui->user->rolle->language : ''));
+		return $this->get($name_col . (($name_col == 'Name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -820,7 +834,7 @@ l.Name AS sub_layer_name
 		$query_attribute_aliases = array();
 
 		for ($i = 0; $i < count($query_attributes['name']); $i++) {
-			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . ($this->gui->user->rolle->language != 'german' ? '_' . $this->gui->user->rolle->language : '')][$i];
+			$query_attribute_aliases[$query_attributes['name'][$i]] = $query_attributes['alias' . (rolle::$language != 'german' ? '_' . rolle::$language : '')][$i];
 		}
 
 		$data_attribute_names = array_map(

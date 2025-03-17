@@ -1,6 +1,6 @@
 <?php
 	# 2008-01-12 pkvvm
-	include(LAYOUTPATH . 'languages/layer_export_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/layer_export_' . rolle::$language . '.php');
 	include_once(CLASSPATH . 'FormObject.php');
 ?>
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">

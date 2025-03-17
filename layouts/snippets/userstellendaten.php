@@ -1,6 +1,6 @@
 <?php
 	# 2008-01-12 pkvvm
-	include(LAYOUTPATH . 'languages/userdaten_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/userdaten_' . rolle::$language . '.php');
 	$loeschen = strtolower(NUTZER_ARCHIVIEREN ? $this->strArchive : $this->strDelete);
 ?>
 <script type="text/javascript">

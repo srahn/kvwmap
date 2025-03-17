@@ -4,14 +4,14 @@ $SVGvars_defs = '
 	<style type="text/css"><![CDATA[
 		#buttons{
 		}
-		#buttons:hover .navbutton_bg{
+		g:hover .navbutton_bg{
 			transition: all 0.15s ease;
 			opacity: 1;
 		}
-		#buttons:hover .navbutton_frame{
+		g:hover .navbutton_frame{
 			opacity: 1;
 		}
-		#buttons .navbutton_frame{
+		g .navbutton_frame{
 			opacity: 0.0;
 		}		
 		.navbutton_frame{
@@ -152,6 +152,34 @@ $SVGvars_defs = '
 			<line x1="0" y1="0" x2="20" y2="10" stroke="black" stroke-width="1.5" />
 			<line x1="0" y1="20" x2="20" y2="10" stroke="black" stroke-width="1.5" />
     </marker>
+
+		<marker
+      id="location_pin"
+      viewBox="0 0 26 26"
+      refX="14"
+      refY="26"
+      markerUnits="userSpaceOnUse"
+      markerWidth="26"
+      markerHeight="26"
+      orient="180">
+      <g style="stroke: none; stroke-width: 0; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: none; fill-rule: nonzero; opacity: 1;" transform="scale(0.3 0.3)" >
+				<path d="M 45 90 c -1.415 0 -2.725 -0.748 -3.444 -1.966 l -4.385 -7.417 C 28.167 65.396 19.664 51.02 16.759 45.189 c -2.112 -4.331 -3.175 -8.955 -3.175 -13.773 C 13.584 14.093 27.677 0 45 0 c 17.323 0 31.416 14.093 31.416 31.416 c 0 4.815 -1.063 9.438 -3.157 13.741 c -0.025 0.052 -0.053 0.104 -0.08 0.155 c -2.961 5.909 -11.41 20.193 -20.353 35.309 l -4.382 7.413 C 47.725 89.252 46.415 90 45 90 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(4,136,219); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+				<path d="M 45 45.678 c -8.474 0 -15.369 -6.894 -15.369 -15.368 S 36.526 14.941 45 14.941 c 8.474 0 15.368 6.895 15.368 15.369 S 53.474 45.678 45 45.678 z" style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-linejoin: miter; stroke-miterlimit: 10; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1;" transform=" matrix(1 0 0 1 0 0) " stroke-linecap="round" />
+			</g>
+    </marker>
+
+		<marker
+      id="point"
+      viewBox="0 0 20 20"
+      refX="10"
+      refY="10"
+      markerUnits="userSpaceOnUse"
+      markerWidth="20"
+      markerHeight="20"
+      orient="auto">
+			<circle cx="10" cy="10" r="10" style="fill:rgb(4,136,219);stroke-width: 2px"/>
+			<circle cx="10" cy="10" r="5" style="fill:white;stroke-width: 2px"/>
+    </marker>				
 		
 		<clipPath id="compare_clipper">
       <rect id="compare_clipper_rect" x="0" y="0" width="' . $this->user->rolle->nImageWidth . '" height="' . $this->user->rolle->nImageHeight . '" />
@@ -458,7 +486,7 @@ $SVGvars_defs = '
 		global $last_x;global $events;
 		$dist ='
       <g id="dist" transform="translate('.$last_x.' 0)">
-				<rect id="measure0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strRuler.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);measure();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
+				<rect id="measure0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strRuler.'\',evt.clientX,evt.clientY)" onmousedown="hide_tooltip();highlightbyid(this.id);measure();noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3"   width="36" height="36" class="navbutton_frame"/>
 				<g class="navbutton" transform="translate(5 5) scale(0.8)">
 					<path d="M9.9,28.5 L28.5,9.9 L28.5,9.9 C28.7,9.8 28.8,9.5 28.8,9.2 C28.8,9 28.7,8.7 28.5,8.5 L21.5,1.5 L21.5,1.5 C21.3,1.3 21.0,1.2 20.8,1.2 C20.5,1.2 20.2,1.3 20.1,1.5 L1.5,20.1 L1.5,20.1 C1.3,20.2 1.2,20.5 1.2,20.8 C1.2,21.0 1.3,21.3 1.5,21.5 L8.5,28.5 L8.5,28.5 C8.7,28.7 9,28.8 9.2,28.8 C9.5,28.8 9.8,28.7 9.9,28.5 M9.2,25.7 L25.7,9.2 L20.8,4.3 L4.3,20.8 Z" style="fill-rule: evenodd;"/>
 					<path d="M6.3,18.7 L8.3,20.7 L9.7,19.3 L7.7,17.3 Z"/>
@@ -471,6 +499,43 @@ $SVGvars_defs = '
     $last_x += 36;
   	return $dist;
 	}
+
+	function measure_area($strMeasureArea){
+		global $last_x;global $events;
+		$measure_area ='
+			<g id="measurearea" transform="translate('.$last_x.' 0)">
+				<rect id="measurearea0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strMeasureArea.'\',evt.clientX,evt.clientY)" onmousedown="measurearea();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<text transform="scale(1 1)" x="15" y="20" style="text-anchor:middle;font-size:14px;font-family:system-ui;stroke: #5c88a8;">m²</text>
+					<path d="M16.25,29 C17.5,29 18.5,28 18.5,26.75 C18.5,25.5 17.5,24.5 16.25,24.5 C15.0,24.5 14.0,25.5 14,26.75 C14,28 15.0,29 16.25,29"/>
+					<path d="M14.95,5.5 C16.2,5.5 17.2,4.5 17.2,3.25 C17.2,2.0 16.2,1 14.95,1 C13.7,1 12.7,2.0 12.7,3.2 C12.7,4.5 13.7,5.5 14.95,5.5"/>
+					<path d="M8.3,29 C9.5,29 10.5,28 10.5,26.75 C10.5,25.5 9.5,24.5 8.3,24.5 C7.0,24.5 6,25.5 6,26.7 C6,28 7.0,29 8.25,29"/>
+					<path d="M3.3,23.2 C4.5,23.2 5.5,22.2 5.5,20.95 C5.5,19.7 4.5,18.7 3.2,18.7 C2.0,18.7 1.0,19.7 1.0,20.9 C1,22.2 2.0,23.2 3.3,23.2"/>
+					<path d="M5.3,11.2 C6.5,11.2 7.5,10.2 7.5,8.9 C7.5,7.7 6.5,6.7 5.3,6.7 C4.0,6.7 3,7.7 3,8.9 C3,10.2 4.0,11.2 5.3,11.2"/>
+					<path d="M26.7,9.6 C27.9,9.6 28.9,8.6 28.9,7.4 C28.9,6.1 27.9,5.1 26.7,5.1 C25.4,5.1 24.4,6.1 24.4,7.4 C24.4,8.6 25.4,9.6 26.7,9.6"/>
+					<path d="M24.6,23.9 C25.9,23.9 26.9,22.9 26.9,21.7 C26.9,20.4 25.9,19.4 24.6,19.4 C23.4,19.4 22.4,20.4 22.4,21.7 C22.4,22.9 23.4,23.9 24.6,23.9"/>
+					<path d="M10.3,27.8 L14.2,27.8 L18.5,26.5 L23.4,23.5 L25.9,19.8 L27.3,9.5 L25.1,5.8 L17.2,3 L12.7,3.4 L6.5,7.1 L3.9,10.8 L2.6,18.8 L3.8,23.1 L6.2,25.9 Z M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="fill-rule: evenodd;"/>
+					<path d="M10.3,25.8 L14.2,25.8 L17.4,24.8 L22.4,21.8 L23.9,19.5 L25.4,9.2 L24.4,7.6 L16.5,4.8 L13.7,5.1 L7.5,8.8 L5.9,11.1 L4.6,19.1 L5.3,21.8 L7.7,24.6 Z" style="opacity:0.15;"/>
+        </g>
+      </g>';
+    $last_x += 36;
+  	return $measure_area;
+	}
+
+	function routing($strRouting){
+		global $last_x;global $events;
+		$routing ='
+			<g id="routing" transform="translate('.$last_x.' 0)">
+				<rect id="routing0" '.(($events == true)? 'onmouseover="show_tooltip(\''.$strRouting.'\',evt.clientX,evt.clientY)" onmousedown="routing();highlightbyid(this.id);hidetooltip(evt);noMeasuring();"' : '').' x="0" y="0" rx="3" ry="3" width="36" height="36" class="navbutton_frame"/>
+				<g class="navbutton" transform="translate(5 5) scale(0.8)">
+					<path d="M4,28 L15,25 L16,20 L24,15 L22,11 L28.5,5" style="fill: none; stroke-width:2; stroke: #5c88a8;"/>
+					<circle cx="4" cy="28" r="3"></circle>
+					<circle cx="28.5" cy="5" r="3"></circle>
+        </g>
+      </g>';
+    $last_x += 36;
+  	return $routing;
+	}	
 
 	function punktfang($strPunktfang){
 		global $last_x;global $events;

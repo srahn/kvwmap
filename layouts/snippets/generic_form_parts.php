@@ -434,7 +434,7 @@
 						$datapart .= 'checked ';
 					}
 					$datapart .= ' onclick="'.($attribute_privileg == '0'? 'return false;' : '').'if(this.checked2 == undefined){this.checked2 = true;}this.checked = this.checked2; if(this.checked===false){var evt = document.createEvent(\'HTMLEvents\');evt.initEvent(\'change\', false, true); this.dispatchEvent(evt);}" onmousedown="this.checked2 = !this.checked;"';
-					$datapart .= 'value="' . $enum_key . '"><label for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
+					$datapart .= 'value="' . $enum_key . '"><label class="radio-label" for="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="margin-right: 15px">' . $enum['output'] . '</label>';
 					if(!$attributes['horizontal'][$j] OR (is_numeric($attributes['horizontal'][$j]) AND($e+1) % $attributes['horizontal'][$j] == 0))$datapart .= '<br>';
 					$e++;
 				}
@@ -607,8 +607,13 @@
 				$reloadParams .= '&targetobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&fromobject='.$layer_id.'_'.$name.'_'.$k;
 				$reloadParams .= '&targetlayer_id='.$layer_id;
-				$reloadParams .= '&targetattribute='.$name;
-				$reloadParams .= '&reload='.$attributes['reload'][$j];
+				$reloadParams .= '&targetattribute='.$name;				
+				if ($attributes['no_subform_reload'][$j] == true) {
+					$reloadParams .= '&reload=0';
+				}
+				else {
+					$reloadParams .= '&reload='.$attributes['reload'][$j];
+				}
 				$reloadParams .= '&oid_mother='.$dataset[$attributes['table_name'][$key].'_oid'];			# die oid des Datensatzes und wird mit übergeben, für evtl. Zoom auf den Datensatz
 				$reloadParams .= '&tablename_mother='.$attributes['table_name'][$attributes['the_geom']];											# dito
 				$reloadParams .= '&columnname_mother='.$attributes['the_geom'];																								# dito
@@ -631,7 +636,7 @@
 
 			case 'Dokument': {
 				if ($value != '') {
-					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url']);
+					$preview = $gui->get_dokument_vorschau($value, $layer['document_path'], $layer['document_url'], $attributes['type'][$j], $layer_id, $oid, $name);
 					if ($preview['doc_src'] != '') {
 						$datapart .= '<table border="0"><tr><td>';
 						if ($hover_preview) {
@@ -660,7 +665,7 @@
 							$datapart .= '<a href="javascript:delete_document(\'' . $fieldname . '\', ' . $layer_id . ', \'' . $gui->formvars['fromobject'] . '\', \'' . $gui->formvars['targetobject'] . '\',  \'' . $gui->formvars['reload'] . '\');"><span>Dokument löschen</span></a>';
 						}
 						$datapart .= '</td></tr>';
-						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ' (' . $preview['filesize'] . ')</span></td></tr>';
+						$datapart .= '<tr><td colspan="2"><span id="image_original_name">' . $preview['original_name'] . ($preview['filesize'] ? ' (' . $preview['filesize'] . ')' : '') . '</span></td></tr>';
 						$datapart .= '</table>';
 					}
 					else {
@@ -1360,6 +1365,9 @@
 		}
 		elseif ($geomtype == 'MULTILINESTRING' OR $geomtype == 'LINESTRING') {
 			$geomtype = 'Line';
+		}
+		elseif ($geomtype == 'MULTIPOINT') {
+			$geomtype = 'Multipoint';
 		}
 		return $geomtype;
 	}

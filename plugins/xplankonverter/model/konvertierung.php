@@ -371,7 +371,7 @@ class Konvertierung extends PgObject {
 				$konvertierung->contenttype = 'application/pdf';
 				return $konvertierung;
 			case 'jpg' :
-				$filename = get_name_from_thump($path['basename']);
+				$filename = get_name_from_thumb($path['basename']);
 				$sql = "
 					SELECT
 						*
@@ -1846,9 +1846,9 @@ class Konvertierung extends PgObject {
 	}
 
 	/**
-	* Erzeugt eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
-	* gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
-	*
+	 * Löscht eine Layergruppe vom Typ GML oder Shape und trägt die dazugehörige
+	 * gml_layer_group_id oder shape_layer_group_id in PG-Tabelle konvertierung ein.
+	 *
 	*/
 	function delete_layer_group($layer_type) {
 		$this->debug->show('delete_layer_group typ: ' . $layer_type, Konvertierung::$write_debug);

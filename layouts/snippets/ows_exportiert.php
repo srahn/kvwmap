@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH.'languages/ows_export_'.$this->user->rolle->language.'.php');
+  include(LAYOUTPATH.'languages/ows_export_'.rolle::$language.'.php');
 ?>
 <script>
 	function copyToClipBoard(element) {

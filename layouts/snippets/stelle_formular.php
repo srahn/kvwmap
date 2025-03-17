@@ -1,6 +1,6 @@
 <?php
 	# 2007-12-30 pk
-	include(LAYOUTPATH . 'languages/stelle_formular_' . $this->user->rolle->language . '.php');
+	include(LAYOUTPATH . 'languages/stelle_formular_' . rolle::$language . '.php');
 ?><script language="JavaScript" src="funktionen/selectformfunctions.js" type="text/javascript">
 </script>
 <script language="JavaScript">
@@ -195,9 +195,9 @@ function addMenues(){
 	<tr>
     <td style="text-align: center">
 		<span class="px17 fetter"><? echo $this->strTask;?>:</span>
-			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
+			<select id="selected_stelle_id" style="min-width:250px" size="1" name="selected_stelle_id" onchange="document.GUI.submit();" <?php if(count_or_0($this->allstellendaten['ID'])==0){ echo 'disabled';}?>>
 				<option value="">--------- <?php echo $this->strPleaseSelect; ?> --------</option><?
-				for ($i = 0; $i < count($this->allstellendaten['ID']); $i++){
+				for ($i = 0; $i < count_or_0($this->allstellendaten['ID']); $i++){
 					echo '<option';
 					if ($this->allstellendaten['ID'][$i] == $this->formvars['selected_stelle_id']){
 						echo ' selected';
@@ -242,11 +242,11 @@ else {
 				</tr>
 
 				<tr class="group-stammdaten"><?
-				if ($this->user->rolle->language != 'german') { ?>
+				if (rolle::$language != 'german') { ?>
 					<tr>
-						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst($this->user->rolle->language); ?></th>
+						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $this->strLabel . ' ' . ucfirst(rolle::$language); ?></th>
 						<td colspan="2" style="border-bottom:1px solid #C3C7C3">
-							<input name="Bezeichnung_<? echo $this->user->rolle->language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . $this->user->rolle->language]; ?>" size="25" maxlength="100">
+							<input name="Bezeichnung_<? echo rolle::$language; ?>" type="text" value="<?php echo $this->formvars['Bezeichnung_' . rolle::$language]; ?>" size="25" maxlength="100">
 						</td>
 					</tr><?
 				} ?>
@@ -549,7 +549,7 @@ alt="<?php echo $strNoLogoSelected; ?>"><?
 											<select name="selectedlayer" size="12" multiple style="position: relative; width: 340px">
 											<?
 											for($i=0; $i < count_or_0($this->formvars['sellayer']["Bezeichnung"]); $i++){
-													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace(' ', '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
+													echo '<option class="select_option_link" onclick="gotoLayer(event, this)" title='.str_replace([' ', '<br>'], '&nbsp;', $this->formvars['sellayer']["Bezeichnung"][$i]).' id="'.$this->formvars['sellayer']["ID"][$i].'_'.$this->formvars['sellayer']["Gruppe"][$i].'" value="'.$this->formvars['sellayer']["ID"][$i].'">'.$this->formvars['sellayer']["Bezeichnung"][$i].'</option>';
 												 }
 											?>
 											</select>

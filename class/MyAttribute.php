@@ -75,7 +75,7 @@ class MyAttribute {
 					$html .= "<span style=\"padding-top: 2px; float: left\">" . $this->value . "</span>";
 				}
 				else {
-					$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : $this->value) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
+					$html .= "<input name=\"" . $this->name . "\" type=\"" . $this->get_input_type() . "\" value=\"" . (($this->get_input_type() == 'checkbox' AND $this->value == '') ? 1 : htmlentities($this->value)) . "\" class=\"" . ($is_valid['success'] ? 'valid' : 'alerts-border') . "\" oninput=\"$(this).removeClass('alerts-border'); $(this).addClass('valid'); if ($(this).next().hasClass('validation-error-msg-div')) { $(this).next().hide(); }\">";
 					if (!$is_valid['success']) {
 						$html .= "<div class=\"validation-error-msg-div\">" . implode('<br>', $is_valid['results']) . "</div>";
 					}

@@ -98,7 +98,7 @@
     $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $Gemkgschl."'";
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($Gemkgschl);
     $layer->data = $datastring;
@@ -109,10 +109,11 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0'); #2005-11-30_pk
@@ -148,11 +149,11 @@
 		$GUI->map_scaledenom = $GUI->map->scaledenom;
     # zu 3)
     $GemkgObj=new Gemarkung($GemkgID,$GUI->pgdatabase);
-    $layer=ms_newLayerObj($GUI->map);
+    $layer = new LayerObj($GUI->map);
     $datastring ="the_geom from (SELECT 1 as id, st_multi(st_buffer(st_union(wkb_geometry), 0.1)) as the_geom FROM alkis.ax_flurstueck ";
     $datastring.="WHERE land||gemarkungsnummer = '" . $GemkgID."'";
     $datastring.=" AND flurnummer = ".(int)$FlurID;
-		$datastring.=" AND CASE WHEN '\$hist_timestamp' = '' THEN endet IS NULL ELSE beginnt::text <= '\$hist_timestamp' and ('\$hist_timestamp' <= endet::text or endet IS NULL) END";
+		$datastring.=" AND CASE WHEN '" . rolle::$hist_timestamp . "' = '' THEN endet IS NULL ELSE beginnt::text <= '" . rolle::$hist_timestamp . "' and ('" . rolle::$hist_timestamp . "' <= endet::text or endet IS NULL) END";
     $datastring.=") as foo using unique id using srid=".EPSGCODE_ALKIS;
     $legendentext ="Gemarkung: " . $GemkgObj->getGemkgName($GemkgID);
     $legendentext .="<br>Flur: " . $FlurID;
@@ -164,15 +165,16 @@
     $layer->group = 'eigene Abfragen';
     $layer->metadata->set('off_requires',0);
     $layer->metadata->set('layer_has_classes',0);
-    $GUI->map->setMetaData('group_status_eigene Abfragen','0');
-    $GUI->map->setMetaData('group_eigene Abfragen_has_active_layers','0');
-    $layer->setConnectionType(6);
-    $layer->set('connection', $GUI->pgdatabase->get_connection_string());
+    $GUI->map->web->metadata->set('group_status_eigene Abfragen','0');
+    $GUI->map->web->metadata->set('group_eigene Abfragen_has_active_layers','0');
+    $layer->setConnectionType(6, '');
+    $layer->updateFromString("LAYER COMPOSITE OPACITY 50 END END");
+    $layer->connection = $GUI->pgdatabase->get_connection_string();
     $layer->metadata->set('queryStatus','2');
     $layer->metadata->set('wms_queryable','0');
     $layer->metadata->set('layer_hidden','0');
     $klasse = new ClassObj($layer);
-    $klasse->set('status', MS_ON);
+    $klasse->status = MS_ON;
     $style = new StyleObj($klasse);
     $style->color->setRGB(255,255,128);
     $style->outlinecolor->setRGB(0,0,0);
@@ -201,28 +203,14 @@
 		$explosion = explode('using unique ', strtolower($data));
 		$end = $explosion[1];
 		$select = $dbmap->getSelectFromData($data);
-		$whereposition = strpos(strtolower($select), ' where ');
-		$withoutwhere = substr($select, 0, $whereposition);
-		$fromposition = strpos(strtolower($withoutwhere), ' from ');
-		#$alias = $GUI->pgdatabase->get_table_alias('alkis.ax_flurstueck', $fromposition, $withoutwhere);
 		$orderbyposition = strpos(strtolower($select), ' order by ');
 		if($orderbyposition > 0)$select = substr($select, 0, $orderbyposition);
 		if(strpos(strtolower($select), ' where ') === false)$select .= " WHERE ";
 		else $select .= " AND ";
-		$datastring = $datageom." from (" . $select;
-		#$datastring.=" " . $alias.".flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-		$datastring.=" flurstueckskennzeichen IN ('" . $FlurstListe[0]."' ";
-    $legendentext="Flurstück";
-    if (count_or_0($FlurstListe) > 1) {
-			$legendentext .= "e";
-		}
-    $legendentext .= " (".date('d.m. H:i',time())."): " . $FlurstListe[0];
-    for ($i=1; $i < count_or_0($FlurstListe); $i++) {
-      $datastring.=",'" . $FlurstListe[$i]."'";
-      $legendentext.=" " . $FlurstListe[$i];
-    }
-   	$datastring.=") ";
-		$datastring.=") as foo using unique " . $end;
+		$select .= " flurstueckskennzeichen IN ('" . implode("','", $FlurstListe) . "')";
+    $legendentext = "Flurstück" . (count_or_0($FlurstListe) > 1 ? 'e' : '');
+    $legendentext .= " (".date('d.m. H:i',time())."): " . implode(" ", $FlurstListe);
+    $datastring = $datageom." from (" . $select . ") as foo using unique " . $end;
     $group = $dbmap->getGroupbyName('eigene Abfragen');
     if($group != ''){
       $groupid = $group['id'];
@@ -230,6 +218,7 @@
     else{
       $groupid = $dbmap->newGroup('eigene Abfragen', 0);
     }
+    $GUI->formvars['original_layer_id'] = $layerset[0]['Layer_ID'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
     $GUI->formvars['aktivStatus'] = 1;
@@ -238,12 +227,15 @@
     $GUI->formvars['Typ'] = 'search';
     $GUI->formvars['Datentyp'] = 2;
     $GUI->formvars['Data'] = $datastring;
+    $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
     $GUI->formvars['epsg_code'] = $epsg;
     $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 
     $layer_id = $dbmap->newRollenLayer($GUI->formvars);
+    $attributes = $dbmap->load_attributes($GUI->pgdatabase, $select);
+		$dbmap->save_postgis_attributes($GUI->pgdatabase, -$layer_id, $attributes, '', '');
 		
 		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
@@ -1106,8 +1098,11 @@
 		$GUI->formvars['no_last_search'] = true;
 		$GUI->GenerischeSuche_Suchen();
 		$GUI->formvars['aktivesLayout'] = $GUI->formvars['formnummer'];
-		$GUI->generischer_sachdaten_druck_drucken();
-	};
+		$result = $GUI->generischer_sachdaten_druck_createPDF();
+    $GUI->outputfile = basename($result['pdf_file']);
+    $GUI->mime_type='pdf';
+    $GUI->output();
+  };
 
 	$GUI->export_Adressaenderungen = function() use ($GUI){
     $GUI->titel='Adressänderungen der Eigentümer exportieren';

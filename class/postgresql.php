@@ -90,7 +90,7 @@ class pgdatabase {
 			$connection_string = $this->get_connection_string();
 		}
 		try {
-			$this->dbConn = pg_connect($connection_string, $flag);
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
 		catch (Exception $e) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
@@ -206,6 +206,33 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
+
+	function schema_exists($schema_name) {
+		$sql = "
+			SELECT
+				EXISTS(
+					SELECT
+						1
+					FROM
+						information_schema.schemata
+					WHERE 
+						schema_name = '" . $schema_name . "'
+					AND
+						catalog_name = '" . POSTGRES_DBNAME . "'
+				)
+			;";
+		$ret = $this->execSQL($sql, 4, 0);
+		$result = pg_fetch_row($ret[1]);
+		return ($result[0] === 't');
+	}
+
+	function create_schema($schema_name) {
+		$sql = "
+			CREATE SCHEMA IF NOT EXISTS " . $schema_name . "
+		";
+		$ret = $this->pgdatabase->execSQL($sql, 4,0);
+		return $ret;
+	}
 
 	function get_schemata($user_name) {
 		$schemata = array();
@@ -542,7 +569,7 @@ FROM
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
-			echo '<p>pgconn: ' . $this->dbConn; exit;
+			echo '<p>pgconn: ' . $this->dbConn;
 		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
@@ -1503,7 +1530,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						flurstueckskennzeichen";
@@ -1544,7 +1571,7 @@ FROM
 						alkis.ax_flurstueck
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . str_pad($FlurID, 3, '0', STR_PAD_LEFT) . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+						($FlstID != ''? " AND concat_ws('/', ltrim(substring(flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
 					UNION
 					SELECT 
 						hf.flurstueckskennzeichen,
@@ -2533,7 +2560,7 @@ FROM
 						alkis.ax_flurstueck 
 					WHERE 
 						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') .
+						(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . 
 						$this->build_temporal_filter(array('ax_flurstueck')) . "
 					ORDER BY 
 						FlurID";
@@ -2577,8 +2604,8 @@ FROM
 					FROM 
 						alkis.ax_flurstueck
 					WHERE 
-						flurstueckskennzeichen LIKE '" . $GemkgID . "%'" .
-						($FlstID != ''? " AND concat_ws('/', ltrim(substring(f.flurstueckskennzeichen, 10, 5), '0'), ltrim(nullif(substring(f.flurstueckskennzeichen, 15, 4), '____'), '0')) IN ('" . implode("','", $FlstID) . "')" : '') . "
+					flurstueckskennzeichen LIKE '" . $GemkgID . "%'" . 
+					(!empty($FlurID)? ' AND flurnummer IN (' . implode(',', $FlurID) . ')' : '') . "
 					UNION
 					SELECT 
 						substring(flurstueckskennzeichen, 7, 3)::integer as flurnummer,
@@ -3108,6 +3135,15 @@ FROM
 		";
 		#echo '<br>SQL: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
+
+	function drop_schema($schema_name, $cascade = false) {
+		$sql = "
+			DROP SCHEMA IF EXISTS " . $schema_name .
+			($cascade ? ' CASCADE' : '') . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
 		return $ret;
 	}
 }

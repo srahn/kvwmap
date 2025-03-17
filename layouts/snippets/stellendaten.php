@@ -1,5 +1,5 @@
 <?php
-  include(LAYOUTPATH . 'languages/stellendaten_' . $this->user->rolle->language . '.php');
+  include(LAYOUTPATH . 'languages/stellendaten_' . rolle::$language . '.php');
 	$has_shared_stelle = array_reduce(
 		$this->stellendaten['show_shared_layers'],
 		function($has_shared_stelle, $show_shared_layers) {

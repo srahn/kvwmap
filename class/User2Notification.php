@@ -99,8 +99,8 @@ class User2Notification extends MyObject {
 		$user2notification = new User2Notification($gui);
 		$user2notification->set('notification_id', $notification_id);
 		$user2notification->set('user_id', $user_id);
-		$results = $user2notification->delete();
-		return $results;
+		$result = $user2notification->delete();
+		return $result;
 	}
 }
 ?>

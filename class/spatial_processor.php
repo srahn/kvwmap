@@ -40,6 +40,26 @@ class spatial_processor {
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }
+
+	function getGeomFromGeoJSON($geojson, $epsg) {
+		$sql = "
+			SELECT 
+				ST_AsSVG(geom) as svg,
+				round(ST_Length(geom)) as length
+			FROM
+				(SELECT
+					ST_Transform(
+							ST_GeomFromGeoJSON('" . $geojson . "'),
+							" . $epsg . "
+					) as geom
+				) as foo
+		";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+			return json_encode($rs);
+    }
+	}
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
   	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
@@ -448,7 +468,7 @@ class spatial_processor {
 		echo $result;
 	}
 	
-	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom) {
+	function queryMap($input_coord, $pixsize, $layer_id, $singlegeom, $aggregate_function = 'st_union') {
 		# pixsize wird übergeben, weil sie aus dem Geometrieeditor anders sein kann, da es dort eine andere Kartengröße geben kann
 		# Abfragebereich berechnen
 		if ($input_coord) {
@@ -465,7 +485,7 @@ class spatial_processor {
 			$maxy = $miny + $height;
 			$rect = rectObj($minx, $miny, $maxx, $maxy);
 		}
-		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom);
+		$geom = $this->getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function);
 		return $geom;
 	}
  
@@ -535,7 +555,7 @@ class spatial_processor {
   }
 
 	function add_buffered_vertices($geom_1, $formvars) {
-		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false);
+		$querygeometryWKT = $this->queryMap($formvars['input_coord'], $formvars['pixsize'], $formvars['geom_from_layer'], false, 'st_collect');
 		if($querygeometryWKT == '') {
 			header('warning: true');
 			echo 'Keine Geometrie zum Hinzufügen an der Kartenposition gefunden.';
@@ -633,7 +653,7 @@ class spatial_processor {
     }
   }
 
-	function getgeometrybyquery($rect, $layer_id, $singlegeom) {
+	function getgeometrybyquery($rect, $layer_id, $singlegeom, $aggregate_function) {
 		$dbmap = new db_mapObj($this->rolle->stelle_id, $this->rolle->user_id);
 		if ($layer_id != '') {
 			if ($layer_id < 0) { # Rollenlayer
@@ -661,15 +681,7 @@ class spatial_processor {
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg = $layerset[0]['epsg_code'];
 
-				$data = replace_params(
-					$layerset[0]['Data'],
-					rolle::$layer_params,
-					$this->user->id,
-					$this->stelle_id,
-					rolle::$hist_timestamp,
-					$this->user->rolle->language
-				);
-				$data = str_replace('$SCALE', 1000, $data);
+				$data = $layerset[0]['Data'];
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
@@ -747,7 +759,7 @@ class spatial_processor {
 					}
 					if (!$punktuell) {
 						# bei punktueller Abfrage wird immer nur eine Objektgeometrie geholt, bei Rechteck-Abfrage die Vereinigung aller getroffenen Geometrien
-						$columnname = "st_union(".$columnname.")";
+						$columnname = $aggregate_function . "(".$columnname.")";
 					}
 					$columnname = 'ST_Force2D(' . $columnname . ')';
 					$sql = "
@@ -1040,6 +1052,22 @@ class spatial_processor {
     }
     return $WKT;
   }
+
+	function composeMultipointWKTStringFromSVGPath($svgpath) {
+		if ($svgpath != '') {
+			$wkt = "MULTIPOINT((";
+			$coord = explode(' ', $svgpath);
+			$wkt = $wkt . $coord[1] . " " . $coord[2];
+			for ($i = 3; $i < count($coord) - 1; $i++){
+				if ($coord[$i] != ""){
+					$wkt = $wkt . "),(" . $coord[$i] . " " . $coord[$i+1];
+				}
+				$i++;
+			}
+			$wkt = $wkt . "))";
+		}
+		return $wkt;
+	}
   
   function transformCoordsSVG($path){
 	if($path != ''){

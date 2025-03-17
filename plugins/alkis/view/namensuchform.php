@@ -1,5 +1,5 @@
 <?php
-include(LAYOUTPATH.'languages/namensuche_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/namensuche_'.rolle::$language.'.php');
 include('funktionen/input_check_functions.php');
   
 $anzNamen = count_or_0($this->namen);

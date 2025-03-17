@@ -1,6 +1,6 @@
 <?
 global $supportedLanguages;
-include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'); ?>
+include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 <div id="mapimage">
 	<input type="hidden" name="go" value="neu Laden">
 	<INPUT TYPE="hidden" NAME="minx" VALUE="<?php echo $this->map->extent->minx; ?>">
@@ -10,6 +10,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="last_button" VALUE="">
+	<INPUT TYPE="HIDDEN" NAME="previous_button" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
@@ -34,6 +35,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 	<input type="hidden" name="group_options_open" value="">
 	<input type="hidden" name="free_polygons" value="">
 	<input type="hidden" name="free_texts" value="">
+	<input type="hidden" name="output_filetype" value="">
 	<?php
 		include(LAYOUTPATH.'snippets/SVG_map.php');
 	?>
@@ -75,7 +77,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . $this->user->rolle->language . '.php'
 					</select>
 				</div>
 			</div>
-			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
+			&nbsp;&nbsp;<span class="fett"><?php echo $this->strMapScale; ?>&nbsp;1:&nbsp;</span><input type="text" id="scale" onkeyup="if (event.keyCode == 13) { setScale(this); }" autocomplete="off" name="nScale" style="width:58px" value="<?php echo round($this->map_scaledenom); ?>">
 		</div>
 	</div>
 	<div id="map_copyrights_div" style="float: right; margin-right: 5px; height: 30px;">

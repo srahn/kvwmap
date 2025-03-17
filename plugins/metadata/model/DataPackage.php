@@ -13,6 +13,7 @@ class DataPackage extends PgObject {
 	public $export_format;
 	public $datatype;
 	public $datatype_icon;
+	public $num_features;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object from Class DataPackage in table ' . DataPackage::$schema . '.' .  DataPackage::$tableName, $this->write_debug);
@@ -52,6 +53,11 @@ class DataPackage extends PgObject {
 		";
 	}
 
+	public static	function find($gui, $where, $order = '') {
+		$datapackage = new DataPackage($gui);
+		return $datapackage->find_where($where, $order);
+	}
+
 	public static	function find_by_id($gui, $id) {
 		// echo '<br>DataPackage->find_by_id with id: ' . $id;
 		$package = new DataPackage($gui);
@@ -76,6 +82,7 @@ class DataPackage extends PgObject {
 
 	public static	function find_by_stelle_id($gui, $stelle_id) {
 		$package = new DataPackage($gui);
+		// $package->show = true;
 		$params = array(
 			'select' => $package->select,
 			'from' => "
@@ -90,13 +97,15 @@ class DataPackage extends PgObject {
 				) p ON r.id = p.ressource_id LEFT JOIN
 				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
 				kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
-				metadata.dateninhaber i ON r.dateninhaber_id = i.id
+				metadata.dateninhaber i ON r.dateninhaber_id = i.id JOIN
+				kvwmap.used_layer ul ON r.layer_id = ul.layer_id
 			",
 			'where' => $package->where . " AND
 				(
 					p.stelle_id IS NULL OR
 					p.stelle_id = " . $stelle_id . "
-				)
+				) AND
+				ul.stelle_id = " . $stelle_id . "
 			",
 			'order' => "r.bezeichnung"
 		);
@@ -183,6 +192,10 @@ class DataPackage extends PgObject {
 		return $this->export_path;
 	}
 
+	/**
+	 * Function return the name of file that contains the content of the data package
+	 * It consists on the path, file name and file extension .zip
+	 */
 	function get_export_file() {
 		$export_path = $this->get_export_path();
 		$this->export_file = (substr($export_path, -1, 1) == '/' ? substr($export_path, 0, -1) : $export_path) . '.zip';

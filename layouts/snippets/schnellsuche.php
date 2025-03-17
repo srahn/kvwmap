@@ -36,7 +36,7 @@
 		}
 		attribute = attributes.split(',');
 		for(i = 0; i < attribute.length; i++){
-			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
+			ahah("index.php", "go=get_select_list&layer_id="+layer_id+"&attribute="+attribute[i]+"&attributenames="+attributenames+"&attributevalues="+attributevalues+"&type=select-one&auswahl=1", new Array(document.getElementById('value_'+attribute[i])), new Array('sethtml'));
 		}
 	}
 	

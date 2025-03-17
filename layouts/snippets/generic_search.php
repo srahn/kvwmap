@@ -1,5 +1,5 @@
 <? 
-include(LAYOUTPATH.'languages/generic_search_'.$this->user->rolle->language.'.php');
+include(LAYOUTPATH.'languages/generic_search_'.rolle::$language.'.php');
 include(SNIPPETS.'/sachdatenanzeige_functions.php');
 ?>
 
@@ -135,6 +135,7 @@ function update_require_attribute(attributes, layer_id, attributenamesarray, sea
 	var attributevalues = '';
 	var values = [];
 	for(i = 0; i < attributenamesarray.length; i++){
+		values = [];
 		if(document.getElementById(prefix+'value_'+attributenamesarray[i]) != undefined){
 			attributenames += attributenamesarray[i] + '|';
 			options = document.getElementById(prefix+'value_'+attributenamesarray[i]).selectedOptions;
