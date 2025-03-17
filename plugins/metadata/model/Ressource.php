@@ -150,19 +150,24 @@ class Ressource extends PgObject {
 			$result = $this->transform();
 			if (!$result['success']) { return $result; }
 		}
-
-		$this->update_status(0);
+		$last_updated_at = date("Y-m-d");
+		$this->update_status(0, '', $last_updated_at);
 		return array(
 			'success' => true,
-			'msg' => $msg . '<br>Ressource erfolgreich aktualisiert.'
+			'msg' => $msg . '<br>Ressource am ' . $last_updated_at . ' erfolgreich aktualisiert.'
 		);
 	}
 
-	function update_status($status_id, $msg = '') {
+	function update_status($status_id, $msg = '', $date = '') {
 		if ($msg != '') {
 			echo '<br>Update Status auf ' . $status_id . '<br>Msg: ' . $msg;
 		}
-		$this->update_attr(array('status_id = ' . (string)$status_id));
+		$attributes = array();
+		$attributes[] = "status_id = " . (string)$status_id;
+		if ($date != '') {
+			$attributes[] = "last_updated_at = '" . $date . "'";
+		}
+		$this->update_attr($attributes);
 	}
 
 	####################
@@ -904,67 +909,147 @@ class Ressource extends PgObject {
 
 	/**
 	 * Import shape with ogr2ogr to Postgres
+	 * Import only one if $this->get('import_layer') is defined else all shapes in $shape_path
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
-		if ($this->get('import_table') == '') {
-			return array(
-				'success' => false,
-				'msg' => 'Es ist kein Name für die Importtabelle angegeben!'
-			);
-		}
-
-		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		$imported_shape_files = array();
 
 		if ($this->get('import_layer') != '') {
-			// shape file is set explicit
-			if (file_exists($dest_path . $this->get('import_layer') . '.shp')) {
-				$shp_ext = 'shp';
-			}
-			elseif (file_exists($dest_path . $this->get('import_layer') . '.SHP')) {
-				$shp_ext = 'SHP';
-			}
-			else {
+			// shape file is set explicit. Import only this
+			// load only one shape
+			$files = glob($shape_path . $this->get('import_layer') . '.[sS][hH][pP]');
+			if (count($files) == 0) {
 				return array(
 					'success' => false,
-					'msg' => 'Die Shape-Datei mit dem Namen ' . $this->get('import_layer') . ' existiert nicht im Verzeichnis ' . $dest_dir
+					'msg' => 'Die Shape-Datei mit dem Namen ' . $this->get('import_layer') . ' existiert nicht im Verzeichnis ' . $shape_path
 				);
 			}
-			$shp_file = $this->get('import_layer') . '.' . $shp_ext;
+
+			$shape_file = $files[0];
+			$this->debug->show('Shape-Datei ' . $shape_file . ' gefunden.', true);
+			$result = $this->shape_file_import($shape_file);
+			if (!$result['success']) {
+				return array(
+					'success' => false,
+					'msg' => $result['msg']
+				);
+			}
+			else {
+				$imported_shape_files[] = $shape_file;
+			}
 		}
 		else {
-			// find the shape file name in dest_path
-			$files = array_filter(
-				scandir($dest_path),
-				function($entry) use ($dest_path) {
-					return is_file($dest_path . $entry);
+			$this->debug->show('Importiere alle Shape-Dateien in Verzeichnis ' . $shape_path, true);
+			// import all shape files in shape_path
+			foreach (glob($shape_path . '*.[sS][hH][pP]') AS $shape_file) {
+				$this->debug->show('Shape-Datei ' . $shape_file . ' gefunden.', true);
+				$result = $this->shape_file_import($shape_file);
+				if (!$result['success']) {
+					return array(
+						'success' => false,
+						'msg' => $result['msg']
+					);
 				}
-			);
-
-			$this->debug->show('Dateien im Verzeichnis:<br>' . implode('<br>', $files), true);
-			$result = required_shape_files_exists($files);
-			if (!$result['success']) { return $result; }
-			$shp_file = '';
-			foreach($files AS $file) {
-				$info = pathinfo($dest_path . $file);
-				if (strtolower($info['extension']) == 'shp') {
-					$shp_file = $info['basename'];
+				else {
+					$imported_shape_files[] = $shape_file;
 				}
 			};
 		}
-
-		$this->debug->show('Der Name des Shapes lautet: ' . $shp_file, true);
-
-		$result = $this->gui->data_import_export->ogr2ogr_import($this->get('import_schema'), $this->get('import_table'), $this->get('import_epsg'), $dest_path . $shp_file, $this->database, '', NULL, '-overwrite', 'UTF-8', true);
-		if ($result != '') {
-			return array(
-				'success' => false,
-				'msg' => $result
-			);
-		}
 		return array(
 			'success' => true,
-			'msg' => 'Shape-Datei ' . $shp_file . ' erfolgreich eingelesen.'
+			'msg' => 'Shape-Dateien geladen: ' . implode(', ', $imported_shape_files)
+		);
+	}
+
+	/**
+	 * Function imports data with ogr2ogr from an ESRI Geodatabase file to postgres
+	 * Import with ogr2ogr command: ogr2ogr --config OGR_TRUNCATE YES -f PostgreSQL -dim XY -nlt CONVERT_TO_LINEAR -a_srs EPSG:5650 PG:"host=$host user=$user password=\'$password\' dbname=$dbname active_schema=$import_schema" $gdb_file
+	 */
+	function import_ogr2ogr_gdb() {
+		if (!$this->get('dest_path')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es muss ein Zielverzeichnis angegeben sein!'
+			);
+		}
+		$dest_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
+		if (!file_exists($dest_path)) {
+			return array(
+				'success' => false,
+				'msg' => 'Das angegebene Zielverzeichnis ' . $dest_path . ' existiert nicht!'
+			);
+		}
+		if (!$this->get('import_file')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es muss eine Importdatei angegeben werden!'
+			);
+		}
+		$gdb_file = rtrim($dest_path, '/') . '/' . $this->get('import_file');
+		if (!file_exists($gdb_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Importdatei ' . $gdb_file . ' nicht auf dem Server gefunden!'
+			);
+		}
+		if (!$this->get('import_schema')) {
+			return array(
+				'success' => false,
+				'msg' => 'Es ist kein Importschema angegeben!'
+			);
+		}
+
+		$this->debug->show('Starte mit Einlesen der GDB-Datei ' . $gdb_file, true);
+		$result = $this->gui->data_import_export->ogr2ogr_import(
+			$this->get('import_schema'),
+			'',
+			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
+			$gdb_file,
+			$this->database,
+			'',
+			NULL,
+			'--config OGR_TRUNCATE YES',
+			'UTF-8',
+			false
+		);
+
+		if ($result != 0) {
+			return array(
+				'success' => false,
+				'msg' => 'Fehler beim Einlesen der GDB-Datei ' . $gdb_file
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'GDB-Datei erfolgreich geladen!'
+		);
+	}
+
+	function shape_file_import($shape_file) {
+		$this->debug->show('Starte mit Einlesen der Shape-Datei ' . $shape_file);
+		$pathinfo = pathinfo($shape_file);
+		$result = required_shape_files_exists(glob($pathinfo['dirname'] . '/' . $pathinfo['filename'] . '.*'));
+		if (!$result['success']) { return $result; }
+		$import_table = strtolower(sonderzeichen_umwandeln($pathinfo['filename']));
+		$this->debug->show('Importiere in Tabelle ' . ($this->get('import_schema') != '' ? $this->get('import_schema') : $import_table) . '.' . $import_table, true);
+		$result = $this->gui->data_import_export->ogr2ogr_import(
+			$this->get('import_schema') != '' ? $this->get('import_schema') : $import_table,
+			$import_table,
+			$this->get('import_epsg') != '' ? $this->get('import_epsg') : 25833,
+			$shape_file,
+			$this->database,
+			'',
+			NULL,
+			'-overwrite',
+			'UTF-8',
+			true
+		);
+		return array(
+			'success' => ($result == 0),
+			'msg' => ($result == 0 ? 'Shape-Datei ' . $shape_file . ' erfolgreich eingelesen' : 'Fehler beim Einlesen der Shape-Datei ' . $shape_file)
 		);
 	}
 
