@@ -291,21 +291,11 @@ class Ressource extends PgObject {
 		if ($method_only == '') {
 			$this->update_status(0, ' Datum der letzten Aktualisierung gesetzt.');
 		}
-<<<<<<< HEAD
 		$last_updated_at = date("Y-m-d");
 		$this->update_status(0, '', $last_updated_at);
 		return array(
 			'success' => true,
-			'msg' => $msg . '<br>Ressource am ' . $last_updated_at . ' erfolgreich aktualisiert.'
-		);
-	}
-
-	function update_status($status_id, $msg = '', $date = '') {
-=======
-
-		return array(
-			'success' => true,
-			'msg' => $msg . 'Ressource ' . $this->get_id() . ' erfolgreich aktualisiert.'
+			'msg' => $msg . '<br>Ressource ' . $this->get_id() . ' am ' . $last_updated_at . ' erfolgreich aktualisiert.'
 		);
 	}
 
@@ -316,29 +306,24 @@ class Ressource extends PgObject {
 	 * @param Integer $status_id
 	 * @param String (optional) $msg
 	 */
-	function update_status($status_id, $msg = '') {
+	function update_status($status_id, $msg = '', $date = '') {
 		// $this->debug->show('Set status_id: ' . $status_id, true);
 		$attributes = array('status_id = ' . (string)$status_id);
 		$last_updated_at = date('Y-m-d H:i:s', time());
->>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 		if ($msg != '') {
 			$this->debug->show('Ressource ' . $this->get_id() . ' uptodate: ' . $last_updated_at, true);
 		}
 		if ($this->get('status_id') != 0 AND $status_id == 0) {
 			$attributes[] = "last_updated_at = '" . $last_updated_at . "'";
 		}
-<<<<<<< HEAD
 		$attributes = array();
 		$attributes[] = "status_id = " . (string)$status_id;
 		if ($date != '') {
 			$attributes[] = "last_updated_at = '" . $date . "'";
 		}
-		$this->update_attr($attributes);
-=======
+		$this->update_attr($attributes, true);
 		// $this->show = true;
 		// echo '<br>Update status_id: ' . $this->get('status_id') . ' auf ' . $status_id;
-		$this->update_attr($attributes, true);
->>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 	}
 
 	####################
@@ -1182,10 +1167,9 @@ class Ressource extends PgObject {
 	 */
 	function import_ogr2ogr_shape() {
 		$this->debug->show('Starte Funktion import_org2ogr_shape', true);
-<<<<<<< HEAD
 		$shape_path = METADATA_DATA_PATH . 'ressourcen/' . $this->get('dest_path');
 		$imported_shape_files = array();
-=======
+
 		if ($this->get('import_table') == '') {
 			return array(
 				'success' => false,
@@ -1194,7 +1178,6 @@ class Ressource extends PgObject {
 		}
 
 		$dest_path = $this->get_full_path($this->get('dest_path'));
->>>>>>> cb4b914d5da02a55adf151ee3e0cfb028aea2997
 
 		if ($this->get('import_layer') != '') {
 			// shape file is set explicit. Import only this
@@ -1402,23 +1385,6 @@ class Ressource extends PgObject {
 		return array(
 			'success' => true,
 			'msg' => 'Anzahl erfolgreich gelesener GML-Dateien: ' . count($gml_files) . '.'
-		);
-	}
-
-	function import_ogr2ogr_gdb() {
-		$this->debug->show('Starte Funktion import_org2ogr_gdb', true);
-		if ($this->get('import_schema') == '') {
-			return array(
-				'success' => false,
-				'msg' => 'Es ist kein Name für das Importschema angegeben!'
-			);
-		}
-
-		// Hier weiter mit Implementierung gdb-Import.
-
-		return array(
-			'success' => true,
-			'msg' => 'Anzahl erfolgreich gelesener gdb-Tabellen: ' . count($gdb_files) . '.'
 		);
 	}
 
