@@ -131,7 +131,7 @@ update_gebietstyp = function(){
 	<? /*for($a = 0; $a < count_or_0($this->qlayerset[$i]['attributes']['name']); $a++){
 		echo $this->qlayerset[$i]['attributes']['name'][$a].'  '.$a.'<br>';
 	}*/
-	if($this->formvars['value_b_plan_stammdaten_oid'] != '' OR $this->new_entry == true){
+	if($this->formvars['value_b_plan_stammdaten_oid'] != '' OR $this->new_entry == true OR $this->formvars['details'] == 'true'){
 		$this->formvars['printversion'] = 'n';   # nur dazu da, damit die Links "zurück zur Suche" und "drucken" nicht erscheinen
 ?>
 <table style="border: 1px solid grey" width="1020px" border="0" cellspacing="0" cellpadding="0">

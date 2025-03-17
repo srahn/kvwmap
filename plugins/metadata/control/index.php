@@ -4,6 +4,7 @@
 // metadata_create_bundle_package
 // metadata_create_data_package
 // metadata_create_metadata_document
+// metadata_list_files
 // metadata_delete_bundle_package
 // metadata_delete_data_package
 // metadata_download_bundle_package
@@ -63,6 +64,15 @@ function go_switch_metadata($go){
 			]);
 			$response = $GUI->metadata_create_metadata_document($GUI->formvars['layer_id']);
 			echo json_encode($response);
+		} break;
+
+		case 'metadata_list_files' : {
+			$GUI->checkCaseAllowed('metadata_list_files');
+			$result = $GUI->metadata_list_files($GUI->formvars['dir']);
+			if (!$result['success']) {
+				$GUI->Fehlermeldung = $result['msg'];
+			}
+			$GUI->output();
 		} break;
 
 		case 'metadata_delete_bundle_package' : {

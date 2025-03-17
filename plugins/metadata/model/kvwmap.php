@@ -268,6 +268,31 @@
 		);
 	};
 
+	$GUI->metadata_list_files = function($dir) use ($GUI) {
+		$GUI->main = PLUGINS . 'metadata/view/list_files.php';
+		if (strpos($dir, METADATA_DATA_DIR) === false) {
+			$msg = 'Das Verzeichnis ' . $dir . ' liegt nicht unterhalb von ' . METADATA_DATA_DIR;
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+		if (!is_dir($dir)) {
+			$msg = 'Das Verzeichnis ' . METADATA_DATA_DIR . $dir . ' exitstiert nicht.';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+		else {
+			$this->files = getAllFiles($dir);
+		}
+		return array(
+			'success' => false,
+			'msg' => $msg
+		);
+	};
+
 	/**
 	 * Function delete the bundle package of current stelle.
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
