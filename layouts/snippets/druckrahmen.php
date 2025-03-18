@@ -459,7 +459,7 @@ function art_hide(){
 	        </tr>
 	        <tr>
 	        	<td style="border-right:1px solid #C3C7C3" colspan="2">&nbsp;</td>
-	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=Druckrahmen_Freitextloeschen&freitext_id=<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>&aktiverRahmen=<? echo $this->formvars['aktiverRahmen']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen</a></td>
+	        	<td colspan="2" align="right"><a href="javascript:Bestaetigung('index.php?go=Druckrahmen_Freitextloeschen&freitext_id=<? echo $this->Document->selectedframe[0]['texts'][$i]['id'] ?>&aktiverRahmen=<? echo $this->formvars['aktiverRahmen']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>', 'Wollen Sie den Freitext wirklich löschen?');">löschen</a></td>
 	        </tr>
 	      <? } ?>
 
