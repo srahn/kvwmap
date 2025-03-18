@@ -46,8 +46,6 @@ if (isset($this) AND is_object($this) AND get_class($this) == 'administration') 
     }
   }
   $result = $this->database->exec_commands($sql, NULL, NULL, false, true);
-
-  $this->database->gui->user->rolle->readSettings();
 }
 
 ?>
