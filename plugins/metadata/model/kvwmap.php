@@ -268,25 +268,30 @@
 		);
 	};
 
-	$GUI->metadata_list_files = function($dir) use ($GUI) {
+	$GUI->metadata_list_files = function($seach_dir) use ($GUI) {
 		$GUI->main = PLUGINS . 'metadata/view/list_files.php';
-		if (strpos($dir, METADATA_DATA_DIR) === false) {
-			$msg = 'Das Verzeichnis ' . $dir . ' liegt nicht unterhalb von ' . METADATA_DATA_DIR;
+
+		if (strpos($seach_dir, '..') !== false) {
+			$msg = 'Das Verzeichnis ' . $search_dir . ' darf keine .. Zeichenkette beinhalten!';
 			return array(
 				'success' => false,
 				'msg' => $msg
 			);
 		}
-		if (!is_dir($dir)) {
-			$msg = 'Das Verzeichnis ' . METADATA_DATA_DIR . $dir . ' exitstiert nicht.';
+
+		$GUI->metadata_data_dir = append_slash(METADATA_DATA_PATH) . 'ressourcen/';
+		$GUI->search_dir = $GUI->metadata_data_dir . $search_dir;
+
+		if (!is_dir($GUI->search_dir)) {
+			$msg = 'Das Verzeichnis ' . $GUI->seach_dir . ' existiert nicht!';
 			return array(
 				'success' => false,
 				'msg' => $msg
 			);
 		}
-		else {
-			$this->files = getAllFiles($dir);
-		}
+
+		$GUI->files = getAllFiles($GUI->search_dir);
+
 		return array(
 			'success' => false,
 			'msg' => $msg
