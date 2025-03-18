@@ -5462,7 +5462,6 @@ echo '			</table>
 				}
 				$this->administration->get_database_status();
 				$this->administration->get_config_params();
-				$this->user->rolle->readSettings();
 				$this->showAdminFunctions();
 			} break;			
 			case "update_databases" : {
