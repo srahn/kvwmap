@@ -230,7 +230,7 @@ class pgdatabase {
 		$sql = "
 			CREATE SCHEMA IF NOT EXISTS " . $schema_name . "
 		";
-		$ret = $this->pgdatabase->execSQL($sql, 4,0);
+		$ret = $this->execSQL($sql, 4,0);
 		return $ret;
 	}
 
