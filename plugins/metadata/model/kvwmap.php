@@ -268,7 +268,7 @@
 		);
 	};
 
-	$GUI->metadata_list_files = function($seach_dir) use ($GUI) {
+	$GUI->metadata_list_files = function($search_dir) use ($GUI) {
 		$GUI->main = PLUGINS . 'metadata/view/list_files.php';
 
 		if (strpos($seach_dir, '..') !== false) {
