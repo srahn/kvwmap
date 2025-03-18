@@ -2788,7 +2788,6 @@ table.tgle .gledata select:not(.suggests), table.tgle .gledata input:not([type=r
 .scrolltable_header{
 	position: absolute;
 	top: -30px;
-	padding-left: 5px;
 }
 
 .scrolltable_footer{
