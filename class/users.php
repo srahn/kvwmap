@@ -641,7 +641,7 @@ class account {
 		# Abfragen, für welchen Zeitraum die statistische Abfrage möglich ist
 		$sql ='SELECT day(MIN(time_id)) AS min_d, month(MIN(time_id)) AS min_m, year(MIN(time_id)) AS min_y' .
 		$sql.=' , day(MAX(time_id)) AS max_d, month(MAX(time_id)) AS max_m, year(MAX(time_id)) AS max_y';
-		$sql.=' FROM `u_consume2layer`';
+		$sql.=' FROM u_consume2layer';
 		$this->debug->write("<p>file:kvwmap class:account->getNumber_of_Access_to_Layer:<br>".$sql,4);
 		$this->database->execSQL($sql);
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . INFO1 . "<p>" . $this->database->mysqli->error, 4); return 0; }
@@ -1058,41 +1058,40 @@ class user {
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
-				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
-				ELSE s.`Bezeichnung`
-			END AS Bezeichnung";
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
 		}
 		else {
-			$name_column = "s.`Bezeichnung`";
+			$name_column = "s.bezeichnung";
 		}
 		$sql = "
 			SELECT
-				s.ID,
+				s.id,
 				" . $name_column . "
 			FROM
 				stelle AS s,
 				rolle AS r
 			WHERE
-				s.ID = r.stelle_id AND
+				s.id = r.stelle_id AND
 				r.user_id = " . $this->id .
-				($stelle_ID > 0 ? " AND s.ID = " . $stelle_ID : "") . 
+				($stelle_ID > 0 ? " AND s.id = " . $stelle_ID : "") . 
 				(!$with_expired ? "
 				AND (
 					('" . date('Y-m-d h:i:s') . "' >= s.start AND ('" . date('Y-m-d h:i:s') . "' <= s.stop OR s.stop IS NULL))
 					OR
-					(s.start = '0000-00-00 00:00:00' AND s.stop = '0000-00-00 00:00:00')
+					(s.start IS NULL AND s.stop IS NULL)
 				)" : "") . "
 			ORDER BY
-				Bezeichnung;
+				bezeichnung;
 		";
 
 		#debug_write('<br>sql: ', $sql, 1);
 		$this->debug->write("<p>file:users.php class:user->getStellen - Abfragen der Stellen die der User einnehmen darf:", 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
-			$stellen['ID'][]=$rs['ID'];
-			$stellen['Bezeichnung'][]=$rs['Bezeichnung'];
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$stellen['ID'][]=$rs['id'];
+			$stellen['Bezeichnung'][]=$rs['bezeichnung'];
 		}
 		return $stellen;
 	}
@@ -1197,15 +1196,15 @@ class user {
 					, showlayeroptions = '" . ($formvars['showlayeroptions'] == '' ? '0' : '1') . "'
 					, showrollenfilter = '" . (value_of($formvars, 'showrollenfilter') == '' ? '0' : '1') . "'
 					, menue_buttons = '" . (value_of($formvars, 'menue_buttons') == '' ? '0' : '1') . "'
-					" . (value_of($formvars, 'redline_text_color')  != '' ? ", `redline_text_color`  = '" . $formvars['redline_text_color']  . "'" : '') . "
-					" . (value_of($formvars, 'redline_font_family') != '' ? ", `redline_font_family` = '" . $formvars['redline_font_family'] . "'" : '') . "
-					" . (value_of($formvars, 'redline_font_size')   != '' ? ", `redline_font_size`   = '" . $formvars['redline_font_size']   . "'" : '') . "
-					" . (value_of($formvars, 'redline_font_weight') != '' ? ", `redline_font_weight` = '" . $formvars['redline_font_weight'] . "'" : '') . "
+					" . (value_of($formvars, 'redline_text_color')  != '' ? ", redline_text_color  = '" . $formvars['redline_text_color']  . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_family') != '' ? ", redline_font_family = '" . $formvars['redline_font_family'] . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_size')   != '' ? ", redline_font_size   = '" . $formvars['redline_font_size']   . "'" : '') . "
+					" . (value_of($formvars, 'redline_font_weight') != '' ? ", redline_font_weight = '" . $formvars['redline_font_weight'] . "'" : '') . "
 					, singlequery = '" . value_of($formvars, 'singlequery') . "'
 					, instant_reload = '" . (value_of($formvars, 'instant_reload') == '' ? '0' : '1') . "'
 					, menu_auto_close = '" . (value_of($formvars, 'menu_auto_close') == '' ? '0' : '1') . "'
 					, visually_impaired = '" . (value_of($formvars, 'visually_impaired') == '' ? '0' : '1') . "'
-					" . (value_of($formvars, 'font_size_factor') != '' ? ", `font_size_factor` = " . $formvars['font_size_factor'] : '') . "
+					" . (value_of($formvars, 'font_size_factor') != '' ? ", font_size_factor = " . $formvars['font_size_factor'] : '') . "
 					, querymode = " . (value_of($formvars, 'querymode') != '' ? "'1'" : "'0', overlayx = 400, overlayy = 150") . "
 					, geom_edit_first = '" . $formvars['geom_edit_first'] . "'
 					, dataset_operations_position = '" . $formvars['dataset_operations_position'] . "'
@@ -1481,35 +1480,35 @@ class user {
 		$password_columns = '';
 		if ($userdaten['changepasswd'] == 1) {
 			$password_columns = ",
-				`password` = SHA1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
-				`password_setting_time` = CURRENT_TIMESTAMP(),
-				`password_expired` = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
+				password = SHA1('" . $this->database->mysqli->real_escape_string(trim($userdaten['password2'])) . "'),
+				password_setting_time = CURRENT_TIMESTAMP(),
+				password_expired = " . ($userdaten['reset_password'] ? 'true' : 'false') . "
 			";
 		}
 
 		$sql = "
 			UPDATE
-				`user`
+				user
 			SET
-				`Name` = '" . $userdaten['nachname'] . "',
-				`Vorname` = '" . $userdaten['vorname'] . "',
-				`login_name` = '" . trim($userdaten['loginname']) . "',
-				`Namenszusatz` = '" . $userdaten['Namenszusatz'] . "',
-				`start` = '" . ($userdaten['start'] ?: '0000-00-00') . "',
-				`stop`= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
-				`archived`= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
-				`ID` =  " . $userdaten['id'].",
-				`phon` = '" . $userdaten['phon']."',
-				`email` = '" . $userdaten['email']."',
-				`organisation` = '" . $userdaten['organisation']."',
-				`position` = '" . $userdaten['position']."',
-				`ips` = '" . $userdaten['ips'] . "',
-				`agreement_accepted` = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
-				`share_rollenlayer_allowed` = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
-				`layer_data_import_allowed` = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
+				Name = '" . $userdaten['nachname'] . "',
+				Vorname = '" . $userdaten['vorname'] . "',
+				login_name = '" . trim($userdaten['loginname']) . "',
+				Namenszusatz = '" . $userdaten['Namenszusatz'] . "',
+				start = '" . ($userdaten['start'] ?: '0000-00-00') . "',
+				stop= '" . ($userdaten['stop'] ?: '0000-00-00') . "',
+				archived= " . ($userdaten['archived']? "'" . $userdaten['archived'] . "'" : "NULL") . ",
+				ID =  " . $userdaten['id'].",
+				phon = '" . $userdaten['phon']."',
+				email = '" . $userdaten['email']."',
+				organisation = '" . $userdaten['organisation']."',
+				position = '" . $userdaten['position']."',
+				ips = '" . $userdaten['ips'] . "',
+				agreement_accepted = " . ($userdaten['agreement_accepted'] == 1 ? 1 : 0) . ",
+				share_rollenlayer_allowed = " . ($userdaten['share_rollenlayer_allowed'] == 1 ? 1 : 0) . ",
+				layer_data_import_allowed = " . ($userdaten['layer_data_import_allowed'] == 1 ? 1 : 0) .
 				$password_columns . "
 			WHERE
-				`ID`= " . $userdaten['selected_user_id'] . "
+				ID= " . $userdaten['selected_user_id'] . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1522,11 +1521,11 @@ class user {
 	function archivieren() {
 		$sql = "
 			UPDATE
-				`user`
+				user
 			SET
-				`archived` = CURRENT_TIMESTAMP
+				archived = CURRENT_TIMESTAMP
 			WHERE
-				`ID`= " . $this->id . "
+				ID= " . $this->id . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1539,11 +1538,11 @@ class user {
 	function set_userdata_checking_time() {
 		$sql = "
 			UPDATE
-				`user`
+				user
 			SET
-				`userdata_checking_time` = CURRENT_TIMESTAMP
+				userdata_checking_time = CURRENT_TIMESTAMP
 			WHERE
-				`ID`= " . $this->id . "
+				ID= " . $this->id . "
 		";
 		#echo 'SQL: ' . $sql;
 		$ret = $this->database->execSQL($sql, 4, 0);
@@ -1574,11 +1573,11 @@ class user {
 			UPDATE
 				user
 			SET
-				`password` = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
-				`password_setting_time` = '" . $password_setting_time . "',
-				`password_expired` = false
+				password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "'),
+				password_setting_time = '" . $password_setting_time . "',
+				password_expired = false
 			WHERE
-				`ID` = " . $this->id . "
+				ID = " . $this->id . "
 		";
 		#echo $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -1595,7 +1594,7 @@ class user {
 	function delete($user_id) {
 		$sql ="
 			DELETE FROM
-				`user`
+				user
 			WHERE
 				ID = " . $user_id . "
 		";
@@ -1605,7 +1604,7 @@ class user {
 		}
 		else {
 			$sql = "
-				ALTER TABLE `user` PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
+				ALTER TABLE user PACK_KEYS = 0 CHECKSUM = 0 DELAY_KEY_WRITE = 0 AUTO_INCREMENT = 1
 			";
 			$ret = $this->database->execSQL($sql, 4, 0);
 			if ($ret[0]) {

@@ -1,10 +1,10 @@
 <?php
-class Nutzer extends MyObject {
+class Nutzer extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'user');
+		parent::__construct($gui, 'kvwmap', 'user');
 		$this->identifier = 'ID';
 		$this->validations = array(
 			array(

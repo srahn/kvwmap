@@ -464,8 +464,8 @@ class rolle {
 			$this->last_time_id=$rs['last_time_id'];
 			$this->gui=$rs['gui'];
 			rolle::$language = $rs['language'];
-			$this->hideMenue=$rs['hidemenue'];
-			$this->hideLegend=$rs['hidelegend'];
+			$this->hideMenue = ($rs['hidemenue'] == 'f'? false : true);
+			$this->hideLegend = ($rs['hidelegend'] == 'f'? false : true);
 			$this->tooltipquery=$rs['tooltipquery'];
 			$this->scrollposition=$rs['scrollposition'];
 			$this->result_color=$rs['result_color'];
@@ -647,7 +647,7 @@ class rolle {
 			WHERE 
 				user_id = " . $user_id ." AND 
 				stelle_id = " . $this->stelle_id . " AND 
-				time_id = '" . $consumetime . "'";
+				time_id = " . ($consumetime != ''? "'" . $consumetime . "'" : 'NULL');
     #echo '<br>'.$sql;
     $queryret = $this->database->execSQL($sql, 4, 0, true);
     if ($queryret[0]) {

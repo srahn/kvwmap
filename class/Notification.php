@@ -1,6 +1,7 @@
 <?php
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'User2Notification.php');
-class Notification extends MyObject {
+class Notification extends PgObject {
 
 	static $write_debug = false;
 	var $selusers;
@@ -8,7 +9,7 @@ class Notification extends MyObject {
 	var $validations;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'notifications');
+		parent::__construct($gui, 'kvwmap', 'notifications');
 		$this->selusers = array();
 		$this->selstellen = array();
 		$this->setKeys(

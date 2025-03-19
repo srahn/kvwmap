@@ -2149,14 +2149,14 @@ echo '			</table>
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
-					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
+					$layerset['layers_of_group'][$layerset['list'][$i]['gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
-						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
+						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['gruppe']] = true;
 					}
 					if(value_of($layerset['list'][$i], 'requires') == ''){
-						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['Layer_ID'];				# die Layer-IDs in einer Gruppe
+						$this->layer_ids_of_group[$layerset['list'][$i]['gruppe']][] = $layerset['list'][$i]['layer_id'];				# die Layer-IDs in einer Gruppe
 					}
-					$this->layer_id_string .= $layerset['list'][$i]['Layer_ID'].'|';							# alle Layer-IDs hintereinander in einem String
+					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
 					if (value_of($layerset['list'][$i], 'requires') != '') {
 						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
@@ -2171,7 +2171,7 @@ echo '			</table>
 						$error = msGetErrorObj();
 						$test = 0;
 						while ($test < 100 AND $error && $error->code != MS_NOERR) {
-							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['Layer_ID'] . 
+							$this->error_message .= '<br>Fehler beim Laden des Layers mit der Layer-ID: ' . $layerset['list'][$i]['layer_id'] . 
 							'<br>&nbsp;&nbsp;in der Routine ' . $error->routine . ' Msg="' . $error->message . '" code=' . $error->code;
 							$error = $error->next();
 							$test++;
@@ -18228,7 +18228,7 @@ class db_mapObj{
 		$groups = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
-			$groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
+			$groups[$rs['id']]['Gruppenname'] = $rs['gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
 			$groups[$rs['id']]['id'] = $rs['id'];
 			$groups[$rs['id']]['selectable_for_shared_layers'] = $rs['selectable_for_shared_layers'];

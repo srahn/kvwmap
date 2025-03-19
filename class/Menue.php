@@ -1,12 +1,12 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
+include_once(CLASSPATH . 'PgObject.php');
 include_once(CLASSPATH . 'MyAttribute.php');
-class Menue extends MyObject {
+class Menue extends PgObject {
 	var $obermenue;
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'u_menues', 'id');
+		parent::__construct($gui, 'kvwmap', 'u_menues', 'id');
 		$this->validations = array(
 			array(
 				'attribute' => 'id',
@@ -69,7 +69,7 @@ class Menue extends MyObject {
 					m.links,
 					m.onclick,
 					name as name_german," .
-					(rolle::$language != 'german' ? "`name_" . rolle::$language . "` AS" : "") . " name,
+					(rolle::$language != 'german' ? "name_" . rolle::$language . " AS" : "") . " name,
 					m.menueebene,
 					m.obermenue,
 					m.target,
@@ -114,8 +114,8 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,".
-					(rolle::$language != 'german' ? "m.`name_" . rolle::$language . "` AS" : "") . " name,
-					m.`order`,
+					(rolle::$language != 'german' ? "m.name_" . rolle::$language . " AS" : "") . " name,
+					m.order,
 					m.menueebene
 				",
 				'from' => "
@@ -127,7 +127,7 @@ class Menue extends MyObject {
 					$more_where . "
 				",
 				'order' => "
-					m.`order`
+					m.order
 				"
 			)
 		);
@@ -155,8 +155,8 @@ class Menue extends MyObject {
 			array(
 				'select' => " DISTINCT
 					m.id,
-					m.`name" . (rolle::$language != 'german' ? "_" . rolle::$language : "") . "` AS name,
-					m.`order`,
+					m.name" . (rolle::$language != 'german' ? "_" . rolle::$language : "") . " AS name,
+					m.order,
 					m.menueebene
 				",
 				'from' => "
@@ -169,7 +169,7 @@ class Menue extends MyObject {
 					$more_where . "
 				",
 				'order' => "
-					m.`order`, name
+					m.order, name
 				"
 			)
 		);

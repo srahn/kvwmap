@@ -37,7 +37,7 @@ class PgObject {
 	* $this->gui->database MySQL Datenbank
 	*
 	*/
-
+	public $children_ids;
 	private $select;
 	private $from;
 	private $where;
@@ -67,6 +67,7 @@ class PgObject {
 		$this->geom_column = 'geom';
 		$this->extent = array();
 		$this->extents = array();
+		$this->children_ids = array();
 		$gui->debug->show('Create new Object PgObject with schema ' . $schema . ' table ' . $tableName, $this->show);
 	}
 
@@ -89,6 +90,14 @@ class PgObject {
 		);
 		$result = pg_fetch_assoc($query);
 		return floatval($result['postgis_version']);
+	}
+
+	function setKeys($keys) {
+		foreach ($keys AS $key) {
+			if (!array_key_exists($key, $this->data)) {
+				$this->set($key, NULL);
+			}
+		}
 	}
 
 	function find_by($attribute, $value) {
@@ -515,7 +524,7 @@ class PgObject {
 	 * @param array $params: Array with select, from, where and order parts of sql.
 	 * @return array $results: All found objects.
 	 */
-	function find_by_sql($params) {
+	function find_by_sql($params, $hierarchy_key = NULL) {
 		$sql = "
 			SELECT
 				" . (!empty($params['select']) ? $params['select'] : '*') . "
@@ -529,7 +538,15 @@ class PgObject {
 		$query = pg_query($this->database->dbConn, $sql);
 		$results = array();
 		while ($this->data = pg_fetch_assoc($query)) {
-			$results[] = clone $this;
+			if ($hierarchy_key == NULL) {
+				$results[] = clone $this;
+			}
+			else {
+				$results[$this->data[$this->identifier]] = clone $this;		// create result-array as associative array
+				if ($this->data[$hierarchy_key] > 0 AND value_of($results, $this->data[$hierarchy_key]) != NULL) {
+					$results[$this->data[$hierarchy_key]]->children_ids[] = $this->data[$this->identifier];		// add this id to parents children array
+				}
+			}
 		}
 		return $results;
 	}
