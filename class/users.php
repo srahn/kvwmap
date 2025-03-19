@@ -796,27 +796,28 @@ class user {
 	function readUserDaten($id, $login_name = '', $password = '', $archived) {
 		$where = array();
 		if ($id > 0) array_push($where, "ID = " . $id);
-		if ($login_name != '') array_push($where, "login_name = '" . $this->database->mysqli->real_escape_string($login_name) . "'");
-		if ($password != '') array_push($where, "password = SHA1('" . $this->database->mysqli->real_escape_string($password) . "')");
+		if ($login_name != '') array_push($where, "login_name = '" . pg_escape_string($login_name) . "'");
+		if ($password != '') array_push($where, "password = SHA1('" . pg_escape_string($password) . "')");
 		if (!$archived) array_push($where, "archived IS NULL");
 		$sql = "
 			SELECT
 				*
 			FROM
-				user
+				kvwmap.user
 			WHERE
 				" . implode(" AND ", $where);
 		#echo '<br>SQL to read user data: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>", 3);
-		$this->database->execSQL($sql, 4, 0, true);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4); return 0; }
-		$rs = $this->database->result->fetch_array(MYSQLI_ASSOC);
-		$this->id = $rs['ID'];
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if(!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+    }
+		$this->id = $rs['id'];
 		$this->login_name = $rs['login_name'];
-		$this->Namenszusatz = $rs['Namenszusatz'];
-		$this->Name = $rs['Name'];
-		$this->Vorname = $rs['Vorname'];
+		$this->Namenszusatz = $rs['namenszusatz'];
+		$this->Name = $rs['name'];
+		$this->Vorname = $rs['vorname'];
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
 		$this->email = $rs['email'];

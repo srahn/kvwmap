@@ -440,29 +440,24 @@ class rolle {
 			SELECT
 				*
 			FROM
-				rolle
+				kvwmap.rolle
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
 		";
 		#echo '<br>Read rolle settings mit sql: ' . $sql;
-    $this->debug->write("<p>file:rolle.php class:rolle function:readSettings - Abfragen der Einstellungen der Rolle:<br>",4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) {
-      $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4);
-      return 0;
-    }
-		if ($this->database->result->num_rows > 0){
-			$rs = $this->database->result->fetch_assoc();
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if (pg_num_rows($ret[1]) > 0){
+			$rs = pg_fetch_assoc($ret[1]);
 			$this->oGeorefExt = rectObj($rs['minx'],$rs['miny'],$rs['maxx'],$rs['maxy']);
-			$this->nImageWidth=$rs['nImageWidth'];
-			$this->nImageHeight=$rs['nImageHeight'];			
+			$this->nImageWidth=$rs['nimagewidth'];
+			$this->nImageHeight=$rs['nimageheight'];			
 			$this->mapsize=$this->nImageWidth.'x'.$this->nImageHeight;
 			$this->auto_map_resize=$rs['auto_map_resize'];
-			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nImageWidth'];
-			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nImageHeight'];
+			@$this->pixwidth=($rs['maxx']-$rs['minx'])/$rs['nimagewidth'];
+			@$this->pixheight=($rs['maxy']-$rs['miny'])/$rs['nimageheight'];
 			$this->pixsize=($this->pixwidth+$this->pixheight)/2;
-			$this->nZoomFactor=$rs['nZoomFactor'];
+			$this->nZoomFactor=$rs['nzoomfactor'];
 			$this->epsg_code=$rs['epsg_code'];
 			$this->epsg_code2=$rs['epsg_code2'];
 			$this->coordtype=$rs['coordtype'];
@@ -507,7 +502,7 @@ class rolle {
 				rolle::$hist_timestamp = $this->hist_timestamp_de = '';
 				#rolle::$hist_timestamp = '';
 			}
-			$this->selectedButton = $rs['selectedButton'];
+			$this->selectedButton = $rs['selectedbutton'];
 			$buttons = explode(',', $rs['buttons']);
 			$this->back = in_array('back', $buttons);
 			$this->forward = in_array('forward', $buttons);
@@ -648,20 +643,20 @@ class rolle {
 			SELECT 
 				* 
 			FROM 
-				u_consume
+				kvwmap.u_consume
 			WHERE 
 				user_id = " . $user_id ." AND 
 				stelle_id = " . $this->stelle_id . " AND 
 				time_id = '" . $consumetime . "'";
     #echo '<br>'.$sql;
-    $queryret=$this->database->execSQL($sql,4, 0);
+    $queryret = $this->database->execSQL($sql, 4, 0, true);
     if ($queryret[0]) {
       # Fehler bei Datenbankanfrage
       $ret[0]=1;
       $ret[1]='<br>Fehler bei der Abfrage der letzten Zugriffszeit.<br>'.$ret[1];
     }
     else {
-      $rs = $this->database->result->fetch_assoc();
+			$rs = pg_fetch_assoc($queryret[1]);
       $ret[0]=0;
       $ret[1]=$rs;
     }

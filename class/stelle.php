@@ -113,7 +113,7 @@ class stelle {
 		global $language;
 		$sql ='SELECT menue_id,';
 		if ($language != 'german') {
-			$sql.='`name_'.$language.'` AS ';
+			$sql.='name_'.$language.' AS ';
 		}
 		$sql .=' name, target, links FROM u_menue2stelle, u_menues';
 		$sql .=' WHERE stelle_id = '.$this->id;
@@ -166,7 +166,7 @@ class stelle {
 		global $language;
     $sql ='SELECT ';
     if ($language != 'german' AND $language != ''){
-      $sql.='`Bezeichnung_'.$language.'` AS ';
+      $sql.='Bezeichnung_'.$language.' AS ';
     }
     $sql.='Bezeichnung FROM stelle WHERE ID='.$this->id;
     #echo '<p>SQL zur Abfrage des Stellennamens: ' . $sql;
@@ -185,67 +185,67 @@ class stelle {
 		if ($language != '' AND $language != 'german') {
 			$name_column = "
 			CASE
-				WHEN s.`Bezeichnung_" . $language . "` != \"\" THEN s.`Bezeichnung_" . $language . "`
-				ELSE s.`Bezeichnung`
-			END AS Bezeichnung";
+				WHEN s.bezeichnung_" . $language . " != \"\" THEN s.bezeichnung_" . $language . "
+				ELSE s.bezeichnung
+			END AS bezeichnung";
 		}
 		else {
-			$name_column = "s.`Bezeichnung`";
+			$name_column = "s.Bezeichnung";
 		}
 
 		$sql = "
 			SELECT
-				`ID`," .
+				id," .
 				$name_column . ",
-				`start`,
-				`stop`, `minxmax`, `minymax`, `maxxmax`, `maxymax`, `epsg_code`, `Referenzkarte_ID`, `Authentifizierung`, `ALB_status`, `wappen`, `wappen_link`, `logconsume`,
-				`ows_namespace`,
-				`ows_title`,
-				`wms_accessconstraints`,
-				`ows_abstract`,
-				`ows_updatesequence`,
-				`ows_geographicdescription`,
-				`ows_fees`,
-				`ows_srs`,
+				start,
+				stop, minxmax, minymax, maxxmax, maxymax, epsg_code, referenzkarte_id, authentifizierung, alb_status, wappen, wappen_link, logconsume,
+				ows_namespace,
+				ows_title,
+				wms_accessconstraints,
+				ows_abstract,
+				ows_updatesequence,
+				ows_geographicdescription,
+				ows_fees,
+				ows_srs,
 
-				`ows_contactorganization`,
-				`ows_contactaddress`,
-				`ows_contactpostalcode`,
-				`ows_contactcity`,
-				`ows_contactadministrativearea`,
-				`ows_contactemailaddress`,
-				`ows_contactperson`,
-				`ows_contactposition`,
-				`ows_contactvoicephone`,
-				`ows_contactfacsimile`,
+				ows_contactorganization,
+				ows_contactaddress,
+				ows_contactpostalcode,
+				ows_contactcity,
+				ows_contactadministrativearea,
+				ows_contactemailaddress,
+				ows_contactperson,
+				ows_contactposition,
+				ows_contactvoicephone,
+				ows_contactfacsimile,
 
-				`ows_distributionorganization`,
-				`ows_distributionaddress`,
-				`ows_distributionpostalcode`,
-				`ows_distributioncity`,
-				`ows_distributionadministrativearea`,
-				`ows_distributionemailaddress`,
-				`ows_distributionperson`,
-				`ows_distributionposition`,
-				`ows_distributionvoicephone`,
-				`ows_distributionfacsimile`,
+				ows_distributionorganization,
+				ows_distributionaddress,
+				ows_distributionpostalcode,
+				ows_distributioncity,
+				ows_distributionadministrativearea,
+				ows_distributionemailaddress,
+				ows_distributionperson,
+				ows_distributionposition,
+				ows_distributionvoicephone,
+				ows_distributionfacsimile,
 
-				`ows_contentorganization`,
-				`ows_contentaddress`,
-				`ows_contentpostalcode`,
-				`ows_contentcity`,
-				`ows_contentadministrativearea`,
-				`ows_contentemailaddress`,
-				`ows_contentperson`,
-				`ows_contentposition`,
-				`ows_contentvoicephone`,
-				`ows_contentfacsimile`,
+				ows_contentorganization,
+				ows_contentaddress,
+				ows_contentpostalcode,
+				ows_contentcity,
+				ows_contentadministrativearea,
+				ows_contentemailaddress,
+				ows_contentperson,
+				ows_contentposition,
+				ows_contentvoicephone,
+				ows_contentfacsimile,
 
-				`protected`, `check_client_ip`, `check_password_age`, `allowed_password_age`, `use_layer_aliases`, `selectable_layer_params`, `hist_timestamp`, `default_user_id`,
-				`style`,
-				`show_shared_layers`,
-				`reset_password_text`,
-				`invitation_text`
+				protected, check_client_ip, check_password_age, allowed_password_age, use_layer_aliases, selectable_layer_params, hist_timestamp, default_user_id,
+				style,
+				show_shared_layers,
+				reset_password_text,
+				invitation_text
 			FROM
 				stelle s
 			WHERE
@@ -253,13 +253,12 @@ class stelle {
 		";
 		#echo 'SQL zum Abfragen der Stelle: ' . $sql;
 		$this->debug->write('<p>file:stelle.php class:stelle->readDefaultValues - Abfragen der Default Parameter der Karte zur Stelle:<br>', 4);
-		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return $ret;
-		}
-		$rs = $this->database->result->fetch_array();
+		$ret = $this->database->execSQL($sql, 4, 0, true);
+		if(!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+    }
 		$this->data = $rs;
-		$this->Bezeichnung = $rs['Bezeichnung'];
+		$this->Bezeichnung = $rs['bezeichnung'];
 		$this->MaxGeorefExt = rectObj($rs['minxmax'], $rs['minymax'], $rs['maxxmax'], $rs['maxymax']);
 		$this->epsg_code = $rs['epsg_code'];
 		$this->protected = $rs['protected'];
@@ -333,13 +332,13 @@ class stelle {
 	}
 
 	function deleteMenue($menue_ids) {
-		$where_menue_id = ((is_array($menue_ids) and count($menue_ids) > 0) ? " AND `menue_id` IN (" . implode(", ", $menue_ids) . ")" : "");
+		$where_menue_id = ((is_array($menue_ids) and count($menue_ids) > 0) ? " AND menue_id IN (" . implode(", ", $menue_ids) . ")" : "");
 		# Löschen der Zuordnung der Menüs zu der Stelle
 		$sql = "
 			DELETE FROM
-				`u_menue2stelle`
+				u_menue2stelle
 			WHERE
-				`stelle_id` = " . $this->id .
+				stelle_id = " . $this->id .
 				$where_menue_id . "
 		";
 		#echo '<br>stelle.php deleteMenue(' . (is_array($menue_ids) ? implode(', ', $menue_ids) : $menue_ids) . ') Löschen der Menüpunkte der Stelle mit sql: ' . $sql . '!';
@@ -351,9 +350,9 @@ class stelle {
 		# Löschen der Zuordnung der Menüs zu den Rollen der Stelle
 		$sql = "
 			DELETE FROM
-				`u_menue2rolle`
+				u_menue2rolle
 			WHERE
-				`stelle_id` = " . $this->id .
+				stelle_id = " . $this->id .
 				$where_menue_id . "
 		";
 		#echo '<br>stelle.php deleteMenue (' . (is_array($menue_ids) ? implode(', ', $menue_ids) : $menue_ids) . 'Löschen der Menüpunkte der Rollen der Stellen sql: ' . $sql . '!';
@@ -368,16 +367,16 @@ class stelle {
 		#echo 'stelle.php deleteLayer ids: ' . implode(', ', $layer);
 		if($layer == 0){
 			# löscht alle Layer der Stelle
-			$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id;
+			$sql ='DELETE FROM used_layer WHERE Stelle_ID = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-			$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id;
+			$sql ='DELETE FROM layer_attributes2stelle WHERE stelle_id = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 			# Filter löschen
-			$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id;
+			$sql ='SELECT attributvalue FROM u_attributfilter2used_layer WHERE type = \'geometry\' AND Stelle_ID = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -385,7 +384,7 @@ class stelle {
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
 			}
-			$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id;
+			$sql ='DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$this->id;
 			$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -393,23 +392,23 @@ class stelle {
 		else{
 			# löscht die übergebenen Layer der Stelle
 			for ($i=0;$i<count($layer);$i++) {
-				$sql ='DELETE FROM `used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
+				$sql ='DELETE FROM used_layer WHERE Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-				$sql ='DELETE FROM `layer_attributes2stelle` WHERE `stelle_id` = '.$this->id.' AND `layer_id` = '.$layer[$i];
+				$sql ='DELETE FROM layer_attributes2stelle WHERE stelle_id = '.$this->id.' AND layer_id = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; 	}			
 				# Filter löschen
-				$sql ='SELECT attributvalue FROM `u_attributfilter2used_layer` WHERE `type` = \'geometry\' AND `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
+				$sql ='SELECT attributvalue FROM u_attributfilter2used_layer WHERE type = \'geometry\' AND Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 				$rs = $this->database->result->fetch_array();
 				$poly_id = $rs[0];
 				if($poly_id != '')$pgdatabase->deletepolygon($poly_id);
-				$sql ='DELETE FROM `u_attributfilter2used_layer` WHERE `Stelle_ID` = '.$this->id.' AND `Layer_ID` = '.$layer[$i];
+				$sql ='DELETE FROM u_attributfilter2used_layer WHERE Stelle_ID = '.$this->id.' AND Layer_ID = '.$layer[$i];
 				$this->debug->write("<p>file:stelle.php class:stelle function:deleteLayer - Löschen der Layer der Stelle:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -420,7 +419,7 @@ class stelle {
 	
 	function deleteDruckrahmen() {
 		# löscht alle Druckrahmenzuordnungen der Stelle
-		$sql ='DELETE FROM `druckrahmen2stelle` WHERE `stelle_id` = '.$this->id;
+		$sql ='DELETE FROM druckrahmen2stelle WHERE stelle_id = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteDruckrahmen - Löschen der Druckrahmen der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -430,7 +429,7 @@ class stelle {
 	
 	function deleteStelleGemeinden() {
 		# löscht alle StelleGemeinden der Stelle
-		$sql ='DELETE FROM `stelle_gemeinden` WHERE `Stelle_ID` = '.$this->id;
+		$sql ='DELETE FROM stelle_gemeinden WHERE Stelle_ID = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteStelleGemeinden - Löschen der StelleGemeinden der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -440,7 +439,7 @@ class stelle {
 	
 	function deleteFunktionen() {
 		# löscht alle StelleGemeinden der Stelle
-		$sql ='DELETE FROM `u_funktion2stelle` WHERE `stelle_id` = '.$this->id;
+		$sql ='DELETE FROM u_funktion2stelle WHERE stelle_id = '.$this->id;
 		#echo '<br>'.$sql;
 		$this->debug->write("<p>file:stelle.php class:stelle function:deleteFunktionen - Löschen der Funktionen der Stelle:<br>".$sql,4);
 		$this->database->execSQL($sql);
@@ -503,65 +502,65 @@ class stelle {
 		$sql = "
 			INSERT INTO stelle
 			SET
-				" . ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "") . "
-				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "',
-				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
-				`minxmax` = " . $stellendaten['minxmax'] . ",
-				`minymax` = " . $stellendaten['minymax'] . ",
-				`maxxmax` = " . $stellendaten['maxxmax'] . ",
-				`maxymax` = " . $stellendaten['maxymax'] . ",
-				`epsg_code` = " . $stellendaten['epsg_code'] . ",
-				`start` = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
-				`stop` = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
-				`ows_title` = '" . $stellendaten['ows_title'] . "',
-				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
-				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
-				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
-				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
-				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
-				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
-				`ows_contactvoicephone` = '" . $stellendaten['ows_contactvoicephone'] . "',
-				`ows_contactfacsimile` = '" . $stellendaten['ows_contactfacsimile'] . "',
-				`ows_contactaddress` = '" . $stellendaten['ows_contactaddress'] . "',
-				`ows_contactpostalcode` = '" . $stellendaten['ows_contactpostalcode'] . "',
-				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
-				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
-				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
-				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
-				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
-				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
-				`ows_contentvoicephone` = '" . $stellendaten['ows_contentvoicephone'] . "',
-				`ows_contentfacsimile` = '" . $stellendaten['ows_contentfacsimile'] . "',
-				`ows_contentaddress` = '" . $stellendaten['ows_contentaddress'] . "',
-				`ows_contentpostalcode` = '" . $stellendaten['ows_contentpostalcode'] . "',
-				`ows_contentcity` = '" . $stellendaten['ows_contentcity'] . "',
-				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
-				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
-				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
-				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
-				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
-				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
-				`ows_distributionvoicephone` = '" . $stellendaten['ows_distributionvoicephone'] . "',
-				`ows_distributionfacsimile` = '" . $stellendaten['ows_distributionfacsimile'] . "',
-				`ows_distributionaddress` = '" . $stellendaten['ows_distributionaddress'] . "',
-				`ows_distributionpostalcode` = '" . $stellendaten['ows_distributionpostalcode'] . "',
-				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
-				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
-				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
-				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
-				`wappen` = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
-				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				`check_client_ip` = '" . ($stellendaten['checkClientIP'] == '1'	? "1" : "0") . "',
-				`check_password_age` = '" . ($stellendaten['checkPasswordAge'] == '1' ? "1" : "0") . "',
-				`allowed_password_age` = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
-				`use_layer_aliases` = '" . (value_of($stellendaten, 'use_layer_aliases') == '1'	? "1" : "0") . "',
-				`hist_timestamp` = '" . (value_of($stellendaten, 'hist_timestamp') == '1' ? 1 : 0) . "',
-				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
-				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
-				`reset_password_text` = '" . $stellendaten['reset_password_text'] . "',
-				`invitation_text` = '" . $stellendaten['invitation_text'] . "',				
-				`comment` = '" . $stellendaten['comment'] . "'				
+				" . ($stellendaten['id'] != '' ? "ID = " . $stellendaten['id'] . ", " : "") . "
+				Bezeichnung = '" . $stellendaten['bezeichnung'] . "',
+				Referenzkarte_ID = " . $stellendaten['Referenzkarte_ID'] . ",
+				minxmax = " . $stellendaten['minxmax'] . ",
+				minymax = " . $stellendaten['minymax'] . ",
+				maxxmax = " . $stellendaten['maxxmax'] . ",
+				maxymax = " . $stellendaten['maxymax'] . ",
+				epsg_code = " . $stellendaten['epsg_code'] . ",
+				start = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
+				stop = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
+				ows_title = '" . $stellendaten['ows_title'] . "',
+				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
+				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
+				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
+				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
+				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
+				ows_contactvoicephone = '" . $stellendaten['ows_contactvoicephone'] . "',
+				ows_contactfacsimile = '" . $stellendaten['ows_contactfacsimile'] . "',
+				ows_contactaddress = '" . $stellendaten['ows_contactaddress'] . "',
+				ows_contactpostalcode = '" . $stellendaten['ows_contactpostalcode'] . "',
+				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
+				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
+				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
+				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
+				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
+				ows_contentvoicephone = '" . $stellendaten['ows_contentvoicephone'] . "',
+				ows_contentfacsimile = '" . $stellendaten['ows_contentfacsimile'] . "',
+				ows_contentaddress = '" . $stellendaten['ows_contentaddress'] . "',
+				ows_contentpostalcode = '" . $stellendaten['ows_contentpostalcode'] . "',
+				ows_contentcity = '" . $stellendaten['ows_contentcity'] . "',
+				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
+				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
+				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
+				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
+				ows_distributionvoicephone = '" . $stellendaten['ows_distributionvoicephone'] . "',
+				ows_distributionfacsimile = '" . $stellendaten['ows_distributionfacsimile'] . "',
+				ows_distributionaddress = '" . $stellendaten['ows_distributionaddress'] . "',
+				ows_distributionpostalcode = '" . $stellendaten['ows_distributionpostalcode'] . "',
+				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
+				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
+				ows_fees = '" . $stellendaten['ows_fees'] . "',
+				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
+				wappen_link = '" . $stellendaten['wappen_link'] . "',
+				wappen = '" . ($stellendaten['wappen'] ? $_files['wappen']['name'] : $stellendaten['wappen_save']) . "',
+				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				check_client_ip = '" . ($stellendaten['checkClientIP'] == '1'	? "1" : "0") . "',
+				check_password_age = '" . ($stellendaten['checkPasswordAge'] == '1' ? "1" : "0") . "',
+				allowed_password_age = " . ($stellendaten['allowedPasswordAge'] != '' ? $stellendaten['allowedPasswordAge'] : "6") . ",
+				use_layer_aliases = '" . (value_of($stellendaten, 'use_layer_aliases') == '1'	? "1" : "0") . "',
+				hist_timestamp = '" . (value_of($stellendaten, 'hist_timestamp') == '1' ? 1 : 0) . "',
+				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
+				invitation_text = '" . $stellendaten['invitation_text'] . "',				
+				comment = '" . $stellendaten['comment'] . "'				
 		";
 		#echo '<br>SQL zum Ändern der Stelle: ' . $sql;
 		$ret = $this->database->execSQL($sql,4, 0);
@@ -593,74 +592,74 @@ class stelle {
 	# Stelle ändern
 	function Aendern($stellendaten) {
 		$language = rolle::$language;
-		$stelle = ($stellendaten['id'] != '' ? "`ID` = " . $stellendaten['id'] . ", " : "");
-		$wappen = (value_of($stellendaten, 'wappen') != '' ? "`wappen` = '" . $stellendaten['wappen'] . "', " : "");
+		$stelle = ($stellendaten['id'] != '' ? "ID = " . $stellendaten['id'] . ", " : "");
+		$wappen = (value_of($stellendaten, 'wappen') != '' ? "wappen = '" . $stellendaten['wappen'] . "', " : "");
 		$sql = "
 			UPDATE
 				stelle
 			SET" .
 				$stelle .
 				$wappen . "
-				`Bezeichnung` = '" . $stellendaten['bezeichnung'] . "'," .
+				Bezeichnung = '" . $stellendaten['bezeichnung'] . "'," .
 				(array_key_exists('Bezeichnung_' . $language, $stellendaten) ? "
-				`Bezeichnung_" . $language . "` = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
-				`Referenzkarte_ID` = " . $stellendaten['Referenzkarte_ID'] . ",
-				`minxmax` = '" . $stellendaten['minxmax'] . "',
-				`minymax` = '" . $stellendaten['minymax'] . "',
-				`maxxmax` = '" . $stellendaten['maxxmax'] . "',
-				`maxymax` = '" . $stellendaten['maxymax'] . "',
-				`epsg_code` = '" . $stellendaten['epsg_code'] . "',
-				`start` = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
-				`stop` = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
-				`ows_title` = '" . $stellendaten['ows_title'] . "',
-				`ows_namespace` = '" . $stellendaten['ows_namespace'] . "',
- 				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
-				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
-				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
-				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
-				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
-				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
-				`ows_contactvoicephone` = '" . $stellendaten['ows_contactvoicephone'] . "',
-				`ows_contactfacsimile` = '" . $stellendaten['ows_contactfacsimile'] . "',
-				`ows_contactaddress` = '" . $stellendaten['ows_contactaddress'] . "',
-				`ows_contactpostalcode` = '" . $stellendaten['ows_contactpostalcode'] . "',
-				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
-				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
-				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
-				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
-				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
-				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
-				`ows_contentvoicephone` = '" . $stellendaten['ows_contentvoicephone'] . "',
-				`ows_contentfacsimile` = '" . $stellendaten['ows_contentfacsimile'] . "',
-				`ows_contentaddress` = '" . $stellendaten['ows_contentaddress'] . "',
-				`ows_contentpostalcode` = '" . $stellendaten['ows_contentpostalcode'] . "',
-				`ows_contentcity` = '" . $stellendaten['ows_contentcity'] . "',
-				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
-				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
-				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
-				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
-				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
-				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
-				`ows_distributionvoicephone` = '" . $stellendaten['ows_distributionvoicephone'] . "',
-				`ows_distributionfacsimile` = '" . $stellendaten['ows_distributionfacsimile'] . "',
-				`ows_distributionaddress` = '" . $stellendaten['ows_distributionaddress'] . "',
-				`ows_distributionpostalcode` = '" . $stellendaten['ows_distributionpostalcode'] . "',
-				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
-				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
-				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
-				`wappen_link` = '" . $stellendaten['wappen_link'] . "',
-				`check_client_ip` =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
-				`check_password_age` =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
-				`use_layer_aliases` = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
-				`hist_timestamp` = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
-				`allowed_password_age` = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
-				`default_user_id` = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
-				`show_shared_layers` = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
-				`version` = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
-				`reset_password_text` = '" . $stellendaten['reset_password_text'] . "',
-				`invitation_text` = '" . $stellendaten['invitation_text'] . "',
-				`comment` = '" . $stellendaten['comment'] . "'
+				Bezeichnung_" . $language . " = '" . $stellendaten['Bezeichnung_' . $language] . "'," : "") . "
+				Referenzkarte_ID = " . $stellendaten['Referenzkarte_ID'] . ",
+				minxmax = '" . $stellendaten['minxmax'] . "',
+				minymax = '" . $stellendaten['minymax'] . "',
+				maxxmax = '" . $stellendaten['maxxmax'] . "',
+				maxymax = '" . $stellendaten['maxymax'] . "',
+				epsg_code = '" . $stellendaten['epsg_code'] . "',
+				start = '" . ($stellendaten['start'] == '' ? '0000-00-00' : $stellendaten['start']) . "',
+				stop = '" . ($stellendaten['stop'] == '' ? '0000-00-00' : $stellendaten['stop']). "',
+				ows_title = '" . $stellendaten['ows_title'] . "',
+				ows_namespace = '" . $stellendaten['ows_namespace'] . "',
+ 				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
+				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
+				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
+				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
+				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
+				ows_contactvoicephone = '" . $stellendaten['ows_contactvoicephone'] . "',
+				ows_contactfacsimile = '" . $stellendaten['ows_contactfacsimile'] . "',
+				ows_contactaddress = '" . $stellendaten['ows_contactaddress'] . "',
+				ows_contactpostalcode = '" . $stellendaten['ows_contactpostalcode'] . "',
+				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
+				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
+				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
+				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
+				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
+				ows_contentvoicephone = '" . $stellendaten['ows_contentvoicephone'] . "',
+				ows_contentfacsimile = '" . $stellendaten['ows_contentfacsimile'] . "',
+				ows_contentaddress = '" . $stellendaten['ows_contentaddress'] . "',
+				ows_contentpostalcode = '" . $stellendaten['ows_contentpostalcode'] . "',
+				ows_contentcity = '" . $stellendaten['ows_contentcity'] . "',
+				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
+				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
+				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
+				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
+				ows_distributionvoicephone = '" . $stellendaten['ows_distributionvoicephone'] . "',
+				ows_distributionfacsimile = '" . $stellendaten['ows_distributionfacsimile'] . "',
+				ows_distributionaddress = '" . $stellendaten['ows_distributionaddress'] . "',
+				ows_distributionpostalcode = '" . $stellendaten['ows_distributionpostalcode'] . "',
+				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
+				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
+				ows_fees = '" . $stellendaten['ows_fees'] . "',
+				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "',
+				wappen_link = '" . $stellendaten['wappen_link'] . "',
+				check_client_ip =				'" . ($stellendaten['checkClientIP'] 			== '1'	? "1" : "0") . "',
+				check_password_age =		'" . ($stellendaten['checkPasswordAge'] 	== '1'	? "1" : "0") . "',
+				use_layer_aliases = 		'" . (value_of($stellendaten, 'use_layer_aliases') 	== '1'	? "1" : "0") . "',
+				hist_timestamp = 				'" . (value_of($stellendaten, 'hist_timestamp') 		== '1'	? "1" : "0") . "',
+				allowed_password_age = 	'" . ($stellendaten['allowedPasswordAge'] != '' 	? $stellendaten['allowedPasswordAge'] : "6") . "',
+				default_user_id = " . ($stellendaten['default_user_id'] != '' ? $stellendaten['default_user_id'] : 'NULL') . ",
+				show_shared_layers = " . ($stellendaten['show_shared_layers'] ? 1 : 0) . ",
+				version = '" . ($stellendaten['version'] == '' ? "1.0.0" : $stellendaten['version']) . "',
+				reset_password_text = '" . $stellendaten['reset_password_text'] . "',
+				invitation_text = '" . $stellendaten['invitation_text'] . "',
+				comment = '" . $stellendaten['comment'] . "'
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -680,43 +679,43 @@ class stelle {
 			UPDATE
 				stelle
 			SET
-				`ows_title` = '" . $stellendaten['ows_title'] . "',
-				`ows_namespace` = '" . $stellendaten['ows_namespace'] . "',
-				`ows_abstract` = '" . $stellendaten['ows_abstract'] . "',
-				`wms_accessconstraints` = '" . $stellendaten['wms_accessconstraints'] . "',
-				`ows_contactorganization` = '" . $stellendaten['ows_contactorganization'] . "',
-				`ows_contactemailaddress` = '" . $stellendaten['ows_contactemailaddress'] . "',
-				`ows_contactperson` = '" . $stellendaten['ows_contactperson'] . "',
-				`ows_contactposition` = '" . $stellendaten['ows_contactposition'] . "',
-				`ows_contactvoicephone` = '" . $stellendaten['ows_contactvoicephone'] . "',
-				`ows_contactfacsimile` = '" . $stellendaten['ows_contactfacsimile'] . "',
-				`ows_contactaddress` = '" . $stellendaten['ows_contactaddress'] . "',
-				`ows_contactpostalcode` = '" . $stellendaten['ows_contactpostalcode'] . "',
-				`ows_contactcity` = '" . $stellendaten['ows_contactcity'] . "',
-				`ows_contactadministrativearea` = '" . $stellendaten['ows_contactadministrativearea'] . "',
-				`ows_contentorganization` = '" . $stellendaten['ows_contentorganization'] . "',
-				`ows_contentemailaddress` = '" . $stellendaten['ows_contentemailaddress'] . "',
-				`ows_contentperson` = '" . $stellendaten['ows_contentperson'] . "',
-				`ows_contentposition` = '" . $stellendaten['ows_contentposition'] . "',
-				`ows_contentvoicephone` = '" . $stellendaten['ows_contentvoicephone'] . "',
-				`ows_contentfacsimile` = '" . $stellendaten['ows_contentfacsimile'] . "',
-				`ows_contentaddress` = '" . $stellendaten['ows_contentaddress'] . "',
-				`ows_contentpostalcode` = '" . $stellendaten['ows_contentpostalcode'] . "',
-				`ows_contentcity` = '" . $stellendaten['ows_contentcity'] . "',
-				`ows_contentadministrativearea` = '" . $stellendaten['ows_contentadministrativearea'] . "',
-				`ows_geographicdescription` = '" . $stellendaten['ows_geographicdescription'] . "',
-				`ows_distributionorganization` = '" . $stellendaten['ows_distributionorganization'] . "',
-				`ows_distributionemailaddress` = '" . $stellendaten['ows_distributionemailaddress'] . "',
-				`ows_distributionperson` = '" . $stellendaten['ows_distributionperson'] . "',
-				`ows_distributionposition` = '" . $stellendaten['ows_distributionposition'] . "',
-				`ows_distributionvoicephone` = '" . $stellendaten['ows_distributionvoicephone'] . "',
-				`ows_distributionfacsimile` = '" . $stellendaten['ows_distributionfacsimile'] . "',
-				`ows_distributionaddress` = '" . $stellendaten['ows_distributionaddress'] . "',
-				`ows_distributionpostalcode` = '" . $stellendaten['ows_distributionpostalcode'] . "',
-				`ows_distributioncity` = '" . $stellendaten['ows_distributioncity'] . "',
-				`ows_distributionadministrativearea` = '" . $stellendaten['ows_distributionadministrativearea'] . "',
-				`ows_fees` = '" . $stellendaten['ows_fees'] . "',
-				`ows_srs` = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
+				ows_title = '" . $stellendaten['ows_title'] . "',
+				ows_namespace = '" . $stellendaten['ows_namespace'] . "',
+				ows_abstract = '" . $stellendaten['ows_abstract'] . "',
+				wms_accessconstraints = '" . $stellendaten['wms_accessconstraints'] . "',
+				ows_contactorganization = '" . $stellendaten['ows_contactorganization'] . "',
+				ows_contactemailaddress = '" . $stellendaten['ows_contactemailaddress'] . "',
+				ows_contactperson = '" . $stellendaten['ows_contactperson'] . "',
+				ows_contactposition = '" . $stellendaten['ows_contactposition'] . "',
+				ows_contactvoicephone = '" . $stellendaten['ows_contactvoicephone'] . "',
+				ows_contactfacsimile = '" . $stellendaten['ows_contactfacsimile'] . "',
+				ows_contactaddress = '" . $stellendaten['ows_contactaddress'] . "',
+				ows_contactpostalcode = '" . $stellendaten['ows_contactpostalcode'] . "',
+				ows_contactcity = '" . $stellendaten['ows_contactcity'] . "',
+				ows_contactadministrativearea = '" . $stellendaten['ows_contactadministrativearea'] . "',
+				ows_contentorganization = '" . $stellendaten['ows_contentorganization'] . "',
+				ows_contentemailaddress = '" . $stellendaten['ows_contentemailaddress'] . "',
+				ows_contentperson = '" . $stellendaten['ows_contentperson'] . "',
+				ows_contentposition = '" . $stellendaten['ows_contentposition'] . "',
+				ows_contentvoicephone = '" . $stellendaten['ows_contentvoicephone'] . "',
+				ows_contentfacsimile = '" . $stellendaten['ows_contentfacsimile'] . "',
+				ows_contentaddress = '" . $stellendaten['ows_contentaddress'] . "',
+				ows_contentpostalcode = '" . $stellendaten['ows_contentpostalcode'] . "',
+				ows_contentcity = '" . $stellendaten['ows_contentcity'] . "',
+				ows_contentadministrativearea = '" . $stellendaten['ows_contentadministrativearea'] . "',
+				ows_geographicdescription = '" . $stellendaten['ows_geographicdescription'] . "',
+				ows_distributionorganization = '" . $stellendaten['ows_distributionorganization'] . "',
+				ows_distributionemailaddress = '" . $stellendaten['ows_distributionemailaddress'] . "',
+				ows_distributionperson = '" . $stellendaten['ows_distributionperson'] . "',
+				ows_distributionposition = '" . $stellendaten['ows_distributionposition'] . "',
+				ows_distributionvoicephone = '" . $stellendaten['ows_distributionvoicephone'] . "',
+				ows_distributionfacsimile = '" . $stellendaten['ows_distributionfacsimile'] . "',
+				ows_distributionaddress = '" . $stellendaten['ows_distributionaddress'] . "',
+				ows_distributionpostalcode = '" . $stellendaten['ows_distributionpostalcode'] . "',
+				ows_distributioncity = '" . $stellendaten['ows_distributioncity'] . "',
+				ows_distributionadministrativearea = '" . $stellendaten['ows_distributionadministrativearea'] . "',
+				ows_fees = '" . $stellendaten['ows_fees'] . "',
+				ows_srs = '" . preg_replace(array('/: +/', '/ +:/'), ':', $stellendaten['ows_srs']) . "'
 			WHERE
 				ID = " . $this->id . "
 		";
@@ -749,29 +748,29 @@ class stelle {
 					SELECT 
 						group_concat(es.Bezeichnung)
 					FROM 
-						`stellen_hierarchie` AS h,
+						stellen_hierarchie AS h,
 						stelle es
 					WHERE
-						s.`ID` = h.`child_id` AND 
+						s.ID = h.child_id AND 
 						es.ID = h.parent_id
 				) as Bezeichnung_parent,
 				(
 					SELECT
 						max(last_time_id)
 					FROM
-						`rolle`
+						rolle
 					WHERE
-					`rolle`.stelle_id = s.ID
+					rolle.stelle_id = s.ID
 				) as last_time_id
 			FROM
-				`stelle` AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
-				`rolle` AS r ON s.ID = r.stelle_id
+				stelle AS s" . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " LEFT JOIN
+				rolle AS r ON s.ID = r.stelle_id
 				" : "") . "
 			WHERE " .
 				$where . (($user_id > 0 AND !in_array($this->id, $admin_stellen)) ? " AND
 				(r.user_id = " . $user_id . " OR r.stelle_id IS NULL)" : "") . "
 			ORDER BY " .
-				($order != '' ? $order : "s.`Bezeichnung`") . "
+				($order != '' ? $order : "s.Bezeichnung") . "
 		";
 		#echo '<br>sql: ' . $sql;
 
@@ -797,7 +796,7 @@ class stelle {
 			SELECT
 				*
 			FROM
-				`stellen_hierarchie`
+				stellen_hierarchie
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->getStellenhierarchie - <br>" . $sql, 4);
 		$this->database->execSQL($sql);
@@ -900,13 +899,13 @@ class stelle {
 		$parents = array();
 		$sql = "
 			SELECT
-				s.`ID`,
-				s.`Bezeichnung`
+				s.ID,
+				s.Bezeichnung
 			FROM
-				`stelle` AS s JOIN
-				`stellen_hierarchie` AS h ON (s.`ID` = h.`parent_id`)
+				stelle AS s JOIN
+				stellen_hierarchie AS h ON (s.ID = h.parent_id)
 			WHERE
-				h.`child_id`= ".$this->id." "
+				h.child_id= ".$this->id." "
 			.$order;
 		#echo '<br>stelle.php getParents sql:<br>' . $sql;
 
@@ -923,13 +922,13 @@ class stelle {
 		$children = array();
 		$sql = "
 			SELECT
-				s.`ID`,
-				s.`Bezeichnung`
+				s.ID,
+				s.Bezeichnung
 			FROM
-				`stelle` AS s JOIN
-				`stellen_hierarchie` AS h ON (s.`ID` = h.`child_id`)
+				stelle AS s JOIN
+				stellen_hierarchie AS h ON (s.ID = h.child_id)
 			WHERE
-				h.`parent_id`= ".$parent_id." "
+				h.parent_id= ".$parent_id." "
 			.$order;
 		#echo '<br>sql: ' . $sql;
 
@@ -1070,7 +1069,7 @@ class stelle {
 	) {
 		include_once(CLASSPATH . 'datendrucklayout.php');
 		$results = array();
-		$old_parents = $this->getParents('ORDER BY `ID`', 'only_ids');
+		$old_parents = $this->getParents('ORDER BY ID', 'only_ids');
 		$document = new Document($this->database);
 		$ddl = new ddl($this->database);
 				
@@ -1103,14 +1102,14 @@ class stelle {
 		# sortiert zunächst die Menüs von Ebene 1 nach order und dann innerhalb der Obermenüpunkte die Untermenüpunkte nach order
 		$sql = '
 			SELECT 
-				CASE WHEN m.menueebene = 1 THEN m.`order` ELSE om.`order` END as order1, 
-				CASE WHEN m.menueebene = 1 THEN m.`id` ELSE m.`obermenue` END as order2,
-				m.`id`
-			FROM `u_menues` as m 
-			LEFT JOIN `u_menues` as om ON om.id = m.obermenue
+				CASE WHEN m.menueebene = 1 THEN m.order ELSE om.order END as order1, 
+				CASE WHEN m.menueebene = 1 THEN m.id ELSE m.obermenue END as order2,
+				m.id
+			FROM u_menues as m 
+			LEFT JOIN u_menues as om ON om.id = m.obermenue
 			WHERE
 				m.id IN (' . implode(',', $menues) . ')
-			ORDER BY order1, order2, m.menueebene, m.`order`
+			ORDER BY order1, order2, m.menueebene, m.order
 		';
 		$this->database->execSQL($sql);
 		if (!$this->database->success) {
@@ -1126,9 +1125,9 @@ class stelle {
 
 	function addParent($parent_id) {
 		$sql = "
-			INSERT INTO `stellen_hierarchie` (
-				`parent_id`,
-				`child_id`
+			INSERT INTO stellen_hierarchie (
+				parent_id,
+				child_id
 			)
 			VALUES (
 				" . $parent_id . ",
@@ -1154,10 +1153,10 @@ class stelle {
 
 	function dropParent($drop_parent_id) {
 		$sql = "
-			DELETE FROM `stellen_hierarchie`
+			DELETE FROM stellen_hierarchie
 			WHERE
-				`parent_id` = " . $drop_parent_id . " AND
-				`child_id` = " . $this->id . "
+				parent_id = " . $drop_parent_id . " AND
+				child_id = " . $this->id . "
 		";
 		#echo '<p>stelle.php dropParent(' . $drop_parent_id . ') Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->dropParent - Delete Parent Id: " . $drop_parent_id . " von Stelle Id: " . $this->id . "<br>", 4);
@@ -1177,9 +1176,9 @@ class stelle {
 	
 	function addChild($child_id) {
 		$sql = "
-			INSERT INTO `stellen_hierarchie` (
-				`parent_id`,
-				`child_id`
+			INSERT INTO stellen_hierarchie (
+				parent_id,
+				child_id
 			)
 			VALUES (
 				" . $this->id . ",
@@ -1205,10 +1204,10 @@ class stelle {
 	
 	function dropChild($drop_child_id) {
 		$sql = "
-			DELETE FROM `stellen_hierarchie`
+			DELETE FROM stellen_hierarchie
 			WHERE
-				`parent_id` = " . $this->id . " AND
-				`child_id` = " . $drop_child_id . "
+				parent_id = " . $this->id . " AND
+				child_id = " . $drop_child_id . "
 		";
 		$this->debug->write("<p>file:stelle.php class:stelle->dropChild - Delete Child Id: " . $drop_child_id . " von Stelle Id: " . $this->id . "<br>", 4);
 		$this->database->execSQL($sql);
@@ -1251,9 +1250,9 @@ class stelle {
 			$sql ="
 				INSERT IGNORE INTO
 					u_menue2stelle (
-						`stelle_id`,
-						`menue_id`,
-						`menue_order`
+						stelle_id,
+						menue_id,
+						menue_order
 					)
 				VALUES (
 					'" . $this->id ."',
@@ -1277,24 +1276,24 @@ class stelle {
 		if ($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN m.`name_" . $language . "` != \"\" THEN m.`name_" . $language . "`
-				ELSE m.`name`
-			END AS `name`";
+				WHEN m.name_" . $language . " != \"\" THEN m.name_" . $language . "
+				ELSE m.name
+			END AS name";
 		}
 		else
-			$name_column = "m.`name`";
+			$name_column = "m.name";
 
 		$sql = "
 			SELECT
-				`menue_id`," .
+				menue_id," .
 				$name_column . ",
-				`menueebene`,
-				`order`
+				menueebene,
+				order
 			FROM
-				`u_menues` m JOIN
-				`u_menue2stelle` m2s ON m.`id` = m2s.`menue_id`
+				u_menues m JOIN
+				u_menue2stelle m2s ON m.id = m2s.menue_id
 			WHERE
-				m2s.`stelle_id` = " . $this->id .
+				m2s.stelle_id = " . $this->id .
 				($ebene != 0 ? " AND menueebene = " . $ebene : "") . "
 			ORDER BY
 				menue_order
@@ -1330,30 +1329,30 @@ class stelle {
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			# usedlayer
 			$columns = '
-				`Layer_ID`, 
-				`queryable`, 
-				`legendorder`,
-				`minscale`, 
-				`maxscale`, 
-				`offsite`, 
-				`transparency`, 
-				`postlabelcache`, 
-				`Filter`, 
-				`template`, 
-				`header`, 
-				`footer`, 
-				`symbolscale`, 
-				`logconsume`, 
-				`requires`, 
-				`privileg`, 
-				`export_privileg`,
-				`use_parent_privileges`,
-				`start_aktiv`,
-				`use_geom`
+				Layer_ID, 
+				queryable, 
+				legendorder,
+				minscale, 
+				maxscale, 
+				offsite, 
+				transparency, 
+				postlabelcache, 
+				Filter, 
+				template, 
+				header, 
+				footer, 
+				symbolscale, 
+				logconsume, 
+				requires, 
+				privileg, 
+				export_privileg,
+				use_parent_privileges,
+				start_aktiv,
+				use_geom
 			';
 			$sql = '
 				INSERT IGNORE INTO used_layer ( 
-					`Stelle_ID` , 
+					Stelle_ID , 
 					' . $columns . ')
 				SELECT 
 					'.$this->id.', 
@@ -1393,19 +1392,19 @@ class stelle {
 			#  u_attributfilter2used_layer
 			$sql = '
 				INSERT IGNORE INTO u_attributfilter2used_layer (
-					`Stelle_ID`, 
-					`Layer_ID`, 
-					`attributname`, 
-					`attributvalue`, 
-					`operator`, 
-					`type`)
+					Stelle_ID, 
+					Layer_ID, 
+					attributname, 
+					attributvalue, 
+					operator, 
+					type)
 				SELECT
 					'.$this->id.', 
-					`Layer_ID`, 
-					`attributname`, 
-					`attributvalue`, 
-					`operator`, 
-					`type`
+					Layer_ID, 
+					attributname, 
+					attributvalue, 
+					operator, 
+					type
 				FROM 
 				u_attributfilter2used_layer 
 				WHERE 
@@ -1421,7 +1420,7 @@ class stelle {
 	function addFunctions($function_ids){
 		# Hinzufügen von Funktionen zur Stelle
 		for ($i=0;$i<count($function_ids);$i++) {
-			$sql ='INSERT IGNORE INTO u_funktion2stelle ( `funktion_id` , `stelle_id`)';
+			$sql ='INSERT IGNORE INTO u_funktion2stelle ( funktion_id , stelle_id)';
 			$sql.="VALUES ('".$function_ids[$i]."', '".$this->id."')";
 			$this->debug->write("<p>file:stelle.php class:stelle->addFunctions - Hinzufügen von Funktionen zur Stelle:<br>".$sql,4);
 			$this->database->execSQL($sql);
@@ -1457,25 +1456,25 @@ class stelle {
 		# Hinzufügen von Layern zur Stelle
 		for ($i = 0; $i < count($layer_ids); $i++) {
 			$insert = "(
-				`Stelle_ID`,
-				`Layer_ID`,
-				`queryable`,
-				`use_geom`,
-				`legendorder`,
-				`minscale`,
-				`maxscale`,
-				`symbolscale`,
-				`offsite`,
-				`transparency`,
-				`Filter`,
-				`template`,
-				`header`,
-				`footer`,
-				`privileg`,
-				`export_privileg`,
-				`postlabelcache`,
-				`requires`,
-				`start_aktiv`
+				Stelle_ID,
+				Layer_ID,
+				queryable,
+				use_geom,
+				legendorder,
+				minscale,
+				maxscale,
+				symbolscale,
+				offsite,
+				transparency,
+				Filter,
+				template,
+				header,
+				footer,
+				privileg,
+				export_privileg,
+				postlabelcache,
+				requires,
+				start_aktiv
 			)";
 			if (!$assign_default_values) {
 				# Einstellungen von der Elternstelle übernehmen
@@ -1496,11 +1495,11 @@ class stelle {
 						template, 
 						header,
 						footer,
-						`privileg`,
-						`export_privileg`,
+						privileg,
+						export_privileg,
 						postlabelcache,
 						requires,
-						`start_aktiv`
+						start_aktiv
 					FROM
 						used_layer as l,
 						stellen_hierarchie
@@ -1520,8 +1519,8 @@ class stelle {
 						transparency = l.transparency, 
 						template = l.template, 
 						postlabelcache = l.postlabelcache,
-						`privileg` = l.`privileg`,
-						`export_privileg` = l.`export_privileg`,
+						privileg = l.privileg,
+						export_privileg = l.export_privileg,
 						requires = l.requires
 				";
 				// echo $sql.'<br><br>';
@@ -1548,7 +1547,7 @@ class stelle {
 						NULL,
 						NULL,
 						" . ($privileg == 'editable'? "'1'" : 'privileg') . ",
-						`export_privileg`,
+						export_privileg,
 						postlabelcache,
 						requires,
 						'0'
@@ -1690,7 +1689,7 @@ class stelle {
 									SELECT
 										id
 										FROM
-										`layer_parameter` as p,
+										layer_parameter as p,
 										used_layer as ul,
 										layer as l
 									--	LEFT JOIN layer_attributes la ON la.layer_id = l.Layer_ID
@@ -1742,23 +1741,23 @@ class stelle {
 			UPDATE
 				used_layer
 			SET
-				`Layer_ID` 				= "  . $formvars['selected_layer_id'] . ",
-				`use_geom`				= "  . $formvars['use_geom'] 					. ",
-				`postlabelcache` 	= "  . $formvars['postlabelcache'] 		. ",
-				`offsite` 				= '" . $formvars['offsite'] 					. "',
-				`Filter` 					= '" . $formvars['Filter'] 						. "',
-				`template` 				= '" . $formvars['template'] 					. "',
-				`header`   				= '" . $formvars['header'] 						. "',
-				`footer`   				= '" . $formvars['footer'] 						. "',
-				`logconsume` 			= '" . $formvars['logconsume'] 				. "',
-				`queryable`				= '" . ($formvars['queryable'] 	== '0' ? "0" : "1") . "',
-				`start_aktiv` 		= '" . ($formvars['start_aktiv'] == '0' ? "0"  : "1") 	. "',
-				`group_id`				= "  . ($formvars['group_id'] 					? $formvars['group_id'] : "NULL")			. ",
-				`transparency` 		= "  . ($formvars['transparency'] 			? $formvars['transparency'] : "NULL") . ",
-				`minscale` 				= "  . ($formvars['minscale'] 		!= '' ? $formvars['minscale'] : "NULL") 		. ",
-				`maxscale` 				= "  . ($formvars['maxscale'] 		!= '' ? $formvars['maxscale'] : "NULL") 		. ",
-				`symbolscale` 		= "  . ($formvars['symbolscale'] 	!= '' ? $formvars['symbolscale'] : "NULL")	. ",
-				`requires` 				= "  . ($formvars['requires'] 		!= '' ? "'" . $formvars['requires'] . "'" : "NULL") . "
+				Layer_ID 				= "  . $formvars['selected_layer_id'] . ",
+				use_geom				= "  . $formvars['use_geom'] 					. ",
+				postlabelcache 	= "  . $formvars['postlabelcache'] 		. ",
+				offsite 				= '" . $formvars['offsite'] 					. "',
+				Filter 					= '" . $formvars['Filter'] 						. "',
+				template 				= '" . $formvars['template'] 					. "',
+				header   				= '" . $formvars['header'] 						. "',
+				footer   				= '" . $formvars['footer'] 						. "',
+				logconsume 			= '" . $formvars['logconsume'] 				. "',
+				queryable				= '" . ($formvars['queryable'] 	== '0' ? "0" : "1") . "',
+				start_aktiv 		= '" . ($formvars['start_aktiv'] == '0' ? "0"  : "1") 	. "',
+				group_id				= "  . ($formvars['group_id'] 					? $formvars['group_id'] : "NULL")			. ",
+				transparency 		= "  . ($formvars['transparency'] 			? $formvars['transparency'] : "NULL") . ",
+				minscale 				= "  . ($formvars['minscale'] 		!= '' ? $formvars['minscale'] : "NULL") 		. ",
+				maxscale 				= "  . ($formvars['maxscale'] 		!= '' ? $formvars['maxscale'] : "NULL") 		. ",
+				symbolscale 		= "  . ($formvars['symbolscale'] 	!= '' ? $formvars['symbolscale'] : "NULL")	. ",
+				requires 				= "  . ($formvars['requires'] 		!= '' ? "'" . $formvars['requires'] . "'" : "NULL") . "
 			WHERE
 				Stelle_ID = " . $formvars['selected_stelle_id'] .  " AND
 				Layer_ID = " . $formvars['selected_layer_id'] . "
@@ -1839,12 +1838,12 @@ class stelle {
 		global $language;
 		$sql = 'SELECT DISTINCT';
 		if($language != 'german') {
-			$sql.=' CASE WHEN `Gruppenname_'.$language.'` IS NOT NULL THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS';
+			$sql.=' CASE WHEN Gruppenname_'.$language.' IS NOT NULL THEN Gruppenname_'.$language.' ELSE Gruppenname END AS';
 		}
 		$sql.=' Gruppenname, obergruppe, g.id FROM u_groups AS g, u_groups2rolle AS g2r';
 		$sql.=' WHERE g2r.stelle_ID='.$this->id;
 		$sql.=' AND g2r.id = g.id';
-		$sql.=' ORDER BY `order`';
+		$sql.=' ORDER BY order';
 		#echo $sql; exit;
     $this->debug->write("<p>file:kvwmap class:stelle->getGroups - Lesen der Gruppen der Stelle:<br>".$sql,4);
     $this->database->execSQL($sql);
@@ -2017,7 +2016,7 @@ class stelle {
 				(
 					SELECT
 						l.Layer_ID,
-						CASE WHEN l.`" . $language_layer_name . "` != '' THEN l.`" . $language_layer_name . "` ELSE l.`Name` END AS Name,
+						CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.Name END AS Name,
 						l.alias,
 						ul.export_privileg,
 						form_element_type as subformfk,
@@ -2080,12 +2079,12 @@ class stelle {
 		$language_group_name = "Gruppenname" . $language_postfix;
 		$sql = "
 			SELECT
-				l.`Layer_ID`,
-				CASE WHEN l.`" . $language_layer_name . "` != '' THEN l.`" . $language_layer_name . "` ELSE l.`Name` END AS Name,
-				l.`alias`,
-				COALESCE(ul.group_id, l.`Gruppe`) AS Gruppe,
-				CASE WHEN g.`" . $language_group_name . "` != '' THEN g.`" . $language_group_name . "` ELSE g.`Gruppenname` END AS Gruppenname,
-				l.`connection`,
+				l.Layer_ID,
+				CASE WHEN l." . $language_layer_name . " != '' THEN l." . $language_layer_name . " ELSE l.Name END AS Name,
+				l.alias,
+				COALESCE(ul.group_id, l.Gruppe) AS Gruppe,
+				CASE WHEN g." . $language_group_name . " != '' THEN g." . $language_group_name . " ELSE g.Gruppenname END AS Gruppenname,
+				l.connection,
 				ul.export_privileg
 			FROM
 				layer l LEFT JOIN
@@ -2098,22 +2097,22 @@ class stelle {
 					l.connectiontype = 9
 				) AND "
 				. ($use_geom != NULL ? "ul.use_geom = 1" : "ul.queryable = '1'")
-				. ($no_query_layers ? " AND l.`Datentyp` != 5" : "")
+				. ($no_query_layers ? " AND l.Datentyp != 5" : "")
 				. ($privileg != NULL ? " AND ul.privileg >= '" . $privileg . "'" : "")
 				. ($export_privileg != NULL ? " AND ul.export_privileg > 0" : "")
-				. ($group_id != NULL ? " AND COALESCE(ul.group_id, l.`Gruppe`) = " . $group_id : "")
-				. ($layer_ids != NULL ? " AND l.`Layer_ID` IN (" . implode(',', $layer_ids) . ")" : "") . "
+				. ($group_id != NULL ? " AND COALESCE(ul.group_id, l.Gruppe) = " . $group_id : "")
+				. ($layer_ids != NULL ? " AND l.Layer_ID IN (" . implode(',', $layer_ids) . ")" : "") . "
 		";
 		if ($user_id != NULL) {
 			$sql .= "
 				UNION
 				SELECT
 					-id AS Layer_ID,
-					concat(`Name`, CASE WHEN Typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS Name,
+					concat(Name, CASE WHEN Typ = 'search' THEN ' -eigene Abfrage-' ELSE ' -eigener Import-' END) AS Name,
 					'' AS alias,
 					Gruppe,
 					' ' AS Gruppenname,
-					`connection`,
+					connection,
 					1 AS export_privileg
 				FROM
 					rollenlayer
@@ -2217,21 +2216,21 @@ class stelle {
 				ul.privileg,
 				ul.export_privileg,
 				ul.requires,
-				ul.`queryable`, 
-				l.`drawingorder`, 
-				ul.`legendorder`, 
-				ul.`minscale`, 
-				ul.`maxscale`, 
-				ul.`offsite`, 
-				ul.`transparency`, 
-				ul.`postlabelcache`, 
-				ul.`Filter`, 
-				ul.`template`, 
-				ul.`symbolscale`, 
-				ul.`logconsume`, 
-				ul.`start_aktiv`, 
-				ul.`use_geom`,
-				ul.`group_id`,
+				ul.queryable, 
+				l.drawingorder, 
+				ul.legendorder, 
+				ul.minscale, 
+				ul.maxscale, 
+				ul.offsite, 
+				ul.transparency, 
+				ul.postlabelcache, 
+				ul.Filter, 
+				ul.template, 
+				ul.symbolscale, 
+				ul.logconsume, 
+				ul.start_aktiv, 
+				ul.use_geom,
+				ul.group_id,
 				parent_id,
 				GROUP_CONCAT(ul2.Stelle_ID) as used_layer_parent_id,
 				GROUP_CONCAT(s.Bezeichnung) as used_layer_parent_bezeichnung
@@ -2248,20 +2247,20 @@ class stelle {
 				($Layer_id != '' ? " AND l.Layer_ID = " . $Layer_id : '') . "
 			GROUP BY 
 				l.Layer_ID, l.Name, l.Gruppe, ul.use_parent_privileges, ul.privileg, ul.export_privileg,
-				ul.`queryable`, 
-				l.`drawingorder`, 
-				ul.`legendorder`, 
-				ul.`minscale`, 
-				ul.`maxscale`, 
-				ul.`offsite`, 
-				ul.`transparency`, 
-				ul.`postlabelcache`, 
-				ul.`Filter`, 
-				ul.`template`, 
-				ul.`symbolscale`, 
-				ul.`logconsume`, 
-				ul.`start_aktiv`, 
-				ul.`use_geom`
+				ul.queryable, 
+				l.drawingorder, 
+				ul.legendorder, 
+				ul.minscale, 
+				ul.maxscale, 
+				ul.offsite, 
+				ul.transparency, 
+				ul.postlabelcache, 
+				ul.Filter, 
+				ul.template, 
+				ul.symbolscale, 
+				ul.logconsume, 
+				ul.start_aktiv, 
+				ul.use_geom
 		";
 		#echo '<br>getLayer Sql:<br>'. $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getLayer - Abfragen der Layer zur Stelle:<br>".$sql,4);
@@ -2344,24 +2343,24 @@ class stelle {
 		if ($layer_id > 0) {
 			$sql = "
 				SELECT
-					`attributename`,
-					`privileg`,
-					`tooltip`
+					attributename,
+					privileg,
+					tooltip
 				FROM
-					`layer_attributes2stelle`
+					layer_attributes2stelle
 				WHERE
-					`stelle_id` = " . $this->id . " AND
-					`layer_id` = " . $layer_id;
+					stelle_id = " . $this->id . " AND
+					layer_id = " . $layer_id;
 		}
 		else {
 			$sql = "
 				SELECT 
-					name as `attributename`,
-					0 as `privileg`
+					name as attributename,
+					0 as privileg
 				FROM 
-					`layer_attributes` 
+					layer_attributes 
 				WHERE 
-				`layer_id` = " . $layer_id;
+				layer_id = " . $layer_id;
 		}
 		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
@@ -2411,10 +2410,10 @@ class stelle {
 		# erst alles löschen zu diesem Layer und Stelle
 		$sql = "
 			DELETE FROM
-				`layer_attributes2stelle`
+				layer_attributes2stelle
 			WHERE
-				`layer_id` = " . $formvars['selected_layer_id'] . " AND
-				`stelle_id` = " . $this->id . "
+				layer_id = " . $formvars['selected_layer_id'] . " AND
+				stelle_id = " . $this->id . "
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
@@ -2443,11 +2442,11 @@ class stelle {
 					INSERT INTO
 						layer_attributes2stelle
 					SET 
-						`layer_id` = " . $formvars['selected_layer_id'] . ",
-						`stelle_id` = " . $this->id . ",
-						`attributename` = '" . $attributes['name'][$i] . "',
-						`privileg` = " . $formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] .",
-						`tooltip`= " . ($formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] == 'on' ? "1" : "0") . "
+						layer_id = " . $formvars['selected_layer_id'] . ",
+						stelle_id = " . $this->id . ",
+						attributename = '" . $attributes['name'][$i] . "',
+						privileg = " . $formvars['privileg_' . $attributes['name'][$i] .'_'. $this->id] .",
+						tooltip= " . ($formvars['tooltip_' . $attributes['name'][$i] .'_'. $this->id] == 'on' ? "1" : "0") . "
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:stelle.php class:stelle->set_attributes_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);

@@ -466,7 +466,7 @@ class GUI {
 		else {
 			$layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
 		}
-		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "`selectable_for_shared_layers`");
+		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "selectable_for_shared_layers");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
@@ -1680,10 +1680,10 @@ echo '			</table>
 					UPDATE
 						u_menue2rolle
 					SET
-						`status` = 0
+						status = 0
 					WHERE
-						`user_id` = " . $this->user->id . "
-						AND `stelle_id` = " . $this->Stelle->id . "
+						user_id = " . $this->user->id . "
+						AND stelle_id = " . $this->Stelle->id . "
 				";
 				$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 				$ret = $this->database->execSQL($sql);
@@ -1693,11 +1693,11 @@ echo '			</table>
 				UPDATE
 					u_menue2rolle
 				SET
-					`status` = 1
+					status = 1
 				WHERE
-					`user_id` = " . $this->user->id . "
-					AND `stelle_id` = " . $this->Stelle->id . "
-					AND `menue_id` = " . $id . "
+					user_id = " . $this->user->id . "
+					AND stelle_id = " . $this->Stelle->id . "
+					AND menue_id = " . $id . "
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 			$ret = $this->database->execSQL($sql);
@@ -1708,11 +1708,11 @@ echo '			</table>
 				UPDATE
 					u_menue2rolle
 				SET
-					`status` = 0
+					status = 0
 				WHERE
-					`user_id` = " . $this->user->id . "
-					AND `stelle_id` = " . $this->Stelle->id . "
-					" . ($id != '' ? "AND `menue_id` = " . $id : "") . "
+					user_id = " . $this->user->id . "
+					AND stelle_id = " . $this->Stelle->id . "
+					" . ($id != '' ? "AND menue_id = " . $id : "") . "
 			";
 			$this->debug->write("<p>file:kvwmap class:GUI->changemenue :<br>" . $sql, 4);
 			$ret = $this->database->execSQL($sql);
@@ -8540,7 +8540,7 @@ SET @connection_id = {$this->pgdatabase->connection_id};
 			$this->layerdata = $mapDB->get_Layer($this->formvars['selected_layer_id'], false);
 			$layer_labelitems = new MyObject($this, 'layer_labelitems');
 			$this->layerdata['labelitems'] = $layer_labelitems->find_where('layer_id = ' . $this->formvars['selected_layer_id'], 'order');
-			$this->layerdata['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
+			$this->layerdata['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 			$this->layerdata['datasources'] = DataSource::find_by_layer_id($this, $this->formvars['selected_layer_id']);
 			$this->layerdata['datasource_ids'] = array_map(function($datasource) { return $datasource->get('id'); }, $this->layerdata['datasources']);
 			if (!$this->use_form_data) {
@@ -9427,7 +9427,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if (in_array($this->Stelle->id, $admin_stellen)) {
 			$stellen = $myobj->find_by_sql(
 				array(
-					'select' => 's.`ID`, s.`Bezeichnung`',
+					'select' => 's.ID, s.Bezeichnung',
 					'from' => 'stelle s',
 					'order' => 'bezeichnung'
 				)
@@ -9436,7 +9436,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		else {
 			$stellen = $myobj->find_by_sql(
 				array(
-					'select' => 's.`ID`, s.`Bezeichnung`',
+					'select' => 's.ID, s.Bezeichnung',
 					'from' => 'stelle s, rolle r',
 					'where' => 's.ID = r.stelle_id AND r.user_id = ' . $this->user->id,
 					'order' => 'bezeichnung'
@@ -9606,7 +9606,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		}
 		else {
 			include_once(CLASSPATH . 'LayerChart.php');
-			$layerset[0]['charts'] = LayerChart::find($this, '`layer_id` = ' . $this->formvars['selected_layer_id']);
+			$layerset[0]['charts'] = LayerChart::find($this, 'layer_id = ' . $this->formvars['selected_layer_id']);
 		}
 		$mapDB = new db_mapObj($this->Stelle->id, $this->user->id);
 		switch ($layerset[0]['connectiontype']) {
@@ -10376,8 +10376,8 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
+				WHEN l.Name_" . $language . " != \"\" THEN l.Name_" . $language . "
+				ELSE l.Name
 			END AS Name";
 		}
 		else{
@@ -10680,10 +10680,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 							foreach ($this->qlayerset[0]['shape'] AS $dataset) {
 								foreach ($document_attributes AS $document_attribute) {
 									$where = "
-										`user_id` = " . $this->user->id . " AND
-										`layer_id` = " . $layer['Layer_ID'] . " AND
-										`attribute_name` = '" . $document_attribute . "' AND
-										`file` = '" . $dataset['datei'] . "'
+										user_id = " . $this->user->id . " AND
+										layer_id = " . $layer['Layer_ID'] . " AND
+										attribute_name = '" . $document_attribute . "' AND
+										file = '" . $dataset['datei'] . "'
 									";
 									foreach (BelatedFile::find($this, $where) AS $belated_file) {
 										$belated_file->delete();
@@ -13093,7 +13093,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$frames = array_diff($this->document->load_frames($child_id, false, 'only_ids'), $old_frames);
 				$layer = array_diff($child_stelle->getLayer('', 'only_ids'), $old_layer);
 				$selectedusers = $child_stelle->getUser('only_ids');
-				$parents = $child_stelle->getParents('ORDER BY `ID`', 'only_ids');
+				$parents = $child_stelle->getParents('ORDER BY ID', 'only_ids');
 				# dann entsprechend der Elternstellen erweitern bzw. reduzieren
 				$child_stelle->apply_parent_selection(
 					($drop_child ? array_diff($parents, array($Stelle->id)) : $parents),
@@ -13383,7 +13383,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 			$this->formvars['sellayouts'] = $ddl->load_layouts($this->formvars['selected_stelle_id'], NULL, NULL, NULL);
       $this->formvars['sellayer'] = $Stelle->getLayers(NULL, 'Name');
       $this->formvars['selusers'] = $Stelle->getUser();
-			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY `Bezeichnung`"); // formatted mysql resultset, ordered by Bezeichnung
+			$this->formvars['selparents'] = $Stelle->getParents("ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['selchildren'] = $Stelle->getChildren($this->formvars['selected_stelle_id'], "ORDER BY Bezeichnung"); // formatted mysql resultset, ordered by Bezeichnung
 			$this->formvars['default_user_id'] = $this->stellendaten['default_user_id'];
 			$this->formvars['show_shared_layers'] = $this->stellendaten['show_shared_layers'];
@@ -14701,17 +14701,17 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 	function get_copyrights(){
 		$sql = "
 			SELECT 
-				GROUP_CONCAT(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.`alias`, l.`Name`)' : 'l.`Name`') . " SEPARATOR ', ') as layer, 
-				d.`beschreibung`
+				GROUP_CONCAT(" . ($this->Stelle->useLayerAliases ? 'COALESCE(l.alias, l.Name)' : 'l.Name') . " SEPARATOR ', ') as layer, 
+				d.beschreibung
 			FROM 
-				`datasources` as d JOIN
-				`layer_datasources` as ld ON ld.datasource_id = d.id JOIN
-				`layer` as l ON l.Layer_ID = ld.layer_id JOIN
-				`u_rolle2used_layer` r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
+				datasources as d JOIN
+				layer_datasources as ld ON ld.datasource_id = d.id JOIN
+				layer as l ON l.Layer_ID = ld.layer_id JOIN
+				u_rolle2used_layer r ON r.layer_id = ld.layer_id AND r.user_id = " . $this->user->id . " AND r.stelle_id = " . $this->Stelle->id . "
 			WHERE
-				r.`aktivStatus` != '0'
+				r.aktivStatus != '0'
 			GROUP BY
-				d.`id`
+				d.id
 		";
 		$ret = $this->database->execSQL($sql, 4, 1);
 		if ($ret[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
@@ -15730,10 +15730,10 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 											if ($belated_file != '') {
 												$file = json_decode($belated_file);
 												$where = "
-													`user_id` = " . $this->user->id . " AND
-													`layer_id` = " . $layer_id . " AND
-													`attribute_name` = '" . $document_attributes[$i]['attributename'] . "' AND
-													`dataset_id` = '" . $oid . "'
+													user_id = " . $this->user->id . " AND
+													layer_id = " . $layer_id . " AND
+													attribute_name = '" . $document_attributes[$i]['attributename'] . "' AND
+													dataset_id = '" . $oid . "'
 												";
 												if ($old_belated_file = BelatedFile::find($this, $where)) {	# ein "=" ist richtig, da Zuweisung
 													$old_belated_file[0]->set('name', $file->name);
@@ -16063,7 +16063,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				}
 				else {
 					include_once(CLASSPATH . 'LayerChart.php');
-					$layerset[$i]['charts'] = LayerChart::find($this, '`layer_id` = ' . $layerset[$i]['Layer_ID']);
+					$layerset[$i]['charts'] = LayerChart::find($this, 'layer_id = ' . $layerset[$i]['Layer_ID']);
 				}
 				switch ($layerset[$i]['connectiontype']) {
 					case MS_SHAPEFILE : { # Shape File Layer (1)
@@ -17654,7 +17654,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 		$this->LayerAnlegen();
 
 		# Assign new layer $this->formvars['selected_layer_id'] to alle stellen that allow shared layers
-		$shared_stellen = $this->Stelle->getStellen('', $this->user->id, '`show_shared_layers`');
+		$shared_stellen = $this->Stelle->getStellen('', $this->user->id, 'show_shared_layers');
 		$this->addLayersToStellen(
 			array($this->formvars['selected_layer_id']),
 			$shared_stellen['ID'],
@@ -17932,7 +17932,7 @@ class db_mapObj{
 		$this->script_name = 'db_MapObj.php';
 		$this->debug = $debug;
 		$this->GUI = $GUI;
-		$this->db = $GUI->database;
+		$this->db = $GUI->pgdatabase;
 		$this->Stelle_ID = $Stelle_ID;
 		$this->User_ID = $User_ID;
 		$this->rolle = new rolle($User_ID, $Stelle_ID, $this->db);
@@ -17943,16 +17943,15 @@ class db_mapObj{
 			SELECT
 				r.*
 			FROM
-				referenzkarten AS r,
-				stelle AS s
+				kvwmap.referenzkarten AS r,
+				kvwmap.stelle AS s
 			WHERE
-				r.ID = s.Referenzkarte_ID
-    		AND s.ID = " . $this->Stelle_ID . "
+				r.id = s.referenzkarte_id
+    		AND s.id = " . $this->Stelle_ID . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>",4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-		$rs = $this->db->result->fetch_assoc();
+		$ret = $this->db->execSQL($sql);
+		$rs = pg_fetch_assoc($ret[1]);
     $this->referenceMap = $rs;
 #		echo '<br>sql: ' . print_r($sql, true);
 #		echo '<br>ref: ' . print_r($this->referenceMap, true);
@@ -17962,19 +17961,19 @@ class db_mapObj{
 	function read_RollenLayer($id = NULL, $typ = NULL, $autodelete = NULL) {
 		$sql = "
 			SELECT DISTINCT
-				l.`id`,
-				l.`user_id`,
-				l.`stelle_id`,
-				l.`aktivStatus`,
-				l.`queryStatus`,
-				l.`Name`,
-				l.`Name` as alias,
-				l.`Gruppe`,
-				l.`Typ`,
-				l.`Datentyp`,
-				l.`Data`,
-				l.`query`,
-				l.`connectiontype`,
+				l.id,
+				l.user_id,
+				l.stelle_id,
+				l.aktivstatus,
+				l.querystatus,
+				l.name,
+				l.name as alias,
+				l.gruppe,
+				l.typ,
+				l.datentyp,
+				l.data,
+				l.query,
+				l.connectiontype,
 				l.connection_id,
 				l.wms_auth_username,
 				l.wms_auth_password,
@@ -17982,17 +17981,17 @@ class db_mapObj{
 					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', l.user_id)
 					ELSE l.connection
 				END as connection,
-				l.`epsg_code`,
-				l.`transparency`,
-				l.`buffer`,
-				l.`labelitem`,
-				l.`classitem`,
-				l.`gle_view`,
-				l.`rollenfilter`,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				g.Gruppenname,
-				-l.id AS Layer_ID,
+				l.epsg_code,
+				l.transparency,
+				l.buffer,
+				l.labelitem,
+				l.classitem,
+				l.gle_view,
+				l.rollenfilter,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				g.gruppenname,
+				-l.id AS layer_id,
 				1 as showclasses,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				CASE WHEN rollenfilter != '' THEN concat('(', rollenfilter, ')') END as Filter,
@@ -18002,22 +18001,21 @@ class db_mapObj{
 				'' as wms_connectiontimeout,
 				'' as oid
 			FROM
-				rollenlayer AS l JOIN
-				u_groups AS g ON l.Gruppe = g.id LEFT JOIN
-				connections AS c ON l.connection_id = c.id
+				kvwmap.rollenlayer AS l JOIN
+				kvwmap.u_groups AS g ON l.Gruppe = g.id LEFT JOIN
+				kvwmap.connections AS c ON l.connection_id = c.id
 			WHERE
 				l.stelle_id=" . $this->Stelle_ID . " AND
 				l.user_id = " . $this->User_ID .
 				($id != NULL ? " AND l.id = " . $id : '') .
-				($typ != NULL ? " AND l.Typ = '" . $typ . "'" : '') . 
+				($typ != NULL ? " AND l.typ = '" . $typ . "'" : '') . 
 				($autodelete != NULL ? " AND l.autodelete = '" . $autodelete . "'" : '') . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_RollenLayer - Lesen der RollenLayer:<br>",4);
 		#echo '<p>SQL zur Abfrage der Rollenlayer: ' . $sql;
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$Layer = array();
-		while ($rs = $ret['result']->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
 			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params_rolle(
@@ -18038,50 +18036,50 @@ class db_mapObj{
 		if ($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
+				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
+				ELSE l.name
+			END AS name";
 			$group_column = '
 			CASE
-				WHEN `Gruppenname_' . $language . '` IS NOT NULL THEN `Gruppenname_' . $language . '`
-				ELSE `Gruppenname`
-			END AS Gruppenname';
+				WHEN gruppenname_' . $language . ' IS NOT NULL THEN gruppenname_' . $language . '
+				ELSE gruppenname
+			END AS gruppenname';
 		}
 		else {
-			$name_column = "l.Name";
-			$group_column = 'Gruppenname';
+			$name_column = "l.name";
+			$group_column = 'gruppenname';
 		}
 
 		$sql = "
 			SELECT DISTINCT
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
-				rl.`aktivStatus`,
-				rl.`queryStatus`,
-				rl.`gle_view`,
-				rl.`showclasses`,
-				rl.`logconsume`,
-				rl.`rollenfilter`,
-				ul.`queryable`,
+				rl.aktivStatus,
+				rl.queryStatus,
+				rl.gle_view,
+				rl.showclasses,
+				rl.logconsume,
+				rl.rollenfilter,
+				ul.queryable,
 				COALESCE(rl.drawingorder, l.drawingorder) as drawingorder,
 				ul.legendorder,
-				ul.`minscale`, ul.`maxscale`,
-				ul.`offsite`,
-				ul.`postlabelcache`,
-				ul.`Filter`,
-				ul.`template`,
-				ul.`header`,
-				ul.`footer`,
-				ul.`symbolscale`,
-				ul.`logconsume`,
-				ul.`requires`,
-				ul.`privileg`,
-				ul.`export_privileg`,
-				ul.`group_id`,
-				l.Layer_ID," .
+				ul.minscale, ul.maxscale,
+				ul.offsite,
+				ul.postlabelcache,
+				ul.filter,
+				ul.template,
+				ul.header,
+				ul.footer,
+				ul.symbolscale,
+				ul.logconsume,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				ul.group_id,
+				l.layer_id," .
 				$name_column . ",
 				l.alias,
-				l.Datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
+				l.datentyp, COALESCE(ul.group_id, l.Gruppe) AS Gruppe, l.pfad, l.Data, l.tileindex, l.tileitem, l.labelangleitem, coalesce(rl.labelitem, l.labelitem) as labelitem, rl.labelitem as user_labelitem,
 				l.labelmaxscale, l.labelminscale, l.labelrequires,
 				l.connection_id,
 				CASE
@@ -18106,22 +18104,22 @@ class db_mapObj{
 				" . $group_column . ",
 				g.obergruppe,
 				g.order
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
-				u_rolle2used_layer AS rl,
-				used_layer AS ul JOIN
-				layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
-				u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
-				u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
-				connections as c ON l.connection_id = c.id
+				kvwmap.u_rolle2used_layer AS rl,
+				kvwmap.used_layer AS ul JOIN
+				kvwmap.layer AS l ON l.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.u_groups AS g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
+				kvwmap.u_groups2rolle AS gr ON g.id = gr.id LEFT JOIN
+				kvwmap.connections as c ON l.connection_id = c.id
 			WHERE
-				rl.stelle_id = ul.Stelle_ID AND
-				rl.layer_id = ul.Layer_ID AND
+				rl.stelle_id = ul.stelle_id AND
+				rl.layer_id = ul.layer_id AND
 				(ul.minscale != -1 OR ul.minscale IS NULL) AND
-				l.Datentyp != 5 AND 
-				rl.stelle_ID = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
+				l.datentyp != 5 AND 
+				rl.stelle_id = " . $this->Stelle_ID . " AND rl.user_id = " . $this->User_ID . " AND
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
 				($groups != NULL ? " AND g.id IN (" . $groups . ")" : '') .
@@ -18129,42 +18127,38 @@ class db_mapObj{
 				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
 				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
-				($this->nurNameLike ? " AND l.Name LIKE '" . $this->nurNameLike . "'" : '') . 
+				($this->nurNameLike ? " AND l.name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
 				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
-				($this->nurLayerID ? " AND l.Layer_ID = " . $this->nurLayerID : '') .
-				($this->nurLayerIDs ? " AND l.Layer_ID IN (" . $this->nurLayerIDs . ")" : '') .
-				($this->nichtLayerID ? " AND l.Layer_ID != " . $this->nichtLayerID : '') . "
+				($this->nurLayerID ? " AND l.layer_id = " . $this->nurLayerID : '') .
+				($this->nurLayerIDs ? " AND l.layer_id IN (" . $this->nurLayerIDs . ")" : '') .
+				($this->nichtLayerID ? " AND l.layer_id != " . $this->nichtLayerID : '') . "
 			ORDER BY
 				drawingorder
 		";
 		# echo '<br>SQL zur Abfrage der Layer: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Layer - Lesen der Layer der Rolle:<br>", 4);
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { 
-			echo err_msg($this->script_name, __LINE__, $sql); 
-			return 0;
-		}
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$layer = array();
 		$layer['list'] = array();
 		$this->disabled_classes = $this->read_disabled_classes();
 		$i = 0;
-		while ($rs = $ret['result']->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == '') {
-					$rs['Filter'] = '('.$rs['rollenfilter'].')';
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '('.$rs['rollenfilter'].')';
 				}
 				else {
-					$rs['Filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['Filter']);
+					$rs['filter'] = str_replace(' AND ', ' AND ('.$rs['rollenfilter'].') AND ', $rs['filter']);
 				}
 			}
 
-			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
 				$rs['Name_or_alias'],
 				rolle::$layer_params,
-				$rs['Layer_ID']
+				$rs['layer_id']
 			);
 			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
 				$rs[$key] = replace_params_rolle(
@@ -18175,7 +18169,7 @@ class db_mapObj{
 			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
-				$rs['Class'] = $this->read_Classes($rs['Layer_ID'], $this->disabled_classes, false, $rs['classification']);
+				$rs['Class'] = $this->read_Classes($rs['layer_id'], $this->disabled_classes, false, $rs['classification']);
 			}
 			if ($rs['maxscale'] > 0) {
 				$rs['maxscale'] = $rs['maxscale'] + 0.3;
@@ -18185,16 +18179,16 @@ class db_mapObj{
 			}
 			$layer['list'][$i] = $rs;
 			# Pointer auf requires-Array
-			$layer['list'][$i]['required'] =& $requires_layer[$rs['Layer_ID']];
+			$layer['list'][$i]['required'] =& $requires_layer[$rs['layer_id']];
 			if ($rs['requires'] != '') {
 				# requires-Array füllen
-				$requires_layer[$rs['requires']][] = $rs['Layer_ID'];
+				$requires_layer[$rs['requires']][] = $rs['layer_id'];
 				if ($rs['queryable']) {
 					# wenn der untergeordnete Layer queryable ist, wird queryable auch beim übergeordneten gesetzt, damit die Checkbox in der Legende erscheint
 					$layer['layer_ids'][$rs['requires']]['queryable'] = $rs['queryable'];
 				}
 			}
-			$layer['layer_ids'][$rs['Layer_ID']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
+			$layer['layer_ids'][$rs['layer_id']] =& $layer['list'][$i]; # damit man mit einer Layer-ID als Schlüssel auf dieses Array zugreifen kann
 			$i++;
 		}
 		return $layer;
@@ -18205,36 +18199,34 @@ class db_mapObj{
 		if ($language != 'german') {
 			$gruppenname_column = "
 			CASE
-				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
-				ELSE g.`Gruppenname`
+				WHEN g.gruppenname_" . $language . " != \"\" THEN g.gruppenname_" . $language . "
+				ELSE g.gruppenname
 			END";
 		}
 		else {
-			$gruppenname_column = "g.`Gruppenname`";
+			$gruppenname_column = "g.gruppenname";
 		}
 
 		$sql = "
 			SELECT
 				g.id,
-				" . $gruppenname_column . " AS Gruppenname,
+				" . $gruppenname_column . " AS gruppenname,
 				g.obergruppe,
 				g.selectable_for_shared_layers " .
 				(!$all ? ", g2r.status" : "") . "
 			FROM
-				u_groups AS g" . ($all ? "" : "
-				JOIN u_groups2rolle AS g2r ON g.id = g2r.id") . "
+				kvwmap.u_groups AS g" . ($all ? "" : "
+				JOIN kvwmap.u_groups2rolle AS g2r ON g.id = g2r.id") . "
 			WHERE
 				" . $where . ($all ? "" : " AND
 				g2r.stelle_ID = " . $this->Stelle_ID . " AND
 				g2r.user_id = " . $this->User_ID) . "
 			ORDER BY " .
-				($order != '' ? replace_semicolon($order) : "g.`order`") . "
+				($order != '' ? replace_semicolon($order) : "g.order") . "
 		";
-		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Groups - Lesen der Gruppen der Rolle:<br>", 4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$groups = array();
-		while ($rs = $this->db->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$groups[$rs['id']]['status'] = value_of($rs, 'status');
 			$groups[$rs['id']]['Gruppenname'] = $rs['Gruppenname'];
 			$groups[$rs['id']]['obergruppe'] = $rs['obergruppe'];
@@ -18266,26 +18258,26 @@ class db_mapObj{
 			SELECT" .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN `Name_" . $language . "` IS NOT NULL THEN `Name_" . $language . "`
-						ELSE `Name`
-					END" : "`Name`"
+						WHEN Name_" . $language . " IS NOT NULL THEN Name_" . $language . "
+						ELSE Name
+					END" : "Name"
 				) . " AS Name,
-				`Class_ID`,
-				`Layer_ID`,
-				`Expression`,
-				`classification`,
-				`legendgraphic`,
-				`drawingorder`,
-				`legendorder`,
-				`text`
+				Class_ID,
+				Layer_ID,
+				Expression,
+				classification,
+				legendgraphic,
+				drawingorder,
+				legendorder,
+				text
 			FROM
-				`classes`
+				classes
 			WHERE
-				`Class_ID` = " . $class_id . "
+				Class_ID = " . $class_id . "
 			ORDER BY
-				`classification`,
-				`drawingorder`,
-				`Class_ID`
+				classification,
+				drawingorder,
+				Class_ID
 		";
 
 		#echo $sql;
@@ -18308,29 +18300,29 @@ class db_mapObj{
 			SELECT " .
 				((!$all_languages AND $language != 'german') ? "
 					CASE
-						WHEN `Name_" . $language . "`IS NOT NULL THEN `Name_" . $language . "`
-						ELSE `Name`
+						WHEN name_" . $language . "IS NOT NULL THEN name_" . $language . "
+						ELSE name
 					END" : "
-					`Name`"
-				) . " AS Name,
-				`Name_low-german`,
-				`Name_english`,
-				`Name_polish`,
-				`Name_vietnamese`,
-				`Class_ID`,
-				`Layer_ID`,
-				`Expression`,
-				`classification`,
-				`legendgraphic`,
-				`legendimagewidth`,
-				`legendimageheight`,
-				`drawingorder`,
-				`legendorder`,
-				`text`
+					name"
+				) . " AS name,
+				name_low_german,
+				name_english,
+				name_polish,
+				name_vietnamese,
+				class_id,
+				layer_id,
+				expression,
+				classification,
+				legendgraphic,
+				legendimagewidth,
+				legendimageheight,
+				drawingorder,
+				legendorder,
+				text
 			FROM
-				`classes`
+				kvwmap.classes
 			WHERE
-				`Layer_ID` = " . $Layer_ID .
+				layer_id = " . $Layer_ID .
 				(
 					(!empty($classification)) ? " AND
 						(
@@ -18342,20 +18334,19 @@ class db_mapObj{
 				NULLIF(classification, '') IS NULL,
 				classification,
 				drawingorder,
-				Class_ID
+				class_id
 		";
 		#echo $sql.'<br>';
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Class - Lesen der Classen eines Layers:<br>", 4);
-		$ret = $this->db->execSQL($sql);
-		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name . " Zeile: " . __LINE__ .'<br>'.$sql; return 0; }
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$index = 0;
-		while ($rs = $ret['result']->fetch_assoc()) {
-			$rs['Style'] = $this->read_Styles($rs['Class_ID']);
-			$rs['Label'] = $this->read_Label($rs['Class_ID']);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Style'] = $this->read_Styles($rs['class_id']);
+			$rs['Label'] = $this->read_Label($rs['class_id']);
 			$rs['index'] = $index;
 			#Anne
 			if($disabled_classes){
-				if($disabled_classes['status'][$rs['Class_ID']] == 2) {
+				if($disabled_classes['status'][$rs['class_id']] == 2) {
 					$rs['Status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
@@ -18368,7 +18359,7 @@ class db_mapObj{
 						}
 					}
 				}
-				elseif ($disabled_classes['status'][$rs['Class_ID']] == '0') {
+				elseif ($disabled_classes['status'][$rs['class_id']] == '0') {
 					$rs['Status'] = 0;
 				}
 				else $rs['Status'] = 1;
@@ -18387,14 +18378,14 @@ class db_mapObj{
 				class_id,
 				status
 			FROM
-				u_rolle2used_class
+				kvwmap.u_rolle2used_class
 			WHERE
 				user_id = " . $this->User_ID . "
 				AND stelle_id = " . $this->Stelle_ID . "
 		";
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
-		$this->db->execSQL($sql);
-    while ($row = $this->db->result->fetch_assoc()) {
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+    while ($row = pg_fetch_assoc($ret[1])) {
   		$classarray['class_id'][] = $row['class_id'];
 			$classarray['status'][$row['class_id']] = $row['status'];
 		}
@@ -18404,13 +18395,19 @@ class db_mapObj{
 
   function read_Styles($Class_ID) {
 		$Styles = array();
-    $sql ='SELECT * FROM styles AS s,u_styles2classes AS s2c';
-    $sql.=' WHERE s.Style_ID=s2c.style_id AND s2c.class_id='.$Class_ID;
-    $sql.=' ORDER BY drawingorder';
+    $sql ='
+			SELECT 
+				* 
+			FROM 
+				kvwmap.styles AS s,
+				kvwmap.u_styles2classes AS s2c
+			WHERE 
+				s.Style_ID = s2c.style_id AND 
+				s2c.class_id = ' . $Class_ID . '
+			ORDER BY drawingorder';
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_Styles - Lesen der Styledaten:<br>",4);
-    $ret = $this->db->execSQL($sql);
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    while($rs = $this->db->result->fetch_assoc()) {
+    $ret = $this->db->execSQL($sql, 4, 0, true);
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $Styles[]=$rs;
     }
     return $Styles;
@@ -18424,16 +18421,15 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				labels AS l,
-				u_labels2classes AS l2c
+				kvwmap.labels AS l,
+				kvwmap.u_labels2classes AS l2c
 			WHERE
-				l.Label_ID = l2c.label_id
+				l.label_id = l2c.label_id
 				AND l2c.class_id = " . $Class_ID . "
 		";
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_Label - Lesen der Labels zur Classe eines Layers:<br>",4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-		while ($rs = $this->db->result->fetch_assoc()) {
+		$ret = $this->db->execSQL($sql, 4, 0, true);
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$Labels[]=$rs;
 		}
 		return $Labels;
@@ -18591,10 +18587,10 @@ class db_mapObj{
 			UPDATE
 				used_layer
 			SET
-				`Filter` = '" . $filterstring . "'
+				Filter = '" . $filterstring . "'
 			WHERE
-				`Stelle_ID` = " . $stelle_id . " AND
-				`Layer_ID` = " . $layer_id . "
+				Stelle_ID = " . $stelle_id . " AND
+				Layer_ID = " . $layer_id . "
 		";
 		// echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->write_filter - Speichern des Filterstrings:<br>" . $sql, 4);
@@ -18690,12 +18686,12 @@ class db_mapObj{
 		global $language;
 		$sql = "
 			SELECT
-				`Data`,
-				`duplicate_criterion`
+				Data,
+				duplicate_criterion
 			FROM
-				`" . ($layer_id < 0 ? "rollenlayer" : "layer") . "`
+				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
 			WHERE
-				" . ($layer_id < 0 ? "-id" : "`Layer_ID`") . " = " . $layer_id . "
+				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . "
 		";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
@@ -18715,10 +18711,10 @@ class db_mapObj{
   function getPath($layer_id){
     $sql = "
 			SELECT
-				`pfad`,
-				`duplicate_criterion`
+				pfad,
+				duplicate_criterion
 			FROM
-				`layer`
+				layer
 			WHERE
 				Layer_ID = " . $layer_id . "
 		";
@@ -18801,13 +18797,13 @@ class db_mapObj{
 		# $layer_id < 0 Rollenlayer else normal layer
 		$sql = "
 			SELECT
-				`connection_id`,
-				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "`schema`
+				connection_id,
+				" . ($layer_id < 0 ? "'" . CUSTOM_SHAPE_SCHEMA . "' AS " : "") . "schema
 			FROM
 				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
 			WHERE
 				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . " AND
-				`connectiontype` = 6
+				connectiontype = 6
 		";
 		#echo '<br>sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_layer_connection - Lesen der connection Daten des Layers:<br>" . $sql, 4);
@@ -19308,14 +19304,14 @@ class db_mapObj{
 			}
 			$sql = "
 				INSERT INTO
-					`layer_attributes`
+					layer_attributes
 				SET
 					layer_id = " . $layer_id.",
 					name = '" . $attributes[$i]['name'] . "',
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] ."',
 					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
-					`schema` = '" . $attributes[$i]['schema_name'] . "',
+					schema = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
@@ -19323,13 +19319,13 @@ class db_mapObj{
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					`order` = " . $attributes[$i]['order'] . "
+					default = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
+					order = " . $attributes[$i]['order'] . "
 				ON DUPLICATE KEY UPDATE
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] . "',
 					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
-					`schema` = '" . $attributes[$i]['schema_name'] . "',
+					schema = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
 					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
@@ -19337,8 +19333,8 @@ class db_mapObj{
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					`default` = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					`order` = " . $attributes[$i]['order'] . "
+					default = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
+					order = " . $attributes[$i]['order'] . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
@@ -19372,16 +19368,16 @@ class db_mapObj{
 		# den PRIMARY KEY constraint rausnehmen, falls der tablename nicht der maintable entspricht
 		$sql = "
 			UPDATE
-				`layer_attributes`,
-				`layer`
+				layer_attributes,
+				layer
 			SET
-				`constraints` = ''
+				constraints = ''
 			WHERE
-				`layer_attributes`.
-				`layer_id` = " . $layer_id . " AND
-				`layer`.`Layer_ID` = " . $layer_id . " AND
-				`constraints` = 'PRIMARY KEY' AND
-				`tablename` != maintable
+				layer_attributes.
+				layer_id = " . $layer_id . " AND
+				layer.Layer_ID = " . $layer_id . " AND
+				constraints = 'PRIMARY KEY' AND
+				tablename != maintable
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
@@ -19421,10 +19417,10 @@ class db_mapObj{
 					ID,
 					Bezeichnung
 				FROM
-					`stelle` AS s JOIN
-					`used_layer` AS ul ON (s.`ID` = ul.`Stelle_ID`)
+					stelle AS s JOIN
+					used_layer AS ul ON (s.ID = ul.Stelle_ID)
 				WHERE
-					ul.`Layer_ID` IN (" . implode(', ', $layer_ids) . ")
+					ul.Layer_ID IN (" . implode(', ', $layer_ids) . ")
 			";
 			#echo '<br>Sql: ' . $sql;
 			$ret = $database->execSQL($sql, 4, 0);
@@ -19448,9 +19444,9 @@ class db_mapObj{
 							SELECT
 								*
 							FROM
-								`stelle`
+								stelle
 							WHERE
-								`ID` = " . $rs['ID'] . "
+								ID = " . $rs['ID'] . "
 						"
 					);
 					# Stelle
@@ -19468,10 +19464,10 @@ class db_mapObj{
 			$layer = $database->create_insert_dump(
 				'layer',
 				'',
-				'SELECT `Name`, `alias`, `Datentyp`, \'@group_id\' AS `Gruppe`, `pfad`, `maintable`, `oid`, `Data`, `schema`, `document_path`, `tileindex`, `tileitem`, `labelangleitem`, `labelitem`, `labelmaxscale`, `labelminscale`, `labelrequires`, `connection`, `connection_id`, `printconnection`, `connectiontype`, `classitem`, `tolerance`, `toleranceunits`, `sizeunits`, `epsg_code`, `template`, `queryable`, `transparency`, `drawingorder`, `minscale`, `maxscale`, `offsite`, `ows_srs`, `wms_name`, `wms_server_version`, `wms_format`, `wms_connectiontimeout`, wms_auth_username, wms_auth_password, `wfs_geom`, `write_mapserver_templates`, `selectiontype`, `querymap`, `logconsume`, `processing`, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, `metalink`, `terms_of_use_link`, `privileg`, `trigger_function`, `geom_column`
-				' . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . '
-				' . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . '
-				' . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . '
+				'SELECT Name, alias, Datentyp, \'@group_id\' AS Gruppe, pfad, maintable, oid, Data, schema, document_path, tileindex, tileitem, labelangleitem, labelitem, labelmaxscale, labelminscale, labelrequires, connection, connection_id, printconnection, connectiontype, classitem, tolerance, toleranceunits, sizeunits, epsg_code, template, queryable, transparency, drawingorder, minscale, maxscale, offsite, ows_srs, wms_name, wms_server_version, wms_format, wms_connectiontimeout, wms_auth_username, wms_auth_password, wfs_geom, write_mapserver_templates, selectiontype, querymap, logconsume, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, privileg, trigger_function, geom_column
+				' . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . '
+				' . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . '
+				' . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . '
 				FROM layer WHERE Layer_ID=' . $layer_ids[$i]
 			);
 			$dump_text .= "\n\n-- Layer " . $layer_ids[$i] . "\n" . $layer['insert'][0];
@@ -19488,17 +19484,17 @@ class db_mapObj{
 							SELECT
 								'" . $last_layer_id . "' AS Layer_ID,
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
-								`queryable`,
-								`drawingorder`,
-								`legendorder`, `minscale`, `maxscale`, `offsite`, `transparency`, `postlabelcache`, `Filter`,
-								`template`, `header`, `footer`, `symbolscale`, `requires`, `logconsume`, `privileg`, `export_privileg`,
-								`start_aktiv`,
-								`use_geom`
+								queryable,
+								drawingorder,
+								legendorder, minscale, maxscale, offsite, transparency, postlabelcache, Filter,
+								template, header, footer, symbolscale, requires, logconsume, privileg, export_privileg,
+								start_aktiv,
+								use_geom
 							FROM
-								`used_layer`
+								used_layer
 							WHERE
-								`Layer_ID` = " . $layer_ids[$i] . " AND
-								`Stelle_ID` = " . $stellen[$s]['id'] . "
+								Layer_ID = " . $layer_ids[$i] . " AND
+								Stelle_ID = " . $stellen[$s]['id'] . "
 						"
 					);
 					if (count($used_layer['insert']) > 0) {
@@ -19513,15 +19509,15 @@ class db_mapObj{
 							SELECT
 								'" . $stellen[$s]['var'] . "' AS Stelle_ID,
 								'" . $last_layer_id . "' AS Layer_ID,
-								`attributname`,
-								`attributvalue`,
-								`operator`,
-								`type`
+								attributname,
+								attributvalue,
+								operator,
+								type
 							FROM
-								`u_attributfilter2used_layer`
+								u_attributfilter2used_layer
 							WHERE
-								`Layer_ID` = " . $layer_ids[$i] . " AND
-								`Stelle_ID` = " . $stellen[$s]['id'] . "
+								Layer_ID = " . $layer_ids[$i] . " AND
+								Stelle_ID = " . $stellen[$s]['id'] . "
 						"
 					);
 					if (count($attributfilter2used_layer['insert']) > 0) {
@@ -19534,43 +19530,43 @@ class db_mapObj{
 				'layer_attributes', 
 				'layer_attribut_id', 
 				'SELECT 
-					`name` AS layer_attribut_id, 
-					\''.$last_layer_id.'\' AS `layer_id`, 
-					`name`, 
-					`real_name`, 
-					`tablename`, 
-					`table_alias_name`, 
-					`type`, 
-					`geometrytype`, 
-					`constraints`, 
-					`saveable`, 
-					`nullable`, 
-					`length`, 
-					`decimal_length`, 
-					`default`, 
-					`form_element_type`, 
-					`options`, 
-					`alias`, 
-					`alias_low-german`, 
-					`alias_english`, 
-					`alias_polish`, 
-					`alias_vietnamese`, 
-					`tooltip`, 
-					`group`, 
-					`tab`, 
-					`arrangement`, 
-					`labeling`, 
-					`raster_visibility`, 
-					`dont_use_for_new`, 
-					`mandatory`, 
-					`quicksearch`, 
-					`visible`, 
-					`vcheck_attribute`, 
-					`vcheck_operator`, 
-					`vcheck_value`, 
-					`order`, 
-					`privileg`, 
-					`query_tooltip` 
+					name AS layer_attribut_id, 
+					\''.$last_layer_id.'\' AS layer_id, 
+					name, 
+					real_name, 
+					tablename, 
+					table_alias_name, 
+					type, 
+					geometrytype, 
+					constraints, 
+					saveable, 
+					nullable, 
+					length, 
+					decimal_length, 
+					default, 
+					form_element_type, 
+					options, 
+					alias, 
+					alias_low-german, 
+					alias_english, 
+					alias_polish, 
+					alias_vietnamese, 
+					tooltip, 
+					group, 
+					tab, 
+					arrangement, 
+					labeling, 
+					raster_visibility, 
+					dont_use_for_new, 
+					mandatory, 
+					quicksearch, 
+					visible, 
+					vcheck_attribute, 
+					vcheck_operator, 
+					vcheck_value, 
+					order, 
+					privileg, 
+					query_tooltip 
 				FROM 
 					layer_attributes 
 				WHERE 
@@ -19591,14 +19587,14 @@ class db_mapObj{
 							SELECT
 								'". $last_layer_id . "' AS layer_id,
 								'" . $stellen[$s]['var'] . "' AS stelle_id,
-								`attributename`,
-								`privileg`,
-								`tooltip`
+								attributename,
+								privileg,
+								tooltip
 							FROM
-								`layer_attributes2stelle`
+								layer_attributes2stelle
 							WHERE
-								`layer_id` = " . $layer_ids[$i] . " AND
-								`stelle_id` = " . $stellen[$s]['id'] . "
+								layer_id = " . $layer_ids[$i] . " AND
+								stelle_id = " . $stellen[$s]['id'] . "
 						"
 					);
 					if (count($layer_attributes2stelle['insert']) > 0) {
@@ -19607,12 +19603,12 @@ class db_mapObj{
 				}
 			}
 
-			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT `Class_ID`, `Name`, \''.$last_layer_id.'\' AS `Layer_ID`, `Expression`, `drawingorder`, `text` FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
+			$classes = $database->create_insert_dump('classes', 'Class_ID', 'SELECT Class_ID, Name, \''.$last_layer_id.'\' AS Layer_ID, Expression, drawingorder, text FROM classes WHERE Layer_ID=' . $layer_ids[$i]);
 			for ($j = 0; $j < count_or_0($classes['insert']); $j++) {
 				$dump_text .= "\n\n-- Class " . $classes['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $classes['insert'][$j];
 				$dump_text .= "\nSET @last_class_id=LAST_INSERT_ID();";
 
-				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, `symbol`,`symbolname`,`size`,`color`,`outlinecolor`, `colorrange`, `datarange`, `rangeitem`, `opacity`, `minsize`,`maxsize`, `minscale`, `maxscale`, `angle`,`angleitem`,`width`,`minwidth`,`maxwidth`, `offsetx`, `offsety`, `polaroffset`, `pattern`, `geomtransform`, `gap`, `initialgap`, `linecap`, `linejoin`, `linejoinmaxsize` FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
+				$styles = $database->create_insert_dump('styles', 'Style_ID', 'SELECT styles.Style_ID, symbol,symbolname,size,color,outlinecolor, colorrange, datarange, rangeitem, opacity, minsize,maxsize, minscale, maxscale, angle,angleitem,width,minwidth,maxwidth, offsetx, offsety, polaroffset, pattern, geomtransform, gap, initialgap, linecap, linejoin, linejoinmaxsize FROM styles, u_styles2classes WHERE u_styles2classes.style_id = styles.Style_ID AND Class_ID='.$classes['extra'][$j].' ORDER BY drawingorder');
 				for ($k = 0; $k < count_or_0($styles['insert']); $k++) {
 					$dump_text .= "\n\n-- Style " . $styles['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $styles['insert'][$k] . "\nSET @last_style_id=LAST_INSERT_ID();";
@@ -19620,7 +19616,7 @@ class db_mapObj{
 					$dump_text .= "\nINSERT INTO u_styles2classes (style_id, class_id, drawingorder) VALUES (@last_style_id, @last_class_id, " . $k . ");";
 				}
 
-				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, `font`,`type`,`color`,`outlinecolor`,`shadowcolor`,`shadowsizex`,`shadowsizey`,`backgroundcolor`,`backgroundshadowcolor`,`backgroundshadowsizex`,`backgroundshadowsizey`,`size`,`minsize`,`maxsize`,`position`,`offsetx`,`offsety`,`angle`,`anglemode`,`buffer`,`minfeaturesize`,`maxfeaturesize`,`partials`,`wrap`,`the_force` FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
+				$labels = $database->create_insert_dump('labels', 'Label_ID', 'SELECT labels.Label_ID, font,type,color,outlinecolor,shadowcolor,shadowsizex,shadowsizey,backgroundcolor,backgroundshadowcolor,backgroundshadowsizex,backgroundshadowsizey,size,minsize,maxsize,position,offsetx,offsety,angle,anglemode,buffer,minfeaturesize,maxfeaturesize,partials,wrap,the_force FROM labels, u_labels2classes WHERE u_labels2classes.label_id = labels.Label_ID AND Class_ID='.$classes['extra'][$j]);
 				for ($k = 0; $k < count_or_0($labels['insert']); $k++) {
 					$dump_text .= "\n\n-- Label " . $labels['extra'][$k] . " der Class " . $classes['extra'][$j];
 					$dump_text .= "\n" . $labels['insert'][$k] . "\nSET @last_label_id=LAST_INSERT_ID();";
@@ -19629,31 +19625,31 @@ class db_mapObj{
 				}
 			}
 
-			$ddls = $database->create_insert_dump('datendrucklayouts', 'id', 'SELECT `id`, `name`, \''.$last_layer_id.'\' AS `layer_id`, `format`, `bgsrc`, `bgposx`, `bgposy`, `bgwidth`, `bgheight`, `dateposx`, `dateposy`, `datesize`, `userposx`, `userposy`, `usersize`, `font_date`, `font_user`, `type`, `margin_top`, `margin_bottom`, `margin_left`, `margin_right`, `gap`, `no_record_splitting`, `columns`, `filename`, `use_previews` FROM datendrucklayouts WHERE layer_id = ' . $layer_ids[$i]);
+			$ddls = $database->create_insert_dump('datendrucklayouts', 'id', 'SELECT id, name, \''.$last_layer_id.'\' AS layer_id, format, bgsrc, bgposx, bgposy, bgwidth, bgheight, dateposx, dateposy, datesize, userposx, userposy, usersize, font_date, font_user, type, margin_top, margin_bottom, margin_left, margin_right, gap, no_record_splitting, columns, filename, use_previews FROM datendrucklayouts WHERE layer_id = ' . $layer_ids[$i]);
 			for ($j = 0; $j < count_or_0($ddls['insert']); $j++) {
 				$dump_text .= "\n\n-- Datendrucklayout " . $ddls['extra'][$j] . " des Layers " . $layer_ids[$i] . "\n" . $ddls['insert'][$j];
 				$dump_text .= "\nSET @last_ddl_id=LAST_INSERT_ID();\n";
 
-				$ddl_elemente = $database->create_insert_dump('ddl_elemente', '', 'SELECT \'@last_ddl_id\' AS ddl_id, `name`, `xpos`, `ypos`, `offset_attribute`, `width`, `border`, `font`, `fontsize` FROM `ddl_elemente` WHERE ddl_id = ' . $ddls['extra'][$j]);
+				$ddl_elemente = $database->create_insert_dump('ddl_elemente', '', 'SELECT \'@last_ddl_id\' AS ddl_id, name, xpos, ypos, offset_attribute, width, border, font, fontsize FROM ddl_elemente WHERE ddl_id = ' . $ddls['extra'][$j]);
 				for ($k = 0; $k < count_or_0($ddl_elemente['insert']); $k++) {
 					$dump_text .= "\n" . $ddl_elemente['insert'][$k];
 				}
 
-				$druckfreitexte = $database->create_insert_dump('druckfreitexte', 'id', 'SELECT `id`, `text`, `posx`, `posy`, `offset_attribute`, `size`, `width`, `border`, `font`, `angle`, `type` FROM `druckfreitexte`, `ddl2freitexte` WHERE freitext_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreitexte = $database->create_insert_dump('druckfreitexte', 'id', 'SELECT id, text, posx, posy, offset_attribute, size, width, border, font, angle, type FROM druckfreitexte, ddl2freitexte WHERE freitext_id = id AND ddl_id = '.$ddls['extra'][$j]);
 				for ($k = 0; $k < count_or_0($druckfreitexte['insert']); $k++) {
 					$dump_text .= "\n" . $druckfreitexte['insert'][$k] . "\nSET @last_druckfreitexte_id=LAST_INSERT_ID();";
 					$dump_text .= "\n-- Zuordnung Druckfreitext " . $druckfreitexte['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
 					$dump_text .= "\nINSERT INTO ddl2freitexte (ddl_id, freitext_id) VALUES (@last_ddl_id, @last_druckfreitexte_id);";
 				}
 
-				$druckfreilinien = $database->create_insert_dump('druckfreilinien', 'id', 'SELECT `id`, `posx`, `posy`, `endposx`, `endposy`, `breite`, `offset_attribute_start`, `offset_attribute_end`, `type` FROM `druckfreilinien`, `ddl2freilinien` WHERE line_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreilinien = $database->create_insert_dump('druckfreilinien', 'id', 'SELECT id, posx, posy, endposx, endposy, breite, offset_attribute_start, offset_attribute_end, type FROM druckfreilinien, ddl2freilinien WHERE line_id = id AND ddl_id = '.$ddls['extra'][$j]);
 				for ($k = 0; $k < count_or_0($druckfreilinien['insert']); $k++) {
 					$dump_text .= "\n" . $druckfreilinien['insert'][$k] . "\nSET @last_druckfreilinien_id=LAST_INSERT_ID();";
 					$dump_text .= "\n-- Zuordnung Druckfreilinie " . $druckfreilinien['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
 					$dump_text .= "\nINSERT INTO ddl2freilinien (ddl_id, line_id) VALUES (@last_ddl_id, @last_druckfreilinien_id);";
 				}
 
-				$druckfreirechtecke = $database->create_insert_dump('druckfreirechtecke', 'id', 'SELECT `id`, `posx`, `posy`, `endposx`, `endposy`, `breite`, `color`, `offset_attribute_start`, `offset_attribute_end`, `type` FROM `druckfreirechtecke`, `ddl2freirechtecke` WHERE rect_id = id AND ddl_id = '.$ddls['extra'][$j]);
+				$druckfreirechtecke = $database->create_insert_dump('druckfreirechtecke', 'id', 'SELECT id, posx, posy, endposx, endposy, breite, color, offset_attribute_start, offset_attribute_end, type FROM druckfreirechtecke, ddl2freirechtecke WHERE rect_id = id AND ddl_id = '.$ddls['extra'][$j]);
 				for ($k = 0; $k < count_or_0($druckfreirechtecke['insert']); $k++) {
 					$dump_text .= "\n" . $druckfreirechtecke['insert'][$k] . "\nSET @last_druckfreirechtecke_id=LAST_INSERT_ID();";
 					$dump_text .= "\n-- Zuordnung Druckfreirechteck " . $druckfreirechtecke['extra'][$k] . " zu DDL " . $ddls['extra'][$j];
@@ -19695,9 +19691,9 @@ class db_mapObj{
 					"
 						SELECT
 							'" . $last_datatype_id . "' AS datatype_id,
-							`name`, `real_name`, `tablename`, `table_alias_name`, `type`, `geometrytype`, `constraints`, `nullable`, `length`, `decimal_length`, `default`, `form_element_type`,
-							`options`, `alias`, `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`, `tooltip`, `group`, `raster_visibility`, `mandatory`, `quicksearch`,
-							`order`, `privileg`, `query_tooltip`, `visible`, `vcheck_attribute`, `vcheck_operator`, `vcheck_value`, `arrangement`, `labeling`
+							name, real_name, tablename, table_alias_name, type, geometrytype, constraints, nullable, length, decimal_length, default, form_element_type,
+							options, alias, alias_low-german, alias_english, alias_polish, alias_vietnamese, tooltip, group, raster_visibility, mandatory, quicksearch,
+							order, privileg, query_tooltip, visible, vcheck_attribute, vcheck_operator, vcheck_value, arrangement, labeling
 						FROM
 							datatype_attributes
 						WHERE
@@ -19915,25 +19911,25 @@ class db_mapObj{
 		$formvars['query'] = str_replace ( "'", "''", value_of($formvars, 'query'));
 		$sql = "
 			INSERT INTO rollenlayer (
-				`original_layer_id`,
-				`user_id`,
-				`stelle_id`,
-				`aktivStatus`,
-				`Name`,
-				`Datentyp`,
-				`Gruppe`,
-				`Typ`,
-				`Data`,
-				`query`,
-				`connectiontype`,
-				" . (array_key_exists('connection', $formvars) ? "`connection`," : "") . "
-				" . (array_key_exists('connection_id', $formvars) ? "`connection_id`," : "") . "
-				`transparency`,
-				`epsg_code`,
-				`labelitem`,
-				`classitem`,
-				`wms_auth_username`,
-				`wms_auth_password`
+				original_layer_id,
+				user_id,
+				stelle_id,
+				aktivStatus,
+				Name,
+				Datentyp,
+				Gruppe,
+				Typ,
+				Data,
+				query,
+				connectiontype,
+				" . (array_key_exists('connection', $formvars) ? "connection," : "") . "
+				" . (array_key_exists('connection_id', $formvars) ? "connection_id," : "") . "
+				transparency,
+				epsg_code,
+				labelitem,
+				classitem,
+				wms_auth_username,
+				wms_auth_password
 			)
 			VALUES (
 				" . ($formvars['original_layer_id'] ?: 'NULL') . ",
@@ -20062,13 +20058,13 @@ class db_mapObj{
 					'comment'
 				) AS $key
 			) {
-				$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+				$attribute_sets[] = "" . $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 			}
 
 			# Scheibt alle unterstützten Language Attribute, außer german dafür heißt das Attribut nur Name
 			foreach($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$attribute_sets[] = "`Name_" . $language . "` = '" . $formvars['Name_'.$language] . "'";
+					$attribute_sets[] = "Name_" . $language . " = '" . $formvars['Name_'.$language] . "'";
 				}
 			}
 		}
@@ -20081,7 +20077,7 @@ class db_mapObj{
 			) AS $key
 		) {
 			if ($formvars[$key]	!= '') {
-				$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
+				$attribute_sets[] = "" . $key . " = '" . $formvars[$key] . "'";
 			}
 		}
 
@@ -20099,7 +20095,7 @@ class db_mapObj{
 
 		foreach($null_attributes AS $key
 		) {
-			$attribute_sets[] = "`" . $key . "` = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
+			$attribute_sets[] = "" . $key . " = " . ($formvars[$key] == '' ? 'NULL' : "'" . $formvars[$key] . "'");
 		}
 
 		# Schreibt alle Attribute, die '0' bekommen sollen wenn Wert == '' ist
@@ -20116,7 +20112,7 @@ class db_mapObj{
 		}
 
 		foreach ($zero_if_empty_attributes AS $key) {
-			$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
+			$attribute_sets[] = "" . $key . " = '" . ($formvars[$key] == '' ? '0' : $formvars[$key]) . "'";
 		}
 
 		# Schreibt alle Attribute, die getrimmt werden sollen
@@ -20126,7 +20122,7 @@ class db_mapObj{
 			) AS $key
 		) {
 			if ($formvars[$key]	!= '') {
-				$attribute_sets[] = "`" . $key . "` = '" . trim($formvars[$key]) . "'";
+				$attribute_sets[] = "" . $key . " = '" . trim($formvars[$key]) . "'";
 			}
 		}
 
@@ -20136,7 +20132,7 @@ class db_mapObj{
 				'document_path'
 			) AS $key
 		) {
-				$attribute_sets[] = "`" . $key . "` = '" . append_slash($formvars[$key]) . "'";
+				$attribute_sets[] = "" . $key . " = '" . append_slash($formvars[$key]) . "'";
 		}
 
 		# Setzt Wert auf default wenn leer
@@ -20145,13 +20141,13 @@ class db_mapObj{
 				'version'
 			) AS $key
 		) {
-				$attribute_sets[] = "`" . $key . "` = '" . ($formvars[$key] == '' ? '1.0.0' : $formvars[$key]) . "'";
+				$attribute_sets[] = "" . $key . " = '" . ($formvars[$key] == '' ? '1.0.0' : $formvars[$key]) . "'";
 		}
 
 		# Schreibt alle Attribute, die immer geschrieben werden sollen, egal wie der Wert ist
 		# Besonderheit beim Attribut classification, kommt aus Field layer_classification,
 		# weil classification schon belegt ist von den Classes
-		$attribute_sets[] = "`classification` = '" . $formvars['layer_classification'] . "'";
+		$attribute_sets[] = "classification = '" . $formvars['layer_classification'] . "'";
 		# the rest where column names equal to the field names in layer editor form
 
 		$column_equal_field_attributes = array(
@@ -20198,7 +20194,7 @@ class db_mapObj{
 		}
 
 		foreach($column_equal_field_attributes AS $key) {
-			$attribute_sets[] = "`" . $key . "` = '" . $formvars[$key] . "'";
+			$attribute_sets[] = "" . $key . " = '" . $formvars[$key] . "'";
 		}
 
 		$sql = "
@@ -20257,90 +20253,90 @@ class db_mapObj{
 			$names = '';
 			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$name_columns .= "`Name_" . $language."`, ";
+					$name_columns .= "Name_" . $language.", ";
 					$names .= quote($formvars['Name_' . $language]) . ", ";
 				}
 			}
 
 			$sql = "
 				INSERT INTO layer (
-					" . ($formvars['id'] != '' ? "`Layer_ID`," : '') . "
-					`Name`,
+					" . ($formvars['id'] != '' ? "Layer_ID," : '') . "
+					Name,
 					" . $name_columns . "
-					`alias`,
-					`Datentyp`,
-					`Gruppe`,
-					`pfad`,
-					`maintable`,
-					`oid`,
-					`identifier_text`,
-					`Data`,
-					`schema`,
-					`document_path`,
-					`document_url`,
-					`tileindex`,
-					`tileitem`,
-					`labelangleitem`,
-					`labelitem`,
-					`labelmaxscale`,
-					`labelminscale`,
-					`labelrequires`,
-					`postlabelcache`,
-					`connection`,
-					`connection_id`,
-					`printconnection`,
-					`connectiontype`,
-					`classitem`,
-					`styleitem`,
-					`classification`,
-					`cluster_maxdistance`,
-					`tolerance`,
-					`toleranceunits`,
-					`sizeunits`,
-					`epsg_code`,
-					`template`,
-					`queryable`,
-					`use_geom`,
-					`transparency`,
-					`drawingorder`,
-					`legendorder`,
-					`minscale`,
-					`maxscale`,
-					`symbolscale`,
-					`offsite`,
-					`requires`,
-					`ows_srs`,
-					`wms_name`,
-					`wms_keywordlist`,
-					`wms_server_version`,
-					`wms_format`,
-					`wms_connectiontimeout`,
-					`wms_auth_username`,
-					`wms_auth_password`,
-					`wfs_geom`,
-					`write_mapserver_templates`,
-					`selectiontype`,
-					`querymap`,
-					`processing`,
-					`kurzbeschreibung`,
-					`dataowner_name`,
-					`dataowner_email`,
-					`dataowner_tel`,
-					`uptodateness`,
-					`updatecycle`,
-					`metalink`,
-					`terms_of_use_link`,
-					`status`,
-					`trigger_function`,
-					`listed`,
-					`duplicate_from_layer_id`,
-					`duplicate_criterion`,
-					`shared_from`,
-					`version`,
-					`comment`
-					" . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . "
-					" . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . "
-					" . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . "
+					alias,
+					Datentyp,
+					Gruppe,
+					pfad,
+					maintable,
+					oid,
+					identifier_text,
+					Data,
+					schema,
+					document_path,
+					document_url,
+					tileindex,
+					tileitem,
+					labelangleitem,
+					labelitem,
+					labelmaxscale,
+					labelminscale,
+					labelrequires,
+					postlabelcache,
+					connection,
+					connection_id,
+					printconnection,
+					connectiontype,
+					classitem,
+					styleitem,
+					classification,
+					cluster_maxdistance,
+					tolerance,
+					toleranceunits,
+					sizeunits,
+					epsg_code,
+					template,
+					queryable,
+					use_geom,
+					transparency,
+					drawingorder,
+					legendorder,
+					minscale,
+					maxscale,
+					symbolscale,
+					offsite,
+					requires,
+					ows_srs,
+					wms_name,
+					wms_keywordlist,
+					wms_server_version,
+					wms_format,
+					wms_connectiontimeout,
+					wms_auth_username,
+					wms_auth_password,
+					wfs_geom,
+					write_mapserver_templates,
+					selectiontype,
+					querymap,
+					processing,
+					kurzbeschreibung,
+					dataowner_name,
+					dataowner_email,
+					dataowner_tel,
+					uptodateness,
+					updatecycle,
+					metalink,
+					terms_of_use_link,
+					status,
+					trigger_function,
+					listed,
+					duplicate_from_layer_id,
+					duplicate_criterion,
+					shared_from,
+					version,
+					comment
+					" . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . "
 				)
 				VALUES (
 					" . ($formvars['id'] != '' ? $formvars['id'] . ', ' : '') . "
@@ -20429,35 +20425,35 @@ class db_mapObj{
 			$projection = explode('epsg:', $layer->getProjection());
 			$sql = "
 				INSERT INTO layer (
-					`Name`,
-					`Datentyp`,
-					`Gruppe`,
-					`pfad`,
-					`Data`,
-					`tileindex`,
-					`tileitem`,
-					`labelangleitem`,
-					`labelitem`,
-					`labelmaxscale`,
-					`labelminscale`,
-					`labelrequires`,
-					`connection`,
-					`connectiontype`,
-					`classitem`,
-					`tolerance`,
-					`toleranceunits`,
-					`epsg_code`,
-					`ows_srs`,
-					`wms_name`,
-					`wms_server_version`,
-					`wms_format`,
-					`wms_connectiontimeout`,
-					`trigger_function`,
-					`version`,
-					`comment`
-					" . ($this->GUI->plugin_loaded('mobile') ? ', `sync`' : '') . "
-					" . ($this->GUI->plugin_loaded('mobile') ? ', `vector_tile_url`' : '') . "
-					" . ($this->GUI->plugin_loaded('portal') ? ', `cluster_option`' : '') . "
+					Name,
+					Datentyp,
+					Gruppe,
+					pfad,
+					Data,
+					tileindex,
+					tileitem,
+					labelangleitem,
+					labelitem,
+					labelmaxscale,
+					labelminscale,
+					labelrequires,
+					connection,
+					connectiontype,
+					classitem,
+					tolerance,
+					toleranceunits,
+					epsg_code,
+					ows_srs,
+					wms_name,
+					wms_server_version,
+					wms_format,
+					wms_connectiontimeout,
+					trigger_function,
+					version,
+					comment
+					" . ($this->GUI->plugin_loaded('mobile') ? ', sync' : '') . "
+					" . ($this->GUI->plugin_loaded('mobile') ? ', vector_tile_url' : '') . "
+					" . ($this->GUI->plugin_loaded('portal') ? ', cluster_option' : '') . "
 				)
 				VALUES (
 					'" . $layer->name . "',
@@ -20521,7 +20517,7 @@ class db_mapObj{
 
 		foreach ($supportedLanguages as $language){
 			if ($language != 'german') {
-				$language_columns[] = "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
+				$language_columns[] = "alias_" . $language . " = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "'";
 			}
 		}
 		$language_columns = (count($language_columns) > 0 ? implode(',
@@ -20535,21 +20531,21 @@ class db_mapObj{
 			}
 			$set_values = 
 				$language_columns . "
-				`name` = '" . $attributes['name'][$i] . "',
-				`form_element_type` = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
-				`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-				`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
-				`alias` = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
-				`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-				`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-				`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-				`quicksearch` = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-				`visible` = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
-				`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-				`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-				`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."',
-				`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
-				`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]);
+				name = '" . $attributes['name'][$i] . "',
+				form_element_type = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
+				options = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
+				tooltip = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
+				alias = '" . $formvars['alias_'.$attributes['name'][$i]] . "',
+				group = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+				raster_visibility = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+				mandatory = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+				quicksearch = " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+				visible = " . ($formvars['visible_' . $attributes['name'][$i]] == '' ? "0" : $formvars['visible_' . $attributes['name'][$i]]) . ",
+				vcheck_attribute= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+				vcheck_operator= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+				vcheck_value= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."',
+				arrangement = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? "0" : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+				labeling = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? "0" : $formvars['labeling_' . $attributes['name'][$i]]);
 				
 			if ($formvars['for_all_layers'] != 1) {
 				# nur für einen bestimmten Layer
@@ -20557,8 +20553,8 @@ class db_mapObj{
 					INSERT INTO
 						datatype_attributes
 					SET
-						`layer_id` = " . $formvars['selected_layer_id'] . ",
-						`datatype_id` = " . $formvars['selected_datatype_id'] . ",
+						layer_id = " . $formvars['selected_layer_id'] . ",
+						datatype_id = " . $formvars['selected_datatype_id'] . ",
 						" . $set_values . "
 					ON DUPLICATE KEY UPDATE
 						" . $set_values . "
@@ -20572,8 +20568,8 @@ class db_mapObj{
 					SET
 						" . $set_values . "
 					WHERE
-						`datatype_id` = " . $formvars['selected_datatype_id'] . " AND
-						`name` = '" . $attributes['name'][$i] . "'";
+						datatype_id = " . $formvars['selected_datatype_id'] . " AND
+						name = '" . $attributes['name'][$i] . "'";
 			}
 			#echo '<br>Save datatype Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:Document->save_datatype_attributes :", 4);
@@ -20595,10 +20591,10 @@ class db_mapObj{
 
 		for ($i = 0; $i < count($attributes['name']); $i++) {
 			if ($formvars['attribute_' . $attributes['name'][$i]] != '') {
-				$alias_rows = "`alias` = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
+				$alias_rows = "alias = '" . $formvars['alias_' . $attributes['name'][$i]] . "',";
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') {
-						$alias_rows .= "`alias_" . $language . "` = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
+						$alias_rows .= "alias_" . $language . " = '" . $formvars['alias_' . $language . '_' . $attributes['name'][$i]] . "',";
 					}
 				}
 				if ($formvars['visible_' . $attributes['name'][$i]] != 2){
@@ -20615,31 +20611,31 @@ class db_mapObj{
 				}
 				$last_tab = $formvars['tab_' . $attributes['name'][$i]];
 				$rows = "
-					`order` = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
-					`name` = '" . $attributes['name'][$i] . "', " .
+					order = " . ($formvars['order_' . $attributes['name'][$i]] == '' ? 0 : $formvars['order_' . $attributes['name'][$i]]) . ",
+					name = '" . $attributes['name'][$i] . "', " .
 					$alias_rows . "
-					`form_element_type` = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
-					`options` = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
-					`default` = '" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "',
-					`tooltip` = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
-					`group` = '" . $formvars['group_' . $attributes['name'][$i]] . "',
-					`tab` = '" . $formvars['tab_' . $attributes['name'][$i]] . "',
-					`arrangement` = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
-					`labeling` = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]) . ",
-					`raster_visibility` = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
-					`dont_use_for_new`= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
-					`mandatory` = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
-					`quicksearch`= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
-					`visible`= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
-					`vcheck_attribute`= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
-					`vcheck_operator`= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
-					`vcheck_value`= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
+					form_element_type = '" . ($formvars['form_element_' . $attributes['name'][$i]] ?: 'Text'). "',
+					options = '" . pg_escape_string($formvars['options_' . $attributes['name'][$i]]) . "',
+					default = '" . pg_escape_string($formvars['default_' . $attributes['name'][$i]]) . "',
+					tooltip = '" . pg_escape_string($formvars['tooltip_' . $attributes['name'][$i]]) . "',
+					group = '" . $formvars['group_' . $attributes['name'][$i]] . "',
+					tab = '" . $formvars['tab_' . $attributes['name'][$i]] . "',
+					arrangement = " . ($formvars['arrangement_' . $attributes['name'][$i]] == '' ? 0 : $formvars['arrangement_' . $attributes['name'][$i]]) . ",
+					labeling = " . ($formvars['labeling_' . $attributes['name'][$i]] == '' ? 0 : $formvars['labeling_' . $attributes['name'][$i]]) . ",
+					raster_visibility = " . ($formvars['raster_visibility_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['raster_visibility_' . $attributes['name'][$i]]) . ",
+					dont_use_for_new= " . ($formvars['dont_use_for_new_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['dont_use_for_new_' . $attributes['name'][$i]]) . ",
+					mandatory = " . ($formvars['mandatory_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['mandatory_' . $attributes['name'][$i]]) . ",
+					quicksearch= " . ($formvars['quicksearch_' . $attributes['name'][$i]] == '' ? "NULL" : $formvars['quicksearch_' . $attributes['name'][$i]]) . ",
+					visible= ".($formvars['visible_'.$attributes['name'][$i]] == '' ? "0" : $formvars['visible_'.$attributes['name'][$i]]).",
+					vcheck_attribute= '" . $formvars['vcheck_attribute_'.$attributes['name'][$i]]."',
+					vcheck_operator= '" . $formvars['vcheck_operator_'.$attributes['name'][$i]]."',
+					vcheck_value= '" . $formvars['vcheck_value_'.$attributes['name'][$i]]."'
 				";
 				$sql = "
 					INSERT INTO
-						`layer_attributes`
+						layer_attributes
 					SET
-						`layer_id` = " . $formvars['selected_layer_id'] . ", " .
+						layer_id = " . $formvars['selected_layer_id'] . ", " .
 						$rows . "
 					ON DUPLICATE KEY UPDATE " .
 						$rows . "
@@ -20672,12 +20668,12 @@ class db_mapObj{
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -20687,48 +20683,48 @@ class db_mapObj{
 
 		$sql = "
 			SELECT " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`datatype_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`raster_visibility`,
-				`mandatory`,
-				`quicksearch`,
-				`order`,
-				`privileg`,
-				`query_tooltip`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`arrangement`,
-				`labeling`
+				$alias_column . ", alias_low-german, alias_english, alias_polish, alias_vietnamese,
+				datatype_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				nullable,
+				length,
+				decimal_length,
+				default,
+				form_element_type,
+				options,
+				tooltip,
+				group,
+				raster_visibility,
+				mandatory,
+				quicksearch,
+				order,
+				privileg,
+				query_tooltip,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				arrangement,
+				labeling
 			FROM
-				`datatype_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				datatype_attributes as a LEFT JOIN
+				datatypes as d ON d.id = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id . " AND 
-				`datatype_id` = " . $datatype_id .
+				layer_id = " . $layer_id . " AND 
+				datatype_id = " . $datatype_id .
 				$einschr . "
 			ORDER BY
-				`order`
+				order
 		";
 		/* Attributes die fehlen im Vergleich zu layer_attributes
-		`dont_use_for_new`
+		dont_use_for_new
 		*/
 		#echo '<br>Sql read_datatype_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_datatype_attributes:<br>" . $sql,4);
@@ -20834,12 +20830,12 @@ class db_mapObj{
 			(!$all_languages AND $language != 'german') ?
 			"
 				CASE
-					WHEN `alias_" . $language. "` != '' THEN `alias_" . $language . "`
-					ELSE `alias`
+					WHEN alias_" . $language. " != '' THEN alias_" . $language . "
+					ELSE alias
 				END AS alias
 			" :
 			"
-				`alias`
+				alias
 			"
 		);
 
@@ -20849,49 +20845,49 @@ class db_mapObj{
 
 		$sql = "
 			SELECT
-				`order`, " .
-				$alias_column . ", `alias_low-german`, `alias_english`, `alias_polish`, `alias_vietnamese`,
-				`layer_id`,
-				a.`name`,
-				`real_name`,
-				`tablename`,
-				`table_alias_name`,
-				a.`schema`,
-				`type`,
-				d.`name` as typename,
-				`geometrytype`,
-				`constraints`,
-				`saveable`,
-				`nullable`,
-				`length`,
-				`decimal_length`,
-				`default`,
-				`form_element_type`,
-				`options`,
-				`tooltip`,
-				`group`,
-				`tab`,
-				`arrangement`,
-				`labeling`,
-				`raster_visibility`,
-				`dont_use_for_new`,
-				`mandatory`,
-				`quicksearch`,
-				`visible`,
-				`vcheck_attribute`,
-				`vcheck_operator`,
-				`vcheck_value`,
-				`order`,
-				`privileg`,
-				`query_tooltip`
+				order, " .
+				$alias_column . ", alias_low-german, alias_english, alias_polish, alias_vietnamese,
+				layer_id,
+				a.name,
+				real_name,
+				tablename,
+				table_alias_name,
+				a.schema,
+				type,
+				d.name as typename,
+				geometrytype,
+				constraints,
+				saveable,
+				nullable,
+				length,
+				decimal_length,
+				default,
+				form_element_type,
+				options,
+				tooltip,
+				group,
+				tab,
+				arrangement,
+				labeling,
+				raster_visibility,
+				dont_use_for_new,
+				mandatory,
+				quicksearch,
+				visible,
+				vcheck_attribute,
+				vcheck_operator,
+				vcheck_value,
+				order,
+				privileg,
+				query_tooltip
 			FROM
-				`layer_attributes` as a LEFT JOIN
-				`datatypes` as d ON d.`id` = REPLACE(`type`, '_', '')
+				layer_attributes as a LEFT JOIN
+				datatypes as d ON d.id = REPLACE(type, '_', '')
 			WHERE
-				`layer_id` = " . $layer_id .
+				layer_id = " . $layer_id .
 				$einschr . "
 			ORDER BY
-				`order`
+				order
 		";
 		// echo '<br>Sql read_layer_attributes: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->read_layer_attributes:<br>",4);
@@ -21007,8 +21003,8 @@ class db_mapObj{
 			SELECT DISTINCT
 				dt.*
 			FROM
-				`layer_attributes` la JOIN
-				`datatypes` dt ON replace(la.type,'_', '') = dt.id
+				layer_attributes la JOIN
+				datatypes dt ON replace(la.type,'_', '') = dt.id
 			WHERE
 				la.layer_id IN (" . implode(', ', $layer_ids) . ")
 		";
@@ -21057,23 +21053,23 @@ class db_mapObj{
 		if ($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`name_" . $language . "` != \"\" THEN l.`name_" . $language . "`
-				ELSE l.`name`
+				WHEN l.name_" . $language . " != \"\" THEN l.name_" . $language . "
+				ELSE l.name
 			END";
 		}
 		else {
-			$name_column = "l.`name`";
+			$name_column = "l.name";
 		}
 
 		if ($language != 'german') {
 			$gruppenname_column = "
 			CASE
-				WHEN g.`Gruppenname_" . $language . "` != \"\" THEN g.`Gruppenname_" . $language . "`
-				ELSE g.`Gruppenname`
+				WHEN g.Gruppenname_" . $language . " != \"\" THEN g.Gruppenname_" . $language . "
+				ELSE g.Gruppenname
 			END";
 		}
 		else {
-			$gruppenname_column = "g.`Gruppenname`";
+			$gruppenname_column = "g.Gruppenname";
 		}
 
 		if ($only_listed) {
@@ -21118,9 +21114,9 @@ class db_mapObj{
 				l.drawingorder,
 				l.alias,
 				l.shared_from
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->GUI->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->GUI->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->GUI->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->GUI->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
 				layer l LEFT JOIN
 				u_groups g ON l.Gruppe = g.id" .
@@ -21229,7 +21225,7 @@ class db_mapObj{
 			SELECT
 				p.id, p.key, l.Layer_ID, l.Name, l.alias
 			FROM
-				`layer_parameter` as p,
+				layer_parameter as p,
 				layer as l
 			WHERE
 				locate(
@@ -21290,7 +21286,7 @@ class db_mapObj{
 		$layer_params = array();
 		$sql = "
 			SELECT
-				GROUP_CONCAT(concat('\"', `key`, '\":\"', `default_value`, '\"')) AS params
+				GROUP_CONCAT(concat('\"', key, '\":\"', default_value, '\"')) AS params
 			FROM
 				layer_parameter p
 		";
@@ -21310,16 +21306,16 @@ class db_mapObj{
   function get_stellen_from_layer($layer_id){
     $sql = "
 			SELECT
-				`ID`,
-				`Bezeichnung`
+				ID,
+				Bezeichnung
 			FROM
-				`stelle`,
-				`used_layer`
+				stelle,
+				used_layer
 			WHERE
-				`used_layer`.`Stelle_ID` = `stelle`.`ID` AND
-				`used_layer`.`Layer_ID` = " . $layer_id . "
+				used_layer.Stelle_ID = stelle.ID AND
+				used_layer.Layer_ID = " . $layer_id . "
 			ORDER BY
-				`Bezeichnung`
+				Bezeichnung
 		";
 		#echo '<br>Sql: ' . $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_stellen_from_layer - Lesen der Stellen eines Layers:<br>" . $sql, 4);
@@ -21339,8 +21335,8 @@ class db_mapObj{
 		if($language != 'german') {
 			$name_column = "
 			CASE
-				WHEN `Name_" . $language . "` != \"\" THEN `Name_" . $language . "`
-				ELSE `Name`
+				WHEN Name_" . $language . " != \"\" THEN Name_" . $language . "
+				ELSE Name
 			END AS Name";
 		}
 		else {
@@ -21380,9 +21376,9 @@ class db_mapObj{
 			SELECT
 				*
 			FROM
-				`layer`
+				layer
 			WHERE
-				`Layer_ID` = " . $id ."
+				Layer_ID = " . $id ."
 		";
 		#echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->get_Layer - Lesen eines Layers:<br>" . $sql, 4);
@@ -21405,13 +21401,13 @@ class db_mapObj{
 			if ($formvars['privileg_'.$attributes['name'][$i].'_'] == '') $formvars['privileg_'.$attributes['name'][$i].'_'] = 'NULL';
 			$sql = "
 				UPDATE
-					`layer_attributes`
+					layer_attributes
 				SET
-					`privileg` = " . $formvars['privileg_' . $attributes['name'][$i].'_'] . ",
-					`query_tooltip` = " . ($formvars['tooltip_' . $attributes['name'][$i].'_'] == 'on' ? "1" : "0") ."
+					privileg = " . $formvars['privileg_' . $attributes['name'][$i].'_'] . ",
+					query_tooltip = " . ($formvars['tooltip_' . $attributes['name'][$i].'_'] == 'on' ? "1" : "0") ."
 				WHERE
-					`layer_id` = " . $formvars['selected_layer_id'] . " AND
-					`name` = '" . $attributes['name'][$i] . "'
+					layer_id = " . $formvars['selected_layer_id'] . " AND
+					name = '" . $attributes['name'][$i] . "'
 			";
 			#echo '<br>Sql zum Speichern der Default-Layerrechte der Attribute: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern des Layerrechte zur Stelle:<br>" . $sql, 4);
@@ -21420,12 +21416,12 @@ class db_mapObj{
 
 			$sql = "
 				UPDATE
-					`layer`
+					layer
 				SET
-					`privileg` = '" . $formvars['privileg'] . "',
-					`export_privileg` = '" . $formvars['export_privileg'] . "'
+					privileg = '" . $formvars['privileg'] . "',
+					export_privileg = '" . $formvars['export_privileg'] . "'
 				WHERE
-					`Layer_ID` = " . $formvars['selected_layer_id'] . "
+					Layer_ID = " . $formvars['selected_layer_id'] . "
 			";
 			#echo '<br>Sql zur Speicherung der Default-Layerrechte: ' . $sql;
 			$this->debug->write("<p>file:users.php class:stelle->set_default_layer_privileges - Speichern der Layerrechte zur Stelle:<br>" . $sql,4);
@@ -21490,7 +21486,7 @@ class db_mapObj{
   }
 
   function newGroup($groupname, $order){
-    $sql = 'INSERT INTO u_groups (Gruppenname, `order`) VALUES ("'.$groupname.'", '.$order.')';
+    $sql = 'INSERT INTO u_groups (Gruppenname, order) VALUES ("'.$groupname.'", '.$order.')';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->newGroup - Erstellen einer Gruppe:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
@@ -21591,7 +21587,7 @@ class db_mapObj{
   function copyClass($class_id, $layer_id){
     # diese Funktion kopiert eine Klasse mit Styles und Labels und gibt die ID der neuen Klasse zurück
     $class = $this->read_ClassesbyClassid($class_id);
-    $sql = "INSERT INTO classes (Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,legendorder,text) SELECT Name, `Name_low-german`, Name_english, Name_polish, Name_vietnamese, " . $layer_id.",Expression,classification,drawingorder,legendorder,text FROM classes WHERE Class_ID = " . $class_id;
+    $sql = "INSERT INTO classes (Name, Name_low-german, Name_english, Name_polish, Name_vietnamese, Layer_ID,Expression,classification,drawingorder,legendorder,text) SELECT Name, Name_low-german, Name_english, Name_polish, Name_vietnamese, " . $layer_id.",Expression,classification,drawingorder,legendorder,text FROM classes WHERE Class_ID = " . $class_id;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->copyClass - Kopieren einer Klasse:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
     if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
@@ -21618,7 +21614,7 @@ class db_mapObj{
 			$sql = 'INSERT INTO classes (Name, ';
 			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$sql.= '`Name_'.$language.'`, ';
+					$sql.= 'Name_'.$language.', ';
 				}
 			}
 			$sql .= 'Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
@@ -21715,8 +21711,8 @@ class db_mapObj{
 			', ',
 			array_map(
 				function($language) use ($attrib) {
-					if($language != 'german')return "`Name_" . $language . "` = '" . $attrib['name_' . $language] . "'";
-					else return "`Name` = '" . $attrib['name']."'";
+					if($language != 'german')return "Name_" . $language . " = '" . $attrib['name_' . $language] . "'";
+					else return "Name = '" . $attrib['name']."'";
 				},
 				$supportedLanguages
 			)
@@ -21726,19 +21722,19 @@ class db_mapObj{
 			UPDATE
 				classes
 			SET
-				`Class_ID` = ' . $attrib['new_class_id'] . ',
+				Class_ID = ' . $attrib['new_class_id'] . ',
 				'.$names.',
-				`Layer_ID` = ' . $attrib['layer_id'] . ',
-				`Expression` = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
-				`text` = "' . $attrib['text'] . '",
-				`classification` = "' . $attrib['classification'] . '",
-				`legendgraphic`= "' . $attrib['legendgraphic'] . '",
-				`legendimagewidth`= ' . $attrib['legendimagewidth'] . ',
-				`legendimageheight`= ' . $attrib['legendimageheight'] . ',
-				`drawingorder` = ' . $attrib['order'] . ',
-				`legendorder` = '. $attrib['legendorder'] . '
+				Layer_ID = ' . $attrib['layer_id'] . ',
+				Expression = "' . str_replace('\\', '\\\\', $attrib['expression']) . '",
+				text = "' . $attrib['text'] . '",
+				classification = "' . $attrib['classification'] . '",
+				legendgraphic= "' . $attrib['legendgraphic'] . '",
+				legendimagewidth= ' . $attrib['legendimagewidth'] . ',
+				legendimageheight= ' . $attrib['legendimageheight'] . ',
+				drawingorder = ' . $attrib['order'] . ',
+				legendorder = '. $attrib['legendorder'] . '
 			WHERE
-				`Class_ID` = ' . $attrib['class_id'] . '
+				Class_ID = ' . $attrib['class_id'] . '
 		';
 
 		#echo $sql.'<br>';
@@ -22357,7 +22353,7 @@ class Document {
   }
 
   function get_price($format){
-    $sql ='SELECT preis FROM druckrahmen WHERE `format` = \''.$format.'\'';
+    $sql ='SELECT preis FROM druckrahmen WHERE format = \''.$format.'\'';
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:Document->get_price :<br>" . $sql,4);
     $this->database->execSQL($sql,4, 1);
@@ -22386,120 +22382,120 @@ class Document {
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
       $preis = $formvars['euro'] * 100 + $formvars['cent'];
 
-      $sql = "INSERT INTO `druckrahmen`";
-      $sql .= " SET `Name` = '" . $formvars['Name']."'";
-			$sql .= ", `dhk_call` = '" . $formvars['dhk_call']."'";
-      $sql .= ", `headposx` = " . $formvars['headposx'];
-      $sql .= ", `headposy` = " . $formvars['headposy'];
-      $sql .= ", `headwidth` = " . $formvars['headwidth'];
-      $sql .= ", `headheight` = " . $formvars['headheight'];
-      $sql .= ", `mapposx` = " . $formvars['mapposx'];
-      $sql .= ", `mapposy` = " . $formvars['mapposy'];
-      $sql .= ", `mapwidth` = " . $formvars['mapwidth'];
-      $sql .= ", `mapheight` = " . $formvars['mapheight'];
-      if($formvars['refmapposx'] != ''){$sql .= ", `refmapposx` = " . $formvars['refmapposx'];}
-      if($formvars['refmapposy'] != ''){$sql .= ", `refmapposy` = " . $formvars['refmapposy'];}
-      if($formvars['refmapwidth'] != ''){$sql .= ", `refmapwidth` = " . $formvars['refmapwidth'];}
-      if($formvars['refmapheight'] != ''){$sql .= ", `refmapheight` = " . $formvars['refmapheight'];}
-      if($formvars['refposx'] != ''){$sql .= ", `refposx` = " . $formvars['refposx'];}
-      if($formvars['refposy'] != ''){$sql .= ", `refposy` = " . $formvars['refposy'];}
-      if($formvars['refwidth'] != ''){$sql .= ", `refwidth` = " . $formvars['refwidth'];}
-      if($formvars['refheight'] != ''){$sql .= ", `refheight` = " . $formvars['refheight'];}
-      if($formvars['refzoom'] != ''){$sql .= ", `refzoom` = " . $formvars['refzoom'];}
-      if($formvars['dateposx'] != ''){$sql .= ", `dateposx` = " . $formvars['dateposx'];}
-      if($formvars['dateposy'] != ''){$sql .= ", `dateposy` = " . $formvars['dateposy'];}
-      if($formvars['datesize'] != ''){$sql .= ", `datesize` = " . $formvars['datesize'];}
-      if($formvars['scaleposx'] != ''){$sql .= ", `scaleposx` = " . $formvars['scaleposx'];}
-      if($formvars['scaleposy'] != ''){$sql .= ", `scaleposy` = " . $formvars['scaleposy'];}
-      if($formvars['scalesize'] != ''){$sql .= ", `scalesize` = " . $formvars['scalesize'];}
-			if($formvars['scalebarposx'] != ''){$sql .= ", `scalebarposx` = " . $formvars['scalebarposx'];}
-      if($formvars['scalebarposy'] != ''){$sql .= ", `scalebarposy` = " . $formvars['scalebarposy'];}
-      if($formvars['oscaleposx'] != ''){$sql .= ", `oscaleposx` = " . $formvars['oscaleposx'];}
-      if($formvars['oscaleposy'] != ''){$sql .= ", `oscaleposy` = " . $formvars['oscaleposy'];}
-      if($formvars['oscalesize'] != ''){$sql .= ", `oscalesize` = " . $formvars['oscalesize'];}
-			if($formvars['lageposx'] != ''){$sql .= ", `lageposx` = " . $formvars['lageposx'];}
-      if($formvars['lageposy'] != ''){$sql .= ", `lageposy` = " . $formvars['lageposy'];}
-      if($formvars['lagesize'] != ''){$sql .= ", `lagesize` = " . $formvars['lagesize'];}
-			if($formvars['gemeindeposx'] != ''){$sql .= ", `gemeindeposx` = " . $formvars['gemeindeposx'];}
-      if($formvars['gemeindeposy'] != ''){$sql .= ", `gemeindeposy` = " . $formvars['gemeindeposy'];}
-      if($formvars['gemeindesize'] != ''){$sql .= ", `gemeindesize` = " . $formvars['gemeindesize'];}
-      if($formvars['gemarkungposx'] != ''){$sql .= ", `gemarkungposx` = " . $formvars['gemarkungposx'];}
-      if($formvars['gemarkungposy'] != ''){$sql .= ", `gemarkungposy` = " . $formvars['gemarkungposy'];}
-      if($formvars['gemarkungsize'] != ''){$sql .= ", `gemarkungsize` = " . $formvars['gemarkungsize'];}
-      if($formvars['flurposx'] != ''){$sql .= ", `flurposx` = " . $formvars['flurposx'];}
-      if($formvars['flurposy'] != ''){$sql .= ", `flurposy` = " . $formvars['flurposy'];}
-      if($formvars['flursize'] != ''){$sql .= ", `flursize` = " . $formvars['flursize'];}
-			if($formvars['flurstposx'] != ''){$sql .= ", `flurstposx` = " . $formvars['flurstposx'];}
-      if($formvars['flurstposy'] != ''){$sql .= ", `flurstposy` = " . $formvars['flurstposy'];}
-      if($formvars['flurstsize'] != ''){$sql .= ", `flurstsize` = " . $formvars['flurstsize'];}
-      if($formvars['legendposx'] != ''){$sql .= ", `legendposx` = " . $formvars['legendposx'];}
-      if($formvars['legendposy'] != ''){$sql .= ", `legendposy` = " . $formvars['legendposy'];}
-      if($formvars['legendsize'] != ''){$sql .= ", `legendsize` = " . $formvars['legendsize'];}
-      if($formvars['arrowposx'] != ''){$sql .= ", `arrowposx` = " . $formvars['arrowposx'];}
-      if($formvars['arrowposy'] != ''){$sql .= ", `arrowposy` = " . $formvars['arrowposy'];}
-      if($formvars['arrowlength'] != ''){$sql .= ", `arrowlength` = " . $formvars['arrowlength'];}
-      if($formvars['userposx'] != ''){$sql .= ", `userposx` = '" . $formvars['userposx']."'";}
-      if($formvars['userposy'] != ''){$sql .= ", `userposy` = '" . $formvars['userposy']."'";}
-      if($formvars['usersize'] != ''){$sql .= ", `usersize` = '" . $formvars['usersize']."'";}
-      if($formvars['watermark'] != ''){$sql .= ", `watermark` = '" . $formvars['watermark']."'";}
-      if($formvars['watermarkposx'] != ''){$sql .= ", `watermarkposx` = " . $formvars['watermarkposx'];}
-      if($formvars['watermarkposy'] != ''){$sql .= ", `watermarkposy` = " . $formvars['watermarkposy'];}
-      if($formvars['watermarksize'] != ''){$sql .= ", `watermarksize` = " . $formvars['watermarksize'];}
-      if($formvars['watermarkangle'] != ''){$sql .= ", `watermarkangle` = " . $formvars['watermarkangle'];}
-      if($formvars['watermarktransparency'] != ''){$sql .= ", `watermarktransparency` = '" . $formvars['watermarktransparency']."'";}
+      $sql = "INSERT INTO druckrahmen";
+      $sql .= " SET Name = '" . $formvars['Name']."'";
+			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
+      $sql .= ", headposx = " . $formvars['headposx'];
+      $sql .= ", headposy = " . $formvars['headposy'];
+      $sql .= ", headwidth = " . $formvars['headwidth'];
+      $sql .= ", headheight = " . $formvars['headheight'];
+      $sql .= ", mapposx = " . $formvars['mapposx'];
+      $sql .= ", mapposy = " . $formvars['mapposy'];
+      $sql .= ", mapwidth = " . $formvars['mapwidth'];
+      $sql .= ", mapheight = " . $formvars['mapheight'];
+      if($formvars['refmapposx'] != ''){$sql .= ", refmapposx = " . $formvars['refmapposx'];}
+      if($formvars['refmapposy'] != ''){$sql .= ", refmapposy = " . $formvars['refmapposy'];}
+      if($formvars['refmapwidth'] != ''){$sql .= ", refmapwidth = " . $formvars['refmapwidth'];}
+      if($formvars['refmapheight'] != ''){$sql .= ", refmapheight = " . $formvars['refmapheight'];}
+      if($formvars['refposx'] != ''){$sql .= ", refposx = " . $formvars['refposx'];}
+      if($formvars['refposy'] != ''){$sql .= ", refposy = " . $formvars['refposy'];}
+      if($formvars['refwidth'] != ''){$sql .= ", refwidth = " . $formvars['refwidth'];}
+      if($formvars['refheight'] != ''){$sql .= ", refheight = " . $formvars['refheight'];}
+      if($formvars['refzoom'] != ''){$sql .= ", refzoom = " . $formvars['refzoom'];}
+      if($formvars['dateposx'] != ''){$sql .= ", dateposx = " . $formvars['dateposx'];}
+      if($formvars['dateposy'] != ''){$sql .= ", dateposy = " . $formvars['dateposy'];}
+      if($formvars['datesize'] != ''){$sql .= ", datesize = " . $formvars['datesize'];}
+      if($formvars['scaleposx'] != ''){$sql .= ", scaleposx = " . $formvars['scaleposx'];}
+      if($formvars['scaleposy'] != ''){$sql .= ", scaleposy = " . $formvars['scaleposy'];}
+      if($formvars['scalesize'] != ''){$sql .= ", scalesize = " . $formvars['scalesize'];}
+			if($formvars['scalebarposx'] != ''){$sql .= ", scalebarposx = " . $formvars['scalebarposx'];}
+      if($formvars['scalebarposy'] != ''){$sql .= ", scalebarposy = " . $formvars['scalebarposy'];}
+      if($formvars['oscaleposx'] != ''){$sql .= ", oscaleposx = " . $formvars['oscaleposx'];}
+      if($formvars['oscaleposy'] != ''){$sql .= ", oscaleposy = " . $formvars['oscaleposy'];}
+      if($formvars['oscalesize'] != ''){$sql .= ", oscalesize = " . $formvars['oscalesize'];}
+			if($formvars['lageposx'] != ''){$sql .= ", lageposx = " . $formvars['lageposx'];}
+      if($formvars['lageposy'] != ''){$sql .= ", lageposy = " . $formvars['lageposy'];}
+      if($formvars['lagesize'] != ''){$sql .= ", lagesize = " . $formvars['lagesize'];}
+			if($formvars['gemeindeposx'] != ''){$sql .= ", gemeindeposx = " . $formvars['gemeindeposx'];}
+      if($formvars['gemeindeposy'] != ''){$sql .= ", gemeindeposy = " . $formvars['gemeindeposy'];}
+      if($formvars['gemeindesize'] != ''){$sql .= ", gemeindesize = " . $formvars['gemeindesize'];}
+      if($formvars['gemarkungposx'] != ''){$sql .= ", gemarkungposx = " . $formvars['gemarkungposx'];}
+      if($formvars['gemarkungposy'] != ''){$sql .= ", gemarkungposy = " . $formvars['gemarkungposy'];}
+      if($formvars['gemarkungsize'] != ''){$sql .= ", gemarkungsize = " . $formvars['gemarkungsize'];}
+      if($formvars['flurposx'] != ''){$sql .= ", flurposx = " . $formvars['flurposx'];}
+      if($formvars['flurposy'] != ''){$sql .= ", flurposy = " . $formvars['flurposy'];}
+      if($formvars['flursize'] != ''){$sql .= ", flursize = " . $formvars['flursize'];}
+			if($formvars['flurstposx'] != ''){$sql .= ", flurstposx = " . $formvars['flurstposx'];}
+      if($formvars['flurstposy'] != ''){$sql .= ", flurstposy = " . $formvars['flurstposy'];}
+      if($formvars['flurstsize'] != ''){$sql .= ", flurstsize = " . $formvars['flurstsize'];}
+      if($formvars['legendposx'] != ''){$sql .= ", legendposx = " . $formvars['legendposx'];}
+      if($formvars['legendposy'] != ''){$sql .= ", legendposy = " . $formvars['legendposy'];}
+      if($formvars['legendsize'] != ''){$sql .= ", legendsize = " . $formvars['legendsize'];}
+      if($formvars['arrowposx'] != ''){$sql .= ", arrowposx = " . $formvars['arrowposx'];}
+      if($formvars['arrowposy'] != ''){$sql .= ", arrowposy = " . $formvars['arrowposy'];}
+      if($formvars['arrowlength'] != ''){$sql .= ", arrowlength = " . $formvars['arrowlength'];}
+      if($formvars['userposx'] != ''){$sql .= ", userposx = '" . $formvars['userposx']."'";}
+      if($formvars['userposy'] != ''){$sql .= ", userposy = '" . $formvars['userposy']."'";}
+      if($formvars['usersize'] != ''){$sql .= ", usersize = '" . $formvars['usersize']."'";}
+      if($formvars['watermark'] != ''){$sql .= ", watermark = '" . $formvars['watermark']."'";}
+      if($formvars['watermarkposx'] != ''){$sql .= ", watermarkposx = " . $formvars['watermarkposx'];}
+      if($formvars['watermarkposy'] != ''){$sql .= ", watermarkposy = " . $formvars['watermarkposy'];}
+      if($formvars['watermarksize'] != ''){$sql .= ", watermarksize = " . $formvars['watermarksize'];}
+      if($formvars['watermarkangle'] != ''){$sql .= ", watermarkangle = " . $formvars['watermarkangle'];}
+      if($formvars['watermarktransparency'] != ''){$sql .= ", watermarktransparency = '" . $formvars['watermarktransparency']."'";}
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
-      $sql .= ", `variable_freetexts` = " . $formvars['variable_freetexts'];
-      if($formvars['format']){$sql .= ", `format` = '" . $formvars['format']."'";}
-      if($preis){$sql .= ", `preis` = '" . $preis."'";}
-      if($formvars['font_date']){$sql .= ", `font_date` = '" . $formvars['font_date']."'";}
-      if($formvars['font_scale']){$sql .= ", `font_scale` = '" . $formvars['font_scale']."'";}
-			if($formvars['font_lage']){$sql .= ", `font_lage` = '" . $formvars['font_lage']."'";}
-			if($formvars['font_gemeinde']){$sql .= ", `font_gemeinde` = '" . $formvars['font_gemeinde']."'";}
-      if($formvars['font_gemarkung']){$sql .= ", `font_gemarkung` = '" . $formvars['font_gemarkung']."'";}
-      if($formvars['font_flur']){$sql .= ", `font_flur` = '" . $formvars['font_flur']."'";}
-			if($formvars['font_flurst']){$sql .= ", `font_flurst` = '" . $formvars['font_flurst']."'";}
-      if($formvars['font_legend']){$sql .= ", `font_legend` = '" . $formvars['font_legend']."'";}
-      if($formvars['font_user']){$sql .= ", `font_user` = '" . $formvars['font_user']."'";}
-      if($formvars['font_watermark']){$sql .= ", `font_watermark` = '" . $formvars['font_watermark']."'";}
+      $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
+      if($formvars['format']){$sql .= ", format = '" . $formvars['format']."'";}
+      if($preis){$sql .= ", preis = '" . $preis."'";}
+      if($formvars['font_date']){$sql .= ", font_date = '" . $formvars['font_date']."'";}
+      if($formvars['font_scale']){$sql .= ", font_scale = '" . $formvars['font_scale']."'";}
+			if($formvars['font_lage']){$sql .= ", font_lage = '" . $formvars['font_lage']."'";}
+			if($formvars['font_gemeinde']){$sql .= ", font_gemeinde = '" . $formvars['font_gemeinde']."'";}
+      if($formvars['font_gemarkung']){$sql .= ", font_gemarkung = '" . $formvars['font_gemarkung']."'";}
+      if($formvars['font_flur']){$sql .= ", font_flur = '" . $formvars['font_flur']."'";}
+			if($formvars['font_flurst']){$sql .= ", font_flurst = '" . $formvars['font_flurst']."'";}
+      if($formvars['font_legend']){$sql .= ", font_legend = '" . $formvars['font_legend']."'";}
+      if($formvars['font_user']){$sql .= ", font_user = '" . $formvars['font_user']."'";}
+      if($formvars['font_watermark']){$sql .= ", font_watermark = '" . $formvars['font_watermark']."'";}
 
       if($_files['headsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
         if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `headsrc` = '" . $_files['headsrc']['name']."'";
+          $sql .= ", headsrc = '" . $_files['headsrc']['name']."'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", `headsrc` = '" . $formvars['headsrc_save']."'";
+        $sql .= ", headsrc = '" . $formvars['headsrc_save']."'";
       }
       if($_files['refmapsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
         if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapsrc` = '" . $_files['refmapsrc']['name']."'";
+          $sql .= ", refmapsrc = '" . $_files['refmapsrc']['name']."'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", `refmapsrc` = '" . $formvars['refmapsrc_save']."'";
+        $sql .= ", refmapsrc = '" . $formvars['refmapsrc_save']."'";
       }
       if($_files['refmapfile']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
         if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapfile` = '" . $_files['refmapfile']['name']."'";
+          $sql .= ", refmapfile = '" . $_files['refmapfile']['name']."'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
       else{
-        $sql .= ", `refmapfile` = '" . $formvars['refmapfile_save']."'";
+        $sql .= ", refmapfile = '" . $formvars['refmapfile_save']."'";
       }
       $this->debug->write("<p>file:kvwmap class:Document->save_frame :",4);
       $this->database->execSQL($sql,4, 1);
@@ -22512,12 +22508,12 @@ class Document {
       for($i = 0; $i < $formvars['textcount']; $i++){
         $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
         $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "INSERT INTO druckfreitexte SET `text` = '" . $formvars['text'.$i]."'";
-        $sql .= ", `posx` = " . $formvars['textposx'.$i];
-        $sql .= ", `posy` = " . $formvars['textposy'.$i];
-        $sql .= ", `size` = " . $formvars['textsize'.$i];
-        $sql .= ", `angle` = " . $formvars['textangle'.$i];
-        $sql .= ", `font` = '" . $formvars['textfont'.$i]."'";
+        $sql = "INSERT INTO druckfreitexte SET text = '" . $formvars['text'.$i]."'";
+        $sql .= ", posx = " . $formvars['textposx'.$i];
+        $sql .= ", posy = " . $formvars['textposy'.$i];
+        $sql .= ", size = " . $formvars['textsize'.$i];
+        $sql .= ", angle = " . $formvars['textangle'.$i];
+        $sql .= ", font = '" . $formvars['textfont'.$i]."'";
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
         $this->database->execSQL($sql,4, 1);
@@ -22536,87 +22532,87 @@ class Document {
       $formvars['cent'] = str_pad ($formvars['cent'], 2, "0", STR_PAD_RIGHT);
       $preis = $formvars['euro'] * 100 + $formvars['cent'];
 
-      $sql ="UPDATE `druckrahmen`";
-      $sql .= " SET `Name` = '" . $formvars['Name']."'";
-			$sql .= ", `dhk_call` = '" . $formvars['dhk_call']."'";
-      $sql .= ", `headposx` = '" . $formvars['headposx']."'";
-      $sql .= ", `headposy` = '" . $formvars['headposy']."'";
-      $sql .= ", `headwidth` = '" . $formvars['headwidth']."'";
-      $sql .= ", `headheight` = '" . $formvars['headheight']."'";
-      $sql .= ", `mapposx` = '" . $formvars['mapposx']."'";
-      $sql .= ", `mapposy` = '" . $formvars['mapposy']."'";
-      $sql .= ", `mapwidth` = '" . $formvars['mapwidth']."'";
-      $sql .= ", `mapheight` = '" . $formvars['mapheight']."'";
-      $sql .= ", `refmapposx` = '" . $formvars['refmapposx']."'";
-      $sql .= ", `refmapposy` = '" . $formvars['refmapposy']."'";
-      $sql .= ", `refmapwidth` = '" . $formvars['refmapwidth']."'";
-      $sql .= ", `refmapheight` = '" . $formvars['refmapheight']."'";
-      $sql .= ", `refposx` = '" . $formvars['refposx']."'";
-      $sql .= ", `refposy` = '" . $formvars['refposy']."'";
-      $sql .= ", `refwidth` = '" . $formvars['refwidth']."'";
-      $sql .= ", `refheight` = '" . $formvars['refheight']."'";
-      $sql .= ", `refzoom` = '" . $formvars['refzoom']."'";
-      $sql .= ", `dateposx` = '" . $formvars['dateposx']."'";
-      $sql .= ", `dateposy` = '" . $formvars['dateposy']."'";
-      $sql .= ", `datesize` = '" . $formvars['datesize']."'";
-      $sql .= ", `scaleposx` = '" . $formvars['scaleposx']."'";
-      $sql .= ", `scaleposy` = '" . $formvars['scaleposy']."'";
-      $sql .= ", `scalesize` = '" . $formvars['scalesize']."'";
-			$sql .= ", `scalebarposx` = '" . $formvars['scalebarposx']."'";
-      $sql .= ", `scalebarposy` = '" . $formvars['scalebarposy']."'";
-      $sql .= ", `oscaleposx` = " . ($formvars['oscaleposx'] ?: 'NULL');
-      $sql .= ", `oscaleposy` = " . ($formvars['oscaleposy'] ?: 'NULL');
-      $sql .= ", `oscalesize` = " . ($formvars['oscalesize'] ?: 'NULL');
-			$sql .= ", `lageposx` = '" . $formvars['lageposx']."'";
-      $sql .= ", `lageposy` = '" . $formvars['lageposy']."'";
-      $sql .= ", `lagesize` = '" . $formvars['lagesize']."'";
-			$sql .= ", `gemeindeposx` = '" . $formvars['gemeindeposx']."'";
-      $sql .= ", `gemeindeposy` = '" . $formvars['gemeindeposy']."'";
-      $sql .= ", `gemeindesize` = '" . $formvars['gemeindesize']."'";
-      $sql .= ", `gemarkungposx` = '" . $formvars['gemarkungposx']."'";
-      $sql .= ", `gemarkungposy` = '" . $formvars['gemarkungposy']."'";
-      $sql .= ", `gemarkungsize` = '" . $formvars['gemarkungsize']."'";
-      $sql .= ", `flurposx` = '" . $formvars['flurposx']."'";
-      $sql .= ", `flurposy` = '" . $formvars['flurposy']."'";
-      $sql .= ", `flursize` = '" . $formvars['flursize']."'";
-			$sql .= ", `flurstposx` = '" . $formvars['flurstposx']."'";
-      $sql .= ", `flurstposy` = '" . $formvars['flurstposy']."'";
-      $sql .= ", `flurstsize` = '" . $formvars['flurstsize']."'";
-      $sql .= ", `legendposx` = '" . $formvars['legendposx']."'";
-      $sql .= ", `legendposy` = '" . $formvars['legendposy']."'";
-      $sql .= ", `legendsize` = '" . $formvars['legendsize']."'";
-      $sql .= ", `arrowposx` = '" . $formvars['arrowposx']."'";
-      $sql .= ", `arrowposy` = '" . $formvars['arrowposy']."'";
-      $sql .= ", `arrowlength` = '" . $formvars['arrowlength']."'";
-      $sql .= ", `userposx` = '" . $formvars['userposx']."'";
-      $sql .= ", `userposy` = '" . $formvars['userposy']."'";
-      $sql .= ", `usersize` = '" . $formvars['usersize']."'";
-      $sql .= ", `watermark` = '" . $formvars['watermark']."'";
-      $sql .= ", `watermarkposx` = '" . $formvars['watermarkposx']."'";
-      $sql .= ", `watermarkposy` = '" . $formvars['watermarkposy']."'";
-      $sql .= ", `watermarksize` = '" . $formvars['watermarksize']."'";
-      $sql .= ", `watermarkangle` = '" . $formvars['watermarkangle']."'";
-      $sql .= ", `watermarktransparency` = '" . $formvars['watermarktransparency']."'";
+      $sql ="UPDATE druckrahmen";
+      $sql .= " SET Name = '" . $formvars['Name']."'";
+			$sql .= ", dhk_call = '" . $formvars['dhk_call']."'";
+      $sql .= ", headposx = '" . $formvars['headposx']."'";
+      $sql .= ", headposy = '" . $formvars['headposy']."'";
+      $sql .= ", headwidth = '" . $formvars['headwidth']."'";
+      $sql .= ", headheight = '" . $formvars['headheight']."'";
+      $sql .= ", mapposx = '" . $formvars['mapposx']."'";
+      $sql .= ", mapposy = '" . $formvars['mapposy']."'";
+      $sql .= ", mapwidth = '" . $formvars['mapwidth']."'";
+      $sql .= ", mapheight = '" . $formvars['mapheight']."'";
+      $sql .= ", refmapposx = '" . $formvars['refmapposx']."'";
+      $sql .= ", refmapposy = '" . $formvars['refmapposy']."'";
+      $sql .= ", refmapwidth = '" . $formvars['refmapwidth']."'";
+      $sql .= ", refmapheight = '" . $formvars['refmapheight']."'";
+      $sql .= ", refposx = '" . $formvars['refposx']."'";
+      $sql .= ", refposy = '" . $formvars['refposy']."'";
+      $sql .= ", refwidth = '" . $formvars['refwidth']."'";
+      $sql .= ", refheight = '" . $formvars['refheight']."'";
+      $sql .= ", refzoom = '" . $formvars['refzoom']."'";
+      $sql .= ", dateposx = '" . $formvars['dateposx']."'";
+      $sql .= ", dateposy = '" . $formvars['dateposy']."'";
+      $sql .= ", datesize = '" . $formvars['datesize']."'";
+      $sql .= ", scaleposx = '" . $formvars['scaleposx']."'";
+      $sql .= ", scaleposy = '" . $formvars['scaleposy']."'";
+      $sql .= ", scalesize = '" . $formvars['scalesize']."'";
+			$sql .= ", scalebarposx = '" . $formvars['scalebarposx']."'";
+      $sql .= ", scalebarposy = '" . $formvars['scalebarposy']."'";
+      $sql .= ", oscaleposx = " . ($formvars['oscaleposx'] ?: 'NULL');
+      $sql .= ", oscaleposy = " . ($formvars['oscaleposy'] ?: 'NULL');
+      $sql .= ", oscalesize = " . ($formvars['oscalesize'] ?: 'NULL');
+			$sql .= ", lageposx = '" . $formvars['lageposx']."'";
+      $sql .= ", lageposy = '" . $formvars['lageposy']."'";
+      $sql .= ", lagesize = '" . $formvars['lagesize']."'";
+			$sql .= ", gemeindeposx = '" . $formvars['gemeindeposx']."'";
+      $sql .= ", gemeindeposy = '" . $formvars['gemeindeposy']."'";
+      $sql .= ", gemeindesize = '" . $formvars['gemeindesize']."'";
+      $sql .= ", gemarkungposx = '" . $formvars['gemarkungposx']."'";
+      $sql .= ", gemarkungposy = '" . $formvars['gemarkungposy']."'";
+      $sql .= ", gemarkungsize = '" . $formvars['gemarkungsize']."'";
+      $sql .= ", flurposx = '" . $formvars['flurposx']."'";
+      $sql .= ", flurposy = '" . $formvars['flurposy']."'";
+      $sql .= ", flursize = '" . $formvars['flursize']."'";
+			$sql .= ", flurstposx = '" . $formvars['flurstposx']."'";
+      $sql .= ", flurstposy = '" . $formvars['flurstposy']."'";
+      $sql .= ", flurstsize = '" . $formvars['flurstsize']."'";
+      $sql .= ", legendposx = '" . $formvars['legendposx']."'";
+      $sql .= ", legendposy = '" . $formvars['legendposy']."'";
+      $sql .= ", legendsize = '" . $formvars['legendsize']."'";
+      $sql .= ", arrowposx = '" . $formvars['arrowposx']."'";
+      $sql .= ", arrowposy = '" . $formvars['arrowposy']."'";
+      $sql .= ", arrowlength = '" . $formvars['arrowlength']."'";
+      $sql .= ", userposx = '" . $formvars['userposx']."'";
+      $sql .= ", userposy = '" . $formvars['userposy']."'";
+      $sql .= ", usersize = '" . $formvars['usersize']."'";
+      $sql .= ", watermark = '" . $formvars['watermark']."'";
+      $sql .= ", watermarkposx = '" . $formvars['watermarkposx']."'";
+      $sql .= ", watermarkposy = '" . $formvars['watermarkposy']."'";
+      $sql .= ", watermarksize = '" . $formvars['watermarksize']."'";
+      $sql .= ", watermarkangle = '" . $formvars['watermarkangle']."'";
+      $sql .= ", watermarktransparency = '" . $formvars['watermarktransparency']."'";
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
-      $sql .= ", `variable_freetexts` = " . $formvars['variable_freetexts'];
-      $sql .= ", `format` = '" . $formvars['format']."'";
-      $sql .= ", `preis` = '" . $preis."'";
-      $sql .= ", `font_date` = '" . $formvars['font_date']."'";
-      $sql .= ", `font_scale` = '" . $formvars['font_scale']."'";
-			$sql .= ", `font_lage` = '" . $formvars['font_lage']."'";
-			$sql .= ", `font_gemeinde` = '" . $formvars['font_gemeinde']."'";
-      $sql .= ", `font_gemarkung` = '" . $formvars['font_gemarkung']."'";
-      $sql .= ", `font_flur` = '" . $formvars['font_flur']."'";
-			$sql .= ", `font_flurst` = '" . $formvars['font_flurst']."'";
-      $sql .= ", `font_legend` = '" . $formvars['font_legend']."'";
-      $sql .= ", `font_user` = '" . $formvars['font_user']."'";
-      $sql .= ", `font_watermark` = '" . $formvars['font_watermark']."'";
+      $sql .= ", variable_freetexts = " . $formvars['variable_freetexts'];
+      $sql .= ", format = '" . $formvars['format']."'";
+      $sql .= ", preis = '" . $preis."'";
+      $sql .= ", font_date = '" . $formvars['font_date']."'";
+      $sql .= ", font_scale = '" . $formvars['font_scale']."'";
+			$sql .= ", font_lage = '" . $formvars['font_lage']."'";
+			$sql .= ", font_gemeinde = '" . $formvars['font_gemeinde']."'";
+      $sql .= ", font_gemarkung = '" . $formvars['font_gemarkung']."'";
+      $sql .= ", font_flur = '" . $formvars['font_flur']."'";
+			$sql .= ", font_flurst = '" . $formvars['font_flurst']."'";
+      $sql .= ", font_legend = '" . $formvars['font_legend']."'";
+      $sql .= ", font_user = '" . $formvars['font_user']."'";
+      $sql .= ", font_watermark = '" . $formvars['font_watermark']."'";
 
       if($_files['headsrc']['name']){
         $nachDatei = DRUCKRAHMEN_PATH.$_files['headsrc']['name'];
         if (move_uploaded_file($_files['headsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `headsrc` = '" . $_files['headsrc']['name']."'";
+          $sql .= ", headsrc = '" . $_files['headsrc']['name']."'";
           #echo $sql;
         }
         else {
@@ -22627,7 +22623,7 @@ class Document {
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapsrc']['name'];
         if (move_uploaded_file($_files['refmapsrc']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['Wappen']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapsrc` = '" . $_files['refmapsrc']['name']."'";
+          $sql .= ", refmapsrc = '" . $_files['refmapsrc']['name']."'";
           #echo $sql;
         }
         else {
@@ -22638,25 +22634,25 @@ class Document {
         $nachDatei = DRUCKRAHMEN_PATH.$_files['refmapfile']['name'];
         if (move_uploaded_file($_files['refmapfile']['tmp_name'],$nachDatei)) {
             //echo '<br>Lade '.$_files['headsrc']['tmp_name'].' nach '.$nachDatei.' hoch';
-          $sql .= ", `refmapfile` = '" . $_files['refmapfile']['name']."'";
+          $sql .= ", refmapfile = '" . $_files['refmapfile']['name']."'";
         }
         else {
             //echo '<br>Datei: '.$_files['headsrc']['tmp_name'].' konnte nicht nach '.$nachDatei.' hochgeladen werden!';
         }
       }
-      $sql .= " WHERE `id` =".(int)$formvars['aktiverRahmen'];
+      $sql .= " WHERE id =".(int)$formvars['aktiverRahmen'];
       $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
       $this->database->execSQL($sql,4, 1);
 
       for($i = 0; $i < $formvars['textcount']; $i++){
         $formvars['text'.$i] = str_replace(chr(10), ';', $formvars['text'.$i]);
         $formvars['text'.$i] = str_replace(chr(13), '', $formvars['text'.$i]);
-        $sql = "UPDATE druckfreitexte SET `text` = '" . $formvars['text'.$i]."'";
-        $sql .= ", `posx` = " . $formvars['textposx'.$i];
-        $sql .= ", `posy` = " . $formvars['textposy'.$i];
-        $sql .= ", `size` = " . $formvars['textsize'.$i];
-        $sql .= ", `angle` = " . $formvars['textangle'.$i];
-        $sql .= ", `font` = '" . $formvars['textfont'.$i]."'";
+        $sql = "UPDATE druckfreitexte SET text = '" . $formvars['text'.$i]."'";
+        $sql .= ", posx = " . $formvars['textposx'.$i];
+        $sql .= ", posy = " . $formvars['textposy'.$i];
+        $sql .= ", size = " . $formvars['textsize'.$i];
+        $sql .= ", angle = " . $formvars['textangle'.$i];
+        $sql .= ", font = '" . $formvars['textfont'.$i]."'";
         $sql .= " WHERE id = " . $formvars['text_id'.$i];
         #echo $sql;
         $this->debug->write("<p>file:kvwmap class:Document->update_frame :",4);
@@ -22678,13 +22674,13 @@ class Document {
   }
 
   function save_active_frame($id, $userid, $stelleid){
-    $sql ="UPDATE `rolle` SET `active_frame` = '" . $id."' WHERE `user_id` =" . $userid." AND `stelle_id` =" . $stelleid;
+    $sql ="UPDATE rolle SET active_frame = '" . $id."' WHERE user_id =" . $userid." AND stelle_id =" . $stelleid;
     $this->debug->write("<p>file:kvwmap class:Document->save_active_frame :",4);
     $this->database->execSQL($sql,4, 1);
   }
 
   function get_active_frameid($userid, $stelleid){
-    $sql ='SELECT active_frame from rolle WHERE `user_id` ='.$userid.' AND `stelle_id` ='.$stelleid;
+    $sql ='SELECT active_frame from rolle WHERE user_id ='.$userid.' AND stelle_id ='.$stelleid;
     $this->debug->write("<p>file:kvwmap class:GUI->get_active_frameid :<br>" . $sql,4);
     $this->database->execSQL($sql,4, 1);
 		$rs = $this->database->result->fetch_row();

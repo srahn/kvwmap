@@ -28,70 +28,76 @@ if (!DBWRITE) { echo '<br>Das Schreiben in die Datenbank wird unterdrückt!'; }
 
 # Öffnen der Datenbankverbindung zur Kartenverwaltung (MySQL)
 # Erzeugen des MYSQL-DB-Objekts, falls es noch nicht durch den Login erzeugt wurde
-if (!isset($userDb)) {
-	$userDb = new database();
-	$userDb->host = MYSQL_HOST;
-	$userDb->user = MYSQL_USER;
-	$userDb->passwd = MYSQL_PASSWORD;
-	$userDb->dbName = MYSQL_DBNAME;
+// if (!isset($userDb)) {
+// 	$userDb = new database();
+// 	$userDb->host = MYSQL_HOST;
+// 	$userDb->user = MYSQL_USER;
+// 	$userDb->passwd = MYSQL_PASSWORD;
+// 	$userDb->dbName = MYSQL_DBNAME;
+// }
+// $GUI->database = $userDb;
+
+$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
+if (!$GUI->pgdatabase->open()) {
+	echo $GUI->pgdatabase->err_msg;
+	exit;
 }
-$GUI->database = $userDb;
 
 if ($formvars['go'] == 'health_check') {
 	include(SNIPPETS . 'health_check.php');
 	exit;
 }
 
-if (!$GUI->database->open()) {
-  # Prüfen ob eine neue Datenbank angelegt werden soll
-  if ($GUI->formvars['go'] == 'install-mysql-db') {
-    # Anlegen der neuen Datenbank
-    # Herstellen der Verbindung mit defaultwerten
-		$GUI->mysqli = new mysqli(MYSQL_HOST, 'kvwmap', 'kvwmap', 'mysql');
-    $GUI->debug->write('MySQL Datenbankverbindung hergestellt mit (' . MYSQL_HOST . ', kvwmap, kvwmap, mysql) thread_id: ' . $GUI->mysqli->thread_id, 4);
-    # Erzeugen der leeren Datenbank für kvwmap
-    $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
-    $GUI->database->execSQL($sql,4,0);
-    # Anlegen der leeren Tabellen für kvwmap
-    if ($GUI->formvars['install-GUI']) {
-      # Demo Daten in Datenbank schreiben
-      $sql = file_get_contents(LAYOUTPATH.'sql_dumps/mysql_setup_GUI.sql');
-      $GUI->database->execSQL($sql,4,0);
-    }
-    # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
-    if ($GUI->database->select_db($GUI->database->dbName)) {
-      $GUI->debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
-    }
-    else {
-      # Die neue Datenbank konnte nicht hergestellt werden
-      echo 'Die Neue Datenbank konnte nicht hergestellt werden mit:';
-      echo '<br>Host: '.$GUI->database->host;
-      echo '<br>User: '.$GUI->database->user;
-     # echo '<br>Passwd: '.$GUI->database->passwd;
-      echo '<br>Datenbankname: '.$GUI->database->dbName;
-      echo '<p>Das kann folgende Gründe haben:<lu>';
-      echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
-      echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
-      echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
-      echo '</lu>';
-    } # ende fehler beim aufbauen der mysql datenbank
-  } # ende mysql datenbank installieren
-  else {
-    # Es konnte keine Datenbankverbindung aufgebaut werden
-    $errors[] = '
-		Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:<br>
-		Host: ' . $GUI->database->host . '<br>
-		User: ' . $GUI->database->user . '<br>
-		Datenbankname: ' . $GUI->database->dbName . '<br>';
-		exit;
-  }
-}
-else {
-  $GUI->debug->write("Verbindung zur MySQL Kartendatenbank erfolgreich hergestellt.",4);
-}
+// if (!$GUI->database->open()) {
+//   # Prüfen ob eine neue Datenbank angelegt werden soll
+//   if ($GUI->formvars['go'] == 'install-mysql-db') {
+//     # Anlegen der neuen Datenbank
+//     # Herstellen der Verbindung mit defaultwerten
+// 		$GUI->mysqli = new mysqli(MYSQL_HOST, 'kvwmap', 'kvwmap', 'mysql');
+//     $GUI->debug->write('MySQL Datenbankverbindung hergestellt mit (' . MYSQL_HOST . ', kvwmap, kvwmap, mysql) thread_id: ' . $GUI->mysqli->thread_id, 4);
+//     # Erzeugen der leeren Datenbank für kvwmap
+//     $sql = 'CREATE DATABASE '.$GUI->database->dbName.' CHARACTER SET latin1 COLLATE latin1_german2_ci';
+//     $GUI->database->execSQL($sql,4,0);
+//     # Anlegen der leeren Tabellen für kvwmap
+//     if ($GUI->formvars['install-GUI']) {
+//       # Demo Daten in Datenbank schreiben
+//       $sql = file_get_contents(LAYOUTPATH.'sql_dumps/mysql_setup_GUI.sql');
+//       $GUI->database->execSQL($sql,4,0);
+//     }
+//     # Abfrage ob Zugang zur neuen Datenbank jetzt möglich
+//     if ($GUI->database->select_db($GUI->database->dbName)) {
+//       $GUI->debug->write("Verbindung zur MySQL Datenbank erfolgreich hergestellt.",4);
+//     }
+//     else {
+//       # Die neue Datenbank konnte nicht hergestellt werden
+//       echo 'Die Neue Datenbank konnte nicht hergestellt werden mit:';
+//       echo '<br>Host: '.$GUI->database->host;
+//       echo '<br>User: '.$GUI->database->user;
+//      # echo '<br>Passwd: '.$GUI->database->passwd;
+//       echo '<br>Datenbankname: '.$GUI->database->dbName;
+//       echo '<p>Das kann folgende Gründe haben:<lu>';
+//       echo '<li>Der Datenbankserver ist gerade nicht erreichbar.</li>';
+//       echo '<li>Die Angaben zum Host, Benutzer und Password in der config.php sind falsch.</li>';
+//       echo '<li>Die Angaben zum Host, Benutzer und Password in der Tabelle mysql.users sind falsch.</li>';
+//       echo '</lu>';
+//     } # ende fehler beim aufbauen der mysql datenbank
+//   } # ende mysql datenbank installieren
+//   else {
+//     # Es konnte keine Datenbankverbindung aufgebaut werden
+//     $errors[] = '
+// 		Die Verbindung zur Kartendatenbank konnte mit folgenden Daten nicht hergestellt werden:<br>
+// 		Host: ' . $GUI->database->host . '<br>
+// 		User: ' . $GUI->database->user . '<br>
+// 		Datenbankname: ' . $GUI->database->dbName . '<br>';
+// 		exit;
+//   }
+// }
+// else {
+//   $GUI->debug->write("Verbindung zur MySQL Kartendatenbank erfolgreich hergestellt.",4);
+// }
 
-$GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
-$GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
+// $GUI->database->execSQL("SET NAMES '".MYSQL_CHARSET."'",0,0);
+// $GUI->database->execSQL("SET CHARACTER SET ".MYSQL_CHARSET.";",0,0);
 
 /*
 *	Hier findet sich die gesamte Loging für Login und Reggistrierung, sowie Stellenwechsel
@@ -129,7 +135,7 @@ if (is_logged_in()) {
 	}
 	$GUI->formvars['login_name'] = $_SESSION['login_name'];
 	$GUI->debug->write('Ist angemeldet als: ' . $_SESSION['login_name'], 4, $GUI->echo);
-	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->database);
+	$GUI->user = new user($_SESSION['login_name'], 0, $GUI->pgdatabase);
 	if ($GUI->user->login_name == '') {
 		$GUI->debug->write('Nutzer mit login_name: ' . $_SESSION['login_name'] . ' nicht in Datenbank vorhanden.', 4, $GUI->echo);
 		logout();
@@ -334,12 +340,12 @@ $GUI->debug->write('$show_login_form is ' . ($show_login_form ? 'true' : 'false'
 if (!$show_login_form) {
 	if (is_new_stelle($GUI->formvars, $GUI->user)) {
 		$GUI->debug->write('Neue Stelle ' . $GUI->formvars['Stelle_ID'] . ' angefragt.', 4, $GUI->echo);
-		$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->database);
+		$GUI->Stelle = new stelle($GUI->formvars['Stelle_ID'], $GUI->pgdatabase);
 	}
 	else {
 		$GUI->debug->write('Keine neue Stelle angefragt. Stelle: ' . $GUI->user->stelle_id . ' bleibt.', 4, $GUI->echo);
-		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->database);
-		if ($GUI->database->errormessage != '') {
+		$GUI->Stelle = new stelle($GUI->user->stelle_id, $GUI->pgdatabase);
+		if ($GUI->pgdatabase->errormessage != '') {
 			$GUI->add_message('error', 'Die Stelle kann nicht abgefragt werden. Prüfen Sie ob das Datenmodell der Stelle aktuell ist!');
 			logout();
 			$show_login_form = true;
@@ -530,12 +536,6 @@ else {
 
 	if (defined('BEARBEITER') AND BEARBEITER == 'true') {
 		define('BEARBEITER_NAME', 'Bearbeiter: ' . $GUI->user->Name);
-	}
-
-	$GUI->pgdatabase = $GUI->baudatabase = new pgdatabase();
-	if (!$GUI->pgdatabase->open(POSTGRES_CONNECTION_ID)) {
-		echo $GUI->pgdatabase->err_msg;
-		exit;
 	}
 
 	if (!in_array($go, $non_spatial_cases)) {	// für fast_cases, die keinen Raumbezug haben, die Trafos weglassen
