@@ -22335,56 +22335,56 @@ class Document {
       $sql .= ", `mapposy` = " . $formvars['mapposy'];
       $sql .= ", `mapwidth` = " . $formvars['mapwidth'];
       $sql .= ", `mapheight` = " . $formvars['mapheight'];
-      if($formvars['refmapposx']){$sql .= ", `refmapposx` = " . $formvars['refmapposx'];}
-      if($formvars['refmapposy']){$sql .= ", `refmapposy` = " . $formvars['refmapposy'];}
-      if($formvars['refmapwidth']){$sql .= ", `refmapwidth` = " . $formvars['refmapwidth'];}
-      if($formvars['refmapheight']){$sql .= ", `refmapheight` = " . $formvars['refmapheight'];}
-      if($formvars['refposx']){$sql .= ", `refposx` = " . $formvars['refposx'];}
-      if($formvars['refposy']){$sql .= ", `refposy` = " . $formvars['refposy'];}
-      if($formvars['refwidth']){$sql .= ", `refwidth` = " . $formvars['refwidth'];}
-      if($formvars['refheight']){$sql .= ", `refheight` = " . $formvars['refheight'];}
-      if($formvars['refzoom']){$sql .= ", `refzoom` = " . $formvars['refzoom'];}
-      if($formvars['dateposx']){$sql .= ", `dateposx` = " . $formvars['dateposx'];}
-      if($formvars['dateposy']){$sql .= ", `dateposy` = " . $formvars['dateposy'];}
-      if($formvars['datesize']){$sql .= ", `datesize` = " . $formvars['datesize'];}
-      if($formvars['scaleposx']){$sql .= ", `scaleposx` = " . $formvars['scaleposx'];}
-      if($formvars['scaleposy']){$sql .= ", `scaleposy` = " . $formvars['scaleposy'];}
-      if($formvars['scalesize']){$sql .= ", `scalesize` = " . $formvars['scalesize'];}
-			if($formvars['scalebarposx']){$sql .= ", `scalebarposx` = " . $formvars['scalebarposx'];}
-      if($formvars['scalebarposy']){$sql .= ", `scalebarposy` = " . $formvars['scalebarposy'];}
-      if($formvars['oscaleposx']){$sql .= ", `oscaleposx` = " . $formvars['oscaleposx'];}
-      if($formvars['oscaleposy']){$sql .= ", `oscaleposy` = " . $formvars['oscaleposy'];}
-      if($formvars['oscalesize']){$sql .= ", `oscalesize` = " . $formvars['oscalesize'];}
-			if($formvars['lageposx']){$sql .= ", `lageposx` = " . $formvars['lageposx'];}
-      if($formvars['lageposy']){$sql .= ", `lageposy` = " . $formvars['lageposy'];}
-      if($formvars['lagesize']){$sql .= ", `lagesize` = " . $formvars['lagesize'];}
-			if($formvars['gemeindeposx']){$sql .= ", `gemeindeposx` = " . $formvars['gemeindeposx'];}
-      if($formvars['gemeindeposy']){$sql .= ", `gemeindeposy` = " . $formvars['gemeindeposy'];}
-      if($formvars['gemeindesize']){$sql .= ", `gemeindesize` = " . $formvars['gemeindesize'];}
-      if($formvars['gemarkungposx']){$sql .= ", `gemarkungposx` = " . $formvars['gemarkungposx'];}
-      if($formvars['gemarkungposy']){$sql .= ", `gemarkungposy` = " . $formvars['gemarkungposy'];}
-      if($formvars['gemarkungsize']){$sql .= ", `gemarkungsize` = " . $formvars['gemarkungsize'];}
-      if($formvars['flurposx']){$sql .= ", `flurposx` = " . $formvars['flurposx'];}
-      if($formvars['flurposy']){$sql .= ", `flurposy` = " . $formvars['flurposy'];}
-      if($formvars['flursize']){$sql .= ", `flursize` = " . $formvars['flursize'];}
-			if($formvars['flurstposx']){$sql .= ", `flurstposx` = " . $formvars['flurstposx'];}
-      if($formvars['flurstposy']){$sql .= ", `flurstposy` = " . $formvars['flurstposy'];}
-      if($formvars['flurstsize']){$sql .= ", `flurstsize` = " . $formvars['flurstsize'];}
-      if($formvars['legendposx']){$sql .= ", `legendposx` = " . $formvars['legendposx'];}
-      if($formvars['legendposy']){$sql .= ", `legendposy` = " . $formvars['legendposy'];}
-      if($formvars['legendsize']){$sql .= ", `legendsize` = " . $formvars['legendsize'];}
-      if($formvars['arrowposx']){$sql .= ", `arrowposx` = " . $formvars['arrowposx'];}
-      if($formvars['arrowposy']){$sql .= ", `arrowposy` = " . $formvars['arrowposy'];}
-      if($formvars['arrowlength']){$sql .= ", `arrowlength` = " . $formvars['arrowlength'];}
-      if($formvars['userposx']){$sql .= ", `userposx` = '" . $formvars['userposx']."'";}
-      if($formvars['userposy']){$sql .= ", `userposy` = '" . $formvars['userposy']."'";}
-      if($formvars['usersize']){$sql .= ", `usersize` = '" . $formvars['usersize']."'";}
-      if($formvars['watermark']){$sql .= ", `watermark` = '" . $formvars['watermark']."'";}
-      if($formvars['watermarkposx']){$sql .= ", `watermarkposx` = " . $formvars['watermarkposx'];}
-      if($formvars['watermarkposy']){$sql .= ", `watermarkposy` = " . $formvars['watermarkposy'];}
-      if($formvars['watermarksize']){$sql .= ", `watermarksize` = " . $formvars['watermarksize'];}
-      if($formvars['watermarkangle']){$sql .= ", `watermarkangle` = " . $formvars['watermarkangle'];}
-      if($formvars['watermarktransparency']){$sql .= ", `watermarktransparency` = '" . $formvars['watermarktransparency']."'";}
+      if($formvars['refmapposx'] != ''){$sql .= ", `refmapposx` = " . $formvars['refmapposx'];}
+      if($formvars['refmapposy'] != ''){$sql .= ", `refmapposy` = " . $formvars['refmapposy'];}
+      if($formvars['refmapwidth'] != ''){$sql .= ", `refmapwidth` = " . $formvars['refmapwidth'];}
+      if($formvars['refmapheight'] != ''){$sql .= ", `refmapheight` = " . $formvars['refmapheight'];}
+      if($formvars['refposx'] != ''){$sql .= ", `refposx` = " . $formvars['refposx'];}
+      if($formvars['refposy'] != ''){$sql .= ", `refposy` = " . $formvars['refposy'];}
+      if($formvars['refwidth'] != ''){$sql .= ", `refwidth` = " . $formvars['refwidth'];}
+      if($formvars['refheight'] != ''){$sql .= ", `refheight` = " . $formvars['refheight'];}
+      if($formvars['refzoom'] != ''){$sql .= ", `refzoom` = " . $formvars['refzoom'];}
+      if($formvars['dateposx'] != ''){$sql .= ", `dateposx` = " . $formvars['dateposx'];}
+      if($formvars['dateposy'] != ''){$sql .= ", `dateposy` = " . $formvars['dateposy'];}
+      if($formvars['datesize'] != ''){$sql .= ", `datesize` = " . $formvars['datesize'];}
+      if($formvars['scaleposx'] != ''){$sql .= ", `scaleposx` = " . $formvars['scaleposx'];}
+      if($formvars['scaleposy'] != ''){$sql .= ", `scaleposy` = " . $formvars['scaleposy'];}
+      if($formvars['scalesize'] != ''){$sql .= ", `scalesize` = " . $formvars['scalesize'];}
+			if($formvars['scalebarposx'] != ''){$sql .= ", `scalebarposx` = " . $formvars['scalebarposx'];}
+      if($formvars['scalebarposy'] != ''){$sql .= ", `scalebarposy` = " . $formvars['scalebarposy'];}
+      if($formvars['oscaleposx'] != ''){$sql .= ", `oscaleposx` = " . $formvars['oscaleposx'];}
+      if($formvars['oscaleposy'] != ''){$sql .= ", `oscaleposy` = " . $formvars['oscaleposy'];}
+      if($formvars['oscalesize'] != ''){$sql .= ", `oscalesize` = " . $formvars['oscalesize'];}
+			if($formvars['lageposx'] != ''){$sql .= ", `lageposx` = " . $formvars['lageposx'];}
+      if($formvars['lageposy'] != ''){$sql .= ", `lageposy` = " . $formvars['lageposy'];}
+      if($formvars['lagesize'] != ''){$sql .= ", `lagesize` = " . $formvars['lagesize'];}
+			if($formvars['gemeindeposx'] != ''){$sql .= ", `gemeindeposx` = " . $formvars['gemeindeposx'];}
+      if($formvars['gemeindeposy'] != ''){$sql .= ", `gemeindeposy` = " . $formvars['gemeindeposy'];}
+      if($formvars['gemeindesize'] != ''){$sql .= ", `gemeindesize` = " . $formvars['gemeindesize'];}
+      if($formvars['gemarkungposx'] != ''){$sql .= ", `gemarkungposx` = " . $formvars['gemarkungposx'];}
+      if($formvars['gemarkungposy'] != ''){$sql .= ", `gemarkungposy` = " . $formvars['gemarkungposy'];}
+      if($formvars['gemarkungsize'] != ''){$sql .= ", `gemarkungsize` = " . $formvars['gemarkungsize'];}
+      if($formvars['flurposx'] != ''){$sql .= ", `flurposx` = " . $formvars['flurposx'];}
+      if($formvars['flurposy'] != ''){$sql .= ", `flurposy` = " . $formvars['flurposy'];}
+      if($formvars['flursize'] != ''){$sql .= ", `flursize` = " . $formvars['flursize'];}
+			if($formvars['flurstposx'] != ''){$sql .= ", `flurstposx` = " . $formvars['flurstposx'];}
+      if($formvars['flurstposy'] != ''){$sql .= ", `flurstposy` = " . $formvars['flurstposy'];}
+      if($formvars['flurstsize'] != ''){$sql .= ", `flurstsize` = " . $formvars['flurstsize'];}
+      if($formvars['legendposx'] != ''){$sql .= ", `legendposx` = " . $formvars['legendposx'];}
+      if($formvars['legendposy'] != ''){$sql .= ", `legendposy` = " . $formvars['legendposy'];}
+      if($formvars['legendsize'] != ''){$sql .= ", `legendsize` = " . $formvars['legendsize'];}
+      if($formvars['arrowposx'] != ''){$sql .= ", `arrowposx` = " . $formvars['arrowposx'];}
+      if($formvars['arrowposy'] != ''){$sql .= ", `arrowposy` = " . $formvars['arrowposy'];}
+      if($formvars['arrowlength'] != ''){$sql .= ", `arrowlength` = " . $formvars['arrowlength'];}
+      if($formvars['userposx'] != ''){$sql .= ", `userposx` = '" . $formvars['userposx']."'";}
+      if($formvars['userposy'] != ''){$sql .= ", `userposy` = '" . $formvars['userposy']."'";}
+      if($formvars['usersize'] != ''){$sql .= ", `usersize` = '" . $formvars['usersize']."'";}
+      if($formvars['watermark'] != ''){$sql .= ", `watermark` = '" . $formvars['watermark']."'";}
+      if($formvars['watermarkposx'] != ''){$sql .= ", `watermarkposx` = " . $formvars['watermarkposx'];}
+      if($formvars['watermarkposy'] != ''){$sql .= ", `watermarkposy` = " . $formvars['watermarkposy'];}
+      if($formvars['watermarksize'] != ''){$sql .= ", `watermarksize` = " . $formvars['watermarksize'];}
+      if($formvars['watermarkangle'] != ''){$sql .= ", `watermarkangle` = " . $formvars['watermarkangle'];}
+      if($formvars['watermarktransparency'] != ''){$sql .= ", `watermarktransparency` = '" . $formvars['watermarktransparency']."'";}
       if($formvars['variable_freetexts'] != 1)$formvars['variable_freetexts'] = 0;
       $sql .= ", `variable_freetexts` = " . $formvars['variable_freetexts'];
       if($formvars['format']){$sql .= ", `format` = '" . $formvars['format']."'";}
