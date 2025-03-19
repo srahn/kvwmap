@@ -247,7 +247,7 @@ class stelle {
 				reset_password_text,
 				invitation_text
 			FROM
-				stelle s
+				kvwmap.stelle s
 			WHERE
 				ID = " . $this->id . "
 		";
