@@ -1007,14 +1007,14 @@ class user {
 
 		if ($admin_id > 0 AND !in_array($stelle_id, $admin_stellen)) {
 			$more_from = "
-				LEFT JOIN rolle rall ON u.ID = rall.user_id
-				LEFT JOIN rolle radm ON radm.stelle_id = rall.stelle_id
+				LEFT JOIN kvwmap.rolle rall ON u.id = rall.user_id
+				LEFT JOIN kvwmap.rolle radm ON radm.stelle_id = rall.stelle_id
 			";
 			$where[] = "(radm.user_id = ".$admin_id." OR rall.user_id IS NULL)";
 		}
 
 		if ($id > 0) {
-			$where[] = 'u.ID = ' . $id;
+			$where[] = 'u.id = ' . $id;
 		}
 
 		if ($login_name != '') {
@@ -1027,9 +1027,9 @@ class user {
 
 		$sql = "
 			SELECT DISTINCT
-				u.*, (select nullif(max(r.last_time_id), '0000-00-00 00:00:00') from rolle r where u.ID = r.user_id ) as last_timestamp
+				u.*, (select max(r.last_time_id) from rolle r where u.ID = r.user_id ) as last_timestamp
 			FROM
-				user u " .
+				kvwmap.user u " .
 				$more_from .
 			(count($where) > 0 ? " WHERE " . implode(' AND ', $where) : "") .
 			$order . "
@@ -1037,19 +1037,19 @@ class user {
 		#echo '<br>sql: ' . $sql;
 
 		$this->debug->write("<p>file:users.php class:user->readUserDaten - Abfragen des Namens des Benutzers:<br>".$sql,4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>' . $this->database->mysqli->error, 4);
 			return 0;
 		}
-		while ($rs = $this->database->result->fetch_array()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			$userdaten[] = $rs;
 		}
-		if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
-			usort($userdaten, function($a, $b) {
-				return strcmp($a['last_timestamp'], $b['last_timestamp']);
-			});
-		}
+		// if ($order == ' ORDER BY last_timestamp') {	# MySQL sortiert falsch
+		// 	usort($userdaten, function($a, $b) {
+		// 		return strcmp($a['last_timestamp'], $b['last_timestamp']);
+		// 	});
+		// }
 		return $userdaten;
 	}
 

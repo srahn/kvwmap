@@ -2088,7 +2088,7 @@ echo '			</table>
 					);
 				}
 				else {
-					$this->ref['refMapImg'] = REFERENCEMAPPATH.$this->ref['Dateiname'];
+					$this->ref['refMapImg'] = REFERENCEMAPPATH.$this->ref['dateiname'];
 				}
 				$reference_map->web->imagepath = IMAGEPATH;
 				$reference_map->setProjection('+init=epsg:' . $this->ref['epsg_code']);

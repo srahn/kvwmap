@@ -23,7 +23,7 @@
 
 	<div style="padding: 6px; float: left; width: 54%; text-align: left;">
 		<span class="fett px20"><?php
-			echo $this->Stelle->getName(); ?>
+			echo $this->Stelle->Bezeichnung; ?>
 		</span>
 	</div>
 

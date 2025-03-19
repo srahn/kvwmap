@@ -219,45 +219,39 @@ class rolle {
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
 		$layer = array();
     # Abfragen der zu loggenden Layer der Rolle
-    $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
+    $sql = '
+			SELECT 
+				r2ul.layer_id 
+			FROM 
+				kvwmap.u_rolle2used_layer AS r2ul' . 
+    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    	WHERE 
+				r2ul.user_id = ' . $this->user_id . ' AND 
+				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
-      $sql.=',used_layer AS ul,layer AS l,stelle AS s';
-    }
-    $sql.=' WHERE r2ul.user_id='.$this->user_id.' AND r2ul.stelle_id='.$this->stelle_id;
-    if ($logconsume) {
-      $sql.=' AND r2ul.layer_id=ul.Layer_ID AND r2ul.stelle_id=ul.Stelle_ID';
-      $sql.=' AND ul.Layer_ID=l.Layer_ID AND ul.Stelle_ID=s.ID';
-      $sql.=' AND (s.logconsume="1"';
-      $sql.=' OR l.logconsume="1"';
-      $sql.=' OR ul.logconsume="1"';
-      $sql.=' OR r2ul.logconsume="1")';
+      $sql .= ' 
+				AND r2ul.layer_id = ul.layer_id 
+				AND r2ul.stelle_id = ul.stelle_id
+				AND ul.layer_id = l.layer_id 
+				AND ul.stelle_id = s.id
+				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
     }
     $anzaktivStatus=count($aktivStatus);
-    if ($anzaktivStatus>0) {
-      $sql.=' AND r2ul.aktivStatus IN ("'.$aktivStatus[0].'"';
-      for ($i=1;$i<$anzaktivStatus;$i++) {
-        $sql.=',"'.$aktivStatus[$i].'"';
-      }
-      $sql.=')';
+    if ($anzaktivStatus > 0) {
+      $sql.=' AND r2ul.aktivstatus IN (' . implode(',', $aktivStatus) . ')';
     }
     $anzqueryStatus=count($queryStatus);
-    if ($anzqueryStatus>0) {
-      $sql.=' AND r2ul.queryStatus IN ("'.$queryStatus[0].'"';
-      for ($i=1;$i<$anzqueryStatus;$i++) {
-        $sql.=',"'.$queryStatus[$i].'"';
-      }
-      $sql.=')';
+    if ($anzqueryStatus > 0) {
+      $sql.=' AND r2ul.querystatus IN (' . implode(',', $queryStatus) . ')';
     }
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle->getAktivLayer - Abfragen der aktiven Layer zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql,4, 0);
-    if (!$this->database->success) {
-      # Fehler bei Datenbankanfrage
-      $ret[0] = 1;
+    $ret = $this->database->execSQL($sql,4, 0);
+    if ($ret[0]) {
       $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
         $layer[] = $rs['layer_id'];
       }
       $ret[0] = 0;
@@ -749,19 +743,24 @@ class rolle {
       }
       else {
         # Eintragen der Consume Activity
-        $sql ='INSERT IGNORE INTO u_consume SET';
-        $sql.=' user_id='.$this->user_id;
-        $sql.=', stelle_id='.$this->stelle_id;
-        $sql.=', time_id="'.$time.'"';
-        $sql.=',activity="'.$activity.'"';
-        if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
-          $prevtime=$time;
-        }
-        $sql.=',prev="'.$prevtime.'"';        
-        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
-				$sql.=", epsg_code='".$this->epsg_code."'";
-        $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
-        $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
+        $sql ='
+					INSERT INTO 
+						u_consume 
+					VALUES (
+						' . $this->user_id . ', 
+						' . $this->stelle_id . ", 
+						'" . $time . "',
+						'" . $activity . "',						
+						" . $this->nImageWidth . ',
+						' . $this->nImageHeight . ", 
+						'" . $this->epsg_code . "', 
+						" . $this->oGeorefExt->minx . ', 
+						' . $this->oGeorefExt->miny . ', 
+						' . $this->oGeorefExt->maxx . ', 
+						' . $this->oGeorefExt->maxy . ",
+						'" . ($prevtime ?: $time) . "'
+					) 
+					ON CONFLICT DO NOTHING";
 				#echo '<p>SQL zum Eintragen von consume-Aktivitäten in der Karte: ' . $sql;
         $ret=$this->database->execSQL($sql,4, 1);
         
@@ -793,11 +792,15 @@ class rolle {
             # Wichtig wird das besonders für externe Datenquellen wie fremde WMS oder WFS Layer
             # Die dürfen nicht mit abgerechnet werden, wenn sie beim Client nicht erscheinen.
             # bzw. nicht geliefert werden
-            $sql ='INSERT IGNORE INTO u_consume2layer SET';
-            $sql.=' user_id='.$this->user_id;
-            $sql.=', stelle_id='.$this->stelle_id;
-            $sql.=', time_id="'.$time.'"';
-            $sql.=', layer_id='.$layer[$i];
+            $sql = '
+							INSERT INTO 
+								kvwmap.u_consume2layer
+							VALUES (
+            		' . $this->user_id . ', 
+								' . $this->stelle_id . ", 
+								'" . $time . "', 
+								" . $layer[$i] . '
+							)';
 						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {

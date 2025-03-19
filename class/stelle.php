@@ -190,7 +190,7 @@ class stelle {
 			END AS bezeichnung";
 		}
 		else {
-			$name_column = "s.Bezeichnung";
+			$name_column = "s.bezeichnung";
 		}
 
 		$sql = "
