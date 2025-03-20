@@ -1250,20 +1250,20 @@ class rolle {
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
 		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
 			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>'; exit;
-			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'Layer_ID'));
+			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
 			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
 			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if ($this->layerset[$i]['Layer_ID'] > 0) {
+				if ($this->layerset[$i]['layer_id'] > 0) {
 					$sql ="
 						UPDATE
-							u_rolle2used_layer
+							kvwmap.u_rolle2used_layer
 						SET
-							aktivStatus = '" . $aktiv_status . "'
+							aktivstatus = '" . $aktiv_status . "'
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							layer_id = " . $this->layerset[$i]['Layer_ID'] . "
+							layer_id = " . $this->layerset[$i]['layer_id'] . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -1271,13 +1271,13 @@ class rolle {
 				else { # Rollenlayer
 					$sql  = "
 						UPDATE
-							rollenlayer
+							kvwmap.rollenlayer
 						SET
-							aktivStatus = '" . $aktiv_status . "'
+							aktivstatus = '" . $aktiv_status . "'
 						WHERE
 							user_id = " . $this->user_id . " AND
 							stelle_id = " . $this->stelle_id . " AND
-							id = " . abs($this->layerset[$i]['Layer_ID']) . "
+							id = " . abs($this->layerset[$i]['layer_id']) . "
 					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
@@ -1286,27 +1286,26 @@ class rolle {
 				if ($aktiv_status != 0){
 					$sql = "
 						SELECT
-							Class_ID
+							class_id
 						FROM
-							classes
+							kvwmap.classes
 						WHERE
-							Layer_ID = " . $this->layerset[$i]['Layer_ID'] . "
+						layer_id = " . $this->layerset[$i]['layer_id'] . "
 					";
-					$this->database->execSQL($sql);
-					$result = $this->database->result;
-					while ($rs = mysqli_fetch_assoc($result)) {
-						if (value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['Class_ID'].', '.$formvars['class'.$rs['Class_ID']].');';
+					$ret = $this->database->execSQL($sql);
+					while ($rs = pg_fetch_assoc($ret[1])) {
+						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif (value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
+						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
 							$sql1 = "
 								DELETE FROM
-									u_rolle2used_class
+									kvwmap.u_rolle2used_class
 								WHERE
 									user_id = " . $this->user_id . " AND
 									stelle_id = " . $this->stelle_id . " AND
-									class_id = " . $rs['Class_ID'] . "
+									class_id = " . $rs['class_id'] . "
 							";
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}

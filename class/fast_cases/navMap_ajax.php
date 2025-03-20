@@ -2826,17 +2826,17 @@ class rolle {
 		$this->groupset = $this->getGroups('');
 		# Eintragen des group_status=1 für Gruppen, die angezeigt werden sollen
 		for ($i = 0; $i < count($this->groupset); $i++) {
-			if ($formvars['group_' . $this->groupset[$i]['id']] !== NULL) {
-				$group_status = ($formvars['group_' . $this->groupset[$i]['id']] == 1 ? 1 : 0);
+			if(value_of($formvars, 'group_'.$this->groupset[$i]['id']) !== '') {
+				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
-						`u_groups2rolle`
+						kvwmap.u_groups2rolle
 					SET
-						`status` = '" . $group_status . "'
+						status = '" . $group_status . "'
 					WHERE
-						`user_id` = " . $this->user_id . " AND
-						`stelle_id` = " . $this->stelle_id . " AND
-						`id` = " . $this->groupset[$i]['id'] . "
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						id = " . $this->groupset[$i]['id'] . "
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
@@ -2847,66 +2847,96 @@ class rolle {
 	}
 
   function getGroups($GroupName) {
-		global $language;
     # Abfragen der Gruppen in der Rolle
-    $sql ='SELECT g2r.*, ';
-		if($language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.$language.'` != "" THEN `Gruppenname_'.$language.'` ELSE `Gruppenname` END AS ';
-		}
-		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
-    $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
-    $sql.=' AND g2r.id = g.id';
-    if ($GroupName!='') {
-      $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
+    $sql = '
+			SELECT 
+				g2r.*, ' .
+				(rolle::$language != 'german'? 'CASE WHEN gruppenname_' . rolle::$language . ' != "" THEN gruppenname_' . rolle::$language . ' ELSE gruppenname END AS ' : '') . '
+				gruppenname 
+			FROM 
+				kvwmap.u_groups AS g, 
+				kvwmap.u_groups2rolle AS g2r 
+			WHERE 
+				g2r.stelle_id = ' . $this->stelle_id . ' AND 
+				g2r.user_id = '.$this->user_id . ' AND 
+				g2r.id = g.id';
+    if ($GroupName != '') {
+      $sql.=' AND gruppenname = "' . $GroupName . '"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->database->result->fetch_assoc()) {
+    $ret = $this->database->execSQL($sql);
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $groups[]=$rs;
     }
     return $groups;
   }
 
 	function setAktivLayer($formvars, $stelle_id, $user_id, $ignore_rollenlayer = false) {
-		$this->layerset=$this->getLayer('');
-		if(!$ignore_rollenlayer){
-			$rollenlayer=$this->getRollenLayer('', NULL);
+		$this->layerset = $this->getLayer('');
+		if (!$ignore_rollenlayer) {
+			$rollenlayer = $this->getRollenLayer('', NULL);
 			$this->layerset = array_merge($this->layerset, $rollenlayer);
 		}
 		# Eintragen des Status der Layer, 1 angezeigt oder 0 nicht.
-		for ($i=0;$i<count($this->layerset)-1;$i++) {
-			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>';
-			$aktiv_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'Layer_ID'));
-			$requires_status = value_of($formvars, 'thema'.value_of($this->layerset[$i], 'requires'));
-			if($aktiv_status != '' OR $requires_status != ''){										// entweder ist der Layer selber an oder sein requires-Layer
+		for ($i = 0; $i < count($this->layerset) - 1; $i++) {
+			#echo $i.' '.$this->layerset[$i]['Layer_ID'].' '.$formvars['thema'.$this->layerset[$i]['Layer_ID']].'<br>'; exit;
+			$aktiv_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'layer_id'));
+			$requires_status = value_of($formvars, 'thema' . value_of($this->layerset[$i], 'requires'));
+			if ($aktiv_status !== '' OR $requires_status !== '') { // entweder ist der Layer selber an oder sein requires-Layer
 				$aktiv_status = (int)$aktiv_status + (int)$requires_status;
-				if($this->layerset[$i]['Layer_ID'] > 0){
-					$sql ='UPDATE u_rolle2used_layer SET aktivStatus="'.$aktiv_status.'"';
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND layer_id='.$this->layerset[$i]['Layer_ID'];
+				if ($this->layerset[$i]['layer_id'] > 0) {
+					$sql ="
+						UPDATE
+							kvwmap.u_rolle2used_layer
+						SET
+							aktivstatus = '" . $aktiv_status . "'
+						WHERE
+							user_id = " . $this->user_id . " AND
+							stelle_id = " . $this->stelle_id . " AND
+							layer_id = " . $this->layerset[$i]['layer_id'] . "
+					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
-				else{						# Rollenlayer
-					$sql ='UPDATE rollenlayer SET aktivStatus="'.$aktiv_status.'"';
-					$sql.=' WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id;
-					$sql.=' AND id = '.abs($this->layerset[$i]['Layer_ID']);
+				else { # Rollenlayer
+					$sql  = "
+						UPDATE
+							kvwmap.rollenlayer
+						SET
+							aktivstatus = '" . $aktiv_status . "'
+						WHERE
+							user_id = " . $this->user_id . " AND
+							stelle_id = " . $this->stelle_id . " AND
+							id = " . abs($this->layerset[$i]['layer_id']) . "
+					";
 					$this->debug->write("<p>file:rolle.php class:rolle->setAktivLayer - Speichern der aktiven Layer zur Rolle:",4);
 					$this->database->execSQL($sql,4, $this->loglevel);
 				}
 				#neu eintragen der deaktiven Klassen
-				if($aktiv_status != 0){
-					$sql = 'SELECT Class_ID FROM classes WHERE Layer_ID='.$this->layerset[$i]['Layer_ID'].';';
-					$this->database->execSQL($sql);
-					$result = $this->database->result;
-					while ($rs = mysqli_fetch_assoc($result)) {
-						if(value_of($formvars, 'class'.$rs['Class_ID']) == '0' OR value_of($formvars, 'class'.$rs['Class_ID']) == '2'){
-							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['Class_ID'].', '.$formvars['class'.$rs['Class_ID']].');';
+				if ($aktiv_status != 0){
+					$sql = "
+						SELECT
+							class_id
+						FROM
+							kvwmap.classes
+						WHERE
+						layer_id = " . $this->layerset[$i]['layer_id'] . "
+					";
+					$ret = $this->database->execSQL($sql);
+					while ($rs = pg_fetch_assoc($ret[1])) {
+						if (value_of($formvars, 'class'.$rs['class_id']) == '0' OR value_of($formvars, 'class'.$rs['class_id']) == '2'){
+							$sql2 = 'REPLACE INTO u_rolle2used_class (user_id, stelle_id, class_id, status) VALUES ('.$this->user_id.', '.$this->stelle_id.', '.$rs['class_id'].', '.$formvars['class'.$rs['class_id']].');';
 							$this->database->execSQL($sql2,4, $this->loglevel);
 						}
-						elseif(value_of($formvars, 'class'.$rs['Class_ID']) == '1'){
-							$sql1 = 'DELETE FROM u_rolle2used_class WHERE user_id='.$this->user_id.' AND stelle_id='.$this->stelle_id.' AND class_id='.$rs['Class_ID'].';';
+						elseif (value_of($formvars, 'class'.$rs['class_id']) == '1'){
+							$sql1 = "
+								DELETE FROM
+									kvwmap.u_rolle2used_class
+								WHERE
+									user_id = " . $this->user_id . " AND
+									stelle_id = " . $this->stelle_id . " AND
+									class_id = " . $rs['class_id'] . "
+							";
 							$this->database->execSQL($sql1,4, $this->loglevel);
 						}
 					}
@@ -2917,100 +2947,103 @@ class rolle {
 	}
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
-		global $language;
+		$layer = [];
 		$layer_name_filter = '';
 		$privilegfk = '';
 
 		# Abfragen der Layer in der Rolle
-		if ($language != 'german') {
+		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . $language . "` != \"\" THEN l.`Name_" . $language . "`
-				ELSE l.`Name`
-			END AS Name";
+				WHEN l.name_" . rolle::$language . " != \"\" THEN l.name_" . rolle::$language . "
+				ELSE l.name
+			END AS name";
 		} else {
-			$name_column = "l.Name";
+			$name_column = "l.name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
-				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+				$layer_name_filter .= " AND l.layer_id = " . $LayerName;
 			} else {
-				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+				$layer_name_filter = " AND (l.name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
 			$privilegfk = ",
 				(
 					SELECT
 						max(las.privileg)
 					FROM
-						layer_attributes AS la,
-						layer_attributes2stelle AS las
+						kvwmap.layer_attributes AS la,
+						kvwmap.layer_attributes2stelle AS las
 					WHERE
 						la.layer_id = ul.Layer_ID AND
 						form_element_type = 'SubformFK' AND
 						las.stelle_id = ul.Stelle_ID AND
 						ul.Layer_ID = las.layer_id AND
-						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
 
 		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
+		}
+		else {
+			$active_filter = '';
 		}
 
 		$sql = "
 			SELECT " .
 			$name_column . ",
-				l.Layer_ID,
-				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.layer_id,
+				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.user_id)
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
-				ul.`queryable`,
-				l.`drawingorder`,
-				ul.`legendorder`,
-				ul.`minscale`,
-				ul.`maxscale`,
-				ul.`offsite`,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				ul.queryable,
+				l.drawingorder,
+				ul.legendorder,
+				ul.minscale,
+				ul.maxscale,
+				ul.offsite,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				l.`shared_from`,
-				l.`geom_column`,
-				ul.`postlabelcache`,
-				`Filter`,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				l.shared_from,
+				l.geom_column,
+				ul.postlabelcache,
+				filter,
 				r2ul.gle_view,
-				ul.`template`,
-				`header`,
-				`footer`,
-				ul.`symbolscale`,
-				ul.`logconsume`,
-				ul.`requires`,
-				ul.`privileg`,
-				ul.`export_privileg`,
-				`start_aktiv`,
+				ul.template,
+				header,
+				footer,
+				ul.symbolscale,
+				ul.logconsume,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				start_aktiv,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer 
 				" . $privilegfk . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
-				layer AS l JOIN
-				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l JOIN
+				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
+				kvwmap.u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID = " . $this->stelle_id . " AND
-				r2ul.User_ID = " . $this->user_id .
+				ul.stelle_id = " . $this->stelle_id . " AND
+				r2ul.user_id = " . $this->user_id .
 			$layer_name_filter . 
 			$active_filter . "
 			ORDER BY
@@ -3018,32 +3051,28 @@ class rolle {
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
-			return 0;
-		}
+		$ret = $this->database->execSQL($sql);
 		$i = 0;
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == '') {
-					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+				if ($rs['filter'] == '') {
+					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
 				} else {
-					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
+					$rs['filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
 				}
 			}
 			if ($replace_params) {
-				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data') as $key) {
 					$rs[$key] = replace_params_rolle(
 						$rs[$key],
 						['duplicate_criterion' => $rs['duplicate_criterion']]
 					);
 				}
 			}
-			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'name' : 'alias'];
 			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
-			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['layer_id'];
 			$i++;
 		}
 		return $layer;
@@ -3058,33 +3087,46 @@ class rolle {
 				$where[] = "l.id = " . $LayerName;
 			}
 			else {
-				$where[] = "l.`Name` LIKE '" . $LayerName . "'";
+				$where[] = "l.name LIKE '" . $LayerName . "'";
 			}
 		}
 		if ($typ != NULL) {
-			$where[] = "`Typ` = '" . $typ . "'";
+			$where[] = "typ = '" . $typ . "'";
 		}
 		$sql = "
 			SELECT
 				l.*,
 				4 as tolerance,
-				-l.id as Layer_ID,
+				-l.id as layer_id,
 				l.query as pfad,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter
+				'(' || rollenfilter || ')' as filter
 			FROM
-				rollenlayer AS l
-			" . (count($where) > 0 ? "WHERE " . implode(" AND ", $where) : '') . "
+				kvwmap.rollenlayer AS l
+			WHERE
+				l.stelle_id = " . $this->stelle_id . " AND
+				l.user_id = " . $this->user_id . "
 		";
-
-		#echo $sql.'<br>';
+		if ($LayerName != '') {
+			$sql .=' AND (l.name LIKE "'.$LayerName.'" ';
+			if (is_numeric($LayerName)) {
+				$sql .= 'OR l.id = "' . $LayerName . '")';
+			}
+			else {
+				$sql .= ')';
+			}
+		}
+		if ($typ != NULL){
+			$sql .= " AND typ = '" . $typ . "'";
+		}
+		#echo '<br>SQL zur Abfrage des Rollenlayers: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->database->execSQL($sql);
 		$layer = array();
-		while ($rs = $this->database->result->fetch_assoc()) {
-			$layer[]=$rs;
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Name_or_alias'] = $rs['name'];
+			$layer[] = $rs;
 		}
 		return $layer;
 	}
@@ -3238,6 +3280,7 @@ class rolle {
   }
 
   function setConsumeActivity($time,$activity,$prevtime) {
+		$errmsg = '';
     if (LOG_CONSUME_ACTIVITY==1) {
       # function setzt eine Verbraucheraktivität (den Zugriff auf Layer oder Daten)
       # Starten der Transaktion
@@ -3249,20 +3292,25 @@ class rolle {
       }
       else {
         # Eintragen der Consume Activity
-        $sql ='INSERT INTO u_consume SET';
-        $sql.=' user_id='.$this->user_id;
-        $sql.=', stelle_id='.$this->stelle_id;
-        $sql.=', time_id="'.$time.'"';
-        $sql.=',activity="'.$activity.'"';
-        if ($prevtime=="0000-00-00 00:00:00" OR $prevtime=='') {
-          $prevtime=$time;
-        }
-        $sql.=',prev="'.$prevtime.'"';        
-        $sql.=', nimagewidth='.$this->nImageWidth.',nimageheight='.$this->nImageHeight;
-				$sql.=", epsg_code='".$this->epsg_code."'";
-        $sql.=', minx='.$this->oGeorefExt->minx.', miny='.$this->oGeorefExt->miny;
-        $sql.=', maxx='.$this->oGeorefExt->maxx.', maxy='.$this->oGeorefExt->maxy;
-        #echo $sql;
+        $sql ='
+					INSERT INTO 
+						u_consume 
+					VALUES (
+						' . $this->user_id . ', 
+						' . $this->stelle_id . ", 
+						'" . $time . "',
+						'" . $activity . "',						
+						" . $this->nImageWidth . ',
+						' . $this->nImageHeight . ", 
+						'" . $this->epsg_code . "', 
+						" . $this->oGeorefExt->minx . ', 
+						' . $this->oGeorefExt->miny . ', 
+						' . $this->oGeorefExt->maxx . ', 
+						' . $this->oGeorefExt->maxy . ",
+						'" . ($prevtime ?: $time) . "'
+					) 
+					ON CONFLICT DO NOTHING";
+				#echo '<p>SQL zum Eintragen von consume-Aktivitäten in der Karte: ' . $sql;
         $ret=$this->database->execSQL($sql,4, 1);
         
         if ($ret[0]) {
@@ -3293,11 +3341,16 @@ class rolle {
             # Wichtig wird das besonders für externe Datenquellen wie fremde WMS oder WFS Layer
             # Die dürfen nicht mit abgerechnet werden, wenn sie beim Client nicht erscheinen.
             # bzw. nicht geliefert werden
-            $sql ='INSERT INTO u_consume2layer SET';
-            $sql.=' user_id='.$this->user_id;
-            $sql.=', stelle_id='.$this->stelle_id;
-            $sql.=', time_id="'.$time.'"';
-            $sql.=', layer_id='.$layer[$i];
+            $sql = '
+							INSERT INTO 
+								kvwmap.u_consume2layer
+							VALUES (
+            		' . $this->user_id . ', 
+								' . $this->stelle_id . ", 
+								'" . $time . "', 
+								" . $layer[$i] . '
+							)';
+						#echo '<p>SQL zum Eintragen des consumierten Layers: ' . $sql;
             $ret=$this->database->execSQL($sql,4, 1);
             if ($ret[0]) {
               # Fehler bei Datenbankanfrage
@@ -3336,57 +3389,58 @@ class rolle {
     return $ret;
   }
 
-  function set_last_time_id($time){
-    # Eintragen der last_time_id
-    $sql = 'UPDATE rolle SET last_time_id="'.$time.'"';
-    $sql.= ' WHERE user_id = '.$this->user_id.' AND stelle_id = '.$this->stelle_id;
-    #echo $sql;
-    $ret=$this->database->execSQL($sql,4, 1);
-    return $ret;
-  }
+	function set_last_time_id($time) {
+		# Eintragen der last_time_id
+		$sql = "
+			UPDATE
+				rolle
+			SET
+				last_time_id = '" . $time . "'
+			WHERE
+				user_id = " . $this->user_id . " AND
+				stelle_id = " . $this->stelle_id . "
+		";
+		#echo $sql;
+		$ret=$this->database->execSQL($sql, 4, 1);
+		return $ret;
+	}
 
   function getAktivLayer($aktivStatus,$queryStatus,$logconsume) {
 		$layer = array();
     # Abfragen der zu loggenden Layer der Rolle
-    $sql ='SELECT r2ul.layer_id FROM u_rolle2used_layer AS r2ul';
+    $sql = '
+			SELECT 
+				r2ul.layer_id 
+			FROM 
+				kvwmap.u_rolle2used_layer AS r2ul' . 
+    		($logconsume? ', kvwmap.used_layer AS ul, kvwmap.layer AS l, kvwmap.stelle AS s' : '') . '
+    	WHERE 
+				r2ul.user_id = ' . $this->user_id . ' AND 
+				r2ul.stelle_id = ' . $this->stelle_id;
     if ($logconsume) {
-      $sql.=',used_layer AS ul,layer AS l,stelle AS s';
-    }
-    $sql.=' WHERE r2ul.user_id='.$this->user_id.' AND r2ul.stelle_id='.$this->stelle_id;
-    if ($logconsume) {
-      $sql.=' AND r2ul.layer_id=ul.Layer_ID AND r2ul.stelle_id=ul.Stelle_ID';
-      $sql.=' AND ul.Layer_ID=l.Layer_ID AND ul.Stelle_ID=s.ID';
-      $sql.=' AND (s.logconsume="1"';
-      $sql.=' OR l.logconsume="1"';
-      $sql.=' OR ul.logconsume="1"';
-      $sql.=' OR r2ul.logconsume="1")';
+      $sql .= ' 
+				AND r2ul.layer_id = ul.layer_id 
+				AND r2ul.stelle_id = ul.stelle_id
+				AND ul.layer_id = l.layer_id 
+				AND ul.stelle_id = s.id
+				AND (s.logconsume OR l.logconsume OR ul.logconsume OR r2ul.logconsume)';
     }
     $anzaktivStatus=count($aktivStatus);
-    if ($anzaktivStatus>0) {
-      $sql.=' AND r2ul.aktivStatus IN ("'.$aktivStatus[0].'"';
-      for ($i=1;$i<$anzaktivStatus;$i++) {
-        $sql.=',"'.$aktivStatus[$i].'"';
-      }
-      $sql.=')';
+    if ($anzaktivStatus > 0) {
+      $sql.=' AND r2ul.aktivstatus IN (' . implode(',', $aktivStatus) . ')';
     }
     $anzqueryStatus=count($queryStatus);
-    if ($anzqueryStatus>0) {
-      $sql.=' AND r2ul.queryStatus IN ("'.$queryStatus[0].'"';
-      for ($i=1;$i<$anzqueryStatus;$i++) {
-        $sql.=',"'.$queryStatus[$i].'"';
-      }
-      $sql.=')';
+    if ($anzqueryStatus > 0) {
+      $sql.=' AND r2ul.querystatus IN (' . implode(',', $queryStatus) . ')';
     }
     #echo $sql;
     $this->debug->write("<p>file:rolle.php class:rolle->getAktivLayer - Abfragen der aktiven Layer zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql,4, 0);
-    if (!$this->database->success) {
-      # Fehler bei Datenbankanfrage
-      $ret[0] = 1;
+    $ret = $this->database->execSQL($sql,4, 0);
+    if ($ret[0]) {
       $ret[1] = '<br>Die aktiven Layer konnten nicht abgefragt werden.<br>'.$ret[1];
     }
     else {
-      while ($rs = $this->database->result->fetch_assoc()) {
+			while ($rs = pg_fetch_assoc($ret[1])) {
         $layer[] = $rs['layer_id'];
       }
       $ret[0] = 0;
@@ -3407,10 +3461,15 @@ class pgdatabase {
 	var $blocktransaction;
 	var $host;
 	var $port;
+	var $dbname;
+	var $user;
+	var $passwd;
 	var $schema;
 	var $pg_text_attribute_types = array('character', 'character varying', 'text', 'timestamp without time zone', 'timestamp with time zone', 'date', 'USER-DEFINED');
 	var $version = POSTGRESVERSION;
 	var $connection_id;
+	var $error;
+	var $dbName;
 
 	function __construct() {
 		global $debug;
@@ -3426,6 +3485,7 @@ class pgdatabase {
 		$this->type='postgresql';
 		$this->commentsign='--';
 		$this->err_msg = '';
+		$this->error = false;
 		# Wenn dieser Parameter auf 1 gesetzt ist werden alle Anweisungen
 		# START TRANSACTION, ROLLBACK und COMMIT unterdrückt, so daß alle anderen SQL
 		# Anweisungen nicht in Transactionsblöcken ablaufen.
@@ -3536,8 +3596,13 @@ class pgdatabase {
     return $ret[1];
   }  
 
-	function execSQL($sql, $debuglevel, $loglevel, $suppress_error_msg = false) {
+	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
+		if (!$this->dbConn) {
+			echo '<p>pgconn: ' . $this->dbConn;
+		}
 		$ret = array(); // Array with results to return
+		$ret['msg'] = '';
+		$strip_context = true;
 
 		switch ($this->loglevel) {
 			case 0 : {
@@ -3553,43 +3618,97 @@ class pgdatabase {
 		# SQL-Statement wird nur ausgeführt, wenn DBWRITE gesetzt oder
 		# wenn keine INSERT, UPDATE und DELETE Anweisungen in $sql stehen.
 		# (lesend immer, aber schreibend nur mit DBWRITE=1)
-		if (DBWRITE OR (!stristr($sql,'INSERT') AND !stristr($sql,'UPDATE') AND !stristr($sql,'DELETE'))) {
-			#echo "<br>".$sql;
-			if ($this->schema != ''){
+		if (DBWRITE OR (!stristr($sql, 'INSERT') AND !stristr($sql, 'UPDATE') AND !stristr($sql, 'DELETE'))) {
+			#echo "<br>SQL in execSQL: " . $sql;
+			if ($this->schema != '') {
 				$sql = "SET search_path = " . $this->schema . ", public;" . $sql;
 			}
-			if ($suppress_error_msg) {
-				$query = @pg_query($this->dbConn, $sql);
+			if (count($prepared_params) > 0) {
+				$query_id = 'query_' . rand();
+				$query = pg_prepare($this->dbConn, $query_id, $sql);
+				$query = pg_execute($this->dbConn, $query_id, $prepared_params);
 			}
 			else {
+				#echo "<br>SQL in execSQL: " . $sql;
 				$query = @pg_query($this->dbConn, $sql);
 			}
-
 			//$query=0;
-			if ($query == 0) {
-				$ret[0] = 1;
+			if ($query === false) {
+				$this->error = true;
 				$ret['success'] = false;
-				$errormessage = pg_last_error($this->dbConn);
-				#header('error: true');		// damit ajax-Requests das auch mitkriegen
-				$ret[1] = "Fehler bei SQL Anweisung:<br><br>\n\n" . $sql . "\n\n<br><br>" . $errormessage;
-				$ret['msg'] = $ret[1];
-				$ret['type'] = 'error';
-				if (!$suppress_error_msg) {
-					echo "<br><b>" . $ret[1] . "</b>";
+				$ret['sql'] = $sql;
+				$last_error = pg_last_error($this->dbConn);
+				if ($strip_context AND strpos($last_error, 'CONTEXT: ') !== false) {
+					$ret['msg'] = substr($last_error, 0, strpos($last_error, 'CONTEXT: '));
 				}
-				$this->debug->write("<br><b>" . $ret[1] . "</b>", $debuglevel);
+				else {
+					$ret['msg'] = $last_error;
+				}
+
+				if (strpos($last_error, '{') !== false AND strpos($last_error, '}') !== false) {
+					# Parse als JSON String;
+					$error_obj = json_decode(substr($last_error, strpos($last_error, '{'), strpos($last_error, '}') - strpos($last_error, '{') + 1), true);
+					if ($error_obj) {
+						if (array_key_exists('msg_type', $error_obj)) {
+							$ret['type'] = $error_obj['msg_type'];
+						}
+						if (array_key_exists('msg', $error_obj) AND $error_obj['msg'] != '') {
+							$ret['msg'] = $error_obj['msg'];
+						}
+					}
+				}
+				else {
+					$ret['type'] = 'error';
+				}
+				$this->debug->write("<br><b>" . $last_error . "</b>", $debuglevel);
 				if ($logsql) {
-					$this->logfile->write($this->commentsign . " " . $ret[1]);
+					$this->logfile->write($this->commentsign . ' ' . $sql . ' ' . $last_error);
 				}
 			}
 			else {
-				# Abfrage wurde erfolgreich ausgeführt
+				# Abfrage wurde zunächst erfolgreich ausgeführt
 				$ret[0] = 0;
 				$ret['success'] = true;
-				$ret[1] = $query;
-				$ret['query'] = $ret[1]; 
+				$ret[1] = $ret['query'] = $query;
+
+				# Prüfe ob eine Fehlermeldung in der Notice steckt
+				if (PHPVERSION >= 710) {
+					$last_notices = pg_last_notice($this->dbConn, PGSQL_NOTICE_ALL);
+				}
+				else {
+					$last_notices = array(pg_last_notice($this->dbConn));
+				}
+				foreach ($last_notices as $last_notice) {
+					if ($strip_context AND strpos($last_notice, 'CONTEXT: ') !== false) {
+						$last_notice = substr($last_notice, 0, strpos($last_notice, 'CONTEXT: '));
+					}
+					# Verarbeite Notice nur, wenn sie nicht schon mal vorher ausgewertet wurde
+					if ($last_notice != '' AND ($this->gui->notices == NULL OR !in_array($last_notice, $this->gui->notices))) {
+						$this->gui->notices[] = $last_notice;
+						if (strpos($last_notice, '{') !== false AND strpos($last_notice, '}') !== false) {
+							# Parse als JSON String
+							$notice_obj = json_decode(substr($last_notice, strpos($last_notice, '{'), strpos($last_notice, '}') - strpos($last_notice, '{') + 1), true);
+							if ($notice_obj AND array_key_exists('success', $notice_obj)) {
+								if (!$notice_obj['success']) {
+									$ret['success'] = false;
+								}
+								if (array_key_exists('msg_type', $notice_obj)) {
+									$ret['type'] = $notice_obj['msg_type'];
+								}
+								if (array_key_exists('msg', $notice_obj) AND $notice_obj['msg'] != '') {
+									$ret['msg'] .= $notice_obj['msg'];
+								}
+							}
+						}
+						else {
+							# Gebe Noticetext wie er ist zurück
+							$ret['msg'] .= $last_notice.chr(10).chr(10);
+						}
+					}
+				}
+
+				# Schreibe Meldungen in Log und Debugfile
 				$this->debug->write("<br>" . $sql, $debuglevel);
-				# 2006-07-04 pk $logfile ersetzt durch $this->logfile
 				if ($logsql) {
 					$this->logfile->write($sql . ';');
 				}
@@ -3610,6 +3729,29 @@ class pgdatabase {
 				$this->logfile->write($sql . ';');
 			}
 			$this->debug->write("<br>" . $sql, $debuglevel);
+		}
+
+		if ($ret['success']) {
+			# alles ok mach nichts weiter
+		}
+		else {
+			# Fehler setze entsprechende Flags und Fehlermeldung
+			$ret[0] = 1;
+			$ret[1] = $ret['msg'];
+			if ($suppress_err_msg) {
+				# mache nichts, denn die Fehlermeldung wird unterdrückt
+			}
+			else {
+				if (strpos(strtolower($this->gui->formvars['export_format']), 'json') !== false) {
+					header('Content-Type: application/json; charset=utf-8');
+					echo utf8_decode(json_encode($ret));
+					exit;
+				}
+				# gebe Fehlermeldung aus.
+				$ret[1] = $ret['msg'] = sql_err_msg('Fehler bei der Abfrage der PostgreSQL-Datenbank:' . $sql, $sql, $ret['msg'], 'error_div_' . rand(1, 99999));
+				$this->gui->add_message($ret['type'], $ret['msg']);
+				header('error: true');	// damit ajax-Requests das auch mitkriegen
+			}
 		}
 		return $ret;
 	}

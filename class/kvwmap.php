@@ -1294,7 +1294,7 @@ echo '			</table>
 			if ($layer['queryable'] == 1 AND $this->user->rolle->singlequery < 2 AND !value_of($this->formvars, 'nurFremdeLayer')) {
 				$input_attr['id'] = 'qLayer' . $layer['layer_id'];
 				$input_attr['name'] = 'qLayer' . $layer['layer_id'];
-				$input_attr['title'] = ($layer['queryStatus'] == 1 ? $this->deactivatequery : $this->activatequery);
+				$input_attr['title'] = ($layer['querystatus'] == 1 ? $this->deactivatequery : $this->activatequery);
 				$input_attr['value'] = 1;
 				$input_attr['class'] = 'info-select-field';
 				$input_attr['type'] = (($this->user->rolle->singlequery == 1 or $layer['selectiontype'] == 'radio') ? 'radio' : 'checkbox');
@@ -1325,7 +1325,7 @@ echo '			</table>
 						event,
 						document.getElementById('thema" . $layer['layer_id'] . "'),
 						document.getElementById('qLayer" . $layer['layer_id'] . "')," .
-						($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['Gruppe'] : "''") . "," .
+						($layer['selectiontype'] == 'radio' ? "document.GUI.radiolayers_" . $layer['gruppe'] : "''") . "," .
 						($this->user->rolle->singlequery == 1 ? "document.GUI.layers" : "''") . "," .
 						$this->user->rolle->instant_reload . "
 					)" :
@@ -1339,7 +1339,7 @@ echo '			</table>
 				foreach ($input_attr AS $key => $value) {
 					$legend .= ($value != '' ? ' ' . $key . '="' . $value . '"' : '');
 				}
-				$legend .= ($layer['queryStatus'] == 1 ? ' checked' : '');
+				$legend .= ($layer['querystatus'] == 1 ? ' checked' : '');
 				$legend .= '>';
 			}
 			else{
@@ -1352,15 +1352,15 @@ echo '			</table>
 			$legend .=  '<input id="thema'.$layer['layer_id'].'" ';
 			if(value_of($layer, 'selectiontype') == 'radio'){
 				$legend .=  'type="radio" ';
-				$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), document.GUI.radiolayers_'.$layer['Gruppe'].', '.$this->user->rolle->instant_reload.')"';
-				$this->radiolayers[$layer['Gruppe']] = value_of($this->radiolayers, $layer['Gruppe']).$layer['layer_id'].'|';
+				$legend .=  ' onClick="this.checked = this.checked2;" onMouseUp="this.checked = this.checked2;" onMouseDown="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), document.GUI.radiolayers_'.$layer['gruppe'].', '.$this->user->rolle->instant_reload.')"';
+				$this->radiolayers[$layer['gruppe']] = value_of($this->radiolayers, $layer['gruppe']).$layer['layer_id'].'|';
 			}
 			else{
 				$legend .=  'type="checkbox" ';
 				$legend .=  ' onClick="updateQuery(event, document.getElementById(\'thema'.$layer['layer_id'].'\'), document.getElementById(\'qLayer'.$layer['layer_id'].'\'), \'\', '.$this->user->rolle->instant_reload.')"';
 			}
 			$legend .=  ' name="thema'.$layer['layer_id'].'" value="1" ';
-			if($layer['aktivStatus'] == 1){
+			if($layer['aktivstatus'] == 1){
 				$legend .=  'checked title="'.$this->deactivatelayer.'"';
 			}
 			else{
@@ -1406,7 +1406,7 @@ echo '			</table>
 			}
 			$legend .=  '</td><td valign="top">';
 			// die nicht sichtbaren Layer brauchen dieses Hiddenfeld mit dem gleichen Namen nur bei Radiolayern, damit sie beim Neuladen ausgeschaltet werden können, denn ein disabledtes input-Feld wird ja nicht übergeben
-			$legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="'.$layer['aktivStatus'].'">';
+			$legend .=  '<input type="hidden" name="thema'.$layer['layer_id'].'" value="'.$layer['aktivstatus'].'">';
 			$legend .=  '<input ';
 			if($layer['selectiontype'] == 'radio'){
 				$legend .=  'type="radio" ';
@@ -1415,7 +1415,7 @@ echo '			</table>
 			else{
 				$legend .=  'type="checkbox" ';
 			}
-			if($layer['aktivStatus'] == 1){
+			if($layer['aktivstatus'] == 1){
 				$legend .=  'checked="true" ';
 			}
 			$legend .= 'id="thema'.$layer['layer_id'].'" name="thema'.$layer['layer_id'].'" disabled="true"></td><td id="legend_layer_' . $layer['layer_id'] . '">';
@@ -1466,7 +1466,7 @@ echo '			</table>
 		$legend .= ' >' . html_umlaute($layer['alias_link']) . '</span>';
 		$legend .= '</a>';
 		# Bei eingeschalteten Layern und eingeschalteter Rollenoption ist ein Optionen-Button sichtbar
-		if ($layer['aktivStatus'] == 1 and $this->user->rolle->showlayeroptions) {
+		if ($layer['aktivstatus'] == 1 and $this->user->rolle->showlayeroptions) {
 			$legend .= '&nbsp';
 			if ($layer['rollenfilter'] != '') {
 				$legend .= '<a href="javascript:void(0)" onclick="getLayerOptions('.$layer['layer_id'] . ')">
