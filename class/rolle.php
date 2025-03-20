@@ -114,7 +114,7 @@ class rolle {
 						form_element_type = 'SubformFK' AND
 						las.stelle_id = ul.Stelle_ID AND
 						ul.Layer_ID = las.layer_id AND
-						las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',', -1)
+						las.attributename = split_part(split_part(la.options, ';', 1) , ',', -1)
 				) as privilegfk";
 		}
 

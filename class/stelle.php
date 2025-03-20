@@ -2026,7 +2026,7 @@ class stelle {
 						used_layer ul ON l.Layer_ID = ul.Layer_ID LEFT JOIN
 						u_groups g ON COALESCE(ul.group_id, l.Gruppe) = g.id LEFT JOIN
 						layer_attributes AS la ON la.layer_id = ul.Layer_ID AND form_element_type = 'SubformFK' LEFT JOIN
-						layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = SUBSTRING_INDEX(SUBSTRING_INDEX(la.options, ';', 1) , ',',  -1)
+						layer_attributes2stelle AS las ON las.stelle_id = ul.Stelle_ID AND ul.Layer_ID = las.layer_id AND las.attributename = split_part(split_part(la.options, ';', 1) , ',',  -1)
 					WHERE
 						ul.stelle_id = " . $this->id . " AND
 						l.connectiontype = 6 AND
