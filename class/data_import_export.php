@@ -1285,6 +1285,7 @@ class data_import_export {
 		ini_set('memory_limit', '8192M');
 		global $GUI;
 		global $kvwmap_plugins;
+		rolle::$export = 'true';
 		$currenttime = date('Y-m-d H:i:s',time());
 		$this->formvars = $formvars;
 		$export_rollen_layer = ((int)$this->formvars['selected_layer_id'] < 0);
@@ -1332,8 +1333,7 @@ class data_import_export {
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params_rolle(
-					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id),
-					['$EXPORT' => 'true']
+					$mapdb->getFilter($this->formvars['selected_layer_id'], $stelle->id)
 				);
 			}
 
