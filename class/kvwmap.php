@@ -9899,7 +9899,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
 				$layerset[0]['attributes'] = $mapDB->add_attribute_values($layerset[0]['attributes'], $layerdb, $layerset[0]['shape'], true, $this->Stelle->id);
 				# Datendrucklayouts abfragen
 				include_(CLASSPATH.'datendrucklayout.php');
-				$ddl = new ddl($this->database);
+				$ddl = new ddl($this->pgdatabase);
 				$layerset[0]['layouts'] = $ddl->load_layouts($this->Stelle->id, NULL, $layerset[0]['Layer_ID'], array(0,1));
 
 				# last_search speichern
@@ -21470,16 +21470,15 @@ class db_mapObj{
 				l.oid, 
 				ul.* 
 			FROM 
-				layer as l,
-				used_layer as ul 
+				kvwmap.layer as l,
+				kvwmap.used_layer as ul 
 			WHERE 
-				l.Layer_ID = ul.Layer_ID AND
-				l.Layer_ID = '.$id.' AND 
-				ul.Stelle_ID = '.$this->Stelle_ID;
+				l.layer_id = ul.layer_id AND
+				l.layer_id = '.$id.' AND 
+				ul.stelle_id = '.$this->Stelle_ID;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->get_used_Layer - Lesen eines Layers:<br>" . $sql,4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		$layer = $this->db->result->fetch_array();
+		$ret = $this->db->execSQL($sql);
+		$layer = pg_fetch_array($ret[1]);
 		return $layer;
   }
 

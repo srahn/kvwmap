@@ -4,7 +4,7 @@
 	global $layer_ids_flst_auszuege;
 	if(!empty($layer_ids_flst_auszuege)){
 		include_once(CLASSPATH.'datendrucklayout.php');
-		$ddl = new ddl($this->database);
+		$ddl = new ddl($this->pgdatabase);
 		foreach($layer_ids_flst_auszuege as $layer_id){
 			$generische_auszuege[$layer_id] = $ddl->load_layouts($this->Stelle->id, NULL, $layer_id, array(0,1));
 		}
