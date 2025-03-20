@@ -66,6 +66,7 @@ function replace_params_rolle($str, $additional_params = NULL) {
 		$str = str_replace('$STELLE', rolle::$stelle_bezeichnung, $str);
 		$str = str_replace('$HIST_TIMESTAMP', rolle::$hist_timestamp, $str);
 		$str = str_replace('$LANGUAGE', rolle::$language, $str);
+		$str = str_replace('$EXPORT', rolle::$export, $str);
 	}
 	return $str;
 }
@@ -1797,6 +1798,7 @@ class rolle {
 	static $user_ID;
 	static $stelle_ID;
 	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
 	var $newtime;
 	var $gui_object;
@@ -1809,10 +1811,11 @@ class rolle {
 		$this->debug = $debug;
 		$this->user_id = $user_id;
 		$this->stelle_id = $stelle_id;
-		$this->database=$database;
+		$this->database = $database;
 		rolle::$user_ID = $user_id;
 		rolle::$stelle_ID = $stelle_id;
 		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 
