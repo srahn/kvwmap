@@ -466,13 +466,13 @@ class GUI {
 		else {
 			$layer = $this->user->rolle->getRollenLayer(-$this->formvars['layer_id']);
 		}
-		$selectable_layer_groups = $mapDB->read_Groups(true, 'Gruppenname', "selectable_for_shared_layers");
+		$selectable_layer_groups = $mapDB->read_Groups(true, 'gruppenname', "selectable_for_shared_layers");
 		if ($layer[0]['connectiontype'] == 6) {
 			$layerdb = $mapDB->getlayerdatabase($this->formvars['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->getDataAttributes($layerdb, $this->formvars['layer_id'],  array('if_empty_use_query' => true));
-			$layer_labelitems = new MyObject($this, 'layer_labelitems');
-			$labelitems = $layer_labelitems->find_where('layer_id = ' . ($layer[0]['original_layer_id'] ?: $layer[0]['Layer_ID']), 'order');
-			$query_attributes = $mapDB->read_layer_attributes(($layer[0]['original_layer_id'] ?: $layer[0]['Layer_ID']), $layerdb, NULL, false, false, false);
+			$layer_labelitems = new PgObject($this, 'kvwmap', 'layer_labelitems');
+			$labelitems = $layer_labelitems->find_where('layer_id = ' . ($layer[0]['original_layer_id'] ?: $layer[0]['layer_id']), '"order"');
+			$query_attributes = $mapDB->read_layer_attributes(($layer[0]['original_layer_id'] ?: $layer[0]['layer_id']), $layerdb, NULL, false, false, false);
 			$privileges = $this->Stelle->get_attributes_privileges($this->formvars['layer_id']);
 		}
 		$disabled_classes = $mapDB->read_disabled_classes();
@@ -18219,7 +18219,7 @@ class db_mapObj{
 				JOIN kvwmap.u_groups2rolle AS g2r ON g.id = g2r.id") . "
 			WHERE
 				" . $where . ($all ? "" : " AND
-				g2r.stelle_ID = " . $this->Stelle_ID . " AND
+				g2r.stelle_id = " . $this->Stelle_ID . " AND
 				g2r.user_id = " . $this->User_ID) . "
 			ORDER BY " .
 				($order != '' ? replace_semicolon($order) : "g.order") . "
@@ -21221,10 +21221,10 @@ class db_mapObj{
 		$params = array();
 		$sql = "
 			SELECT
-				p.id, p.key, l.Layer_ID, l.Name, l.alias
+				p.id, p.key, l.layer_id, l.name, l.alias
 			FROM
-				layer_parameter as p,
-				layer as l
+				kvwmap.layer_parameter as p,
+				kvwmap.layer as l
 			WHERE
 				locate(
 					concat('$', p.key),
@@ -21235,18 +21235,18 @@ class db_mapObj{
 			$sql .= " AND p.id = ".$params_id;
 		}
 		if ($layer_id != NULL) {
-			$sql .= " AND l.Layer_ID = " . $layer_id;
+			$sql .= " AND l.layer_id = " . $layer_id;
 		}
-		$this->db->execSQL($sql);
-		if (!$this->db->success) {
+		$ret = $this->db->execSQL($sql);
+		if (!$ret[0]) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
 		else {
-			while ($rs = $this->db->result->fetch_assoc()) {
-				$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+			while ($rs = pg_fetch_assoc($ret[1])) {
+				$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->Stelle->useLayerAliases) ? 'name' : 'alias'];
 				$rs['Name_or_alias'] = replace_params_rolle($rs['Name_or_alias']);
 				$params[$rs['id']]['key'] = $rs['key'];
-				$params[$rs['id']][] = ['Layer_ID' => $rs['Layer_ID'], 'Name' => $rs['Name_or_alias']];
+				$params[$rs['id']][] = ['layer_id' => $rs['layer_id'], 'name' => $rs['Name_or_alias']];
 			}
 		}
 		return $params;
