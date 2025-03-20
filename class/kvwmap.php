@@ -18054,8 +18054,8 @@ class db_mapObj{
 			SELECT DISTINCT
 				l.oid,
 				coalesce(rl.transparency, ul.transparency, 100) as transparency,
-				rl.aktivStatus,
-				rl.queryStatus,
+				rl.aktivstatus,
+				rl.querystatus,
 				rl.gle_view,
 				rl.showclasses,
 				rl.logconsume,
