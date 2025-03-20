@@ -2246,7 +2246,7 @@ echo '			</table>
 		$layer->metadata->set('wms_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		$layer->metadata->set('wfs_title', $layerset['Name_or_alias'] ?: ''); #Mapserver8
 		# Umlaute umwandeln weil es in einigen Programmen (masterportal und MapSolution) mit Komma und Leerzeichen in wms_group_title zu problemen kommt.
-		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['Gruppenname']));
+		$layer->metadata->set('wms_group_title', sonderzeichen_umwandeln($layerset['gruppenname']));
 		$layer->metadata->set('wms_queryable',$layerset['queryable']);
 		$layer->metadata->set('wms_format',$layerset['wms_format'] ?: ''); #Mapserver8
 		$layer->metadata->set('ows_server_version',$layerset['wms_server_version'] ?: ''); #Mapserver8
@@ -17950,7 +17950,7 @@ class db_mapObj{
     		AND s.id = " . $this->Stelle_ID . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->read_ReferenceMap - Lesen der Referenzkartendaten:<br>",4);
-		$ret = $this->db->execSQL($sql);
+		$ret = $this->db->execSQL($sql, 4, 0, true);
 		$rs = pg_fetch_assoc($ret[1]);
     $this->referenceMap = $rs;
 #		echo '<br>sql: ' . print_r($sql, true);
@@ -18123,10 +18123,10 @@ class db_mapObj{
 				gr.stelle_id = " . $this->Stelle_ID . " AND
 				gr.user_id = " . $this->User_ID .
 				($groups != NULL ? " AND g.id IN (" . $groups . ")" : '') .
-				($this->nurAufgeklappteLayer ? " AND (rl.aktivStatus != '0' OR gr.status != '0' OR ul.requires != '')" : '') .
-				($this->nurAktiveLayer ? " AND (rl.aktivStatus != '0')" : '') .
+				($this->nurAufgeklappteLayer ? " AND (rl.aktivstatus != '0' OR gr.status != '0' OR ul.requires IS NOT NULL)" : '') .
+				($this->nurAktiveLayer ? " AND (rl.aktivstatus != '0')" : '') .
 				($this->OhneRequires ? " AND (ul.requires IS NULL)" : '') .
-				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivStatus != '0')" : '') .
+				($this->nurFremdeLayer ? " AND (c.host NOT IN ('pgsql', 'localhost') OR l.connectiontype != 6 AND rl.aktivstatus != '0')" : '') .
 				($this->nurNameLike ? " AND l.name LIKE '" . $this->nurNameLike . "'" : '') . 
 				($this->nurPostgisLayer ? " AND l.connectiontype = 6" : '') . 
 				($this->keinePostgisLayer ? " AND l.connectiontype != 6" : '') . 
@@ -18347,7 +18347,7 @@ class db_mapObj{
 			#Anne
 			if($disabled_classes){
 				if($disabled_classes['status'][$rs['class_id']] == 2) {
-					$rs['Status'] = 1;
+					$rs['status'] = 1;
 					for($i = 0; $i < count($rs['Style']); $i++) {
 						if ($rs['Style'][$i]['color'] != '' AND $rs['Style'][$i]['color'] != '-1 -1 -1') {
 							$rs['Style'][$i]['outlinecolor'] = $rs['Style'][$i]['color'];
@@ -18362,9 +18362,9 @@ class db_mapObj{
 				elseif ($disabled_classes['status'][$rs['class_id']] == '0') {
 					$rs['Status'] = 0;
 				}
-				else $rs['Status'] = 1;
+				else $rs['status'] = 1;
 			}
-			else $rs['Status'] = 1;
+			else $rs['status'] = 1;
 
 			$Classes[] = $rs;
 			$index++;

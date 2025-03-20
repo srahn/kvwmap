@@ -63,22 +63,21 @@ class rolle {
 		return $formvars;
 	}
 
-	function set_selected_button($selectedButton) {
-		$this->selectedButton = $selectedButton;
-		# Eintragen des aktiven Button
-		$sql = "
-			UPDATE
-				rolle
-			SET
-				selectedButton = '" . $selectedButton . "'
-			WHERE
-				user_id = " . $this->user_id . " AND
-				stelle_id = " . $this->stelle_id . "
-		";
-		$this->debug->write("<p>file:rolle.php class:rolle->set_selected_button - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
-		$this->database->execSQL($sql,4, $this->loglevel);
-		return 1;
-	}
+  function set_selected_button($selectedButton) {
+    $this->selectedButton=$selectedButton;
+    # Eintragen des aktiven Button
+    $sql = "
+			UPDATE 
+				kvwmap.rolle 
+			SET 
+				selectedbutton = '" . $selectedButton . "'
+    	WHERE 
+				user_id = " . $this->user_id . ' 
+				AND stelle_id = ' . $this->stelle_id;
+    $this->debug->write("<p>file:rolle.php class:rolle->set_selected_button - Speichern des zuletzt gewählten Buttons aus dem Kartenfensters:",4);
+    $this->database->execSQL($sql,4, $this->loglevel);
+    return 1;
+  }
 
 	function getLayer($LayerName, $only_active_or_requires = false, $replace_params = true) {
 		$layer = [];
