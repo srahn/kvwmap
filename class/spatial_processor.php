@@ -40,6 +40,26 @@ class spatial_processor {
     $this->pgdatabase = $pgdatabase;
 		$this->rolle = $rolle;
   }
+
+	function getGeomFromGeoJSON($geojson, $epsg) {
+		$sql = "
+			SELECT 
+				ST_AsSVG(geom) as svg,
+				round(ST_Length(geom)) as length
+			FROM
+				(SELECT
+					ST_Transform(
+							ST_GeomFromGeoJSON('" . $geojson . "'),
+							" . $epsg . "
+					) as geom
+				) as foo
+		";
+		$ret = $this->pgdatabase->execSQL($sql,4, 0);
+		if (!$ret[0]) {
+      $rs = pg_fetch_assoc($ret[1]);
+			return json_encode($rs);
+    }
+	}
   
   function split_multi_geometries($wktgeom, $layer_epsg, $client_epsg, $geomtype){
   	$sql = "select " . (substr($geomtype, 0, 5) == 'MULTI'? 'st_multi' : '') . "(ST_geometryN(st_transform(st_geomfromtext('".$wktgeom."', ".$client_epsg."), ".$layer_epsg."),"; 
@@ -57,7 +77,7 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_collect(geom) as geom from (select (st_dump(st_split(st_geomfromtext('".$geom_1."'), st_geomfromtext('".$geom_2."')))).geom as geom) as foo) as fooo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_assoc($ret[1]);
@@ -195,7 +215,7 @@ class spatial_processor {
   	$sql = "SELECT round(st_length_utm(st_geomfromtext('".$geom."'), ".EPSGCODE_ALKIS.", ".EARTH_RADIUS.")::numeric, 2)";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -208,7 +228,20 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_translate(st_geomfromtext('".$geom."'), ".$x.", ".$y.") as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['svg'] . '||' . $rs['wkt'];
+			return $result;
+    }
+  }
+
+	function rotate($geom, $angle){
+  	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_rotate(st_geomfromtext('".$geom."'), RADIANS(".$angle."), st_centroid(st_geomfromtext('".$geom."'))) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
@@ -221,14 +254,27 @@ class spatial_processor {
   	$sql = "SELECT st_astext(geom) as wkt, st_assvg(geom, 0, 15) as svg FROM (SELECT st_reverse(st_geomfromtext('".$geom."')) as geom) as foo";
   	$ret = $this->pgdatabase->execSQL($sql,4, 0);
     if ($ret[0]) {
-      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgef�hrt werden!\n'.$ret[1];
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
     }
     else {
     	$rs = pg_fetch_array($ret[1]);
 			$result = $rs['svg'] . '||' . $rs['wkt'];
 			return $result;
     }
-  }	
+  }
+	
+	function centroid($geom){
+  	$sql = "SELECT st_x(geom) as x, st_y(geom) as y FROM (SELECT st_centroid(st_geomfromtext('".$geom."')) as geom) as foo";
+  	$ret = $this->pgdatabase->execSQL($sql,4, 0);
+    if ($ret[0]) {
+      $rs = '\nAuf Grund eines Datenbankfehlers konnte die Operation nicht durchgeführt werden!\n'.$ret[1];
+    }
+    else {
+    	$rs = pg_fetch_array($ret[1]);
+			$result = $rs['x'] . ' ' . $rs['y'];
+			return $result;
+    }
+  }
   
   function process_query($formvars){
 		$formvars['fromwhere'] = str_replace("''", "'", $formvars['fromwhere']);
@@ -310,9 +356,17 @@ class spatial_processor {
 			case 'translate':{
 				$result = $this->translate($polywkt1, $formvars['translate_x'], $formvars['translate_y']);
 			}break;
+
+			case 'rotate':{
+				$result = $this->rotate($polywkt1, $formvars['angle']);
+			}break;
 			
 			case 'reverse':{
 				$result = $this->reverse($polywkt1);
+			}break;
+
+			case 'centroid':{
+				$result = $this->centroid($polywkt1);
 			}break;
 			
 			case 'buffer':{
@@ -402,7 +456,7 @@ class spatial_processor {
 			}break;
 			
 		}
-		if($result != '' AND !in_array($formvars['operation'], array('isvalid', 'area', 'length', 'transformPoint', 'transform'))){
+		if($result != '' AND !in_array($formvars['operation'], array('isvalid', 'area', 'length', 'transformPoint', 'transform', 'centroid'))){
 			if($formvars['resulttype'] != 'wkt'){
 				$result = $this->transformCoordsSVG($result);
 			}
@@ -998,6 +1052,22 @@ class spatial_processor {
     }
     return $WKT;
   }
+
+	function composeMultipointWKTStringFromSVGPath($svgpath) {
+		if ($svgpath != '') {
+			$wkt = "MULTIPOINT((";
+			$coord = explode(' ', $svgpath);
+			$wkt = $wkt . $coord[1] . " " . $coord[2];
+			for ($i = 3; $i < count($coord) - 1; $i++){
+				if ($coord[$i] != ""){
+					$wkt = $wkt . "),(" . $coord[$i] . " " . $coord[$i+1];
+				}
+				$i++;
+			}
+			$wkt = $wkt . "))";
+		}
+		return $wkt;
+	}
   
   function transformCoordsSVG($path){
 	if($path != ''){

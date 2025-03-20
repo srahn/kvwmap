@@ -4,6 +4,12 @@
 		<? include(SNIPPETS . 'gui_head.php'); ?>
 	</head>
 	<body onload="onload_functions();">
+		<? include(LAYOUTPATH.'snippets/SVGvars_defs.php');	?>
+		<svg xmlns="http://www.w3.org/2000/svg" width="0" height="0">
+		<defs>
+			<? echo $SVGvars_defs; ?>
+		</defs>
+		</svg>
 		<div id="waitingdiv" style="position: absolute;height: 100%; width: 100%; display:none; z-index: 1000000; text-align: center">
 			<div style="position: absolute;  top: 50%; left: 50%; transform: translate(-50%,-50%);">
 				<i class="fa fa-spinner fa-7x wobble-fix spinner"></i>
@@ -30,7 +36,7 @@
 						<table cellpadding=0 cellspacing=0>
 							<tr> 
 								<td colspan="2" id="header"><?php
-									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php",4);
+									$this->debug->write("<br>Include <b>".HEADER."</b> in gui.php", 4, false);
 									include(HEADER); ?>
 								</td>
 							</tr>
@@ -38,7 +44,7 @@
 								<td id="menuebar" valign="top" align="center"><?php
 									include(SNIPPETS . "menue.php"); ?>
 								</td>
-								<td align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
+								<td id="container_paint_td" align="center" width="100%" height="100%" valign="top" style="background: url('<?php echo BG_IMAGE; ?>'); border-right: 1px solid; border-color: #FFFFFF #CCCCCC #CCCCCC;">
 									<div id="container_paint" style="height:100%; position: relative; <? echo (in_array($this->main, ['map.php', 'druckausschnittswahl.php']) ? 'overflow: hidden' : ''); ?>">		<!-- overflow wird für rausfliegende Legende benötigt und height:100% für den Box-Shadow unter der MapFunctionsBar und Legende -->
 										<script type="text/javascript">
 											window.name = 'root';

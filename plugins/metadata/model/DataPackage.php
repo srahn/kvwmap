@@ -13,6 +13,7 @@ class DataPackage extends PgObject {
 	public $export_format;
 	public $datatype;
 	public $datatype_icon;
+	public $num_features;
 
 	function __construct($gui) {
 		$gui->debug->show('Create new Object from Class DataPackage in table ' . DataPackage::$schema . '.' .  DataPackage::$tableName, $this->write_debug);
@@ -21,6 +22,7 @@ class DataPackage extends PgObject {
 			r.id AS ressource_id,
 			r.bezeichnung,
 			r.layer_id,
+			r.ansprechperson,
 			p.id,
 			p.stelle_id,
 			p.pack_status_id,
@@ -28,7 +30,10 @@ class DataPackage extends PgObject {
 			l.connectiontype,
 			l.datentyp,
 			p.created_at,
-			p.created_from
+			p.created_from,
+			p.updated_at,
+			i.dateninhaber,
+			i.abk
 		";
 		$this->from = "
 			metadata.ressources r LEFT JOIN
@@ -39,12 +44,18 @@ class DataPackage extends PgObject {
 					metadata.data_packages
 			) p ON r.id = p.ressource_id LEFT JOIN
 			metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
-			kvwmap.layer l ON r.layer_id = l.layer_id
+			kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
+			metadata.dateninhaber i ON r.dateninhaber_id = i.id
 		";
 		$this->where = "
 			r.use_for_datapackage AND
 			r.layer_id IS NOT NULL
 		";
+	}
+
+	public static	function find($gui, $where, $order = '') {
+		$datapackage = new DataPackage($gui);
+		return $datapackage->find_where($where, $order);
 	}
 
 	public static	function find_by_id($gui, $id) {
@@ -71,6 +82,7 @@ class DataPackage extends PgObject {
 
 	public static	function find_by_stelle_id($gui, $stelle_id) {
 		$package = new DataPackage($gui);
+		// $package->show = true;
 		$params = array(
 			'select' => $package->select,
 			'from' => "
@@ -84,13 +96,16 @@ class DataPackage extends PgObject {
 						stelle_id = " . $stelle_id . "
 				) p ON r.id = p.ressource_id LEFT JOIN
 				metadata.pack_status s ON p.pack_status_id = s.id LEFT JOIN
-				kvwmap.layer l ON r.layer_id = l.layer_id
+				kvwmap.layer l ON r.layer_id = l.layer_id LEFT JOIN
+				metadata.dateninhaber i ON r.dateninhaber_id = i.id JOIN
+				kvwmap.used_layer ul ON r.layer_id = ul.layer_id
 			",
 			'where' => $package->where . " AND
 				(
 					p.stelle_id IS NULL OR
 					p.stelle_id = " . $stelle_id . "
-				)
+				) AND
+				ul.stelle_id = " . $stelle_id . "
 			",
 			'order' => "r.bezeichnung"
 		);
@@ -173,8 +188,45 @@ class DataPackage extends PgObject {
 	}
 
 	function get_export_path() {
-		$this->export_path = SHAPEPATH . 'datentool/datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
+		$this->export_path = METADATA_DATA_PATH . 'datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
 		return $this->export_path;
+	}
+
+	/**
+	 * Function return the name of file that contains the content of the data package
+	 * It consists on the path, file name and file extension .zip
+	 */
+	function get_export_file() {
+		$export_path = $this->get_export_path();
+		$this->export_file = (substr($export_path, -1, 1) == '/' ? substr($export_path, 0, -1) : $export_path) . '.zip';
+		return $this->export_file;
+	}
+
+	function get_inhaber_info() {
+		$infos = array();
+		if ($this->get('dateninhaber') != '') {
+			$infos[] = 'Dateninhaber: ' . $this->get('dateninhaber');
+		}
+		if ($this->get('abk') != '') {
+			$infos[] = 'Abkürzung: ' . $this->get('abk');
+		}
+		if ($this->get('ansprechperson') != '') {
+			$infos[] = 'Ansprechperson: ' . $this->get('ansprechperson');
+		}
+		return implode('<br>', $infos);
+	}
+
+	function delete_export_path() {
+		$export_path = $this->get_export_path();
+		array_map('unlink', glob($export_path . '*.*'));
+		rmdir($export_path);
+		return $export_path;
+	}
+
+	function delete_export_file() {
+		$export_file = $this->get_export_file();
+		unlink($export_file);
+		return $export_file;
 	}
 
 	/**
@@ -184,7 +236,7 @@ class DataPackage extends PgObject {
 	 */
 	public static	function get_bundle_package_file($stelle_id) {
 		$bundle_package_file = array(
-			SHAPEPATH . 'datentool/datenpakete/' . $stelle_id . '/',
+			METADATA_DATA_PATH . 'datenpakete/' . $stelle_id . '/',
 			METADATA_BUNDLE_PACKAGE_NAME . '.zip'
 		);
 		return $bundle_package_file;

@@ -22,19 +22,26 @@
 <tr><?
 	if ($layer['export_privileg'] != 0) {
 		 ?>
-		<td style="padding: 5 0 0 0;"><?
-			$numSearchResultsText = ($layer['count'] > $maxRows ? '&nbsp;(' . $layer['count'] . ')' : ''); ?>
-			<select
-				id="all_<? echo $layer['Layer_ID']; ?>"
+		<td style="padding: 5 10 0 0;"><?
+			$numSearchResultsText = $layer['count']; ?>
+			<input type="radio"
+				id="all_<? echo $layer['Layer_ID']; ?>_1"
 				name="all_<? echo $layer['Layer_ID']; ?>"
 				onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);"
+				value=""
+				checked="true"
 			>
-				<option value=""><? echo $strSelectedDatasets; ?>:</option>
-				<option value="true"><? echo $strAllDatasets . ':' . $numSearchResultsText; ?></option>
-			</select>
+			<label for="all_<? echo $layer['Layer_ID']; ?>_1"><? echo $strSelectedDatasets; ?></label> (<label id="selected_count_<? echo $layer['Layer_ID']; ?>">0</label>)
+			<br>
+			<input type="radio"
+				id="all_<? echo $layer['Layer_ID']; ?>_2"
+				name="all_<? echo $layer['Layer_ID']; ?>"
+				onchange="update_buttons(this.value, <? echo $layer['Layer_ID']; ?>);"
+				value="true"
+			>
+			<label for="all_<? echo $layer['Layer_ID']; ?>_2"><? echo $strAllDatasets . ' (' . $numSearchResultsText . ')'; ?></label>
 		</td><?
 	}
 	else { ?>
 		<td style="padding: 5 0 0 0;"><? echo $strSelectedDatasets . ':'; ?></td><?
 	} ?>
-</tr>

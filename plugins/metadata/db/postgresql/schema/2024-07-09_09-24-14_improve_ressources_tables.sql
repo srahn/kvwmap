@@ -71,7 +71,7 @@ BEGIN;
   ('ogr2ogr_shape', 'Import shape mit ogr2ogr in Postgres', 1),
   ('ogr2ogr_gml', 'Import GML mit ogr2ogr in Postgres', 2),
   ('gml_dictionary', 'Import GML-Dictionary in Postgres', 3),
-  ('csv_by_import', 'CSV-Import mit Header in Postgres', 4),
+  ('csv_by_header', 'CSV-Import mit Header in Postgres', 4),
   ('raster2pgsql', 'Import mit raster2pgsql in Postgres', 5);
 
   --
@@ -97,7 +97,7 @@ BEGIN;
     reihenfolge INTEGER
   );
   INSERT INTO metadata.update_status (id, status, reihenfolge) VALUES
-  (-1, 'Abbruch wegem Fehler', 11),
+  (-1, 'Abbruch wegen Fehler', 11),
   ( 0, 'Uptodate', 1),
   ( 1, 'Update gestartet', 2),
   ( 2, 'Download gestartet', 3),

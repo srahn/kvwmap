@@ -115,8 +115,8 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (13, 'LAYER_ERROR_PAGE', 'SNIPPETS', 'layer_error_page.php', 'Seite zur Fehlerbehandlung, die durch fehlerhafte Layer verursacht werden; unterhalb von /snippets\r\n', 'string', 'Layout', '', 1, 3),
 (14, 'AGREEMENT_MESSAGE', 'CUSTOM_PATH', '', 'Seite mit der Datenschutzerklärung, die einmalig beim Login angezeigt wird\r\nz.B. custom/ds_gvo.htm', 'string', 'Layout', '', 1, 2),
 (15, 'CUSTOM_STYLE', 'CUSTOM_PATH', '', 'hier kann eine eigene css-Datei angegeben werden\r\n', 'string', 'Layout', '', 1, 2),
-(16, 'ZOOM2COORD_STYLE_ID', '', '3244', 'hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden\r\n', 'string', 'Layout', '', 1, 2),
-(17, 'ZOOM2POINT_STYLE_ID', '', '3244', '', 'string', 'Layout', '', 1, 2),
+(16, 'ZOOM2COORD_STYLE_ID', '', '', 'hier können eigene Styles für den Koordinatenzoom und Punktzoom definiert werden\r\n', 'string', 'Layout', '', 1, 2),
+(17, 'ZOOM2POINT_STYLE_ID', '', '', '', 'string', 'Layout', '', 1, 2),
 (18, 'GLEVIEW', '', '2', 'Schalter für eine zeilen- oder spaltenweise Darstellung der Attribute im generischen Layereditor  # Version 1.6.5\r\n', 'numeric', 'Layout', '', 1, 2),
 (19, 'sizes', '', '{\r\n    \"layouts/gui.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 10\r\n        },\r\n        \"header\": {\r\n            \"height\": 25\r\n        },\r\n        \"scale_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"lagebezeichnung_bar\": {\r\n            \"height\": 30\r\n        },\r\n        \"map_functions_bar\": {\r\n            \"height\": 36\r\n        },\r\n        \"footer\": {\r\n            \"height\": 20\r\n        },\r\n        \"menue\": {\r\n            \"width\": 240,\r\n            \"hide_width\": 22\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250,\r\n            \"hide_width\": 27\r\n        }\r\n    },\r\n    \"gui_button.php\": {\r\n        \"margin\": {\r\n            \"width\": 10,\r\n            \"height\": 22\r\n        },\r\n        \"header\": {\r\n            \"height\": 25\r\n        },\r\n        \"footer\": {\r\n            \"height\": 107\r\n        },\r\n        \"menue\": {\r\n            \"width\": 209\r\n        },\r\n        \"legend\": {\r\n            \"width\": 250\r\n        }\r\n    }\r\n}', 'Höhen und Breiten von Browser, Rand, Header, Footer, Menü und Legende																# Version 2.7\r\n', 'array', 'Layout', '', 1, 2),
 (20, 'LEGEND_GRAPHIC_FILE', '', '', 'zusätzliche Legende; muss unterhalb von snippets liegen\r\n', 'string', 'Layout', '', 1, 2),
@@ -149,7 +149,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (47, 'MAXQUERYROWS', '', '100', 'maximale Anzahl der in einer Sachdatenabfrage zurückgelieferten Zeilen.\r\n', 'numeric', 'Administration', '', 1, 2),
 (48, 'ALWAYS_DRAW', '', 'true', 'definiert, ob der Polygoneditor nach einem Neuladen\r\nder Seite immer in den Modus \"Polygon zeichnen\" wechselt\r\n', 'boolean', 'Administration', '', 1, 2),
 (49, 'EARTH_RADIUS', '', '6384000', 'Parameter für die Strecken- und Flächenreduktion\r\n', 'numeric', 'Administration', '', 1, 2),
-(50, 'admin_stellen', '', '[\r\n    1,54\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
+(50, 'admin_stellen', '', '[\r\n    1\r\n]', 'Adminstellen\r\n', 'array', 'Administration', '', 1, 2),
 (51, 'gast_stellen', '', '[\r\n  \r\n]', 'Gast-Stellen\r\n', 'array', 'Administration', '', 1, 2),
 (52, 'selectable_limits', '', '[\r\n    10,\r\n    25,\r\n    50,\r\n    100,\r\n    200\r\n]', 'auswählbare Treffermengen\r\n', 'array', 'Administration', '', 1, 2),
 (53, 'selectable_scales', '', '[\r\n    500,\r\n    1000,\r\n    2500,\r\n    5000,\r\n    7500,\r\n    10000,\r\n    25000,\r\n    50000,\r\n    100000,\r\n    250000,\r\n    500000,\r\n    1000000\r\n]', 'auswählbare Maßstäbe\r\n', 'array', 'Administration', '', 1, 2),
@@ -185,7 +185,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (84, 'BOOTSTRAPTABLE_PATH', 'THIRDPARTY_PATH', 'bootstrap-table-1.20.2/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 (85, 'PROJ4JS_PATH', 'THIRDPARTY_PATH', 'proj4js-2.4.3/', '', 'string', 'Pfadeinstellungen', '', 1, 2),
 (86, 'POSTGRESBINPATH', '', '/usr/bin/', 'Bin-Pfad der Postgres-tools (shp2pgsql, pgsql2shp)\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
-(87, 'OGR_BINPATH', '', '/usr/bin/', 'Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
+(87, 'OGR_BINPATH', '', '', 'Bin-Pfad der OGR-tools (ogr2ogr, ogrinfo)\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 (88, 'ZIP_PATH', '', 'zip', 'Pfad zum Zip-Programm (unter Linux: \'zip -j\', unter Windows z.B. \'c:/programme/Zip/bin/zip.exe\')\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 (89, 'CUSTOM_IMAGE_PATH', 'SHAPEPATH', 'bilder/', 'Pfad für selbst gemachte Bilder\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
 (90, 'CACHEPATH', 'INSTALLPATH', 'cache/', 'Cachespeicherort\r\n', 'string', 'Pfadeinstellungen', '', 1, 2),
@@ -265,7 +265,7 @@ INSERT INTO `config` (`id`, `name`, `prefix`, `value`, `description`, `type`, `g
 (164, 'OWS_CONTACTINSTRUCTIONS', '', 'Telefon oder E-Mail', 'Metadatenelement zur Beschreibung von Webdiensten im Anwendungsfall go=OWS', 'string', 'OWS-METADATEN', NULL, 1, 2),
 (165, 'OWS_ROLE', '', 'GIS-Administrator', 'Metadatenelement zur Beschreibung von Webdiensten im Anwendungsfall go=OWS', 'string', 'OWS-METADATEN', NULL, 1, 2),
 (166, 'CUSTOM_RASTER', 'SHAPEPATH', 'custom_raster/', 'Das Verzeichnis, in dem die von den Nutzern hochgeladenen Rasterdateien abgelegt werden.', 'string', 'Pfadeinstellungen', NULL, 1, 2),
-(167, 'OGR_BINPATH_GDAL', '', '/usr/local/gdal/bin/', 'Wenn man dem ogr oder gdal Befehl docker exec gdal voranstellt, wird das ogr bzw. gdal in dem gdal Container verwendet statt des ogr bzw. gdal im Web Container. Diese Konstante gibt an wo sich das Bin-Verzeichnis innerhalb des verwendeten GDAL-Containers befindet.', 'string', 'Pfadeinstellungen', NULL, 1, 2),
+(167, 'OGR_BINPATH_GDAL', '', '', 'Wenn man dem ogr oder gdal Befehl docker exec gdal voranstellt, wird das ogr bzw. gdal in dem gdal Container verwendet statt des ogr bzw. gdal im Web Container. Diese Konstante gibt an wo sich das Bin-Verzeichnis innerhalb des verwendeten GDAL-Containers befindet.', 'string', 'Pfadeinstellungen', NULL, 1, 2),
 (168, 'PASSWORD_INFO', '', '', 'Hier kann ein Hinweistext eingetragen werden, welcher bei der Passwortvergabe erscheint.', 'string', 'Administration', NULL, 1, 2),
 (169, 'GEO_NAME_SEARCH_URL', '', 'https://nominatim.openstreetmap.org/search.php?format=geojson&q=', 'URL eines Geo-Namen-Such-Dienstes. Der Dienst muss GeoJSON zurückliefern.', 'string', 'Administration', NULL, 1, 2),
 (170, 'GEO_NAME_SEARCH_PROPERTY', '', 'display_name', 'Das Attribut welches als Suchergebnis bei der Geo-Namen-Suche angezeigt werden soll.', 'string', 'Administration', NULL, 1, 2),
@@ -337,7 +337,7 @@ CREATE TABLE `cron_jobs` (
 
 INSERT INTO `cron_jobs` (`id`, `bezeichnung`, `beschreibung`, `time`, `query`, `function`, `url`, `user_id`, `stelle_id`, `aktiv`, `dbname`, `user`) VALUES
 (1, 'Lösche MapServer tmp Dateien', 'Löscht jeden Tag Dateien die älter als 1 Tag sind aus Verzeichnis /var/www/tmp', '1 1 * * *', '', 'find /var/www/tmp -mtime +1 ! -path /var/www/tmp -exec rm -rf {} +', NULL, 0, 0, 1, '', 'gisadmin'),
-(2, 'Lösche Gastnutzer', 'Jeden Tag 01:01', '1 1 * * *', NULL, '/var/www/apps/kvwmap_intern/tools/deleteGastUser.sh', NULL, 2, 54, 1, NULL, 'gisadmin');
+(2, 'Lösche Gastnutzer', 'Jeden Tag 01:01', '1 1 * * *', NULL, '/var/www/apps/kvwmap_intern/tools/deleteGastUser.sh', NULL, 2, 1, 1, NULL, 'gisadmin');
 
 -- --------------------------------------------------------
 
@@ -2104,7 +2104,6 @@ INSERT INTO `u_groups2rolle` (`user_id`, `stelle_id`, `id`, `status`) VALUES
 (1, 1, 20, 0),
 (1, 1, 31, 1),
 (1, 1, 32, 1),
-(1, 1, 54, 1),
 (1, 1, 57, 0),
 (1, 1, 59, 0),
 (1, 1, 60, 1),

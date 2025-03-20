@@ -286,7 +286,12 @@ function rotate_print_extent(angle){
 <?		}		?>
 
 			<div class="print_options_box" style="text-align: center; padding: 10px 5px 10px 5px">
-	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();"><br><br>
+				<? echo $strOutputFileType; ?>
+				<select name="output_filetype">
+					<option value="pdf" <? if (in_array($this->formvars['output_filetype'], ['', 'pdf'])){ echo 'selected'; } ?>>PDF</option>
+					<option value="image/jpeg" <? if ($this->formvars['output_filetype'] == 'image/jpeg'){ echo 'selected'; } ?>>JPG</option>
+				</select><br><br>
+	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">&nbsp;
 	      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
 	    </div>
 			

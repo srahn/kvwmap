@@ -41,5 +41,9 @@ class DataPackage {
     this.showButton();
     document.getElementById('status_span_' + this.get('ressource_id')).innerHTML = this.getPackStatus();
     document.getElementById('package_id_span_' + this.get('ressource_id')).innerHTML = (this.get('id') ? ' (ID: ' + this.get('id') + ')' : '');
+    document.getElementById('num_packages_span').innerHTML = numDataPackages();
+    document.getElementById('num_packed_packages_span').innerHTML = numPackedDataPackages();
+    document.getElementById('num_packages_in_progress_span').innerHTML = numDataPackagesInProgress();
+    document.getElementById('num_ordered_packages_span').innerHTML = numOrderedDataPackages();
   }
 }

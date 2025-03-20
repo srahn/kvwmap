@@ -77,7 +77,7 @@ $last_x = 0;
 $svg .= '<g id="buttons_FS" cursor="pointer" onmousedown="hide_tooltip()" onmouseout="hide_tooltip()" transform="translate('.$button_position.')">';
 $buttons_fs .= deletebuttons($strUndo, $strDelete);
 $buttons_fs .= polygonbuttons($strDrawPolygon, $strCutByPolygon);
-$buttons_fs .= boxbuttons();
+$buttons_fs .= boxbuttons($strCreateRectangle);
 $buttons_fs .= flurstquerybuttons();
 $buttons_fs .= bufferbuttons($strBuffer, $strBufferedLine, $strCircle, $strParallelPolygon);
 $buttons_fs .= vertex_edit_buttons($strCornerPoint);

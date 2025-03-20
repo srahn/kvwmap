@@ -1,5 +1,6 @@
 <?php
 header('Content-Type: text/html; charset=utf-8');
+
 # CLI-Parameterübergabe
 if (isset($argv)) {
 	array_shift($argv);
@@ -213,7 +214,6 @@ else {
 	include_(CLASSPATH . 'bauleitplanung.php');
 }
 include(WWWROOT . APPLVERSION . 'start.php');
-
 $GUI->go = $go;
 
 # Laden der Plugins index.phps
@@ -223,7 +223,7 @@ if (!FAST_CASE) {
 	}
 }
 # Übergeben des Anwendungsfalles
-$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4);
+$debug->write("<br><b>Anwendungsfall go: " . $go . "</b>", 4, false);
 function go_switch($go, $exit = false) {
 	global $GUI;
 	global $newPassword;
@@ -278,6 +278,10 @@ function go_switch($go, $exit = false) {
 				$GUI->drawMap(true);
 				$GUI->mime_type = 'image/' . $format;
 				$GUI->output();
+			} break;
+
+			case 'get_route' : {
+				$GUI->getRoute($GUI->formvars);
 			} break;
 
 			case 'get_position_qrcode' : {
@@ -613,6 +617,10 @@ function go_switch($go, $exit = false) {
 				$GUI->showMapImage();
 			} break;
 
+			case 'show_missing_documents' : {
+				$GUI->show_missing_documents();
+			} break;
+
 			case 'showRefMapImage' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->getRefMapImage($GUI->formvars['ID']);
@@ -792,24 +800,34 @@ function go_switch($go, $exit = false) {
 				$GUI->PointEditor_Senden();
 			}break;
 
+			# MultipointEditor
+			case 'MultipointEditor' : {
+				$GUI->MultiGeomEditor();
+			}break;
+
+			# MultipointEditor
+			case 'MultipointEditor_Senden' : {
+				$GUI->MultiGeomEditor_Senden();
+			}break;
+
 			# PolygonEditor
 			case 'PolygonEditor' : {
-				$GUI->PolygonEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# PolygonEditor
 			case 'PolygonEditor_Senden' : {
-				$GUI->PolygonEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# LineEditor
 			case 'LineEditor' : {
-				$GUI->LineEditor();
+				$GUI->MultiGeomEditor();
 			}break;
 
 			# LineEditor
 			case 'LineEditor_Senden' : {
-				$GUI->LineEditor_Senden();
+				$GUI->MultiGeomEditor_Senden();
 			}break;
 
 			# Sachdaten speichern
@@ -1097,7 +1115,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Druckausschnittswahl_Drucken' : {
 				$GUI->createMapPDF($GUI->formvars['aktiverRahmen'], false);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1106,7 +1124,7 @@ function go_switch($go, $exit = false) {
 					$GUI->formvars['druckrahmen_id'] = DEFAULT_DRUCKRAHMEN_ID;
 				}
 				$GUI->createMapPDF($GUI->formvars['druckrahmen_id'], false, true);
-				$GUI->mime_type='pdf';
+				$GUI->mime_type = $GUI->formvars['output_filetype'] ?: 'pdf';
 				$GUI->output();
 			} break;
 
@@ -1881,7 +1899,7 @@ function go_switch($go, $exit = false) {
 
 			case 'Stelleneditor_Ändern' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
-				$GUI->StelleAendern();
+				$GUI->stelle_aendern();
 			} break;
 
 			case 'Stellen_Anzeigen' : {
@@ -1892,7 +1910,22 @@ function go_switch($go, $exit = false) {
 			case 'Stellenhierarchie' : {
 				$GUI->checkCaseAllowed('Stellen_Anzeigen');
 				$GUI->Stellenhierarchie();
-			} break;			
+			} break;
+
+			case 'role_list' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Anzeigen');
+				$GUI->role_list();
+			} break;
+
+			case 'role_edit' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_edit();
+			} break;
+
+			case 'role_update' : {
+				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
+				$GUI->role_update();
+			} break;
 
 			case 'Menues_Anzeigen' : {
 				$GUI->checkCaseAllowed('Menues_Anzeigen');
@@ -1971,6 +2004,7 @@ function go_switch($go, $exit = false) {
 			case 'Benutzerdaten_Als neuen Nutzer eintragen' : {
 				$GUI->checkCaseAllowed('Benutzerdaten_Formular');
 				$GUI->BenutzerdatenAnlegen();
+				$GUI->BenutzerdatenFormular();
 			} break;
 
 			case 'Benutzerdaten_Ändern' : {
@@ -2122,9 +2156,9 @@ function go_switch($go, $exit = false) {
 				$GUI->output();
 			} break;
 
-			case "zoomToMaxLayerExtent" : {
+			case "zoom_to_max_layer_extent" : {
 				$GUI->loadMap('DataBase');
-				$GUI->zoomToMaxLayerExtent($GUI->formvars['layer_id']);
+				$GUI->zoom_to_max_layer_extent($GUI->formvars['layer_id']);
 				$currenttime=date('Y-m-d H:i:s',time());
 				$GUI->user->rolle->setConsumeActivity($currenttime,'getMap',$GUI->user->rolle->last_time_id);
 				$GUI->drawMap();

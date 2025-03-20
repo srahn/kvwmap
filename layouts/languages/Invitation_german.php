@@ -5,7 +5,7 @@
 	$strInvitationLinkAlternative = 'Sollte sich Ihr Browser nicht öffnen, können Sie auch manuell ein Browserfenster öffnen und den oben stehenden Link in die Adresszeile kopieren. Achten Sie bitte darauf, den Link vollständig zu kopieren.
 
 Der Link verweist auf die Registrierungsseite von';
-	$strInvitationAfterLinkText = 'Dort werden Sie aufgefordert, einen Benutzernamen und ein Passwort für Ihren Account zu vergeben. Ist die Registrierung erfolgreich abgeschlossen, können Sie mit diesem Login in der Web-Anwendung arbeiten.';
+	$strInvitationAfterLinkText = 'Dort werden Sie aufgefordert, ein Passwort für Ihren Account zu vergeben. Ist die Registrierung erfolgreich abgeschlossen, können Sie mit diesem Login in der Web-Anwendung mit der URL ' . URL . APPLVERSION . ' arbeiten.';
 	$strInvitationQuestionsTo = 'Für Rückfragen wenden Sie sich bitte an';
 	$strInvitationAutomationText = '
 

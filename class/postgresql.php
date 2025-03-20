@@ -90,7 +90,7 @@ class pgdatabase {
 			$connection_string = $this->get_connection_string();
 		}
 		try {
-			$this->dbConn = pg_connect($connection_string, $flag);
+			$this->dbConn = pg_connect($connection_string . ' connect_timeout=5', $flag);
 		}
 		catch (Exception $e) {
 			$this->err_msg = 'Die Verbindung zur PostGIS-Datenbank konnte mit folgenden Daten nicht hergestellt werden connection_id: ' . $connection_id . ' '
@@ -206,6 +206,33 @@ class pgdatabase {
     $this->debug->write("<br>PostgreSQL Verbindung mit ID: ".$this->dbConn." schließen.",4);
     return pg_close($this->dbConn);
   }
+
+	function schema_exists($schema_name) {
+		$sql = "
+			SELECT
+				EXISTS(
+					SELECT
+						1
+					FROM
+						information_schema.schemata
+					WHERE 
+						schema_name = '" . $schema_name . "'
+					AND
+						catalog_name = '" . POSTGRES_DBNAME . "'
+				)
+			;";
+		$ret = $this->execSQL($sql, 4, 0);
+		$result = pg_fetch_row($ret[1]);
+		return ($result[0] === 't');
+	}
+
+	function create_schema($schema_name) {
+		$sql = "
+			CREATE SCHEMA IF NOT EXISTS " . $schema_name . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
+		return $ret;
+	}
 
 	function get_schemata($user_name) {
 		$schemata = array();
@@ -542,7 +569,7 @@ FROM
 	*/
 	function execSQL($sql, $debuglevel = 4, $loglevel = 1, $suppress_err_msg = false, $prepared_params = array()) {
 		if (!$this->dbConn) {
-			echo '<p>pgconn: ' . $this->dbConn; exit;
+			echo '<p>pgconn: ' . $this->dbConn;
 		}
 		$ret = array(); // Array with results to return
 		$ret['msg'] = '';
@@ -824,7 +851,7 @@ FROM
 			if(strpos($error_message, "\n      :resno") !== false){
 				$error_list[] = $error_message;
 			}
-			return false;
+			#return false;
 		};
 		set_error_handler($myErrorHandler);
 		# den Queryplan als Notice mitabfragen um an Infos zur Query zu kommen
@@ -2113,6 +2140,10 @@ FROM
     if ($flur>0) {
       $sql.=" AND f.flurnummer = ".$flur;
     }
+		if (value_of($formvars, 'newpathwkt') != ''){
+			# Suche im Suchpolygon
+			$sql .=' AND st_intersects(f.wkb_geometry, (st_transform(st_geomfromtext(\'' . $formvars['newpathwkt'] . '\', ' . $formvars['user_epsg'] . '), ' . EPSGCODE_ALKIS . ')))';
+		}
 		if($ganze_gemkg_ids[0] != '' OR count_or_0($eingeschr_gemkg_ids) > 0){
 			$sql.=" AND (FALSE ";
 			if($ganze_gemkg_ids[0] != ''){
@@ -3104,6 +3135,15 @@ FROM
 		";
 		#echo '<br>SQL: ' . $sql;
 		$ret = $this->execSQL($sql, 4, 0);
+		return $ret;
+	}
+
+	function drop_schema($schema_name, $cascade = false) {
+		$sql = "
+			DROP SCHEMA IF EXISTS " . $schema_name .
+			($cascade ? ' CASCADE' : '') . "
+		";
+		$ret = $this->execSQL($sql, 4,0);
 		return $ret;
 	}
 }

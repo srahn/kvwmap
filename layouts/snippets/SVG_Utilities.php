@@ -37,44 +37,48 @@
 		}
 	}
 
-	function update_geometry(){
-		document.getElementById("svghelp").SVGupdate_geometry();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	}
-	
 	function show_vertices(){
-		document.getElementById("svghelp").SVGshow_foreign_vertices();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.show_vertices();
 	}
-	
+
+	function update_geometry(){
+		SVG.update_geometry();
+	}
+		
 	function coord_input_submit(){
-		document.getElementById("svghelp").SVGcoord_input_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.coord_input_submit();
 	}
 	
 	function add_buffer_submit(){
-		document.getElementById("svghelp").SVGadd_buffer_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_buffer_submit();
 	}	
 	
 	function add_parallel_polygon_submit(){
-		document.getElementById("svghelp").SVGadd_parallel_polygon_submit();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_parallel_polygon_submit();
 	}	
 	
 	function add_ortho_point(world_x, world_y, local_x, local_y, deactivate){
-		document.getElementById("svghelp").SVGadd_ortho_point(world_x, world_y, local_x, local_y, deactivate);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.add_ortho_point(world_x, world_y, local_x, local_y, deactivate);
 	}
 	
 	function remove_ortho_points(){
-		document.getElementById("svghelp").SVGremove_ortho_points();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.remove_ortho_points();
 	}
 	
 	function moveback(){	
-		document.getElementById("svghelp").SVGmoveback();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.moveback();
 	}
 	
 	function startup(){
-		document.getElementById("svghelp").SVGstartup();			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.startup();
 	}
 	
 	function showtooltip(result, showdata){
-		document.getElementById("svghelp").SVGshowtooltip(result, showdata);			// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
+		SVG.showtooltip(result, showdata);
+	}	
+
+	function change_box_width_height(){
+		SVG.change_box_width_height();
 	}	
 
 	var nbh = new Array();
@@ -86,7 +90,6 @@
 	global $last_x;$last_x = 0;
 	global $events;$events = true;
 
-	include(LAYOUTPATH.'snippets/SVGvars_defs.php'); 					# zuweisen von: $SVGvars_defs
 	include(LAYOUTPATH.'snippets/SVGvars_navbuttons.php'); 		# zuweisen von: $SVGvars_navbuttons	
 	include(LAYOUTPATH.'snippets/SVGvars_coordscript.php'); 	# zuweisen von: $SVGvars_coordscript
 	include(LAYOUTPATH.'snippets/SVGvars_querytooltipscript.php');   # zuweisen von: $SVGvars_tooltipscript
@@ -154,6 +157,7 @@
 	let flurstuecksqueryfunctions = false;
 	let boxfunctions = false;
 	let pointfunctions = false;
+	let multipointfunctions = false;
 	let linefunctions = false;
 	let measurefunctions = false;
 	let path  = "";
@@ -207,6 +211,8 @@
 	let draggingFS  = false;
 	let moving  = false;
 	let movinggeom  = false;
+	let rotatinggeom = false;
+	let rotated = false;
 	let moved  = false;
 	let must_redraw = false;
 	let mobile = {$rolle_gps};
@@ -231,6 +237,9 @@
 	let doing;
 	let doing_save;
 	let suppresszoom = false;
+	let centroid = new Array();
+	let angle;
+	let startangle;
 SCRIPTDEFINITIONS;
 
 	$polygonANDpoint = '
@@ -484,10 +493,7 @@ SCRIPTDEFINITIONS;
 				path.push(laststarty);
 			}
 		}
-		pixelpath = '';
-		for(i = 0; i < path.length; i++){
-			pixelpath = pixelpath + path[i] + ' ';
-		}
+		pixelpath = path.join(' ');
 		return pixelpath;
 	}
 
@@ -893,6 +899,9 @@ SCRIPTDEFINITIONS;
 			redrawfirstline();
 			if(enclosingForm.firstline.value == 'true')linelength();
 		}
+		if(multipointfunctions == true){
+			redrawmultipoint();
+		}		
 		if((enclosingForm.always_draw != undefined && enclosingForm.always_draw.checked && enclosingForm.last_doing2.value == 'vertex_edit') || enclosingForm.last_button.value == 'vertex_edit1'){
 			edit_vertices();
 		}
@@ -969,6 +978,10 @@ SCRIPTDEFINITIONS;
 	 			choose(world_x, world_y);
 	 			redrawpoint();
 			break;
+			case 'draw_multipoint':
+				addmultipoint(world_x, world_y);
+				redrawmultipoint();
+			break;			
 			case 'draw_box':
 	 			startpointFS(world_x, world_y);
 			break;
@@ -1057,6 +1070,9 @@ SCRIPTDEFINITIONS;
 			case 'move_geometry':
 				startMoveGeom(client_x, client_y);
 			break;
+			case 'rotate_geometry':
+				startRotateGeom(client_x, client_y);
+			break;
 			
 			case 'ortho_point':
 				add_ortho_point(world_x, world_y, null, null, true);
@@ -1131,6 +1147,11 @@ function mousemove(evt){
 						if(movinggeom){
 							moveGeom(evt);
 						}
+						else {
+							if(rotatinggeom){
+								rotateGeom(evt);
+							}
+						}
 					}
 				}
 			}
@@ -1190,6 +1211,9 @@ function mouseup(evt){
 	if(movinggeom){
 		endMoveGeom(evt);
 	}
+	if(rotatinggeom){
+		endRotateGeom(evt);
+	}
 }
 
 	// ----------------------ausgewaehlten button highlighten---------------------------
@@ -1210,6 +1234,9 @@ function mouseup(evt){
 				remove_vertices();
 				remove_in_between_vertices();
 			}
+			if(multipointfunctions == true){
+				remove_vertices();
+			}			
 			enclosingForm.last_button.value = id;
 			if(id == 'recentre0'){
 				document.getElementById('canvas').setAttribute('cursor', 'move');
@@ -1326,8 +1353,6 @@ function mouseup(evt){
 
 	coord_input_functions = true;
 	
-	top.document.getElementById("svghelp").SVGcoord_input_submit = coord_input_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function dec2dms(number, coordtype){
 		number = number+"";
 		part1 = number.split(".");
@@ -1446,10 +1471,6 @@ function mouseup(evt){
 
 	ortho_point_functions = true;
 	
-	top.document.getElementById("svghelp").SVGadd_ortho_point = add_ortho_point;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-	
-	top.document.getElementById("svghelp").SVGremove_ortho_points = remove_ortho_points;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function ortho_point(){
 		enclosingForm.last_doing.value = "ortho_point";
 		if(enclosingForm.ortho_point_vertices.value == "")ortho_point_vertices = new Array();
@@ -1630,8 +1651,6 @@ function mouseup(evt){
 
 	pointfunctions = true;
 	
-	top.document.getElementById("svghelp").SVGrotate_point_direction = rotate_point_direction;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function rotate_point_direction(){
 		angle = 360 - enclosingForm.angle.value.replace(",", ".");
 		custom_angle = top.document.getElementById("custom_angle");
@@ -1669,17 +1688,284 @@ function mouseup(evt){
 	}
 	';
 
+	$multipointfunctions = '
+
+	multipointfunctions = true;
+
+	function update_geometry(){
+		document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
+		updatepaths();
+		if (["move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
+			enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
+		}
+		redrawmultipoint();
+	}
+
+	function getxcoordsfromsvgpath(path){
+		xcoords = new Array();
+		parts = path.split(" ");
+		for(i = 1; i < parts.length; i=i+2){
+			if(parts[i] != ""){
+				xcoords.push(parts[i]);
+			}
+		}
+		return xcoords;
+	}
+
+	function getycoordsfromsvgpath(path){
+		ycoords = new Array();
+		parts = path.split(" ");
+		for(i = 2; i < parts.length; i=i+2){
+			if(parts[i] != ""){
+				ycoords.push(parts[i]);
+			}
+		}
+		return ycoords;
+	}
+	
+	function draw_multipoint(){
+		applymultipoint();
+		enclosingForm.last_doing.value = "draw_multipoint";
+	}
+
+	// ------------------------Punkt setzen-----------------------------
+	function addmultipoint(worldx, worldy){
+		// neuen punkt setzen
+		enclosingForm.lastcoordx.value = world_x;
+		enclosingForm.lastcoordy.value = world_y; 
+	  pathx.push(world_x);
+	  pathy.push(world_y);
+	  path = buildsvglinepath(pathx,pathy);
+	  enclosingForm.newpath.value = path;
+		applymultipoint();
+	}
+
+	function redrawmultipoint(){
+	  var obj = document.getElementById("multipoint");
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+	  obj.setAttribute("d", pixel_path);
+	}
+
+	function buildwktmultipointfromsvgpath(svgpath){
+		if(svgpath != ""){		
+			var wkt = "";
+			svgpath = svgpath.substring(2);		// "M " abschneiden
+			coord = svgpath.split(" ");
+			wkt = wkt+coord[0]+" "+coord[1];
+			for(var i = 2; i < coord.length; i=i+2){
+				if(coord[i] != ""){
+					wkt = wkt+"),("+coord[i]+" "+coord[i+1];
+				}
+			}
+			wkt = "MULTIPOINT(("+wkt+"))";
+			return wkt;
+		}
+		else{
+			return "";
+		}
+	}	
+
+	function applymultipoint(){
+		enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value = buildwktmultipointfromsvgpath(enclosingForm.newpath.value);
+	}	
+
+	function activate_vertex(evt){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
+			vertex_id_string = evt.target.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			if(vertex_id[1] == "new"){
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill: #00DD00");
+			}
+			else{
+				evt.target.setAttribute("style", "-moz-user-select: none;opacity: 1;fill-opacity: 0.1;stroke: #FF0000;stroke-width:2");
+			}
+		}
+	}
+	
+	function deactivate_vertex(evt){
+		if(enclosingForm.last_doing.value == "vertex_edit"){
+			vertex_id_string = evt.target.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			if(vertex_id[1] == "new"){
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.01");
+			}
+			else{
+				evt.target.setAttribute("style", "-moz-user-select: none;fill: #FF0000;opacity: 0.3");
+			}
+		}
+	}
+
+	function select_vertex(evt){
+		selected_vertex = evt.target;
+		last_selected_vertex = selected_vertex;
+		vertex_id_string = evt.target.getAttribute("id");
+		vertex_id = vertex_id_string.split("_");
+		if(vertex_id[1] != "new"){
+			jetzt = new Date();
+	  	time = jetzt.getTime();
+			if(time - time_mouse_down < 1000){
+				delete_vertex(evt);
+			}
+			time_mouse_down = time;
+		}
+	}
+
+	function move_vertex(evt, vertex, coordtype){
+		if(vertex == undefined){
+			vertex = evt.target;
+		}
+		vertex_id_string = vertex.getAttribute("id");
+		vertex_id = vertex_id_string.split("_");
+		if(vertex_id[1] != "new"){
+			if(selected_vertex == vertex){
+				if(deactivated_foreign_vertex != 0){		// wenn es einen deaktivierten foreign vertex gibt, wird dieser jetzt wieder aktiviert
+					document.getElementById(deactivated_foreign_vertex).setAttribute("pointer-events", "auto");
+					deactivated_foreign_vertex = 0;
+				}
+				if(coordtype == "world"){
+					vertex_new_world_x = evt.clientX; 
+					vertex_new_world_y = evt.clientY;
+				}
+				else{
+					x = evt.clientX;
+					y = evt.clientY;
+					vertex_new_world_x = (x * scale) + minx;
+					vertex_new_world_y = ((resy-y) * scale) + miny;
+				}
+				vertex.setAttribute("cx", x);
+				vertex.setAttribute("cy", resy-y);
+				svg_path = enclosingForm.newpath.value+"";
+				components = svg_path.split(" ");
+				components[parseInt(vertex_id[1])] = vertex_new_world_x;
+		  	components[parseInt(vertex_id[1])+1] = vertex_new_world_y;
+				pathx[Math.floor(parseInt(vertex_id[1])/2)] = vertex_new_world_x;
+		  	pathy[Math.floor(parseInt(vertex_id[1])/2)] = vertex_new_world_y;
+				new_svg_path = components[0];
+				for(i = 1; i < components.length; i++){
+					new_svg_path = new_svg_path + " " + components[i];
+				}
+				enclosingForm.newpath.value = new_svg_path;
+				redrawmultipoint();
+				vertex_moved = true;
+			}
+		}
+	}
+
+	function delete_vertex(evt){
+		vertex = evt.target;
+		if(selected_vertex == vertex){
+			vertex_id_string = vertex.getAttribute("id");
+			vertex_id = vertex_id_string.split("_");
+			svg_path = enclosingForm.newpath.value+"";
+			components = svg_path.split(" ");
+			if(components.length > 2){			// nur loeschen, wenn mindestens 1 Eckpunkt uebrig
+				components.splice(parseInt(vertex_id[1]), 2);
+				pathx.splice(Math.floor(parseInt(vertex_id[1])/2), 1);
+				pathy.splice(Math.floor(parseInt(vertex_id[1])/2), 1);
+				new_svg_path = components.join(" ");
+				enclosingForm.newpath.value = new_svg_path;
+	
+				if(enclosingForm.newpathwkt.value != ""){			// wenn ein WKT-String da ist, diesen neu aus dem SVG erstellen
+					applymultipoint();
+				}
+				remove_vertices();													// alle entfernen
+				pixel_path = world2pixelsvg(new_svg_path);
+				add_vertices(pixel_path);										// und wieder hinzufuegen, damit die Nummerierung wieder stimmt
+				redrawmultipoint();
+				selected_vertex = "";
+				last_selected_vertex = "";
+			}
+		}
+	}
+
+	function end_vertex_move(evt){
+		if(selected_vertex == evt.target){
+			if(vertex_moved == true){
+				if(enclosingForm.newpathwkt.value != ""){
+					applymultipoint();
+				}
+				remove_vertices();													// alle entfernen
+				pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+				add_vertices(pixel_path);										// und wieder hinzufuegen
+			}
+			selected_vertex = "";
+			vertex_moved = false;
+		}
+	}
+	
+	function remove_vertices(){
+		var parent = document.getElementById("vertices");
+		var count = parent.childNodes.length;
+		for(i = 0; i < count; i++){
+			parent.removeChild(parent.lastChild);
+		}
+	}
+	
+	function add_vertices(pixel_path){
+		pixel_path = pixel_path+"";
+		components = pixel_path.split(" ");
+		var parent = document.getElementById("vertices");
+		circle = new Array();
+		kreis1 = document.getElementById("kreis");
+		for(i = 1; i < components.length; i=i+2){
+			// Eckpunkte
+			circle[i] = kreis1.cloneNode(true);
+			circle[i].setAttribute("cx", components[i]);
+			circle[i].setAttribute("cy", components[i+1]);
+			circle[i].setAttribute("style","fill: #FF0000");
+			circle[i].setAttribute("id", "vertex_"+i);
+			parent.appendChild(circle[i]);
+		}
+	}
+
+	function edit_vertices(){
+		highlightbyid("vertex_edit1");
+		save_geometry_for_undo();
+		enclosingForm.last_doing.value = "vertex_edit";
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+		add_vertices(pixel_path);
+	}
+
+	function save_geometry_for_undo(){
+		newpath_undo = enclosingForm.newpath.value;
+		newpathwkt_undo = enclosingForm.newpathwkt.value;
+	}
+
+	function undo_geometry_editing(){
+		enclosingForm.newpath.value = newpath_undo;
+		enclosingForm.newpathwkt.value = newpathwkt_undo;
+		remove_vertices();													// alle entfernen
+		pixel_path = world2pixelsvg(enclosingForm.newpath.value);
+		add_vertices(pixel_path);										// und wieder hinzufuegen
+		redrawmultipoint();
+	}
+	
+	function restart(){
+		highlightbyid(\'text0\');
+		enclosingForm.last_doing.value = "draw_multipoint";
+		enclosingForm.newpath.value = "";
+		enclosingForm.pathwkt.value = "";
+		enclosingForm.newpathwkt.value = "";
+		enclosingForm.result.value = "";
+		path = "";
+		var alle = pathx.length;
+		for(var i = 0; i < alle; ++i){
+		  pathx.pop();
+		  pathy.pop();
+		}
+		redrawmultipoint();
+	}
+	';
+
 	$linefunctions = '
 
 	linefunctions = true;
-
-	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function update_geometry(){
 		if(enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if(enclosingForm.last_doing.value == "add_geom" || enclosingForm.last_doing.value == "subtract_geom" || enclosingForm.last_doing.value == "move_geometry"){
+			if (["add_geom", "subtract_geom", "move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				if(enclosingForm.secondline.value == "true" && must_redraw){
 					applylines();
@@ -2335,15 +2621,14 @@ function mouseup(evt){
 	boxfunctions = true;
 
 	function draw_box_on() {
-	  //document.getElementById("canvas_FS").setAttribute("cursor", "text");
-	 	restart();
+	 	clear_geometry();
 		enclosingForm.last_doing.value = "draw_box";
 	}
 
 	// ----------------------------box aufziehen---------------------------------
 	function startpointFS(worldx, worldy) {
 	  draggingFS  = true;
-	  restart();
+	  clear_geometry();
 	  // neuen punkt hinzufuegen
 	  pathx.push(worldx);
 	  pathy.push(worldy);
@@ -2352,7 +2637,7 @@ function mouseup(evt){
 	}
 
 	function movepointFS(evt) {
-	if (!draggingFS) return;
+		if (!draggingFS) return;
 	  // neuen punkt abgreifen
 	  clientx = evt.clientX;
 	  clienty = resy - evt.clientY;
@@ -2372,15 +2657,40 @@ function mouseup(evt){
 
 	function endpointFS(evt) {
 	  draggingFS  = false;
-	}';
+		var width = Math.abs(Math.round((pathx[2] - pathx[1]) * 1000) / 1000);
+		var height = Math.abs(Math.round((pathy[0] - pathy[2]) * 1000) / 1000);
+		var Msg = top.$("#message_box");
+		Msg[0].style.left = "75%";
+		Msg.show();
+		content = \'<div style="position: absolute;top: 0px;right: 0px"><a href="javascript:void(0)" onclick="top.$(\\\'#message_box\\\').hide();" title="Schlie&szlig;en"><img style="border:none" src="'.GRAPHICSPATH.'exit2.png"></img></a></div>\';
+		content+= \'<div style="width:320px;height: 30px">Rechteck</div>\';
+		content+= \'<table style="padding: 5px;width: 100%"><tr><td align="right" class="px15">Breite:</td><td><input style="width: 110px" type="text" id="rect_width" name="rect_width" value="\'+width+\'">&nbsp;m</td></tr>\';
+		content+= \'<tr><td align="right">Höhe:&nbsp;</td><td><input style="width: 110px" type="text" id="rect_height" name="rect_height" value="\'+height+\'">&nbsp;m</td></tr></table>\';
+		content+= \'<br><input type="button" value="OK" onclick="change_box_width_height()">\';
+		Msg.html(content);
+	}
+	
+	function change_box_width_height() {
+		if (enclosingForm.rect_width.value && enclosingForm.rect_height.value) {
+			var width = parseFloat(enclosingForm.rect_width.value);
+			var height = parseFloat(enclosingForm.rect_height.value);
+			if (pathy[0] > pathy[2]) {
+				height = -1 * height;
+			}
+			pathy[1] = pathy[2] = (pathy[0] + height);
+			pathx[2] = pathx[3] = (pathx[0] + width);
+			path = buildsvgpath(pathx,pathy);
+			enclosingForm.newpath.value = path;
+			redrawfirstpolygon();
+		}
+	}
+	
+	';
 	
 	$bufferfunctions ='
 
 		bufferfunctions = true;
 		
-		top.document.getElementById("svghelp").SVGadd_parallel_polygon_submit = add_parallel_polygon_submit;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-		top.document.getElementById("svghelp").SVGadd_buffer_submit = add_buffer_submit;												// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 		function add_buffer(){		
 			var Msg = top.$("#message_box");
 			Msg.show();
@@ -2536,13 +2846,11 @@ function mouseup(evt){
 
 	polygonfunctions = true;
 
-	top.document.getElementById("svghelp").SVGupdate_geometry = update_geometry;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
 	function update_geometry(){
 		if(enclosingForm.secondline != undefined && enclosingForm.secondline.value == "true" || enclosingForm.secondpoly.value == "true"){
 			document.getElementById("cartesian").setAttribute("transform", "translate(0,'.$res_y.') scale(1,-1)");
 			updatepaths();
-			if (["add_geom", "subtract_geom", "add_circle", "move_geometry"].includes(enclosingForm.last_doing.value)){
+			if (["add_geom", "subtract_geom", "add_circle", "move_geometry", "rotate_geometry"].includes(enclosingForm.last_doing.value)){
 				enclosingForm.pathwkt.value = enclosingForm.newpathwkt.value;
 				if(enclosingForm.secondpoly.value == "true" && must_redraw){
 					applypolygons();
@@ -3248,10 +3556,7 @@ function mouseup(evt){
 		}
 	}
 
-	function restart(){
-		highlightbyid(\'pgon0\');
-		enclosingForm.last_doing.value = "draw_polygon";
-		enclosingForm.last_doing2.value = "draw_polygon";
+	function clear_geometry(){
 		textx = -1000000;
 		texty = -1000000;
 		redrawpoint();
@@ -3288,7 +3593,17 @@ function mouseup(evt){
 		redraw();
 	}
 
+	function restart(){
+		highlightbyid(\'pgon0\');
+		enclosingForm.last_doing.value = "draw_polygon";
+		enclosingForm.last_doing2.value = "draw_polygon";
+		clear_geometry();
+	}
+
 	function applypolygons(isvalid_check = true){
+		var Msg = top.$("#message_box");
+		Msg.hide();
+		Msg.html("");
 		if(enclosingForm.pathwkt.value == "" && enclosingForm.newpath.value != ""){
 			enclosingForm.pathwkt.value = buildwktpolygonfromsvgpath(enclosingForm.newpath.value);
 		}
@@ -3386,7 +3701,7 @@ $transformfunctions = '
 		if(polygonfunctions){
 			applypolygons();
 		}
-		else{
+		else if(linefunctions){
 			applylines();
 		}
 	}
@@ -3424,13 +3739,78 @@ $transformfunctions = '
 
 //---------------------- Verschieben der Geometrie -------------
 
+//---------------------- Drehen der Geometrie -------------
+
+	function rotate_geometry(){
+		document.getElementById("canvas").setAttribute("cursor", "se-resize");
+		enclosingForm.last_doing.value = "rotate_geometry";
+		if(polygonfunctions){
+			applypolygons();
+		}
+		else if(linefunctions){
+			applylines();
+		}
+		top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&operation=centroid", new Array(enclosingForm.result), new Array("setvalue"));
+	}
+	
+	function startRotateGeom(clientx, clienty){
+		rotatinggeom  = true;
+		if (enclosingForm.result.value != "") {
+			var centroid_world = enclosingForm.result.value.split(" ");
+			centroid[0] = (centroid_world[0] - minx) / scale;
+			centroid[1] = (centroid_world[1] - miny) / scale;
+		}
+	  move_x[0] = clientx;
+	  move_y[0] = clienty;
+		move_dx = move_x[0] - centroid[0];
+	  move_dy = move_y[0] - centroid[1];
+		startangle = getAngle(move_dx, move_dy);
+	}
+
+	function getAngle(a, b) {
+		var angle = Math.atan(b / a) * (180/Math.PI);
+		if (angle < 0 && a > 0 && b < 0) {
+			angle = 360 + angle;
+		}
+		else {
+			if ((angle < 0 && a < 0) || b < 0) {
+				angle = 180 + angle;
+			}
+		}
+		return angle;
+	}
+	
+	function rotateGeom(evt){
+		move_x[1] = evt.clientX;
+	  move_y[1] = resy - evt.clientY;
+	  move_dx = move_x[1] - centroid[0];
+	  move_dy = move_y[1] - centroid[1];
+		angle = getAngle(move_dx, move_dy);
+		angle = angle - startangle;
+		path = "translate(0 "+resy+") scale(1,-1) rotate(" + angle + ", " + centroid[0] + " " + centroid[1] + ")";
+	  document.getElementById("cartesian").setAttribute("transform", path);
+		rotated = true;
+	}
+
+	function endRotateGeom(evt) {
+	  if(rotated){
+			enclosingForm.secondpoly.value = true;
+			enclosingForm.secondline.value = true;
+			must_redraw = true;
+			top.ahah("index.php", "go=spatial_processing&path1="+enclosingForm.pathwkt.value+"&angle="+angle+"&operation=rotate&resulttype=svgwkt", new Array(enclosingForm.result, ""), new Array("setvalue", "execute_function"));
+		}
+	  rotatinggeom  = false;
+	  rotated  = false;
+	}
+	
+
+//---------------------- Drehen der Geometrie -------------
+
 ';
 
 $vertex_catch_functions = '
 
 	//-------------------- Punktfang -----------------------------
-
-	top.document.getElementById("vertices").SVGtoggle_vertices = toggle_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
 
 	function toggle_vertices(){
 		remove_foreign_vertices();
@@ -3500,9 +3880,7 @@ $vertex_catch_functions = '
 		}
 	}
 
-	top.document.getElementById("svghelp").SVGshow_foreign_vertices = show_foreign_vertices;		// das ist ein Trick, nur so kann man aus dem html-Dokument eine Javascript-Funktion aus dem SVG-Dokument aufrufen
-
-	function show_foreign_vertices(){
+	function show_vertices(){
 		if(enclosingForm.vertices.value != ""){
 			var parent = document.getElementById("foreignvertices");
 			circle = new Array();
@@ -3769,6 +4147,7 @@ $measurefunctions = '
 				<polyline points="" id="polyline" style="fill:none;stroke-dasharray:2,2;stroke:black;stroke-width:4"/>
 				<use id="gps_position" style="stroke:red;" xlink:href="#crosshair_red" x="-1000" y="-1000"/>
 				<use id="pointposition" xlink:href="#crosshair_blue" x="-500" y="-500"/>
+				<path d="" id="multipoint" marker-start="url(#point)" marker-mid="url(#point)" marker-end="url(#point)" style="fill:none;stroke:blue;stroke-width:0"/>
 				<circle id="startvertex" cx="-500" cy="-500" r="2" style="fill:blue;stroke:blue;stroke-width:2"/>
 				<path d="" id="highlight" style="fill:none;stroke:blue;stroke-width:2"/>
 			</g>
@@ -3948,11 +4327,29 @@ $measurefunctions = '
 		return $pointbuttons;
 	}
 
-	function boxbuttons(){
+	function multipointbuttons($strSetPosition){
+		global $last_x;
+		$pointbuttons = '
+				<g id="text" onmousedown="draw_multipoint();highlightbyid(\'text0\');" transform="translate('.$last_x.' 0 )">
+	        <rect id="text0" onmouseover="show_tooltip(\''.$strSetPosition.'\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+					<g class="navbutton" transform="translate(4 4) scale(1)">
+						<circle cx="14" cy="12" r="3"/>
+						<g transform="scale(1.12)">
+							<polygon class="navbutton_stroke navbutton_whitefill" points="178.579,57.7353 164.258,51.2544 178.96,44.515 176.48,49.1628 185.48,49.1628 185.48,53.1628 176.48,53.1628"
+								 style="stroke-width:1.7" transform="scale(0.7) translate(-46 -154) rotate(60.992 13.3045 25.4374)"/>
+						</g>
+					</g>
+		    </g>
+		';
+		$last_x += 36;
+		return $pointbuttons;
+	}	
+
+	function boxbuttons($strCreateRectangle){
 		global $last_x;
 		$boxbuttons = '
 				<g id="box" onmousedown="draw_box_on();highlightbyid(\'box0\');" transform="translate('.$last_x.' 0)">
-	        <rect id="box0" onmouseover="show_tooltip(\'Fenster aufziehen\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+	        <rect id="box0" onmouseover="show_tooltip(\'' . $strCreateRectangle . '\',evt.clientX,evt.clientY)" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
 					<g class="navbutton navbutton_nofill navbutton_stroke" transform="translate(-3 2) scale(0.9)">
 						<g transform="matrix(-1 0 0 1 118 0) scale(0.5)">
 							<rect x="170" y="30" width="40" height="14" style="stroke-width:4"/>
@@ -4099,17 +4496,6 @@ $measurefunctions = '
 					<polyline class="navbutton_nofill" points="503 281 242 389 367 577 462 486" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-dasharray:2,2;stroke-width:15"/>
 				</g>
       </g>';
-			$last_x += 36;
-			$bufferbuttons .= '
-      <g id="add_circle" transform="translate('.$last_x.' 0)">
-        <rect id="buffer3" onmouseover="show_tooltip(\''.$strCircle.'\',evt.clientX,evt.clientY)" onmousedown="add_circle();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
-				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
-					<circle cx="503" cy="281"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="242" cy="389"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="337" cy="577"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-					<circle cx="462" cy="486"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
-				</g>
-      </g>';
 			$last_x += 36;			
 		$bufferbuttons .= '
       <g id="parallel_polygon" transform="translate('.$last_x.' 0)">
@@ -4122,6 +4508,17 @@ $measurefunctions = '
 				</g>
       </g>';
 		$last_x += 36;
+		$bufferbuttons .= '
+      <g id="add_circle" transform="translate('.$last_x.' 0)">
+        <rect id="buffer3" onmouseover="show_tooltip(\''.$strCircle.'\',evt.clientX,evt.clientY)" onmousedown="add_circle();hide_tooltip();highlightbyid(\'buffer3\');" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_semifill navbutton_stroke" transform="translate(5 3) scale(1.1)">
+					<circle cx="503" cy="281"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="242" cy="389"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="337" cy="577"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+					<circle cx="462" cy="486"	r="53" transform="translate(2.5 -17) scale(0.050) rotate(88 197 419)" style="stroke-width:21"/>
+				</g>
+      </g>';
+			$last_x += 36;
     return $bufferbuttons;
   }
 	
@@ -4143,7 +4540,7 @@ $measurefunctions = '
     return $special_bufferbuttons;
   }
 
-	function transform_buttons($strMoveGeometry){
+	function transform_buttons($strMoveGeometry, $strRotateGeometry){
 		global $last_x;
 		$transform_buttons ='
 			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
@@ -4159,6 +4556,24 @@ $measurefunctions = '
       </g>
     ';
 		$last_x += 36;
+		$transform_buttons .='
+			<g id="vertex_edit" transform="translate('.$last_x.' 0)">
+        <rect id="rotate1" onmouseover="show_tooltip(\''.$strRotateGeometry.'\',evt.clientX,evt.clientY)" onmousedown="highlightbyid(\'rotate1\');rotate_geometry();hide_tooltip();" x="0" y="0" rx="3" ry="3" fill="url(#LinearGradient)" width="36.5" height="36" class="navbutton_frame"/>
+				<g class="navbutton navbutton_stroke" transform="translate(5 5) scale(1.1)">
+					<polygon class="navbutton_semifill" points="252.5,91 177.5,113 106.5,192 128.5,260 116.5,354 127.5,388 173.5,397 282.5,331 394.5,284	379.5,218 378.5,139 357.5,138 260.5,91"
+						transform="translate(-2 2) scale(0.045)"
+						 style="stroke-width:25"/>
+					<g transform="translate(23 -14) rotate(55 0 0)">
+						<polygon points="178.579,57.7353 164.258,51.2544 178.96,44.515 174.48,51.1628"
+							style="stroke-width:4" transform="scale(0.36) translate(-139 136) rotate(-45 0 0)"/>
+						<path d="M137.5 355 C230.674 287.237 311.196 227.137 396.5 349"
+								transform="matrix(1 0 0 1 0 0) scale(0.05)"
+								style="fill:none;stroke-width:40"/>
+					</g>
+				</g>
+      </g>
+    ';
+		$last_x += 36;		
     return $transform_buttons;
 	}
 	

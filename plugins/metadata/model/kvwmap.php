@@ -3,18 +3,21 @@
 	// metadata_cancel_data_package
 	// metadata_create_bundle_package
 	// metadata_create_data_package
+	// metadata_create_metadata_document
 	// metadata_delete_bundle_package
 	// metadata_delete_data_package
 	// metadata_download_bundle_package
 	// metadata_download_data_package
+	// metadata_download_metadata_document
 	// metadata_order_bundle_package
 	// metadata_order_data_package
 	// metadata_reorder_data_packages
+	// metadata_set_ressource_status
 	// metadata_show_data_packages
+	// metadata_show_ressources_status
 	// metadata_upload_to_geonetwork
 	// Metadaten_Auswaehlen_Senden
 	// Metadaten_Recherche
-	// Metadaten_update_outdated
 	// Metadateneingabe
 
 	include_once(PLUGINS . 'metadata/model/GeonetworkClient.php');
@@ -115,6 +118,12 @@
 
 	/**
 	 * Function create the package with id $package_id.
+	 *  - change pack_status to start packing
+	 *  - create export path if not exists
+	 *  - export the file with data_import_export method export_exportieren
+	 *  - exit with error and pack_status -1 in error case
+	 *  - if export format is not shape or csv, download the capabilities document, write it to a xml-file and pack all from export_path into the zip file
+	 *  - put metadata file into data package zip
 	 * @param int $package_id
 	 * @return array{ success: Boolean, msg: String, downloadUrl?: String}
 	 */
@@ -158,10 +167,16 @@
 			$package->update_attr(array('pack_status_id = 3'));
 			$GUI->formvars['selected_layer_id'] = $package->get('layer_id');
 			$GUI->formvars['epsg'] = $package->layer->get('epsg_code');
-			$exportpath = $package->get_export_path();
-			if (!file_exists($exportpath)) {
-				$GUI->debug->show('Lege Verzeichnis ' . $exportpath . ' an, weil es noch nicht existiert!', false);
-				mkdir($exportpath, 0777, true);
+			$export_path = $package->get_export_path();
+			if (!is_dir($export_path)) {
+				$GUI->debug->show('Lege Verzeichnis ' . $export_path . ' an, weil es noch nicht existiert!', false);
+				$old_umask = umask(0);
+				$result = mkdir($export_path, 0774, true);
+				umask($old_umask);
+				chgrp($export_path, 'gisadmin');
+				if (!$result) {
+					$GUI->debug->show('Anlegen von ' . $export_path . ' hat nicht geklappt!', false);
+				}
 			}
 			$result = $package->get_export_format();
 			if (!$result['success']) {
@@ -176,8 +191,11 @@
 				// mit ogr2ogr exportieren und zippen
 				include_once(CLASSPATH . 'data_import_export.php');
 				$data_import_export = new data_import_export();
-				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $exportpath, $exportfilename, true);
-				if (!$result['success']) {
+				$result = $data_import_export->export_exportieren($GUI->formvars, $GUI->Stelle, $GUI->user , $export_path, $exportfilename, true);
+				if (strtolower(pathinfo($result['success'])['extension']) !== 'zip') {
+					$data_import_export->zip_export_path($export_path);
+				}
+				else {
 					// Fehler loggen
 					$result['msg'] = 'Fehler beim Exportieren des Layers ID: ' . $package->get('layer_id') . ' des Paket ID: ' . $package->get_id() . ' für Ressource ID: ' . $package->get('ressource_id') . "\n" . $result['msg'];
 					$package->log($result['msg']);
@@ -188,18 +206,28 @@
 			}
 			else {
 				// Text-Datei mit Links zum Dienst anlegen und Zip.
-				if (!is_dir($exportpath)) {
-					mkdir($exportpath);
-				}
-				file_put_contents($exportpath . $exportfilename . '.txt', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
-				exec(ZIP_PATH . ' -j ' . rtrim($exportpath, '/') . ' ' . $exportpath . '*');
+				file_put_contents($export_path . $exportfilename . '.xml', 'GetCapabilties: ' . $package->layer->get('connection') . 'Service=WMS&Request=GetCapabilities&Version=' . $package->layer->get('wms_server_version'));
+				$data_import_export->zip_export_path($export_path);
 			}
 
 			// Metadatendatei erzeugen und in ZIP packen
-
+			// von Ressource des Datenpaketes
+			$export_file = $package->get_export_file();
+			// Put the metadata document into the $xport_file.zip
+			$command = ZIP_PATH . ' -j ' . $export_file . ' ' . METADATA_DATA_PATH . 'metadaten/Metadaten_Ressource_' . $package->get('ressource_id') . '.pdf';
+			exec($command);
 			// An Ressourcen hängende Dokumente in ZIP packen
+			$ressource = Ressource::find_by_id($GUI, 'id', $package->get('ressource_id'));
+			#echo '<br>ressources documents: ' . print_r($ressource->get('documents'), true);
 
-			// Wenn ZIP-Datei existiert und etwas drin ist, Verzeichnis löschen. (Aufräumen)
+			// Metadaten und Dokumente von an Ressourcen hängenden Quellen
+
+			// Wenn ZIP-Datei existiert und etwas drin ist, chgrp www-data, chmod g+w und Verzeichnis löschen. (Aufräumen)
+			$package->delete_export_path();
+			chgrp($export_file, 'gisadmin');
+			$old_umask = umask(0);
+			$result = chmod($export_file, 0664, true);
+			umask($old_umask);
 
 			$package->update_attr(array('pack_status_id = 4'));
 
@@ -215,6 +243,59 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Function create a metadata document for layer $selected_layer_id
+	 */
+	$GUI->metadata_create_metadata_document = function($layer_id) use ($GUI) {
+		if ($layer_id == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter layer_id ist leer!'
+			);
+		}
+		// ToDo pk: set metadata from layer and stelle metadata
+		$ressource = Ressource::find_by_layer_id($GUI, $layer_id);
+		if ($ressource->get_id()) {
+			// ToDo pk: set additional metadata from ressource data
+			
+		}
+
+		return array(
+			'success' => false,
+			'msg' => 'Funktion noch nicht implementiert!'
+		);
+	};
+
+	$GUI->metadata_list_files = function($search_dir) use ($GUI) {
+		$GUI->main = PLUGINS . 'metadata/view/list_files.php';
+
+		if (strpos($seach_dir, '..') !== false) {
+			$msg = 'Das Verzeichnis ' . $search_dir . ' darf keine .. Zeichenkette beinhalten!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->metadata_data_dir = append_slash(METADATA_DATA_PATH) . 'ressourcen/';
+		$GUI->search_dir = $GUI->metadata_data_dir . $search_dir;
+
+		if (!is_dir($GUI->search_dir)) {
+			$msg = 'Das Verzeichnis ' . $GUI->seach_dir . ' existiert nicht!';
+			return array(
+				'success' => false,
+				'msg' => $msg
+			);
+		}
+
+		$GUI->files = getAllFiles($GUI->search_dir);
+
+		return array(
+			'success' => false,
+			'msg' => $msg
+		);
 	};
 
 	/**
@@ -315,12 +396,11 @@
 				);
 			}
 
-			$package->update_attr(array('pack_status_id = 3'));
 			$export_path = $package->get_export_path();
 			// Dateien im Verzeichnis löschen
-			array_map('unlink', glob($export_path . '*.*'));
-			// Verzeichnis löschen
-			rmdir($export_path);
+			$package->update_attr(array('pack_status_id = 3'));
+			$package->delete_export_path();
+			$package->delete_export_file();
 			$package_id = $package->get_id();
 			$package->delete();
 
@@ -409,6 +489,48 @@
 				'msg' => 'Fehler: ' . print_r($e, true)
 			);
 		}
+	};
+
+	/**
+	 * Function responds metadata document of layer with $selected_layer_id
+	 */
+	$GUI->metadata_download_metadata_document = function($layer_id) use ($GUI) {
+		if ($layer_id == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Der Parameter layer_id ist leer!'
+			);
+		}
+		$layer = Layer::find_by_id($GUI, $layer_id);
+		if ($layer->get_id() == '') {
+			return array(
+				'success' => false,
+				'msg' => 'Es wurde kein Layer mit der id: ' . $layer_id . ' gefunden!'
+			);
+		}
+		$metadata_file = METADATA_DATA_PATH . 'metadaten/' . $layer_id . '.pdf';
+		if (!file_exists($metadata_file)) {
+			$response = $GUI->metadata_create_metadata_document($layer_id);
+			if (!$response['success']) {
+				return array(
+					'success' => false, 
+					'msg' => $response['msg']
+				);
+			}
+		}
+		if (!file_exists($metadata_file)) {
+			return array(
+				'success' => false,
+				'msg' => 'Die Metadatendatei ' . $metadata_file . ' wurde nicht auf dem Server gefunden!'
+			);
+		}
+
+		return array(
+			'success' => true,
+			'msg' => 'Metadatendatei gefunden.',
+			'downloadfile' => $metadata_file,
+			'filename' => $layer->get('Name')
+		);
 	};
 
 	/**
@@ -517,9 +639,69 @@
 		);
 	};
 
+	$GUI->metadata_set_ressource_status = function() use ($GUI) {
+		$ressource = Ressource::find_by_id($GUI, 'ressource_id', $GUI->formvars['ressource_id']);
+		$result = $ressource->update_attr(array('status_id' => $GUI->formvars['status_id']));
+		if (!$result['success']) {
+			return $result;
+		}
+		return array(
+			'success' => true,
+			'msg' => 'Status erfolgreich aktualisiert'
+		);
+	};
+
 	$GUI->metadata_show_data_packages = function() use ($GUI) {
 		$GUI->main = PLUGINS . 'metadata/view/data_packages.php';
-		$GUI->metadata_data_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
+		$all_packages = DataPackage::find_by_stelle_id($GUI, $GUI->Stelle->id);
+		$GUI->metadata_data_packages = array();
+		foreach ($all_packages AS $package) {
+			$pfad = replace_params_rolle($package->layer->get('pfad'));
+			$where = "";
+			if ($package->layer->get('Datentyp') != 5) {
+				$where = "
+					WHERE
+						ST_MakeEnvelope(
+							" . $GUI->Stelle->MaxGeorefExt->minx . ",
+							" . $GUI->Stelle->MaxGeorefExt->miny . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxx . ",
+							" . $GUI->Stelle->MaxGeorefExt->maxy . ",
+							25832
+						) && query." . $package->layer->get('geom_column') . "
+				";
+			}
+			$sql = "
+				SET search_path = " . $package->layer->get('schema') . ", public;
+				SELECT
+					count(*) AS anzahl
+				FROM
+					(
+						" . $pfad . "
+					) AS query" .
+				$where . "
+			";
+			// echo '<br>SQL zum Filtern der Daten ' . $package->get('bezeichnung') . ' im Datenpaket: ' . $sql;
+			$query = pg_query($sql);
+			$num_feature = pg_fetch_assoc($query)['anzahl'];
+			if ( $num_feature > 0) {
+				// echo '<br>Anzahl Datensätze: ' . $num_feature;
+				$package->num_feature = $num_feature;
+				$GUI->metadata_data_packages[] = $package;
+			}
+
+		}
+		$GUI->output();
+	};
+
+	$GUI->metadata_show_ressources_status = function($ressource_id) use ($GUI) {
+		$GUI->metadata_ressources = Ressource::find($GUI, "von_eneka OR use_for_datapackage", "auto_update, status_id");
+		$GUI->metadata_outdated_ressources = Ressource::find_outdated($GUI);
+		$command = "ps aux | grep -i 'ressources_cron.php' | grep -v grep";
+		$output = '';
+		$result_code = '';
+		exec($command, $outputs, $result_code);
+		$GUI->metadata_processes = $outputs;
+		$GUI->main = PLUGINS . 'metadata/view/ressources_status.php';
 		$GUI->output();
 	};
 

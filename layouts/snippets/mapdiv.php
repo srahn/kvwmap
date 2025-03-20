@@ -10,6 +10,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 	<INPUT TYPE="hidden" NAME="pixelsize" VALUE="<?php echo $pixelsize; ?>">
 	<INPUT TYPE="HIDDEN" NAME="CMD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="last_button" VALUE="">
+	<INPUT TYPE="HIDDEN" NAME="previous_button" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_TYPE" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="INPUT_COORD" VALUE="">
 	<INPUT TYPE="HIDDEN" NAME="searchradius" VALUE="<?php echo $this->formvars['searchradius']; ?>">
@@ -34,6 +35,7 @@ include(LAYOUTPATH . 'languages/mapdiv_' . rolle::$language . '.php'); ?>
 	<input type="hidden" name="group_options_open" value="">
 	<input type="hidden" name="free_polygons" value="">
 	<input type="hidden" name="free_texts" value="">
+	<input type="hidden" name="output_filetype" value="">
 	<?php
 		include(LAYOUTPATH.'snippets/SVG_map.php');
 	?>
