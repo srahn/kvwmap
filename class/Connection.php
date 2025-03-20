@@ -1,6 +1,6 @@
 <?php
-include_once(CLASSPATH . 'MyObject.php');
-class Connection extends MyObject {
+include_once(CLASSPATH . 'PgObject.php');
+class Connection extends PgObject {
 	static $write_debug = false;
 	static $title = array(
 		'german' => 'Datenbankverbindungen',
@@ -81,7 +81,7 @@ class Connection extends MyObject {
 	);
 
 	function __construct($gui) {
-		parent::__construct($gui, 'connections');
+		parent::__construct($gui, 'kvwmap', 'connections');
 		$this->validations = array(
 			array(
 				'attribute' => 'name',

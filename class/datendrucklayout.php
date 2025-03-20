@@ -73,12 +73,11 @@ class ddl {
   }
 	
 	function read_colors(){
-		$sql = "SELECT * FROM ddl_colors";
+		$sql = "SELECT * FROM kvwmap.ddl_colors";
   	#echo $sql;
-  	$ret=$this->database->execSQL($sql, 4, 0);
-    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+  	$ret = $this->database->execSQL($sql, 4, 0);
     if($ret[0]==0){
-			while($row = $this->database->result->fetch_assoc()){
+			while ($row = pg_fetch_assoc($ret[1])){
         $colors[$row['id']] = $row;
       }
     }
@@ -1957,9 +1956,9 @@ class ddl {
 			SELECT DISTINCT
 				d.*
 			FROM
-				datendrucklayouts d LEFT JOIN
-				ddl2stelle d2s ON d.id = d2s.ddl_id
-				" . ($layer_id ? 'LEFT JOIN layer l ON l.Layer_ID = ' . $layer_id : '') . "
+				kvwmap.datendrucklayouts d LEFT JOIN
+				kvwmap.ddl2stelle d2s ON d.id = d2s.ddl_id
+				" . ($layer_id ? 'LEFT JOIN kvwmap.layer l ON l.layer_id = ' . $layer_id : '') . "
 			" . (!empty($where_clauses)? ' WHERE ' : '') . "
 				" . implode(" AND ", $where_clauses) . "
 			ORDER BY
@@ -1972,8 +1971,7 @@ class ddl {
 		$ret1 = $this->database->execSQL($sql, 4, 1);
 		if ($ret1[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
 		$i = 0;
-		$result = $this->database->result;
-		while ($rs = $result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret1[1])) {
 			if ($return == 'only_ids') {
 				$layouts[] = $rs['id'];
 			}
@@ -2014,13 +2012,18 @@ class ddl {
   
   function load_elements($ddl_id){
 		$elements = array();
-    $sql = 'SELECT * FROM ddl_elemente';
-    $sql.= ' WHERE ddl_elemente.ddl_id = '.$ddl_id;
+    $sql = '
+			SELECT 
+				* 
+			FROM 
+				kvwmap.ddl_elemente
+			WHERE 
+				ddl_elemente.ddl_id = '.$ddl_id;
     #echo $sql;
     $this->debug->write("<p>file:kvwmap class:ddl->load_elements :<br>".$sql,4);
     $ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
+    while($rs = pg_fetch_assoc($ret1[1])){
       $elements[$rs['name']] = $rs;
     }
     return $elements;
@@ -2032,8 +2035,8 @@ class ddl {
 			SELECT
 				t.*
 			FROM
-				druckfreitexte t JOIN
-				ddl2freitexte d2t ON t.id = d2t.freitext_id
+				kvwmap.druckfreitexte t JOIN
+				kvwmap.ddl2freitexte d2t ON t.id = d2t.freitext_id
 			WHERE
 				d2t.ddl_id = " . $ddl_id . "
 				" . ($freetext_id != NULL ? " AND t.id = " . $freetext_id : '') . "
@@ -2045,7 +2048,7 @@ class ddl {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__, 4);
 			return 0;
 		}
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while($rs = pg_fetch_assoc($ret1[1])){
 			$texts[] = $rs;
 		}
 		return $texts;
@@ -2108,7 +2111,8 @@ class ddl {
 			SELECT
 				druckfreilinien.*
 			FROM
-				druckfreilinien, ddl2freilinien
+				kvwmap.druckfreilinien, 
+				kvwmap.ddl2freilinien
 			WHERE
 				ddl2freilinien.ddl_id = " . $ddl_id . " AND
 				ddl2freilinien.line_id = druckfreilinien.id
@@ -2117,7 +2121,7 @@ class ddl {
 		$this->debug->write("<p>file:kvwmap class:ddl->load_lines :<br>".$sql,4);
 		$ret1 = $this->database->execSQL($sql, 4, 1);
 		if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-		while($rs = $this->database->result->fetch_assoc()){
+		while($rs = pg_fetch_assoc($ret1[1])){
 			$lines[] = $rs;
 		}
 		return $lines;
@@ -2125,14 +2129,20 @@ class ddl {
 
   function load_rectangles($ddl_id){
 		$rects = array();
-    $sql = 'SELECT druckfreirechtecke.* FROM druckfreirechtecke, ddl2freirechtecke';
-    $sql.= ' WHERE ddl2freirechtecke.ddl_id = '.$ddl_id;
-    $sql.= ' AND ddl2freirechtecke.rect_id = druckfreirechtecke.id';
+    $sql = '
+			SELECT 
+				druckfreirechtecke.* 
+			FROM 
+				kvwmap.druckfreirechtecke, 
+				kvwmap.ddl2freirechtecke
+			WHERE 
+				ddl2freirechtecke.ddl_id = ' . $ddl_id . ' AND 
+				ddl2freirechtecke.rect_id = druckfreirechtecke.id';
     #echo $sql.'<br>';
     $this->debug->write("<p>file:kvwmap class:ddl->load_rectangles :<br>".$sql,4);
     $ret1 = $this->database->execSQL($sql, 4, 1);
     if($ret1[0]){ $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
-    while($rs = $this->database->result->fetch_assoc()){
+    while($rs = pg_fetch_assoc($ret1[1])){
       $rects[] = $rs;
     }
     return $rects;

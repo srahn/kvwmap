@@ -1,10 +1,10 @@
 <?php
-class LayerChart extends MyObject {
+class LayerChart extends PgObject {
 
 	static $write_debug = false;
 
 	function __construct($gui) {
-		parent::__construct($gui, 'layer_charts', 'id');
+		parent::__construct($gui, 'kvwmap', 'layer_charts', 'id');
 		$this->validations = array(
 			array(
 				'attribute' => 'breite',

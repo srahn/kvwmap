@@ -207,6 +207,21 @@ class pgdatabase {
     return pg_close($this->dbConn);
   }
 
+	function read_colors() {
+		$sql = "
+			SELECT
+				*
+			FROM
+				kvwmap.colors
+		";
+		#echo $sql;
+		$ret = $this->execSQL($sql, 4, 0);
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$colors[] = $rs;
+		}
+		return $colors;
+	}
+
 	function schema_exists($schema_name) {
 		$sql = "
 			SELECT

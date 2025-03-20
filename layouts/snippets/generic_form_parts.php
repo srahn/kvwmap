@@ -389,7 +389,7 @@
 				else {
 					# Auswahl vordefinierter Farben
 					if ($gui->result_colors == '') {
-						$gui->result_colors = $gui->database->read_colors();
+						$gui->result_colors = $gui->pgdatabase->read_colors();
 					}
 					$datapart .= '
 						<select class="'.$field_class.'" tabindex="1" name="'.$fieldname.'" id="'.$layer_id.'_'.$name.'_'.$e.'_'.$k.'" style="width: 80px; background-color: rgb(' . $value . ')" onchange="' . $onchange . ';this.setAttribute(\'style\', this.options[this.selectedIndex].getAttribute(\'style\'));">';

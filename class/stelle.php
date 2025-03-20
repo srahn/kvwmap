@@ -2347,7 +2347,7 @@ class stelle {
 					privileg,
 					tooltip
 				FROM
-					layer_attributes2stelle
+					kvwmap.layer_attributes2stelle
 				WHERE
 					stelle_id = " . $this->id . " AND
 					layer_id = " . $layer_id;
@@ -2358,15 +2358,14 @@ class stelle {
 					name as attributename,
 					0 as privileg
 				FROM 
-					layer_attributes 
+					kvwmap.layer_attributes 
 				WHERE 
-				layer_id = " . $layer_id;
+					layer_id = " . $layer_id;
 		}
 		// echo '<br>Sql: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->get_attributes_privileges - Abfragen der Layerrechte zur Stelle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4); return 0; }
-		while ($rs = $this->database->result->fetch_array()) {
+		$ret = $this->database->execSQL($sql);
+		while ($rs = pg_fetch_array($ret[1])) {
 			$privileges[$rs['attributename']] = $rs['privileg'];
 			$privileges['tooltip_' . $rs['attributename']] = $rs['tooltip'];
 			$privileges['attributenames'][] = $rs['attributename'];

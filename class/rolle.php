@@ -47,7 +47,7 @@ class rolle {
 				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
-						u_groups2rolle
+						kvwmap.u_groups2rolle
 					SET
 						status = '" . $group_status . "'
 					WHERE
@@ -185,21 +185,17 @@ class rolle {
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
 		$ret = $this->database->execSQL($sql);
-		if (!$this->database->success) {
-			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
-			return 0;
-		}
 		$i = 0;
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
 				if ($rs['filter'] == '') {
-					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
+					$rs['filter'] = '(' . $rs['rollenfilter'] . ')';
 				} else {
-					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
+					$rs['filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
 				}
 			}
 			if ($replace_params) {
-				foreach (array('Name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'Data') as $key) {
+				foreach (array('name', 'alias', 'connection', 'maintable', 'classification', 'pfad', 'data') as $key) {
 					$rs[$key] = replace_params_rolle(
 						$rs[$key],
 						['duplicate_criterion' => $rs['duplicate_criterion']]
@@ -262,23 +258,23 @@ class rolle {
   function read_disabled_class_expressions($layerset) {
 		$sql = "
 			SELECT 
-				cl.Layer_ID,
-				cl.Class_ID,
-				cl.Expression,
+				cl.layer_id,
+				cl.class_id,
+				cl.expression,
 				cl.classification
 			FROM 
-				classes as cl
-				JOIN u_rolle2used_class as r2uc ON r2uc.class_id = cl.Class_ID    
+				kvwmap.classes as cl
+				JOIN kvwmap.u_rolle2used_class as r2uc ON r2uc.class_id = cl.class_id
 			WHERE 
 				r2uc.status = 0 AND 
 				r2uc.user_id = " . $this->user_id . "	AND 
 				r2uc.stelle_id = " . $this->stelle_id . "
 		";
 		#echo '<p>SQL zur Abfrage von diabled classes: ' . $sql;
-		$this->database->execSQL($sql);
-    while ($row = $this->database->result->fetch_assoc()) {
-			if ($layerset['layer_ids'][$row['Layer_ID']]['classification'] == $row['classification']) {
-  			$result[$row['Layer_ID']][] = $row;
+		$ret = $this->database->execSQL($sql);
+    while ($row = pg_fetch_assoc($ret[1])) {
+			if ($layerset['layer_ids'][$row['layer_id']]['classification'] == $row['classification']) {
+  			$result[$row['layer_id']][] = $row;
 			}
 		}
 		return $result ?: [];
@@ -286,20 +282,24 @@ class rolle {
 
   function getGroups($GroupName) {
     # Abfragen der Gruppen in der Rolle
-    $sql ='SELECT g2r.*, ';
-		if(rolle::$language != 'german') {
-			$sql.='CASE WHEN Gruppenname_'.rolle::$language.' != "" THEN Gruppenname_'.rolle::$language.' ELSE Gruppenname END AS ';
-		}
-		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
-    $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
-    $sql.=' AND g2r.id = g.id';
-    if ($GroupName!='') {
-      $sql.=' AND Gruppenname LIKE "'.$GroupName.'"';
+    $sql = '
+			SELECT 
+				g2r.*, ' .
+				(rolle::$language != 'german'? 'CASE WHEN gruppenname_' . rolle::$language . ' != "" THEN gruppenname_' . rolle::$language . ' ELSE gruppenname END AS ' : '') . '
+				gruppenname 
+			FROM 
+				kvwmap.u_groups AS g, 
+				kvwmap.u_groups2rolle AS g2r 
+			WHERE 
+				g2r.stelle_id = ' . $this->stelle_id . ' AND 
+				g2r.user_id = '.$this->user_id . ' AND 
+				g2r.id = g.id';
+    if ($GroupName != '') {
+      $sql.=' AND gruppenname = "' . $GroupName . '"';
     }
     $this->debug->write("<p>file:rolle.php class:rolle->getGroups - Abfragen der Gruppen zur Rolle:<br>".$sql,4);
-    $this->database->execSQL($sql);
-    if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
-    while ($rs = $this->database->result->fetch_assoc()) {
+    $ret = $this->database->execSQL($sql);
+    while ($rs = pg_fetch_assoc($ret[1])) {
       $groups[]=$rs;
     }
     return $groups;
@@ -848,16 +848,16 @@ class rolle {
 				layer_id,
 				sql,
 				orderby,
-				limit,
-				offset
+				\"limit\",
+				\"offset\"
 			)
 			VALUES (
 				" . $this->user_id . ",
 				" . $this->stelle_id . ",
 				'" . $go . "',
 				" . $layer_id . ",
-				'" . $this->database->mysqli->real_escape_string($query) . "',
-				'" . $this->database->mysqli->real_escape_string($sql_order) . "',
+				'" . pg_escape_string($query) . "',
+				'" . pg_escape_string($sql_order) . "',
 				" . ($limit == '' ? 'NULL' : $limit) . ",
 				" . ($offset == '' ? 'NULL' : $offset) . "
 			)
@@ -1126,29 +1126,29 @@ class rolle {
 				$where[] = "l.id = " . $LayerName;
 			}
 			else {
-				$where[] = "l.Name LIKE '" . $LayerName . "'";
+				$where[] = "l.name LIKE '" . $LayerName . "'";
 			}
 		}
 		if ($typ != NULL) {
-			$where[] = "Typ = '" . $typ . "'";
+			$where[] = "typ = '" . $typ . "'";
 		}
 		$sql = "
 			SELECT
 				l.*,
 				4 as tolerance,
-				-l.id as Layer_ID,
+				-l.id as layer_id,
 				l.query as pfad,
 				CASE WHEN Typ = 'import' THEN 1 ELSE 0 END as queryable,
 				gle_view,
-				concat('(', rollenfilter, ')') as Filter
+				'(' || rollenfilter || ')' as filter
 			FROM
-				rollenlayer AS l
+				kvwmap.rollenlayer AS l
 			WHERE
 				l.stelle_id = " . $this->stelle_id . " AND
 				l.user_id = " . $this->user_id . "
 		";
 		if ($LayerName != '') {
-			$sql .=' AND (l.Name LIKE "'.$LayerName.'" ';
+			$sql .=' AND (l.name LIKE "'.$LayerName.'" ';
 			if (is_numeric($LayerName)) {
 				$sql .= 'OR l.id = "' . $LayerName . '")';
 			}
@@ -1157,15 +1157,14 @@ class rolle {
 			}
 		}
 		if ($typ != NULL){
-			$sql .= " AND Typ = '" . $typ . "'";
+			$sql .= " AND typ = '" . $typ . "'";
 		}
 		#echo '<br>SQL zur Abfrage des Rollenlayers: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getRollenLayer - Abfragen der Rollenlayer zur Rolle:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->database->execSQL($sql);
 		$layer = array();
-		while ($rs = $this->database->result->fetch_assoc()) {
-			$rs['Name_or_alias'] = $rs['Name'];
+		while ($rs = pg_fetch_assoc($ret[1])) {
+			$rs['Name_or_alias'] = $rs['name'];
 			$layer[] = $rs;
 		}
 		return $layer;
