@@ -47,13 +47,13 @@ class rolle {
 				$group_status = (value_of($formvars, 'group_'.$this->groupset[$i]['id']) == 1 ? 1 : 0);
 				$sql = "
 					UPDATE
-						`u_groups2rolle`
+						u_groups2rolle
 					SET
-						`status` = '" . $group_status . "'
+						status = '" . $group_status . "'
 					WHERE
-						`user_id` = " . $this->user_id . " AND
-						`stelle_id` = " . $this->stelle_id . " AND
-						`id` = " . $this->groupset[$i]['id'] . "
+						user_id = " . $this->user_id . " AND
+						stelle_id = " . $this->stelle_id . " AND
+						id = " . $this->groupset[$i]['id'] . "
 				";
 				#echo '<br>Sql: ' . $sql;
 				$this->debug->write("<p>file:rolle.php class:rolle->setGroupStatus - Speichern des Status der Gruppen zur Rolle:", 4);
@@ -89,26 +89,26 @@ class rolle {
 		if (rolle::$language != 'german') {
 			$name_column = "
 			CASE
-				WHEN l.`Name_" . rolle::$language . "` != \"\" THEN l.`Name_" . rolle::$language . "`
-				ELSE l.`Name`
-			END AS Name";
+				WHEN l.name_" . rolle::$language . " != \"\" THEN l.name_" . rolle::$language . "
+				ELSE l.name
+			END AS name";
 		} else {
-			$name_column = "l.Name";
+			$name_column = "l.name";
 		}
 
 		if ($LayerName != '') {
 			if (is_numeric($LayerName)) {
-				$layer_name_filter .= " AND l.Layer_ID = " . $LayerName;
+				$layer_name_filter .= " AND l.layer_id = " . $LayerName;
 			} else {
-				$layer_name_filter = " AND (l.Name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
+				$layer_name_filter = " AND (l.name LIKE '" . $LayerName . "' OR l.alias LIKE '" . $LayerName . "')";
 			}
 			$privilegfk = ",
 				(
 					SELECT
 						max(las.privileg)
 					FROM
-						layer_attributes AS la,
-						layer_attributes2stelle AS las
+						kvwmap.layer_attributes AS la,
+						kvwmap.layer_attributes2stelle AS las
 					WHERE
 						la.layer_id = ul.Layer_ID AND
 						form_element_type = 'SubformFK' AND
@@ -119,7 +119,7 @@ class rolle {
 		}
 
 		if ($only_active_or_requires) {
-			$active_filter = " AND (r2ul.aktivStatus = '1' OR ul.`requires` = 1)";
+			$active_filter = " AND (r2ul.aktivstatus = '1' OR ul.requires = 1)";
 		}
 		else {
 			$active_filter = '';
@@ -128,56 +128,56 @@ class rolle {
 		$sql = "
 			SELECT " .
 			$name_column . ",
-				l.Layer_ID,
-				l.alias, Datentyp, COALESCE(ul.group_id, Gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, Data, tileindex, l.`schema`, max_query_rows, document_path, document_url, classification, ddl_attribute, 
+				l.layer_id,
+				l.alias, datentyp, COALESCE(ul.group_id, gruppe) AS Gruppe, pfad, maintable, oid, identifier_text, maintable_is_view, data, tileindex, l.schema, max_query_rows, document_path, document_url, classification, ddl_attribute, 
 				CASE 
-					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.User_ID)
+					WHEN connectiontype = 6 THEN concat('host=', c.host, ' port=', c.port, ' dbname=', c.dbname, ' user=', c.user, ' password=', c.password, ' application_name=kvwmap_user_', r2ul.user_id)
 					ELSE l.connection 
 				END as connection, 
 				printconnection, classitem, connectiontype, epsg_code, tolerance, toleranceunits, sizeunits, wms_name, wms_auth_username, wms_auth_password, wms_server_version, ows_srs,
 				wfs_geom,
 				write_mapserver_templates,
-				selectiontype, querymap, processing, `kurzbeschreibung`, `dataowner_name`, `dataowner_email`, `dataowner_tel`, `uptodateness`, `updatecycle`, metalink, terms_of_use_link, status, trigger_function, version,
-				ul.`queryable`,
-				l.`drawingorder`,
-				ul.`legendorder`,
-				ul.`minscale`,
-				ul.`maxscale`,
-				ul.`offsite`,
+				selectiontype, querymap, processing, kurzbeschreibung, dataowner_name, dataowner_email, dataowner_tel, uptodateness, updatecycle, metalink, terms_of_use_link, status, trigger_function, version,
+				ul.queryable,
+				l.drawingorder,
+				ul.legendorder,
+				ul.minscale,
+				ul.maxscale,
+				ul.offsite,
 				coalesce(r2ul.transparency, ul.transparency, 100) as transparency,
 				coalesce(r2ul.labelitem, l.labelitem) as labelitem,
 				l.labelitem as original_labelitem,
-				l.`duplicate_from_layer_id`,
-				l.`duplicate_criterion`,
-				l.`shared_from`,
-				l.`geom_column`,
-				ul.`postlabelcache`,
-				`Filter`,
+				l.duplicate_from_layer_id,
+				l.duplicate_criterion,
+				l.shared_from,
+				l.geom_column,
+				ul.postlabelcache,
+				filter,
 				r2ul.gle_view,
-				ul.`template`,
-				`header`,
-				`footer`,
-				ul.`symbolscale`,
-				ul.`logconsume`,
-				ul.`requires`,
-				ul.`privileg`,
-				ul.`export_privileg`,
-				`start_aktiv`,
+				ul.template,
+				header,
+				footer,
+				ul.symbolscale,
+				ul.logconsume,
+				ul.requires,
+				ul.privileg,
+				ul.export_privileg,
+				start_aktiv,
 				r2ul.showclasses,
 				r2ul.rollenfilter,
 				r2ul.geom_from_layer 
 				" . $privilegfk . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`sync`' : '') . "
-				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.`vector_tile_url`' : '') . "
-				" . ($this->gui_object->plugin_loaded('portal') ? ', l.`cluster_option`' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.sync' : '') . "
+				" . ($this->gui_object->plugin_loaded('mobile') ? ', l.vector_tile_url' : '') . "
+				" . ($this->gui_object->plugin_loaded('portal') ? ', l.cluster_option' : '') . "
 			FROM
-				layer AS l JOIN
-				used_layer AS ul ON l.Layer_ID=ul.Layer_ID JOIN
-				u_rolle2used_layer as r2ul ON r2ul.Stelle_ID = ul.Stelle_ID AND r2ul.Layer_ID = ul.Layer_ID LEFT JOIN
+				kvwmap.layer AS l JOIN
+				kvwmap.used_layer AS ul ON l.layer_id = ul.layer_id JOIN
+				kvwmap.u_rolle2used_layer as r2ul ON r2ul.stelle_id = ul.stelle_id AND r2ul.layer_id = ul.layer_id LEFT JOIN
 				connections as c ON l.connection_id = c.id
 			WHERE
-				ul.Stelle_ID = " . $this->stelle_id . " AND
-				r2ul.User_ID = " . $this->user_id .
+				ul.stelle_id = " . $this->stelle_id . " AND
+				r2ul.user_id = " . $this->user_id .
 			$layer_name_filter . 
 			$active_filter . "
 			ORDER BY
@@ -185,18 +185,18 @@ class rolle {
 		";
 		#echo '<br>SQL zur Abfrage des Layers der Rolle: ' . $sql;
 		$this->debug->write("<p>file:rolle.php class:rolle->getLayer - Abfragen der Layer zur Rolle:<br>" . $sql, 4);
-		$this->database->execSQL($sql);
+		$ret = $this->database->execSQL($sql);
 		if (!$this->database->success) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF']) . " Zeile: " . __LINE__, 4);
 			return 0;
 		}
 		$i = 0;
-		while ($rs = $this->database->result->fetch_assoc()) {
+		while ($rs = pg_fetch_assoc($ret[1])) {
 			if ($rs['rollenfilter'] != '') {		// Rollenfilter zum Filter hinzufügen
-				if ($rs['Filter'] == '') {
+				if ($rs['filter'] == '') {
 					$rs['Filter'] = '(' . $rs['rollenfilter'] . ')';
 				} else {
-					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['Filter']);
+					$rs['Filter'] = str_replace(' AND ', ' AND (' . $rs['rollenfilter'] . ') AND ', $rs['filter']);
 				}
 			}
 			if ($replace_params) {
@@ -207,10 +207,10 @@ class rolle {
 					);
 				}
 			}
-			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'Name' : 'alias'];
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$this->gui_object->Stelle->useLayerAliases) ? 'name' : 'alias'];
 			$layer[$i] = $rs;
-			$layer['layer_ids'][$rs['Layer_ID']] = &$layer[$i];
-			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['Layer_ID'];
+			$layer['layer_ids'][$rs['layer_id']] = &$layer[$i];
+			$layer['layer_ids'][$layer[$i]['requires']]['required'] = $rs['layer_id'];
 			$i++;
 		}
 		return $layer;
@@ -289,7 +289,7 @@ class rolle {
     # Abfragen der Gruppen in der Rolle
     $sql ='SELECT g2r.*, ';
 		if(rolle::$language != 'german') {
-			$sql.='CASE WHEN `Gruppenname_'.rolle::$language.'` != "" THEN `Gruppenname_'.rolle::$language.'` ELSE `Gruppenname` END AS ';
+			$sql.='CASE WHEN Gruppenname_'.rolle::$language.' != "" THEN Gruppenname_'.rolle::$language.' ELSE Gruppenname END AS ';
 		}
 		$sql.='Gruppenname FROM u_groups AS g, u_groups2rolle AS g2r ';
     $sql.=' WHERE g2r.stelle_ID='.$this->stelle_id.' AND g2r.user_id='.$this->user_id;
@@ -572,7 +572,7 @@ class rolle {
 			UPDATE
 				rolle
 			SET
-				`layer_params` = '" . sanitize($layer_params, 'text') . "'
+				layer_params = '" . sanitize($layer_params, 'text') . "'
 			WHERE
 				user_id = " . $this->user_id . " AND
 				stelle_id = " . $this->stelle_id . "
@@ -842,15 +842,15 @@ class rolle {
 	
 	function save_last_query($go, $layer_id, $query, $sql_order, $limit, $offset) {
 		$sql = "
-			INSERT INTO `rolle_last_query` (
-				`user_id`,
-				`stelle_id`,
-				`go`,
-				`layer_id`,
-				`sql`,
-				`orderby`,
-				`limit`,
-				`offset`
+			INSERT INTO rolle_last_query (
+				user_id,
+				stelle_id,
+				go,
+				layer_id,
+				sql,
+				orderby,
+				limit,
+				offset
 			)
 			VALUES (
 				" . $this->user_id . ",
@@ -1127,11 +1127,11 @@ class rolle {
 				$where[] = "l.id = " . $LayerName;
 			}
 			else {
-				$where[] = "l.`Name` LIKE '" . $LayerName . "'";
+				$where[] = "l.Name LIKE '" . $LayerName . "'";
 			}
 		}
 		if ($typ != NULL) {
-			$where[] = "`Typ` = '" . $typ . "'";
+			$where[] = "Typ = '" . $typ . "'";
 		}
 		$sql = "
 			SELECT
@@ -1647,24 +1647,24 @@ class rolle {
 		# Gespeicherte Themeneinstellungen von default user übernehmen
 		if ($default_user_id > 0 AND $default_user_id != $user_id) {
 			$sql = "
-				INSERT INTO `rolle_saved_layers` (
-					`user_id`,
-					`stelle_id`,
-					`name`,
-					`layers`,
-					`query`
+				INSERT INTO rolle_saved_layers (
+					user_id,
+					stelle_id,
+					name,
+					layers,
+					query
 				)
 				SELECT " .
 					$user_id . "," .
 					$stelle_id . ",
-					`name`,
-					`layers`,
-					`query`
+					name,
+					layers,
+					query
 				FROM
-					`rolle_saved_layers`
+					rolle_saved_layers
 				WHERE
-					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . $stelle_id . "
+					user_id = " . $default_user_id . " AND
+					stelle_id = " . $stelle_id . "
 			";
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:setSavedLayersFromDefaultUser :<br>" . $sql, 4);
@@ -1682,100 +1682,100 @@ class rolle {
 		if ($default_user_id > 0 AND ($default_user_id != $user_id OR $parent_stelle_id)) {
 			# Rolleneinstellungen vom Defaultnutzer verwenden
 			$sql = "
-				INSERT IGNORE INTO `rolle` (
-					`user_id`,
-					`stelle_id`,
-					`nImageWidth`, `nImageHeight`,
-					`auto_map_resize`,
-					`minx`, `miny`, `maxx`, `maxy`,
-					`nZoomFactor`,
-					`selectedButton`,
-					`epsg_code`,
-					`epsg_code2`,
-					`coordtype`,
-					`active_frame`,
-					`gui`,
-					`language`,
-					`hidemenue`,
-					`hidelegend`,
-					`tooltipquery`,
-					`buttons`,
-					`scrollposition`,
-					`result_color`,
-					`result_hatching`,
-					`result_transparency`,
-					`always_draw`,
-					`runningcoords`,
-					`showmapfunctions`,
-					`showlayeroptions`,
-					`showrollenfilter`,
-					`singlequery`,
-					`querymode`,
-					`geom_edit_first`,
-					`dataset_operations_position`,
-					`immer_weiter_erfassen`,
-					`upload_only_file_metadata`,
-					`overlayx`, `overlayy`,
-					`instant_reload`,
-					`menu_auto_close`,
-					`layer_params`,
-					`visually_impaired`,
-					`font_size_factor`,
-					`menue_buttons`,
-					`redline_text_color`,
-					`redline_font_family`,
-					`redline_font_size`,
-					`redline_font_weight`
+				INSERT IGNORE INTO rolle (
+					user_id,
+					stelle_id,
+					nImageWidth, nImageHeight,
+					auto_map_resize,
+					minx, miny, maxx, maxy,
+					nZoomFactor,
+					selectedButton,
+					epsg_code,
+					epsg_code2,
+					coordtype,
+					active_frame,
+					gui,
+					language,
+					hidemenue,
+					hidelegend,
+					tooltipquery,
+					buttons,
+					scrollposition,
+					result_color,
+					result_hatching,
+					result_transparency,
+					always_draw,
+					runningcoords,
+					showmapfunctions,
+					showlayeroptions,
+					showrollenfilter,
+					singlequery,
+					querymode,
+					geom_edit_first,
+					dataset_operations_position,
+					immer_weiter_erfassen,
+					upload_only_file_metadata,
+					overlayx, overlayy,
+					instant_reload,
+					menu_auto_close,
+					layer_params,
+					visually_impaired,
+					font_size_factor,
+					menue_buttons,
+					redline_text_color,
+					redline_font_family,
+					redline_font_size,
+					redline_font_weight
 				)
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					`nImageWidth`, `nImageHeight`,
-					`auto_map_resize`,
-					`minx`, `miny`, `maxx`, `maxy`,
-					`nZoomFactor`,
-					`selectedButton`,
-					`epsg_code`,
-					`epsg_code2`,
-					`coordtype`,
-					`active_frame`,
-					`gui`,
-					`language`,
-					`hidemenue`,
-					`hidelegend`,
-					`tooltipquery`,
-					`buttons`,
-					`scrollposition`,
-					`result_color`,
-					`result_hatching`,
-					`result_transparency`,
-					`always_draw`,
-					`runningcoords`,
-					`showmapfunctions`,
-					`showlayeroptions`,
-					`showrollenfilter`,
-					`singlequery`,
-					`querymode`,
-					`geom_edit_first`,
-					`dataset_operations_position`,
-					`immer_weiter_erfassen`,
-					`upload_only_file_metadata`,
-					`overlayx`, `overlayy`,
-					`instant_reload`,
-					`menu_auto_close`,
-					`layer_params`,
-					`visually_impaired`,
-					`font_size_factor`,
-					`menue_buttons`,
-					`redline_text_color`,
-					`redline_font_family`,
-					`redline_font_size`,
-					`redline_font_weight`
+					nImageWidth, nImageHeight,
+					auto_map_resize,
+					minx, miny, maxx, maxy,
+					nZoomFactor,
+					selectedButton,
+					epsg_code,
+					epsg_code2,
+					coordtype,
+					active_frame,
+					gui,
+					language,
+					hidemenue,
+					hidelegend,
+					tooltipquery,
+					buttons,
+					scrollposition,
+					result_color,
+					result_hatching,
+					result_transparency,
+					always_draw,
+					runningcoords,
+					showmapfunctions,
+					showlayeroptions,
+					showrollenfilter,
+					singlequery,
+					querymode,
+					geom_edit_first,
+					dataset_operations_position,
+					immer_weiter_erfassen,
+					upload_only_file_metadata,
+					overlayx, overlayy,
+					instant_reload,
+					menu_auto_close,
+					layer_params,
+					visually_impaired,
+					font_size_factor,
+					menue_buttons,
+					redline_text_color,
+					redline_font_family,
+					redline_font_size,
+					redline_font_weight
 				FROM
-					`rolle`
+					rolle
 				WHERE
-					`user_id` = " . $default_user_id . " AND
-					`stelle_id` = " . ($parent_stelle_id ?? $stelle_id) . "
+					user_id = " . $default_user_id . " AND
+					stelle_id = " . ($parent_stelle_id ?? $stelle_id) . "
 			";
 		}
 		else {
@@ -1872,10 +1872,10 @@ class rolle {
 		# löscht die übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < count_or_0($stellen); $i++) {
 			$sql = "
-				DELETE FROM `rolle`
+				DELETE FROM rolle
 				WHERE
-					`user_id` = " . $user_id . ' AND
-					`stelle_id` = ' . $stellen[$i] . "
+					user_id = " . $user_id . ' AND
+					stelle_id = ' . $stellen[$i] . "
 			";
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>" . $sql, 4);
@@ -1887,7 +1887,7 @@ class rolle {
 			# default_user_id
 			$sql = "
 				UPDATE
-					`stelle` 
+					stelle 
 				SET	
 					default_user_id = NULL
 				WHERE 
@@ -1906,10 +1906,10 @@ class rolle {
 			# rolle_nachweise
 			if ($this->gui_object->plugin_loaded('nachweisverwaltung')) {
 				$sql = "
-					DELETE FROM `rolle_nachweise`
+					DELETE FROM rolle_nachweise
 					WHERE
-						`user_id` = " . $user_id . " AND
-						`stelle_id` = " . $stellen[$i] . "
+						user_id = " . $user_id . " AND
+						stelle_id = " . $stellen[$i] . "
 				";
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteRollen - Löschen der Rollen:<br>".$sql,4);
@@ -1931,13 +1931,13 @@ class rolle {
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					`menue_id`,
-					`status`
+					menue_id,
+					status
 				FROM
-					`u_menue2rolle`
+					u_menue2rolle
 				WHERE
-					`stelle_id` = " . $stelle_id . " AND
-					`user_id` = " . $default_user_id . "
+					stelle_id = " . $stelle_id . " AND
+					user_id = " . $default_user_id . "
 			";
 		}
 		else {
@@ -1946,20 +1946,20 @@ class rolle {
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					`menue_id`,
+					menue_id,
 					0
 				FROM
-					`u_menue2stelle`
+					u_menue2stelle
 				WHERE
-					`stelle_id` = " . $stelle_id . "
+					stelle_id = " . $stelle_id . "
 			";
 		}
 		$sql = "
-			INSERT IGNORE INTO `u_menue2rolle` (
-				`user_id`,
-				`stelle_id`,
-				`menue_id`,
-				`status`
+			INSERT IGNORE INTO u_menue2rolle (
+				user_id,
+				stelle_id,
+				menue_id,
+				status
 			) " .
 			$menue2rolle_select_sql . "
 		";
@@ -1977,10 +1977,10 @@ class rolle {
 				# löscht alle Menuepunkte der Stelle
 				$sql = "
 					DELETE FROM
-						`u_menue2rolle`
+						u_menue2rolle
 					WHERE
-						`user_id` = " . $user_id . " AND
-						`stelle_id` = " . $stellen[$i] . "
+						user_id = " . $user_id . " AND
+						stelle_id = " . $stellen[$i] . "
 				";
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:stelle function:deleteMenue - Löschen der Menuepunkte der Stelle:<br>".$sql,4);
@@ -1993,11 +1993,11 @@ class rolle {
 				for ($j=0; $j < count($menues); $j++) {
 					$sql = "
 						DELETE FROM
-							`u_menue2rolle`
+							u_menue2rolle
 						WHERE
-							`user_id` = " . $user_id . " AND
-							`stelle_id` = " . $stellen[$i] . " AND
-							`menue_id` = " . $menues[$j] . "
+							user_id = " . $user_id . " AND
+							stelle_id = " . $stellen[$i] . " AND
+							menue_id = " . $menues[$j] . "
 					";
 					#echo '<br>'.$sql;
 					$this->debug->write("<p>file:rolle.php class:rolle function:deleteMenue - Löschen der Menuepunkte der Rollen:<br>".$sql,4);
@@ -2076,7 +2076,7 @@ class rolle {
 				g5.id,
 				0
 			FROM 
-				`u_rolle2used_layer` r2ul
+				u_rolle2used_layer r2ul
 				JOIN layer l ON l.Layer_ID = r2ul.layer_id
 				JOIN u_groups g1 ON g1.id = l.Gruppe
 				LEFT JOIN u_groups g2 ON g2.id = g1.obergruppe
@@ -2090,7 +2090,7 @@ class rolle {
 	function deleteGroups($user_id,$stellen) {
 		# löscht die Gruppen der übergebenen Stellen für einen Benutzer.
 		for ($i = 0; $i < count_or_0($stellen); $i++) {
-			$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stellen[$i];
+			$sql ='DELETE FROM u_groups2rolle WHERE user_id = '.$user_id.' AND stelle_id = '.$stellen[$i];
 			#echo '<br>'.$sql;
 			$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 			$this->database->execSQL($sql);
@@ -2144,12 +2144,12 @@ class rolle {
 			}
 			
 			if($rs_layer[$gruppen_ids[0]] == '' AND $rs_subgroups[$gruppen_ids[0]] == ''){					# wenn die erste Gruppe, also die Gruppe des Layers weder Layer noch Untergruppen hat, diese löschen
-				$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` = '.$gruppen_ids[0].';';
+				$sql ='DELETE FROM u_groups2rolle WHERE user_id = '.$user_id.' AND stelle_id = '.$stelle_id.' AND id = '.$gruppen_ids[0].';';
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 				$this->database->execSQL($sql);
 				if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 				if($rs_layer == '' AND empty($rs_subgroups)){				# wenn darüberhinaus keine Layer oder Untergruppen in den Gruppen darüber vorhanden sind, diese auch löschen
-					$sql ='DELETE FROM `u_groups2rolle` WHERE `user_id` = '.$user_id.' AND `stelle_id` = '.$stelle_id.' AND `id` IN ('.implode(',', $gruppen_ids).');';
+					$sql ='DELETE FROM u_groups2rolle WHERE user_id = '.$user_id.' AND stelle_id = '.$stelle_id.' AND id IN ('.implode(',', $gruppen_ids).');';
 					$this->debug->write("<p>file:rolle.php class:rolle function:deleteGroups - Löschen der Gruppen der Rollen:<br>".$sql,4);
 					$this->database->execSQL($sql);
 					if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
@@ -2177,12 +2177,12 @@ class rolle {
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					`layer_id`,
-					`aktivStatus`,
-					`queryStatus`,
-					`gle_view`,
-					`showclasses`,
-					`logconsume`
+					layer_id,
+					aktivStatus,
+					queryStatus,
+					gle_view,
+					showclasses,
+					logconsume
 				FROM
 					u_rolle2used_layer
 				WHERE
@@ -2196,9 +2196,9 @@ class rolle {
 				SELECT " .
 					$user_id . ", " .
 					$stelle_id . ",
-					`Layer_ID`,
-					`start_aktiv`,
-					`start_aktiv`,
+					Layer_ID,
+					start_aktiv,
+					start_aktiv,
 					1,
 					1,
 					0
@@ -2210,15 +2210,15 @@ class rolle {
 		}
 		# Layereinstellungen der Rolle eintragen
 		$sql = "
-			INSERT IGNORE INTO `u_rolle2used_layer` (
-				`user_id`,
-				`stelle_id`,
-				`layer_id`,
-				`aktivStatus`,
-				`queryStatus`,
-				`gle_view`,
-				`showclasses`,
-				`logconsume`
+			INSERT IGNORE INTO u_rolle2used_layer (
+				user_id,
+				stelle_id,
+				layer_id,
+				aktivStatus,
+				queryStatus,
+				gle_view,
+				showclasses,
+				logconsume
 			) " .
 			$rolle2used_layer_select_sql . "
 		";
@@ -2239,11 +2239,11 @@ class rolle {
 				$sql = "
 					DELETE
 					FROM
-						`u_rolle2used_layer`
+						u_rolle2used_layer
 					WHERE
-						`stelle_id` = " . $stellen[$i] .
-						($user_id != 0 ? " AND `user_id` = " . $user_id : "") .
-						($layer != 0 ? " AND `layer_id` = " . $layer[$j] : "") . "
+						stelle_id = " . $stellen[$i] .
+						($user_id != 0 ? " AND user_id = " . $user_id : "") .
+						($layer != 0 ? " AND layer_id = " . $layer[$j] : "") . "
 				";
 				#echo '<br>'.$sql;
 				$this->debug->write("<p>file:rolle.php class:rolle function:deleteLayer - Löschen der Layer der Rollen:<br>".$sql,4);
@@ -2337,18 +2337,18 @@ class rolle {
 		$where_id = ($id != '' ? " AND id = " . $id : "");
 		$sql = "
 			SELECT
-				`id`,
-				`name`,
-				`layers`,
-				`query`
+				id,
+				name,
+				layers,
+				query
 			FROM
-				`rolle_saved_layers`
+				rolle_saved_layers
 			WHERE
-				`user_id` = " . $user_id . " AND
-				`stelle_id` = " . $this->stelle_id .
+				user_id = " . $user_id . " AND
+				stelle_id = " . $this->stelle_id .
 				$where_id . "
 			ORDER BY
-				`name`
+				name
 		";
 		#echo '<br>Sql: ' . $sql;
 
