@@ -2159,7 +2159,7 @@ echo '			</table>
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
 					if (value_of($layerset['list'][$i], 'requires') != '') {
-						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
+						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
