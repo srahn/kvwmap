@@ -21644,11 +21644,11 @@ class db_mapObj{
 					$sql.= 'name_'.$language.', ';
 				}
 			}
-			$sql .= 'layer_id, expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
-				"' . $attrib['name'] . '",';
+			$sql .= "layer_id, expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
+				'" . $attrib['name'] . "',";
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german'){
-						$sql .= '"' . $attrib['name_' . $language] . '",';
+						$sql .= "'" . $attrib['name_' . $language] . "',";
 					}
 				}
 				$sql .= $attrib['layer_id'] . ",
@@ -21771,36 +21771,67 @@ class db_mapObj{
   function new_Style($style){
 		#echo '<p>style: ' . print_r($style, true);
     if(is_array($style)){
-      $sql = "INSERT INTO styles SET ";
-			if($style['colorred'] != ''){$sql.= "color = '" . $style['colorred']." " . $style['colorgreen']." " . $style['colorblue']."'";}
-      else $sql.= "color = '" . $style['color']."'";
-      if(value_of($style, 'symbol')){$sql.= ", symbol = '" . $style['symbol']."'";}
-      if(value_of($style, 'symbolname')){$sql.= ", symbolname = '" . $style['symbolname']."'";}
-      if(value_of($style, 'size')){$sql.= ", size = '" . $style['size']."'";}      
-      if (value_of($style, 'outlinecolor')) {
-				$sql.= ", outlinecolor = '" . $style['outlinecolor']."'";
+      $sql = "
+				INSERT INTO kvwmap.styles 
+				(
+					color, "
+					. (value_of($style, 'symbol')? 'symbol, ' : '') 
+					. (value_of($style, 'symbolname')? 'symbolname, ' : '') 
+					. (value_of($style, 'size')? 'size, ' : '') 
+					. (value_of($style, 'outlinecolor')? 'outlinecolor, ' : '') 
+					. (value_of($style, 'colorrange')? 'colorrange, ' : '') 
+					. (value_of($style, 'datarange')? 'datarange, ' : '') 
+					. (value_of($style, 'opacity')? 'opacity, ' : '') 
+					. (value_of($style, 'minsize')? 'minsize, ' : '') 
+					. (value_of($style, 'maxsize')? 'maxsize, ' : '') 
+					. (value_of($style, 'angle')? 'angle, ' : '') 
+					. (value_of($style, 'angleitem')? 'angleitem, ' : '') 
+					. (value_of($style, 'width')? 'width, ' : '') 
+					. (value_of($style, 'minwidth')? 'minwidth, ' : '') 
+					. (value_of($style, 'maxwidth')? 'maxwidth, ' : '') 
+					. (value_of($style, 'offsetx')? 'offsetx, ' : '') 
+					. (value_of($style, 'offsety')? 'offsety, ' : '') 
+					. (value_of($style, 'polaroffset')? 'polaroffset, ' : '') 
+					. (value_of($style, 'pattern')? 'pattern, ' : '') 
+					. (value_of($style, 'geomtransform')? 'geomtransform, ' : '') 
+					. (value_of($style, 'gap')? 'gap, ' : '') 
+					. (value_of($style, 'initialgap')? 'initialgap, ' : '') 
+					. (value_of($style, 'linecap')? 'linecap, ' : '') 
+					. (value_of($style, 'linejoin')? 'linejoin, ' : '') 
+					. (value_of($style, 'linejoinmaxsize')? 'linejoinmaxsize' : '') . "
+				)
+				VALUES (";
+			if ($style['colorred'] != '') {
+				$sql.= "'" . $style['colorred']." " . $style['colorgreen']." " . $style['colorblue']."'";
 			}
-      if(value_of($style, 'outlinecolorred')){$sql.= ", outlinecolor = '" . $style['outlinecolorred']." " . $style['outlinecolorgreen']." " . $style['outlinecolorblue']."'";}
-			if(value_of($style, 'colorrange')){$sql.= ", colorrange = '" . $style['colorrange']."'";}
-			if(value_of($style, 'datarange')){$sql.= ", datarange = '" . $style['datarange']."'";}
-			if(value_of($style, 'opacity')){$sql.= ", opacity = " . $style['opacity'];}
-      if(value_of($style, 'minsize')){$sql.= ", minsize = '" . $style['minsize']."'";}
-      if(value_of($style, 'maxsize')){$sql.= ", maxsize = '" . $style['maxsize']."'";}
-      if(value_of($style, 'angle')){$sql.= ", angle = '" . $style['angle']."'";}
-			if(value_of($style, 'angleitem')){$sql.= ", angleitem = '" . $style['angleitem']."'";}
-      if(value_of($style, 'width')){$sql.= ", width = '" . $style['width']."'";}
-      if(value_of($style, 'minwidth')){$sql.= ", minwidth = '" . $style['minwidth']."'";}
-      if(value_of($style, 'maxwidth')){$sql.= ", maxwidth = '" . $style['maxwidth']."'";}
-			if(value_of($style, 'offsetx')){$sql.= ", offsetx = '" . $style['offsetx'] . "'";}
-			if(value_of($style, 'offsety')){$sql.= ", offsety = '" . $style['offsety'] . "'";}
-			if(value_of($style, 'polaroffset')){$sql.= ", polaroffset = '" . $style['polaroffset']."'";}
-			if(value_of($style, 'pattern')){$sql.= ", pattern = '" . $style['pattern']."'";}
-			if(value_of($style, 'geomtransform')){$sql.= ", geomtransform = '" . $style['geomtransform']."'";}
-			if(value_of($style, 'gap')){$sql.= ", gap = " . $style['gap'];}
-			if(value_of($style, 'initialgap')){$sql.= ", initialgap = " . $style['initialgap'];}
-			if(value_of($style, 'linecap')){$sql.= ", linecap = '" . $style['linecap']."'";}
-			if(value_of($style, 'linejoin')){$sql.= ", linejoin = '" . $style['linejoin']."'";}
-			if(value_of($style, 'linejoinmaxsize')){$sql.= ", linejoinmaxsize = " . $style['linejoinmaxsize'];}
+      else {
+				$sql.= "'" . $style['color']."'";
+			}
+      if(value_of($style, 'symbol')){$sql.= ", '" . $style['symbol']."'";}
+      if(value_of($style, 'symbolname')){$sql.= ", '" . $style['symbolname']."'";}
+      if(value_of($style, 'size')){$sql.= ", '" . $style['size']."'";}      
+      if(value_of($style, 'outlinecolor')) {$sql.= ", '" . $style['outlinecolor']."'";}
+      if(value_of($style, 'outlinecolorred')){$sql.= ", '" . $style['outlinecolorred']." " . $style['outlinecolorgreen']." " . $style['outlinecolorblue']."'";}
+			if(value_of($style, 'colorrange')){$sql.= ", '" . $style['colorrange']."'";}
+			if(value_of($style, 'datarange')){$sql.= ", '" . $style['datarange']."'";}
+			if(value_of($style, 'opacity')){$sql.= ", " . $style['opacity'];}
+      if(value_of($style, 'minsize')){$sql.= ", '" . $style['minsize']."'";}
+      if(value_of($style, 'maxsize')){$sql.= ", '" . $style['maxsize']."'";}
+      if(value_of($style, 'angle')){$sql.= ", '" . $style['angle']."'";}
+			if(value_of($style, 'angleitem')){$sql.= ", '" . $style['angleitem']."'";}
+      if(value_of($style, 'width')){$sql.= ", '" . $style['width']."'";}
+      if(value_of($style, 'minwidth')){$sql.= ", '" . $style['minwidth']."'";}
+      if(value_of($style, 'maxwidth')){$sql.= ", '" . $style['maxwidth']."'";}
+			if(value_of($style, 'offsetx')){$sql.= ", '" . $style['offsetx'] . "'";}
+			if(value_of($style, 'offsety')){$sql.= ", '" . $style['offsety'] . "'";}
+			if(value_of($style, 'polaroffset')){$sql.= ", '" . $style['polaroffset']."'";}
+			if(value_of($style, 'pattern')){$sql.= ", '" . $style['pattern']."'";}
+			if(value_of($style, 'geomtransform')){$sql.= ", '" . $style['geomtransform']."'";}
+			if(value_of($style, 'gap')){$sql.= ", " . $style['gap'];}
+			if(value_of($style, 'initialgap')){$sql.= ", " . $style['initialgap'];}
+			if(value_of($style, 'linecap')){$sql.= ", '" . $style['linecap']."'";}
+			if(value_of($style, 'linejoin')){$sql.= ", '" . $style['linejoin']."'";}
+			if(value_of($style, 'linejoinmaxsize')){$sql.= ", " . $style['linejoinmaxsize'];}
     }
     else{
     # Styleobjekt wird übergeben
@@ -21813,12 +21844,14 @@ class db_mapObj{
       $sql.= "minsize = '" . $style->minsize."', ";
       $sql.= "maxsize = '" . $style->maxsize."'";
     }
+		$sql .= ') RETURNING style_id';
     #echo '<p>SQL zum Anlegen eines Styles: '. $sql;
     $this->debug->write("<p>file:kvwmap class:db_mapObj->new_Style - Erzeugen eines Styles:<br>" . $sql,4);
     $ret = $this->db->execSQL($sql);
 		if($this->db->logfile != NULL)$this->db->logfile->write($sql.';');
-    if (!$this->db->success) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
-    return $this->db->mysqli->insert_id;
+    if ($ret[0]) { echo "<br>Abbruch in " . $this->script_name." Zeile: ".__LINE__; return 0; }
+    $rs = pg_fetch_array($ret[1]);
+		return $rs[0];
   }
 
 	function get_classes2style($style_id){

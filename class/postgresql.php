@@ -222,6 +222,23 @@ class pgdatabase {
 		return $colors;
 	}
 
+  function read_color($id){
+  	$sql = "
+			SELECT 
+				* 
+			FROM 
+				kvwmap.colors 
+			WHERE 
+				id = ".$id;
+  	#echo $sql;
+  	$ret = $this->execSQL($sql, 4, 0);
+    if ($ret[0]) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
+    if($ret[0]==0){
+      $color = pg_fetch_assoc($ret[1]);
+    }
+    return $color;
+  }	
+
 	function schema_exists($schema_name) {
 		$sql = "
 			SELECT
