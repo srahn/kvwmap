@@ -2463,15 +2463,17 @@ class rolle {
 			for($i = 0; $i < count($log_number); $i++){
 				# function setzt eine ALB-PDF-EXportaktivität
 				$sql = "
-					INSERT IGNORE INTO 
-						u_consumeALB 
-					SET
-						user_id = " . $this->user_id . ",
-						stelle_id = " . $this->stelle_id . ",
-						time_id = '" . $time . "',
-						format = '" . $format . "',
-						log_number = '" . $log_number[$i] . "',
-						wz = '" . $wz . "'";
+					INSERT INTO 
+						kvwmap.u_consumeALB 
+					VALUES (
+						" . $this->user_id . ",
+						" . $this->stelle_id . ",
+						'" . $time . "',
+						'" . $format . "',
+						'" . $log_number[$i] . "',
+						'" . $wz . "'
+					)
+					ON CONFLICT DO NOTHING";
 				#echo $sql.'<br>';
 				$ret=$this->database->execSQL($sql,4, 1);
 				if ($ret[0]) {

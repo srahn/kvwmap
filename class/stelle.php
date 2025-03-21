@@ -960,8 +960,8 @@ class stelle {
 				f.bezeichnung,
 				1 as erlaubt
 			FROM
-				u_funktionen AS f,
-				u_funktion2stelle AS f2s
+				kvwmap.u_funktionen AS f,
+				kvwmap.u_funktion2stelle AS f2s
 			WHERE
 				f.id=f2s.funktion_id AND
 				f2s.stelle_id = " . $this->id . "
@@ -969,14 +969,14 @@ class stelle {
 		";
 		#echo '</script>SQL zur Abfrage der Funktionen: ' . $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->getFunktionen - Fragt die Funktionen der Stelle ab:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
+		$ret = $this->database->execSQL($sql);
+		if ($ret[0]) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Abfrage der Funktionen für die Stelle';
 			return $errmsg;
 		}
 		else {
-			while($rs=$this->database->result->fetch_array()) {
+			while ($rs = pg_fetch_array($ret[1])) {
 				if ($return == 'only_ids') {
 					$funktionen[] = $rs['id'];
 				}
