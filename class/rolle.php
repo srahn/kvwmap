@@ -536,17 +536,17 @@ class rolle {
 				SELECT
 					*
 				FROM
-					layer_parameter
+					kvwmap.layer_parameter
 				WHERE
 					id IN (" . $selectable_layer_params . ")
 			";
 			#echo '<br>Sql: ' . $sql;
-			$this->database->execSQL($sql, 4, 0);
-			if (!$this->database->success) {
+			$ret = $this->database->execSQL($sql, 4, 0);
+			if ($ret[0]) {
 				echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 			}
 			else {
-				while ($param = $this->database->result->fetch_assoc()) {
+				while ($param = pg_fetch_assoc($ret[1])) {
 					$sql = $param['options_sql'];
 					$sql = str_replace('$USER_ID', $this->user_id, $sql);
 					$sql = str_replace('$STELLE_ID', $this->stelle_id, $sql);

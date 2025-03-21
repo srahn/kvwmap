@@ -991,7 +991,7 @@ FROM
 				else { # Attribut ist keine Tabellenspalte -> nicht speicherbar
 					$fieldtype = pg_field_type($ret[1], $i);			# Typ aus Query ermitteln
 					$fields[$i]['saveable'] = 0;
-					$fields[$i]['real_name'] = $this->gui->database->mysqli->real_escape_string($select_attr[$fields[$i]['name']]['base_expr']);
+					$fields[$i]['real_name'] = pg_escape_string($select_attr[$fields[$i]['name']]['base_expr']);
 				}
 				$fields[$i]['type'] = $fieldtype;
 

@@ -18686,23 +18686,23 @@ class db_mapObj{
 		global $language;
 		$sql = "
 			SELECT
-				Data,
+				data,
 				duplicate_criterion
 			FROM
-				" . ($layer_id < 0 ? "rollenlayer" : "layer") . "
+				kvwmap." . ($layer_id < 0 ? "rollenlayer" : "layer") . "
 			WHERE
-				" . ($layer_id < 0 ? "-id" : "Layer_ID") . " = " . $layer_id . "
+				" . ($layer_id < 0 ? "-id" : "layer_id") . " = " . $layer_id . "
 		";
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->getData - Lesen des Data-Statements des Layers:<br>" . $sql,4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) {
+		$ret = $this->db->execSQL($sql);
+		if ($ret[0]) {
 			$this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4);
 			return 0;
 		}
-		$rs = $this->db->result->fetch_assoc();
+		$rs = pg_fetch_assoc($ret[1]);
 		$data = replace_params_rolle(
-			$rs['Data'],
+			$rs['data'],
 			['duplicate_criterion' => $rs['duplicate_criterion']]
 		);
 		return $data;
@@ -18714,14 +18714,13 @@ class db_mapObj{
 				pfad,
 				duplicate_criterion
 			FROM
-				layer
+				kvwmap.layer
 			WHERE
-				Layer_ID = " . $layer_id . "
+				layer_id = " . $layer_id . "
 		";
     $this->debug->write("<p>file:kvwmap class:db_mapObj->getPath - Lesen des Path-Statements des Layers:<br>" . $sql,4);
-    $this->db->execSQL($sql);
-    if (!$this->db->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . "<br>" . $this->db->mysqli->error, 4); return 0; }
-    $layer = $this->db->result->fetch_assoc();
+    $ret = $this->db->execSQL($sql);
+    $layer = pg_fetch_assoc($ret[1]);
 		$path = replace_params_rolle(
 			$layer['pfad'],
 			['duplicate_criterion' => $rs['duplicate_criterion']]
@@ -21226,8 +21225,8 @@ class db_mapObj{
 				kvwmap.layer_parameter as p,
 				kvwmap.layer as l
 			WHERE
-				locate(
-					concat('$', p.key),
+				position(
+					concat('$', p.key) IN
 					concat(" . ($only_from_attribute ?: "l.Name, COALESCE(l.alias, ''), l.schema, l.connection, l.Data, l.pfad, l.classitem, l.classification, l.maintable, l.tileindex, COALESCE(l.connection, ''), COALESCE(l.processing, '')") . ")
 				) > 0
 		";
@@ -21238,7 +21237,7 @@ class db_mapObj{
 			$sql .= " AND l.layer_id = " . $layer_id;
 		}
 		$ret = $this->db->execSQL($sql);
-		if (!$ret[0]) {
+		if ($ret[0]) {
 			echo '<br>Fehler bei der Abfrage der Layerparameter mit SQL: ' . $sql;
 		}
 		else {
