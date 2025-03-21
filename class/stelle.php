@@ -1007,8 +1007,8 @@ class stelle {
 			SELECT
 				distinct a.*
 			FROM
-				u_menues as a,
-				u_menue2stelle as b
+				kvwmap.u_menues as a,
+				kvwmap.u_menue2stelle as b
 			WHERE
 				links LIKE 'index.php?go=" . $menuename . "%' AND
 				b.menue_id = a.id AND
@@ -1016,13 +1016,13 @@ class stelle {
 		";
 		#echo $sql;
 		$this->debug->write("<p>file:stelle.php class:stelle->isMenueAllowed - Guckt ob der Menuepunkt der Stelle zugeordnet ist:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) {
+		$ret = $this->database->execSQL($sql);
+		if ($ret[0]) {
 			$this->debug->write("<br>Abbruch in " . htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4);
 			$errmsg='Fehler bei der Ueberpruefung des Menuepunkts für die Stelle';
 		}
 		else{
-			$rs=$this->database->result->fetch_array();
+			$rs = pg_fetch_array($ret[1]);
 		}
 		if($rs[0] != '') {
 			return 1;

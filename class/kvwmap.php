@@ -15362,7 +15362,7 @@ MS_MAPFILE="' . WMS_MAPFILE_PATH . $mapfile . '" exec ${MAPSERV}');
       $this->formvars['epsg_code']=$this->user->rolle->epsg_code;
     }
     # Abfragen der Farben für die Suchergebnisse
-    $this->result_colors = read_colors($this->database);
+    $this->result_colors = read_colors($this->pgdatabase);
 		# Speichern des neuen Passworts, falls übergeben
 		if ($this->formvars['go'] == 'Stelle_waehlen_Passwort_aendern') {
 			if ($this->formvars['passwort'] == '') {
