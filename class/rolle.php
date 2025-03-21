@@ -14,6 +14,7 @@ class rolle {
 	static $user_ID;
 	static $stelle_ID;
 	static $stelle_bezeichnung;
+	static $export;
 	var $minx;
 	var $newtime;
 	var $gui; // file to include as gui
@@ -32,6 +33,7 @@ class rolle {
 		rolle::$user_ID = $user_id;
 		rolle::$stelle_ID = $stelle_id;
 		rolle::$stelle_bezeichnung = $this->gui_object->Stelle->Bezeichnung;
+		rolle::$export = 'false';
 		$this->loglevel = 0;
 	}
 
