@@ -2010,10 +2010,19 @@ class rolle {
 
 
 	function set_one_Group($user_id, $stelle_id, $group_id, $open) {
-		$sql ='REPLACE INTO u_groups2rolle VALUES('.$user_id.', '.$stelle_id.', '.$group_id.', '.$open.')';
+		$sql = '
+			INSERT INTO 
+				u_groups2rolle 
+			VALUES (
+				' . $user_id . ', 
+				' . $stelle_id . ', 
+				' . $group_id . ', 
+				' . $open . '
+			)
+			ON CONFLICT (user_id, stelle_id, id) DO NOTHING';
 		$this->debug->write("<p>file:rolle.php class:rolle function:setGroups - Setzen der Gruppen der Rollen:<br>".$sql,4);
-		$this->database->execSQL($sql);
-		if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
+		$ret = $this->database->execSQL($sql);
+		if ($ret[0]) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 		return 1;
 	}
 
