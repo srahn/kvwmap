@@ -229,7 +229,7 @@
     $GUI->formvars['data'] = $datastring;
     $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
-    $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
+    $GUI->formvars['connection_id'] = POSTGRES_CONNECTION_ID;
     $GUI->formvars['epsg_code'] = $epsg;
     $GUI->formvars['transparency'] = $GUI->user->rolle->result_transparency;
 

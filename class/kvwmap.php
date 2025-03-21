@@ -19303,37 +19303,55 @@ class db_mapObj{
 			}
 			$sql = "
 				INSERT INTO
-					layer_attributes
-				SET
-					layer_id = " . $layer_id.",
-					name = '" . $attributes[$i]['name'] . "',
-					real_name = '" . $attributes[$i]['real_name'] . "',
-					tablename = '" . $attributes[$i]['table_name'] ."',
-					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
-					schema = '" . $attributes[$i]['schema_name'] . "',
-					type = '" . $attributes[$i]['type'] . "',
-					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
-					saveable = " . $attributes[$i]['saveable'] . ",
-					nullable = " . $attributes[$i]['nullable'] . ",
-					length = " . $attributes[$i]['length'] . ",
-					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					default = '".$this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					order = " . $attributes[$i]['order'] . "
-				ON DUPLICATE KEY UPDATE
+					kvwmap.layer_attributes	
+				(
+					layer_id,
+					name,
+					real_name,
+					tablename,
+					table_alias_name,
+					schema,
+					type,
+					geometrytype,
+					constraints,
+					saveable,
+					nullable,
+					length,
+					decimal_length,
+					\"default\",
+					\"order\"
+				)
+				VALUES (
+					" . $layer_id . ",
+					'" . $attributes[$i]['name'] . "',
+					'" . $attributes[$i]['real_name'] . "',
+					'" . $attributes[$i]['table_name'] ."',
+					'" . $attributes[$i]['table_alias_name'] . "',
+					'" . $attributes[$i]['schema_name'] . "',
+					'" . $attributes[$i]['type'] . "',
+					'" . $attributes[$i]['geomtype'] . "',
+					'" . pg_escape_string($attributes[$i]['constraints']) . "',
+					" . $attributes[$i]['saveable'] . ",
+					" . $attributes[$i]['nullable'] . ",
+					" . $attributes[$i]['length'] . ",
+					" . $attributes[$i]['decimal_length'] . ",
+					'" . pg_escape_string($attributes[$i]['default']) . "',
+					" . $attributes[$i]['order'] . "
+				)
+				ON CONFLICT (layer_id, name) DO UPDATE SET
 					real_name = '" . $attributes[$i]['real_name'] . "',
 					tablename = '" . $attributes[$i]['table_name'] . "',
 					table_alias_name = '" . $attributes[$i]['table_alias_name'] . "',
 					schema = '" . $attributes[$i]['schema_name'] . "',
 					type = '" . $attributes[$i]['type'] . "',
 					geometrytype = '" . $attributes[$i]['geomtype'] . "',
-					constraints = '".$this->db->mysqli->real_escape_string($attributes[$i]['constraints']) . "',
+					constraints = '" . pg_escape_string($attributes[$i]['constraints']) . "',
 					saveable = " . $attributes[$i]['saveable'] . ",
 					nullable = " . $attributes[$i]['nullable'] . ",
 					length = " . $attributes[$i]['length'] . ",
 					decimal_length = " . $attributes[$i]['decimal_length'] . ",
-					default = '" . $this->db->mysqli->real_escape_string($attributes[$i]['default']) . "',
-					order = " . $attributes[$i]['order'] . "
+					\"default\" = '" . pg_escape_string($attributes[$i]['default']) . "',
+					\"order\" = " . $attributes[$i]['order'] . "
 			";
 			#echo '<br>Sql: ' . $sql;
 			$this->debug->write("<p>file:kvwmap class:db_mapObj->save_postgis_attributes - Speichern der Layerattribute:<br>" . $sql,4);
@@ -21617,13 +21635,16 @@ class db_mapObj{
 			if (value_of($attrib, 'legendimageheight') == '') $attrib['legendimageheight'] = 'NULL';
 			if (value_of($attrib, 'legendorder') == '') $attrib['legendorder'] = 'NULL';
 			# attrib:(Name, Layer_ID, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder)
-			$sql = 'INSERT INTO classes (Name, ';
+			$sql = '
+				INSERT INTO 
+					kvwmap.classes 
+				(name, ';
 			foreach ($supportedLanguages as $language) {
 				if ($language != 'german') {
-					$sql.= 'Name_'.$language.', ';
+					$sql.= 'name_'.$language.', ';
 				}
 			}
-			$sql .= 'layer_id, Expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
+			$sql .= 'layer_id, expression, classification, legendgraphic, legendimagewidth, legendimageheight, drawingorder, legendorder) VALUES (
 				"' . $attrib['name'] . '",';
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german'){
@@ -21631,7 +21652,7 @@ class db_mapObj{
 					}
 				}
 				$sql .= $attrib['layer_id'] . ",
-					'" . $this->db->mysqli->real_escape_string($attrib['expression']) . "',
+					'" . pg_escape_string($attrib['expression']) . "',
 					'" . value_of($attrib, 'classification') . "',
 					'" . value_of($attrib, 'legendgraphic') . "',
 					" . $attrib['legendimagewidth'] . ",
@@ -21642,17 +21663,13 @@ class db_mapObj{
 		}
 		else {
 			$class = $classdata; # Classobjekt wurde übergeben
-			if (MAPSERVERVERSION > 500) {
-				$expression = $class->getExpressionString();
-			}
-			else {
-				$expression = $class->getExpression();
-			}
+			$expression = $class->getExpressionString();
 			$sql  = "
-				INSERT INTO classes (
-					Name,
-					Layer_ID,
-					Expression,
+				INSERT INTO 
+					kvwmap.classes (
+					name,
+					layer_id,
+					expression,
 					classification,
 					drawingorder
 				) VALUES (
@@ -21664,12 +21681,14 @@ class db_mapObj{
 				)
 			";
 		}
+		$sql .= 'RETURNING class_id';
 		#echo $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->new_Class - Erstellen einer Klasse zu einem Layer:<br>" . $sql, 4);
 		$ret = $this->db->execSQL($sql);
 		if ($this->db->logfile != NULL) $this->db->logfile->write($sql . ';');
-    if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
-		return $this->db->mysqli->insert_id;
+    if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql); return 0; }
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0];
 	}
 
 	function delete_Class($class_id) {
