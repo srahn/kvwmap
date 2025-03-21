@@ -19913,12 +19913,13 @@ class db_mapObj{
 				original_layer_id,
 				user_id,
 				stelle_id,
-				aktivStatus,
-				Name,
-				Datentyp,
-				Gruppe,
-				Typ,
-				Data,
+				aktivstatus,
+				querystatus,
+				name,
+				datentyp,
+				gruppe,
+				typ,
+				data,
 				query,
 				connectiontype,
 				" . (array_key_exists('connection', $formvars) ? "connection," : "") . "
@@ -19934,10 +19935,11 @@ class db_mapObj{
 				" . ($formvars['original_layer_id'] ?: 'NULL') . ",
 				'" . $formvars['user_id'] . "',
 				'" . $formvars['stelle_id'] . "',
-				'" . $formvars['aktivStatus'] . "',
-				'" . $this->db->mysqli->real_escape_string($formvars['Name']) . "',
+				" . $formvars['aktivStatus'] . ",
+				" . ($formvars['queryStatus'] ?: '0') . ",
+				'" . pg_escape_string($formvars['Name']) . "',
 				'" . $formvars['Datentyp'] . "',
-				'" . $formvars['Gruppe'] . "',
+				" . $formvars['Gruppe'] . ",
 				'" . $formvars['Typ'] . "',
 				'" . $formvars['Data'] . "',
 				'" . $formvars['query'] . "',
@@ -19951,12 +19953,14 @@ class db_mapObj{
 				'" . $formvars['wms_auth_username'] . "',
 				'" . $formvars['wms_auth_password'] . "'
 			)
+			RETURNING id
 		";
     #echo 'SQL: ' . $sql;
 		$this->debug->write("<p>file:kvwmap class:db_mapObj->newRollenLayer - Erzeugen eines RollenLayers" . str_replace($formvars['connection'], 'Connection', $sql), 4);
-		$this->db->execSQL($sql);
-		if (!$this->db->success) { echo err_msg($this->script_name, __LINE__, $sql, $formvars['connection']); return 0; }
-		return $this->db->mysqli->insert_id;
+		$ret = $this->db->execSQL($sql);
+		if ($ret[0]) { echo err_msg($this->script_name, __LINE__, $sql, $formvars['connection']); return 0; }
+		$rs = pg_fetch_array($ret[1]);
+		return $rs[0];
 	}
 
 	function createAutoClasses($classes, $attribute, $layer_id, $datatype, $database){
