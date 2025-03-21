@@ -119,7 +119,7 @@ $db_check_sqls[] = [
 function checkStatus($layer) {
 	$status['oid'] = ($layer['oid'] == 'oid' ? false : true);
 	$status['query'] = ((strpos($layer['pfad'], ' oid') !== false OR strpos($layer['pfad'], ',oid') !== false OR strpos($layer['pfad'], '.oid') !== false)? false : true);
-	$status['data'] = (strpos($layer['Data'], 'oid') !== false ? false : true);
+	$status['data'] = (strpos($layer['data'], 'oid') !== false ? false : true);
 	return $status;
 }
 
@@ -248,7 +248,7 @@ switch ($this->formvars['action']) {
 $color[false] = '#db5a5a';
 $color[true] = '#36908a';
 
-$this->formvars['order'] = $this->formvars['order'] ?: 'Name';
+$this->formvars['order'] = $this->formvars['order'] ?: 'name';
 
 $query = "
 	SELECT DISTINCT 
@@ -454,8 +454,8 @@ while ($layer = $this->database->result->fetch_assoc()) {
 			</td>
 			<td valign="top" style="background-color: '.$color[$status['data']].'">
 				' . ($i == 0 ? '<div class="fett scrolltable_header">Data</div>' : '') . '
-				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['Data'] . '</textarea>
-				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea name="new_data_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['Data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
+				<textarea onmouseenter="select_text(this, \'oid\');">' . $layer['data'] . '</textarea>
+				' . ((!$status['data'] AND $result['oid_alternative']) ? '<div class="replaced"><textarea name="new_data_' . $layer["Layer_ID"] . '" onmouseenter="select_text(this, \'oid\');">' . replace_oid_in_data($layer['data'], $result['oid_alternative']) . '</textarea></div>' : '') . '
 			</td>
 			<td>
 				' . ($i == 0 ? '<div class="fett scrolltable_header">oid-Alternative</div>' : '') . '
@@ -488,7 +488,7 @@ echo '</tbody></table></div>';
 					<br>
 					Sortierung: 
 					<select name="order" onchange="document.GUI.submit();">
-						<option value="Name" <? if($this->formvars['order'] == 'Name')echo 'selected'; ?>>Name</option>
+						<option value="Name" <? if($this->formvars['order'] == 'name')echo 'selected'; ?>>Name</option>
 						<option value="Gruppenname" <? if($this->formvars['order'] == 'Gruppenname')echo 'selected'; ?>>Gruppe</option>
 					</select>
 					<div id="nav_bar"><? echo $nav_bar; ?></div>

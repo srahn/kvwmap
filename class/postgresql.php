@@ -322,7 +322,7 @@ class pgdatabase {
 				'schema_name' => $schema_name,
 				'oid_column' => $oid_column,
 				'geom_column' => $geom['column'],
-				'Datentyp' =>  $geom['Datentyp'],
+				'datentyp' =>  $geom['datentyp'],
 				'epsg_code' => $geom['epsg_code']
 			);
 		}
@@ -382,7 +382,7 @@ class pgdatabase {
 		$geom_types = array('POINT' => 0, 'LINESTRING' => 1, 'POLYGON' => 2);
 		$geom = array(
 			'column' => '',
-			'Datentyp' => 5,
+			'datentyp' => 5,
 			'epsg_code' => null
 		);
 		$sql = "
@@ -398,7 +398,7 @@ class pgdatabase {
 				$the_geom_id = $fields_from_select[1]['the_geom_id'];
 				$geom = array(
 					'column' => $geometry_column,
-					'Datentyp' => $geom_types[$fields_from_select[1][$the_geom_id]['geomtype']]
+					'datentyp' => $geom_types[$fields_from_select[1][$the_geom_id]['geomtype']]
 				);
 				$sql = "
 					SELECT
@@ -1456,7 +1456,7 @@ FROM
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['GemkgID'][]=$rs['gemkgid'];
-      $Liste['Name'][]=$rs['name'];
+      $Liste['name'][]=$rs['name'];
       $Liste['gemeinde'][]=$rs['gemeinde'];
       $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
     }
@@ -1504,7 +1504,7 @@ FROM
     if ($queryret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['GemkgID'][]=$rs['gemkgid'];
-      $Liste['Name'][]=$rs['name'];
+      $Liste['name'][]=$rs['name'];
       $Liste['gemeinde'][]=$rs['gemeinde'];
       $Liste['Bezeichnung'][]=$rs['name']." (".$rs['gemkgid'].") ".$rs['gemeindename'];
 			if ($rs['hist'] == 't') {
@@ -1528,7 +1528,7 @@ FROM
     if ($ret==0) { $this->debug->write("<br>Abbruch Zeile: ".__LINE__,4); return 0; }
     while ($rs=pg_fetch_assoc($ret[1])) {
       $GemeindeListe['ID'][]=$rs['id'];
-      $GemeindeListe['Name'][]=$rs['name'];
+      $GemeindeListe['name'][]=$rs['name'];
     }
     return $GemeindeListe;
   }
@@ -2513,7 +2513,7 @@ FROM
     while ($rs = pg_fetch_assoc($queryret[1])) {
 			$Liste['Gemeinde'][] = $rs['gemeinde'];
 			$Liste['StrID'][] = $rs['strasse'];
-			$Liste['Name'][] = $rs['strassenname'];
+			$Liste['name'][] = $rs['strassenname'];
     }
     return $Liste;
   }
@@ -2550,11 +2550,11 @@ FROM
 			$Liste['gemkgschl'][]=$rs['gemkgschl'];
 			$namen[]=$rs['strassenname'];		# eigentlichen Strassennamen sichern
 			if($namen[$i-1] == $rs['strassenname'] AND $Liste['Gemarkung'][$i-1] != $rs['gemkgname']){
-				$Liste['Name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
-				$Liste['Name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
+				$Liste['name'][$i-1]=$namen[$i-1].' ('.$Liste['Gemarkung'][$i-1].')';
+				$Liste['name'][$i]=$rs['strassenname'].' ('.$rs['gemkgname'].')';
 			}
 			else{
-				$Liste['Name'][]=$rs['strassenname'];
+				$Liste['name'][]=$rs['strassenname'];
 			}
       $i++;
     }
@@ -2639,7 +2639,7 @@ FROM
     $queryret=$this->execSQL($sql, 4, 0);
     while ($rs=pg_fetch_assoc($queryret[1])) {
       $Liste['FlurID'][]=$rs['flurid'];
-      $Liste['Name'][]=intval($rs['name']);
+      $Liste['name'][]=intval($rs['name']);
       $Liste['GemFlurID'][]=$rs['gemflurid'];
     }
     return $Liste;

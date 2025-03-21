@@ -67,7 +67,7 @@
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Scale';
 	$this->strMetadata = 'Metadata';
-	$this->strName = 'Name';
+	$this->strName = 'name';
 	$this->strNameSuffix = 'Name suffix';
 	$this->strNewDatasetTitle1 = 'New data set in layer';
 	$this->strNo = 'No';

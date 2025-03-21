@@ -139,7 +139,7 @@ class XP_Plan extends PgObject {
 		$layers_with_content = array();
 		foreach ($xplan_layers AS $xplan_layer) {
 			if ($xplan_layer['geom_column'] == '') {
-				$msg = 'In der Layerdefinition des Layers ' . $xplan_layer['Name'] . ' ist keine geom_column angegeben.';
+				$msg = 'In der Layerdefinition des Layers ' . $xplan_layer['name'] . ' ist keine geom_column angegeben.';
 				$ret[0] = 1;
 				$ret[1] = $msg;
 				$ret['success'] = false;
@@ -148,7 +148,7 @@ class XP_Plan extends PgObject {
 			}
 			$sql = "
 				SELECT
-					'" . $xplan_layer['Name'] . "',
+					'" . $xplan_layer['name'] . "',
 					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%point%' THEN 1 ELSE 0 END) AS num_points,
 					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%linestring%' THEN 1 ELSE 0 END) AS num_lines,
 					sum(CASE WHEN LOWER(ST_GeometryType(" . $xplan_layer['geom_column'] . ")) LIKE '%polygon%' THEN 1 ELSE 0 END) AS num_polygons
@@ -171,11 +171,11 @@ class XP_Plan extends PgObject {
 			$content = pg_fetch_array($ret[1]);
 
 			if (
-				($xplan_layer['Datentyp'] == 0 AND $content['num_points'] > 0) OR
-				($xplan_layer['Datentyp'] == 1 AND $content['num_lines'] > 0) OR
-				($xplan_layer['Datentyp'] == 2 AND $content['num_polygons'] > 0)
+				($xplan_layer['datentyp'] == 0 AND $content['num_points'] > 0) OR
+				($xplan_layer['datentyp'] == 1 AND $content['num_lines'] > 0) OR
+				($xplan_layer['datentyp'] == 2 AND $content['num_polygons'] > 0)
 			) {
-				$layers_with_content[$xplan_layer['Name']] = $xplan_layer;
+				$layers_with_content[$xplan_layer['name']] = $xplan_layer;
 			}
 		}
 

@@ -7,7 +7,7 @@ include_once(CLASSPATH . 'LayerGroup.php');
 	<tr align="center">
 		<td>
 			<h2 style="line-height: 1.2;">
-				<?php echo $strTitle; ?> "<? echo $this->formvars['Name']; ?>"<br>in <? echo $strTask; ?> "<? echo $this->formvars['stellen_name']; ?>"</h2>
+				<?php echo $strTitle; ?> "<? echo $this->formvars['name']; ?>"<br>in <? echo $strTask; ?> "<? echo $this->formvars['stellen_name']; ?>"</h2>
 		</td>
 	</tr>
 	</td>

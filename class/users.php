@@ -913,7 +913,7 @@ class user {
 		if (!$this->database->success) { $this->debug->write("<br>Abbruch Zeile: " . __LINE__ . '<br>wegen: ' . $sql . '<p>' . INFO1 . '<p>' . $this->database->mysqli->error, 4); return 0; }
 		while ($rs = $this->database->result->fetch_array()) {
 			$user['ID'][] = $rs['ID'];
-			$user['Bezeichnung'][] = $rs['Name'] . ', ' . $rs['Vorname'];
+			$user['Bezeichnung'][] = $rs['name'] . ', ' . $rs['Vorname'];
 		}
 		// Sortieren der User unter Berücksichtigung von Umlauten
 		$sorted_arrays = umlaute_sortieren($user['Bezeichnung'], $user['ID']);
@@ -950,7 +950,7 @@ class user {
 		else {
 			while ($rs = $this->database->result->fetch_array()) {
 				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
+				$user['Bezeichnung'][]=$rs['name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten
@@ -984,7 +984,7 @@ class user {
 		else {
 			while ($rs = $this->database->result->fetch_array()) {
 				$user['ID'][]=$rs['ID'];
-				$user['Bezeichnung'][]=$rs['Name'].', '.$rs['Vorname'];
+				$user['Bezeichnung'][]=$rs['name'].', '.$rs['Vorname'];
 				$user['email'][]=$rs['email'];
 			}
 			// Sortieren der User unter Berücksichtigung von Umlauten

@@ -10,7 +10,7 @@ include_once(CLASSPATH . 'FormObject.php') ?>
 if ($this->formvars['layer_id'] == '') {
 	$this->Fehlermeldung = $strLayerChartMissingLayerId;
 }
-elseif ($this->layer->get('Name') == '') {
+elseif ($this->layer->get('name') == '') {
 	$this->Fehlermeldung = $strLayerChartMissingLayer;
 }
 elseif ($this->formvars['id'] != '' AND $this->layer_chart->get_id() == '') {
@@ -57,7 +57,7 @@ else { ?>
 
 			<label class="fetter form-label" for="layer_id">Layer:</label>
 			<input type="hidden" class="form-field" name="layer_id" value="<? echo $this->layer_chart->get('layer_id'); ?>">
-			<span style="float:left; margin: 7px;"><b><? echo $this->layer->get('Name'); ?></b> (id: <? echo $this->layer->get_id(); ?>)</span>
+			<span style="float:left; margin: 7px;"><b><? echo $this->layer->get('name'); ?></b> (id: <? echo $this->layer->get_id(); ?>)</span>
 			<div style="clear: both"></div>
 
 			<label class="fetter form-label" for="id">Diagramm ID:</label><?php

@@ -314,7 +314,7 @@ function set_all(column){
 					<th>
 						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strCommonData; ?></div></a>
 					</th><?
-					if (!in_array($this->layer['Datentyp'], [MS_LAYER_QUERY])){ ?>
+					if (!in_array($this->layer['datentyp'], [MS_LAYER_QUERY])){ ?>
 						<th>
 							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strClasses; ?></div></a>
 						</th>
@@ -331,7 +331,7 @@ function set_all(column){
 					<th>
 						<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div style="width: 100%"><? echo $strPrivileges; ?></div></a>
 					</th><?
-					if (!in_array($this->layer['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->layer['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
 						</th><?

@@ -26,9 +26,9 @@ class DataSource extends MyObject
 		[
 			'attribute'	=> 'name',
 			'alias'			=> array(
-				'german'		=> 'Name',
-				'english' => 'Name',
-				'low_german' => 'Name'
+				'german'		=> 'name',
+				'english' => 'name',
+				'low_german' => 'name'
 			),
 			'type'			=> 'text',
 			'privileg'	=> 'editable',

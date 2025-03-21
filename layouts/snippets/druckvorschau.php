@@ -181,7 +181,7 @@ function preventflickering(evt){
   <tr align="center"> 
     <td colspan="2"> 
       <input type="button" name="zurueck" value="zurück zum Druckausschnitt" onclick="goback();">
-      <input type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['Name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
+      <input type="button" name="drucken" value="Drucken" onclick="print('<? echo $this->Docu->activeframe[0]['name']; ?>', '<? echo $this->Docu->activeframe[0]['format']; ?>', <? echo $this->Docu->activeframe[0]['preis']; ?>);">
     </td>
   </tr>
   <tr>
@@ -257,7 +257,7 @@ function preventflickering(evt){
 	$scale = $this->map_scaledenom;
 	for ($i = 0; $i < count_or_0($layerset); $i++){
 		if (
-			$layerset[$i]['aktivStatus'] != 0 
+			$layerset[$i]['aktivstatus'] != 0 
 			AND ($layerset[$i]['minscale'] < $scale OR $layerset[$i]['minscale'] == 0) 
 			AND ($layerset[$i]['maxscale'] > $scale OR $layerset[$i]['maxscale'] == 0)
 			AND !empty($layerset[$i]['Class'])

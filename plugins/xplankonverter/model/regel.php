@@ -528,8 +528,8 @@ class Regel extends PgObject {
 				$this->debug->show('<p>Kopiere Templatelayer in gml layer gruppe id: ' . $this->konvertierung->get('gml_layer_group_id'), Regel::$write_debug);
 				$gml_layer = $template_layer->copy(
 					array(
-						'Gruppe' => $this->konvertierung->get('gml_layer_group_id'),
-						'Data' => str_ireplace('using srid=25832', 'using srid=' . $this->konvertierung->get('output_epsg'), $template_layer->get('Data')),
+						'gruppe' => $this->konvertierung->get('gml_layer_group_id'),
+						'data' => str_ireplace('using srid=25832', 'using srid=' . $this->konvertierung->get('output_epsg'), $template_layer->get('data')),
 						'epsg_code' => $this->konvertierung->get('output_epsg')
 					)
 				);
@@ -594,7 +594,7 @@ class Regel extends PgObject {
 		if (pg_num_rows($result) == 0) {
 			$this->debug->show('nein, Prüfe ob der Layer existiert.', Regel::$write_debug);
 			if ($this->gml_layer_exists()) {
-				$this->debug->show("Layer {$this->gml_layer->get('Name')} existiert.", Regel::$write_debug);
+				$this->debug->show("Layer {$this->gml_layer->get('name')} existiert.", Regel::$write_debug);
 				$this->debug->show("Lösche Layer mit ID: " . $this->gml_layer->get('layer_id'), Regel::$write_debug);
 
 				$formvars_before = $this->gui->formvars;

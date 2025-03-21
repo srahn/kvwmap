@@ -82,7 +82,7 @@
           if ($this->formvars['nutzung']=='nutzer') {   ?>
 		  
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
         <tr> 
           <td colspan="2"><ul>
               <table width="90%" border="1" cellspacing="0" cellpadding="0">
@@ -126,7 +126,7 @@
          
         if ($this->formvars['nutzung']=='stelle_nutzer' ) {     ?>
 	        <tr> 
-	          <td colspan="2"><li>Layer-Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+	          <td colspan="2"><li>Layer-Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über 
 	              die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 	          </td>
 	        </tr>
@@ -175,7 +175,7 @@
 	 	
 	  				
 	  				<tr> 
-	          <td colspan="2"><li>Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+	          <td colspan="2"><li>Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über 
 	              die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 	          </td>
 	        </tr>
@@ -278,7 +278,7 @@
 			if ($this->formvars['nutzung']=='nutzer') { 
 		?>
         <tr> 
-          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?></li></td>
+          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
               <table width="90%" border="1" cellspacing="0" cellpadding="0">
@@ -322,7 +322,7 @@
 		if ($this->formvars['nutzung']=='stelle_nutzer') { 
 		       ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
@@ -414,7 +414,7 @@
 			<?php } 
 			if ($this->formvars['nutzung']=='nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?></li></td>
+          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
               <table width="90%" border="1" cellspacing="0" cellpadding="0">
@@ -455,7 +455,7 @@
 			<?php }
 		  if ($this->formvars['nutzung']=='stelle_nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
@@ -548,7 +548,7 @@
 			<?php } 
 			if ($this->formvars['nutzung']=='nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?></li></td>
+          <td colspan="2"><li>Zugriff durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?></li></td>
         <tr> 
           <td colspan="2"><ul>
               <table width="90%" border="1" cellspacing="0" cellpadding="0">
@@ -590,7 +590,7 @@
 			<?php }
 		  if ($this->formvars['nutzung']=='stelle_nutzer') { ?>
         <tr> 
-          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über 
+          <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über 
               die Stelle: <?php echo $this->account->Bezeichnung ;?></li></td>
         <tr> 
           <td colspan="2"><ul>

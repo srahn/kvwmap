@@ -17,7 +17,7 @@
   	?>
   <tr>
     <td><a href="index.php?go=Kartenkommentar_Zoom&storetime=<?php echo $this->mapComments[$i]['time_id']; ?>&user_id=<?php echo $this->mapComments[$i]['user_id']; ?>"><?php echo DateTime::createFromFormat('Y-m-d H:i:s', $this->mapComments[$i]['time_id'])->format('d.m.Y H:i:s'); ?></a></td>
-		<td><? echo $this->mapComments[$i]['Vorname'].' '.$this->mapComments[$i]['Name']; ?></td>
+		<td><? echo $this->mapComments[$i]['Vorname'].' '.$this->mapComments[$i]['name']; ?></td>
     <td><?php echo $this->mapComments[$i]['comment']; ?></td>
     <td>
 			<? if($this->mapComments[$i]['user_id'] == $this->user->id){ ?>

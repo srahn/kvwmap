@@ -185,7 +185,7 @@
 			$GUI->formvars['export_format'] = $result['export_format'];
 			$GUI->formvars['all'] = 1;
 
-			$exportfilename = $package->layer->get('Name');
+			$exportfilename = $package->layer->get('name');
 
 			if (in_array($result['export_format'], array('Shape', 'CSV'))) {
 				// mit ogr2ogr exportieren und zippen
@@ -529,7 +529,7 @@
 			'success' => true,
 			'msg' => 'Metadatendatei gefunden.',
 			'downloadfile' => $metadata_file,
-			'filename' => $layer->get('Name')
+			'filename' => $layer->get('name')
 		);
 	};
 
@@ -658,7 +658,7 @@
 		foreach ($all_packages AS $package) {
 			$pfad = replace_params_rolle($package->layer->get('pfad'));
 			$where = "";
-			if ($package->layer->get('Datentyp') != 5) {
+			if ($package->layer->get('datentyp') != 5) {
 				$where = "
 					WHERE
 						ST_MakeEnvelope(

@@ -301,7 +301,7 @@ class Layer extends MyObject {
 						$funktionen2stelle = Funktion2Stelle::find($this->gui, "stelle_id = " . $stelle_id . " AND funktion_id = " . $funktionen[0]->get_id());
 					}
 					if (count($menues2stelle) == 0 AND count($funktionen2stelle) == 0) {
-						$msg[] = "Die Funktion '" . $function . "' muss in einem Menü oder als Funktion der Stelle ID: " . $stelle_id . " zugewiesen sein damit der Layer '" . $this->get('Name') . "' synchronisiert werden kann!";
+						$msg[] = "Die Funktion '" . $function . "' muss in einem Menü oder als Funktion der Stelle ID: " . $stelle_id . " zugewiesen sein damit der Layer '" . $this->get('name') . "' synchronisiert werden kann!";
 					}
 				}
 			}
@@ -460,7 +460,7 @@ l.Name AS sub_layer_name
 	*/
 	function copy_classes($new_layer_id) {
 		foreach(LayerClass::find($this->gui, 'Layer_id = ' . $this->get('layer_id')) AS $layer_class) {
-			$this->debug->show('Copy class: ' . $layer_class->get('Name') . ' mit layer id: ' . $this->get('layer_id') . ' => ' . $new_layer_id, Layer::$write_debug);
+			$this->debug->show('Copy class: ' . $layer_class->get('name') . ' mit layer id: ' . $this->get('layer_id') . ' => ' . $new_layer_id, Layer::$write_debug);
 			$layer_class->copy($new_layer_id);
 		}
 	}
@@ -550,7 +550,7 @@ l.Name AS sub_layer_name
 			'</li><li>',
 			array_map(
 				function($layer) use ($anchor) {
-					return '<a title="Layereditor anzeigen" href="index.php?go=Layereditor&selected_layer_id=' . $layer->get('layer_id') . '#' . $anchor . '" target="_blank">' . $layer->get('Name') . ' (ID: ' . $layer->get('layer_id') . ')</a>';
+					return '<a title="Layereditor anzeigen" href="index.php?go=Layereditor&selected_layer_id=' . $layer->get('layer_id') . '#' . $anchor . '" target="_blank">' . $layer->get('name') . ' (ID: ' . $layer->get('layer_id') . ')</a>';
 				},
 				$layers
 			)
@@ -559,7 +559,7 @@ l.Name AS sub_layer_name
 
 	function get_group_name() {
 		include_once(CLASSPATH . 'LayerGroup.php');
-		$group = LayerGroup::find_by_id($this->gui, $this->get('Gruppe'));
+		$group = LayerGroup::find_by_id($this->gui, $this->get('gruppe'));
 		if ($group->get('obergruppe') != '') {
 			$obergroup = LayerGroup::find_by_id($this->gui, $group->get('obergruppe'));
 			return $obergroup->get('Gruppenname') . '|' . $group->get('Gruppenname');
@@ -576,7 +576,7 @@ l.Name AS sub_layer_name
 	 */
 	function get_baselayers_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_baselayers_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
-		#echo '<p>get_baselayer_def for Layer: ' . $this->get('Name');
+		#echo '<p>get_baselayer_def for Layer: ' . $this->get('name');
 
 		include_once(CLASSPATH . 'LayerClass.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
@@ -598,9 +598,9 @@ l.Name AS sub_layer_name
 			$legendgraphic = 'graphics/leer.gif';
 		}
 		$layerdef = (Object) array(
-			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('name')),
 			'options' => $this->get_baselayer_options(),
-			'shortLabel' => $this->get('Name'),
+			'shortLabel' => $this->get('name'),
 			'img' => URL . APPLVERSION . $legendgraphic,
 			'url' => $this->get_baselayer_url()
 		);
@@ -608,8 +608,8 @@ l.Name AS sub_layer_name
 	}
 
 	function get_baselayer_options() {
-		if (strpos($this->get('Data'), '{') === 0) {
-			$data = json_decode($this->get('Data'));
+		if (strpos($this->get('data'), '{') === 0) {
+			$data = json_decode($this->get('data'));
 			$data->options->attribution = $this->get_datasources('name');
 			return $data->options;
 		}
@@ -621,21 +621,21 @@ l.Name AS sub_layer_name
 	}
 
 	function get_baselayer_url() {
-		if ($this->get('Data') == '') {
+		if ($this->get('data') == '') {
 			return $this->get('connection');
 		}
-		if (strpos($this->get('Data'), '{') === 0) {
-			$data = json_decode($this->get('Data'));
+		if (strpos($this->get('data'), '{') === 0) {
+			$data = json_decode($this->get('data'));
 			return $data->url;
 		}
 		else {
-			return $this->get('Data');
+			return $this->get('data');
 		}
 	}
 
 	function get_overlays_def($stelle_id) {
 		$this->debug->show('<p>Layer->get_overlays_def for stelle_id: ' . $stelle_id, MyObject::$write_debug);
-		#echo '<p>get_overlays_def for Layer: ' . $this->get('Name');
+		#echo '<p>get_overlays_def for Layer: ' . $this->get('name');
 		include_once(CLASSPATH . 'LayerClass.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
@@ -724,12 +724,12 @@ l.Name AS sub_layer_name
 		}
 
 		$classitem = $this->get('classitem');
-		$datentyp = $this->get('Datentyp');
+		$datentyp = $this->get('datentyp');
 		$layer_opacity = $this->opacity;
 
 		$layerdef = (Object) array(
 			'thema' => $this->get_group_name(),
-			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('Name')),
+			'label' => ($this->get('alias') != '' ? $this->get('alias') : $this->get('name')),
 			'abstract' => $this->get('kurzbeschreibung'),
 			'contactOrganisation' => $this->get_datasources('beschreibung'),
 			'contactPersonName' => $this->get('dataowner_name'),
@@ -738,7 +738,7 @@ l.Name AS sub_layer_name
 			'actuality' => $this->get('uptodateness'),
 			'actualityCircle' => $this->get('updatecycle'),
 			'type' => $type,
-			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('Datentyp')],
+			'geomType' => array('Point', 'Linestring', 'Polygon', 'Raster', 'Annotation', 'Query', 'Circle', 'Tileindex', 'Chart')[$this->get('datentyp')],
 			'backgroundColor' => '#c1ffd8',
 			'infoAttribute' => ($this->get('labelitem') != '' ? $this->get('labelitem') : $this->get('oid')),
 			'url' => $url,
@@ -791,8 +791,8 @@ l.Name AS sub_layer_name
 		return $layerdef;
 	}
 
-	function get_name($name_col = 'Name') {
-		return $this->get($name_col . (($name_col == 'Name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
+	function get_name($name_col = 'name') {
+		return $this->get($name_col . (($name_col == 'name' AND rolle::$language != 'german') ? '_' . rolle::$language : ''));
 	}
 
 	function write_mapserver_templates($ansicht = 'Tabelle') {
@@ -963,7 +963,7 @@ l.Name AS sub_layer_name
 		include_once(CLASSPATH . 'CodeList.php');
 		include_once(CLASSPATH . 'LayerAttribute.php');
 
-		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('Name');
+		$msg = 'Generisch anhand des Datenbankmodells ermittelte DATA-Definition des Layers ' . $this->get('name');
 		$mapDB = new db_mapObj($this->gui->Stelle->id, $this->gui->user->id);
 		$layerdb = $mapDB->getlayerdatabase($this->get($this->identifier), $this->gui->Stelle->pgdbhost);
 

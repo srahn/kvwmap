@@ -443,7 +443,7 @@ function go_switch_xplankonverter($go) {
 				$layers_with_content = $result['layers_with_content'];
 				$mapDB = new db_mapObj($GUI->Stelle->id, $GUI->user->id);
 				foreach($layers_with_content AS $layer) {
-					$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['Name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
+					$class_completeness_result .= '<a target="_blank" href="#" onclick="$(\'#class_expressions_layer_' . $layer['id'] . '\').toggle();event.preventDefault();">Layer: ' . layer_name_with_alias($layer['name'], $layer['alias'], array('alias_first' => true, 'brace_type' => 'round')) . '</a><br>';
 					$GUI->formvars['layer_id'] = $layer['id'];
 					$classes = $mapDB->read_Classes($layer['id']);
 					$class_completeness_result .= '<table id="class_expressions_layer_' . $layer['id'] . '" style="display: none">
@@ -454,7 +454,7 @@ function go_switch_xplankonverter($go) {
 								function($class) {
 									return '
 										<tr>
-											<td class="class-td">' . $class['Name'] . '</td>
+											<td class="class-td">' . $class['name'] . '</td>
 											<td class="class-td">' . $class['Expression'] . '</td>
 										</tr>
 									';
@@ -598,11 +598,11 @@ function go_switch_xplankonverter($go) {
 			foreach($gml_classes AS $gml_class) {
 				foreach(array(0 => 'point', 1 => 'line', 2 => 'polygon') AS $geom_type_key => $geom_type_value) {
 					# create layer
-					$GUI->formvars['Name'] = $gml_class['name'];
-					$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
-					$GUI->formvars['Gruppe'] = $layer_group_id;
+					$GUI->formvars['name'] = $gml_class['name'];
+					$GUI->formvars['datentyp'] = $shapeFile->get('datatype');
+					$GUI->formvars['gruppe'] = $layer_group_id;
 					$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-					$GUI->formvars['Data'] = 'the_geom from (select oid, * from ' .
+					$GUI->formvars['data'] = 'the_geom from (select oid, * from ' .
 						$shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() .
 						' where 1=1) as foo using unique oid using srid=' . $shapeFile->get('epsg_code');
 					$GUI->formvars['maintable'] = $shapeFile->dataTableName();
@@ -720,11 +720,11 @@ function go_switch_xplankonverter($go) {
 									if (XPLANKONVERTER_CREATE_UPLOAD_SHAPE_LAYER) {
 										echo '<p>create Layer';
 										# create layer
-										$GUI->formvars['Name'] = $shapeFile->get('filename');
-										$GUI->formvars['Datentyp'] = $shapeFile->get('datatype');
-										$GUI->formvars['Gruppe'] = $layer_group_id;
+										$GUI->formvars['name'] = $shapeFile->get('filename');
+										$GUI->formvars['datentyp'] = $shapeFile->get('datatype');
+										$GUI->formvars['gruppe'] = $layer_group_id;
 										$GUI->formvars['pfad'] = 'Select * from ' . $shapeFile->dataTableName() . ' where 1=1';
-										$GUI->formvars['Data'] = 'the_geom from (
+										$GUI->formvars['data'] = 'the_geom from (
 											SELECT *
 											FROM ' . $shapeFile->dataSchemaName() . '.' . $shapeFile->dataTableName() . '
 											WHERE 1=1

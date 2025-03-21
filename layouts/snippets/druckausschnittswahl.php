@@ -176,7 +176,7 @@ function rotate_print_extent(angle){
 				<select name="aktiverRahmen" style="width: 200px" onchange="document.GUI.go.value='Druckausschnittswahl';document.GUI.target = '';document.GUI.submit()">
 					<?  
 					for($i = 0; $i < count($this->Document->frames); $i++){            	
-						echo ($this->Document->activeframe[0]['id']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'</option>';
+						echo ($this->Document->activeframe[0]['id']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['name'].'</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['name'].'</option>';
 					}
 					?>
 				</select>
@@ -235,7 +235,7 @@ function rotate_print_extent(angle){
 								$layerset = $this->layerset['list'];
 								$scale = $this->map_scaledenom;
 								for($i = 0; $i < count($layerset); $i++){
-									if($layerset[$i]['aktivStatus'] != 0 
+									if($layerset[$i]['aktivstatus'] != 0 
 									AND !empty($layerset[$i]['Class'])){
 										$name = $layerset[$i]['Name_or_alias'];
 										if ($this->formvars['legendlayer'.$layerset[$i]['layer_id']] == '' AND $layerset[$i]['layer_id'] > 0) {
@@ -292,7 +292,7 @@ function rotate_print_extent(angle){
 					<option value="image/jpeg" <? if ($this->formvars['output_filetype'] == 'image/jpeg'){ echo 'selected'; } ?>>JPG</option>
 				</select><br><br>
 	      <input type="button" name="vorschau" value="<?php echo $strButtonPrintPreview; ?>" onclick="preview();">&nbsp;
-	      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['Name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
+	      <input type="button" name="drucken" value="<?php echo $strButtonPrint; ?>" onclick="druck_pdf('<? echo $this->Document->activeframe[0]['name']; ?>', '<? echo $this->Document->activeframe[0]['format']; ?>', <? echo $this->Document->activeframe[0]['preis']; ?>);">
 	    </div>
 			
 		</td>

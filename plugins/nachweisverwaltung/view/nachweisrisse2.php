@@ -1,4 +1,4 @@
-<h2><?php echo $this->qlayerset[$i]['Name']; ?></h2>
+<h2><?php echo $this->qlayerset[$i]['name']; ?></h2>
 <?php
   $layer_id=$this->qlayerset[$i]['layer_id'];
   $this->nachweis = new Nachweis($this->pgdatabase, $this->user->rolle->epsg_code);

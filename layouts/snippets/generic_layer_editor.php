@@ -119,7 +119,7 @@ if ($doit == true) {
 		$columnname = $layer['attributes']['real_name'][$layer['attributes']['the_geom']];
 		$geom_tablename = $layer['attributes']['table_name'][$layer['attributes']['the_geom']];
 		$column_geomtype = $layer['attributes']['geomtype'][$layer['attributes']['the_geom']];
-		$geomtype = getGeomType($column_geomtype, $layer['Datentyp']);
+		$geomtype = getGeomType($column_geomtype, $layer['datentyp']);
 		$privileg = $layer['attributes']['privileg'][$index];
 		$nullable = $layer['attributes']['nullable'][$index];
 		if ($this->new_entry == true AND $privileg == 1) {
@@ -581,5 +581,5 @@ if ($doit == true) {
 	</div><?
 }
 elseif($layer['requires'] == ''){
-	$this->noMatchLayers[$layer['layer_id']] = $layer['Name'];
+	$this->noMatchLayers[$layer['layer_id']] = $layer['name'];
 } ?>

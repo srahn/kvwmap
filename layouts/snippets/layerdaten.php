@@ -76,7 +76,7 @@
 						$this->add_message('info', $strNoLayers);
 					}
 					else {
-						$switch_to_order = ($this->formvars['order'] == 'Name' ? 'Alias' : 'Name');
+						$switch_to_order = ($this->formvars['order'] == 'name' ? 'Alias' : 'name');
 						$alias_first = $this->formvars['order'] == 'Alias';
 						?>
 						<table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -188,8 +188,8 @@
 											</a>
 										</td>
 										<td><?php echo $connectiontypes[$this->layerdaten['connectiontype'][$i]]; ?></td>
-										<td><?php echo $datatypes[$this->layerdaten['Datentyp'][$i]]; ?></td>
-										<td><?php echo $this->layerdaten['Gruppe'][$i]; ?></td><?
+										<td><?php echo $datatypes[$this->layerdaten['datentyp'][$i]]; ?></td>
+										<td><?php echo $this->layerdaten['gruppe'][$i]; ?></td><?
 										if ($has_sync_layer) { ?>
 											<td><?php echo ($this->layerdaten['sync'][$i] ? '<i class="fa fa-mobile" aria-hidden="true"></i>' : ''); ?></td><?
 										}

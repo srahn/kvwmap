@@ -188,7 +188,7 @@ class DataPackage extends PgObject {
 	}
 
 	function get_export_path() {
-		$this->export_path = METADATA_DATA_PATH . 'datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('Name') . '/';
+		$this->export_path = METADATA_DATA_PATH . 'datenpakete/' . $this->get('stelle_id') . '/' . $this->layer->get('name') . '/';
 		return $this->export_path;
 	}
 

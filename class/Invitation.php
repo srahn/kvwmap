@@ -63,7 +63,7 @@ class Invitation extends MyObject {
 		
 		' . $strInvitationLinkAlternative . ' "' . TITLE . '". ' . $strInvitationAfterLinkText . '
 		
-		' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('Name') . ': ' . $this->inviter->get('email') . '
+		' . $strInvitationQuestionsTo . ' ' . $this->inviter->get('Vorname') . ' ' . $this->inviter->get('name') . ': ' . $this->inviter->get('email') . '
 		
 		' . $strInvitationAutomationText;
 

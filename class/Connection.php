@@ -24,7 +24,7 @@ class Connection extends PgObject {
 			'attribute' => 'name',
 			'alias'			=> array(
 				'german'		=> 'Bezeichnung',
-				'english' => 'Name',
+				'english' => 'name',
 				'low_german' => 'Bezeichnung'
 			),
 			'type'			=> 'text',

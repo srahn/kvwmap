@@ -179,19 +179,19 @@ class data_import_export {
 		$user->rolle->set_one_Group($user->id, $stelle->id, $groupid, 1); # der Rolle die Gruppe zuordnen
 		$this->formvars['user_id'] = $user->id;
 		$this->formvars['stelle_id'] = $stelle->id;
-		$this->formvars['aktivStatus'] = 1;
-		$this->formvars['Name'] = $layername;
-		$this->formvars['Gruppe'] = $groupid;
-		$this->formvars['Typ'] = 'import';
-		$this->formvars['Datentyp'] = $custom_table['datatype'];
+		$this->formvars['aktivstatus'] = 1;
+		$this->formvars['name'] = $layername;
+		$this->formvars['gruppe'] = $groupid;
+		$this->formvars['typ'] = 'import';
+		$this->formvars['datentyp'] = $custom_table['datatype'];
 		$this->formvars['epsg_code'] = $epsg;
 		if ($custom_table['datatype'] == 3){ # Raster
-			$this->formvars['Data'] = $custom_table['data'];
+			$this->formvars['data'] = $custom_table['data'];
 			$this->formvars['transparency'] = 100;
 			$this->formvars['connectiontype'] = 0;
 		}
 		else {
-			$this->formvars['Data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique ' . $unique_column . ' using srid=' . $epsg;
+			$this->formvars['data'] = 'the_geom from (SELECT * FROM ' . CUSTOM_SHAPE_SCHEMA . '.' . $custom_table['tablename'] . ' WHERE 1=1 ' . $custom_table['where'] . ') as foo using unique ' . $unique_column . ' using srid=' . $epsg;
 			$this->formvars['query'] = 'SELECT * FROM ' . $custom_table['tablename'] . ' WHERE 1=1' . $custom_table['where'];
 			$this->formvars['connection_id'] = $pgdatabase->connection_id;
 			$this->formvars['connectiontype'] = 6;
@@ -1306,7 +1306,7 @@ class data_import_export {
 			$folder = 'Export_' . $this->formvars['layer_name'] . rand(0,10000);
 			$exportpath = $exportpath ?: IMAGEPATH . $folder . '/';
 			mkdir($exportpath, 0777);
-			$exportfile = $exportpath . ($exportfilename ?: str_replace(' ', '_', $layerset[0]['Name']) . '.json');
+			$exportfile = $exportpath . ($exportfilename ?: str_replace(' ', '_', $layerset[0]['name']) . '.json');
 			if ($this->formvars['epsg'] != '') {
 				$t_epsg = $this->formvars['epsg'];
 			}
@@ -1329,7 +1329,7 @@ class data_import_export {
 		}
 		else {
 			#echo '<br>connectiontype: ' . $layerset[0]['connectiontype'];
-			#echo '<br>name: ' . $layerset[0]['Name']; exit;
+			#echo '<br>name: ' . $layerset[0]['name']; exit;
 			$filter = '';
 			if (!(array_key_exists('without_filter', $this->formvars) AND $this->formvars['without_filter'] == 1 AND array_key_exists('sync', $layerset[0]) AND $layerset[0]['sync'] == 1)) { 
 				$filter = replace_params_rolle(
@@ -1390,7 +1390,7 @@ class data_import_export {
 					$where .= " AND st_intersects(".$layerset[0]['attributes']['the_geom'].", st_transform(st_geomfromtext('".$this->formvars['newpathwkt']."', ".$user->rolle->epsg_code."), ".$layerset[0]['epsg_code']."))";
 				}
 			}
-			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['Datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
+			if ($this->formvars['export_format'] == 'GPX' AND $layerset[0]['datentyp'] == 2) {	# bei GPX Polygone in Linien umwandeln
 				$query_parts['select'] = str_replace(
 					$layerset[0]['attributes']['the_geom'], 
 					'ST_ExteriorRing(' . $layerset[0]['attributes']['the_geom'] . ')::geometry(LINESTRING, ' . $layerset[0]['epsg_code'] . ') as ' . $layerset[0]['attributes']['the_geom'], 
@@ -1449,7 +1449,7 @@ class data_import_export {
 				if (!$ret[0]) {
 					$count = pg_num_rows($ret[1]);
 					if ($this->formvars['layer_name'] == '') {
-						$this->formvars['layer_name'] = $layerset[0]['Name'];
+						$this->formvars['layer_name'] = $layerset[0]['name'];
 					}
 
 					#showAlert('Abfrage erfolgreich. Es wurden '.$count.' Zeilen geliefert.');
@@ -1492,7 +1492,7 @@ class data_import_export {
 						} break;
 
 						case 'GPX' : {
-							$this->formvars['geomtype'] = ($layerset[0]['Datentyp'] == 2 ? 'LINESTRING' : $this->formvars['geomtype']);
+							$this->formvars['geomtype'] = ($layerset[0]['datentyp'] == 2 ? 'LINESTRING' : $this->formvars['geomtype']);
 							$exportfile = $exportfile.'.gpx';
 							$err = $this->ogr2ogr_export($sql, 'GPX', $exportfile, $layerdb, '-lco FORCE_GPX_TRACK=YES -dsco GPX_USE_EXTENSIONS=YES');
 						} break;
@@ -1566,7 +1566,7 @@ class data_import_export {
 						} break;
 
 						case 'OVL' : {
-							$ovl = $this->create_ovl($layerset[0]['Datentyp'], $layerdb, $sql, $layerset[0]['attributes']['the_geom'], $this->formvars['epsg']);
+							$ovl = $this->create_ovl($layerset[0]['datentyp'], $layerdb, $sql, $layerset[0]['attributes']['the_geom'], $this->formvars['epsg']);
 							for($i = 0; $i < count($ovl); $i++){
 								$exportfile2 = $exportfile.'_'.$i.'.ovl';
 								$fp = fopen($exportfile2, 'w');

@@ -2,6 +2,6 @@
 	$strTitleExtent = 'Gespiekerte Koortutsnitte utsöken';
 	$strTitleLayers = 'Gespeicherte Themenauswahl laden';
 	$strTime = 'Tiedstempel';
-	$strName = 'Name';
+	$strName = 'name';
 	$strUser = 'Nutzer';
 ?>  

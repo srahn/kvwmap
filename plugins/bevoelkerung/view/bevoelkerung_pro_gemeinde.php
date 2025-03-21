@@ -47,7 +47,7 @@ function change_orderby(attribute, layer_id){
 //-->
 </script>
 
-<h2><? echo $this->qlayerset[$i]['Name'] ?></h2>
+<h2><? echo $this->qlayerset[$i]['name'] ?></h2>
 <?
   $anzObj = count($this->qlayerset[$i]['shape']);
 ?>

@@ -5,7 +5,7 @@
 	 * Prüfen ob es ein 
 	 */
 ?>
-<h2 style="margin-top: 20px">Fehlende Dokumente im Layer <?php echo $this->layer->get('alias'); ?> [<?php echo $this->layer->get('Name'); ?>] id: <? echo $this->formvars['selected_layer_id']; ?></h2><?
+<h2 style="margin-top: 20px">Fehlende Dokumente im Layer <?php echo $this->layer->get('alias'); ?> [<?php echo $this->layer->get('name'); ?>] id: <? echo $this->formvars['selected_layer_id']; ?></h2><?
 // echo '<br>Layer-Attribute: ' . print_r($this->layer->data, true); ?>
 <div style="text-align: left; margin-left: 25px; width: 1000px; padding: 20px;"><?
 	echo '<b>Dokument-Verzeichnis:</b> ' . $this->layer->get('document_path');

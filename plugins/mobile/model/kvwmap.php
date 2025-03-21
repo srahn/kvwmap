@@ -541,14 +541,14 @@ $GUI->mobile_reformat_layer = function ($layerset, $attributes) use ($GUI) {
 
 	$layer = array(
 		"id" => $layerset['layer_id'],
-		"title" => $layerset['Name'],
+		"title" => $layerset['name'],
 		"alias" => $layerset['alias'],
 		"id_attribute" => $layerset['oid'],
 		"name_attribute" => $layerset['labelitem'],
 		"classitem" => $layerset['classitem'],
 		"transparency" => $layerset['transparency'],
 		"geometry_attribute" => $attributes['the_geom'],
-		"geometry_type" => $geometry_types[$layerset['Datentyp']],
+		"geometry_type" => $geometry_types[$layerset['datentyp']],
 		"table_name" => $layerset['maintable'],
 		"schema_name" => $layerset['schema'],
 		"query" => $layerset['pfad'],
@@ -663,7 +663,7 @@ $GUI->mobile_reformat_classes = function ($classes) use ($GUI) {
 		function ($class) {
 			return array(
 				'id' => $class['Class_ID'],
-				'name' => $class['Name'],
+				'name' => $class['name'],
 				'expression' => $class['Expression'],
 				'style' => array(
 					'id' => $class['Style'][0]['Style_ID'],

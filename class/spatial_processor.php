@@ -681,7 +681,7 @@ class spatial_processor {
 				# EPSG-Code des Layers der Abgefragt werden soll
 				$layer_epsg = $layerset[0]['epsg_code'];
 
-				$data = $layerset[0]['Data'];
+				$data = $layerset[0]['data'];
 				$data_explosion = explode(' ', $data);
 				$columnname = $data_explosion[0];
 				$select = $dbmap->getSelectFromData($data);
@@ -804,10 +804,10 @@ class spatial_processor {
         $this->debug->write("<br>WFS-Request: ".$request,4);
 	      $gml = url_get_contents($request, $layerset[0]['wms_auth_username'], $layerset[0]['wms_auth_password']);
         #$this->debug->write("<br>WFS-Response: ".$gml,4);
-				if ($layerset[0]['Datentyp'] == 2) {
+				if ($layerset[0]['datentyp'] == 2) {
 					$wkt = $this->composeMultipolygonWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
 				}
-				elseif ($layerset[0]['Datentyp'] == 1) {
+				elseif ($layerset[0]['datentyp'] == 1) {
 					$wkt = $this->composeMultilineWKTStringFromGML($gml, $layerset[0]['wfs_geom']);
 				}
 	      #$this->debug->write("<br>WKT von GML-Geometrie: ".$wkt,4);

@@ -80,7 +80,7 @@
 		else {
 			if ($schema_name == 'ukos_doppik' AND $table_name == 'strasse' AND $geometry_type == 2) {
 				while ($rs = $GUI->database->result->fetch_assoc()) {
-					if ($rs['Name'] == 'Straßen') {
+					if ($rs['name'] == 'Straßen') {
 						$nix_gefunden = false;
 						$GUI->formvars['selected_layer_id'] = $rs['layer_id'];
 						$GUI->neuer_Layer_Datensatz();

@@ -2126,7 +2126,7 @@ class rolle {
 			$this->database->execSQL($sql);
 			if (!$this->database->success) { $this->debug->write("<br>Abbruch in ".htmlentities($_SERVER['PHP_SELF'])." Zeile: ".__LINE__,4); return 0; }
 			while ($rs = $this->database->result->fetch_assoc()) {
-				$rs_layer[$rs['Gruppe']] = $rs['Gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
+				$rs_layer[$rs['gruppe']] = $rs['gruppe'];		# ein Array mit den GruppenIDs, die noch Layer haben
 			}
 			
 			# Test ob Untergruppen in den Gruppen vorhanden sind
@@ -2396,7 +2396,7 @@ class rolle {
 		$layers = array();
 		$query = array();
 		for($i=0; $i < count($layerset['list']); $i++){
-			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivStatus'] == 1){
+			if($layerset['list'][$i]['layer_id'] > 0 AND $layerset['list'][$i]['aktivstatus'] == 1){
 				$layers[] = $layerset['list'][$i]['layer_id'];
 				if($layerset['list'][$i]['queryStatus'] == 1)$query[] = $layerset['list'][$i]['layer_id'];
 			}

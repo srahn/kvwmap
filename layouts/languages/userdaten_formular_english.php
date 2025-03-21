@@ -25,7 +25,7 @@
 	$strLastModPassword = 'Last Modification';
 	$strLoginAsUser = 'login as this user';
 	$strLogInName = 'Login name';
-	$strName = 'Name';
+	$strName = 'name';
 	$strNewPassword = 'New Password';
 	$strOrganisation = 'Organisation';
 	$strPassword = 'Password';

@@ -229,7 +229,7 @@ function update_stellen_visibility(){
 					<th>
 						<a href="index.php?go=Layereditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strCommonData; ?></div></a>
 					</th><?
-					if (!in_array($this->layer[0]['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->layer[0]['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a>
 						</th>
@@ -246,7 +246,7 @@ function update_stellen_visibility(){
 					<th class="navigation-selected">
 						<a href="index.php?go=Attributeditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a>
 					</th><?
-					if (!in_array($this->layer[0]['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->layer[0]['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
 						</th><?
@@ -260,7 +260,7 @@ function update_stellen_visibility(){
 <? } ?>
 
 <table border="0" cellpadding="5" cellspacing="2" bgcolor="<?php echo $bgcolor; ?>">
-  <? if($this->layer[0]['Name'] != ''){ ?>
+  <? if($this->layer[0]['name'] != ''){ ?>
 	<tr>
   	<td>
 			<div style="display: flex; justify-content: space-between">

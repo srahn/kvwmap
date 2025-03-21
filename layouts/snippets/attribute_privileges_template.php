@@ -28,9 +28,9 @@
 >
 <div class="apt-main-div">
 	<div class="apt-bezeichnung">
-		<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ ?>
+		<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ ?>
 		<span class="fetter px16"><? echo $this->stelle->Bezeichnung; ?></span>
-		<? }elseif($this->layer[0]['Name'] != ''){ ?>
+		<? }elseif($this->layer[0]['name'] != ''){ ?>
 		<span class="fetter px16"><? echo $strDefaultPrivileges; ?></span>
 		<? } ?>
 	</div>
@@ -86,7 +86,7 @@
 		</select>		
 	</div>
 <? 
-if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
+if ($this->layer[0]['name'] != '' AND count($this->attributes) != 0) { ?>
 	<div class="apt-attributrechte">
 		<table>
 			<tr>
@@ -170,7 +170,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 	</div>
 <?
 	if (count($this->attributes) > 0) {
-		$stelle_and_layer_selected = $this->stelle->id != '' AND $this->layer[0]['Name'] != '';
+		$stelle_and_layer_selected = $this->stelle->id != '' AND $this->layer[0]['name'] != '';
 		if ($stelle_and_layer_selected ) {
 			$default_stellen_ids = $this->stelle->id;
 			$default_privileges_link_text = $strUseDefaultPrivileges;
@@ -192,7 +192,7 @@ if ($this->layer[0]['Name'] != '' AND count($this->attributes) != 0) { ?>
 <?		} ?>
 	<div class="apt-bezeichnung">
 		<span class="fetter px16">
-			<? if($this->stelle->id != '' AND $this->layer[0]['Name'] != ''){ echo $this->stelle->Bezeichnung; } else { echo '&nbsp;'; } ?>
+			<? if($this->stelle->id != '' AND $this->layer[0]['name'] != ''){ echo $this->stelle->Bezeichnung; } else { echo '&nbsp;'; } ?>
 		</span>
 	</div>
 <?	} ?>						

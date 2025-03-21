@@ -32,7 +32,7 @@
   
   $table_data[] = array('key' => '', 'value' => 'Angaben zur zuständige Stelle (gilt nur für Position vom 1. Baum)');
   $table_data[] = array('key' => 'Nr.', 'value' => $data['authority_municipalityNr']);
-  $table_data[] = array('key' => 'Name', 'value' => $data['authority_municipalityName']);
+  $table_data[] = array('key' => 'name', 'value' => $data['authority_municipalityName']);
   $table_data[] = array('key' => 'Landkreis', 'value' => $data['authority_districtNr']);
   $table_data[] = array('key' => 'E-Mail', 'value' => $data['cadastre_parcelId']);
   $table_data[] = array('key' => 'Ansprechpartner', 'value' => $data['authority_contactPerson']);

@@ -30,9 +30,9 @@ echo '
     <div>
       <div class="dropZone" ondragenter="handleDragEnter(event)" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"></div>';
 for ($i = 0; $i < count($layer['ID']); $i++) {
-  if ($layer['Datentyp'][$i] != 5) {
+  if ($layer['datentyp'][$i] != 5) {
     echo '<div class="dragObject" style="height: 16px;" draggable="true" ondragstart="handleDragStart(event)" ondragend="handleDragEnd(event)">
-            <i class="fa fa-' . $type_symbols[$layer['Datentyp'][$i]] . ' lzr_type" aria-hidden="true"></i>
+            <i class="fa fa-' . $type_symbols[$layer['datentyp'][$i]] . ' lzr_type" aria-hidden="true"></i>
             <span>' . $layer['Name_or_alias'][$i] . '</span>
             <input name="layers[]" type="hidden" value="'.$layer['ID'][$i].'">
           </div>';
@@ -43,7 +43,7 @@ echo '
     </div>
     <div>';
 for ($i = 0; $i < count($layer['ID']); $i++) {
-  if ($layer['Datentyp'][$i] != 5) {
+  if ($layer['datentyp'][$i] != 5) {
     echo '<div class="lzr_order"><input name="orders[]" type="text" value="'.$layer['drawingorder'][$i].'"></div>';
   }
 }

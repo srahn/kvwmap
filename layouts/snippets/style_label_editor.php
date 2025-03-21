@@ -266,7 +266,7 @@ function navigate(params) {
 							<a href="javascript:navigate('go=Layerattribut-Rechteverwaltung');"><div><? echo $strPrivileges; ?></div></a>
 						</th><?
 					}
-					if (!in_array($this->layerdata['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->layerdata['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
 						</th><?
@@ -294,7 +294,7 @@ function navigate(params) {
 			    			if($this->allclassdaten[$i]['Class_ID'] == $this->formvars['selected_class_id']){
 			    				echo ' selected';
 			    			}
-			    			echo ' value="'.$this->allclassdaten[$i]['Class_ID'].'">'.$this->allclassdaten[$i]['Name'].'</option>';
+			    			echo ' value="'.$this->allclassdaten[$i]['Class_ID'].'">'.$this->allclassdaten[$i]['name'].'</option>';
 			    		}
 			    		?>
 			      </select>

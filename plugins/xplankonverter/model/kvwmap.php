@@ -289,9 +289,9 @@
 			function ($layer) {
 				return array(
 					'id' => $layer->get('layer_id'),
-					'Name' => $layer->get('Name'),
+					'name' => $layer->get('name'),
 					'alias' => $layer->get('alias'),
-					'Datentyp' =>$layer->get('Datentyp'),
+					'datentyp' =>$layer->get('datentyp'),
 					'schema' => $layer->get('schema'),
 					'maintable' => $layer->get('maintable'),
 					'geom_column' => $layer->get('geom_column')

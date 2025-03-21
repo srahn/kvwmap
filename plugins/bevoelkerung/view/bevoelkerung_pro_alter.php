@@ -52,7 +52,7 @@ function change_orderby(attribute, layer_id){
   $resultSet = $layer['shape'];
   $attributes = $layer['attributes'];
 ?>
-<h2><? echo $layer['Name'] ?></h2>
+<h2><? echo $layer['name'] ?></h2>
 <?
   $anzObj = count($resultSet);
 ?>

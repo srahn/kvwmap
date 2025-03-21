@@ -1,5 +1,5 @@
 <hr>
-<h2>Bodenrichtwerte<br><br><?php echo $this->qlayerset[$i]['Name']; ?></h2>
+<h2>Bodenrichtwerte<br><br><?php echo $this->qlayerset[$i]['name']; ?></h2>
   <?php
   $anzObj=count($this->qlayerset[$i]['shape']);
   if ($anzObj>0) {

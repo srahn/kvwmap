@@ -8,7 +8,7 @@ class LayerNames
     /*        $this->loadMap('DataBase');
      $layer_names = array();
      foreach($this->layerset['layer_ids'] AS $id => $layer) {
-     $layer_names[$layer['Name']] = $id;
+     $layer_names[$layer['name']] = $id;
      }
      $this->layer_names = $layer_names;
      */
@@ -33,13 +33,13 @@ class LayerNames
             $layer_names = array();
             for ($i = 0; $i <= count($this->layers); $i++)
             {
-               //echo $this->layers[$i]->get('Name');
+               //echo $this->layers[$i]->get('name');
                //$this->layers = $layers;
-               //echo $this->layers[0]->get('Name');
+               //echo $this->layers[0]->get('name');
                
               if(!empty($this->layers[$i]))
               {
-                  $layer_name = $this->layers[$i]->get('Name');
+                  $layer_name = $this->layers[$i]->get('name');
                   $layer_id = $this->layers[$i]->get('layer_id');
                   $layer_names[$layer_name] = $layer_id;
               }

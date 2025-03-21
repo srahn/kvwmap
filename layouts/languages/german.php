@@ -53,7 +53,7 @@
 	$this->strEnter = 'Übernehmen';
 	$this->strExceeded = 'überschritten';
 	$this->strForeName = 'Vorname';
-	$this->strGroup = 'Gruppe';
+	$this->strGroup = 'gruppe';
 	$this->strHatching = 'Schraffur';
 	$this->strHelp = 'Hilfe';
 	$this->strID = 'ID';
@@ -68,7 +68,7 @@
 	$this->strLoginName = 'Loginname';
 	$this->strMapScale = 'Maßstab';
 	$this->strMetadata = 'Metadaten';
-	$this->strName = 'Name';
+	$this->strName = 'name';
 	$this->strNameSuffix = 'Namenszusatz';
 	$this->strNewDatasetTitle1 = 'Neuen Daten im Layer';
 	$this->strNo = 'Nein';

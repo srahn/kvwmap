@@ -37,7 +37,7 @@
     # Formularobjekt für Gemarkung bilden
     $GemkgObj = new gemarkung(0,$GUI->pgdatabase);
   	$gemarkungsliste=$GemkgObj->getGemarkungListe(array($GUI->formvars['gemeinde']),array());
-    $GUI->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$GUI->formvars['gemarkung'],$gemarkungsliste['Name'],1,0,0,158);
+    $GUI->GemkgFormObj=new FormObject('gemarkung','select',$gemarkungsliste['GemkgID'],$GUI->formvars['gemarkung'],$gemarkungsliste['name'],1,0,0,158);
     
     $GUI->queryable_vector_layers = $GUI->Stelle->getqueryableVectorLayers(NULL, $GUI->user->id, NULL, NULL, NULL, true, true);
     # Spaltenname und from-where abfragen

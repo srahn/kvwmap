@@ -61,7 +61,7 @@ class LayerClass extends MyObject {
 	}
 
 	function get_layerdef($classitem = null, $datentyp = 0, $layer_opacity = 1) {
-		#echo 'get_layerdef for Class: ' . $this->get('Name') . '(' . $this->get('Class_ID') . ')';
+		#echo 'get_layerdef for Class: ' . $this->get('name') . '(' . $this->get('Class_ID') . ')';
 
 		if ($this->get('Expression') == '') {
 			$def = '';
@@ -80,7 +80,7 @@ class LayerClass extends MyObject {
 
 		$layerdef = (Object) array(
 			'def' => $def,
-			'name' => $this->get('Name')
+			'name' => $this->get('name')
 		);
 
 		if (property_exists($first_style, 'data') AND count($first_style->data) > 0) {

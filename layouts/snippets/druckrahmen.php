@@ -162,7 +162,7 @@ function art_hide(){
                   &nbsp;<select style="width: 200px" name="aktiverRahmen" onchange="document.GUI.submit()">
                   <?
                   for($i = 0; $i < count($this->Document->frames); $i++){
-                    echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['Name'].'  ('.$this->Document->frames[$i]['id'].')</option>';
+                    echo ($this->formvars['aktiverRahmen']<>$this->Document->frames[$i]['id']) ? '<option value="'.$this->Document->frames[$i]['id'].'">'.$this->Document->frames[$i]['name'].'  ('.$this->Document->frames[$i]['id'].')</option>' : '<option value="'.$this->Document->frames[$i]['id'].'" selected>'.$this->Document->frames[$i]['name'].'  ('.$this->Document->frames[$i]['id'].')</option>';
                   }
                   ?>
                   </select>
@@ -509,7 +509,7 @@ function art_hide(){
         <tr>
           <td  colspan=8 style="border-bottom:1px solid #C3C7C3">
           	&nbsp;<span class="fett">Name:</span>
-          	<input type="text" name="Name" value="<? echo $this->Document->selectedframe[0]['Name'] ?>" size="27">
+          	<input type="text" name="Name" value="<? echo $this->Document->selectedframe[0]['name'] ?>" size="27">
           </td>
         </tr>
       </table>

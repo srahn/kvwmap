@@ -551,21 +551,21 @@ class GUI {
 				$layerset['layer_group_has_legendorder'] = array();
 				$this->error_message = '';
 				for ($i = 0; $i < $layerset['anzLayer']; $i++) {
-					$layerset['layers_of_group'][$layerset['list'][$i]['Gruppe']][] = $i;
+					$layerset['layers_of_group'][$layerset['list'][$i]['gruppe']][] = $i;
 					if(value_of($layerset['list'][$i], 'legendorder') != ''){
-						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['Gruppe']] = true;
+						$layerset['layer_group_has_legendorder'][$layerset['list'][$i]['gruppe']] = true;
 					}
 					if(value_of($layerset['list'][$i], 'requires') == ''){
-						$this->layer_ids_of_group[$layerset['list'][$i]['Gruppe']][] = $layerset['list'][$i]['layer_id'];				# die Layer-IDs in einer Gruppe
+						$this->layer_ids_of_group[$layerset['list'][$i]['gruppe']][] = $layerset['list'][$i]['layer_id'];				# die Layer-IDs in einer Gruppe
 					}
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
 					if (value_of($layerset['list'][$i], 'requires') != '') {
-						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivStatus'];
+						$layerset['list'][$i]['aktivstatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
-					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivStatus'] != 0)) {
+					if ($this->class_load_level == 2 OR ($this->class_load_level == 1 AND $layerset['list'][$i]['aktivstatus'] != 0)) {
 						# nur wenn der Layer aktiv ist, sollen seine Parameter gesetzt werden
 						$layerset['list'][$i]['layer_index_mapobject'] = $map->numlayers;
 
@@ -627,9 +627,9 @@ class GUI {
 	}
 
 	function loadlayer($map, $layerset, $strict_layer_name = false) {
-		$this->debug->write('<br>Lade Layer: ' . $layerset['Name'], 4);
+		$this->debug->write('<br>Lade Layer: ' . $layerset['name'], 4);
 		if ($strict_layer_name) {
-			$layer_name_attribute = 'Name';
+			$layer_name_attribute = 'name';
 		}
 		else {
 			$layer_name_attribute = 'Name_or_alias';
@@ -671,18 +671,18 @@ class GUI {
 		$layer->metadata->set("gml_include_items", "all");
 		#$layer->metadata->set('wms_abstract', $layerset['kurzbeschreibung']); #Mapserver8
 		$layer->dump = 0;
-		$layer->type = $layerset['Datentyp'];
+		$layer->type = $layerset['datentyp'];
 		$layer->group = sonderzeichen_umwandeln($layerset['Gruppenname']);
 
 		if(value_of($layerset, 'status') != ''){
-			$layerset['aktivStatus'] = 0;
+			$layerset['aktivstatus'] = 0;
 		}
 
 
 		//---- wenn die Layer einer eingeklappten Gruppe nicht in der Karte //
 		//---- dargestellt werden sollen, muß hier bei aktivStatus != 1 //
 		//---- der layer_status auf 0 gesetzt werden//
-		if ($layerset['aktivStatus'] == 0) {
+		if ($layerset['aktivstatus'] == 0) {
 			$layer->status = 0;
 		}
 		else{
@@ -690,23 +690,23 @@ class GUI {
 		}
 
 		# fremde Layer werden auf Verbindung getestet
-		if ($layerset['aktivStatus'] != 0 AND $layerset['connectiontype'] == 6) {
+		if ($layerset['aktivstatus'] != 0 AND $layerset['connectiontype'] == 6) {
 			$credentials = $this->pgdatabase->get_credentials($layerset['connection_id']);
 			if (!in_array($credentials['host'], array('pgsql', 'localhost'))) {
 				$fp = @fsockopen($credentials['host'], $credentials['port'], $errno, $errstr, 5);
 				if (!$fp) {			# keine Verbindung --> Layer ausschalten
 					$layer->status = 0;
 					$layer->metadata->set('queryStatus', 0);
-					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
+					$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['name'].'<br>';
 				}
 			}
 		}
 		
-		if($layerset['aktivStatus'] != 0){
+		if($layerset['aktivstatus'] != 0){
 			$collapsed = false;
-			if($group = value_of($this->groupset, $layerset['Gruppe'])){				# die Gruppe des Layers
+			if($group = value_of($this->groupset, $layerset['gruppe'])){				# die Gruppe des Layers
 				if($group['status'] == 0){
-					$this->group_has_active_layers[$layerset['Gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
+					$this->group_has_active_layers[$layerset['gruppe']] = 1;  	# die zugeklappte Gruppe hat aktive Layer
 					$collapsed = true;
 				}
 				while($group['obergruppe'] != ''){
@@ -782,12 +782,12 @@ class GUI {
 			$layer->postlabelcache = $layerset['postlabelcache'];
 		}
 
-		if($layerset['Datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
+		if($layerset['datentyp'] == MS_LAYER_POINT AND value_of($layerset, 'cluster_maxdistance') != ''){
 			$layer->cluster->maxdistance = $layerset['cluster_maxdistance'];
 			$layer->cluster->region = 'ellipse';
 		}
 
-		if ($layerset['Datentyp']=='3') {
+		if ($layerset['datentyp']=='3') {
 			if($layerset['transparency'] != ''){
 				if (MAPSERVERVERSION > 700) {
 					$layer->updateFromString("LAYER COMPOSITE OPACITY ".$layerset['transparency']." END END");
@@ -800,7 +800,7 @@ class GUI {
 				$layer->tileindex = SHAPEPATH.$layerset['tileindex'];
 			}
 			else {
-				$layer->data = $layerset['Data'];
+				$layer->data = $layerset['data'];
 			}
 			$layer->tileitem = $layerset['tileitem'];
 			if ($layerset['offsite']!='') {
@@ -810,11 +810,11 @@ class GUI {
 		}
 		else {
 			# Vektorlayer
-			if ($layerset['Data'] != '') {
-				if (strpos($layerset['Data'], '$SCALE') !== false){
+			if ($layerset['data'] != '') {
+				if (strpos($layerset['data'], '$SCALE') !== false){
 					$this->layers_replace_scale[] =& $layer;
 				}
-				$layer->data = $layerset['Data'];
+				$layer->data = $layerset['data'];
 			}
 			
 			if (value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
@@ -920,8 +920,8 @@ class GUI {
 		$anzClass = count_or_0($classset);
     for ($j = 0; $j < $anzClass; $j++) {
       $klasse = new ClassObj($layer);
-      if ($classset[$j]['Name']!='') {
-        $klasse->name = $classset[$j]['Name'];
+      if ($classset[$j]['name']!='') {
+        $klasse->name = $classset[$j]['name'];
       }
       if ($classset[$j]['Status']=='1'){
       	$klasse->status = MS_ON;
@@ -952,7 +952,7 @@ class GUI {
 				if($dbStyle['maxscale'] != ''){
 					$style->maxscaledenom = $dbStyle['maxscale'];
 				}
-				if ($layerset['Datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
+				if ($layerset['datentyp'] == 0 AND value_of($layerset, 'buffer') != NULL AND value_of($layerset, 'buffer') != 0) {
 					$dbStyle['symbolname'] = NULL;
 					$dbStyle['symbol'] = NULL;
 				}
@@ -1035,7 +1035,7 @@ class GUI {
 				}
 
 				if($dbStyle['size'] != ''){
-					if ($layerset['Datentyp'] == 8) {
+					if ($layerset['datentyp'] == 8) {
 						# Skalierung der Stylegröße when Type Chart
 						$style->setbinding(MS_STYLE_BINDING_SIZE, $dbStyle['size']);
 					}
@@ -1657,7 +1657,7 @@ class user {
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
-		$this->Name = $rs['Name'];
+		$this->Name = $rs['name'];
 		$this->Vorname = $rs['Vorname'];
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];
@@ -2446,20 +2446,20 @@ class db_mapObj {
 				}
 			}
 
-			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'Name' : 'alias'];
+			$rs['Name_or_alias'] = $rs[($rs['alias'] == '' OR !$useLayerAliases) ? 'name' : 'alias'];
 			$rs['id'] = $i;
 			$rs['alias_link'] = replace_params_link(
 				$rs['alias'],
 				rolle::$layer_params,
 				$rs['layer_id']
 			);
-			foreach (array('Name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'Data') AS $key) {
+			foreach (array('name', 'alias', 'Name_or_alias', 'connection', 'classification', 'classitem', 'tileindex', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]
 				);
 			}
-			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivStatus'] != '0')) {
+			if ($withClasses == 2 OR $rs['requires'] != '' OR ($withClasses == 1 AND $rs['aktivstatus'] != '0')) {
 				# bei withclasses == 2 werden für alle Layer die Klassen geladen,
 				# bei withclasses == 1 werden Klassen nur dann geladen, wenn der Layer aktiv ist
 				$rs['Class'] = $this->read_Classes($rs['layer_id'], $this->disabled_classes, false, $rs['classification']);
@@ -2680,7 +2680,7 @@ class db_mapObj {
 		$Layer = array();
 		while ($rs = $ret['result']->fetch_array()) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('Name', 'alias', 'connection', 'classification', 'pfad', 'Data') AS $key) {
+			foreach (array('name', 'alias', 'connection', 'classification', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]

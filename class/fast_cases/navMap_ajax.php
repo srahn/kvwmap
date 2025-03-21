@@ -369,11 +369,11 @@ class GUI {
 		else {
 			$layer = $this->user->rolle->getRollenLayer(-$layer_id)[0];
 		}
-		switch ($layer['Datentyp']) {
+		switch ($layer['datentyp']) {
 			case MS_LAYER_POLYGON : case MS_LAYER_LINE : case MS_LAYER_POINT : {
 				# Abfragen der Datenbankverbindung des Layers
 				$layerdb = $this->mapDB->getlayerdatabase($layer_id, $this->Stelle->pgdbhost);
-				$data = $layer['Data'];
+				$data = $layer['data'];
 				if ($data != '') {
 					# suchen nach dem ersten Vorkommen von using
 					$pos = strpos(strtolower($data), 'using ');
@@ -447,9 +447,9 @@ class GUI {
 			} break;
 
 			case MS_LAYER_RASTER : {
-				if ($layer['Data'] != '') {
+				if ($layer['data'] != '') {
 					# eine einzelne Rasterdatei
-					$raster_file = SHAPEPATH . $layer['Data'];
+					$raster_file = SHAPEPATH . $layer['data'];
 					if (file_exists($raster_file)) {
 						$output = rand(0, 100000);
 						$command = OGR_BINPATH . 'gdalinfo "' . $raster_file . '" > ' . IMAGEPATH . $output . '.info';
@@ -588,7 +588,7 @@ class GUI {
 		// 		if (!$fp) {			# keine Verbindung --> Layer ausschalten
 		// 			$layer->status = 0;
 		// 			$layer->metadata->set('queryStatus', 0);
-		// 			$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['Name'].'<br>';
+		// 			$this->Fehlermeldung = $errstr.' für Layer: '.$layerset['name'].'<br>';
 		// 		}
 		// 	}
 		// }
@@ -1254,7 +1254,7 @@ class GUI {
 					$this->layer_id_string .= $layerset['list'][$i]['layer_id'].'|';							# alle Layer-IDs hintereinander in einem String
 
 					if (value_of($layerset['list'][$i], 'requires') != '') {
-						$layerset['list'][$i]['aktivStatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
+						$layerset['list'][$i]['aktivstatus'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['aktivstatus'];
 						$layerset['list'][$i]['showclasses'] = $layerset['layer_ids'][$layerset['list'][$i]['requires']]['showclasses'];
 					}
 
@@ -4438,7 +4438,7 @@ class db_mapObj{
 		$Layer = array();
 		while ($rs = pg_fetch_assoc($ret[1])) {
 			$rs['Class'] = $this->read_Classes(-$rs['id'], $this->disabled_classes);
-			foreach (array('Name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'Data') AS $key) {
+			foreach (array('name', 'alias', 'connection', 'classification', 'classitem', 'pfad', 'data') AS $key) {
 				$rs[$key] = replace_params_rolle(
 					$rs[$key],
 					['duplicate_criterion' => $rs['duplicate_criterion']]

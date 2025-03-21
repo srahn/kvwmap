@@ -80,7 +80,7 @@ COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.zde IS 'Zeitpunkt der Entst
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.rho IS 'relative Höhe';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.kds IS 'Kartendarstellung';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.des IS 'AX_Datenerhebung_Punktort';
-COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.nam IS 'Name';
+COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.nam IS 'name';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.art IS 'Art des Punktes';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.vwl IS 'Vertrauenswürdigkeit';
 COMMENT ON COLUMN nachweisverwaltung.fp_punkte_alkis.lzk IS 'Lagezuverlaessigkeit';

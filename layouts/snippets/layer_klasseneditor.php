@@ -144,7 +144,7 @@
 					<input type="text" size="6" name="new_class_id['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">					
 				</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
-					<textarea rows="1" cols="12" style="min-width: 128px; width: 100%" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]"><?php echo $this->classes[$i]['Name']; ?></textarea>
+					<textarea rows="1" cols="12" style="min-width: 128px; width: 100%" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]"><?php echo $this->classes[$i]['name']; ?></textarea>
 				</td><?php
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') { ?>

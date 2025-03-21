@@ -12,9 +12,9 @@ class LayerGroup extends MyObject {
 			"layers" => array(
 				"alias" => 'Layer',
 				"table" => 'layer',
-				"vorschau" => 'Name',
+				"vorschau" => 'name',
 				"pk" => 'layer_id',
-				"fk" => 'Gruppe'
+				"fk" => 'gruppe'
 			)
 		);
 		parent::__construct($gui, 'u_groups');

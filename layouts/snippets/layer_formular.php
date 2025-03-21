@@ -407,7 +407,7 @@ from
 					<th>
 						<a href="javascript:toggleForm('layerform');"><div id="layerform_link"><? echo $strCommonData; ?></div></a>
 					</th><?
-					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->formvars['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=Klasseneditor&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strClasses; ?></div></a>
 						</th>
@@ -428,7 +428,7 @@ from
 							<a href="index.php?go=Layerattribut-Rechteverwaltung&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><div><? echo $strPrivileges; ?></div></a>
 						</th><?
 					}
-					if (!in_array($this->formvars['Datentyp'], [MS_LAYER_QUERY])) { ?>
+					if (!in_array($this->formvars['datentyp'], [MS_LAYER_QUERY])) { ?>
 						<th>
 							<a href="index.php?go=show_layer_in_map&selected_layer_id=<? echo $this->formvars['selected_layer_id'] ?>&zoom_to_layer_extent=1&csrf_token=<? echo $_SESSION['csrf_token']; ?>"><i class="fa fa-map" style="width: 50px"></i></a>
 						</th><?
@@ -507,7 +507,7 @@ from
 					<tr>
 						<th class="fetter" align="right" style="border-bottom:1px solid #C3C7C3"><?php echo $strName; ?>*</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<input name="Name" type="text" value="<?php echo $this->formvars['Name']; ?>" size="50" maxlength="100">
+							<input name="Name" type="text" value="<?php echo $this->formvars['name']; ?>" size="50" maxlength="100">
 						</td>
 					</tr><?
 					foreach($supportedLanguages as $language){
@@ -548,9 +548,9 @@ from
 								);
 							}
 							echo FormObject::createSelectField(
-								'Gruppe',																	# name
+								'gruppe',																	# name
 								$group_options,														# options
-								$this->formvars['Gruppe'],								# value
+								$this->formvars['gruppe'],								# value
 								1,																				# size
 								'',																				# style
 								'document.GUI.gruppenaenderung.value=1',	# onchange
@@ -567,15 +567,15 @@ from
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
 								<select name="Datentyp">
 									<option value=""><?php echo $this->strPleaseSelect; ?></option>
-									<option <? if($this->formvars['Datentyp'] == '0'){echo 'selected ';} ?>value="0">MS_LAYER_POINT</option>
-									<option <? if($this->formvars['Datentyp'] == 1){echo 'selected ';} ?>value="1">MS_LAYER_LINE</option>
-									<option <? if($this->formvars['Datentyp'] == 2){echo 'selected ';} ?>value="2">MS_LAYER_POLYGON</option>
-									<option <? if($this->formvars['Datentyp'] == 3){echo 'selected ';} ?>value="3">MS_LAYER_RASTER</option>
-									<option <? if($this->formvars['Datentyp'] == 4){echo 'selected ';} ?>value="4">MS_LAYER_ANNOTATION</option>
-									<option <? if($this->formvars['Datentyp'] == 5){echo 'selected ';} ?>value="5">MS_LAYER_QUERY</option>
-									<option <? if($this->formvars['Datentyp'] == 6){echo 'selected ';} ?>value="6">MS_LAYER_CIRCLE</option>
-									<option <? if($this->formvars['Datentyp'] == 7){echo 'selected ';} ?>value="7">MS_LAYER_TILEINDEX</option>
-									<option <? if($this->formvars['Datentyp'] == 8){echo 'selected ';} ?>value="8">MS_LAYER_CHART</option>
+									<option <? if($this->formvars['datentyp'] == '0'){echo 'selected ';} ?>value="0">MS_LAYER_POINT</option>
+									<option <? if($this->formvars['datentyp'] == 1){echo 'selected ';} ?>value="1">MS_LAYER_LINE</option>
+									<option <? if($this->formvars['datentyp'] == 2){echo 'selected ';} ?>value="2">MS_LAYER_POLYGON</option>
+									<option <? if($this->formvars['datentyp'] == 3){echo 'selected ';} ?>value="3">MS_LAYER_RASTER</option>
+									<option <? if($this->formvars['datentyp'] == 4){echo 'selected ';} ?>value="4">MS_LAYER_ANNOTATION</option>
+									<option <? if($this->formvars['datentyp'] == 5){echo 'selected ';} ?>value="5">MS_LAYER_QUERY</option>
+									<option <? if($this->formvars['datentyp'] == 6){echo 'selected ';} ?>value="6">MS_LAYER_CIRCLE</option>
+									<option <? if($this->formvars['datentyp'] == 7){echo 'selected ';} ?>value="7">MS_LAYER_TILEINDEX</option>
+									<option <? if($this->formvars['datentyp'] == 8){echo 'selected ';} ?>value="8">MS_LAYER_CHART</option>
 								</select>
 						</td>
 					</tr>
@@ -668,7 +668,7 @@ from
 							<?php echo $strData; ?>
 						</th>
 						<td colspan=2 style="border-bottom:1px solid #C3C7C3">
-							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['Data'] ?></textarea>&nbsp;
+							<textarea name="Data" cols="33" rows="4"><? echo $this->formvars['data'] ?></textarea>&nbsp;
 							<span data-tooltip="Das Data-Feld wird vom Mapserver für die Kartendarstellung verwendet (siehe Mapserver-Doku). Etwaige Schemanamen müssen hier angegeben werden."></span>
 						</td>
 					</tr>
@@ -1219,7 +1219,7 @@ from
 							<td width="370" colspan=2 style="border-bottom:1px solid #C3C7C3"><?
 								if ($this->formvars['shared_from']) {
 									$shared_user = $this->user->getUserDaten($this->formvars['shared_from'], '', '')[0];
-									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['Name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
+									$shared_name = $shared_user['Vorname'] . ' ' . $shared_user['name'] . (!empty($shared_user['organisation']) ? ' (' . $shared_user['organisation'] . ')' : '');
 								}
 								if ($this->is_admin_user($this->user->id)) { ?>
 									<input name="shared_from" type="text" value="<?php echo $this->formvars['shared_from']; ?>" style="width: <?php echo (strlen($this->formvars['shared_from']) * 15) + 15 ?>px"> <?
@@ -1452,7 +1452,7 @@ from
 				<input type="hidden" name="ID['.$this->classes[$i]['Class_ID'].']" value="'.$this->classes[$i]['Class_ID'].'">
 				<td style="border-bottom:1px solid #C3C7C3">'.$this->classes[$i]['Class_ID'].'</td>'; ?>
 				<td style="border-bottom:1px solid #C3C7C3">
-					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['Name']; ?>">
+					<input size="12" type="text" name="name[<?php echo $this->classes[$i]['Class_ID']; ?>]" value="<?php echo $this->classes[$i]['name']; ?>">
 				</td><?php
 				foreach ($supportedLanguages as $language) {
 					if ($language != 'german') { ?>

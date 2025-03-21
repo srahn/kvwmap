@@ -40,7 +40,7 @@ class Nutzer extends PgObject {
 	}
 
 	function get_name() {
-		return ($this->get('Name') ? $this->get('Name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
+		return ($this->get('name') ? $this->get('name') . ', ' : '') . ($this->get('Vorname') ? $this->get('Vorname') : $this->login_name);
 	}
 
 	public static function increase_num_login_failed($gui, $login_name) {
@@ -83,7 +83,7 @@ class Nutzer extends PgObject {
 		$results = $user->create(
 			array(
 				'login_name' => $gui->formvars['login_name'],
-				'Name' => $gui->formvars['Name'],
+				'name' => $gui->formvars['name'],
 				'Vorname' => $gui->formvars['Vorname'],
 				'Namenszusatz' => $gui->formvars['Namenszusatz'],
 				'password' => SHA1($gui->formvars['new_password']),

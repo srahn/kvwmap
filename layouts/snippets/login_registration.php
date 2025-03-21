@@ -22,7 +22,7 @@
 							<tr>
 								<td colspan="2"><? echo $strWelcomRegistration . ' ' . TITLE; ?>.
 									<p>
-									<b><? echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('Name'); ?><b> <?php echo $strInvitationToTask; ?>: <? echo $this->invitation->stelle->get($bezeichnung_attribute); ?><br>
+									<b><? echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('name'); ?><b> <?php echo $strInvitationToTask; ?>: <? echo $this->invitation->stelle->get($bezeichnung_attribute); ?><br>
 									<?php echo $strNameAndContact; ?>
 									<p>
 									<? echo password_erstellungs_hinweis($language); ?>
@@ -32,7 +32,7 @@
 									<? echo $strRequests; ?> <?
 									if ($this->invitation->inviter->get('email') != '') { ?>
 										<? echo $strPerEMail; ?> <a href="mailto:<? echo $this->invitation->inviter->get('email'); ?>"><?
-										echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('Name'); ?></a><?
+										echo $this->invitation->inviter->get('Vorname') . ' ' . $this->invitation->inviter->get('name'); ?></a><?
 									}
 									if ($this->invitation->inviter->get('phon') != '') { ?>
 										<? echo $strOrCall; ?> <? echo $this->invitation->inviter->get('phon') . '.';
@@ -49,7 +49,7 @@
 							<tr>
 								<td><span class="px16"><? echo $this->strName; ?>: *</span></td>
 								<td>
-									<input style="width: 200px" type="text" value="<? echo $this->formvars['Name']; ?>" name="Name" />
+									<input style="width: 200px" type="text" value="<? echo $this->formvars['name']; ?>" name="Name" />
 								</td>
 							</tr>
 							<tr>

@@ -52,11 +52,11 @@ function popup(id){
 	      </tr>
 	      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 	    	<tr>
-	        <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+	        <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
 	      <tr>
 	      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 	      <tr>
-		      <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+		      <td colspan="2"><li>Zugriffe durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über
 		          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 		      </td>
 		    </tr>
@@ -107,11 +107,11 @@ function popup(id){
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Karten-Drucke durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -153,7 +153,7 @@ function popup(id){
 		              								<? for($j = 0; $j < count($this->account->ALKNumbOfAccess[$i]['time_ids']); $j++){ ?>
 		              								<tr>
 		              									<td><? echo $this->account->ALKNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
-		              									<td><? echo $this->account->ALKNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              									<td><? echo $this->account->ALKNumbOfAccess[$i]['time_ids'][$j]['name']; ?></td>
 		              								</tr>
 		              								<? } ?>
 		              							</table>
@@ -175,11 +175,11 @@ function popup(id){
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Buch-Auszüge durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -221,7 +221,7 @@ function popup(id){
 		              								<? for($j = 0; $j < count($this->account->ALBNumbOfAccess[$i]['time_ids']); $j++){ ?>
 		              								<tr>
 		              									<td><? echo $this->account->ALBNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
-		              									<td><? echo $this->account->ALBNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              									<td><? echo $this->account->ALBNumbOfAccess[$i]['time_ids'][$j]['name']; ?></td>
 		              								</tr>
 		              								<? } ?>
 		              							</table>
@@ -243,11 +243,11 @@ function popup(id){
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>CSV-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -289,7 +289,7 @@ function popup(id){
 		              								<? for($j = 0; $j < count($this->account->CSVNumbOfAccess[$i]['time_ids']); $j++){ ?>
 		              								<tr>
 		              									<td><? echo $this->account->CSVNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
-		              									<td><? echo $this->account->CSVNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              									<td><? echo $this->account->CSVNumbOfAccess[$i]['time_ids'][$j]['name']; ?></td>
 		              								</tr>
 		              								<? } ?>
 		              							</table>
@@ -312,11 +312,11 @@ function popup(id){
 			      </tr>
 			      <? }elseif($this->formvars['nutzung']=='nutzer'){ ?>
 			    	<tr>
-			        <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> </li></td>
+			        <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> </li></td>
 			      <tr>
 			      <? }elseif($this->formvars['nutzung']=='stelle_nutzer' ){ ?>
 			      <tr>
-				      <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['Name'] ;?> über
+				      <td colspan="2"><li>Vektor-Exporte durch Nutzer: <?php echo $this->account->UName[0]['Vorname'].' '.$this->account->UName[0]['name'] ;?> über
 				          die Stelle: <?php echo $this->account->Bezeichnung ;?></li>
 				      </td>
 				    </tr>
@@ -358,7 +358,7 @@ function popup(id){
 		              								<? for($j = 0; $j < count($this->account->ShapeNumbOfAccess[$i]['time_ids']); $j++){ ?>
 		              								<tr>
 		              									<td><? echo $this->account->ShapeNumbOfAccess[$i]['time_ids'][$j]['time_id']; ?></td>
-		              									<td><? echo $this->account->ShapeNumbOfAccess[$i]['time_ids'][$j]['Name']; ?></td>
+		              									<td><? echo $this->account->ShapeNumbOfAccess[$i]['time_ids'][$j]['name']; ?></td>
 		              								</tr>
 		              								<? } ?>
 		              							</table>

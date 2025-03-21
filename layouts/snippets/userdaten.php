@@ -33,14 +33,14 @@
 	<tr>
 		<td style="float: right; margin-right: 50px"><input type="checkbox" onclick="toggle_archived_users();" id="archived" name="archived"> archivierte Nutzer anzeigen</td>
   </tr>
-  <? if (in_array($this->formvars['order'], ['Name', 'Name,Vorname'])) { ?>
+  <? if (in_array($this->formvars['order'], ['name', 'Name,Vorname'])) { ?>
   <tr height="50px" valign="bottom">
     <td colspan="2">
     <? $umlaute=array("Ä","Ö","Ü");
        for ($i=0;$i<count($this->userdaten);$i++) {
-         if(!in_array(strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1)),$umlaute) AND strtolower(mb_substr($this->userdaten[$i]['Name'],0,1)) != $first) {
-					 echo "<a href='#".strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1))."'><div class='menu abc'>".strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1))."</div></a>";
-           $first=strtolower(mb_substr($this->userdaten[$i]['Name'],0,1));
+         if(!in_array(strtoupper(mb_substr($this->userdaten[$i]['name'],0,1)),$umlaute) AND strtolower(mb_substr($this->userdaten[$i]['name'],0,1)) != $first) {
+					 echo "<a href='#".strtoupper(mb_substr($this->userdaten[$i]['name'],0,1))."'><div class='menu abc'>".strtoupper(mb_substr($this->userdaten[$i]['name'],0,1))."</div></a>";
+           $first=strtolower(mb_substr($this->userdaten[$i]['name'],0,1));
          }
        } ?> 
     </td>
@@ -66,8 +66,8 @@
 						<th>&nbsp;</th>
 					</tr><?php
 					for ($i = 0; $i < count($this->userdaten); $i++) {
-						if (in_array($this->formvars['order'], ['Name', 'Name,Vorname'])) {
-							$first = strtoupper(mb_substr($this->userdaten[$i]['Name'],0,1));
+						if (in_array($this->formvars['order'], ['name', 'Name,Vorname'])) {
+							$first = strtoupper(mb_substr($this->userdaten[$i]['name'],0,1));
 							if (in_array($first,$umlaute)) {
 								switch ($first) {
 									case 'Ä': {
@@ -115,7 +115,7 @@
 							<td><?php echo $this->userdaten[$i]['ID']; ?>&nbsp;&nbsp;</td>
 							<td>
 								<a href="index.php?go=Benutzerdaten_Formular&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>" title="<?php echo $this->strChange; ?>"><?
-									echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['Name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
+									echo $this->userdaten[$i]['Namenszusatz'].' '; ?><?php echo $this->userdaten[$i]['name']; ?>,&nbsp;<?php echo $this->userdaten[$i]['Vorname']; ?>
 								</a>
 							</td>
 							<td><? if($this->userdaten[$i]['stop'] != '0000-00-00') echo $this->userdaten[$i]['start'].'&nbsp;- '.$this->userdaten[$i]['stop']; ?>&nbsp;</td>
@@ -136,7 +136,7 @@
 							} ?>
 							<td>
 								<? if (!$this->userdaten[$i]['archived']) { ?>
-								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['Name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
+								<a href="javascript:Bestaetigung('index.php?go=Benutzer_Löschen&selected_user_id=<?php echo $this->userdaten[$i]['ID']; ?>&order=<? echo $this->formvars['order']; ?>&csrf_token=<? echo $_SESSION['csrf_token']; ?>','<? printf($strConfirmDelete, $this->userdaten[$i]['Vorname'] . ' ' . $this->userdaten[$i]['name'], $loeschen); ?>?')" title="<?php echo $this->strDelete?>"><i class="fa fa-trash-o"></i></a>
 								<? } ?>
 							</td>
 						</tr><?

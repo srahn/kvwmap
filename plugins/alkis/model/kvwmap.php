@@ -196,7 +196,7 @@
     }
 		$epsg = EPSGCODE_ALKIS;
 		$layerset = $GUI->user->rolle->getLayer(LAYERNAME_FLURSTUECKE);
-		$data = $layerset[0]['Data'];
+		$data = $layerset[0]['data'];
 		if($data == '')$data ="the_geom from (select f.gml_id as oid, wkb_geometry as the_geom from alkis.ax_flurstueck as f where 1=1) as foo using unique oid using srid=" . $epsg;
 		$explosion = explode(' ', $data);
 		$datageom = $explosion[0];
@@ -221,12 +221,12 @@
     $GUI->formvars['original_layer_id'] = $layerset[0]['layer_id'];
     $GUI->formvars['user_id'] = $GUI->user->id;
     $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
-    $GUI->formvars['aktivStatus'] = 1;
-		$GUI->formvars['Name'] = substr($legendentext, 0, 255);
-    $GUI->formvars['Gruppe'] = $groupid;
-    $GUI->formvars['Typ'] = 'search';
-    $GUI->formvars['Datentyp'] = 2;
-    $GUI->formvars['Data'] = $datastring;
+    $GUI->formvars['aktivstatus'] = 1;
+		$GUI->formvars['name'] = substr($legendentext, 0, 255);
+    $GUI->formvars['gruppe'] = $groupid;
+    $GUI->formvars['typ'] = 'search';
+    $GUI->formvars['datentyp'] = 2;
+    $GUI->formvars['data'] = $datastring;
     $GUI->formvars['query'] = $select;
     $GUI->formvars['connectiontype'] = 6;
     $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
@@ -237,7 +237,7 @@
     $attributes = $dbmap->load_attributes($GUI->pgdatabase, $select);
 		$dbmap->save_postgis_attributes($GUI->pgdatabase, -$layer_id, $attributes, '', '');
 		
-		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
+		$dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 		
     $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -320,12 +320,12 @@
 
 	    $GUI->formvars['user_id'] = $GUI->user->id;
 	    $GUI->formvars['stelle_id'] = $GUI->Stelle->id;
-	    $GUI->formvars['aktivStatus'] = 1;
-	    $GUI->formvars['Name'] = $legendentext;
-	    $GUI->formvars['Gruppe'] = $groupid;
-	    $GUI->formvars['Typ'] = 'search';
-	    $GUI->formvars['Datentyp'] = 2;
-	    $GUI->formvars['Data'] = $datastring;
+	    $GUI->formvars['aktivstatus'] = 1;
+	    $GUI->formvars['name'] = $legendentext;
+	    $GUI->formvars['gruppe'] = $groupid;
+	    $GUI->formvars['typ'] = 'search';
+	    $GUI->formvars['datentyp'] = 2;
+	    $GUI->formvars['data'] = $datastring;
 	    $GUI->formvars['connectiontype'] = 6;
 	    $GUI->formvars['connection_id'] = $GUI->pgdatabase->connection_id;
 	    $GUI->formvars['epsg_code'] = $epsg;
@@ -333,7 +333,7 @@
 
 	    $layer_id = $dbmap->newRollenLayer($GUI->formvars);
 
-	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['Datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
+	    $dbmap->addRollenLayerStyling($layer_id, $GUI->formvars['datentyp'], $GUI->formvars['labelitem'], $GUI->user, 'zoom');
 			
 	    $GUI->user->rolle->set_one_Group($GUI->user->id, $GUI->Stelle->id, $groupid, 1);# der Rolle die Gruppe zuordnen
 
@@ -398,11 +398,11 @@
     $GemkgFormObj->outputHTML();
 
     // Sortieren der Gemeinden unter Berücksichtigung von Umlauten
-    $sorted_arrays = umlaute_sortieren($GemListe['Name'], $GemListe['ID']);
-    $GemListe['Name'] = $sorted_arrays['array'];
+    $sorted_arrays = umlaute_sortieren($GemListe['name'], $GemListe['ID']);
+    $GemListe['name'] = $sorted_arrays['array'];
     $GemListe['ID'] = $sorted_arrays['second_array'];
     # Erzeugen des Formobjektes für die Gemeindeauswahl
-    $GemFormObj=new selectFormObject("GemID","select",$GemListe['ID'],array($GemID),$GemListe['Name'],"1","","",NULL);
+    $GemFormObj=new selectFormObject("GemID","select",$GemListe['ID'],array($GemID),$GemListe['name'],"1","","",NULL);
     $GemFormObj->addJavaScript('onclick', 'document.GUI.GemkgID.disabled = true');
     $GemFormObj->insertOption(-1,0,'--Auswahl--',0);
     $GemFormObj->outputHTML();
@@ -412,7 +412,7 @@
     	elseif($GemkgFormObj->selected)$StrassenListe=$Adresse->getStrassenListe('', $GemkgID,'');
       $StrSelected[0]=$StrID;
       # Erzeugen des Formobjektes für die Strassenauswahl
-      $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['Name'],"1","","",NULL);
+      $StrFormObj=new selectFormObject("StrID","select",$StrassenListe['StrID'],$StrSelected,$StrassenListe['name'],"1","","",NULL);
       # Unterscheidung ob Strasse ausgewählt wurde
       if ($StrFormObj->selected){
       	if($GemID == -1 OR $GemID == ''){
@@ -604,7 +604,7 @@
     	$FlurListe=$Flur->getFlurListe($GemkgID, $GemeindenStelle['eingeschr_gemarkung'][$GemkgID], $GUI->formvars['history_mode']);
       # Erzeugen des Formobjektes für die Flurauswahl
       if (count_or_0($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
-      $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['Name'],"1","","",NULL);
+      $FlurFormObj=new selectFormObject("FlurID","select",$FlurListe['FlurID'],array($FlurID),$FlurListe['name'],"1","","",NULL);
       $FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
       $FlurFormObj->outputHTML();
       # Wenn Flur gewählt wurde, oder nur eine Flur zur Auswahl steht, Auswahllist für Flurstuecke erzeugen
@@ -1318,7 +1318,7 @@
     	# Erzeugen des Formobjektes für die Flurauswahl
     	if (count($FlurListe['FlurID'])==1) { $FlurID=$FlurListe['FlurID'][0]; }
     }
-    $GUI->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$GUI->formvars['FlurID'],$FlurListe['Name'],"1","","",NULL);
+    $GUI->FlurFormObj=new FormObject("FlurID","select",$FlurListe['FlurID'],$GUI->formvars['FlurID'],$FlurListe['name'],"1","","",NULL);
     $GUI->FlurFormObj->insertOption(-1,0,'--Auswahl--',0);
     $GUI->FlurFormObj->outputHTML();
     if (value_of($GUI->formvars, 'map_flag') != '') {

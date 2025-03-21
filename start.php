@@ -288,7 +288,7 @@ else {
 							unset($GUI->formvars['new_password']);
 							unset($GUI->formvars['new_password_2']);
 							unset($GUI->formvars['email']);
-							unset($GUI->formvars['Name']);
+							unset($GUI->formvars['name']);
 							unset($GUI->formvars['Vorname']);
 							unset($GUI->formvars['Namenszusatz']);
 							unset($GUI->formvars['phon']);
@@ -810,7 +810,7 @@ function checkRegistration($gui) {
 	$check = 0;
 
 	# Prüft ob ein Name übergeben wurde
-	if ($params['Name'] == '') {
+	if ($params['name'] == '') {
 		$registration_errors[] = 'Name fehlt.';
 		$check = 1;
 	}

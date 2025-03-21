@@ -469,7 +469,7 @@ class user {
 		$this->id = $rs['ID'];
 		$this->login_name = $rs['login_name'];
 		$this->Namenszusatz = $rs['Namenszusatz'];
-		$this->Name = $rs['Name'];
+		$this->Name = $rs['name'];
 		$this->Vorname = $rs['Vorname'];
 		$this->stelle_id = $rs['stelle_id'];
 		$this->phon = $rs['phon'];

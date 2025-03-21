@@ -1860,7 +1860,7 @@ class stelle {
 			'ID' => array(),
 			'Bezeichnung' => array(),
 			'drawingorder' => array(),
-			'Gruppe' => array()
+			'gruppe' => array()
 		);
 
 		$condition = "
@@ -1895,17 +1895,17 @@ class stelle {
 			$i = 0;
 			while ($rs = $this->database->result->fetch_assoc()) {
 				$layer['ID'][] 						= $rs['layer_id'];
-				$layer['Name'][]					= $rs['Name'];
+				$layer['name'][]					= $rs['name'];
 				$layer['alias'][]					= $rs['alias'];
-				$layer['Name_or_alias']		= $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
-				$layer['Bezeichnung'][]		= $rs['Name'] . ($rs['alias']? ' [' . $rs['alias'] . ']' : '');
+				$layer['Name_or_alias']		= $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'name'];
+				$layer['Bezeichnung'][]		= $rs['name'] . ($rs['alias']? ' [' . $rs['alias'] . ']' : '');
 				$layer['drawingorder'][]	= $rs['drawingorder'];
 				$layer['legendorder'][]		= $rs['legendorder'];
-				$layer['Gruppe'][]				= $rs['Gruppe'];
-				$layer['layers_of_group'][$rs['Gruppe']][] = $i;
+				$layer['gruppe'][]				= $rs['gruppe'];
+				$layer['layers_of_group'][$rs['gruppe']][] = $i;
 				$i++;
 			}
-			if ($order == 'Name') {
+			if ($order == 'name') {
 				// Sortieren der Layer unter Berücksichtigung von Umlauten
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 				$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1917,8 +1917,8 @@ class stelle {
 				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['legendorder']);
 				$sorted_layer['legendorder'] = $sorted_arrays['second_array'];
 
-				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
-				$sorted_layer['Gruppe'] = $sorted_arrays['second_array'];
+				$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['gruppe']);
+				$sorted_layer['gruppe'] = $sorted_arrays['second_array'];
 				$layer = $sorted_layer;
 			}
 		}
@@ -1934,7 +1934,7 @@ class stelle {
 	// 		'ID' => array(),
 	// 		'Bezeichnung' => array(),
 	// 		'drawingorder' => array(),
-	// 		'Gruppe' => array()
+	// 		'gruppe' => array()
 	// 	);
 
 	// 	$condition = "
@@ -1968,14 +1968,14 @@ class stelle {
 	// 		$i = 0;
 	// 		while ($rs = $this->database->result->fetch_assoc()) {
 	// 			$layer['ID'][] 						= $rs['layer_id'];
-	// 			$layer['Bezeichnung'][]		= $rs['Name'];
+	// 			$layer['Bezeichnung'][]		= $rs['name'];
 	// 			$layer['drawingorder'][]	= $rs['drawingorder'];
 	// 			$layer['legendorder'][]		= $rs['legendorder'];
-	// 			$layer['Gruppe'][]				= $rs['Gruppe'];
-	// 			$layer['layers_of_group'][$rs['Gruppe']][] = $i;
+	// 			$layer['gruppe'][]				= $rs['gruppe'];
+	// 			$layer['layers_of_group'][$rs['gruppe']][] = $i;
 	// 			$i++;
 	// 		}
-	// 		if ($order == 'Name') {
+	// 		if ($order == 'name') {
 	// 			// Sortieren der Layer unter Berücksichtigung von Umlauten
 	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['ID']);
 	// 			$sorted_layer['Bezeichnung'] = $sorted_arrays['array'];
@@ -1987,8 +1987,8 @@ class stelle {
 	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['legendorder']);
 	// 			$sorted_layer['legendorder'] = $sorted_arrays['second_array'];
 				
-	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['Gruppe']);
-	// 			$sorted_layer['Gruppe'] = $sorted_arrays['second_array'];
+	// 			$sorted_arrays = umlaute_sortieren($layer['Bezeichnung'], $layer['gruppe']);
+	// 			$sorted_layer['gruppe'] = $sorted_arrays['second_array'];
 	// 			$layer = $sorted_layer;
 	// 		}
 	// 	}
@@ -2053,9 +2053,9 @@ class stelle {
 				'export_privileg' => array()
 			);
 			while($rs=$this->database->result->fetch_array()) {
-				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['name'] = replace_params_rolle($rs['name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
-				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'name'];
 				$layer['ID'][] = $rs['layer_id'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
 				$layer['export_privileg'][] = $rs['export_privileg'];
@@ -2138,12 +2138,12 @@ class stelle {
 		}
 		else {
 			while ($rs=$this->database->result->fetch_assoc()){
-				$rs['Name'] = replace_params_rolle($rs['Name']);
+				$rs['name'] = replace_params_rolle($rs['name']);
 				$rs['alias'] = replace_params_rolle($rs['alias']);
-				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'Name'];
+				$rs['Name_or_alias'] = $rs[($rs['alias'] AND $this->useLayerAliases) ? 'alias' : 'name'];
 				$layer['ID'][] = $rs['layer_id'];
 				$layer['Bezeichnung'][] = $rs['Name_or_alias'];
-				$layer['Gruppe'][] = $rs['Gruppe'];
+				$layer['gruppe'][] = $rs['gruppe'];
 				$layer['Gruppenname'][] = $rs['Gruppenname'];
 				$layer['export_privileg'][] = $rs['export_privileg'];
 			}
@@ -2503,7 +2503,7 @@ class stelle {
 			else{
 				while ($rs = $this->database->result->fetch_array()) {
 					$GemeindeListe['ID'][]=$rs['ID'];
-					$GemeindeListe['Name'][]=$rs['Name'];
+					$GemeindeListe['name'][]=$rs['name'];
 				}
 			}
 		}
@@ -2512,7 +2512,7 @@ class stelle {
 			for($i = 0; $i < count($liste); $i++){
 				$ret = $database->getGemeindeName($liste[$i]);
 				$GemeindeListe['ID'][]=$liste[$i];
-				$GemeindeListe['Name'][]=$ret[1]['name'];
+				$GemeindeListe['name'][]=$ret[1]['name'];
 			}
 		}
 		return $GemeindeListe;
@@ -2544,7 +2544,7 @@ class stelle {
 		else{
 			while($rs=$this->database->result->fetch_array()) {
 				$user['ID'][] = $rs['ID'];
-				$user['Bezeichnung'][] = $rs['Name'].', '.$rs['Vorname'];
+				$user['Bezeichnung'][] = $rs['name'].', '.$rs['Vorname'];
 				$user['position'][] = $rs['position'];
 				$user['email'][] = $rs['email'];
 			}

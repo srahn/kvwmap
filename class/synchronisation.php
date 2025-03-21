@@ -138,7 +138,7 @@ class synchro {
 			$this->commands = array();
 			$layerdb = $mapDB->getlayerdatabase($import_layerset[$i]['layer_id'], $this->Stelle->pgdbhost);
 			$attributes = $mapDB->read_layer_attributes($import_layerset[$i]['layer_id'], $layerdb, NULL);
-			if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['layer_id'], $import_layerset[$i]['Name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
+			if ($this->import_layer_table_data($mapDB, $attributes, $layerdb, $import_layerset[$i]['layer_id'], $import_layerset[$i]['name'], $formvars['mitbildern'], $formvars['username'], $formvars['passwort'])) {
 				$this->commands[] = POSTGRESBINPATH . "psql -U " . $this->database->user . " -f " . SYNC_PATH . $import_layerset[$i]['layer_id'] . ".sql " . $this->database->dbName;
 				$this->commands = array_reverse($this->commands);		# Die Reihenfolge der Datenimporte muss umgedreht werden, damit erst die übergeordneten Tabellen eingespielt werden und dann die abhängigen (ansonsten könnte es sein, dass abhängige Tabellen auf Grund eines Delete Cascade-Constraints wieder gelöscht werden)
 				foreach ($this->commands as $command) {

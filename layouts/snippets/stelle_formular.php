@@ -262,10 +262,10 @@ else {
 							function($referenzkarte) {
 								return array(
 									'value' => $referenzkarte->get('ID'),
-									'output' => $referenzkarte->get('Name')
+									'output' => $referenzkarte->get('name')
 								);
 							},
-							Referenzkarte::find($this, '', 'Name')
+							Referenzkarte::find($this, '', 'name')
 						);
 						echo FormObject::createSelectField(
 							'Referenzkarte_ID',
